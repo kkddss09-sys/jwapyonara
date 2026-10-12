@@ -21,6 +21,13 @@
     </dl>
   </section>
 
+  <section class="card" id="chartCard">
+    <div style="font-weight:700; font-size:15px; margin-bottom:12px; color:var(--ink);">해마다 남는 원금</div>
+    <div style="position:relative; height:220px; width:100%;">
+      <canvas id="balChart"></canvas>
+    </div>
+  </section>
+
   <section class="card">
     <div class="field"><label for="p">빌리는 돈 <b class="hint" id="pHint"></b></label><div class="inp"><input id="p" inputmode="numeric" value="300,000,000"><span>원</span></div></div>
     <div class="row2">
@@ -50,16 +57,20 @@
       <li>원금균등: 원금을 횟수로 똑같이 나누고, 남은 원금에 이자를 붙입니다. 첫 달이 가장 많고 갈수록 줄어듭니다.</li>
       <li>만기일시: 매달 이자만 내고, 마지막 달에 원금을 한꺼번에 갚습니다.</li>
       <li>넣으신 값으로만 계산합니다. 대출 상품을 권하거나 조건을 보장하는 것이 아닙니다.</li>
+      <li>그래프는 공개 프로그램 Chart.js(MIT 허락)를 사이트 안에 넣어 그립니다.</li>
     </ul>
   </details>
 </main>
 
+<script src="../_vendor/chart.umd.js"></script>
 <script src="calc.js"></script>
 <script src="../_common/common.js"></script>
 <script>
 (function () {
   var el = function (id) { return document.getElementById(id); };
   var type = 'equal';
+  var chart = null;
+  var chartCard = el('chartCard');
   var fmt = function (n) { return Math.round(n).toLocaleString('ko-KR'); };
   var num = function (s) { return Number(String(s).replace(/[^\d]/g, '')) || 0; };
   var dec = function (s) { s = String(s).replace(/[^\d.]/g, ''); var i = s.indexOf('.'); return i < 0 ? s : s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, ''); };
@@ -69,6 +80,12 @@
     var eok = Math.floor(n / 100000000), man = Math.floor((n % 100000000) / 10000);
     return (eok ? eok + '억' : '') + (eok && man ? ' ' : '') + (man ? fmt(man) + '만' : '') + ' 원';
   };
+  var fmtAxis = function (v) {
+    if (v === 0) return '0';
+    if (v < 10000) return v.toLocaleString('ko-KR') + '원';
+    var eok = Math.floor(v / 100000000), man = Math.floor((v % 100000000) / 10000);
+    return (eok ? eok + '억' : '') + (eok && man ? ' ' : '') + (man ? fmt(man) + '만' : '');
+  };
   var HELP = { equal: '매달 같은 금액을 갚습니다.', principal: '첫 달이 가장 많고, 갈수록 줄어듭니다.', bullet: '매달 이자만 내고, 마지막 달에 원금을 갚습니다.' };
 
   function render() {
@@ -76,12 +93,87 @@
     var x = loan(P, r, y, type);
     el('pHint').textContent = read(P);
     el('help').textContent = HELP[type];
-    if (!x.months || !P) { el('verdict').textContent = '숫자를 넣어 보세요'; el('sub').textContent = ''; el('ti').textContent = '-'; el('tt').textContent = '-'; return; }
+    if (!x.months || !P) {
+      el('verdict').textContent = '숫자를 넣어 보세요';
+      el('sub').textContent = '';
+      el('ti').textContent = '-';
+      el('tt').textContent = '-';
+      if (chartCard) chartCard.style.display = 'none';
+      return;
+    }
     if (type === 'equal') { el('verdict').innerHTML = '한 달에 <em>' + fmt(x.first) + '원</em>씩 갚습니다'; el('sub').textContent = x.months + '번 동안 같은 금액입니다.'; }
     else if (type === 'principal') { el('verdict').innerHTML = '첫 달 <em>' + fmt(x.first) + '원</em>, 마지막 달 <em>' + fmt(x.last) + '원</em>'; el('sub').textContent = x.months + '번에 걸쳐 조금씩 줄어듭니다.'; }
     else { el('verdict').innerHTML = '매달 이자 <em>' + fmt(x.first) + '원</em>'; el('sub').textContent = '마지막 달에 원금 ' + fmt(P) + '원을 함께 갚습니다.'; }
     el('ti').textContent = fmt(x.totalInterest) + '원';
     el('tt').textContent = fmt(x.total) + '원';
+
+    if (typeof Chart === 'undefined') {
+      if (chartCard) chartCard.style.display = 'none';
+    } else {
+      var bals = loanBalances(P, r, y, type);
+      if (!bals || !bals.length || !P) {
+        if (chartCard) chartCard.style.display = 'none';
+      } else {
+        if (chartCard) chartCard.style.display = 'block';
+        var labels = [];
+        for (var i = 0; i < bals.length; i++) labels.push(i + '년');
+        if (!chart) {
+          var cv = el('balChart');
+          if (cv) {
+            chart = new Chart(cv, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [{
+                  data: bals,
+                  borderColor: '#ff2d55',
+                  backgroundColor: 'rgba(255,45,85,0.12)',
+                  fill: true,
+                  pointRadius: 0,
+                  borderWidth: 2
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    displayColors: false,
+                    callbacks: {
+                      title: function (items) {
+                        var idx = items[0].dataIndex;
+                        return idx === 0 ? '시작' : idx + '년 뒤';
+                      },
+                      label: function (item) {
+                        return fmt(item.parsed.y) + '원';
+                      }
+                    }
+                  }
+                },
+                scales: {
+                  x: {
+                    grid: { display: false },
+                    ticks: { autoSkip: true, maxRotation: 0 }
+                  },
+                  y: {
+                    beginAtZero: true,
+                    ticks: {
+                      callback: function (val) { return fmtAxis(val); }
+                    }
+                  }
+                }
+              }
+            });
+          }
+        } else {
+          chart.data.labels = labels;
+          chart.data.datasets[0].data = bals;
+          chart.update();
+        }
+      }
+    }
   }
 
   el('p').addEventListener('input', function () { this.value = this.value === '' ? '' : fmt(num(this.value)); render(); });

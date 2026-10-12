@@ -42,6 +42,18 @@
     }).join('') + '<button type="button" role="tab" data-c="' + YT + '" class="' + (cur === YT ? 'on' : '') + '">' + YT + '</button>';
   }
 
+  // 찾기: 그냥 글자로 찾고, 초성만 넣었으면("ㄷㅊ") 초성끼리 견준다. 띄어쓰기와 영문 대소문자는 무시한다
+  var CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
+  function cho(s) {
+    return s.replace(/[가-힣]/g, function (ch) { return CHO.charAt(Math.floor((ch.charCodeAt(0) - 0xAC00) / 588)); });
+  }
+  function hit(text, word) {
+    var t = text.toLowerCase().replace(/\s+/g, ''), w = word.toLowerCase().replace(/\s+/g, '');
+    if (!w) return true;
+    if (t.indexOf(w) >= 0) return true;
+    return /^[ㄱ-ㅎ]+$/.test(w) && cho(t).indexOf(w) >= 0;
+  }
+
   function draw() {
     var word = q.value.trim(), shown = 0, html = '';
     // 이 기기에서 자주 연 도구를 맨 위에(찾는 중이 아닐 때만). 묶음 안에서도 자주 연 것이 앞에 온다
@@ -50,7 +62,7 @@
     if (!word && mineTop.length) html += '<section class="cat"><h2>자주 쓴 도구 <small>이 기기에서 많이 연 순서</small></h2><div class="tools" style="margin-top:10px">' + mineTop.map(card).join('') + '</div></section>';
     CATS.forEach(function (c) {
       if (cur !== '전체' && cur !== c) return;
-      var mine = T.filter(function (t) { return t[3] === c && (!word || (t[1] + ' ' + t[2] + ' ' + t[3] + ' ' + t[5]).indexOf(word) >= 0); });
+      var mine = T.filter(function (t) { return t[3] === c && (!word || hit(t[1] + ' ' + t[2] + ' ' + t[3] + ' ' + t[5], word)); });
       if (!mine.length) return;
       shown += mine.length;
       // 작은 묶음별로, 쓸 수 있는 도구가 앞에 오게

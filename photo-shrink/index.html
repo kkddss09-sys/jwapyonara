@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사진 용량 줄이기 — 사진이 커서 안 올라갈 때, 무료 | 좌표나라</title>
+<meta name="description" content="사진 크기와 화질을 조절해 용량을 줄입니다. 가입 없이 무료, 사진은 내 기기 안에서만 줄어들고 어디에도 전송되지 않습니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.preview-box { display:none; margin-top:14px; text-align:center; }
+.preview-box img { max-height:220px; max-width:100%; border-radius:12px; border:1px solid var(--line); display:inline-block; vertical-align:middle; }
+.btn-save { display:none; width:100%; min-height:50px; margin-top:14px; border-radius:12px; border:none; background:var(--red); color:#fff; font:inherit; font-size:16px; font-weight:700; cursor:pointer; }
+.btn-file-label { display:flex; align-items:center; justify-content:center; min-height:50px; border-radius:12px; background:var(--ink); color:#fff; font-size:16px; font-weight:700; cursor:pointer; width:100%; text-align:center; box-sizing:border-box; }
+.seg button { min-height:48px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>사진이 커서 안 올라갈 때<br>용량 줄이기</h1>
+  <p class="lead">사진을 고르면 내 기기 안에서 바로 줄여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">사진을 골라 주세요</div>
+    <div class="sub" id="resSub"></div>
+    <div class="preview-box" id="previewWrap">
+      <img id="previewImg" alt="줄인 사진 미리보기">
+    </div>
+    <button type="button" id="btnSave" class="btn-save">줄인 사진 저장</button>
+  </section>
+
+  <section class="card">
+    <input type="file" id="fileInp" accept="image/*" style="display:none;">
+    <label for="fileInp" class="btn-file-label">사진 고르기</label>
+
+    <div class="field" style="margin-top:16px;">
+      <label>긴 쪽 크기</label>
+      <div class="seg" id="sizeSeg" style="grid-template-columns:repeat(3,minmax(0,1fr));">
+        <button type="button" data-val="1280">1280</button>
+        <button type="button" data-val="1920" class="on">1920</button>
+        <button type="button" data-val="0">원래 크기</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:16px;">
+      <label>화질</label>
+      <div class="seg" id="qualitySeg" style="grid-template-columns:repeat(2,minmax(0,1fr));">
+        <button type="button" data-val="0.7" class="on">보통</button>
+        <button type="button" data-val="0.85">좋게</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">사진은 내 기기 안에서만 줄어들고 어디에도 전송되지 않습니다. 줄인 사진은 JPG로 저장되며, 투명한 배경은 흰색이 됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">오늘 시세는 카톡방에서<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 줄이나요?</summary>
+    <ul>
+      <li>사진의 가로세로를 줄이고 화질을 조금 낮춰 용량을 줄입니다.</li>
+      <li>긴 쪽이 고른 크기보다 작으면 크기는 그대로 두고 화질만 낮춥니다.</li>
+      <li>사진에 들어 있던 찍은 곳·찍은 날 정보는 줄인 사진에 남지 않습니다.</li>
+      <li>줄이는 계산에는 공개 프로그램 pica(Vitaly Puzrin, MIT 허락)를 사이트 안에 넣어 씁니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_vendor/pica.min.js"></script>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var fileInp = document.getElementById('fileInp');
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var previewWrap = document.getElementById('previewWrap');
+  var previewImg = document.getElementById('previewImg');
+  var btnSave = document.getElementById('btnSave');
+
+  var sizeButtons = document.querySelectorAll('#sizeSeg button');
+  var qualityButtons = document.querySelectorAll('#qualitySeg button');
+
+  var currentImg = null;
+  var origBytes = 0;
+  var currentBlob = null;
+  var previewUrl = null;
+
+  var selectedSize = 1920;
+  var selectedQuality = 0.7;
+
+  function flashSave(msg) {
+    var orig = btnSave.textContent;
+    btnSave.textContent = msg;
+    setTimeout(function () { btnSave.textContent = orig; }, 1800);
+  }
+
+  function processImage() {
+    if (!currentImg) return;
+
+    var w = currentImg.naturalWidth || currentImg.width;
+    var h = currentImg.naturalHeight || currentImg.height;
+    var sz = fitSize(w, h, selectedSize);
+
+    var srcCv = document.createElement('canvas');
+    srcCv.width = w;
+    srcCv.height = h;
+    var sctx = srcCv.getContext('2d');
+    sctx.fillStyle = '#ffffff';
+    sctx.fillRect(0, 0, w, h);
+    sctx.drawImage(currentImg, 0, 0);
+
+    var dstCv = document.createElement('canvas');
+    dstCv.width = sz.w;
+    dstCv.height = sz.h;
+    var dctx = dstCv.getContext('2d');
+    dctx.fillStyle = '#ffffff';
+    dctx.fillRect(0, 0, sz.w, sz.h);
+
+    function onBlobReady(blob) {
+      if (!blob) {
+        fallbackResize();
+        return;
+      }
+      currentBlob = blob;
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = URL.createObjectURL(blob);
+      previewImg.src = previewUrl;
+      previewWrap.style.display = 'block';
+
+      var newBytes = blob.size;
+      var pct = savedPercent(origBytes, newBytes);
+
+      if (pct <= 0) {
+        resVerdict.textContent = '이 사진은 이미 충분히 작습니다';
+        resSub.textContent = '원래 사진을 그대로 쓰세요.';
+        btnSave.style.display = 'none';
+      } else {
+        resVerdict.innerHTML = '<em>' + pct + '%</em> 줄었습니다';
+        resSub.textContent = '원래 ' + formatBytes(origBytes) + ' → 줄인 뒤 ' + formatBytes(newBytes) + ' · 크기 ' + sz.w + '×' + sz.h;
+        btnSave.style.display = 'block';
+      }
+    }
+
+    function fallbackResize() {
+      var cv = document.createElement('canvas');
+      cv.width = sz.w;
+      cv.height = sz.h;
+      var ctx = cv.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, sz.w, sz.h);
+      ctx.drawImage(currentImg, 0, 0, sz.w, sz.h);
+      cv.toBlob(onBlobReady, 'image/jpeg', selectedQuality);
+    }
+
+    if (sz.w === w && sz.h === h) {
+      srcCv.toBlob(onBlobReady, 'image/jpeg', selectedQuality);
+    } else if (typeof pica !== 'undefined') {
+      try {
+        var p = pica({ features: ['js', 'wasm'] });
+        p.resize(srcCv, dstCv).then(function (result) {
+          result.toBlob(onBlobReady, 'image/jpeg', selectedQuality);
+        }).catch(function () {
+          fallbackResize();
+        });
+      } catch (err) {
+        fallbackResize();
+      }
+    } else {
+      fallbackResize();
+    }
+  }
+
+  fileInp.addEventListener('change', function (e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    if (file.type && file.type.indexOf('image/') !== 0) {
+      resVerdict.textContent = '사진 파일을 골라 주세요';
+      resSub.textContent = '';
+      previewWrap.style.display = 'none';
+      btnSave.style.display = 'none';
+      currentImg = null;
+      currentBlob = null;
+      origBytes = 0;
+      return;
+    }
+
+    origBytes = file.size;
+    var tempUrl = URL.createObjectURL(file);
+    var img = new Image();
+    img.onload = function () {
+      currentImg = img;
+      URL.revokeObjectURL(tempUrl);
+      processImage();
+    };
+    img.src = tempUrl;
+  });
+
+  sizeButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      sizeButtons.forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      selectedSize = parseInt(btn.getAttribute('data-val'), 10) || 0;
+      if (currentImg) processImage();
+    });
+  });
+
+  qualityButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      qualityButtons.forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      selectedQuality = parseFloat(btn.getAttribute('data-val')) || 0.7;
+      if (currentImg) processImage();
+    });
+  });
+
+  btnSave.addEventListener('click', function () {
+    if (!currentBlob) return;
+    var downloadUrl = URL.createObjectURL(currentBlob);
+    var a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = '좌표나라-줄인사진.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 2000);
+    flashSave('저장했어요');
+  });
+})();
+</script>
+</body>
+</html>

@@ -23,4 +23,52 @@ function loan(principal, yearRate, years, type) {
   return { first: Math.round(m), last: Math.round(m), totalInterest: Math.round(m * n - P), total: Math.round(m * n), months: n };
 }
 
-if (typeof module !== 'undefined') module.exports = { loan: loan };
+// 해마다 남는 원금 배열. [0]은 시작 원금, [k]는 k년 뒤 남은 원금, 마지막은 0.
+function loanBalances(principal, yearRate, years, type) {
+  var P = Math.max(0, Number(principal) || 0);
+  var y = Math.max(0, Math.round(Number(years) || 0));
+  var r = Math.max(0, Number(yearRate) || 0);
+  if (!P || y < 1) return [];
+
+  var n = y * 12;
+  var list = new Array(y + 1);
+  list[0] = Math.round(P);
+
+  if (type === 'bullet') {
+    for (var k = 1; k < y; k++) list[k] = Math.round(P);
+    list[y] = 0;
+    return list;
+  }
+
+  if (type === 'principal') {
+    for (var k = 1; k < y; k++) {
+      var m = k * 12;
+      list[k] = Math.round(P * (1 - m / n));
+    }
+    list[y] = 0;
+    return list;
+  }
+
+  // equal (원리금균등)
+  var i = r / 100 / 12;
+  if (i === 0) {
+    for (var k = 1; k < y; k++) {
+      var m = k * 12;
+      list[k] = Math.round(P * (1 - m / n));
+    }
+    list[y] = 0;
+    return list;
+  }
+
+  var powN = Math.pow(1 + i, n);
+  var denom = powN - 1;
+  for (var k = 1; k < y; k++) {
+    var m = k * 12;
+    var powM = Math.pow(1 + i, m);
+    list[k] = Math.round(P * (powN - powM) / denom);
+  }
+  list[y] = 0;
+  return list;
+}
+
+if (typeof module !== 'undefined') module.exports = { loan: loan, loanBalances: loanBalances };
