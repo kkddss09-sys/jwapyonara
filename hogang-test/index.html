@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>나는 호갱일까? 8문항 테스트 | 좌표나라</title>
+<meta name="description" content="아는 것에만 체크하세요. 휴대폰 살 때 얼마나 준비됐는지 바로 확인해 드립니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.badge { display:inline-block; font-size:13px; font-weight:700; color:#ffd60a; margin-bottom:8px; }
+.result .verdict { font-size:22px; font-weight:800; line-height:1.35; margin-bottom:6px; }
+.result .sub { color:#c7c7cc; font-size:15px; line-height:1.45; }
+.btn-copy { display:block; width:100%; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:12px; padding:11px 14px; font:inherit; font-size:14px; font-weight:700; color:#fff; cursor:pointer; text-align:center; margin-top:14px; transition:all .15s; }
+.btn-copy:hover { background:rgba(255,255,255,.2); border-color:#fff; }
+.missed-wrap { margin-bottom:16px; }
+.missed-label { font-size:14px; font-weight:700; color:var(--sub); margin:0 4px 8px; }
+.missed-list { display:grid; gap:8px; }
+.missed-item { background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:12px 14px; font-size:14px; color:var(--ink); line-height:1.45; word-break:keep-all; }
+.missed-item .tool-link { display:inline-block; margin-top:4px; font-size:13px; font-weight:700; color:var(--red); text-decoration:none; }
+.missed-item .tool-link:hover { text-decoration:underline; }
+.missed-none { background:#fbfbfd; border:1.5px dashed var(--line); border-radius:14px; padding:14px; text-align:center; font-size:14px; color:var(--sub); }
+.check-list { display:grid; gap:8px; }
+.check-item { display:flex; align-items:center; min-height:52px; padding:12px 14px; border:1.5px solid var(--line); border-radius:14px; background:#fff; cursor:pointer; user-select:none; gap:12px; transition:border-color .15s, background .15s; }
+.check-item input[type="checkbox"] { width:22px; height:22px; margin:0; flex-shrink:0; cursor:pointer; accent-color:var(--red); }
+.check-item.done { background:#fbfbfd; border-color:var(--red); }
+.check-item.done span { color:var(--ink); font-weight:700; }
+.check-item span { font-size:15px; font-weight:600; line-height:1.45; color:var(--ink); flex:1; word-break:keep-all; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>나는 호갱일까?<br>8문항 테스트</h1>
+  <p class="lead">아는 것에만 체크하세요. 휴대폰 살 때 얼마나 준비됐는지 보여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="badge" id="resBadge">8개 중 0개 체크</div>
+    <div class="verdict" id="resTitle">아직은 조심하세요</div>
+    <div class="sub" id="resText">모르는 것이 많을수록 불리한 조건을 놓치기 쉽습니다. 아래에서 체크하지 못한 것부터 하나씩 알아보세요.</div>
+    <button type="button" class="btn-copy" id="btnCopy">결과 복사하기</button>
+  </section>
+
+  <section class="card">
+    <h2>해당하는 항목을 골라보세요</h2>
+    <div class="check-list">
+      <label class="check-item"><input type="checkbox" data-idx="0"><span>할부원금이 무엇인지 안다</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="1"><span>계약서에서 할부원금 숫자를 직접 확인한다</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="2"><span>요금제를 몇 달 유지해야 하는지 물어본다</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="3"><span>부가서비스를 언제 해지해도 되는지 적어 둔다</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="4"><span>"기기값 할인"과 "요금 할인"을 구분할 수 있다</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="5"><span>자급제가 무엇인지 안다</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="6"><span>약정이 끝나기 전에 바꾸면 돈을 돌려낼 수 있다는 것을 안다</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="7"><span>개통한 뒤 첫 청구서를 계약 내용과 맞춰 본다</span></label>
+    </div>
+  </section>
+
+  <div class="missed-wrap" id="missedWrap">
+    <div class="missed-label">체크하지 못한 것 (살 때 꼭 확인해 보세요)</div>
+    <div class="missed-list" id="missedList"></div>
+  </div>
+
+  <p class="note">재미로 해 보는 테스트입니다. 실제 조건은 매장과 가입 내용에 따라 다르니 계약서로 확인하세요.</p>
+
+  <a class="cta" data-zw="kakao" href="#">오늘 시세는 카톡방에서<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>진단 기준 안내</summary>
+    <ul>
+      <li>점수 = 체크한 개수 (총 8개)</li>
+      <li>0~2개 (아직은 조심하세요): 모르는 것이 많을수록 불리한 조건을 놓치기 쉽습니다. 아래에서 체크하지 못한 것부터 하나씩 알아보세요.</li>
+      <li>3~5개 (절반은 알고 있어요): 기본은 알고 있습니다. 체크하지 못한 것만 채우면 훨씬 든든합니다.</li>
+      <li>6~8개 (쉽게 속지 않아요): 살 때 확인할 것을 잘 알고 있습니다. 계약서 숫자만 한 번 더 보면 됩니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var ITEMS = [
+    { text: '할부원금이 무엇인지 안다', linkText: '한 달 납부액 계산기', linkHref: '../monthly-phone/' },
+    { text: '계약서에서 할부원금 숫자를 직접 확인한다' },
+    { text: '요금제를 몇 달 유지해야 하는지 물어본다' },
+    { text: '부가서비스를 언제 해지해도 되는지 적어 둔다' },
+    { text: '"기기값 할인"과 "요금 할인"을 구분할 수 있다' },
+    { text: '자급제가 무엇인지 안다', linkText: '자급제 vs 성지 비교', linkHref: '../jagupje-seongji/' },
+    { text: '약정이 끝나기 전에 바꾸면 돈을 돌려낼 수 있다는 것을 안다', linkText: '약정 끝나는 날', linkHref: '../contract-end/' },
+    { text: '개통한 뒤 첫 청구서를 계약 내용과 맞춰 본다' }
+  ];
+
+  var boxes = document.querySelectorAll('input[type="checkbox"]');
+  var resBadge = document.getElementById('resBadge');
+  var resTitle = document.getElementById('resTitle');
+  var resText = document.getElementById('resText');
+  var missedList = document.getElementById('missedList');
+  var btnCopy = document.getElementById('btnCopy');
+
+  var currentResult = null;
+  var currentScore = 0;
+
+  function render() {
+    var checkedCount = 0;
+    var missed = [];
+
+    boxes.forEach(function (box, idx) {
+      var itemEl = box.closest('.check-item');
+      if (box.checked) {
+        checkedCount++;
+        if (itemEl) itemEl.classList.add('done');
+      } else {
+        if (itemEl) itemEl.classList.remove('done');
+        missed.push(ITEMS[idx]);
+      }
+    });
+
+    currentScore = checkedCount;
+    currentResult = calcHogang(checkedCount, 8);
+
+    resBadge.textContent = '8개 중 ' + currentResult.score + '개 체크';
+    resTitle.textContent = currentResult.title;
+    resText.textContent = currentResult.desc;
+
+    // 체크하지 못한 것 렌더링
+    missedList.innerHTML = '';
+    if (missed.length === 0) {
+      var doneEl = document.createElement('div');
+      doneEl.className = 'missed-none';
+      doneEl.textContent = '8개 항목을 모두 알고 계십니다! 준비가 완벽합니다.';
+      missedList.appendChild(doneEl);
+    } else {
+      missed.forEach(function (item) {
+        var el = document.createElement('div');
+        el.className = 'missed-item';
+        var t = document.createElement('div');
+        t.textContent = item.text;
+        el.appendChild(t);
+        if (item.linkHref) {
+          var a = document.createElement('a');
+          a.className = 'tool-link';
+          a.href = item.linkHref;
+          a.textContent = '→ ' + item.linkText + ' 바로가기';
+          el.appendChild(a);
+        }
+        missedList.appendChild(el);
+      });
+    }
+  }
+
+  boxes.forEach(function (box) {
+    box.addEventListener('change', render);
+  });
+
+  btnCopy.addEventListener('click', function () {
+    if (!currentResult) return;
+    var copyText = '나는 호갱일까? 테스트 — 8개 중 ' + currentScore + '개 · ' + currentResult.title + ' · jwapyonara.com/hogang-test/';
+    
+    function showSuccess() {
+      var orig = btnCopy.textContent;
+      btnCopy.textContent = '복사되었습니다!';
+      setTimeout(function () {
+        btnCopy.textContent = orig;
+      }, 2000);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(copyText).then(showSuccess).catch(fallback);
+    } else {
+      fallback();
+    }
+
+    function fallback() {
+      var ta = document.createElement('textarea');
+      ta.value = copyText;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showSuccess();
+      } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

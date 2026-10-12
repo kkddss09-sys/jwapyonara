@@ -106,3 +106,10 @@ details ul { padding-left:20px; margin:8px 0 0; }
 .zw-foot p { margin:4px 0; }
 
 @media (max-width:380px) { h1 { font-size:23px; } .inp input { font-size:18px; } .row2 { grid-template-columns:1fr; } }
+
+/* 읽을거리(설명 글) — 2026-10-13 */
+.guide h2 { font-size:18px; margin:0 0 6px; }
+.guide h3 { font-size:16px; margin:18px 0 6px; }
+.guide p { margin:0; font-size:15px; line-height:1.7; color:#48484a; word-break:keep-all; }
+.guide ul { margin:10px 0 0; padding-left:20px; font-size:15px; line-height:1.9; }
+.guide a { color:#ff2d55; font-weight:600; }
