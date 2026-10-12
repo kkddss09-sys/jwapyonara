@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>날짜 계산기 — 두 날짜 사이 며칠 | 좌표나라</title>
+<meta name="description" content="시작하는 날과 끝나는 날을 넣으면 며칠인지, 몇 주 몇 일인지 바로 계산합니다. 첫날 포함 선택 가능. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.seg button { min-height:48px; }
+.inp input[type="date"] { text-align:left; font-size:17px; padding:12px 0; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>두 날짜 사이,<br>며칠일까?</h1>
+  <p class="lead">시작하는 날과 끝나는 날을 넣으면 며칠인지 바로 보여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict"><em>0일</em>입니다</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>주로 치면</dt><dd id="rowWeeks">-</dd></div>
+      <div><dt>개월로 치면</dt><dd id="rowMonths">-</dd></div>
+      <div><dt>시작하는 날</dt><dd id="rowStartDate">-</dd></div>
+      <div><dt>끝나는 날</dt><dd id="rowEndDate">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="startDate">시작하는 날</label>
+      <div class="inp">
+        <input type="date" id="startDate">
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:16px;">
+      <label for="endDate">끝나는 날</label>
+      <div class="inp">
+        <input type="date" id="endDate">
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:16px;">
+      <label>날 수 세는 기준</label>
+      <div class="seg two" id="includeSeg">
+        <button type="button" class="on" data-include="false">첫날 빼고 세기</button>
+        <button type="button" data-include="true">첫날도 세기</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">기념일처럼 첫날을 1일로 셀 때는 '첫날도 세기'를 누르세요.</p>
+
+  <a class="cta" data-zw="kakao" href="#">오늘 시세는 카톡방에서<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>날 수:</b> 끝나는 날 − 시작하는 날로 계산합니다.</li>
+      <li><b>첫날도 세기:</b> 첫날을 1일째로 포함할 때는 하루를 더합니다.</li>
+      <li><b>주와 개월:</b> 주는 7일 단위로 나누고, 개월은 시작한 날과 같은 날짜가 돌아올 때마다 한 달로 셉니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var startDate = document.getElementById('startDate');
+  var endDate = document.getElementById('endDate');
+  var includeButtons = document.querySelectorAll('#includeSeg button');
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowWeeks = document.getElementById('rowWeeks');
+  var rowMonths = document.getElementById('rowMonths');
+  var rowStartDate = document.getElementById('rowStartDate');
+  var rowEndDate = document.getElementById('rowEndDate');
+
+  var includeStart = false;
+
+  var now = new Date();
+  var ty = now.getFullYear();
+  var tm = now.getMonth() + 1;
+  var td = now.getDate();
+  var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+  var todayStr = ty + '-' + pad(tm) + '-' + pad(td);
+
+  // 기본값: 시작일은 오늘, 종료일은 100일 뒤
+  startDate.value = todayStr;
+  var future100 = new Date(Date.UTC(ty, tm - 1, td) + 100 * 86400000);
+  var fy = future100.getUTCFullYear();
+  var fm = future100.getUTCMonth() + 1;
+  var fd = future100.getUTCDate();
+  endDate.value = fy + '-' + pad(fm) + '-' + pad(fd);
+
+  function formatDateKo(dateStr) {
+    if (!dateStr) return '-';
+    var p = dateStr.split('-');
+    if (p.length !== 3) return '-';
+    var y = parseInt(p[0], 10);
+    var m = parseInt(p[1], 10);
+    var d = parseInt(p[2], 10);
+    var dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+    var day = dayNames[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+    return y + '년 ' + m + '월 ' + d + '일 ' + day + '요일';
+  }
+
+  function render() {
+    var r = calcDaysBetween(startDate.value, endDate.value, includeStart);
+    if (!r.ok) {
+      resVerdict.textContent = '날짜를 올바르게 넣어 주세요';
+      resSub.textContent = '';
+      rowWeeks.textContent = '-';
+      rowMonths.textContent = '-';
+      rowStartDate.textContent = '-';
+      rowEndDate.textContent = '-';
+      return;
+    }
+
+    resVerdict.innerHTML = '<em>' + r.days.toLocaleString('ko-KR') + '일</em>입니다';
+
+    if (r.swapped) {
+      resSub.textContent = '끝나는 날이 더 앞이라 두 날짜를 바꿔 계산했습니다.';
+    } else {
+      resSub.textContent = '';
+    }
+
+    rowWeeks.textContent = r.weeks + '주 ' + r.restDays + '일';
+    rowMonths.textContent = r.months + '개월 ' + r.monthRestDays + '일';
+
+    // 화면 표시는 바뀐 순서(빠른 날 -> 늦은 날)에 맞춰 표시
+    var displayStart = r.swapped ? endDate.value : startDate.value;
+    var displayEnd = r.swapped ? startDate.value : endDate.value;
+    rowStartDate.textContent = formatDateKo(displayStart);
+    rowEndDate.textContent = formatDateKo(displayEnd);
+  }
+
+  startDate.addEventListener('change', render);
+  startDate.addEventListener('input', render);
+  endDate.addEventListener('change', render);
+  endDate.addEventListener('input', render);
+
+  includeButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      includeButtons.forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      includeStart = btn.getAttribute('data-include') === 'true';
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

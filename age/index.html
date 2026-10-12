@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>만 나이 계산기 — 내 만 나이, 연 나이, 다음 생일 | 좌표나라</title>
+<meta name="description" content="생년월일을 넣으면 만 나이, 연 나이, 세는 나이와 다음 생일까지 남은 날짜를 바로 계산합니다. 2023년 만 나이 통일법 반영. 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.inp input[type="date"] { text-align:left; font-size:17px; padding:12px 0; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>내 만 나이,<br>몇 살일까?</h1>
+  <p class="lead">태어난 날을 넣으면 만 나이와 다음 생일까지 남은 날을 보여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">만 <em>0세</em>입니다</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>연 나이</dt><dd id="rowYearAge">-</dd></div>
+      <div><dt>세는 나이</dt><dd id="rowCountingAge">-</dd></div>
+      <div><dt>다음 생일까지</dt><dd id="rowDaysToBday">-</dd></div>
+      <div><dt>태어난 지</dt><dd id="rowDaysLived">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="birthDate">태어난 날</label>
+      <div class="inp">
+        <input type="date" id="birthDate" value="1990-01-01">
+      </div>
+    </div>
+  </section>
+
+  <p class="note">2월 29일에 태어난 분은 윤년이 아닌 해에 3월 1일부터 한 살을 더한 것으로 계산했습니다(기준 확인 중).</p>
+
+  <a class="cta" data-zw="kakao" href="#">오늘 시세는 카톡방에서<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>만 나이:</b> 올해에서 태어난 해를 뺀 뒤, 올해 생일이 아직 지나지 않았으면 1살을 뺍니다(생일 당일부터 만 나이가 올라갑니다).</li>
+      <li><b>연 나이:</b> 올해에서 태어난 해를 뺍니다.</li>
+      <li><b>세는 나이:</b> 연 나이에 1살을 더한 전통 나이입니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var birthDate = document.getElementById('birthDate');
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowYearAge = document.getElementById('rowYearAge');
+  var rowCountingAge = document.getElementById('rowCountingAge');
+  var rowDaysToBday = document.getElementById('rowDaysToBday');
+  var rowDaysLived = document.getElementById('rowDaysLived');
+
+  var now = new Date();
+  var ty = now.getFullYear();
+  var tm = now.getMonth() + 1;
+  var td = now.getDate();
+  var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+  var todayStr = ty + '-' + pad(tm) + '-' + pad(td);
+
+  birthDate.max = todayStr;
+
+  function render() {
+    var r = calcAge(birthDate.value, todayStr);
+    if (!r.ok) {
+      resVerdict.textContent = '태어난 날을 올바르게 넣어 주세요';
+      resSub.textContent = '';
+      rowYearAge.textContent = '-';
+      rowCountingAge.textContent = '-';
+      rowDaysToBday.textContent = '-';
+      rowDaysLived.textContent = '-';
+      return;
+    }
+
+    resVerdict.innerHTML = '만 <em>' + r.age + '세</em>입니다';
+
+    if (r.daysToBirthday === 0) {
+      resSub.textContent = '오늘이 생일입니다. 축하드려요 🎉';
+      rowDaysToBday.textContent = '오늘';
+    } else {
+      resSub.textContent = '';
+      rowDaysToBday.textContent = r.daysToBirthday.toLocaleString('ko-KR') + '일';
+    }
+
+    rowYearAge.textContent = r.yearAge + '세';
+    rowCountingAge.textContent = r.countingAge + '세';
+    rowDaysLived.textContent = (r.daysLived + 1).toLocaleString('ko-KR') + '일째';
+  }
+
+  birthDate.addEventListener('change', render);
+  birthDate.addEventListener('input', render);
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사다리 타기 — 순서와 당번 정하기, 당첨 뽑기 | 좌표나라</title>
+<meta name="description" content="이름과 결과를 적고 간편하게 사다리를 타 보세요. 모임 당번, 순서 정하기, 벌칙 뽑기를 공정하게 즉시 추첨합니다. 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.text-box { width:100%; border:1.5px solid var(--line); border-radius:12px; padding:12px 14px; font:inherit; font-size:16px; line-height:1.6; resize:vertical; outline:0; background:#fff; color:var(--ink); display:block; }
+.text-box:focus { border-color:var(--red); }
+.count-info { display:flex; justify-content:space-between; align-items:center; margin-top:6px; font-size:14px; color:var(--sub); }
+.canvas-wrap { width:100%; margin-top:14px; background:#2c2c2e; border-radius:14px; padding:12px 6px; box-sizing:border-box; overflow-x:auto; }
+#ladderCanvas { display:block; margin:0 auto; max-width:100%; }
+.ladder-list { margin-top:14px; display:grid; gap:8px; }
+.ladder-item { display:flex; align-items:center; justify-content:space-between; background:#2c2c2e; border-radius:12px; padding:12px 16px; cursor:pointer; border:1.5px solid transparent; transition:border-color .15s; }
+.ladder-item:hover, .ladder-item.on { border-color:var(--red); background:#353538; }
+.ladder-item .p-name { font-size:16px; font-weight:700; color:#fff; word-break:break-all; }
+.ladder-item .arrow { color:#8e8e93; font-size:14px; margin:0 8px; flex:none; }
+.ladder-item .p-res { font-size:17px; font-weight:800; color:#ffd60a; word-break:break-all; text-align:right; }
+.btn-act { display:flex; align-items:center; justify-content:center; width:100%; min-height:48px; border-radius:12px; font:inherit; font-size:16px; font-weight:700; cursor:pointer; }
+.btn-main { background:var(--red); color:#fff; border:none; }
+.btn-sub { background:#2c2c2e; border:1px solid #3a3a3c; color:#fff; }
+.btn-sub:hover { background:#3a3a3c; }
+.btn-group { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+.alert-hint { color:var(--red); font-size:13px; font-weight:600; margin-left:6px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>사다리 타기,<br>바로 정하기</h1>
+  <p class="lead">이름과 결과를 한 줄에 하나씩 적고 사다리를 타 보세요.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">사다리 결과</div>
+    <div class="sub" id="resSub">목록에서 이름을 누르면 그 사람의 길을 보여 드립니다.</div>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="ladderCanvas"></canvas>
+    </div>
+
+    <div class="ladder-list" id="ladderList"></div>
+
+    <div class="btn-group" id="resultBtnGroup">
+      <button type="button" class="btn-act btn-sub" id="btnReroll">다시 타기</button>
+      <button type="button" class="btn-act btn-sub" id="btnCopy">결과 복사</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="namesInput">참가자 이름 (한 줄에 한 명씩, 2~10명)</label>
+      <textarea id="namesInput" class="text-box" rows="5" placeholder="예)&#10;가&#10;나&#10;다&#10;라">가
+나
+다
+라</textarea>
+      <div class="count-info">
+        <span id="namesCountText">지금 4명</span>
+        <span id="namesWarnText" class="alert-hint"></span>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:16px;">
+      <label for="resultsInput">결과 항목 (한 줄에 하나씩)</label>
+      <textarea id="resultsInput" class="text-box" rows="5" placeholder="예)&#10;당첨&#10;꽝&#10;꽝&#10;꽝">당첨
+꽝
+꽝
+꽝</textarea>
+      <div class="count-info">
+        <span style="font-size:13px; color:var(--sub);">모자란 자리는 '꽝'으로 자동 채워집니다.</span>
+      </div>
+    </div>
+
+    <div style="margin-top:18px;">
+      <button type="button" class="btn-act btn-main" id="btnPlay">사다리 타기</button>
+    </div>
+  </section>
+
+  <p class="note">이름은 내 기기 안에서만 쓰이고 어디에도 전송되지 않습니다. 사다리는 탈 때마다 무작위로 새로 그려집니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">오늘 시세는 카톡방에서<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 사다리를 타나요?</summary>
+    <ul>
+      <li><b>무작위 가로줄:</b> 사다리의 가로줄은 매번 무작위로 놓이며, 인접한 두 가로줄이 겹치지 않도록 배치됩니다.</li>
+      <li><b>1:1 매칭:</b> 위에서 아래로 내려오며 만나는 가로줄을 따라 건너가므로 참가자 모두가 겹치지 않고 서로 다른 결과에 닿게 됩니다.</li>
+      <li><b>경로 확인:</b> 결과 목록에서 참가자 이름을 누르면 해당 참가자가 내려간 사다리 경로를 빨간 선으로 바로 확인할 수 있습니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var namesInput = document.getElementById('namesInput');
+  var resultsInput = document.getElementById('resultsInput');
+  var namesCountText = document.getElementById('namesCountText');
+  var namesWarnText = document.getElementById('namesWarnText');
+  var btnPlay = document.getElementById('btnPlay');
+  var btnReroll = document.getElementById('btnReroll');
+  var btnCopy = document.getElementById('btnCopy');
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var ladderList = document.getElementById('ladderList');
+  var canvasWrap = document.getElementById('canvasWrap');
+  var canvas = document.getElementById('ladderCanvas');
+  var resultBtnGroup = document.getElementById('resultBtnGroup');
+
+  var currentRungs = null;
+  var currentNames = [];
+  var currentResults = [];
+  var currentMapping = [];
+  var selectedPersonIndex = -1;
+
+  function truncate(str, maxLen) {
+    if (!str) return '';
+    return str.length > maxLen ? str.slice(0, maxLen - 1) + '…' : str;
+  }
+
+  function getCleanedInputs() {
+    var rawNames = parseLines(namesInput.value);
+    var rawResults = parseLines(resultsInput.value);
+
+    namesWarnText.textContent = '';
+    namesCountText.textContent = '지금 ' + rawNames.length + '명';
+
+    if (rawNames.length < 2) {
+      namesWarnText.textContent = '이름을 두 명 넘게 적어 주세요';
+      return null;
+    }
+
+    var names = rawNames;
+    if (names.length > 10) {
+      namesWarnText.textContent = '10명까지만 탈 수 있어요';
+      names = rawNames.slice(0, 10);
+      namesCountText.textContent = '지금 10명 (상위 10명 사용)';
+    }
+
+    var results = [];
+    for (var i = 0; i < names.length; i++) {
+      if (i < rawResults.length && rawResults[i].length > 0) {
+        results.push(rawResults[i]);
+      } else {
+        results.push('꽝');
+      }
+    }
+
+    return { names: names, results: results };
+  }
+
+  function drawCanvas() {
+    if (!currentRungs || currentNames.length < 2) return;
+
+    var ctx = canvas.getContext('2d');
+    var rect = canvasWrap.getBoundingClientRect();
+    var w = Math.max(300, Math.floor(rect.width - 24));
+    var count = currentNames.length;
+    var numRows = currentRungs.length;
+
+    var rowH = Math.max(16, Math.min(26, Math.floor(220 / numRows)));
+    var topPad = 32;
+    var botPad = 32;
+    var h = topPad + botPad + (numRows * rowH);
+
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.floor(w * dpr);
+    canvas.height = Math.floor(h * dpr);
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+
+    ctx.save();
+    ctx.scale(dpr, dpr);
+
+    var colW = (w - 48) / (count - 1);
+    function getX(c) { return 24 + c * colW; }
+    function getY(r) { return topPad + r * rowH; }
+
+    // 1. 기본 세로선
+    ctx.strokeStyle = '#545458';
+    ctx.lineWidth = 2.5;
+    for (var c = 0; c < count; c++) {
+      ctx.beginPath();
+      ctx.moveTo(getX(c), topPad);
+      ctx.lineTo(getX(c), topPad + numRows * rowH);
+      ctx.stroke();
+    }
+
+    // 2. 가로선
+    for (var r = 0; r < numRows; r++) {
+      for (var c = 0; c < count - 1; c++) {
+        if (currentRungs[r][c]) {
+          ctx.beginPath();
+          ctx.moveTo(getX(c), getY(r) + rowH / 2);
+          ctx.lineTo(getX(c + 1), getY(r) + rowH / 2);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // 3. 선택된 경로 하이라이트
+    if (selectedPersonIndex >= 0 && selectedPersonIndex < count) {
+      var path = tracePath(currentRungs, count, selectedPersonIndex);
+      ctx.strokeStyle = '#ff2d55';
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      for (var step = 0; step < path.length; step++) {
+        var pr = path[step][0];
+        var pc = path[step][1];
+        var px = getX(pc);
+        var py;
+        if (pr === -1) {
+          py = topPad;
+        } else if (pr === numRows) {
+          py = topPad + numRows * rowH;
+        } else {
+          py = getY(pr) + rowH / 2;
+        }
+
+        if (step === 0) {
+          ctx.moveTo(px, py);
+        } else {
+          ctx.lineTo(px, py);
+        }
+      }
+      ctx.stroke();
+
+      // 시작점 및 도착점 강조 원
+      var destCol = currentMapping[selectedPersonIndex];
+      ctx.fillStyle = '#ff2d55';
+      ctx.beginPath();
+      ctx.arc(getX(selectedPersonIndex), topPad, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(getX(destCol), topPad + numRows * rowH, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 4. 상단 이름
+    ctx.textAlign = 'center';
+    ctx.font = '700 13px Pretendard, -apple-system, sans-serif';
+    for (var c = 0; c < count; c++) {
+      ctx.fillStyle = (selectedPersonIndex === c) ? '#ff2d55' : '#ffffff';
+      ctx.fillText(truncate(currentNames[c], 5), getX(c), topPad - 10);
+    }
+
+    // 5. 하단 결과
+    for (var c = 0; c < count; c++) {
+      var isDest = (selectedPersonIndex >= 0 && currentMapping[selectedPersonIndex] === c);
+      ctx.fillStyle = isDest ? '#ff2d55' : '#ffd60a';
+      ctx.fillText(truncate(currentResults[c], 5), getX(c), topPad + numRows * rowH + 20);
+    }
+
+    ctx.restore();
+  }
+
+  function renderList() {
+    ladderList.innerHTML = '';
+    for (var i = 0; i < currentNames.length; i++) {
+      (function (idx) {
+        var item = document.createElement('div');
+        item.className = 'ladder-item' + (selectedPersonIndex === idx ? ' on' : '');
+
+        var nameSpan = document.createElement('span');
+        nameSpan.className = 'p-name';
+        nameSpan.textContent = currentNames[idx];
+
+        var arrowSpan = document.createElement('span');
+        arrowSpan.className = 'arrow';
+        arrowSpan.textContent = '→';
+
+        var destIdx = currentMapping[idx];
+        var resSpan = document.createElement('span');
+        resSpan.className = 'p-res';
+        resSpan.textContent = currentResults[destIdx];
+
+        item.appendChild(nameSpan);
+        item.appendChild(arrowSpan);
+        item.appendChild(resSpan);
+
+        item.addEventListener('click', function () {
+          if (selectedPersonIndex === idx) {
+            selectedPersonIndex = -1;
+          } else {
+            selectedPersonIndex = idx;
+          }
+          renderList();
+          drawCanvas();
+        });
+
+        ladderList.appendChild(item);
+      })(i);
+    }
+  }
+
+  function playLadder() {
+    var data = getCleanedInputs();
+    if (!data) {
+      resVerdict.textContent = '이름을 두 명 넘게 적어 주세요';
+      resSub.textContent = '참가자 이름을 2명 이상 적고 사다리를 타 보세요.';
+      canvasWrap.style.display = 'none';
+      ladderList.innerHTML = '';
+      resultBtnGroup.style.display = 'none';
+      currentRungs = null;
+      return;
+    }
+
+    canvasWrap.style.display = 'block';
+    resultBtnGroup.style.display = 'grid';
+    currentNames = data.names;
+    currentResults = data.results;
+
+    var n = currentNames.length;
+    currentRungs = makeLadder(n);
+    currentMapping = traceLadder(currentRungs, n);
+    selectedPersonIndex = -1;
+
+    resVerdict.innerHTML = '총 <em>' + n + '명</em> 사다리 완료!';
+    resSub.textContent = '목록에서 이름을 누르면 그 사람의 길을 보여 드립니다.';
+
+    renderList();
+    drawCanvas();
+  }
+
+  namesInput.addEventListener('input', function () {
+    var raw = parseLines(namesInput.value);
+    namesWarnText.textContent = '';
+    namesCountText.textContent = '지금 ' + raw.length + '명';
+    if (raw.length < 2) {
+      namesWarnText.textContent = '이름을 두 명 넘게 적어 주세요';
+    } else if (raw.length > 10) {
+      namesWarnText.textContent = '10명까지만 탈 수 있어요';
+    }
+  });
+
+  btnPlay.addEventListener('click', playLadder);
+  btnReroll.addEventListener('click', playLadder);
+
+  btnCopy.addEventListener('click', function () {
+    if (!currentNames || currentNames.length === 0 || !currentMapping) return;
+    var lines = ['[좌표나라 사다리 타기 결과]'];
+    for (var i = 0; i < currentNames.length; i++) {
+      var dest = currentMapping[i];
+      lines.push(currentNames[i] + ' → ' + currentResults[dest]);
+    }
+    var copyText = lines.join('\n');
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(copyText).then(function () {
+        showCopyDone();
+      }).catch(function () {
+        fallbackCopy(copyText);
+      });
+    } else {
+      fallbackCopy(copyText);
+    }
+  });
+
+  function showCopyDone() {
+    btnCopy.textContent = '복사 완료!';
+    setTimeout(function () {
+      btnCopy.textContent = '결과 복사';
+    }, 1500);
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      showCopyDone();
+    } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  window.addEventListener('resize', function () {
+    drawCanvas();
+  });
+
+  // 초기 렌더링: 처음 값으로 사다리 1회 실행
+  playLadder();
+})();
+</script>
+</body>
+</html>
