@@ -41,6 +41,7 @@
   <div id="resActions" style="display:none;">
     <div style="display:grid; gap:10px; margin-bottom:14px;">
       <button type="button" id="btnShare" class="cta" style="border:none; cursor:pointer; margin:0;">친구에게 보내기<small>테스트 결과를 공유해 보세요</small></button>
+      <button type="button" id="btnSaveImg" style="font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:14px; padding:13px; cursor:pointer;">결과를 그림으로 저장</button>
       <button type="button" id="btnRestart" style="font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:14px; padding:13px; cursor:pointer;">처음부터 다시 하기</button>
     </div>
 
@@ -171,6 +172,8 @@
     resTitle.textContent = t.title;
     resText.textContent = t.desc;
     resScore.textContent = '갤럭시 ' + res.galaxy + '점 · 아이폰 ' + res.iphone + '점';
+    currentDesc = t.desc;
+    currentScore = resScore.textContent;
 
     try {
       resCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -243,6 +246,81 @@
       }
     } else {
       copyUrl();
+    }
+  });
+
+  // 결과를 1080×1080 그림으로 그려 저장한다(바깥 도구 없이 캔버스에 직접 그린다)
+  var currentDesc = '', currentScore = '';
+  var btnSaveImg = document.getElementById('btnSaveImg');
+
+  function wrapLines(ctx, text, maxWidth) {
+    var words = String(text).split(' '), lines = [], line = '';
+    for (var i = 0; i < words.length; i++) {
+      var tryLine = line ? line + ' ' + words[i] : words[i];
+      if (ctx.measureText(tryLine).width <= maxWidth || !line) line = tryLine;
+      else { lines.push(line); line = words[i]; }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function drawResultImage() {
+    var S = 1080, cv = document.createElement('canvas');
+    cv.width = S; cv.height = S;
+    var ctx = cv.getContext('2d');
+    var font = '"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR",sans-serif';
+    ctx.fillStyle = '#1c1c1e'; ctx.fillRect(0, 0, S, S);
+    ctx.textBaseline = 'top';
+
+    ctx.fillStyle = '#c7c7cc'; ctx.font = '600 40px ' + font;
+    ctx.fillText('나에게 맞는 폰 테스트', 90, 110);
+
+    ctx.fillStyle = '#ffd60a'; ctx.font = '800 92px ' + font;
+    var y = 300, lines = wrapLines(ctx, currentResultTitle, S - 180);
+    for (var i = 0; i < lines.length; i++) { ctx.fillText(lines[i], 90, y); y += 118; }
+
+    ctx.fillStyle = '#ffffff'; ctx.font = '500 46px ' + font;
+    y += 30; lines = wrapLines(ctx, currentDesc, S - 180);
+    for (i = 0; i < lines.length; i++) { ctx.fillText(lines[i], 90, y); y += 68; }
+
+    ctx.fillStyle = '#c7c7cc'; ctx.font = '500 38px ' + font;
+    ctx.fillText(currentScore, 90, y + 36);
+
+    ctx.fillStyle = '#3a3a3c'; ctx.fillRect(90, 880, S - 180, 2);
+    ctx.fillStyle = '#ffffff'; ctx.font = '800 50px ' + font;
+    ctx.fillText('좌표', 90, 920);
+    var w = ctx.measureText('좌표').width;
+    ctx.fillStyle = '#ff2d55'; ctx.fillText('나라', 90 + w, 920);
+    ctx.fillStyle = '#c7c7cc'; ctx.font = '600 38px ' + font; ctx.textAlign = 'right';
+    ctx.fillText('jwapyonara.com', S - 90, 928);
+    ctx.textAlign = 'left';
+
+    ctx.fillStyle = '#8e8e93'; ctx.font = '400 28px ' + font;
+    ctx.fillText('재미로 보는 테스트입니다', 90, 1000);
+    return cv;
+  }
+
+  btnSaveImg.addEventListener('click', function () {
+    if (!currentResultTitle) return;
+    var cv = drawResultImage();
+    var done = function () {
+      btnSaveImg.textContent = '저장했어요';
+      setTimeout(function () { btnSaveImg.textContent = '결과를 그림으로 저장'; }, 1800);
+    };
+    var down = function (url, revoke) {
+      var a = document.createElement('a');
+      a.href = url; a.download = '좌표나라-폰테스트-결과.png';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      if (revoke) setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+      done();
+    };
+    if (cv.toBlob) {
+      cv.toBlob(function (blob) {
+        if (!blob) { down(cv.toDataURL('image/png'), false); return; }
+        down(URL.createObjectURL(blob), true);
+      }, 'image/png');
+    } else {
+      down(cv.toDataURL('image/png'), false);
     }
   });
 
