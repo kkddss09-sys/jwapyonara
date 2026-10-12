@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>폰 바꾸기 전 할 일 확인표 | 좌표나라</title>
+<meta name="description" content="새 폰으로 옮기기 전에 백업부터 앱 이동까지 꼭 챙겨야 할 체크리스트. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.prog-card { background:#fff; border:1.5px solid var(--line); border-radius:18px; padding:18px; margin-bottom:14px; transition:border-color .2s, background .2s; }
+.prog-card.all-done { background:var(--okbg); border-color:var(--ok); }
+.prog-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.prog-status { font-size:18px; font-weight:800; }
+.prog-card.all-done .prog-status { color:var(--ok); }
+.prog-track { height:10px; border-radius:999px; background:#e5e5ea; overflow:hidden; }
+.prog-fill { height:100%; border-radius:999px; background:var(--red); width:0%; transition:width .25s ease; }
+.prog-card.all-done .prog-fill { background:var(--ok); }
+.check-list { display:grid; gap:8px; }
+.check-item { display:flex; align-items:center; min-height:52px; padding:12px 14px; border:1.5px solid var(--line); border-radius:14px; background:#fff; cursor:pointer; user-select:none; gap:12px; transition:border-color .15s, background .15s; }
+.check-item input[type="checkbox"] { width:22px; height:22px; margin:0; flex-shrink:0; cursor:pointer; accent-color:var(--red); }
+.check-item.done { background:#fbfbfd; border-color:#d2d2d7; }
+.check-item.done span { color:var(--sub); text-decoration:line-through; }
+.check-item span { font-size:15px; font-weight:600; line-height:1.45; color:var(--ink); flex:1; word-break:keep-all; }
+.btn-reset { display:block; width:100%; background:transparent; border:1.5px dashed var(--line); border-radius:14px; padding:14px; font:inherit; font-size:15px; font-weight:700; color:var(--sub); cursor:pointer; margin:14px 0 16px; text-align:center; transition:all .15s; }
+.btn-reset:hover { background:#ececee; color:var(--ink); border-color:var(--sub); }
+.note a { color:var(--ink); font-weight:700; text-decoration:underline; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>폰 바꾸기 전<br>할 일 확인표</h1>
+  <p class="lead">새 폰으로 옮기기 전에 하나씩 눌러 확인하세요. 체크한 것은 이 기기에 남아 있습니다.</p>
+
+  <section class="prog-card" id="progCard" aria-live="polite">
+    <div class="prog-head">
+      <div class="prog-status" id="progStatus">11개 중 0개 했어요</div>
+    </div>
+    <div class="prog-track">
+      <div class="prog-fill" id="progFill"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>옛 폰에서 먼저</h2>
+    <div class="check-list">
+      <label class="check-item"><input type="checkbox" data-idx="0"><span>사진과 영상이 백업됐는지 확인하기</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="1"><span>연락처가 계정에 저장돼 있는지 확인하기</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="2"><span>카카오톡 대화 백업하기 (카카오톡 설정 안에 있습니다)</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="3"><span>은행·인증서 앱은 새 폰에서 먼저 로그인해 보기 (옛 폰을 지우기 전에)</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="4"><span>일회용 비밀번호(OTP) 앱을 쓰면 새 폰으로 옮기기</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="5"><span>교통카드·간편결제에 남은 돈이 있는지 확인하기</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="6"><span>메모와 일정이 계정에 동기화돼 있는지 확인하기</span></label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>새 폰에서</h2>
+    <div class="check-list">
+      <label class="check-item"><input type="checkbox" data-idx="7"><span>유심(또는 이심)을 옮기고 통화·문자·데이터가 되는지 확인하기</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="8"><span>사진, 연락처, 앱이 잘 넘어왔는지 확인하기</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="9"><span>자주 쓰는 앱에 로그인해 보기</span></label>
+      <label class="check-item"><input type="checkbox" data-idx="10"><span>옛 폰은 며칠 그대로 두었다가 지우기</span></label>
+    </div>
+  </section>
+
+  <button type="button" class="btn-reset" id="btnReset">처음부터 다시</button>
+
+  <p class="note">※ 기종과 앱에 따라 메뉴 이름이 다를 수 있습니다. 옛 폰을 팔 계획이면 <a href="../sell-checklist/">중고폰 팔기 전 확인표</a>도 보세요.</p>
+
+  <a class="cta" data-zw="kakao" href="#">오늘 시세는 카톡방에서<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>폰 바꿀 때 꼭 챙겨야 할 주의사항</summary>
+    <ul>
+      <li>카카오톡 대화 백업: 카카오톡 설정 &gt; 채팅 &gt; 대화 백업에서 진행하고 14일 이내에 새 폰에서 복원해야 합니다. 톡서랍을 쓰지 않으면 사진·동영상은 백업되지 않으니 중요한 파일은 미리 따로 저장하세요.</li>
+      <li>금융 및 은행 앱: 새 폰에서 인증서를 재발급하거나 로그인할 때 기존 폰으로 본인 확인 문자가 올 수 있습니다. 기존 폰을 초기화하기 전에 새 폰에서 로그인을 꼭 먼저 확인하세요.</li>
+      <li>OTP 앱: Google OTP 등은 앱 내 계정 이전(QR 코드) 기능으로 한 번에 안전하게 옮길 수 있습니다.</li>
+      <li>교통카드: 모바일 티머니나 캐시비 잔액은 환불받거나 새 폰으로 잔액 이전을 마친 뒤 기존 폰에서 삭제하세요.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var STORAGE_KEY = 'zw-switch-checklist';
+  var TOTAL = 11;
+  var boxes = document.querySelectorAll('input[type="checkbox"]');
+  var progCard = document.getElementById('progCard');
+  var progStatus = document.getElementById('progStatus');
+  var progFill = document.getElementById('progFill');
+  var btnReset = document.getElementById('btnReset');
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveState(arr) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    } catch (e) {
+      /* 저장 불가 환경 대응 */
+    }
+  }
+
+  function render() {
+    var checkedIndices = [];
+    boxes.forEach(function (box, i) {
+      var item = box.closest('.check-item');
+      if (box.checked) {
+        checkedIndices.push(i);
+        if (item) item.classList.add('done');
+      } else {
+        if (item) item.classList.remove('done');
+      }
+    });
+
+    var count = checkedIndices.length;
+    var pct = Math.round((count / TOTAL) * 100);
+    progFill.style.width = pct + '%';
+
+    if (count === TOTAL) {
+      progCard.classList.add('all-done');
+      progStatus.textContent = '다 했어요. 이제 옮겨도 됩니다';
+    } else {
+      progCard.classList.remove('all-done');
+      progStatus.textContent = TOTAL + '개 중 ' + count + '개 했어요';
+    }
+
+    saveState(checkedIndices);
+  }
+
+  // 초기 상태 복원
+  var saved = loadState();
+  if (Array.isArray(saved)) {
+    saved.forEach(function (idx) {
+      if (boxes[idx]) boxes[idx].checked = true;
+    });
+  }
+
+  boxes.forEach(function (box) {
+    box.addEventListener('change', render);
+  });
+
+  btnReset.addEventListener('click', function () {
+    if (confirm('체크한 내용을 모두 지우고 처음부터 다시 시작할까요?')) {
+      boxes.forEach(function (box) { box.checked = false; });
+      try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      render();
+    }
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

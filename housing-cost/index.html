@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>한 달 주거비 계산기 — 대출·관리비·월세 합계 | 좌표나라</title>
+<meta name="description" content="대출 상환액, 관리비, 월세를 더해 한 달 주거비와 소득에서 차지하는 비율을 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>이 집에 살면<br>한 달에 얼마가 나갈까?</h1>
+  <p class="lead">집 때문에 매달 나가는 돈을 넣어 보세요. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 소득 대비 몇 %가 적당한지는 사람마다 다릅니다. 이 숫자는 판단을 돕는 참고용입니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>한 달 주거비 = 대출 상환액 + 관리비 + 월세 + 그 밖의 돈</li>
+      <li>소득에서 차지하는 비율 = 한 달 주거비 ÷ 한 달 소득 × 100</li>
+      <li>넣으신 값으로만 계산합니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'repay', label: '한 달 대출 상환액', type: 'money', value: '1,432,246', unit: '원' },
+    { id: 'mgmt', label: '한 달 관리비', type: 'money', value: '250,000', unit: '원' },
+    { id: 'wolse', label: '한 달 월세 (없으면 0)', type: 'money', value: '0', unit: '원' },
+    { id: 'etc', label: '그 밖에 매달 드는 돈 (주차, 보험 등)', type: 'money', value: '100,000', unit: '원' },
+    { id: 'income', label: '한 달 소득 (실제로 받는 돈)', type: 'money', value: '5,000,000', unit: '원' }],
+  compute: function (v) {
+    var r = housingCost(v.repay, v.mgmt, v.wolse, v.etc, v.income);
+    if (!r.total) return {};
+    return { html: '한 달에 <em>' + ZW.fmt(r.total) + '원</em><br>나갑니다', sub: isFinite(r.pct) ? '소득의 ' + ZW.pct(r.pct) + '%입니다.' : '한 달 소득을 넣으면 비율도 보여 드립니다.', pct: isFinite(r.pct) ? r.pct : null, pctLabel: '소득 중 집에 쓰는 만큼',
+      rows: [['한 해로 치면', ZW.fmt(r.year) + '원']] };
+  }
+});
+</script>
+</body>
+</html>

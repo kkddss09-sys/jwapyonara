@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>용적률·건폐율 계산기 | 좌표나라</title>
+<meta name="description" content="대지면적, 건축면적, 연면적을 넣으면 용적률과 건폐율을 바로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>용적률과 건폐율<br>계산하기</h1>
+  <p class="lead">세 가지 넓이를 넣어 보세요. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 용적률을 계산할 때 지하층이나 주차장처럼 연면적에서 빼는 넓이가 법으로 정해져 있습니다. 정확한 값은 건축물대장이나 지자체 자료를 확인하세요.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>건폐율 = 건축면적 ÷ 대지면적 × 100 (땅을 건물이 얼마나 덮고 있는지)</li>
+      <li>용적률 = 연면적 ÷ 대지면적 × 100 (땅 넓이에 견줘 바닥을 얼마나 쌓았는지)</li>
+      <li>넣으신 값으로만 계산합니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'land', label: '대지면적 (땅 넓이)', type: 'num', value: '1000', unit: '㎡', max: 99999999 },
+    { id: 'bld', label: '건축면적 (건물이 땅을 덮은 넓이)', type: 'num', value: '200', unit: '㎡', max: 99999999 },
+    { id: 'tot', label: '연면적 (지상 층 바닥 넓이의 합)', type: 'num', value: '2500', unit: '㎡', max: 99999999 }],
+  compute: function (v) {
+    var r = landRatio(v.land, v.bld, v.tot);
+    if (!isFinite(r.floor)) return {};
+    return { html: '용적률 <em>' + ZW.pct(r.floor) + '%</em><br>건폐율 <em>' + ZW.pct(r.cover) + '%</em>', sub: '땅 넓이 ' + ZW.fmt(v.land) + '㎡를 기준으로 계산했습니다.', pct: r.cover, pctLabel: '땅을 건물이 덮은 만큼(건폐율)' };
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대출 가능 금액 계산기 — 한 달에 낼 수 있는 돈으로 거꾸로 | 좌표나라</title>
+<meta name="description" content="한 달에 갚을 수 있는 돈, 이자율, 기간을 넣으면 감당할 수 있는 대출금을 거꾸로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>내가 감당할 수 있는<br>대출금은 얼마일까?</h1>
+  <p class="lead">한 달에 낼 수 있는 돈으로 거꾸로 계산합니다. 아래 숫자는 예시이니 바꿔 넣으세요.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 은행이 실제로 빌려주는 한도가 아닙니다. 내가 매달 낼 수 있는 돈을 기준으로 거꾸로 계산한 값이며, 실제 한도는 소득과 심사 기준에 따라 다릅니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>원리금균등(매달 같은 금액)으로 갚는다고 보고 계산합니다.</li>
+      <li>대출금 = 한 달 상환액 × ((1+r)<sup>n</sup> − 1) ÷ (r × (1+r)<sup>n</sup>), r은 한 달 이자율, n은 갚는 횟수</li>
+      <li>넣으신 값으로만 계산합니다. 대출을 권하는 것이 아닙니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'pay', label: '한 달에 갚을 수 있는 돈', type: 'money', value: '1,500,000', unit: '원' },
+    { id: 'rate', label: '연 이자율', type: 'num', value: '4.0', unit: '%', max: 30 },
+    { id: 'years', label: '기간', type: 'num', value: '30', unit: '년', max: 50, short: true }],
+  compute: function (v) {
+    var p = affordable(v.pay, v.rate, v.years), n = Math.round(v.years * 12);
+    if (!p) return {};
+    return { html: '<em>' + (ZW.read(p) || ZW.fmt(p) + '원') + '</em>까지<br>감당할 수 있는 계산입니다', sub: '정확히는 ' + ZW.fmt(p) + '원. 한 달 ' + ZW.fmt(v.pay) + '원씩 ' + n + '번 갚는 경우입니다.',
+      rows: [['갚는 돈 합계', ZW.fmt(v.pay * n) + '원'], ['그중 이자', ZW.fmt(v.pay * n - p) + '원']] };
+  }
+});
+</script>
+</body>
+</html>

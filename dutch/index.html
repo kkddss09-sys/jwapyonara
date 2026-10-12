@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>더치페이 계산기 — 여럿이 모여 깔끔하게 나눠 내기 | 좌표나라</title>
+<meta name="description" content="모임, 회식, 여행에서 총금액과 인원수를 넣으면 한 사람당 얼마씩 내야 하는지 바로 계산합니다. 100원·1,000원 올림 지원. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>더치페이 계산기<br>여럿이 나눠 낼 때</h1>
+  <p class="lead">모두 합친 금액과 인원수를 넣으면 한 사람당 낼 돈을 바로 계산합니다. 아래 숫자는 예시이니 바꿔 넣으세요.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 올림 단위에 따라 잔돈(남는 돈)이 생길 수 있습니다. 1원 단위를 고르면 올림 없이 정확히 나눕니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>한 사람 낼 돈:</b> 합친 금액 ÷ 사람 수를 지정한 단위(100원, 1,000원, 1원)로 올림하여 구합니다.</li>
+      <li><b>모인 돈 합계:</b> 한 사람 낼 돈 × 사람 수</li>
+      <li><b>남는 돈(잔돈):</b> 모인 돈 합계 − 합친 금액 (올림 계산으로 더 걷히는 금액)</li>
+      <li><b>딱 나누면:</b> 올림 없이 합친 금액을 사람 수로 나눈 정확한 1인당 금액입니다(소수점 첫째 자리까지).</li>
+    </ul>
+  </details>
+</main>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+function fmtExact(n) {
+  if (n == null || !isFinite(n)) return '0';
+  var parts = String(n).split('.');
+  var intPart = Number(parts[0]).toLocaleString('ko-KR');
+  if (parts.length > 1) {
+    return intPart + '.' + parts[1];
+  }
+  return intPart;
+}
+
+ZW.app({
+  fields: [
+    { id: 'total', label: '모두 합친 금액', type: 'money', value: '100,000', unit: '원' },
+    { id: 'people', label: '사람 수', type: 'num', value: '3', unit: '명', max: 100 },
+    { id: 'unit', label: '올림 단위', type: 'seg', options: [['100', '100원'], ['1000', '1,000원'], ['1', '1원']] }
+  ],
+  compute: function (v) {
+    var res = calcDutch(v.total, v.people, v.unit);
+    return {
+      html: '한 사람이 <em>' + ZW.fmt(res.each) + '원</em>씩 내면 됩니다',
+      sub: '모인 돈 합계 ' + ZW.fmt(res.collected) + '원 (남는 돈 ' + ZW.fmt(res.extra) + '원)',
+      rows: [
+        ['모인 돈 합계 (' + res.people + '명)', ZW.fmt(res.collected) + '원'],
+        ['남는 돈 (잔돈)', ZW.fmt(res.extra) + '원'],
+        ['딱 나누면 (원 단위)', fmtExact(res.exact) + '원']
+      ]
+    };
+  }
+});
+</script>
+</body>
+</html>

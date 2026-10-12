@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DSR 계산기 — 내 소득으로 대출 상환이 감당될까? | 좌표나라</title>
+<meta name="description" content="연소득과 대출 조건을 넣으면 소득 대비 한 해 원리금 상환 비율(DSR)을 바로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>내 소득으로<br>감당이 될까?</h1>
+  <p class="lead">한 해 소득에서 대출 갚는 돈이 차지하는 비율(DSR)을 봅니다. 아래 숫자는 예시이니 바꿔 넣으세요.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="verdict"></div>
+    <div class="sub" id="sub"></div>
+    <div class="bars"><div class="bar win"><div class="top"><span>소득 중 대출 갚는 데 쓰는 만큼</span><b id="pct"></b></div><div class="track"><div class="fill" id="fill"></div></div></div></div>
+    <dl class="rows"><div><dt>새 대출 한 달 상환액</dt><dd id="m"></dd></div><div><dt>한 해 갚는 돈 합계</dt><dd id="y"></dd></div></dl>
+  </section>
+
+  <section class="card">
+    <div class="field"><label for="income">한 해 소득 (세전) <b class="hint" id="incomeHint"></b></label><div class="inp"><input id="income" inputmode="numeric" value="60,000,000"><span>원</span></div></div>
+    <div class="field"><label for="p">새로 빌리는 돈 <b class="hint" id="pHint"></b></label><div class="inp"><input id="p" inputmode="numeric" value="300,000,000"><span>원</span></div></div>
+    <div class="row2">
+      <div class="field"><label for="r">연 이자율</label><div class="inp"><input id="r" inputmode="decimal" value="4.0"><span>%</span></div></div>
+      <div class="field"><label for="yrs">기간</label><div class="inp"><input id="yrs" inputmode="numeric" value="30"><span>년</span></div></div>
+    </div>
+    <div class="field"><label for="other">이미 갚고 있는 대출의 한 해 원리금 (없으면 0)</label><div class="inp"><input id="other" inputmode="numeric" value="0"><span>원</span></div></div>
+  </section>
+
+  <p class="note">※ 참고용입니다. 금융기관은 심사할 때 다른 금리와 기준을 적용하므로 실제 비율과 대출 가능 여부는 다릅니다. 새 대출은 원리금균등으로 갚는다고 보고 계산했습니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>새 대출 한 달 상환액 = 원리금균등 방식(대출 한 달 상환액 계산기와 같은 식)</li>
+      <li>한 해 갚는 돈 = 새 대출 한 달 상환액 × 12 + 이미 갚고 있는 대출의 한 해 원리금</li>
+      <li>비율 = 한 해 갚는 돈 ÷ 한 해 소득 × 100</li>
+      <li>얼마까지 빌릴 수 있는지는 계산하지 않습니다. 그 기준은 금융기관에 확인하세요.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var el = function (id) { return document.getElementById(id); };
+  var income = ZW.money('income', render), p = ZW.money('p', render), r = ZW.number('r', render, 30), yrs = ZW.number('yrs', render, 50), other = ZW.money('other', render);
+  function render() {
+    var x = burden(income(), p(), r(), yrs(), other());
+    el('m').textContent = ZW.fmt(x.monthly) + '원';
+    el('y').textContent = ZW.fmt(x.yearly) + '원';
+    if (!income()) { el('verdict').textContent = '한 해 소득을 넣어 보세요'; el('sub').textContent = ''; el('pct').textContent = '-'; el('fill').style.width = '0'; return; }
+    el('verdict').innerHTML = '소득의 <em>' + ZW.pct(x.pct) + '%</em>를 갚는 데 씁니다';
+    el('sub').textContent = '한 달로 치면 소득 ' + ZW.fmt(income() / 12) + '원 중 ' + ZW.fmt(x.yearly / 12) + '원입니다.';
+    el('pct').textContent = ZW.pct(x.pct) + '%';
+    el('fill').style.width = Math.min(100, x.pct) + '%';
+  }
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>공학용 계산기 | 좌표나라</title>
+<meta name="description" content="삼각함수(sin·cos·tan), 로그, 제곱, 괄호 계산을 설치 없이 바로 할 수 있는 무료 공학용 계산기입니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.calc-card { padding:16px; }
+.angle-box { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.angle-box .title { font-size:15px; font-weight:700; color:var(--ink); }
+.angle-box .seg { width:160px; }
+.angle-box .seg button { padding:6px 4px; font-size:13px; min-height:36px; }
+
+.screen { background:#16181d; color:#fff; border-radius:14px; padding:14px 16px; margin-bottom:14px; min-height:92px; display:flex; flex-direction:column; justify-content:space-between; }
+.screen .expr-line { min-height:26px; font-size:17px; color:#8e8e93; text-align:right; overflow-x:auto; white-space:nowrap; scrollbar-width:none; word-break:break-all; }
+.screen .expr-line::-webkit-scrollbar { display:none; }
+.screen .ans-line { min-height:38px; font-size:28px; font-weight:800; color:#ffd60a; text-align:right; overflow-x:auto; white-space:nowrap; scrollbar-width:none; }
+.screen .ans-line.err { font-size:18px; color:#ff453a; font-weight:600; }
+.screen .ans-line::-webkit-scrollbar { display:none; }
+
+.pad { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:7px; }
+.pad button {
+  appearance:none; border:1px solid var(--line); border-radius:12px;
+  background:#fff; color:var(--ink);
+  font:inherit; font-size:18px; font-weight:700;
+  min-height:50px; padding:8px 2px;
+  cursor:pointer; touch-action:manipulation;
+  display:flex; align-items:center; justify-content:center;
+  user-select:none; -webkit-user-select:none;
+}
+.pad button:active { transform:scale(0.96); opacity:0.85; }
+
+.pad button.num { background:#f9f9fb; font-size:20px; }
+.pad button.fn { color:#48484a; font-size:16px; background:#fff; }
+.pad button.op { background:var(--soft); color:var(--red); border-color:#ffd1dc; font-size:20px; }
+.pad button.del { background:#f2f2f7; color:#ff3b30; font-size:16px; }
+.pad button.ac { background:#f2f2f7; color:#ff3b30; font-size:16px; }
+.pad button.eq { grid-column:span 2; background:var(--red); color:#fff; border-color:var(--red); font-size:22px; }
+
+@media (max-width:380px) {
+  .pad button { min-height:48px; font-size:17px; }
+  .pad button.num { font-size:19px; }
+  .screen .ans-line { font-size:25px; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>공학용 계산기</h1>
+  <p class="lead">삼각함수, 로그, 거듭제곱, 괄호를 바로 계산합니다. 아래 수식은 예시이니 바꿔 넣으세요.</p>
+
+  <section class="card calc-card" aria-label="계산기">
+    <div class="angle-box">
+      <span class="title">각도 단위</span>
+      <div class="seg two" id="angleSeg">
+        <button type="button" class="on" data-deg="true">도 (DEG)</button>
+        <button type="button" data-deg="false">라디안 (RAD)</button>
+      </div>
+    </div>
+
+    <div class="screen" aria-live="polite">
+      <div class="expr-line" id="exprView">(1+2)^3</div>
+      <div class="ans-line" id="ansView">27</div>
+    </div>
+
+    <div class="pad" id="pad">
+      <!-- 1행: 함수 / AC -->
+      <button type="button" class="fn" data-insert="sin(">sin</button>
+      <button type="button" class="fn" data-insert="cos(">cos</button>
+      <button type="button" class="fn" data-insert="tan(">tan</button>
+      <button type="button" class="ac" id="btnAc">AC</button>
+
+      <!-- 2행: 로그, 루트 / 지우기 -->
+      <button type="button" class="fn" data-insert="log(">log</button>
+      <button type="button" class="fn" data-insert="ln(">ln</button>
+      <button type="button" class="fn" data-insert="√(">√</button>
+      <button type="button" class="del" id="btnDel" aria-label="한 글자 지우기">⌫</button>
+
+      <!-- 3행: 상수 / 제곱 / 팩토리얼 -->
+      <button type="button" class="fn" data-insert="π">π</button>
+      <button type="button" class="fn" data-insert="e">e</button>
+      <button type="button" class="op" data-insert="^">^</button>
+      <button type="button" class="op" data-insert="!">!</button>
+
+      <!-- 4행: 괄호 / 퍼센트 / 나누기 -->
+      <button type="button" class="fn" data-insert="(">(</button>
+      <button type="button" class="fn" data-insert=")">)</button>
+      <button type="button" class="op" data-insert="%">%</button>
+      <button type="button" class="op" data-insert="÷">÷</button>
+
+      <!-- 5행: 7 8 9 곱하기 -->
+      <button type="button" class="num" data-insert="7">7</button>
+      <button type="button" class="num" data-insert="8">8</button>
+      <button type="button" class="num" data-insert="9">9</button>
+      <button type="button" class="op" data-insert="×">×</button>
+
+      <!-- 6행: 4 5 6 빼기 -->
+      <button type="button" class="num" data-insert="4">4</button>
+      <button type="button" class="num" data-insert="5">5</button>
+      <button type="button" class="num" data-insert="6">6</button>
+      <button type="button" class="op" data-insert="−">−</button>
+
+      <!-- 7행: 1 2 3 더하기 -->
+      <button type="button" class="num" data-insert="1">1</button>
+      <button type="button" class="num" data-insert="2">2</button>
+      <button type="button" class="num" data-insert="3">3</button>
+      <button type="button" class="op" data-insert="+">+</button>
+
+      <!-- 8행: 0 . = -->
+      <button type="button" class="num" data-insert="0">0</button>
+      <button type="button" class="num" data-insert=".">.</button>
+      <button type="button" class="eq" id="btnEq">=</button>
+    </div>
+  </section>
+
+  <p class="note">※ 계산은 내 기기 브라우저 안에서만 실행되며 서버로 전송되지 않습니다.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산하나요?</summary>
+    <ul>
+      <li><b>계산 순서</b>: 괄호 → 삼각·로그 함수 → 계승(!)·퍼센트(%) → 거듭제곱(^) → 곱하기(×)·나누기(÷) → 더하기(+)·빼기(−) 순서로 계산합니다.</li>
+      <li><b>생략된 곱셈</b>: <code>3π</code>, <code>2(3+4)</code>, <code>2sin(30)</code>처럼 곱하기 기호가 생략된 식도 곱셈으로 계산합니다.</li>
+      <li><b>거듭제곱</b>: <code>2^3^2</code>는 오른쪽부터 먼저 묶여 <code>2^(3^2) = 512</code>가 됩니다.</li>
+      <li><b>음수의 제곱</b>: <code>-3^2</code>는 수학 규칙에 따라 <code>-(3^2) = -9</code>로 계산됩니다. 음수 전체의 제곱을 원하시면 <code>(-3)^2</code>처럼 괄호를 씌워 주세요.</li>
+      <li><b>각도 단위</b>: 삼각함수 계산 시 '도 (DEG)'와 '라디안 (RAD)' 중 단위를 골라 계산할 수 있습니다.</li>
+      <li><b>로그</b>: <code>log</code>는 밑이 10인 상용로그, <code>ln</code>은 밑이 자연상수 e인 자연로그입니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var exprView = document.getElementById('exprView');
+  var ansView = document.getElementById('ansView');
+  var pad = document.getElementById('pad');
+  var btnAc = document.getElementById('btnAc');
+  var btnDel = document.getElementById('btnDel');
+  var btnEq = document.getElementById('btnEq');
+  var angleSeg = document.getElementById('angleSeg');
+
+  var expr = '(1+2)^3';
+  var isDegree = true;
+  var justEvaluated = false;
+
+  function formatOutput(n) {
+    if (typeof n !== 'number' || isNaN(n) || !isFinite(n)) return '';
+    return String(n);
+  }
+
+  function updatePreview() {
+    exprView.textContent = expr || '0';
+    exprView.scrollLeft = exprView.scrollWidth;
+
+    if (!expr) {
+      ansView.textContent = '0';
+      ansView.className = 'ans-line';
+      return;
+    }
+
+    try {
+      var val = evaluate(expr, isDegree);
+      ansView.textContent = formatOutput(val);
+      ansView.className = 'ans-line';
+    } catch (e) {
+      // 입력 중 식이 미완성이면 이전 결과를 유지하거나 비워두고, 에러 표시는 = 누를 때만
+      if (justEvaluated) {
+        ansView.textContent = '계산할 수 없는 식입니다';
+        ansView.className = 'ans-line err';
+      }
+    }
+    ansView.scrollLeft = ansView.scrollWidth;
+  }
+
+  function appendText(txt) {
+    if (justEvaluated) {
+      // 방금 = 눌러 계산을 마친 상태에서 숫자가 들어오면 새 계산 시작, 연산자면 이전 결과에 이어 붙임
+      if (/^[0-9.]/.test(txt) || /^(sin|cos|tan|log|ln|√|π|e)/.test(txt)) {
+        expr = '';
+      }
+      justEvaluated = false;
+    }
+    expr += txt;
+    justEvaluated = false;
+    updatePreview();
+  }
+
+  function doBackspace() {
+    if (justEvaluated) {
+      justEvaluated = false;
+    }
+    if (!expr) return;
+    // 함수 접두사가 끝에 있으면 통째로 지우기 (예: "sin(", "cos(", "log(", "ln(", "√(")
+    var fns = ['sin(', 'cos(', 'tan(', 'log(', 'ln(', '√('];
+    var matchedFn = false;
+    for (var i = 0; i < fns.length; i++) {
+      if (expr.slice(-fns[i].length) === fns[i]) {
+        expr = expr.slice(0, -fns[i].length);
+        matchedFn = true;
+        break;
+      }
+    }
+    if (!matchedFn) {
+      expr = expr.slice(0, -1);
+    }
+    updatePreview();
+  }
+
+  function doClear() {
+    expr = '';
+    justEvaluated = false;
+    updatePreview();
+  }
+
+  function doCalculate() {
+    if (!expr) return;
+    try {
+      var val = evaluate(expr, isDegree);
+      var resStr = formatOutput(val);
+      expr = resStr;
+      exprView.textContent = resStr;
+      ansView.textContent = resStr;
+      ansView.className = 'ans-line';
+      justEvaluated = true;
+    } catch (err) {
+      ansView.textContent = '계산할 수 없는 식입니다';
+      ansView.className = 'ans-line err';
+      justEvaluated = true;
+    }
+  }
+
+  pad.addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var ins = btn.getAttribute('data-insert');
+    if (ins) {
+      appendText(ins);
+    }
+  });
+
+  btnAc.addEventListener('click', doClear);
+  btnDel.addEventListener('click', doBackspace);
+  btnEq.addEventListener('click', doCalculate);
+
+  // 각도 단위 전환
+  var degButtons = angleSeg.querySelectorAll('button');
+  for (var d = 0; d < degButtons.length; d++) {
+    degButtons[d].addEventListener('click', function () {
+      for (var j = 0; j < degButtons.length; j++) degButtons[j].className = '';
+      this.className = 'on';
+      isDegree = this.getAttribute('data-deg') === 'true';
+      updatePreview();
+    });
+  }
+
+  // 키보드 지원
+  window.addEventListener('keydown', function (e) {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+
+    if (e.key >= '0' && e.key <= '9') { appendText(e.key); return; }
+    if (e.key === '.') { appendText('.'); return; }
+    if (e.key === '+') { appendText('+'); return; }
+    if (e.key === '-') { appendText('−'); return; }
+    if (e.key === '*') { appendText('×'); return; }
+    if (e.key === '/') { e.preventDefault(); appendText('÷'); return; }
+    if (e.key === '^') { appendText('^'); return; }
+    if (e.key === '(' || e.key === ')') { appendText(e.key); return; }
+    if (e.key === '!') { appendText('!'); return; }
+    if (e.key === '%') { appendText('%'); return; }
+
+    if (e.key === 'Enter' || e.key === '=') { e.preventDefault(); doCalculate(); return; }
+    if (e.key === 'Backspace') { e.preventDefault(); doBackspace(); return; }
+    if (e.key === 'Escape') { e.preventDefault(); doClear(); return; }
+
+    var low = e.key.toLowerCase();
+    if (low === 'p') { appendText('π'); return; }
+    if (low === 'e') { appendText('e'); return; }
+    if (low === 's') { appendText('sin('); return; }
+    if (low === 'c') { appendText('cos('); return; }
+    if (low === 't') { appendText('tan('); return; }
+    if (low === 'l') { appendText('log('); return; }
+    if (low === 'n') { appendText('ln('); return; }
+    if (low === 'r') { appendText('√('); return; }
+  });
+
+  updatePreview();
+})();
+</script>
+</body>
+</html>

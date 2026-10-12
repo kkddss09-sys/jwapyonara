@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전세 대출 vs 월세 계산기 — 한 달에 어느 쪽이 덜 들까 | 좌표나라</title>
+<meta name="description" content="전세 대출 이자와 월세를 한 달 비용으로 견줘 어느 쪽이 덜 드는지 바로 보여 줍니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>전세 대출과 월세,<br>한 달에 어느 쪽이 덜 들까?</h1>
+  <p class="lead">같은 집을 전세로 살 때와 월세로 살 때를 견줍니다. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 월세 보증금, 내 돈을 예금했을 때 받을 이자, 관리비, 대출이 실제로 나오는지는 넣지 않았습니다. 한 달에 나가는 돈만 단순하게 견준 값입니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>전세 대출금 = 전세 보증금 − 내 돈</li>
+      <li>전세의 한 달 비용 = 전세 대출금 × 대출 이자율 ÷ 12</li>
+      <li>월세의 한 달 비용 = 한 달 월세</li>
+      <li>넣으신 값으로만 계산합니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'jeonse', label: '전세 보증금', type: 'money', value: '400,000,000', unit: '원' },
+    { id: 'mine', label: '내 돈', type: 'money', value: '150,000,000', unit: '원' },
+    { id: 'lrate', label: '전세 대출 연 이자율', type: 'num', value: '4.0', unit: '%', max: 30 },
+    { id: 'wolse', label: '같은 집을 월세로 살 때 한 달 월세', type: 'money', value: '1,200,000', unit: '원' }],
+  compute: function (v) {
+    if (!v.jeonse) return {};
+    var r = jeonseVsWolse(v.jeonse, v.mine, v.lrate, v.wolse);
+    return { html: r.winner === 'same' ? '두 쪽이 <em>똑같이</em> 듭니다' : '<em>' + (r.winner === 'jeonse' ? '전세' : '월세') + '</em> 쪽이 한 달에<br><em>' + ZW.fmt(r.diff) + '원</em> 덜 듭니다',
+      sub: '한 해로 치면 ' + ZW.fmt(r.yearDiff) + '원 차이입니다.',
+      rows: [['전세 대출금', ZW.fmt(r.loan) + '원'], ['전세의 한 달 이자', ZW.fmt(r.interest) + '원'], ['월세의 한 달 월세', ZW.fmt(r.wolse) + '원']] };
+  }
+});
+</script>
+</body>
+</html>

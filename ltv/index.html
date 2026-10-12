@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>주택담보대출 계산기 — 집값의 몇 %를 빌리면 내 돈은 얼마 | 좌표나라</title>
+<meta name="description" content="집값과 빌리는 비율을 넣으면 대출금과 필요한 내 돈을 바로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>이 집을 사려면<br>내 돈이 얼마 필요할까?</h1>
+  <p class="lead">집값과 빌리는 비율을 넣어 보세요. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 빌릴 수 있는 비율의 한도는 지역, 집값, 소득, 주택 수에 따라 정해져 있습니다. 실제로 가능한 비율은 금융기관에 확인해 넣으세요. 세금과 중개 보수는 "그 밖의 비용"에 직접 넣으시면 됩니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>대출금 = 집값 × 빌리는 비율 ÷ 100</li>
+      <li>필요한 내 돈 = 집값 − 대출금 + 그 밖의 비용</li>
+      <li>비율은 넣으신 값을 그대로 씁니다. 대출을 권하는 것이 아닙니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'price', label: '집값', type: 'money', value: '900,000,000', unit: '원' },
+    { id: 'ratio', label: '집값 중 빌리는 비율', type: 'num', value: '50', unit: '%', max: 100 },
+    { id: 'cost', label: '그 밖의 비용 (세금, 중개 보수, 이사 등)', type: 'money', value: '30,000,000', unit: '원' }],
+  compute: function (v) {
+    if (!v.price) return {};
+    var r = ltv(v.price, v.ratio, v.cost);
+    return { html: '내 돈 <em>' + (ZW.read(r.mine) || ZW.fmt(r.mine) + '원') + '</em>이<br>필요합니다', sub: '정확히는 ' + ZW.fmt(r.mine) + '원입니다.', pct: v.ratio, pctLabel: '집값 중 빌리는 만큼',
+      rows: [['빌리는 돈', ZW.fmt(r.loan) + '원'], ['집값에서 내 돈으로 내는 부분', ZW.fmt(v.price - r.loan) + '원'], ['그 밖의 비용', ZW.fmt(v.cost) + '원']] };
+  }
+});
+</script>
+</body>
+</html>

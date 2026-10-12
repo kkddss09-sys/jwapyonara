@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>목돈 모으기 계산기 — 목표 금액까지 몇 년 | 좌표나라</title>
+<meta name="description" content="모으려는 돈, 지금 가진 돈, 한 달에 모으는 돈을 넣으면 목표까지 걸리는 기간을 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>목표 금액까지<br>얼마나 걸릴까?</h1>
+  <p class="lead">집을 사려고 모으는 돈을 넣어 보세요. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 수익률은 넣으신 값이 기간 내내 같다고 보고 계산합니다. 이자에 붙는 세금과 물가는 넣지 않았습니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>매달 초의 돈에 한 달 수익(연 수익률 ÷ 12)을 붙이고, 한 달에 모으는 돈을 더합니다.</li>
+      <li>목표 금액에 닿을 때까지 한 달씩 세어 봅니다(최대 100년).</li>
+      <li>넣으신 값으로만 계산합니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'target', label: '모으려는 돈', type: 'money', value: '200,000,000', unit: '원' },
+    { id: 'have', label: '지금 가진 돈', type: 'money', value: '50,000,000', unit: '원' },
+    { id: 'per', label: '한 달에 모으는 돈', type: 'money', value: '1,500,000', unit: '원' },
+    { id: 'ret', label: '한 해 수익률 (예금 이자 등)', type: 'num', value: '3.0', unit: '%', max: 30 }],
+  compute: function (v) {
+    if (!v.target) return {};
+    var m = savingMonths(v.target, v.have, v.per, v.ret);
+    if (m === 0) return { html: '이미 <em>모았습니다</em>', sub: '지금 가진 돈이 목표보다 많거나 같습니다.' };
+    if (!isFinite(m)) return { html: '이 조건으로는<br>100년 안에 모이지 않습니다', sub: '한 달에 모으는 돈을 늘려 보세요.' };
+    var y = Math.floor(m / 12), mo = m % 12;
+    return { html: '<em>' + (y ? y + '년 ' : '') + (mo ? mo + '개월' : '') + '</em> 걸립니다', sub: '모두 ' + m + '개월입니다.',
+      rows: [['그동안 넣는 돈', ZW.fmt(v.per * m) + '원'], ['모자란 돈(지금)', ZW.fmt(Math.max(0, v.target - v.have)) + '원']] };
+  }
+});
+</script>
+</body>
+</html>

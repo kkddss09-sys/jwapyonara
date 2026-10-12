@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>원리금균등 vs 원금균등 비교 계산기 | 좌표나라</title>
+<meta name="description" content="같은 대출을 원리금균등과 원금균등으로 갚을 때 한 달 상환액과 이자 합계가 얼마나 다른지 비교합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>원리금균등과 원금균등,<br>이자가 얼마나 다를까?</h1>
+  <p class="lead">같은 대출을 두 방식으로 갚을 때를 견줍니다. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 원금균등은 이자 합계가 적지만 처음 몇 년의 한 달 상환액이 더 큽니다. 어느 쪽이 맞는지는 지금 낼 수 있는 돈에 따라 다릅니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>원리금균등: 매달 같은 금액을 갚습니다.</li>
+      <li>원금균등: 원금을 횟수로 똑같이 나누고 남은 원금에 이자를 붙입니다. 첫 달이 가장 많고 갈수록 줄어듭니다.</li>
+      <li>이자 차이 = 원리금균등 이자 합계 − 원금균등 이자 합계</li>
+      <li>넣으신 값으로만 계산합니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'p', label: '대출금', type: 'money', value: '300,000,000', unit: '원' },
+    { id: 'rate', label: '연 이자율', type: 'num', value: '4.0', unit: '%', max: 30 },
+    { id: 'years', label: '기간', type: 'num', value: '30', unit: '년', max: 50, short: true }],
+  compute: function (v) {
+    if (!v.p || !v.years) return {};
+    var r = compareRepay(v.p, v.rate, v.years);
+    return { html: '원금균등이 이자를<br><em>' + ZW.fmt(r.diff) + '원</em> 덜 냅니다', sub: '대신 첫 달 상환액은 ' + ZW.fmt(r.pFirst - r.equalMonthly) + '원 더 많습니다.',
+      rows: [['원리금균등 한 달', ZW.fmt(r.equalMonthly) + '원'], ['원리금균등 이자 합계', ZW.fmt(r.equalInterest) + '원'], ['원금균등 첫 달', ZW.fmt(r.pFirst) + '원'], ['원금균등 마지막 달', ZW.fmt(r.pLast) + '원'], ['원금균등 이자 합계', ZW.fmt(r.pInterest) + '원']] };
+  }
+});
+</script>
+</body>
+</html>

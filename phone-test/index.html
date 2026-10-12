@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>갤럭시일까 아이폰일까? 나에게 맞는 폰 테스트 | 좌표나라</title>
+<meta name="description" content="질문 6개에 답하면 나에게 잘 맞는 스마트폰(갤럭시 vs 아이폰)을 찾아봅니다. 재미로 보는 테스트. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>갤럭시일까 아이폰일까<br>나에게 맞는 폰 테스트</h1>
+  <p class="lead">질문 6개에 답하면 결과가 나옵니다. 재미로 보는 테스트입니다.</p>
+
+  <!-- 질문 카드 -->
+  <section class="card" id="qCard">
+    <div class="bars" style="margin:0 0 16px;">
+      <div class="bar win">
+        <div class="top"><span id="qStep">1 / 6</span></div>
+        <div class="track"><div class="fill" id="qFill" style="width:16.7%;"></div></div>
+      </div>
+    </div>
+    <h2 id="qTitle" style="font-size:19px; line-height:1.45; margin:0 0 16px; word-break:keep-all;"></h2>
+    <div style="display:grid; gap:10px;">
+      <button type="button" id="btnA" class="cta" style="background:#fff; color:var(--ink); border:2px solid var(--line); font-size:15px; font-weight:700; padding:15px 14px; text-align:left; cursor:pointer; line-height:1.45; margin:0;"></button>
+      <button type="button" id="btnB" class="cta" style="background:#fff; color:var(--ink); border:2px solid var(--line); font-size:15px; font-weight:700; padding:15px 14px; text-align:left; cursor:pointer; line-height:1.45; margin:0;"></button>
+    </div>
+    <div style="margin-top:14px; display:flex; justify-content:flex-start;">
+      <button type="button" id="btnPrev" style="font:inherit; font-size:14px; font-weight:600; color:var(--sub); background:none; border:none; padding:8px 0; cursor:pointer; display:none;">← 이전 질문</button>
+    </div>
+  </section>
+
+  <!-- 결과 카드 -->
+  <section class="result" id="resCard" style="display:none;" aria-live="polite">
+    <div class="verdict" id="resTitle"></div>
+    <div class="sub" id="resText" style="font-size:15px; margin-top:8px; line-height:1.45;"></div>
+    <div id="resScore" style="margin-top:14px; font-size:13px; color:#c7c7cc;"></div>
+  </section>
+
+  <!-- 결과 후 액션 및 추천 링크 -->
+  <div id="resActions" style="display:none;">
+    <div style="display:grid; gap:10px; margin-bottom:14px;">
+      <button type="button" id="btnShare" class="cta" style="border:none; cursor:pointer; margin:0;">친구에게 보내기<small>테스트 결과를 공유해 보세요</small></button>
+      <button type="button" id="btnRestart" style="font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:14px; padding:13px; cursor:pointer;">처음부터 다시 하기</button>
+    </div>
+
+    <div class="card" style="padding:16px; margin-bottom:14px;">
+      <a href="../jagupje-seongji/" style="display:flex; justify-content:space-between; align-items:center; text-decoration:none; color:var(--ink);">
+        <div>
+          <b style="display:block; font-size:15px; margin-bottom:2px;">어떻게 사는 게 덜 드는지 계산해 보기</b>
+          <span style="font-size:13px; color:var(--sub);">자급제 vs 성지 2년 총비용 비교 계산기</span>
+        </div>
+        <span style="font-size:18px; color:var(--sub); font-weight:700;">→</span>
+      </a>
+    </div>
+  </div>
+
+  <p class="note">※ 재미로 보는 테스트이며 어느 제품이 더 좋다는 뜻이 아닙니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">오늘 시세는 카톡방에서<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var questions = [
+    {
+      q: '지금 쓰는 태블릿·노트북·시계는?',
+      a: '갤럭시 쪽이거나 윈도우 컴퓨터',
+      b: '아이패드, 맥, 애플워치'
+    },
+    {
+      q: '가족과 친한 친구들이 주로 쓰는 폰은?',
+      a: '갤럭시가 많다',
+      b: '아이폰이 많다'
+    },
+    {
+      q: '폰 화면과 설정은?',
+      a: '내 마음대로 이것저것 바꾸는 게 좋다',
+      b: '처음 그대로 쓰는 게 편하다'
+    },
+    {
+      q: '접는 폰이나 펜으로 쓰는 폰에?',
+      a: '관심 있다',
+      b: '별로 관심 없다'
+    },
+    {
+      q: '지금 쓰는 폰은?',
+      a: '갤럭시(안드로이드)',
+      b: '아이폰'
+    },
+    {
+      q: '새 폰으로 옮길 때 나는?',
+      a: '쓰던 방식 그대로가 좋다(지금 폰과 같은 쪽)',
+      b: '새로운 걸 써 보고 싶다(지금 폰과 다른 쪽)'
+    }
+  ];
+
+  var texts = {
+    galaxy: {
+      title: '갤럭시 쪽이 잘 맞아요',
+      desc: '주변 기기와 쓰는 습관이 갤럭시와 잘 어울립니다.'
+    },
+    iphone: {
+      title: '아이폰 쪽이 잘 맞아요',
+      desc: '주변 기기와 쓰는 습관이 아이폰과 잘 어울립니다.'
+    },
+    both: {
+      title: '어느 쪽이든 잘 쓰실 분',
+      desc: '한쪽으로 기울지 않았습니다. 값과 조건을 견줘 보고 고르셔도 좋습니다.'
+    }
+  };
+
+  var curr = 0;
+  var answers = [];
+  var currentResultTitle = '';
+
+  var qCard = document.getElementById('qCard');
+  var qStep = document.getElementById('qStep');
+  var qFill = document.getElementById('qFill');
+  var qTitle = document.getElementById('qTitle');
+  var btnA = document.getElementById('btnA');
+  var btnB = document.getElementById('btnB');
+  var btnPrev = document.getElementById('btnPrev');
+
+  var resCard = document.getElementById('resCard');
+  var resTitle = document.getElementById('resTitle');
+  var resText = document.getElementById('resText');
+  var resScore = document.getElementById('resScore');
+  var resActions = document.getElementById('resActions');
+  var btnShare = document.getElementById('btnShare');
+  var btnRestart = document.getElementById('btnRestart');
+
+  function renderQuestion() {
+    qCard.style.display = 'block';
+    resCard.style.display = 'none';
+    resActions.style.display = 'none';
+
+    var item = questions[curr];
+    qStep.textContent = (curr + 1) + ' / 6';
+    qFill.style.width = ((curr + 1) / 6 * 100) + '%';
+    qTitle.textContent = (curr + 1) + '. ' + item.q;
+    btnA.textContent = item.a;
+    btnB.textContent = item.b;
+
+    btnPrev.style.display = curr > 0 ? 'inline-block' : 'none';
+  }
+
+  function pick(choice) {
+    answers[curr] = choice;
+    if (curr < 5) {
+      curr++;
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  function showResult() {
+    var res = judgePhone(answers);
+    var t = texts[res.result] || texts.both;
+    currentResultTitle = t.title;
+
+    qCard.style.display = 'none';
+    resCard.style.display = 'block';
+    resActions.style.display = 'block';
+
+    resTitle.textContent = t.title;
+    resText.textContent = t.desc;
+    resScore.textContent = '갤럭시 ' + res.galaxy + '점 · 아이폰 ' + res.iphone + '점';
+
+    try {
+      resCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {}
+  }
+
+  btnA.addEventListener('click', function () { pick('A'); });
+  btnB.addEventListener('click', function () { pick('B'); });
+
+  btnPrev.addEventListener('click', function () {
+    if (curr > 0) {
+      curr--;
+      renderQuestion();
+    }
+  });
+
+  btnRestart.addEventListener('click', function () {
+    curr = 0;
+    answers = [];
+    currentResultTitle = '';
+    renderQuestion();
+    try {
+      qCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {}
+  });
+
+  function copyUrl() {
+    var originalHtml = btnShare.innerHTML;
+    function showSuccess() {
+      btnShare.innerHTML = '주소를 복사했어요<small>친구에게 공유해 보세요</small>';
+      setTimeout(function () {
+        btnShare.innerHTML = originalHtml;
+      }, 2000);
+    }
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(location.href).then(showSuccess).catch(function () {
+        fallbackCopy(showSuccess);
+      });
+    } else {
+      fallbackCopy(showSuccess);
+    }
+  }
+
+  function fallbackCopy(cb) {
+    try {
+      var t = document.createElement('textarea');
+      t.value = location.href;
+      t.style.position = 'fixed';
+      t.style.opacity = '0';
+      document.body.appendChild(t);
+      t.select();
+      document.execCommand('copy');
+      document.body.removeChild(t);
+      cb();
+    } catch (e) {}
+  }
+
+  btnShare.addEventListener('click', function () {
+    var shareData = {
+      title: '나에게 맞는 폰 테스트',
+      text: '나는 "' + currentResultTitle + '" 나왔어. 너도 해 봐',
+      url: location.href
+    };
+    if (navigator.share) {
+      try {
+        navigator.share(shareData).catch(function () {});
+      } catch (e) {
+        copyUrl();
+      }
+    } else {
+      copyUrl();
+    }
+  });
+
+  renderQuestion();
+})();
+</script>
+</body>
+</html>

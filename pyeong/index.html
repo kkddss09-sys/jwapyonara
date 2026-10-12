@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>평수 계산기 — 평 ↔ 제곱미터(㎡) 바로 바꾸기 | 좌표나라</title>
+<meta name="description" content="아파트 면적 59㎡, 84㎡가 몇 평인지 바로 바꿔 보세요. 평에서 제곱미터로도 됩니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>몇 평일까?<br>평 ↔ 제곱미터 바꾸기</h1>
+  <p class="lead">어느 칸이든 숫자를 넣으면 다른 칸이 바로 바뀝니다.</p>
+
+  <section class="card">
+    <div class="field"><label for="m2">제곱미터 (㎡)</label><div class="inp"><input id="m2" inputmode="decimal" value="84"><span>㎡</span></div></div>
+    <div class="field"><label for="py">평</label><div class="inp"><input id="py" inputmode="decimal"><span>평</span></div></div>
+    <div class="chips" aria-label="자주 쓰는 면적">
+      <button type="button" data-m2="59">59㎡</button>
+      <button type="button" data-m2="74">74㎡</button>
+      <button type="button" data-m2="84">84㎡</button>
+      <button type="button" data-m2="114">114㎡</button>
+    </div>
+  </section>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="verdict"></div>
+    <div class="sub">1평은 약 3.3058㎡입니다.</div>
+  </section>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>1평 = 400 ÷ 121 ㎡ (약 3.3058㎡)로 계산하고, 소수 둘째 자리까지 보여 줍니다.</li>
+      <li>아파트의 "○○평형"은 보통 복도·계단 같은 공용 부분을 더한 공급면적을 기준으로 부릅니다. 그래서 전용면적을 평으로 바꾼 값보다 크게 불립니다.</li>
+      <li>계약서와 등기에는 제곱미터로 적힙니다. 정확한 면적은 그 서류를 확인하세요.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var m2 = document.getElementById('m2'), py = document.getElementById('py'), verdict = document.getElementById('verdict');
+  var clean = function (s) { s = String(s).replace(/[^\d.]/g, ''); var i = s.indexOf('.'); return i < 0 ? s : s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, ''); };
+  var show = function (n) { return n ? String(n) : ''; };
+  function say() {
+    var a = Number(m2.value) || 0, b = Number(py.value) || 0;
+    verdict.innerHTML = a && b ? '<em>' + a + '㎡</em>는 <em>' + b + '평</em>입니다' : '숫자를 넣어 보세요';
+  }
+  m2.addEventListener('input', function () { this.value = clean(this.value); py.value = show(toPyeong(this.value)); say(); });
+  py.addEventListener('input', function () { this.value = clean(this.value); m2.value = show(toM2(this.value)); say(); });
+  [m2, py].forEach(function (e) { e.addEventListener('focus', function () { this.select(); }); });
+  var chips = document.querySelectorAll('.chips button');
+  for (var i = 0; i < chips.length; i++) chips[i].addEventListener('click', function () { m2.value = this.getAttribute('data-m2'); py.value = show(toPyeong(m2.value)); say(); });
+  py.value = show(toPyeong(m2.value)); say();
+})();
+</script>
+</body>
+</html>

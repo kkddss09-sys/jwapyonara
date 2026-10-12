@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>금리 인상 계산기 — 금리가 오르면 한 달에 얼마 더 낼까 | 좌표나라</title>
+<meta name="description" content="대출 금리가 0.5%p, 1%p 오르거나 내릴 때 한 달 상환액이 얼마나 달라지는지 바로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>금리가 바뀌면<br>한 달에 얼마나 달라질까?</h1>
+  <p class="lead">지금 조건을 넣고 금리가 바뀌는 폭을 고르세요. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 원금과 기간이 그대로라고 보고 계산합니다. 변동 금리 대출은 바뀌는 시점과 남은 원금에 따라 실제 금액이 다릅니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>원리금균등 방식의 한 달 상환액을 지금 금리와 바뀐 금리로 각각 계산해 뺍니다.</li>
+      <li>%p는 금리 숫자 자체의 차이입니다. 4%에서 1%p 오르면 5%입니다.</li>
+      <li>넣으신 값으로만 계산합니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'p', label: '대출금', type: 'money', value: '300,000,000', unit: '원' },
+    { id: 'rate', label: '지금 연 이자율', type: 'num', value: '4.0', unit: '%', max: 30 },
+    { id: 'years', label: '기간', type: 'num', value: '30', unit: '년', max: 50, short: true },
+    { id: 'delta', label: '금리가 바뀌는 폭', type: 'seg', options: [['1', '+1%p'], ['0.5', '+0.5%p'], ['2', '+2%p'], ['-0.5', '−0.5%p'], ['-1', '−1%p']] }],
+  compute: function (v) {
+    if (!v.p || !v.years) return {};
+    var d = Number(v.delta), r = rateChange(v.p, v.rate, v.years, d), to = Math.max(0, v.rate + d);
+    return { html: '한 달에 <em>' + ZW.fmt(Math.abs(r.diff)) + '원</em> ' + (r.diff >= 0 ? '더' : '덜') + ' 냅니다', sub: '금리 ' + ZW.pct(v.rate, 2) + '%가 ' + ZW.pct(to, 2) + '%로 바뀌는 경우입니다.',
+      rows: [['지금 한 달 상환액', ZW.fmt(r.now) + '원'], ['바뀐 뒤 한 달 상환액', ZW.fmt(r.after) + '원'], ['한 해로 치면', (r.yearDiff >= 0 ? '+' : '−') + ZW.fmt(Math.abs(r.yearDiff)) + '원']] };
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>지금 폰, 바꿀 때가 됐을까? 자가진단 테스트 | 좌표나라</title>
+<meta name="description" content="내 폰의 배터리, 느려짐, 용량 부족 등 증상을 체크해 교체 타이밍인지 바로 확인해 보세요. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.badge { display:inline-block; font-size:13px; font-weight:700; color:#ffd60a; margin-bottom:8px; }
+.result .verdict { font-size:22px; font-weight:800; line-height:1.35; margin-bottom:6px; }
+.result .sub { color:#c7c7cc; font-size:15px; line-height:1.45; }
+.rec-links { margin-bottom:14px; }
+.rec-label { font-size:14px; font-weight:700; color:var(--sub); margin:0 4px 8px; }
+.rec-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.rec-card { display:block; background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:14px; text-decoration:none; color:var(--ink); transition:border-color .15s, background .15s; }
+.rec-card:hover { border-color:var(--red); background:#fff0f3; }
+.rec-card b { display:block; font-size:15px; margin-bottom:3px; color:var(--ink); }
+.rec-card span { display:block; font-size:13px; color:var(--sub); line-height:1.35; }
+.check-list { display:grid; gap:8px; }
+.check-item { display:flex; align-items:center; min-height:52px; padding:12px 14px; border:1.5px solid var(--line); border-radius:14px; background:#fff; cursor:pointer; user-select:none; gap:12px; transition:border-color .15s, background .15s; }
+.check-item input[type="checkbox"] { width:22px; height:22px; margin:0; flex-shrink:0; cursor:pointer; accent-color:var(--red); }
+.check-item.done { background:#fbfbfd; border-color:var(--red); }
+.check-item.done span { color:var(--ink); font-weight:700; }
+.check-item span { font-size:15px; font-weight:600; line-height:1.45; color:var(--ink); flex:1; word-break:keep-all; }
+@media (max-width:480px) {
+  .rec-grid { grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>지금 폰,<br>바꿀 때가 됐을까?</h1>
+  <p class="lead">내 폰에 해당하는 것을 모두 누르세요. 재미로 보는 참고용입니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="badge" id="resBadge">체크한 항목 0개</div>
+    <div class="verdict" id="resTitle">아직 쓸 만합니다</div>
+    <div class="sub" id="resText">급하게 바꿀 이유는 없어 보입니다. 배터리만 문제라면 배터리 교체도 방법입니다.</div>
+  </section>
+
+  <div class="rec-links" id="recLinks" style="display:none;">
+    <div class="rec-label">바꾸기 전에 먼저 비교해 보세요</div>
+    <div class="rec-grid">
+      <a class="rec-card" href="../jagupje-seongji/">
+        <b>자급제 vs 성지 비교</b>
+        <span>2년 동안 어느 쪽이 덜 드는지</span>
+      </a>
+      <a class="rec-card" href="../per-day/">
+        <b>폰값, 하루로 치면</b>
+        <span>오래 쓸수록 얼마나 싸지는지</span>
+      </a>
+    </div>
+  </div>
+
+  <section class="card">
+    <h2>해당하는 항목을 골라보세요</h2>
+    <div class="check-list">
+      <label class="check-item"><input type="checkbox"><span>배터리가 하루를 못 버틴다</span></label>
+      <label class="check-item"><input type="checkbox"><span>앱이 자주 느려지거나 꺼진다</span></label>
+      <label class="check-item"><input type="checkbox"><span>저장 공간이 늘 모자란다</span></label>
+      <label class="check-item"><input type="checkbox"><span>더 이상 업데이트가 오지 않는다</span></label>
+      <label class="check-item"><input type="checkbox"><span>화면이나 뒷면이 깨져 있다</span></label>
+      <label class="check-item"><input type="checkbox"><span>충전 단자가 헐거워 충전이 자주 끊긴다</span></label>
+      <label class="check-item"><input type="checkbox"><span>카메라가 아쉽다</span></label>
+      <label class="check-item"><input type="checkbox"><span>쓴 지 3년이 넘었다</span></label>
+    </div>
+  </section>
+
+  <p class="note">※ 기기 상태를 진단하는 것이 아니라 체크한 개수로만 보여 드리는 참고용입니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">오늘 시세는 카톡방에서<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>진단 기준 안내</summary>
+    <ul>
+      <li>0~1개 (아직 쓸 만함): 급하게 바꿀 이유는 없어 보입니다. 배터리만 문제라면 공식 서비스센터 배터리 교체도 좋은 방법입니다.</li>
+      <li>2~3개 (슬슬 알아볼 때): 고쳐 쓰는 값과 새로 사는 값을 견줘 볼 시점입니다. 시세를 슬슬 확인해 보세요.</li>
+      <li>4개 이상 (바꿀 때가 됨): 불편을 참는 값이 더 커 보입니다. 자급제와 통신사 지원금 중 어느 쪽이 저렴한지 계산해 보세요.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var boxes = document.querySelectorAll('input[type="checkbox"]');
+  var resBadge = document.getElementById('resBadge');
+  var resTitle = document.getElementById('resTitle');
+  var resText = document.getElementById('resText');
+  var recLinks = document.getElementById('recLinks');
+
+  function render() {
+    var count = 0;
+    boxes.forEach(function (box) {
+      var item = box.closest('.check-item');
+      if (box.checked) {
+        count++;
+        if (item) item.classList.add('done');
+      } else {
+        if (item) item.classList.remove('done');
+      }
+    });
+
+    var r = judgeUpgrade(count);
+    resBadge.textContent = '체크한 항목 ' + count + '개';
+    resTitle.textContent = r.title;
+    resText.textContent = r.text;
+
+    // level 1 이상일 때만 추천 링크 두 개 보이기
+    if (r.level >= 1) {
+      recLinks.style.display = 'block';
+    } else {
+      recLinks.style.display = 'none';
+    }
+  }
+
+  boxes.forEach(function (box) {
+    box.addEventListener('change', render);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

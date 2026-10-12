@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>그림판 | 좌표나라</title>
+<meta name="description" content="가입이나 설치 없이 웹에서 바로 그리고 기기에 이미지(PNG)로 저장하는 무료 그림판입니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.paint-card { padding:14px; }
+
+/* 툴바 1: 도구 선택 및 액션 버튼 */
+.toolbar-top { display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.tool-mode { display:flex; gap:4px; }
+.tool-mode button {
+  appearance:none; border:1.5px solid var(--line); border-radius:10px;
+  background:#fff; color:var(--ink); font:inherit; font-size:14px; font-weight:700;
+  padding:8px 14px; min-height:44px; cursor:pointer;
+}
+.tool-mode button.on { border-color:var(--red); background:var(--soft); color:var(--red); }
+
+.tool-actions { display:flex; gap:6px; }
+.tool-actions button {
+  appearance:none; border:1.5px solid var(--line); border-radius:10px;
+  background:#fff; color:var(--ink); font:inherit; font-size:14px; font-weight:700;
+  padding:8px 12px; min-height:44px; cursor:pointer;
+}
+.tool-actions button.save { background:var(--red); color:#fff; border-color:var(--red); }
+.tool-actions button:active { transform:scale(0.97); }
+
+/* 툴바 2: 색상 팔레트 */
+.palette-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:12px; padding-bottom:4px; }
+.palette-row::-webkit-scrollbar { display:none; }
+.palette { display:flex; flex-wrap:wrap; gap:6px; }
+.swatch {
+  width:34px; height:34px; border-radius:50%; border:2px solid #d1d1d6;
+  padding:0; cursor:pointer; position:relative; box-sizing:border-box;
+}
+.swatch.on { border-color:var(--ink); box-shadow:0 0 0 2px #fff, 0 0 0 4px var(--ink); }
+.swatch[data-color="#ffffff"] { border-color:#c7c7cc; }
+
+.picker-wrap { display:flex; align-items:center; gap:4px; flex-shrink:0; margin-left:4px; }
+.picker-btn {
+  width:34px; height:34px; border-radius:50%; border:1.5px dashed var(--sub);
+  padding:0; cursor:pointer; position:relative; overflow:hidden; background:conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+}
+.picker-btn input[type="color"] {
+  position:absolute; top:-10px; left:-10px; width:60px; height:60px;
+  opacity:0; cursor:pointer;
+}
+
+/* 툴바 3: 굵기 조절 */
+.size-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; background:#f5f5f7; border-radius:12px; padding:8px 14px; }
+.size-row label { font-size:13px; font-weight:700; color:var(--sub); white-space:nowrap; }
+.size-row input[type="range"] { flex:1; accent-color:var(--red); cursor:pointer; }
+.size-preview {
+  width:30px; height:30px; display:flex; align-items:center; justify-content:center;
+  background:#fff; border:1px solid var(--line); border-radius:8px;
+}
+.size-dot { border-radius:50%; background:var(--ink); }
+
+/* 캔버스 영역 */
+.canvas-wrap {
+  width:100%; border-radius:14px; overflow:hidden; border:1.5px solid var(--line);
+  background:#fff; box-shadow:inset 0 0 0 1px rgba(0,0,0,0.03);
+}
+#paintCanvas { display:block; width:100%; touch-action:none; cursor:crosshair; background:#fff; }
+
+@media (max-width:380px) {
+  .toolbar-top { gap:6px; }
+  .tool-mode button { padding:8px 10px; font-size:13px; }
+  .tool-actions button { padding:8px 8px; font-size:13px; }
+  .swatch { width:30px; height:30px; }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>그림판</h1>
+  <p class="lead">설치 없이 바로 그리고, 그린 그림을 내 기기에 저장하세요.</p>
+
+  <section class="card paint-card" aria-label="그림판 도구">
+    <!-- 툴바 1: 펜/지우개 및 되돌리기/지우기/저장 -->
+    <div class="toolbar-top">
+      <div class="tool-mode" id="toolMode">
+        <button type="button" class="on" id="btnPen" data-mode="pen">펜</button>
+        <button type="button" id="btnEraser" data-mode="eraser">지우개</button>
+      </div>
+
+      <div class="tool-actions">
+        <button type="button" id="btnUndo" title="최근 20번까지 되돌리기" disabled>되돌리기</button>
+        <button type="button" id="btnClear">모두 지우기</button>
+        <button type="button" class="save" id="btnSave">저장</button>
+      </div>
+    </div>
+
+    <!-- 툴바 2: 색상 팔레트 & 직접 선택 -->
+    <div class="palette-row">
+      <div class="palette" id="palette">
+        <button type="button" class="swatch on" data-color="#000000" style="background:#000000;" aria-label="검정"></button>
+        <button type="button" class="swatch" data-color="#ff2d55" style="background:#ff2d55;" aria-label="빨강"></button>
+        <button type="button" class="swatch" data-color="#007aff" style="background:#007aff;" aria-label="파랑"></button>
+        <button type="button" class="swatch" data-color="#34c759" style="background:#34c759;" aria-label="초록"></button>
+        <button type="button" class="swatch" data-color="#ffcc00" style="background:#ffcc00;" aria-label="노랑"></button>
+        <button type="button" class="swatch" data-color="#ff9500" style="background:#ff9500;" aria-label="주황"></button>
+        <button type="button" class="swatch" data-color="#af52de" style="background:#af52de;" aria-label="보라"></button>
+        <button type="button" class="swatch" data-color="#ffffff" style="background:#ffffff;" aria-label="흰색"></button>
+      </div>
+      <div class="picker-wrap" title="다른 색 고르기">
+        <div class="picker-btn">
+          <input type="color" id="colorPicker" value="#000000" aria-label="직접 색상 고르기">
+        </div>
+      </div>
+    </div>
+
+    <!-- 툴바 3: 굵기 슬라이더 -->
+    <div class="size-row">
+      <label for="sizeRange">굵기 <span id="sizeText">6px</span></label>
+      <input type="range" id="sizeRange" min="2" max="40" value="6" aria-label="선 굵기 조절">
+      <div class="size-preview">
+        <div class="size-dot" id="sizeDot" style="width:6px; height:6px;"></div>
+      </div>
+    </div>
+
+    <!-- 캔버스 -->
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="paintCanvas"></canvas>
+    </div>
+  </section>
+
+  <p class="note">※ 그림은 내 기기 안에서만 그려지고 어디에도 전송되지 않습니다. 창을 닫으면 사라지니 필요한 그림은 저장하세요.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 쓰나요?</summary>
+    <ul>
+      <li><b>펜 / 지우개</b>: 그리고 싶은 도구를 골라 선을 그립니다. 지우개는 흰색으로 지웁니다.</li>
+      <li><b>색상</b>: 자주 쓰는 8가지 색을 누르거나, 무지개 단추에서 원하는 색을 직접 고를 수 있습니다.</li>
+      <li><b>선 굵기</b>: 슬라이더를 좌우로 움직여 가늘게(2px)부터 굵게(40px)까지 조절합니다.</li>
+      <li><b>되돌리기</b>: 실수로 잘못 그렸을 때 최대 20번까지 직전 상태로 되돌립니다.</li>
+      <li><b>모두 지우기</b>: 캔버스를 처음 흰 도화지 상태로 깨끗이 비웁니다.</li>
+      <li><b>저장</b>: '저장' 단추를 누르면 그린 그림이 흰 배경의 <code>좌표나라-그림.png</code> 파일로 내 기기에 다운로드됩니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var canvas = document.getElementById('paintCanvas');
+  var ctx = canvas.getContext('2d');
+  var wrap = document.getElementById('canvasWrap');
+
+  var btnPen = document.getElementById('btnPen');
+  var btnEraser = document.getElementById('btnEraser');
+  var btnUndo = document.getElementById('btnUndo');
+  var btnClear = document.getElementById('btnClear');
+  var btnSave = document.getElementById('btnSave');
+  var palette = document.getElementById('palette');
+  var colorPicker = document.getElementById('colorPicker');
+  var sizeRange = document.getElementById('sizeRange');
+  var sizeText = document.getElementById('sizeText');
+  var sizeDot = document.getElementById('sizeDot');
+
+  var isEraser = false;
+  var currentColor = '#000000';
+  var currentSize = 6;
+  var isDrawing = false;
+  var lastX = 0, lastY = 0;
+  var history = [];
+  var cssW = 0, cssH = 0;
+  var dpr = window.devicePixelRatio || 1;
+
+  function updateUndoBtn() {
+    var canUndo = history.length > 1;
+    btnUndo.disabled = !canUndo;
+    btnUndo.style.opacity = canUndo ? '1' : '0.45';
+    btnUndo.style.cursor = canUndo ? 'pointer' : 'not-allowed';
+  }
+
+  function pushHistory() {
+    if (history.length >= 21) {
+      history.shift();
+    }
+    history.push(canvas.toDataURL('image/png'));
+    updateUndoBtn();
+  }
+
+  function undo() {
+    if (history.length <= 1) return;
+    history.pop();
+    var prev = history[history.length - 1];
+    var img = new Image();
+    img.onload = function () {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      updateUndoBtn();
+    };
+    img.src = prev;
+  }
+
+  function setMode(eraser) {
+    isEraser = eraser;
+    btnPen.className = !isEraser ? 'on' : '';
+    btnEraser.className = isEraser ? 'on' : '';
+    sizeDot.style.background = isEraser ? '#a1a1a6' : currentColor;
+  }
+
+  function setColor(col) {
+    currentColor = col;
+    setMode(false);
+    var swatches = palette.querySelectorAll('.swatch');
+    for (var i = 0; i < swatches.length; i++) {
+      swatches[i].className = 'swatch' + (swatches[i].getAttribute('data-color') === col ? ' on' : '');
+    }
+    sizeDot.style.background = currentColor;
+  }
+
+  function setSize(sz) {
+    currentSize = sz;
+    sizeText.textContent = sz + 'px';
+    var dotSize = Math.max(3, Math.min(26, sz));
+    sizeDot.style.width = dotSize + 'px';
+    sizeDot.style.height = dotSize + 'px';
+  }
+
+  function resizeCanvas() {
+    var rect = wrap.getBoundingClientRect();
+    var targetW = Math.floor(rect.width);
+    if (targetW <= 0) return;
+    var targetH = Math.floor(Math.min(targetW * 1.2, 640));
+    if (targetH < 360) targetH = 360;
+
+    if (targetW === cssW && targetH === cssH) return;
+
+    dpr = window.devicePixelRatio || 1;
+
+    var temp = null;
+    if (cssW > 0 && cssH > 0) {
+      temp = document.createElement('canvas');
+      temp.width = canvas.width;
+      temp.height = canvas.height;
+      temp.getContext('2d').drawImage(canvas, 0, 0);
+    }
+
+    cssW = targetW;
+    cssH = targetH;
+    canvas.width = Math.floor(cssW * dpr);
+    canvas.height = Math.floor(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (temp) {
+      ctx.drawImage(temp, 0, 0, canvas.width, canvas.height);
+    } else {
+      pushHistory();
+    }
+  }
+
+  function getPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / rect.width;
+    var scaleY = canvas.height / rect.height;
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
+    };
+  }
+
+  canvas.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    isDrawing = true;
+    var p = getPos(e);
+    lastX = p.x;
+    lastY = p.y;
+
+    var color = isEraser ? '#ffffff' : currentColor;
+    var strokeW = currentSize * dpr;
+
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(lastX, lastY, strokeW / 2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  canvas.addEventListener('pointermove', function (e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    var p = getPos(e);
+
+    var color = isEraser ? '#ffffff' : currentColor;
+    var strokeW = currentSize * dpr;
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = strokeW;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    ctx.beginPath();
+    ctx.moveTo(lastX, lastY);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+
+    lastX = p.x;
+    lastY = p.y;
+  });
+
+  function stopDrawing(e) {
+    if (!isDrawing) return;
+    isDrawing = false;
+    try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+    pushHistory();
+  }
+
+  canvas.addEventListener('pointerup', stopDrawing);
+  canvas.addEventListener('pointercancel', stopDrawing);
+
+  btnPen.addEventListener('click', function () { setMode(false); });
+  btnEraser.addEventListener('click', function () { setMode(true); });
+  btnUndo.addEventListener('click', undo);
+
+  btnClear.addEventListener('click', function () {
+    if (confirm('그린 내용을 모두 지울까요?')) {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      pushHistory();
+    }
+  });
+
+  btnSave.addEventListener('click', function () {
+    var a = document.createElement('a');
+    a.download = '좌표나라-그림.png';
+    a.href = canvas.toDataURL('image/png');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+
+  palette.addEventListener('click', function (e) {
+    var sw = e.target.closest('.swatch');
+    if (!sw) return;
+    var col = sw.getAttribute('data-color');
+    if (col) {
+      setColor(col);
+      colorPicker.value = col === '#ffffff' ? '#ffffff' : col;
+    }
+  });
+
+  colorPicker.addEventListener('input', function () {
+    setColor(this.value);
+  });
+
+  sizeRange.addEventListener('input', function () {
+    setSize(Number(this.value));
+  });
+
+  window.addEventListener('resize', resizeCanvas);
+
+  resizeCanvas();
+  setSize(6);
+  setColor('#000000');
+})();
+</script>
+</body>
+</html>

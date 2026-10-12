@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>평당 가격 계산기 — 이 집은 평당 얼마? | 좌표나라</title>
+<meta name="description" content="집값과 면적(㎡)을 넣으면 평당 가격과 ㎡당 가격을 바로 보여 줍니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>이 집은<br>평당 얼마일까?</h1>
+  <p class="lead">가격과 면적을 넣으면 바로 나옵니다. 아래 숫자는 예시이니 바꿔 넣으세요.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="verdict"></div>
+    <div class="sub" id="sub"></div>
+    <dl class="unit2"><div><dt>평수</dt><dd id="py"></dd></div><div><dt>㎡당 가격</dt><dd id="pm"></dd></div></dl>
+  </section>
+
+  <section class="card">
+    <div class="field"><label for="price">집값 <b class="hint" id="priceHint"></b></label><div class="inp"><input id="price" inputmode="numeric" value="900,000,000"><span>원</span></div></div>
+    <div class="field"><label for="m2">면적</label><div class="inp"><input id="m2" inputmode="decimal" value="84"><span>㎡</span></div></div>
+    <div class="chips"><button type="button" data-m2="59">59㎡</button><button type="button" data-m2="74">74㎡</button><button type="button" data-m2="84">84㎡</button><button type="button" data-m2="114">114㎡</button></div>
+  </section>
+
+  <p class="note">※ 넣은 면적 그대로 나눕니다. 전용면적을 넣으면 전용 평당가, 공급면적을 넣으면 공급 평당가가 나오니 비교할 때는 같은 기준으로 넣으세요.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>평수 = 면적(㎡) × 121 ÷ 400 (1평 = 약 3.3058㎡)</li>
+      <li>평당 가격 = 집값 ÷ 평수, ㎡당 가격 = 집값 ÷ 면적</li>
+      <li>넣으신 값으로만 계산합니다. 특정 집의 가격을 평가하거나 권하는 것이 아닙니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var el = function (id) { return document.getElementById(id); };
+  var price = ZW.money('price', render), m2 = ZW.number('m2', render, 9999);
+  function render() {
+    var r = perPyeong(price(), m2());
+    if (!r.perPyeong) { el('verdict').textContent = '숫자를 넣어 보세요'; el('sub').textContent = ''; el('py').textContent = '-'; el('pm').textContent = '-'; return; }
+    el('verdict').innerHTML = '평당 <em>' + ZW.fmt(r.perPyeong / 10000) + '만 원</em>입니다';
+    el('sub').textContent = '정확히는 평당 ' + ZW.fmt(r.perPyeong) + '원';
+    el('py').textContent = r.pyeong + '평';
+    el('pm').textContent = ZW.fmt(r.perM2 / 10000) + '만 원';
+  }
+  var c = document.querySelectorAll('.chips button');
+  for (var i = 0; i < c.length; i++) c[i].addEventListener('click', function () { el('m2').value = this.getAttribute('data-m2'); render(); });
+  render();
+})();
+</script>
+</body>
+</html>

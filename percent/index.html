@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>퍼센트 계산기 — 몇 %인지, 몇 % 변했는지 바로 계산 | 좌표나라</title>
+<meta name="description" content="A의 B%는 얼마인지, A는 B의 몇 %인지, A에서 B로 몇 % 변했는지 바로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>퍼센트 계산기<br>몇 %인지 바로 확인하기</h1>
+  <p class="lead">A의 B%는 얼마 / A는 B의 몇 % / A에서 B로 몇 % 변했는지 세 가지 방식으로 바로 계산합니다. 아래 숫자는 예시이니 바꿔 넣으세요.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 소수점 둘째 자리까지 반올림해 계산합니다. 0으로는 나눌 수 없습니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>몇 %는 얼마(of):</b> A × B ÷ 100 (예: 200의 15% = 30)</li>
+      <li><b>몇 %인지(ratio):</b> A ÷ B × 100 (예: 30은 200의 15%)</li>
+      <li><b>몇 % 변했는지(change):</b> (B − A) ÷ A × 100 (예: 200에서 250으로 25% 증가)</li>
+      <li>소수점은 둘째 자리까지 반올림하며, 끝자리 불필요한 0은 생략해 깔끔하게 표시합니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+function fmtNum(n) {
+  if (n == null || !isFinite(n)) return '0';
+  var abs = Math.abs(n);
+  var sign = n < 0 ? '-' : '';
+  var parts = String(abs).split('.');
+  var intPart = Number(parts[0]).toLocaleString('ko-KR');
+  if (parts.length > 1) {
+    return sign + intPart + '.' + parts[1];
+  }
+  return sign + intPart;
+}
+
+ZW.app({
+  fields: [
+    { id: 'mode', label: '무엇을 구할지', type: 'seg', options: [['of', '몇 %는 얼마'], ['ratio', '몇 %인지'], ['change', '몇 % 변했는지']] },
+    { id: 'a', label: '첫째 숫자(A)', type: 'num', value: '200', unit: '' },
+    { id: 'b', label: '둘째 숫자(B)', type: 'num', value: '15', unit: '' }
+  ],
+  compute: function (v) {
+    var a = Number(v.a) || 0;
+    var b = Number(v.b) || 0;
+    var res = calcPercent(v.mode, a, b);
+
+    if (!res.ok) {
+      return {
+        html: '<em>0으로는 나눌 수 없습니다</em>',
+        sub: '분모나 기준 값이 0이면 계산할 수 없습니다.',
+        rows: [
+          ['첫째 숫자(A)', fmtNum(a)],
+          ['둘째 숫자(B)', fmtNum(b)]
+        ]
+      };
+    }
+
+    var html = '';
+    var sub = '';
+    var rows = [];
+
+    if (v.mode === 'of') {
+      html = fmtNum(a) + '의 ' + fmtNum(b) + '%는 <em>' + fmtNum(res.value) + '</em>입니다';
+      sub = '계산식: ' + fmtNum(a) + ' × ' + fmtNum(b) + ' ÷ 100';
+      rows = [
+        ['기준 값(A)', fmtNum(a)],
+        ['비율(B)', fmtNum(b) + '%'],
+        ['계산 결과', fmtNum(res.value)]
+      ];
+    } else if (v.mode === 'ratio') {
+      html = fmtNum(a) + '은 ' + fmtNum(b) + '의 <em>' + fmtNum(res.value) + '%</em>입니다';
+      sub = '계산식: ' + fmtNum(a) + ' ÷ ' + fmtNum(b) + ' × 100';
+      rows = [
+        ['비교 값(A)', fmtNum(a)],
+        ['전체 기준(B)', fmtNum(b)],
+        ['차지하는 비율', fmtNum(res.value) + '%']
+      ];
+    } else if (v.mode === 'change') {
+      if (res.value > 0) {
+        html = fmtNum(a) + '에서 ' + fmtNum(b) + '(으)로 <em>' + fmtNum(res.value) + '% 늘었습니다</em>';
+      } else if (res.value < 0) {
+        html = fmtNum(a) + '에서 ' + fmtNum(b) + '(으)로 <em>' + fmtNum(Math.abs(res.value)) + '% 줄었습니다</em>';
+      } else {
+        html = fmtNum(a) + '에서 ' + fmtNum(b) + '(으)로 <em>변화가 없습니다</em>';
+      }
+      sub = '계산식: (' + fmtNum(b) + ' − ' + fmtNum(a) + ') ÷ ' + fmtNum(a) + ' × 100';
+      rows = [
+        ['처음 값(A)', fmtNum(a)],
+        ['바뀐 값(B)', fmtNum(b)],
+        ['차이(B − A)', (b >= a ? '+' : '') + fmtNum(Math.round((b - a) * 100) / 100)],
+        ['증감률', (res.value > 0 ? '+' : '') + fmtNum(res.value) + '%']
+      ];
+    }
+
+    return {
+      html: html,
+      sub: sub,
+      rows: rows
+    };
+  }
+});
+</script>
+</body>
+</html>

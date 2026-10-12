@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>분양 대금 계산기 — 계약금·중도금·잔금 나누기 | 좌표나라</title>
+<meta name="description" content="분양가와 계약금·중도금 비율을 넣으면 회차별로 내야 하는 돈을 바로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>분양 대금,<br>언제 얼마씩 낼까?</h1>
+  <p class="lead">분양가와 비율을 넣어 보세요. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 계약금·중도금·잔금의 비율과 횟수는 단지마다 다릅니다. 분양 공고의 숫자를 넣으세요. 발코니 확장비, 선택 품목, 세금은 넣지 않았습니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>계약금 = 분양가 × 계약금 비율</li>
+      <li>중도금 합계 = 분양가 × 중도금 비율, 한 번에 내는 돈 = 중도금 합계 ÷ 횟수</li>
+      <li>잔금 = 분양가 − 계약금 − 중도금 합계</li>
+      <li>넣으신 값으로만 계산합니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'price', label: '분양가', type: 'money', value: '800,000,000', unit: '원' },
+    { id: 'down', label: '계약금 비율', type: 'num', value: '10', unit: '%', max: 100 },
+    { id: 'mid', label: '중도금 비율', type: 'num', value: '60', unit: '%', max: 100, short: true },
+    { id: 'cnt', label: '중도금을 나눠 내는 횟수', type: 'num', value: '6', unit: '회', max: 24 }],
+  compute: function (v) {
+    if (!v.price) return {};
+    var r = installments(v.price, v.down, v.mid, v.cnt);
+    return { html: '계약금 <em>' + (ZW.read(r.down) || ZW.fmt(r.down) + '원') + '</em>', sub: '계약할 때 먼저 내는 돈입니다. (' + ZW.fmt(r.down) + '원)',
+      rows: [['중도금 합계', ZW.fmt(r.mid) + '원'], ['중도금 한 번에 (' + r.count + '회)', ZW.fmt(r.midEach) + '원'], ['잔금 (' + ZW.pct(r.restPct, 0) + '%)', ZW.fmt(r.rest) + '원']] };
+  }
+});
+</script>
+</body>
+</html>

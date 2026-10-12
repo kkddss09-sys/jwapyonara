@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>글자 수 세기 — 공백 포함·제외, 단어, 줄, 바이트 수 | 좌표나라</title>
+<meta name="description" content="글을 넣으면 공백 포함·제외 글자 수, 단어 수, 줄 수, UTF-8 바이트 수를 실시간으로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>글자 수 세기<br>공백 포함·제외 바로 확인</h1>
+  <p class="lead">글을 적거나 붙여 넣으면 글자 수, 단어 수, 줄 수, 용량을 바로 셉니다. 아래 글은 예시이니 바꿔 넣으세요.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="verdict">띄어쓰기 포함 <em id="cntChars">0자</em></div>
+    <div class="sub" id="sub">띄어쓰기 제외 0자 · 0단어</div>
+    <dl class="rows">
+      <div><dt>띄어쓰기 포함</dt><dd id="rowChars">0자</dd></div>
+      <div><dt>띄어쓰기 제외</dt><dd id="rowNoSpace">0자</dd></div>
+      <div><dt>낱말(단어) 수</dt><dd id="rowWords">0개</dd></div>
+      <div><dt>줄 수</dt><dd id="rowLines">0줄</dd></div>
+      <div><dt>용량(UTF-8)</dt><dd id="rowBytes">0 Byte</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="textInp">글을 적거나 붙여 넣으세요</label>
+      <div style="margin-top:6px;">
+        <textarea id="textInp" rows="8" placeholder="여기에 글을 입력하세요..." style="width:100%; border:1.5px solid var(--line); border-radius:12px; padding:14px; font:inherit; font-size:16px; line-height:1.6; resize:vertical; outline:0; background:#fff; color:var(--ink); display:block;">안녕하세요. 좌표나라 무료 도구 모음입니다. 글을 적거나 붙여 넣어 글자 수를 바로 확인해 보세요.</textarea>
+      </div>
+    </div>
+    <div class="chips" style="margin-top:12px; display:flex; justify-content:flex-end;">
+      <button type="button" id="btnClear">모두 지우기</button>
+    </div>
+  </section>
+
+  <p class="note">※ 넣은 글은 내 기기 안에서만 세고 어디에도 전송되지 않습니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>띄어쓰기 포함:</b> 공백, 줄바꿈, 특수문자를 포함한 전체 글자 수입니다. 이모지(😀 등)도 한 글자로 정확히 셉니다.</li>
+      <li><b>띄어쓰기 제외:</b> 띄어쓰기, 탭, 줄바꿈을 뺀 순수 글자 수입니다. 자기소개서나 과제 제출 시 유용합니다.</li>
+      <li><b>낱말(단어) 수:</b> 빈칸으로 나눈 단어 덩어리의 개수입니다.</li>
+      <li><b>줄 수:</b> 줄바꿈을 기준으로 나눈 총 줄 수입니다 (글이 비어 있으면 0줄).</li>
+      <li><b>용량:</b> 표준 UTF-8 기준 바이트 수입니다. 영문·숫자는 1바이트, 한글은 3바이트, 이모지는 4바이트로 계산됩니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var textInp = document.getElementById('textInp');
+  var btnClear = document.getElementById('btnClear');
+  var verdict = document.getElementById('verdict');
+  var sub = document.getElementById('sub');
+  var rowChars = document.getElementById('rowChars');
+  var rowNoSpace = document.getElementById('rowNoSpace');
+  var rowWords = document.getElementById('rowWords');
+  var rowLines = document.getElementById('rowLines');
+  var rowBytes = document.getElementById('rowBytes');
+
+  function fmt(n) {
+    return Number(n || 0).toLocaleString('ko-KR');
+  }
+
+  function render() {
+    var r = countText(textInp.value);
+    verdict.innerHTML = '띄어쓰기 포함 <em>' + fmt(r.chars) + '자</em>';
+    sub.textContent = '띄어쓰기 제외 ' + fmt(r.noSpace) + '자 · ' + fmt(r.words) + '단어';
+    rowChars.textContent = fmt(r.chars) + '자';
+    rowNoSpace.textContent = fmt(r.noSpace) + '자';
+    rowWords.textContent = fmt(r.words) + '개';
+    rowLines.textContent = fmt(r.lines) + '줄';
+    rowBytes.textContent = fmt(r.bytes) + ' Byte';
+  }
+
+  textInp.addEventListener('input', render);
+  textInp.addEventListener('focus', function () {
+    this.style.borderColor = 'var(--red)';
+  });
+  textInp.addEventListener('blur', function () {
+    this.style.borderColor = 'var(--line)';
+  });
+
+  btnClear.addEventListener('click', function () {
+    textInp.value = '';
+    textInp.focus();
+    render();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

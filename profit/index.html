@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>부동산 시세 차익 계산기 — 차익과 연평균 수익률 | 좌표나라</title>
+<meta name="description" content="산 가격, 판 가격, 가지고 있던 기간, 든 비용을 넣으면 차익과 한 해 평균 수익률을 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>사고판 차익과<br>한 해 평균 수익률</h1>
+  <p class="lead">숫자를 넣으면 바로 계산됩니다. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 양도소득세 같은 세금, 대출 이자, 그동안 받은 월세는 넣지 않았습니다. 실제로 손에 남는 돈은 이 숫자와 다르고, 앞으로의 수익을 보장하는 계산이 아닙니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>차익 = 판 가격 − 산 가격 − 든 비용</li>
+      <li>산 가격 대비 = 차익 ÷ 산 가격 × 100</li>
+      <li>한 해 평균 수익률 = ((판 가격 − 든 비용) ÷ 산 가격)<sup>1÷기간</sup> − 1</li>
+      <li>넣으신 값으로만 계산합니다. 투자를 권하는 것이 아닙니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'buy', label: '산 가격', type: 'money', value: '600,000,000', unit: '원' },
+    { id: 'sell', label: '판(팔) 가격', type: 'money', value: '800,000,000', unit: '원' },
+    { id: 'years', label: '가지고 있던 기간', type: 'num', value: '5', unit: '년', max: 80 },
+    { id: 'cost', label: '든 비용 합계 (중개 보수, 수리비 등)', type: 'money', value: '20,000,000', unit: '원' }],
+  compute: function (v) {
+    if (!v.buy) return {};
+    var r = profit(v.buy, v.sell, v.years, v.cost), a = Math.abs(r.gain);
+    return { html: (r.gain >= 0 ? '차익 ' : '손실 ') + '<em>' + (ZW.read(a) || ZW.fmt(a) + '원') + '</em>', sub: '정확히는 ' + ZW.fmt(a) + '원입니다. 세금을 내기 전 금액입니다.',
+      rows: [['산 가격 대비', ZW.pct(r.totalPct) + '%'], ['한 해 평균', isFinite(r.yearPct) ? ZW.pct(r.yearPct, 2) + '%' : '-']] };
+  }
+});
+</script>
+</body>
+</html>

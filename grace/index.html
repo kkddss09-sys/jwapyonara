@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>거치 기간 대출 계산기 — 이자만 내다가 갚으면 얼마 | 좌표나라</title>
+<meta name="description" content="거치 기간 동안은 이자만 내고 그 뒤에 원리금을 갚는 대출의 한 달 금액과 이자 합계를 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>이자만 내다가 갚으면<br>한 달에 얼마일까?</h1>
+  <p class="lead">거치 기간이 있는 대출을 계산합니다. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 거치 기간에는 원금이 줄지 않아, 거치 없이 갚을 때보다 이자 합계가 늘어납니다. 금리가 그대로일 때의 계산입니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>거치 동안 한 달 이자 = 원금 × 연 이자율 ÷ 12</li>
+      <li>거치가 끝난 뒤에는 남은 기간 동안 원리금균등으로 갚습니다.</li>
+      <li>이자 합계 = 거치 동안 낸 이자 + 그 뒤에 낸 이자</li>
+      <li>넣으신 값으로만 계산합니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'p', label: '대출금', type: 'money', value: '300,000,000', unit: '원' },
+    { id: 'rate', label: '연 이자율', type: 'num', value: '4.0', unit: '%', max: 30 },
+    { id: 'years', label: '전체 기간', type: 'num', value: '30', unit: '년', max: 50, short: true },
+    { id: 'g', label: '이자만 내는 기간(거치)', type: 'num', value: '3', unit: '년', max: 50 }],
+  compute: function (v) {
+    if (!v.p || !v.years) return {};
+    var r = grace(v.p, v.rate, v.years, v.g);
+    return { html: '거치 동안 한 달 <em>' + ZW.fmt(r.during) + '원</em><br>그 뒤 한 달 <em>' + ZW.fmt(r.after) + '원</em>', sub: r.restMonths > 0 ? '거치가 끝나면 ' + r.restMonths + '번에 걸쳐 원리금을 갚습니다.' : '전체 기간이 거치라 원금은 마지막에 갚습니다.',
+      rows: [['이자 합계', ZW.fmt(r.interest) + '원'], ['거치 없이 갚을 때 이자 합계', ZW.fmt(r.plain) + '원'], ['거치 때문에 늘어나는 이자', ZW.fmt(r.interest - r.plain) + '원']] };
+  }
+});
+</script>
+</body>
+</html>

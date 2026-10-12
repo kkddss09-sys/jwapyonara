@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전월세 인상 계산기 — 보증금과 월세를 올리면 얼마 | 좌표나라</title>
+<meta name="description" content="지금 보증금과 월세에 인상 비율을 넣으면 올린 뒤 금액과 오르는 돈을 바로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>보증금과 월세를<br>올리면 얼마가 될까?</h1>
+  <p class="lead">지금 금액과 올리는 비율을 넣어 보세요. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 계약을 갱신할 때 올릴 수 있는 한도는 법으로 정해져 있습니다. 정확한 한도와 적용되는 경우는 확인이 필요합니다. 1원 아래는 버렸습니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>올린 뒤 금액 = 지금 금액 × (1 + 올리는 비율 ÷ 100)</li>
+      <li>보증금과 월세에 같은 비율을 적용합니다.</li>
+      <li>올리는 비율은 넣으신 값을 그대로 씁니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'dep', label: '지금 보증금', type: 'money', value: '100,000,000', unit: '원' },
+    { id: 'wol', label: '지금 한 달 월세 (없으면 0)', type: 'money', value: '800,000', unit: '원' },
+    { id: 'pct', label: '올리는 비율', type: 'num', value: '5', unit: '%', max: 100 }],
+  compute: function (v) {
+    if (!v.dep && !v.wol) return {};
+    var r = raise(v.dep, v.wol, v.pct);
+    return { html: '보증금 <em>' + ZW.fmt(r.deposit) + '원</em>' + (v.wol ? '<br>월세 <em>' + ZW.fmt(r.wolse) + '원</em>' : ''), sub: ZW.pct(v.pct, 1) + '% 올린 뒤의 금액입니다.',
+      rows: [['보증금이 오르는 돈', ZW.fmt(r.dDiff) + '원'], ['월세가 오르는 돈', ZW.fmt(r.wDiff) + '원']] };
+  }
+});
+</script>
+</body>
+</html>

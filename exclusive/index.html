@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전용률 계산기 — 전용면적과 공급면적 | 좌표나라</title>
+<meta name="description" content="전용면적과 공급면적을 넣으면 전용률과 평수를 바로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>이 집의 전용률은<br>몇 %일까?</h1>
+  <p class="lead">전용면적과 공급면적을 넣어 보세요. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 전용면적은 집 안에서 혼자 쓰는 넓이, 공급면적은 거기에 복도·계단 같은 함께 쓰는 넓이를 더한 것입니다. 정확한 면적은 분양 공고나 건축물대장을 확인하세요.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>전용률 = 전용면적 ÷ 공급면적 × 100</li>
+      <li>평수 = 면적(㎡) × 121 ÷ 400</li>
+      <li>넣으신 값으로만 계산합니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'ex', label: '전용면적', type: 'num', value: '84', unit: '㎡', max: 9999 },
+    { id: 'sup', label: '공급면적', type: 'num', value: '112', unit: '㎡', max: 9999 }],
+  compute: function (v) {
+    var r = exclusiveRatio(v.ex, v.sup);
+    if (!isFinite(r.pct)) return {};
+    return { html: '전용률 <em>' + ZW.pct(r.pct) + '%</em>', sub: '공급면적 가운데 집 안에서 혼자 쓰는 넓이의 비율입니다.', pct: r.pct, pctLabel: '공급면적 중 전용면적',
+      rows: [['전용면적', r.ePy + '평'], ['공급면적', r.sPy + '평']] };
+  }
+});
+</script>
+</body>
+</html>

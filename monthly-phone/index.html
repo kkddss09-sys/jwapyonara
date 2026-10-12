@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>휴대폰 한 달 납부액 계산기 — 기기 할부금과 요금 합계 | 좌표나라</title>
+<meta name="description" content="기기 할부원금, 할부 개월, 수수료율, 요금을 넣으면 매달 실제로 내는 금액과 할부 이자를 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>휴대폰 한 달 납부액<br>얼마나 나올까?</h1>
+  <p class="lead">기기 할부금(이자 포함)과 요금을 더해 매달 내는 돈을 계산합니다. 아래 숫자는 예시이니 바꿔 넣으세요.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 할부 수수료율은 통신사와 계약마다 다르니 내 계약서의 숫자를 넣으세요. 위에 미리 넣어 둔 숫자는 예시입니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>기기 할부금은 원리금균등 방식으로 매달 같은 금액을 냅니다.</li>
+      <li>기기 할부금 한 달 = 원금 × r × (1+r)<sup>n</sup> ÷ ((1+r)<sup>n</sup> − 1) (r은 월 수수료율, n은 할부 개월, r이 0이면 원금 ÷ n)</li>
+      <li>한 달 납부액 = 기기 할부금 한 달 + 한 달 요금</li>
+      <li>할부 이자 합계 = 기기 할부금 한 달 × n − 원금</li>
+      <li>할부 기간 동안 내는 돈 합계 = 한 달 납부액 × n</li>
+      <li>통신사나 요금제에 따른 추가 할인·결합 할인은 직접 요금 칸에 반영해 넣어 주세요.</li>
+    </ul>
+  </details>
+</main>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'device', label: '할부로 내는 기기값(할부원금)', type: 'money', value: '1,200,000', unit: '원' },
+    { id: 'months', label: '할부 기간', type: 'seg', options: [['24', '24개월'], ['30', '30개월'], ['36', '36개월'], ['12', '12개월']] },
+    { id: 'rate', label: '할부 수수료율(1년 기준)', type: 'num', value: '5.9', unit: '%', max: 30 },
+    { id: 'plan', label: '한 달 요금(할인 뒤 실제로 내는 요금)', type: 'money', value: '69,000', unit: '원' }
+  ],
+  compute: function (v) {
+    var res = calcMonthlyPhone(v.device, v.months, v.rate, v.plan);
+    return {
+      html: '한 달에 <em>' + ZW.fmt(res.monthlyTotal) + '원</em> 냅니다',
+      sub: '기기 할부금 ' + ZW.fmt(res.deviceMonthly) + '원 + 요금 ' + ZW.fmt(res.planFee) + '원',
+      rows: [
+        ['기기 할부금 한 달', ZW.fmt(res.deviceMonthly) + '원'],
+        ['요금 한 달', ZW.fmt(res.planFee) + '원'],
+        ['할부 이자 합계', ZW.fmt(res.interestTotal) + '원'],
+        ['할부 기간 동안 내는 돈 합계', ZW.fmt(res.totalPaid) + '원']
+      ]
+    };
+  }
+});
+</script>
+</body>
+</html>

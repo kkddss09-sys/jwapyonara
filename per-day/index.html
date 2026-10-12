@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>폰값, 하루로 치면 — 오래 쓸수록 얼마나 싸지는지 | 좌표나라</title>
+<meta name="description" content="휴대폰 기기값과 사용할 기간, 중고 판매 예상가를 넣으면 하루와 한 달에 실제로 얼마꼴인지 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>폰값, 하루로 치면<br>얼마나 될까?</h1>
+  <p class="lead">기기값과 쓸 기간을 넣으면 하루와 한 달에 실제로 얼마꼴인지 계산합니다. 아래 숫자는 예시이니 바꿔 넣으세요.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 통신 요금이나 파손 보험료는 포함되지 않은 순수 기기값 기준입니다. 위에 미리 넣어 둔 숫자는 예시입니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>실제로 드는 돈 = 기기값 − 나중에 팔 때 받을 돈(0원보다 작으면 0원)</li>
+      <li>하루 = 실제로 드는 돈 ÷ (사용 년수 × 365일)</li>
+      <li>한 달 = 실제로 드는 돈 ÷ (사용 년수 × 12개월)</li>
+      <li>1년 더 쓰면 하루에 = 실제로 드는 돈 ÷ ((사용 년수 + 1년) × 365일)</li>
+      <li>기기를 오래 쓰거나 나중에 중고로 되팔수록 하루 체감 비용이 크게 줄어듭니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'price', label: '기기값', type: 'money', value: '1,500,000', unit: '원' },
+    { id: 'years', label: '쓸 기간', type: 'seg', options: [['2', '2년'], ['3', '3년'], ['4', '4년'], ['5', '5년']] },
+    { id: 'resale', label: '나중에 팔 때 받을 돈(없으면 0)', type: 'money', value: '0', unit: '원' }
+  ],
+  compute: function (v) {
+    var res = calcPerDay(v.price, v.years, v.resale);
+    return {
+      html: '하루에 <em>' + ZW.fmt(res.perDay) + '원</em>꼴입니다',
+      sub: res.years + '년 동안 쓰는 기준 (실제 부담 ' + ZW.fmt(res.net) + '원)',
+      rows: [
+        ['한 달로 치면', ZW.fmt(res.perMonth) + '원'],
+        ['실제로 드는 돈', ZW.fmt(res.net) + '원'],
+        ['1년 더 쓰면 하루에', ZW.fmt(res.perDayNext) + '원']
+      ]
+    };
+  }
+});
+</script>
+</body>
+</html>

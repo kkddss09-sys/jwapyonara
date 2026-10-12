@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>임대 수익률 계산기 — 월세로 보면 연 몇 %? | 좌표나라</title>
+<meta name="description" content="매입가, 보증금, 월세, 대출을 넣으면 내 돈 대비 연 임대 수익률을 바로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>월세로 보면<br>1년에 몇 %일까?</h1>
+  <p class="lead">숫자를 바꾸면 바로 계산됩니다. 아래 숫자는 예시이니 바꿔 넣으세요.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="verdict"></div>
+    <div class="sub" id="sub"></div>
+    <dl class="rows">
+      <div><dt>한 해 월세</dt><dd id="income"></dd></div>
+      <div><dt>한 해 대출 이자</dt><dd id="interest"></dd></div>
+      <div><dt>실제로 들어간 내 돈</dt><dd id="mine"></dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field"><label for="price">매입가 <b class="hint" id="priceHint"></b></label><div class="inp"><input id="price" inputmode="numeric" value="500,000,000"><span>원</span></div></div>
+    <div class="field"><label for="dep">받는 보증금 <b class="hint" id="depHint"></b></label><div class="inp"><input id="dep" inputmode="numeric" value="50,000,000"><span>원</span></div></div>
+    <div class="field"><label for="wolse">한 달 월세</label><div class="inp"><input id="wolse" inputmode="numeric" value="1,500,000"><span>원</span></div></div>
+    <div class="row2">
+      <div class="field"><label for="loanAmt">대출금 (없으면 0)</label><div class="inp"><input id="loanAmt" inputmode="numeric" value="200,000,000"><span>원</span></div></div>
+      <div class="field"><label for="loanRate">대출 이자율</label><div class="inp"><input id="loanRate" inputmode="decimal" value="4.0"><span>%</span></div></div>
+    </div>
+  </section>
+
+  <p class="note">※ 세금, 중개 보수, 수리비, 비어 있는 기간, 집값 변동은 넣지 않았습니다. 실제 수익은 이 숫자보다 낮을 수 있고, 수익을 보장하는 계산이 아닙니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>한 해 월세 = 한 달 월세 × 12, 한 해 대출 이자 = 대출금 × 대출 이자율</li>
+      <li>실제로 들어간 내 돈 = 매입가 − 받는 보증금 − 대출금</li>
+      <li>수익률 = (한 해 월세 − 한 해 대출 이자) ÷ 실제로 들어간 내 돈 × 100</li>
+      <li>넣으신 값으로만 계산합니다. 투자를 권하는 것이 아닙니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var el = function (id) { return document.getElementById(id); };
+  var price = ZW.money('price', render), dep = ZW.money('dep', render), wolse = ZW.money('wolse', render), loanAmt = ZW.money('loanAmt', render), loanRate = ZW.number('loanRate', render, 30);
+  function render() {
+    var r = rentYield(price(), dep(), wolse(), loanAmt(), loanRate());
+    el('income').textContent = ZW.fmt(r.income) + '원';
+    el('interest').textContent = ZW.fmt(r.interest) + '원';
+    el('mine').textContent = ZW.fmt(r.mine) + '원';
+    if (!price()) { el('verdict').textContent = '숫자를 넣어 보세요'; el('sub').textContent = ''; return; }
+    if (!(r.mine > 0)) { el('verdict').textContent = '들어간 내 돈이 0원 이하입니다'; el('sub').textContent = '보증금과 대출금의 합이 매입가와 같거나 커서 수익률을 낼 수 없습니다.'; return; }
+    el('verdict').innerHTML = '연 <em>' + ZW.pct(r.pct, 2) + '%</em>';
+    el('sub').textContent = '한 해에 ' + ZW.fmt(r.net) + '원이 남는 계산입니다. (세금·비용 빼기 전)';
+  }
+  render();
+})();
+</script>
+</body>
+</html>

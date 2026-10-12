@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>평당 관리비 계산기 | 좌표나라</title>
+<meta name="description" content="한 달 관리비와 면적을 넣으면 평당 관리비와 한 해 관리비를 바로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>이 집 관리비는<br>평당 얼마일까?</h1>
+  <p class="lead">관리비와 면적을 넣어 보세요. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 관리비는 보통 공급면적을 기준으로 나눕니다. 다른 단지와 견줄 때는 같은 기준의 면적과 같은 달의 관리비로 넣으세요. 난방비가 드는 겨울과 여름은 차이가 큽니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>평수 = 면적(㎡) × 121 ÷ 400</li>
+      <li>평당 관리비 = 한 달 관리비 ÷ 평수</li>
+      <li>한 해 관리비 = 한 달 관리비 × 12</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'fee', label: '한 달 관리비', type: 'money', value: '250,000', unit: '원' },
+    { id: 'm2', label: '면적 (공급면적)', type: 'num', value: '112', unit: '㎡', max: 9999 }],
+  compute: function (v) {
+    var r = mgmtPer(v.fee, v.m2);
+    if (!r.perPyeong) return {};
+    return { html: '평당 <em>' + ZW.fmt(r.perPyeong) + '원</em>입니다', sub: '한 달 관리비를 평수로 나눈 값입니다.',
+      rows: [['㎡당', ZW.fmt(r.perM2) + '원'], ['한 해 관리비', ZW.fmt(r.year) + '원']] };
+  }
+});
+</script>
+</body>
+</html>

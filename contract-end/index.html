@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>약정 끝나는 날 계산기 — 내 약정 만료일과 남은 날짜 | 좌표나라</title>
+<meta name="description" content="개통한 날과 약정 기간을 넣으면 약정 만료일과 남은 일수, 지난 비율을 바로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.seg button { min-height:48px; }
+.inp input[type="date"] { text-align:left; font-size:17px; padding:12px 0; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>내 약정,<br>언제 끝날까?</h1>
+  <p class="lead">개통한 날과 약정 기간을 넣으면 끝나는 날과 남은 날 수를 보여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">약정이 <em>0일</em> 남았습니다</div>
+    <div class="sub" id="resSub">끝나는 날: - / 지나간 만큼: 0%</div>
+    <div class="bars" style="margin-top:14px;">
+      <div class="bar">
+        <div class="top"><span style="color:#c7c7cc; font-size:13px;">약정 기간 진행률</span><b id="resBarPercent">0%</b></div>
+        <div class="track"><div class="fill" id="resBarFill" style="width:0%;"></div></div>
+      </div>
+    </div>
+    <dl class="rows" style="margin-top:14px;">
+      <div><dt>약정 만료일</dt><dd id="rowEndDate">-</dd></div>
+      <div><dt>남은 일수</dt><dd id="rowDaysLeft">-</dd></div>
+      <div><dt>진행률</dt><dd id="rowPercent">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="startDate">개통한 날</label>
+      <div class="inp">
+        <input type="date" id="startDate">
+      </div>
+    </div>
+    <div class="field" style="margin-top:16px;">
+      <label>약정 기간</label>
+      <div class="seg" id="monthSeg" style="grid-template-columns:repeat(4,minmax(0,1fr));">
+        <button type="button" data-val="12">12개월</button>
+        <button type="button" data-val="24" class="on">24개월</button>
+        <button type="button" data-val="30">30개월</button>
+        <button type="button" data-val="36">36개월</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">개통한 날을 기준으로 한 계산입니다. 실제 약정이 끝나는 날은 가입 조건에 따라 다를 수 있으니 통신사 앱이나 고객센터에서 확인하세요.</p>
+
+  <a class="cta" data-zw="kakao" href="#">오늘 시세는 카톡방에서<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>약정 만료일:</b> 개통한 날에서 약정 기간(개월) 뒤의 같은 날짜로 계산합니다. 그 달에 그 날짜가 없으면 그 달의 마지막 날(예: 8월 31일 개통 후 6개월 약정 시 2월 28일)로 맞춥니다.</li>
+      <li><b>남은 일수:</b> 약정 만료일까지 남은 날 수(만료일 − 오늘)입니다. 이미 지난 약정은 끝난 지 며칠이 지났는지 알려 드립니다.</li>
+      <li><b>지나간 비율:</b> 전체 약정 기간 일수 중 오늘까지 지난 날짜의 비율(0~100%)입니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var startDate = document.getElementById('startDate');
+  var segButtons = document.querySelectorAll('#monthSeg button');
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var resBarPercent = document.getElementById('resBarPercent');
+  var resBarFill = document.getElementById('resBarFill');
+  var rowEndDate = document.getElementById('rowEndDate');
+  var rowDaysLeft = document.getElementById('rowDaysLeft');
+  var rowPercent = document.getElementById('rowPercent');
+
+  var currentMonths = 24;
+
+  var now = new Date();
+  var ty = now.getFullYear();
+  var tm = now.getMonth() + 1;
+  var td = now.getDate();
+  var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+  var todayStr = ty + '-' + pad(tm) + '-' + pad(td);
+
+  // 기본값: 오늘에서 1년 전
+  var prevY = ty - 1;
+  var prevLastDay = new Date(Date.UTC(prevY, tm, 0)).getUTCDate();
+  var prevD = Math.min(td, prevLastDay);
+  startDate.value = prevY + '-' + pad(tm) + '-' + pad(prevD);
+
+  function formatDateKo(dateStr) {
+    var p = dateStr.split('-');
+    var y = parseInt(p[0], 10);
+    var m = parseInt(p[1], 10);
+    var d = parseInt(p[2], 10);
+    var dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+    var day = dayNames[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
+    return y + '년 ' + m + '월 ' + d + '일 ' + day + '요일';
+  }
+
+  function render() {
+    var r = calcContractEnd(startDate.value, currentMonths, todayStr);
+    if (!r.ok) {
+      resVerdict.textContent = '개통한 날을 선택해 주세요';
+      resSub.textContent = '올바른 날짜를 입력하면 계산 결과가 표시됩니다.';
+      resBarPercent.textContent = '0%';
+      resBarFill.style.width = '0%';
+      rowEndDate.textContent = '-';
+      rowDaysLeft.textContent = '-';
+      rowPercent.textContent = '-';
+      return;
+    }
+
+    var endFormatted = formatDateKo(r.endDate);
+
+    if (r.daysLeft > 0) {
+      resVerdict.innerHTML = '약정이 <em>' + r.daysLeft.toLocaleString('ko-KR') + '일</em> 남았습니다';
+    } else if (r.daysLeft === 0) {
+      resVerdict.innerHTML = '오늘 약정이 끝납니다';
+    } else {
+      resVerdict.innerHTML = '약정이 끝난 지 <em>' + Math.abs(r.daysLeft).toLocaleString('ko-KR') + '일</em> 됐습니다';
+    }
+
+    resSub.textContent = '끝나는 날: ' + endFormatted + ' / 지나간 만큼: ' + r.percent + '%';
+    resBarPercent.textContent = r.percent + '%';
+    resBarFill.style.width = r.percent + '%';
+
+    rowEndDate.textContent = endFormatted;
+    rowDaysLeft.textContent = (r.daysLeft > 0 ? (r.daysLeft + '일 남음') : (r.daysLeft === 0 ? '오늘 만료' : (Math.abs(r.daysLeft) + '일 지남')));
+    rowPercent.textContent = r.percent + '%';
+  }
+
+  startDate.addEventListener('change', render);
+  startDate.addEventListener('input', render);
+
+  segButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      segButtons.forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      currentMonths = parseInt(btn.getAttribute('data-val'), 10) || 24;
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

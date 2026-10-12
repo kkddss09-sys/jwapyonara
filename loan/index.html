@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대출 이자 계산기 — 한 달에 얼마 갚을까? | 좌표나라</title>
+<meta name="description" content="빌리는 돈, 이자율, 기간을 넣으면 한 달 상환액과 총 이자를 바로 보여 줍니다. 원리금균등·원금균등·만기일시. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>대출, 한 달에<br>얼마 갚을까?</h1>
+  <p class="lead">숫자를 바꾸면 바로 계산됩니다. 아래 숫자는 예시이니 바꿔 넣으세요.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="verdict"></div>
+    <div class="sub" id="sub"></div>
+    <dl class="rows">
+      <div><dt>이자 합계</dt><dd id="ti"></dd></div>
+      <div><dt>갚는 돈 합계</dt><dd id="tt"></dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field"><label for="p">빌리는 돈 <b class="hint" id="pHint"></b></label><div class="inp"><input id="p" inputmode="numeric" value="300,000,000"><span>원</span></div></div>
+    <div class="row2">
+      <div class="field"><label for="r">연 이자율</label><div class="inp"><input id="r" inputmode="decimal" value="4.0"><span>%</span></div></div>
+      <div class="field"><label for="y">기간</label><div class="inp"><input id="y" inputmode="numeric" value="30"><span>년</span></div></div>
+    </div>
+    <div class="field">
+      <label>갚는 방식</label>
+      <div class="seg" role="group" aria-label="갚는 방식">
+        <button type="button" data-t="equal" class="on">원리금균등</button>
+        <button type="button" data-t="principal">원금균등</button>
+        <button type="button" data-t="bullet">만기일시</button>
+      </div>
+      <p class="help" id="help"></p>
+    </div>
+  </section>
+
+  <p class="note">※ 은행마다 날짜 계산과 끝수 처리가 조금 달라 실제 금액과 차이가 날 수 있습니다. 중도상환수수료, 거치 기간, 변동 금리는 넣지 않았습니다.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>한 달 이자율 = 연 이자율 ÷ 12, 갚는 횟수 = 기간(년) × 12</li>
+      <li>원리금균등: 매달 같은 금액. 한 달 상환액 = 원금 × 이자율 × (1+이자율)<sup>횟수</sup> ÷ ((1+이자율)<sup>횟수</sup> − 1)</li>
+      <li>원금균등: 원금을 횟수로 똑같이 나누고, 남은 원금에 이자를 붙입니다. 첫 달이 가장 많고 갈수록 줄어듭니다.</li>
+      <li>만기일시: 매달 이자만 내고, 마지막 달에 원금을 한꺼번에 갚습니다.</li>
+      <li>넣으신 값으로만 계산합니다. 대출 상품을 권하거나 조건을 보장하는 것이 아닙니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var el = function (id) { return document.getElementById(id); };
+  var type = 'equal';
+  var fmt = function (n) { return Math.round(n).toLocaleString('ko-KR'); };
+  var num = function (s) { return Number(String(s).replace(/[^\d]/g, '')) || 0; };
+  var dec = function (s) { s = String(s).replace(/[^\d.]/g, ''); var i = s.indexOf('.'); return i < 0 ? s : s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, ''); };
+  // 큰 돈을 "3억", "3억 5,000만"처럼 읽어 준다
+  var read = function (n) {
+    if (n < 10000) return '';
+    var eok = Math.floor(n / 100000000), man = Math.floor((n % 100000000) / 10000);
+    return (eok ? eok + '억' : '') + (eok && man ? ' ' : '') + (man ? fmt(man) + '만' : '') + ' 원';
+  };
+  var HELP = { equal: '매달 같은 금액을 갚습니다.', principal: '첫 달이 가장 많고, 갈수록 줄어듭니다.', bullet: '매달 이자만 내고, 마지막 달에 원금을 갚습니다.' };
+
+  function render() {
+    var P = num(el('p').value), r = Number(el('r').value) || 0, y = Math.min(50, num(el('y').value));
+    var x = loan(P, r, y, type);
+    el('pHint').textContent = read(P);
+    el('help').textContent = HELP[type];
+    if (!x.months || !P) { el('verdict').textContent = '숫자를 넣어 보세요'; el('sub').textContent = ''; el('ti').textContent = '-'; el('tt').textContent = '-'; return; }
+    if (type === 'equal') { el('verdict').innerHTML = '한 달에 <em>' + fmt(x.first) + '원</em>씩 갚습니다'; el('sub').textContent = x.months + '번 동안 같은 금액입니다.'; }
+    else if (type === 'principal') { el('verdict').innerHTML = '첫 달 <em>' + fmt(x.first) + '원</em>, 마지막 달 <em>' + fmt(x.last) + '원</em>'; el('sub').textContent = x.months + '번에 걸쳐 조금씩 줄어듭니다.'; }
+    else { el('verdict').innerHTML = '매달 이자 <em>' + fmt(x.first) + '원</em>'; el('sub').textContent = '마지막 달에 원금 ' + fmt(P) + '원을 함께 갚습니다.'; }
+    el('ti').textContent = fmt(x.totalInterest) + '원';
+    el('tt').textContent = fmt(x.total) + '원';
+  }
+
+  el('p').addEventListener('input', function () { this.value = this.value === '' ? '' : fmt(num(this.value)); render(); });
+  el('r').addEventListener('input', function () { this.value = dec(this.value); if (Number(this.value) > 30) this.value = '30'; render(); });
+  el('y').addEventListener('input', function () { var n = Math.min(50, num(this.value)); this.value = this.value === '' ? '' : String(n); render(); });
+  ['p', 'r', 'y'].forEach(function (id) { el(id).addEventListener('focus', function () { this.select(); }); });
+  var segs = document.querySelectorAll('.seg button');
+  for (var i = 0; i < segs.length; i++) segs[i].addEventListener('click', function () {
+    for (var j = 0; j < segs.length; j++) segs[j].className = '';
+    this.className = 'on'; type = this.getAttribute('data-t'); render();
+  });
+  render();
+})();
+</script>
+</body>
+</html>

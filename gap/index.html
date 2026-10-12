@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전세가율 계산기 — 매매가와 전세가의 차이(갭) | 좌표나라</title>
+<meta name="description" content="매매가와 전세가를 넣으면 전세가율과 두 값의 차이를 바로 보여 줍니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>전세가율과<br>매매가·전세가 차이</h1>
+  <p class="lead">두 값을 넣으면 바로 나옵니다. 아래 숫자는 예시이니 바꿔 넣으세요.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="verdict"></div>
+    <div class="sub" id="sub"></div>
+    <div class="bars"><div class="bar win"><div class="top"><span>매매가 중 전세가가 차지하는 만큼</span><b id="pct"></b></div><div class="track"><div class="fill" id="fill"></div></div></div></div>
+  </section>
+
+  <section class="card">
+    <div class="field"><label for="sale">매매가 <b class="hint" id="saleHint"></b></label><div class="inp"><input id="sale" inputmode="numeric" value="900,000,000"><span>원</span></div></div>
+    <div class="field"><label for="jeonse">전세가 <b class="hint" id="jeonseHint"></b></label><div class="inp"><input id="jeonse" inputmode="numeric" value="540,000,000"><span>원</span></div></div>
+  </section>
+
+  <p class="note">※ 전세가율이 높다, 낮다만으로 그 집이 좋은지 판단할 수는 없습니다. 참고용 숫자입니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>전세가율 = 전세가 ÷ 매매가 × 100</li>
+      <li>차이(갭) = 매매가 − 전세가</li>
+      <li>넣으신 값으로만 계산합니다. 투자를 권하거나 결과를 보장하는 것이 아닙니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var el = function (id) { return document.getElementById(id); };
+  var sale = ZW.money('sale', render), jeonse = ZW.money('jeonse', render);
+  function render() {
+    var s = sale(), r = gap(s, jeonse());
+    if (!s) { el('verdict').textContent = '숫자를 넣어 보세요'; el('sub').textContent = ''; el('pct').textContent = '-'; el('fill').style.width = '0'; return; }
+    el('verdict').innerHTML = '전세가율 <em>' + ZW.pct(r.ratio) + '%</em>';
+    el('sub').textContent = r.gap >= 0 ? '매매가와 전세가의 차이는 ' + (ZW.read(r.gap) || ZW.fmt(r.gap) + '원') + '입니다. (' + ZW.fmt(r.gap) + '원)' : '전세가가 매매가보다 ' + ZW.fmt(-r.gap) + '원 높습니다.';
+    el('pct').textContent = ZW.pct(r.ratio) + '%';
+    el('fill').style.width = Math.min(100, r.ratio) + '%';
+  }
+  render();
+})();
+</script>
+</body>
+</html>

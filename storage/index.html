@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>내게 필요한 저장 공간 계산기 — 몇 기가(GB)가 적당할까? | 좌표나라</title>
+<meta name="description" content="사진 장수와 동영상 시간을 넣으면 나에게 꼭 맞는 휴대폰 저장 용량을 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>내게 필요한 저장 공간은<br>몇 기가일까?</h1>
+  <p class="lead">사진과 영상을 얼마나 담을지 넣으면 필요한 용량을 계산합니다. 아래 숫자는 예시이니 바꿔 넣으세요.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 사진과 영상의 크기는 기종과 화질 설정에 따라 크게 다릅니다. 내 폰의 사진·영상 정보에서 실제 크기를 보고 가까운 것을 고르세요. 위에 미리 넣어 둔 숫자는 예시입니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>1GB = 1024MB 기준으로 계산합니다.</li>
+      <li>사진 용량(GB) = 사진 장수 × 사진 한 장 크기(MB) ÷ 1024</li>
+      <li>영상 용량(GB) = 영상 촬영 시간(분) × 영상 1분 크기(MB) ÷ 1024</li>
+      <li>필요한 저장 공간 합계 = 사진 용량 + 영상 용량 + 앱과 그 밖의 용량</li>
+      <li>운영체제(시스템)와 기본 캐시 용량도 필요하므로 실제 폰을 고를 때는 계산된 값보다 여유 있는 모델을 고르는 것이 좋습니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'photos', label: '담아 둘 사진', type: 'num', value: '3000', unit: '장', max: 1000000 },
+    { id: 'photoMB', label: '사진 한 장 크기', type: 'seg', options: [['4', '4MB'], ['2', '2MB'], ['8', '8MB']] },
+    { id: 'minutes', label: '담아 둘 영상', type: 'num', value: '120', unit: '분', max: 100000 },
+    { id: 'videoMB', label: '영상 1분 크기', type: 'seg', options: [['200', '200MB'], ['100', '100MB'], ['400', '400MB']] },
+    { id: 'appsGB', label: '앱과 그 밖의 것', type: 'num', value: '30', unit: 'GB', max: 2000 }
+  ],
+  compute: function (v) {
+    var res = calcStorage(v.photos, v.photoMB, v.minutes, v.videoMB, v.appsGB);
+    return {
+      html: '약 <em>' + res.totalGB + 'GB</em>가 필요합니다',
+      sub: '여유를 두려면 이보다 넉넉한 용량을 고르세요.',
+      rows: [
+        ['사진', res.photoGB + 'GB'],
+        ['영상', res.videoGB + 'GB'],
+        ['앱과 그 밖', res.appsGB + 'GB']
+      ]
+    };
+  }
+});
+</script>
+</body>
+</html>

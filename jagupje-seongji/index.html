@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>자급제 vs 성지, 어느 쪽이 쌀까? 2년 총비용 비교 계산기 | 좌표나라</title>
+<meta name="description" content="자급제로 살 때와 성지에서 개통할 때 2년 동안 드는 돈을 바로 비교해 보세요. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>자급제 vs 성지,<br>2년 동안 어느 쪽이 쌀까?</h1>
+  <p class="lead">들은 조건을 넣으면 바로 비교됩니다. 아래 숫자는 예시이니 바꿔 넣으세요.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="verdict"></div>
+    <div class="sub" id="sub"></div>
+    <div class="bars">
+      <div class="bar" id="barJg"><div class="top"><span>자급제 2년 총액</span><b id="totJg"></b></div><div class="track"><div class="fill" id="fillJg"></div></div></div>
+      <div class="bar" id="barSj"><div class="top"><span>성지 2년 총액</span><b id="totSj"></b></div><div class="track"><div class="fill" id="fillSj"></div></div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>자급제로 살 때 <span class="tagline">폰 따로, 요금제 따로</span></h2>
+    <div class="field"><label for="jgDevice">기기값</label><div class="inp"><input id="jgDevice" inputmode="numeric" value="1,500,000"><span>원</span></div></div>
+    <div class="field"><label for="jgPlan">한 달 요금 (알뜰요금제 등)</label><div class="inp"><input id="jgPlan" inputmode="numeric" value="33,000"><span>원</span></div></div>
+  </section>
+
+  <section class="card">
+    <h2>성지에서 개통할 때 <span class="tagline">통신사로 개통</span></h2>
+    <div class="field"><label for="sjDevice">매장에서 내는 기기값</label><div class="inp"><input id="sjDevice" inputmode="numeric" value="700,000"><span>원</span></div></div>
+    <div class="row2">
+      <div class="field"><label for="sjPlan1">처음 요금제 한 달 요금</label><div class="inp"><input id="sjPlan1" inputmode="numeric" value="89,000"><span>원</span></div></div>
+      <div class="field"><label for="sjKeep">그 요금제 유지 기간</label><div class="inp"><input id="sjKeep" inputmode="numeric" value="6"><span>개월</span></div></div>
+    </div>
+    <div class="field"><label for="sjPlan2">그 뒤에 쓸 요금제 한 달 요금</label><div class="inp"><input id="sjPlan2" inputmode="numeric" value="55,000"><span>원</span></div></div>
+    <div class="row2">
+      <div class="field"><label for="sjAdd">부가서비스 한 달 요금</label><div class="inp"><input id="sjAdd" inputmode="numeric" value="10,000"><span>원</span></div></div>
+      <div class="field"><label for="sjAddKeep">부가서비스 유지 기간</label><div class="inp"><input id="sjAddKeep" inputmode="numeric" value="3"><span>개월</span></div></div>
+    </div>
+  </section>
+
+  <p class="note">※ 기기값을 할부로 낼 때 붙는 이자는 계산에 넣지 않았습니다. 유지 기간은 0~24개월 사이로 계산합니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">오늘 시세는 카톡방에서<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>자급제 총액 = 기기값 + 한 달 요금 × 24개월</li>
+      <li>성지 총액 = 기기값 + 처음 요금 × 유지 기간 + 그 뒤 요금 × (24 − 유지 기간) + 부가서비스 요금 × 부가서비스 유지 기간</li>
+      <li>넣으신 값으로만 계산합니다. 좌표나라가 가격을 정하거나 보장하는 것이 아닙니다.</li>
+      <li>실제로 내는 돈은 카드 조건, 반납 조건, 유심값 등에 따라 달라질 수 있습니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var ids = ['jgDevice', 'jgPlan', 'sjDevice', 'sjPlan1', 'sjKeep', 'sjPlan2', 'sjAdd', 'sjAddKeep'];
+  var months = { sjKeep: 1, sjAddKeep: 1 };
+  var el = function (id) { return document.getElementById(id); };
+  var num = function (s) { return Number(String(s).replace(/[^\d]/g, '')) || 0; };
+  var fmt = function (n) { return Math.round(n).toLocaleString('ko-KR'); };
+  // 백만 원이 넘는 차이만 "약 ○○만 원"으로 줄여 읽기 쉽게. 그보다 작으면 원 단위 그대로(38,000원을 4만 원으로 올려 말하지 않는다)
+  var man = function (n) { return n >= 1000000 ? '약 ' + fmt(Math.round(n / 10000)) + '만 원' : fmt(n) + '원'; };
+
+  function read() { var v = {}; ids.forEach(function (id) { v[id] = num(el(id).value); }); return v; }
+
+  function render() {
+    var r = calc(read());
+    el('totJg').textContent = fmt(r.jg) + '원';
+    el('totSj').textContent = fmt(r.sj) + '원';
+    var max = Math.max(r.jg, r.sj, 1);
+    el('fillJg').style.width = (r.jg / max * 100) + '%';
+    el('fillSj').style.width = (r.sj / max * 100) + '%';
+    el('barJg').className = 'bar' + (r.winner === 'jg' ? ' win' : '');
+    el('barSj').className = 'bar' + (r.winner === 'sj' ? ' win' : '');
+    if (r.winner === 'same') {
+      el('verdict').innerHTML = '두 쪽이 <em>똑같이</em> 듭니다';
+      el('sub').textContent = '2년 총액이 같습니다.';
+    } else {
+      var name = r.winner === 'jg' ? '자급제' : '성지';
+      el('verdict').innerHTML = '<em>' + name + '</em> 쪽이 2년에 <em>' + man(r.diff) + '</em> 덜 듭니다';
+      el('sub').textContent = '한 달로 나누면 약 ' + fmt(r.perMonth) + '원 차이입니다. (넣으신 값 기준)';
+    }
+  }
+
+  ids.forEach(function (id) {
+    el(id).addEventListener('input', function () {
+      var n = num(this.value);
+      if (months[id]) { n = Math.min(24, n); this.value = this.value === '' ? '' : String(n); }
+      else { this.value = this.value === '' ? '' : fmt(n); }   // 천 단위 쉼표
+      render();
+    });
+    el(id).addEventListener('focus', function () { this.select(); });
+  });
+  render();
+})();
+</script>
+</body>
+</html>

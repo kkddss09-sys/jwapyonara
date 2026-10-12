@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대출 갈아타기 계산기 — 대환하면 이득일까 | 좌표나라</title>
+<meta name="description" content="남은 대출금과 지금 금리, 새 금리, 중도상환 수수료를 넣으면 갈아탔을 때의 이득과 손해를 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>대출을 갈아타면<br>이득일까?</h1>
+  <p class="lead">지금 대출과 새 대출의 조건을 넣어 보세요. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 수수료율과 그 밖의 비용은 대출마다 다릅니다. 지금 대출의 약정서와 새 대출의 안내를 확인해 넣으세요. 남은 기간은 그대로 이어 간다고 보고 계산합니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>지금 금리와 새 금리로 원리금균등 한 달 상환액을 각각 계산합니다.</li>
+      <li>줄어드는 돈 = (지금 한 달 − 새 한 달) × 남은 횟수</li>
+      <li>드는 돈 = 남은 대출금 × 중도상환 수수료율 + 그 밖의 비용</li>
+      <li>이득 = 줄어드는 돈 − 드는 돈. 대출 상품을 권하는 것이 아닙니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'bal', label: '남은 대출금', type: 'money', value: '300,000,000', unit: '원' },
+    { id: 'oldR', label: '지금 연 이자율', type: 'num', value: '5.0', unit: '%', max: 30 },
+    { id: 'newR', label: '새 이자율', type: 'num', value: '4.0', unit: '%', max: 30, short: true },
+    { id: 'years', label: '남은 기간', type: 'num', value: '25', unit: '년', max: 50 },
+    { id: 'fee', label: '중도상환 수수료율', type: 'num', value: '1.2', unit: '%', max: 5, short: true },
+    { id: 'other', label: '그 밖의 비용 (인지세, 설정비 등)', type: 'money', value: '500,000', unit: '원' }],
+  compute: function (v) {
+    if (!v.bal || !v.years) return {};
+    var r = refinance(v.bal, v.years, v.oldR, v.newR, v.fee, v.other);
+    return { html: r.net >= 0 ? '갈아타면 <em>' + ZW.fmt(r.net) + '원</em><br>이득인 계산입니다' : '갈아타면 <em>' + ZW.fmt(-r.net) + '원</em><br>손해인 계산입니다',
+      sub: r.monthSave > 0 ? '한 달에 ' + ZW.fmt(r.monthSave) + '원씩 줄고, 드는 돈은 ' + r.breakeven + '개월이면 메워집니다.' : '새 이자율이 더 낮지 않아 한 달 상환액이 줄지 않습니다.',
+      rows: [['지금 한 달 상환액', ZW.fmt(r.old) + '원'], ['갈아탄 뒤 한 달 상환액', ZW.fmt(r.neu) + '원'], ['갈아타는 데 드는 돈', ZW.fmt(r.cost) + '원']] };
+  }
+});
+</script>
+</body>
+</html>

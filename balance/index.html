@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대출 잔액 계산기 — 몇 년 갚으면 원금이 얼마 남을까 | 좌표나라</title>
+<meta name="description" content="대출을 몇 년 갚은 뒤 남는 원금과 그때까지 낸 이자를 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>몇 년 갚으면<br>원금이 얼마 남을까?</h1>
+  <p class="lead">대출 조건과 갚은 햇수를 넣어 보세요. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 원리금균등으로 금리가 그대로일 때의 계산입니다. 중간에 먼저 갚거나 금리가 바뀌면 달라집니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>원리금균등 한 달 상환액을 구한 뒤, 갚은 달 수만큼 원금이 줄어든 값을 계산합니다.</li>
+      <li>남은 원금 = 원금 × (1+r)<sup>k</sup> − 한 달 상환액 × ((1+r)<sup>k</sup> − 1) ÷ r, k는 갚은 횟수</li>
+      <li>그때까지 낸 이자 = 낸 돈 합계 − 갚은 원금</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'p', label: '처음 빌린 돈', type: 'money', value: '300,000,000', unit: '원' },
+    { id: 'rate', label: '연 이자율', type: 'num', value: '4.0', unit: '%', max: 30 },
+    { id: 'years', label: '전체 기간', type: 'num', value: '30', unit: '년', max: 50, short: true },
+    { id: 'after', label: '갚은 햇수', type: 'num', value: '10', unit: '년', max: 50 }],
+  compute: function (v) {
+    if (!v.p || !v.years) return {};
+    var r = balanceAfter(v.p, v.rate, v.years, v.after), left = v.p > 0 ? r.balance / v.p * 100 : 0;
+    return { html: '원금이 <em>' + (ZW.read(r.balance) || ZW.fmt(r.balance) + '원') + '</em><br>남습니다', sub: '정확히는 ' + ZW.fmt(r.balance) + '원입니다.', pct: 100 - left, pctLabel: '원금 중 갚은 만큼',
+      rows: [['그동안 갚은 원금', ZW.fmt(r.paidPrincipal) + '원'], ['그동안 낸 이자', ZW.fmt(r.paidInterest) + '원']] };
+  }
+});
+</script>
+</body>
+</html>
