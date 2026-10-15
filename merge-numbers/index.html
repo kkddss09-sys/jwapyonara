@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>숫자 합치기 무료 게임 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 무료 숫자 합치기. 휴대폰에서도 잘 돼요.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.status-bar { display:flex; justify-content:space-between; align-items:center; background:#2c2c2e; color:#fff; border-radius:14px; padding:12px 16px; margin-bottom:14px; }
+.status-item { font-size:15px; font-weight:700; display:flex; align-items:center; gap:6px; }
+.status-val { font-size:18px; font-weight:800; color:#ffd60a; }
+
+.control-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.btn-reset { display:flex; align-items:center; justify-content:center; min-height:44px; padding:0 20px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; background:#2c2c2e; color:#fff; width:100%; }
+.btn-reset:active { background:#3a3a3c; }
+
+.board-wrap { width:100%; display:flex; justify-content:center; margin:6px 0 16px; }
+.game-board { width:100%; max-width:360px; aspect-ratio:1; background:#2c2c2e; border-radius:16px; padding:10px; display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; touch-action:none; user-select:none; -webkit-user-select:none; position:relative; }
+
+.tile { aspect-ratio:1; width:100%; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:clamp(18px, 6vw, 28px); transition:transform .1s ease, background-color .15s ease; }
+
+/* 좌표나라 스타일: 흰색 -> 연분홍(--soft) -> 빨강(--red) */
+.val-0    { background:#3a3a3c; color:transparent; }
+.val-2    { background:#ffffff; color:#1d1d1f; }
+.val-4    { background:#fff0f3; color:#1d1d1f; }
+.val-8    { background:#ffe0e6; color:#1d1d1f; }
+.val-16   { background:#ffccd5; color:#1d1d1f; }
+.val-32   { background:#ffa3b4; color:#1d1d1f; }
+.val-64   { background:#ff7590; color:#ffffff; }
+.val-128  { background:#ff476d; color:#ffffff; font-size:clamp(16px, 5vw, 24px); }
+.val-256  { background:#ff2d55; color:#ffffff; font-size:clamp(16px, 5vw, 24px); }
+.val-512  { background:#e01740; color:#ffffff; font-size:clamp(16px, 5vw, 24px); }
+.val-1024 { background:#c20c32; color:#ffffff; font-size:clamp(14px, 4.2vw, 20px); }
+.val-2048 { background:#8f001f; color:#ffd60a; font-size:clamp(14px, 4.2vw, 20px); box-shadow:0 0 12px rgba(255,214,10,0.6); }
+.val-more { background:#1d1d1f; color:#ffd60a; border:2px solid var(--red); font-size:clamp(12px, 3.8vw, 18px); }
+
+/* 방향키 단추 모음 (화면 터치 편의) */
+.dpad-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; margin:10px 0 4px; }
+.dpad-row { display:flex; gap:6px; }
+.dpad-btn { width:52px; height:44px; border:1.5px solid var(--line); background:#fff; border-radius:10px; font-size:18px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.dpad-btn:active { background:var(--soft); border-color:var(--red); color:var(--red); }
+
+.game-msg { text-align:center; padding:12px; border-radius:12px; font-size:16px; font-weight:800; margin-bottom:12px; display:none; }
+.game-msg.lose { background:var(--soft); color:var(--red); display:block; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>숫자 합치기</h1>
+  <p class="lead">같은 숫자를 밀어서 합쳐 더 큰 숫자를 만들어 보세요.</p>
+
+  <section class="card">
+    <div class="status-bar">
+      <div class="status-item">
+        <span>점수</span>
+        <span class="status-val" id="scoreText">0</span>
+      </div>
+      <div class="status-item">
+        <span>최고 점수</span>
+        <span class="status-val" id="bestScoreText">0</span>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-reset" id="btnReset">새로 하기</button>
+    </div>
+
+    <div id="gameMsg" class="game-msg"></div>
+
+    <div class="board-wrap">
+      <div class="game-board" id="gameBoard"></div>
+    </div>
+
+    <div class="dpad-wrap">
+      <div class="dpad-row">
+        <button type="button" class="dpad-btn" data-dir="up" aria-label="위로">▲</button>
+      </div>
+      <div class="dpad-row">
+        <button type="button" class="dpad-btn" data-dir="left" aria-label="왼쪽">◀</button>
+        <button type="button" class="dpad-btn" data-dir="down" aria-label="아래로">▼</button>
+        <button type="button" class="dpad-btn" data-dir="right" aria-label="오른쪽">▶</button>
+      </div>
+    </div>
+
+    <p class="note" style="text-align:center; margin-top:8px; margin-bottom:0;">
+      💡 화면을 손가락으로 쓱 밀거나, 키보드 방향키 또는 버튼을 누르세요.
+    </p>
+  </section>
+
+  <p class="note">진행 상황과 점수는 내 기기 안에서만 계산되며 외부로 전송되지 않습니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>숫자 밀기:</b> 판 위를 손가락으로 밀거나 키보드 방향키를 누르면 모든 숫자가 해당 방향으로 끝까지 미끄러집니다.</li>
+      <li><b>숫자 합치기:</b> 같은 숫자가 부딪히면 하나로 합쳐지며 두 배의 숫자가 되고, 합쳐진 만큼 점수를 얻습니다. (예: 2+2=4점, 4+4=8점)</li>
+      <li><b>게임 끝:</b> 더 이상 밀어도 합쳐지거나 이동할 곳이 없으면 게임이 끝납니다. 최고 점수에 도전해 보세요!</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var grid = null;
+  var score = 0;
+  var isOver = false;
+
+  var scoreTextEl = document.getElementById('scoreText');
+  var bestScoreTextEl = document.getElementById('bestScoreText');
+  var gameBoardEl = document.getElementById('gameBoard');
+  var btnReset = document.getElementById('btnReset');
+  var gameMsgEl = document.getElementById('gameMsg');
+  var dpadButtons = document.querySelectorAll('.dpad-btn');
+
+  // 최고 점수 로컬스토리지
+  function getBestScore() {
+    try {
+      var val = localStorage.getItem('zw_merge_numbers_best');
+      return val ? parseInt(val, 10) : 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  function saveBestScore(val) {
+    try {
+      var prev = getBestScore();
+      if (val > prev) {
+        localStorage.setItem('zw_merge_numbers_best', String(val));
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  function updateBestDisplay() {
+    bestScoreTextEl.textContent = getBestScore();
+  }
+
+  // 게임 초기화
+  function initGame() {
+    grid = [
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0]
+    ];
+    score = 0;
+    isOver = false;
+    scoreTextEl.textContent = '0';
+    gameMsgEl.className = 'game-msg';
+    gameMsgEl.style.display = 'none';
+    gameMsgEl.textContent = '';
+    updateBestDisplay();
+
+    // 처음에 숫자 2개 생성
+    window.MergeCalc.addRandomTile(grid);
+    window.MergeCalc.addRandomTile(grid);
+
+    renderBoard();
+  }
+
+  // 화면 렌더링
+  function renderBoard() {
+    gameBoardEl.innerHTML = '';
+    for (var r = 0; r < 4; r++) {
+      for (var c = 0; c < 4; c++) {
+        var val = grid[r][c];
+        var tile = document.createElement('div');
+        tile.className = 'tile ' + getTileClass(val);
+        tile.textContent = val > 0 ? val : '';
+        gameBoardEl.appendChild(tile);
+      }
+    }
+  }
+
+  function getTileClass(val) {
+    if (val === 0) return 'val-0';
+    if (val <= 2048) return 'val-' + val;
+    return 'val-more';
+  }
+
+  // 방향 이동 실행
+  function doMove(dir) {
+    if (isOver) return;
+
+    var res = window.MergeCalc.move(grid, dir);
+    if (!res.moved) return; // 움직임이 없으면 변화 없음
+
+    grid = res.grid;
+    score += res.gained;
+    scoreTextEl.textContent = score;
+
+    var isNewBest = saveBestScore(score);
+    if (isNewBest) updateBestDisplay();
+
+    // 새 숫자 1개 추가
+    window.MergeCalc.addRandomTile(grid);
+    renderBoard();
+
+    // 이동 가능 여부 체크
+    if (!window.MergeCalc.canMove(grid)) {
+      isOver = true;
+      saveBestScore(score);
+      updateBestDisplay();
+      gameMsgEl.className = 'game-msg lose';
+      gameMsgEl.innerHTML = '끝! 더 이상 움직일 곳이 없습니다.<br>최종 점수: <b>' + score + '점</b>';
+    }
+  }
+
+  // 버튼 리셋
+  btnReset.addEventListener('click', initGame);
+
+  // 방향키 버튼
+  dpadButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var dir = btn.getAttribute('data-dir');
+      if (dir) doMove(dir);
+    });
+  });
+
+  // 키보드 방향키
+  window.addEventListener('keydown', function (e) {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.key) !== -1) {
+      e.preventDefault();
+      if (e.key === 'ArrowUp') doMove('up');
+      else if (e.key === 'ArrowDown') doMove('down');
+      else if (e.key === 'ArrowLeft') doMove('left');
+      else if (e.key === 'ArrowRight') doMove('right');
+    }
+  });
+
+  // 터치 스와이프 제스처 (보드에만 적용)
+  var touchStartX = 0;
+  var touchStartY = 0;
+
+  gameBoardEl.addEventListener('touchstart', function (e) {
+    if (e.touches.length > 0) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+
+  gameBoardEl.addEventListener('touchend', function (e) {
+    if (e.changedTouches.length === 0) return;
+    var touchEndX = e.changedTouches[0].clientX;
+    var touchEndY = e.changedTouches[0].clientY;
+
+    var dx = touchEndX - touchStartX;
+    var dy = touchEndY - touchStartY;
+    var minSwipe = 30; // 최소 스와이프 거리
+
+    if (Math.abs(dx) < minSwipe && Math.abs(dy) < minSwipe) return;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 0) doMove('right');
+      else doMove('left');
+    } else {
+      if (dy > 0) doMove('down');
+      else doMove('up');
+    }
+  }, { passive: true });
+
+  // 시작
+  initGame();
+})();
+</script>
+</body>
+</html>

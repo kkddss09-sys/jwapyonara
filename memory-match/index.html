@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>휴대폰 짝 맞추기 무료 게임 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 무료 휴대폰 짝 맞추기. 휴대폰에서도 잘 돼요.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.diff-seg { display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-bottom:14px; }
+.diff-seg button { font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:12px; padding:10px 4px; cursor:pointer; }
+.diff-seg button.on { border-color:var(--red); background:var(--soft); color:var(--red); }
+
+.status-bar { display:flex; justify-content:space-between; align-items:center; background:#2c2c2e; color:#fff; border-radius:14px; padding:12px 16px; margin-bottom:14px; }
+.status-item { font-size:15px; font-weight:700; display:flex; align-items:center; gap:6px; }
+.status-val { font-size:18px; font-weight:800; color:#ffd60a; }
+
+.control-bar { margin-bottom:14px; }
+.btn-reset { display:flex; align-items:center; justify-content:center; min-height:44px; padding:0 20px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; background:#2c2c2e; color:#fff; width:100%; }
+.btn-reset:active { background:#3a3a3c; }
+
+.board-wrap { width:100%; display:flex; justify-content:center; margin:6px 0 16px; }
+.card-grid { width:100%; max-width:360px; display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; user-select:none; -webkit-user-select:none; }
+
+.card-item { aspect-ratio:1; border-radius:12px; border:1.5px solid #3a3a3c; background:#2c2c2e; color:transparent; font-size:clamp(22px, 7vw, 32px); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .15s ease; padding:0; }
+.card-item:active { transform:scale(0.96); }
+
+/* 뒤집힌 상태 */
+.card-item.flipped { background:#ffffff; border-color:var(--red); color:var(--ink); transform:scale(1.02); }
+
+/* 맞춘 상태 */
+.card-item.matched { background:var(--soft); border-color:var(--red); color:var(--ink); opacity:0.85; cursor:default; transform:none; }
+
+.game-msg { text-align:center; padding:12px; border-radius:12px; font-size:16px; font-weight:800; margin-bottom:12px; display:none; }
+.game-msg.win { background:#e6f6ef; color:var(--ok); display:block; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>휴대폰 짝 맞추기</h1>
+  <p class="lead">뒤집은 카드에서 같은 그림 두 장을 찾아 짝을 맞춰 보세요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist">
+      <button type="button" class="on" data-pairs="6">쉬움 (6쌍 · 12장)</button>
+      <button type="button" data-pairs="8">보통 (8쌍 · 16장)</button>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-item">
+        <span>뒤집은 횟수</span>
+        <span class="status-val" id="movesText">0회</span>
+      </div>
+      <div class="status-item">
+        <span>걸린 시간</span>
+        <span class="status-val" id="timerText">0초</span>
+      </div>
+      <div class="status-item">
+        <span>최고 기록</span>
+        <span class="status-val" id="bestScoreText">-</span>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-reset" id="btnReset">새로 하기</button>
+    </div>
+
+    <div id="gameMsg" class="game-msg"></div>
+
+    <div class="board-wrap">
+      <div class="card-grid" id="cardGrid"></div>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0;">
+      💡 두 장을 뒤집어 같은 그림이면 열려 있고, 다르면 0.8초 뒤 다시 닫힙니다.
+    </p>
+  </section>
+
+  <p class="note">카드는 내 기기 안에서만 섞이며 외부로 전송되지 않습니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>카드 뒤집기:</b> 카드를 누르면 스마트폰, 노트북, 스마트워치 등 전자기기 그림이 나타납니다.</li>
+      <li><b>짝 맞추기:</b> 한 번에 두 장씩 뒤집어 같은 그림이 나오면 카드가 열린 채 유지됩니다. 다르면 0.8초 뒤 다시 뒤집힙니다.</li>
+      <li><b>기억력 도전:</b> 카드의 위치를 잘 기억해 두고 최소한의 뒤집기 횟수로 모든 짝을 맞춰 보세요.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var curPairs = 6;
+  var deck = [];
+  var flippedIndices = [];
+  var matchedCount = 0;
+  var moves = 0;
+  var elapsedSec = 0;
+  var timerId = null;
+  var isLocked = false;
+  var isStarted = false;
+
+  var movesTextEl = document.getElementById('movesText');
+  var timerTextEl = document.getElementById('timerText');
+  var bestScoreTextEl = document.getElementById('bestScoreText');
+  var cardGridEl = document.getElementById('cardGrid');
+  var btnReset = document.getElementById('btnReset');
+  var gameMsgEl = document.getElementById('gameMsg');
+  var diffButtons = document.querySelectorAll('.diff-seg button');
+
+  // 최고 기록 (적은 횟수 기준, localStorage)
+  function getBest(pairs) {
+    try {
+      var val = localStorage.getItem('zw_memory_match_best_' + pairs);
+      return val ? JSON.parse(val) : null; // { moves, sec }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveBest(pairs, moves, sec) {
+    try {
+      var prev = getBest(pairs);
+      var isBetter = false;
+      if (!prev) {
+        isBetter = true;
+      } else if (moves < prev.moves) {
+        isBetter = true;
+      } else if (moves === prev.moves && sec < prev.sec) {
+        isBetter = true;
+      }
+
+      if (isBetter) {
+        localStorage.setItem('zw_memory_match_best_' + pairs, JSON.stringify({ moves: moves, sec: sec }));
+        return true;
+      }
+    } catch (e) {}
+    return false;
+  }
+
+  function updateBestDisplay() {
+    var best = getBest(curPairs);
+    if (best) {
+      bestScoreTextEl.textContent = best.moves + '회 (' + best.sec + '초)';
+    } else {
+      bestScoreTextEl.textContent = '-';
+    }
+  }
+
+  function stopTimer() {
+    if (timerId) {
+      clearInterval(timerId);
+      timerId = null;
+    }
+  }
+
+  function startTimer() {
+    stopTimer();
+    elapsedSec = 0;
+    timerTextEl.textContent = '0초';
+    timerId = setInterval(function () {
+      elapsedSec++;
+      timerTextEl.textContent = elapsedSec + '초';
+    }, 1000);
+  }
+
+  // 게임 초기화
+  function initGame() {
+    stopTimer();
+    isStarted = false;
+    isLocked = false;
+    moves = 0;
+    elapsedSec = 0;
+    matchedCount = 0;
+    flippedIndices = [];
+
+    movesTextEl.textContent = '0회';
+    timerTextEl.textContent = '0초';
+    gameMsgEl.className = 'game-msg';
+    gameMsgEl.style.display = 'none';
+    gameMsgEl.textContent = '';
+
+    updateBestDisplay();
+
+    deck = window.MemoryCalc.makeDeck(curPairs);
+    renderGrid();
+  }
+
+  // 카드 그리드 렌더링
+  function renderGrid() {
+    cardGridEl.innerHTML = '';
+    for (var i = 0; i < deck.length; i++) {
+      var card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'card-item';
+      card.setAttribute('data-idx', i);
+      card.setAttribute('aria-label', '카드 ' + (i + 1));
+      card.textContent = deck[i];
+
+      card.addEventListener('click', onCardClick);
+      cardGridEl.appendChild(card);
+    }
+  }
+
+  // 카드 클릭 핸들러
+  function onCardClick(e) {
+    var btn = e.currentTarget;
+    var idx = parseInt(btn.getAttribute('data-idx'), 10);
+
+    if (isLocked) return;
+    if (btn.classList.contains('flipped') || btn.classList.contains('matched')) return;
+
+    if (!isStarted) {
+      isStarted = true;
+      startTimer();
+    }
+
+    // 카드 열기
+    btn.classList.add('flipped');
+    flippedIndices.push(idx);
+
+    if (flippedIndices.length === 2) {
+      moves++;
+      movesTextEl.textContent = moves + '회';
+
+      var idx1 = flippedIndices[0];
+      var idx2 = flippedIndices[1];
+      var cardEl1 = cardGridEl.children[idx1];
+      var cardEl2 = cardGridEl.children[idx2];
+
+      if (window.MemoryCalc.isPair(deck[idx1], deck[idx2])) {
+        // 일치
+        cardEl1.classList.remove('flipped');
+        cardEl2.classList.remove('flipped');
+        cardEl1.classList.add('matched');
+        cardEl2.classList.add('matched');
+        flippedIndices = [];
+        matchedCount++;
+
+        // 모두 맞춤 판별
+        if (matchedCount === curPairs) {
+          stopTimer();
+          var isNew = saveBest(curPairs, moves, elapsedSec);
+          updateBestDisplay();
+          gameMsgEl.className = 'game-msg win';
+          gameMsgEl.innerHTML = '🎉 성공! <b>' + moves + '번</b> 만에 <b>' + elapsedSec + '초</b> 걸렸습니다!' + (isNew ? ' (최고 기록 갱신!)' : '');
+        }
+      } else {
+        // 불일치: 0.8초 후 덮기
+        isLocked = true;
+        setTimeout(function () {
+          if (cardEl1) cardEl1.classList.remove('flipped');
+          if (cardEl2) cardEl2.classList.remove('flipped');
+          flippedIndices = [];
+          isLocked = false;
+        }, 800);
+      }
+    }
+  }
+
+  // 난이도 변경 버튼
+  diffButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pairs = parseInt(btn.getAttribute('data-pairs'), 10);
+      if (pairs === curPairs) return;
+      diffButtons.forEach(function (b) { b.className = ''; });
+      btn.className = 'on';
+      curPairs = pairs;
+      initGame();
+    });
+  });
+
+  btnReset.addEventListener('click', initGame);
+
+  // 시작
+  initGame();
+})();
+</script>
+</body>
+</html>
