@@ -113,3 +113,18 @@ details ul { padding-left:20px; margin:8px 0 0; }
 .guide p { margin:0; font-size:15px; line-height:1.7; color:#48484a; word-break:keep-all; }
 .guide ul { margin:10px 0 0; padding-left:20px; font-size:15px; line-height:1.9; }
 .guide a { color:#ff2d55; font-weight:600; }
+
+/* 단축키 쪽(2026-10-15): 찾기 칸 + 묶음 단추 + 목록. 그리는 일은 _common/shortcut.js */
+.sc-chips { display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 14px; }
+.sc-chips button { border:1.5px solid var(--line); background:#fff; border-radius:999px; padding:8px 14px; font:inherit; font-size:14px; font-weight:700; color:var(--ink); cursor:pointer; }
+.sc-chips button.on { background:var(--ink); border-color:var(--ink); color:#fff; }
+.sc-cnt { font-size:13px; color:var(--sub); margin:0 4px 8px; }
+.sc-list { display:grid; gap:8px; margin-bottom:14px; }
+.sc-item { background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 14px; }
+.sc-keys { display:flex; flex-wrap:wrap; align-items:center; gap:4px; font-size:14px; color:var(--sub); }
+.sc-keys kbd { display:inline-block; font:inherit; font-size:14px; font-weight:800; color:var(--ink); background:#f2f2f7; border:1px solid #d2d2d7; border-bottom-width:2.5px; border-radius:8px; padding:3px 8px; white-space:nowrap; }
+.sc-do { margin-top:8px; font-size:16px; font-weight:700; line-height:1.45; word-break:keep-all; }
+.sc-do .star { color:var(--red); margin-right:4px; }
+.sc-sub { margin-top:4px; font-size:13px; color:var(--sub); line-height:1.5; word-break:keep-all; }
+.sc-empty { text-align:center; color:var(--sub); padding:24px 0; }
+.sc-q input { text-align:left; font-size:17px; }
