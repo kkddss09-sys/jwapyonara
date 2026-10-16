@@ -15,15 +15,17 @@
   textarea.txt { min-height:70px; resize:vertical; }
   .printbtn { display:block; width:100%; border:0; border-radius:14px; background:var(--red); color:#fff; font-size:18px; font-weight:800; padding:16px; margin:14px 0 4px; cursor:pointer; font-family:inherit; }
   /* A4 상담지 */
-  .sheet-wrap { overflow-x:auto; }
+  .sheet-wrap { overflow:hidden; }
+  .sheet { transform-origin:0 0; }
+  .newbtn { display:block; width:100%; border:1.5px solid var(--line); border-radius:14px; background:#fff; color:var(--ink); font-size:15px; font-weight:700; padding:12px; cursor:pointer; font-family:inherit; }
   .sheet { background:#fff; color:#111; width:210mm; min-height:297mm; margin:0 auto; padding:13mm 13mm 10mm; box-shadow:0 2px 16px rgba(0,0,0,.12); font-size:10.5pt; line-height:1.45; }
   .sheet h2 { margin:0; font-size:19pt; letter-spacing:-.02em; }
   .sheet .top { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid #ff2d55; padding-bottom:6px; margin-bottom:10px; }
   .sheet .meta { text-align:right; font-size:9.5pt; color:#444; }
-  .sheet .big { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px; }
+  .sheet .big { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:10px; }
   .sheet .big div { background:#fff0f3; border-radius:8px; padding:7px 10px; }
   .sheet .big span { display:block; font-size:8.5pt; color:#555; }
-  .sheet .big b { font-size:14pt; }
+  .sheet .big b { font-size:13pt; }
   .sheet .cols { display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; }
   .sheet section { break-inside:avoid; }
   .sheet h3 { margin:6px 0 3px; font-size:11pt; padding-left:7px; border-left:4px solid #ff2d55; }
@@ -46,14 +48,15 @@
     body > *:not(main), main > *:not(.sd), .sd > .card, .ad, details, .cta { display:none !important; }
     main.wrap { padding:0; max-width:none; margin:0; }
     .sd { display:block; }
-    .sheet { box-shadow:none; margin:0; width:210mm; min-height:0; height:296mm; overflow:hidden; }
+    .sheet-wrap { height:auto !important; }
+    .sheet { transform:none !important; box-shadow:none; margin:0; width:210mm; min-height:0; height:296mm; overflow:hidden; }
   }
 </style>
 </head>
 <body>
 <main class="wrap wide">
   <h1>부동산 상담 한 장</h1>
-  <p class="lead">손님 조건을 한 번만 넣으면 오른쪽(휴대폰은 아래) 상담지가 바로 채워집니다. <b>인쇄</b>를 누르면 A4 한 장으로 나옵니다. 아래 숫자는 예시입니다.</p>
+  <p class="lead">손님 조건을 한 번만 넣으면 오른쪽(휴대폰은 아래) 상담지가 바로 채워집니다. <b>인쇄</b>를 누르면 A4 한 장으로 나옵니다. 아래 숫자는 예시입니다. 메모가 길어지면 글씨가 조금 작아지며 한 장에 맞춥니다.</p>
 
   <div class="sd">
     <section class="card" id="form">
@@ -100,8 +103,10 @@
 
       <div class="grp">상담 메모</div>
       <textarea class="txt" id="memo" placeholder="손님이 원하는 것, 다음에 볼 단지 등"></textarea>
+      <p id="over" style="display:none;color:#d0021b;font-weight:700;margin:6px 0 0">⚠ 메모가 길어 A4 한 장을 넘습니다. 넘친 부분은 인쇄되지 않으니 조금 줄여 주세요.</p>
 
       <button class="printbtn" type="button" onclick="window.print()">🖨 A4 한 장으로 인쇄 · PDF 저장</button>
+      <button class="newbtn" type="button" id="newBtn">↺ 다음 손님 (이름·집·메모만 지우기)</button>
     </section>
 
     <div class="sheet-wrap"><article class="sheet" id="sheet"></article></div>
@@ -112,7 +117,8 @@
     <summary>어떻게 계산했나요?</summary>
     <ul>
       <li>빌릴 수 있는 돈 = ① 집값 × LTV, ② 최대 한도, ③ (연소득 × DSR − 다른 대출 1년 원리금) ÷ 12를 한 달 상환액으로 보고 거꾸로 계산한 원금 중 가장 작은 값</li>
-      <li>한 달 상환액은 원리금균등, 원금균등은 첫 달 금액. 필요한 내 돈 = 집값 − 대출 + 부대비용</li>
+      <li>한 달 상환액은 원리금균등, 원금균등은 첫 달 금액. 필요한 내 돈 = 집값 − 대출 + 부대비용. "금리 1%p 오르면"은 같은 원금·기간에 금리만 1%p 더한 원리금균등 한 달 금액</li>
+      <li>살 수 있는 집값 최대 = (가진 돈 − 부대비용) ÷ (1 − LTV)와 (가진 돈 − 부대비용 + 최대 한도·소득 기준 중 작은 값) 중 작은 값. 부대비용은 넣은 금액 그대로 둡니다(집값이 오르면 실제로는 늘어남)</li>
       <li>전세 끼고 살 때 필요한 내 돈 = 집값 − 전세 보증금 + 부대비용, 전세가율 = 전세 ÷ 집값</li>
       <li>팔 때 차익 = 파는 가격 − 집값 − 부대비용 (세금·이자 빼기 전), 청약 가점은 주택공급에 관한 규칙 [별표 1] 기준(확인 중)</li>
       <li>LTV·DSR·한도는 지역·상품·정부 발표에 따라 바뀌어 직접 넣게 했습니다. 스트레스 DSR은 넣지 않았습니다. 넣은 값은 이 기기 밖으로 보내지 않습니다.</li>
@@ -141,14 +147,15 @@
     var h = '<div class="top"><div><h2>부동산 상담 한 장</h2><div>' + (esc($('home').value) || '보는 집: ________________') + '</div></div>'
       + '<div class="meta">' + ($('who').value ? esc($('who').value) + ' 님<br>' : '') + '상담일 ' + d + '<br>좌표나라® jwapyonara.com<br>등록상표 제40-1790026호</div></div>';
     h += '<div class="big"><div><span>빌릴 수 있는 돈</span><b>' + big(r.loan) + '</b></div><div><span>한 달 상환액</span><b>' + ZW.fmt(r.monthly) + '원</b></div>'
-      + '<div><span>' + (r.left >= 0 ? '가진 돈에서 남는 돈' : '모자라는 돈') + '</span><b class="' + (r.left >= 0 ? 'good' : 'bad') + '">' + big(r.left) + '</b></div></div>';
+      + '<div><span>' + (r.left >= 0 ? '가진 돈에서 남는 돈' : '모자라는 돈') + '</span><b class="' + (r.left >= 0 ? 'good' : 'bad') + '">' + big(r.left) + '</b></div>'
+      + '<div><span>살 수 있는 집값 최대</span><b>' + (r.maxPrice > 0 ? big(r.maxPrice) : '-') + '</b></div></div>';
     h += '<div class="cols">';
     h += '<section><h3>집</h3><table>' + row('집값', won(v.price)) + row('전용면적', v.m2 ? ZW.pct(v.m2) + '㎡ (약 ' + ZW.pct(r.pyeong) + '평)' : '-')
       + row('평당 가격', r.perPyeong ? won(r.perPyeong) : '-') + row('부대비용', won(v.cost)) + '</table></section>';
     h += '<section><h3>대출 한도</h3><table>' + row('① 집값 기준 (LTV ' + ZW.pct(v.ltv, 0) + '%)', won(r.byLtv)) + row('② 최대 한도', won(r.byCap))
       + row('③ 소득 기준 (DSR ' + ZW.pct(v.dsr, 0) + '%)', won(r.byDsr)) + row('최대 · ' + r.why + '에 걸림', won(r.maxLoan)) + '</table></section>';
     h += '<section><h3>갚는 돈 (' + ZW.pct(v.rate, 2).replace(/\.?0+$/, '') + '%, ' + ZW.pct(v.years, 0) + '년)</h3><table>' + row('빌리는 돈', won(r.loan))
-      + row('한 달 (원리금균등)', won(r.monthly)) + row('첫 달 (원금균등)', won(r.epFirst)) + row('이자 합계 (원리금균등)', won(r.interest))
+      + row('한 달 (원리금균등)', won(r.monthly)) + row('첫 달 (원금균등)', won(r.epFirst)) + row('이자 합계 (원리금균등)', won(r.interest)) + row('금리 1%p 오르면 한 달', won(r.monthlyUp) + ' (+' + ZW.fmt(r.monthlyUp - r.monthly) + ')')
       + row('소득 대비 상환 비율', P(r.dsrPct), r.dsrPct > v.dsr + 0.05 ? 'bad' : '') + '</table></section>';
     h += '<section><h3>직접 살 때 필요한 돈</h3><table>' + row('집값 − 대출', won(Math.max(0, v.price - r.loan))) + row('+ 부대비용', won(v.cost))
       + row('필요한 내 돈', won(r.need)) + row('가진 돈', won(v.cash)) + row(r.left >= 0 ? '남는 돈' : '모자라는 돈', won(Math.abs(r.left)), r.left >= 0 ? 'good' : 'bad') + '</table></section>';
@@ -169,10 +176,26 @@
       + '<div class="warn">⚠ 주의: 대출 한도·금리 등 조건값이 이 상담지와 달라지면 예약은 무조건 취소됩니다. 대출 여력과 금리 조건을 가장 먼저 확인하세요.</div></section>';
     h += '<p class="fine">※ 넣은 값으로만 계산한 참고 자료이며 대출 승인·수익을 보장하지 않습니다. LTV·DSR·한도는 지역·상품·정부 발표에 따라 다르고 스트레스 DSR은 반영하지 않았습니다. 차익은 양도소득세·대출 이자 전 금액입니다. 청약 가점은 주택공급에 관한 규칙 [별표 1] 기준이며 실제 판정은 청약홈을 따르세요.</p>';
     $('sheet').innerHTML = h;
+    fit();
   };
+  // 한 장에 맞추기: 넘치면 글씨를 0.5pt씩 줄임(8pt까지) / 화면 폭이 A4보다 좁으면 상담지를 줄여 보여 줌
+  var fit = function () {
+    var sh = $('sheet'), wrap = sh.parentNode;
+    sh.style.transform = 'none'; sh.style.fontSize = '';
+    var limit = 297 * sh.offsetWidth / 210;   // 화면의 상담지 최소 높이(297mm)와 같음
+    for (var f = 10.5; f > 8 && sh.scrollHeight > limit + 2; f -= 0.5) sh.style.fontSize = (f - 0.5) + 'pt';
+    $('over').style.display = sh.scrollHeight > limit + 2 ? 'block' : 'none';
+    var s = Math.min(1, wrap.clientWidth / sh.offsetWidth);
+    sh.style.transform = s < 1 ? 'scale(' + s + ')' : '';
+    wrap.style.height = s < 1 ? Math.ceil(sh.offsetHeight * s) + 'px' : '';
+  };
+  window.addEventListener('resize', fit);
+  window.addEventListener('beforeprint', function () { $('sheet').style.transform = 'none'; });
+  window.addEventListener('afterprint', fit);
   ['price', 'cost', 'cash', 'income', 'other', 'cap', 'want', 'deposit', 'sell'].forEach(function (id) { get[id] = ZW.money(id, render); });
   [['m2', 1000], ['ltv', 100], ['dsr', 100], ['rate', 30], ['years', 50], ['hold', 50], ['noHouse', 80], ['family', 20], ['account', 80]].forEach(function (a) { get[a[0]] = ZW.number(a[0], render, a[1]); });
   ['who', 'home', 'memo'].forEach(function (id) { $(id).addEventListener('input', render); });
+  $('newBtn').addEventListener('click', function () { ['who', 'home', 'memo'].forEach(function (id) { $(id).value = ''; }); render(); $('who').focus(); });
   var b = $('houseSeg').querySelectorAll('button');
   for (var i = 0; i < b.length; i++) b[i].addEventListener('click', function () { for (var j = 0; j < b.length; j++) b[j].className = ''; this.className = 'on'; house = this.getAttribute('data-t'); render(); });
   var jb = $('jobSeg').querySelectorAll('button');

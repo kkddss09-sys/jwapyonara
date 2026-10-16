@@ -23,8 +23,13 @@ function consult(v) {
   r.epFirst = ep.first;
   r.interest = Math.max(0, Math.round(r.monthly * Math.round((v.years || 0) * 12) - r.loan));
   r.dsrPct = v.income > 0 ? (r.monthly * 12 + (v.other || 0)) / v.income * 100 : NaN;
+  r.monthlyUp = Math.round(monthly(r.loan, (v.rate || 0) + 1, v.years));   // 금리 1%p 오르면(변동금리 대비)
   r.need = Math.max(0, P - r.loan) + (v.cost || 0);       // 직접 살 때 필요한 내 돈
   r.left = (v.cash || 0) - r.need;                         // +면 남고 −면 모자람
+  // 가진 돈 + 대출로 살 수 있는 집값 최대: 집값 − min(집값×LTV, 한도, 소득 기준) + 부대비용 ≤ 가진 돈
+  // ⇔ 집값 ≤ (가진 돈 − 부대비용) ÷ (1 − LTV) 이고 집값 ≤ 가진 돈 − 부대비용 + min(한도, 소득 기준)
+  var base = (v.cash || 0) - (v.cost || 0), l = Math.min(1, Math.max(0, v.ltv || 0) / 100);
+  r.maxPrice = base <= 0 ? 0 : Math.floor(Math.min(l < 1 ? base / (1 - l) : Infinity, base + Math.min(r.byCap, r.byDsr)));
   // 전세 끼고 살 때(대출 없이)
   var g = gap(P, v.deposit);
   r.jeonseRatio = v.deposit > 0 ? g.ratio : NaN;
