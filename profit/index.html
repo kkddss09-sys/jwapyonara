@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>부동산 시세 차익 계산기 — 차익과 연평균 수익률 | 좌표나라</title>
-<meta name="description" content="산 가격, 판 가격, 가지고 있던 기간, 든 비용을 넣으면 차익과 한 해 평균 수익률을 계산합니다. 가입 없이 무료.">
+<title>부동산 시세 차익 계산기 — 전세 끼고 사도 차익·수익률 | 좌표나라</title>
+<meta name="description" content="산 가격, 판 가격, 가지고 있던 기간, 든 비용, 전세 보증금을 넣으면 차익과 한 해 평균 수익률, 전세 끼고 샀을 때 내 돈 대비 수익률을 계산합니다. 가입 없이 무료.">
 <link rel="stylesheet" href="../_common/common.css">
 </head>
 <body>
 <main class="wrap">
-  <h1>사고판 차익과<br>한 해 평균 수익률</h1>
-  <p class="lead">숫자를 넣으면 바로 계산됩니다. 아래 숫자는 예시입니다.</p>
+  <h1>사고판 차익과<br>수익률 (전세 끼고 사도)</h1>
+  <p class="lead">전세를 주고 샀다면 전세 보증금을 넣으세요. 직접 살았다면 0으로 두면 됩니다.</p>
 
   <div id="app"></div>
 
@@ -23,6 +23,9 @@
       <li>차익 = 판 가격 − 산 가격 − 든 비용</li>
       <li>산 가격 대비 = 차익 ÷ 산 가격 × 100</li>
       <li>한 해 평균 수익률 = ((판 가격 − 든 비용) ÷ 산 가격)<sup>1÷기간</sup> − 1</li>
+      <li><b>전세를 끼고 샀다면</b> 실제 들어간 내 돈 = 산 가격 + 든 비용 − 전세 보증금 (전세 보증금은 팔 때 산 사람이 넘겨받거나 돌려주므로 차익은 같습니다)</li>
+      <li>내 돈 대비 수익률 = 차익 ÷ 내 돈 × 100, 한 해 평균(내 돈 기준) = ((내 돈 + 차익) ÷ 내 돈)<sup>1÷기간</sup> − 1</li>
+      <li>전세 보증금이 산 가격 + 비용보다 크면 내 돈이 들지 않아 수익률을 낼 수 없습니다. 이때 전세를 돌려줄 책임(역전세 위험)은 그대로 남습니다.</li>
       <li>넣으신 값으로만 계산합니다. 투자를 권하는 것이 아닙니다.</li>
     </ul>
   </details>
@@ -35,12 +38,14 @@ ZW.app({
     { id: 'buy', label: '산 가격', type: 'money', value: '600,000,000', unit: '원' },
     { id: 'sell', label: '판(팔) 가격', type: 'money', value: '800,000,000', unit: '원' },
     { id: 'years', label: '가지고 있던 기간', type: 'num', value: '5', unit: '년', max: 80 },
-    { id: 'cost', label: '든 비용 합계 (중개 보수, 수리비 등)', type: 'money', value: '20,000,000', unit: '원' }],
+    { id: 'cost', label: '든 비용 합계 (취득세, 중개 보수, 수리비 등)', type: 'money', value: '20,000,000', unit: '원' },
+    { id: 'dep', label: '전세 보증금 (전세 안 줬으면 0)', type: 'money', value: '400,000,000', unit: '원' }],
   compute: function (v) {
     if (!v.buy) return {};
-    var r = profit(v.buy, v.sell, v.years, v.cost), a = Math.abs(r.gain);
+    var r = gapProfit(v.buy, v.sell, v.years, v.cost, v.dep), a = Math.abs(r.gain), P = function (x, d) { return isFinite(x) ? ZW.pct(x, d) + '%' : '-'; };
     return { html: (r.gain >= 0 ? '차익 ' : '손실 ') + '<em>' + (ZW.read(a) || ZW.fmt(a) + '원') + '</em>', sub: '정확히는 ' + ZW.fmt(a) + '원입니다. 세금을 내기 전 금액입니다.',
-      rows: [['산 가격 대비', ZW.pct(r.totalPct) + '%'], ['한 해 평균', isFinite(r.yearPct) ? ZW.pct(r.yearPct, 2) + '%' : '-']] };
+      rows: [['산 가격 대비', P(r.totalPct)], ['한 해 평균 (산 가격 기준)', P(r.yearPct, 2)]].concat(v.dep > 0 ? [
+        ['실제 들어간 내 돈', r.mine > 0 ? ZW.fmt(r.mine) + '원' : '0원 (전세가 더 큼)'], ['내 돈 대비 수익률', P(r.minePct)], ['한 해 평균 (내 돈 기준)', P(r.mineYearPct, 2)]] : []) };
   }
 });
 </script>

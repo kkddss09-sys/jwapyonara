@@ -183,7 +183,18 @@ function grace(principal, yearRatePct, years, graceYears) {
   return { during: Math.round(during), after: Math.round(after), interest: Math.round(interest), plain: Math.round(monthly(P, yearRatePct, years) * n - P), restMonths: rest };
 }
 
-if (typeof module !== 'undefined') module.exports = { perPyeong: perPyeong, gap: gap, toWolse: toWolse, toJeonse: toJeonse, rentYield: rentYield, monthly: monthly, burden: burden,
+// 전세 끼고 사서 팔 때(2026-10-16): 차익은 같고, 실제 들어간 내 돈 = 산 가격 + 든 비용 − 전세 보증금
+//   내 돈 대비 = 차익 ÷ 내 돈, 한 해 평균(내 돈 기준) = ((내 돈 + 차익) ÷ 내 돈)^(1÷기간) − 1
+//   내 돈이 0 이하(전세가 산 가격 + 비용보다 큼)면 수익률은 계산하지 않는다(NaN)
+function gapProfit(buy, sell, years, cost, deposit) {
+  var base = profit(buy, sell, years, cost), y = Number(years) || 0;
+  var mine = pos(buy) + pos(cost) - pos(deposit), g = base.gain;
+  return { gain: g, totalPct: base.totalPct, yearPct: base.yearPct, mine: mine,
+    minePct: mine > 0 ? g / mine * 100 : NaN,
+    mineYearPct: mine > 0 && y > 0 && mine + g > 0 ? (Math.pow((mine + g) / mine, 1 / y) - 1) * 100 : NaN };
+}
+
+if (typeof module !== 'undefined') module.exports = { gapProfit: gapProfit, perPyeong: perPyeong, gap: gap, toWolse: toWolse, toJeonse: toJeonse, rentYield: rentYield, monthly: monthly, burden: burden,
   ltv: ltv, equalPrincipal: equalPrincipal, compareRepay: compareRepay, balanceAfter: balanceAfter, mgmtPer: mgmtPer, housingCost: housingCost, grace: grace,
   affordable: affordable, rateChange: rateChange, refinance: refinance, prepay: prepay, jeonseVsWolse: jeonseVsWolse, savingMonths: savingMonths, profit: profit,
   landRatio: landRatio, raise: raise, installments: installments, exclusiveRatio: exclusiveRatio };

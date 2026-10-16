@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>청약 가점 계산기 — 무주택 기간·부양가족·통장 기간으로 내 점수 | 좌표나라</title>
+<meta name="description" content="무주택 기간, 부양가족 수, 청약통장 가입 기간을 넣으면 84점 만점 청약 가점을 바로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>청약 가점 계산기<br>내 점수는 몇 점?</h1>
+  <p class="lead">세 가지만 넣으면 84점 만점으로 계산됩니다. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 기준: 주택공급에 관한 규칙 [별표 1] 가점제 (2026-10-16 정리, 확인 중). 무주택 기간은 만 30세부터(그 전에 결혼했다면 혼인신고일부터) 셉니다. 부양가족은 같은 주민등록에 올라 있는 가족 기준이며, 부모님은 3년 이상 함께 올라 있어야 합니다. 실제 당첨 판정은 청약홈 기준을 따르세요.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>무주택 기간 (최대 32점)</b>: 1년 미만 2점, 1년마다 2점씩 더해 15년 이상 32점. 집이 있으면 0점</li>
+      <li><b>부양가족 수 (최대 35점)</b>: 0명 5점, 1명마다 5점씩 더해 6명 이상 35점 (본인은 빼고 셉니다)</li>
+      <li><b>청약통장 가입 기간 (최대 17점)</b>: 6개월 미만 1점, 6개월~1년 2점, 그 뒤 1년마다 1점씩 더해 15년 이상 17점</li>
+      <li>합계 = 세 점수의 합 (84점 만점)</li>
+    </ul>
+  </details>
+</main>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'house', label: '지금 집이 있나요? (세대원 포함)', type: 'seg', options: [['no', '없어요'], ['yes', '있어요']] },
+    { id: 'noHouse', label: '무주택 기간', type: 'num', value: '7', unit: '년', max: 80 },
+    { id: 'family', label: '부양가족 수', type: 'num', value: '3', unit: '명', max: 20, short: true },
+    { id: 'account', label: '청약통장 가입 기간 (6개월이면 0.5)', type: 'num', value: '9', unit: '년', max: 80 }],
+  compute: function (v) {
+    var r = cheongyak(v.house === 'yes', v.noHouse, v.family, v.account);
+    return { html: '내 청약 가점 <em>' + r.total + '점</em>', sub: '84점 만점입니다.',
+      pct: r.total / 84 * 100, pctLabel: '84점 중',
+      rows: [['무주택 기간', r.noHouse + ' / 32점'], ['부양가족', r.family + ' / 35점'], ['통장 가입 기간', r.account + ' / 17점']] };
+  }
+});
+</script>
+</body>
+</html>

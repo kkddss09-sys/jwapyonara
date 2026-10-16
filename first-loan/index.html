@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>생애최초 대출 계산기 — 첫 집 살 때 얼마까지 빌릴 수 있나 | 좌표나라</title>
+<meta name="description" content="집값, 대출 비율(LTV), 최대 한도, 연소득(DSR)을 넣으면 생애최초 주택 구입 때 빌릴 수 있는 금액과 한 달 상환액, 필요한 내 돈을 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+</head>
+<body>
+<main class="wrap">
+  <h1>생애최초 대출 계산기<br>첫 집, 얼마까지 빌릴까</h1>
+  <p class="lead">집값 기준·한도·소득 기준 중 가장 작은 금액이 빌릴 수 있는 돈입니다. 아래 숫자는 예시입니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 비율과 한도는 지역(수도권·규제지역 여부), 상품(은행 대출·디딤돌 등), 정부 발표에 따라 자주 바뀝니다. 기본값(LTV 70%, 최대 6억 원, DSR 40%)은 예시이며 확인 중입니다. 다른 대출이 있으면 그만큼 줄어들고, 은행의 스트레스 금리는 넣지 않았습니다. 실제 한도는 은행 상담으로 확인하세요.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>① 집값 기준 = 집값 × LTV</li>
+      <li>② 최대 한도 = 넣으신 금액 (0이면 한도 없음으로 봅니다)</li>
+      <li>③ 소득 기준 = 연소득 × DSR ÷ 12를 한 달 상환액으로 보고, 금리·기간으로 거꾸로 계산한 원금 (원리금균등)</li>
+      <li>빌릴 수 있는 돈 = ①·②·③ 중 가장 작은 값, 필요한 내 돈 = 집값 − 빌릴 수 있는 돈 (취득세·중개 보수는 따로)</li>
+      <li>넣으신 값으로만 계산합니다. 대출을 권하는 것이 아닙니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'price', label: '사려는 집값', type: 'money', value: '800,000,000', unit: '원' },
+    { id: 'ltv', label: '대출 비율(LTV)', type: 'num', value: '70', unit: '%', max: 100 },
+    { id: 'cap', label: '상품·지역 최대 한도 (없으면 0)', type: 'money', value: '600,000,000', unit: '원' },
+    { id: 'income', label: '부부 합산 연소득', type: 'money', value: '60,000,000', unit: '원' },
+    { id: 'dsr', label: 'DSR 기준', type: 'num', value: '40', unit: '%', max: 100, short: true },
+    { id: 'rate', label: '금리', type: 'num', value: '4', unit: '%', max: 30 },
+    { id: 'years', label: '갚는 기간', type: 'num', value: '30', unit: '년', max: 50, short: true }],
+  compute: function (v) {
+    if (!v.price) return {};
+    var r = firstLoan(v.price, v.ltv, v.cap, v.income, v.dsr, v.rate, v.years);
+    var won = function (x) { return isFinite(x) ? ZW.fmt(x) + '원' : '한도 없음'; };
+    return { html: '최대 약 <em>' + (ZW.read(r.loan) || ZW.fmt(r.loan) + '원') + '</em> 빌릴 수 있어요', sub: r.why + '에 걸렸습니다. 정확히는 ' + ZW.fmt(r.loan) + '원입니다.',
+      rows: [['① 집값 기준(LTV)', won(r.byLtv)], ['② 최대 한도', won(r.byCap)], ['③ 소득 기준(DSR)', won(r.byDsr)],
+        ['한 달 상환액', ZW.fmt(r.monthly) + '원'], ['필요한 내 돈', ZW.fmt(r.mine) + '원']] };
+  }
+});
+</script>
+</body>
+</html>
