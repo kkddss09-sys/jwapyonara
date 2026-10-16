@@ -226,7 +226,7 @@ ZW.app = function (cfg) {
     + (LINKS.cafe && cat !== '부동산' ? out(LINKS.cafe, '오늘 휴대폰 시세표') : '')
     + (cat ? (LINKS.youtube[cat] ? out(LINKS.youtube[cat], cat + ' 정보 유튜브') : '')
            : (LINKS.youtube['휴대폰'] ? out(LINKS.youtube['휴대폰'], '휴대폰 정보 유튜브') : '') + (LINKS.youtube['부동산'] ? out(LINKS.youtube['부동산'], '부동산 정보 유튜브') : ''));
-  foot.innerHTML = '<div class="links">' + links + '</div><p>좌표나라 · 휴대폰과 부동산, 무료 도구 모음</p><p>가입 없이 쓰고, 넣은 값은 어디에도 저장하지 않습니다.</p>';
+  foot.innerHTML = '<div class="links">' + links + '</div><p>좌표나라 · 휴대폰과 부동산, 무료 도구 모음</p><p>좌표나라® 등록상표 제40-1790026호</p><p>가입 없이 쓰고, 넣은 값은 어디에도 저장하지 않습니다.</p>';
   document.body.appendChild(foot);
 
   // 쪽 안의 카톡방 단추(data-zw="kakao")에 주소를 넣는다

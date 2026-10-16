@@ -139,7 +139,7 @@
     var d = today.getFullYear() + '. ' + (today.getMonth() + 1) + '. ' + today.getDate() + '.';
     var row = function (a, b, cls) { return '<tr><td>' + a + '</td><td' + (cls ? ' class="' + cls + '"' : '') + '>' + b + '</td></tr>'; };
     var h = '<div class="top"><div><h2>부동산 상담 한 장</h2><div>' + (esc($('home').value) || '보는 집: ________________') + '</div></div>'
-      + '<div class="meta">' + ($('who').value ? esc($('who').value) + ' 님<br>' : '') + '상담일 ' + d + '<br>좌표나라 jwapyonara.com</div></div>';
+      + '<div class="meta">' + ($('who').value ? esc($('who').value) + ' 님<br>' : '') + '상담일 ' + d + '<br>좌표나라® jwapyonara.com<br>등록상표 제40-1790026호</div></div>';
     h += '<div class="big"><div><span>빌릴 수 있는 돈</span><b>' + big(r.loan) + '</b></div><div><span>한 달 상환액</span><b>' + ZW.fmt(r.monthly) + '원</b></div>'
       + '<div><span>' + (r.left >= 0 ? '가진 돈에서 남는 돈' : '모자라는 돈') + '</span><b class="' + (r.left >= 0 ? 'good' : 'bad') + '">' + big(r.left) + '</b></div></div>';
     h += '<div class="cols">';
