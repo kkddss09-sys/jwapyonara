@@ -32,6 +32,13 @@
   .sheet td:last-child { text-align:right; font-weight:700; white-space:nowrap; }
   .sheet .bad { color:#d0021b; } .sheet .good { color:#12805c; }
   .sheet .memo { border:1px solid #ccc; border-radius:6px; min-height:28mm; padding:6px 8px; white-space:pre-wrap; }
+  .sheet .todo { margin-top:8px; border:2px solid #ff2d55; border-radius:8px; padding:6px 10px 8px; break-inside:avoid; }
+  .sheet .todo h3 { margin-top:2px; }
+  .sheet .todo ul { margin:2px 0 4px; padding-left:0; list-style:none; }
+  .sheet .todo li { margin:2px 0; }
+  .sheet .warn { background:#fff0f3; border-radius:6px; padding:5px 8px; font-weight:700; color:#b0002a; margin-top:4px; }
+  .sheet table.bank td { border:1px solid #ccc; height:7mm; text-align:left; font-weight:400; }
+  .sheet table.bank tr:first-child td { height:auto; background:#f6f6f6; font-weight:700; font-size:9pt; }
   .sheet .fine { font-size:8pt; color:#666; margin-top:8px; line-height:1.4; }
   @media print {
     @page { size:A4; margin:0; }
@@ -63,6 +70,8 @@
       <div class="field"><label for="cash">가진 돈 (현금) <b class="hint" id="cashHint"></b></label><div class="inp"><input id="cash" inputmode="numeric" value="300,000,000"><span>원</span></div></div>
       <div class="field"><label for="income">부부 합산 연소득 <b class="hint" id="incomeHint"></b></label><div class="inp"><input id="income" inputmode="numeric" value="70,000,000"><span>원</span></div></div>
       <div class="field"><label for="other">다른 대출 1년 원리금 (없으면 0) <b class="hint" id="otherHint"></b></label><div class="inp"><input id="other" inputmode="numeric" value="0"><span>원</span></div></div>
+
+      <div class="field"><label>소득 형태</label><div class="seg two" id="jobSeg"><button type="button" data-t="emp" class="on">직장인</button><button type="button" data-t="biz">사업자</button></div></div>
 
       <div class="grp">대출 기준 (지역·상품마다 다름)</div>
       <div class="row2">
@@ -122,7 +131,7 @@
   var won = function (n) { return isFinite(n) ? ZW.fmt(n) + '원' : '없음'; };
   var big = function (n) { return isFinite(n) ? (ZW.read(Math.abs(n)) || ZW.fmt(Math.abs(n)) + '원') : '-'; };
   var P = function (x, d) { return isFinite(x) ? ZW.pct(x, d) + '%' : '-'; };
-  var get = {}, house = 'no';
+  var get = {}, house = 'no', job = 'emp';
   var render = function () {
     var v = {}; for (var k in get) v[k] = get[k]();
     v.hasHouse = house === 'yes';
@@ -150,7 +159,15 @@
     h += '<section><h3>청약 가점</h3><table>' + row('무주택 기간', r.cy.noHouse + ' / 32점') + row('부양가족', r.cy.family + ' / 35점') + row('통장 가입 기간', r.cy.account + ' / 17점')
       + row('합계', r.cy.total + ' / 84점') + '</table></section>';
     h += '<section><h3>상담 메모</h3><div class="memo">' + esc($('memo').value) + '</div></section>';
-    h += '</div><p class="fine">※ 넣은 값으로만 계산한 참고 자료이며 대출 승인·수익을 보장하지 않습니다. LTV·DSR·한도는 지역·상품·정부 발표에 따라 다르고 스트레스 DSR은 반영하지 않았습니다. 차익은 양도소득세·대출 이자 전 금액입니다. 청약 가점은 주택공급에 관한 규칙 [별표 1] 기준이며 실제 판정은 청약홈을 따르세요.</p>';
+    h += '</div>';
+    var due = new Date(today.getTime() + 7 * 864e5), dd = (due.getMonth() + 1) + '월 ' + due.getDate() + '일';
+    h += '<section class="todo"><h3>다음 할 일 (필수)</h3><ul>'
+      + '<li>☐ <b>' + dd + '까지(일주일 안에) 은행 두 군데 이상</b>에서 대출이 얼마 나오는지 상담받고 오세요.</li>'
+      + '<li>☐ 자기 자본(가진 돈) ' + won(v.cash) + ' — 바로 쓸 수 있는 돈인지 통장으로 확인해 오세요.</li>'
+      + (job === 'biz' ? '<li>☐ <b>사업자</b>: 최근 3개월 매출 증빙(세금계산서)을 준비하세요. 입주 후 보통 6개월 뒤 1억~2억 원 정도 추가 대출이 나오는 경우가 있습니다(은행·매출에 따라 다름).</li>' : '')
+      + '</ul><table class="bank"><tr><td style="width:22%">은행</td><td style="width:22%">한도</td><td style="width:14%">금리</td><td>조건·메모</td></tr><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr></table>'
+      + '<div class="warn">⚠ 주의: 대출 한도·금리 등 조건값이 이 상담지와 달라지면 예약은 무조건 취소됩니다. 대출 여력과 금리 조건을 가장 먼저 확인하세요.</div></section>';
+    h += '<p class="fine">※ 넣은 값으로만 계산한 참고 자료이며 대출 승인·수익을 보장하지 않습니다. LTV·DSR·한도는 지역·상품·정부 발표에 따라 다르고 스트레스 DSR은 반영하지 않았습니다. 차익은 양도소득세·대출 이자 전 금액입니다. 청약 가점은 주택공급에 관한 규칙 [별표 1] 기준이며 실제 판정은 청약홈을 따르세요.</p>';
     $('sheet').innerHTML = h;
   };
   ['price', 'cost', 'cash', 'income', 'other', 'cap', 'want', 'deposit', 'sell'].forEach(function (id) { get[id] = ZW.money(id, render); });
@@ -158,6 +175,8 @@
   ['who', 'home', 'memo'].forEach(function (id) { $(id).addEventListener('input', render); });
   var b = $('houseSeg').querySelectorAll('button');
   for (var i = 0; i < b.length; i++) b[i].addEventListener('click', function () { for (var j = 0; j < b.length; j++) b[j].className = ''; this.className = 'on'; house = this.getAttribute('data-t'); render(); });
+  var jb = $('jobSeg').querySelectorAll('button');
+  for (var q = 0; q < jb.length; q++) jb[q].addEventListener('click', function () { for (var j = 0; j < jb.length; j++) jb[j].className = ''; this.className = 'on'; job = this.getAttribute('data-t'); render(); });
   render();
 })();
 </script>
