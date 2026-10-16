@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>부동산 상담 한 장 — 대출·필요한 돈·청약·전세·차익을 A4 한 장으로 | 좌표나라</title>
+<meta name="description" content="손님 조건을 한 번만 넣으면 대출 한도, 한 달 상환액, 필요한 내 돈, 전세 끼고 살 때, 팔 때 차익, 청약 가점을 A4 한 장 상담지로 정리해 인쇄합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+  .sd { display:grid; gap:18px; }
+  @media (min-width:1000px) { .sd { grid-template-columns:380px 1fr; align-items:start; } .sd .card { position:sticky; top:12px; max-height:calc(100vh - 24px); overflow:auto; } main.wrap.wide { max-width:1240px; } }
+  .grp { margin:16px 0 6px; font-weight:800; color:var(--red); font-size:15px; }
+  .grp:first-child { margin-top:0; }
+  .txt { width:100%; border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:16px; font-family:inherit; background:#fff; }
+  textarea.txt { min-height:70px; resize:vertical; }
+  .printbtn { display:block; width:100%; border:0; border-radius:14px; background:var(--red); color:#fff; font-size:18px; font-weight:800; padding:16px; margin:14px 0 4px; cursor:pointer; font-family:inherit; }
+  /* A4 상담지 */
+  .sheet-wrap { overflow-x:auto; }
+  .sheet { background:#fff; color:#111; width:210mm; min-height:297mm; margin:0 auto; padding:13mm 13mm 10mm; box-shadow:0 2px 16px rgba(0,0,0,.12); font-size:10.5pt; line-height:1.45; }
+  .sheet h2 { margin:0; font-size:19pt; letter-spacing:-.02em; }
+  .sheet .top { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid #ff2d55; padding-bottom:6px; margin-bottom:10px; }
+  .sheet .meta { text-align:right; font-size:9.5pt; color:#444; }
+  .sheet .big { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px; }
+  .sheet .big div { background:#fff0f3; border-radius:8px; padding:7px 10px; }
+  .sheet .big span { display:block; font-size:8.5pt; color:#555; }
+  .sheet .big b { font-size:14pt; }
+  .sheet .cols { display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; }
+  .sheet section { break-inside:avoid; }
+  .sheet h3 { margin:6px 0 3px; font-size:11pt; padding-left:7px; border-left:4px solid #ff2d55; }
+  .sheet table { width:100%; border-collapse:collapse; }
+  .sheet td { padding:3px 2px; border-bottom:1px solid #eee; vertical-align:top; }
+  .sheet td:last-child { text-align:right; font-weight:700; white-space:nowrap; }
+  .sheet .bad { color:#d0021b; } .sheet .good { color:#12805c; }
+  .sheet .memo { border:1px solid #ccc; border-radius:6px; min-height:28mm; padding:6px 8px; white-space:pre-wrap; }
+  .sheet .fine { font-size:8pt; color:#666; margin-top:8px; line-height:1.4; }
+  @media print {
+    @page { size:A4; margin:0; }
+    body { background:#fff; }
+    body > *:not(main), main > *:not(.sd), .sd > .card, .ad, details, .cta { display:none !important; }
+    main.wrap { padding:0; max-width:none; margin:0; }
+    .sd { display:block; }
+    .sheet { box-shadow:none; margin:0; width:210mm; min-height:0; height:296mm; overflow:hidden; }
+  }
+</style>
+</head>
+<body>
+<main class="wrap wide">
+  <h1>부동산 상담 한 장</h1>
+  <p class="lead">손님 조건을 한 번만 넣으면 오른쪽(휴대폰은 아래) 상담지가 바로 채워집니다. <b>인쇄</b>를 누르면 A4 한 장으로 나옵니다. 아래 숫자는 예시입니다.</p>
+
+  <div class="sd">
+    <section class="card" id="form">
+      <div class="grp">손님</div>
+      <div class="field"><label for="who">손님 이름 (안 써도 됨)</label><input class="txt" id="who" value=""></div>
+      <div class="field"><label for="home">보는 집 (단지·동·호수)</label><input class="txt" id="home" value=""></div>
+
+      <div class="grp">집</div>
+      <div class="field"><label for="price">집값 <b class="hint" id="priceHint"></b></label><div class="inp"><input id="price" inputmode="numeric" value="800,000,000"><span>원</span></div></div>
+      <div class="field"><label for="m2">전용면적</label><div class="inp"><input id="m2" inputmode="decimal" value="84"><span>㎡</span></div></div>
+      <div class="field"><label for="cost">취득세·중개 보수 등 부대비용 <b class="hint" id="costHint"></b></label><div class="inp"><input id="cost" inputmode="numeric" value="15,000,000"><span>원</span></div></div>
+
+      <div class="grp">손님 돈</div>
+      <div class="field"><label for="cash">가진 돈 (현금) <b class="hint" id="cashHint"></b></label><div class="inp"><input id="cash" inputmode="numeric" value="300,000,000"><span>원</span></div></div>
+      <div class="field"><label for="income">부부 합산 연소득 <b class="hint" id="incomeHint"></b></label><div class="inp"><input id="income" inputmode="numeric" value="70,000,000"><span>원</span></div></div>
+      <div class="field"><label for="other">다른 대출 1년 원리금 (없으면 0) <b class="hint" id="otherHint"></b></label><div class="inp"><input id="other" inputmode="numeric" value="0"><span>원</span></div></div>
+
+      <div class="grp">대출 기준 (지역·상품마다 다름)</div>
+      <div class="row2">
+        <div class="field"><label for="ltv">LTV</label><div class="inp"><input id="ltv" inputmode="decimal" value="70"><span>%</span></div></div>
+        <div class="field"><label for="dsr">DSR</label><div class="inp"><input id="dsr" inputmode="decimal" value="40"><span>%</span></div></div>
+      </div>
+      <div class="field"><label for="cap">최대 한도 (없으면 0) <b class="hint" id="capHint"></b></label><div class="inp"><input id="cap" inputmode="numeric" value="600,000,000"><span>원</span></div></div>
+      <div class="row2">
+        <div class="field"><label for="rate">금리</label><div class="inp"><input id="rate" inputmode="decimal" value="4"><span>%</span></div></div>
+        <div class="field"><label for="years">기간</label><div class="inp"><input id="years" inputmode="decimal" value="30"><span>년</span></div></div>
+      </div>
+      <div class="field"><label for="want">빌릴 돈 (0이면 최대로) <b class="hint" id="wantHint"></b></label><div class="inp"><input id="want" inputmode="numeric" value="0"><span>원</span></div></div>
+
+      <div class="grp">전세 끼고 살 때 · 팔 때</div>
+      <div class="field"><label for="deposit">전세 보증금 (해당 없으면 0) <b class="hint" id="depositHint"></b></label><div class="inp"><input id="deposit" inputmode="numeric" value="500,000,000"><span>원</span></div></div>
+      <div class="field"><label for="sell">예상 파는 가격 (모르면 0) <b class="hint" id="sellHint"></b></label><div class="inp"><input id="sell" inputmode="numeric" value="950,000,000"><span>원</span></div></div>
+      <div class="field"><label for="hold">가지고 있을 기간</label><div class="inp"><input id="hold" inputmode="decimal" value="5"><span>년</span></div></div>
+
+      <div class="grp">청약</div>
+      <div class="field"><label>지금 집이 있나요? (세대원 포함)</label><div class="seg two" id="houseSeg"><button type="button" data-t="no" class="on">없어요</button><button type="button" data-t="yes">있어요</button></div></div>
+      <div class="row2">
+        <div class="field"><label for="noHouse">무주택 기간</label><div class="inp"><input id="noHouse" inputmode="decimal" value="5"><span>년</span></div></div>
+        <div class="field"><label for="family">부양가족</label><div class="inp"><input id="family" inputmode="decimal" value="2"><span>명</span></div></div>
+      </div>
+      <div class="field"><label for="account">청약통장 가입 기간</label><div class="inp"><input id="account" inputmode="decimal" value="6"><span>년</span></div></div>
+
+      <div class="grp">상담 메모</div>
+      <textarea class="txt" id="memo" placeholder="손님이 원하는 것, 다음에 볼 단지 등"></textarea>
+
+      <button class="printbtn" type="button" onclick="window.print()">🖨 A4 한 장으로 인쇄 · PDF 저장</button>
+    </section>
+
+    <div class="sheet-wrap"><article class="sheet" id="sheet"></article></div>
+  </div>
+
+  <div class="ad" id="ad1"></div>
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>빌릴 수 있는 돈 = ① 집값 × LTV, ② 최대 한도, ③ (연소득 × DSR − 다른 대출 1년 원리금) ÷ 12를 한 달 상환액으로 보고 거꾸로 계산한 원금 중 가장 작은 값</li>
+      <li>한 달 상환액은 원리금균등, 원금균등은 첫 달 금액. 필요한 내 돈 = 집값 − 대출 + 부대비용</li>
+      <li>전세 끼고 살 때 필요한 내 돈 = 집값 − 전세 보증금 + 부대비용, 전세가율 = 전세 ÷ 집값</li>
+      <li>팔 때 차익 = 파는 가격 − 집값 − 부대비용 (세금·이자 빼기 전), 청약 가점은 주택공급에 관한 규칙 [별표 1] 기준(확인 중)</li>
+      <li>LTV·DSR·한도는 지역·상품·정부 발표에 따라 바뀌어 직접 넣게 했습니다. 스트레스 DSR은 넣지 않았습니다. 넣은 값은 이 기기 밖으로 보내지 않습니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="../_common/re-calc.js"></script>
+<script src="../cheongyak/calc.js"></script>
+<script src="../first-loan/calc.js"></script>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var won = function (n) { return isFinite(n) ? ZW.fmt(n) + '원' : '없음'; };
+  var big = function (n) { return isFinite(n) ? (ZW.read(Math.abs(n)) || ZW.fmt(Math.abs(n)) + '원') : '-'; };
+  var P = function (x, d) { return isFinite(x) ? ZW.pct(x, d) + '%' : '-'; };
+  var get = {}, house = 'no';
+  var render = function () {
+    var v = {}; for (var k in get) v[k] = get[k]();
+    v.hasHouse = house === 'yes';
+    var r = consult(v), today = new Date();
+    var d = today.getFullYear() + '. ' + (today.getMonth() + 1) + '. ' + today.getDate() + '.';
+    var row = function (a, b, cls) { return '<tr><td>' + a + '</td><td' + (cls ? ' class="' + cls + '"' : '') + '>' + b + '</td></tr>'; };
+    var h = '<div class="top"><div><h2>부동산 상담 한 장</h2><div>' + (esc($('home').value) || '보는 집: ________________') + '</div></div>'
+      + '<div class="meta">' + ($('who').value ? esc($('who').value) + ' 님<br>' : '') + '상담일 ' + d + '<br>좌표나라 jwapyonara.com</div></div>';
+    h += '<div class="big"><div><span>빌릴 수 있는 돈</span><b>' + big(r.loan) + '</b></div><div><span>한 달 상환액</span><b>' + ZW.fmt(r.monthly) + '원</b></div>'
+      + '<div><span>' + (r.left >= 0 ? '가진 돈에서 남는 돈' : '모자라는 돈') + '</span><b class="' + (r.left >= 0 ? 'good' : 'bad') + '">' + big(r.left) + '</b></div></div>';
+    h += '<div class="cols">';
+    h += '<section><h3>집</h3><table>' + row('집값', won(v.price)) + row('전용면적', v.m2 ? ZW.pct(v.m2) + '㎡ (약 ' + ZW.pct(r.pyeong) + '평)' : '-')
+      + row('평당 가격', r.perPyeong ? won(r.perPyeong) : '-') + row('부대비용', won(v.cost)) + '</table></section>';
+    h += '<section><h3>대출 한도</h3><table>' + row('① 집값 기준 (LTV ' + ZW.pct(v.ltv, 0) + '%)', won(r.byLtv)) + row('② 최대 한도', won(r.byCap))
+      + row('③ 소득 기준 (DSR ' + ZW.pct(v.dsr, 0) + '%)', won(r.byDsr)) + row('최대 · ' + r.why + '에 걸림', won(r.maxLoan)) + '</table></section>';
+    h += '<section><h3>갚는 돈 (' + ZW.pct(v.rate, 2).replace(/\.?0+$/, '') + '%, ' + ZW.pct(v.years, 0) + '년)</h3><table>' + row('빌리는 돈', won(r.loan))
+      + row('한 달 (원리금균등)', won(r.monthly)) + row('첫 달 (원금균등)', won(r.epFirst)) + row('이자 합계 (원리금균등)', won(r.interest))
+      + row('소득 대비 상환 비율', P(r.dsrPct), r.dsrPct > v.dsr + 0.05 ? 'bad' : '') + '</table></section>';
+    h += '<section><h3>직접 살 때 필요한 돈</h3><table>' + row('집값 − 대출', won(Math.max(0, v.price - r.loan))) + row('+ 부대비용', won(v.cost))
+      + row('필요한 내 돈', won(r.need)) + row('가진 돈', won(v.cash)) + row(r.left >= 0 ? '남는 돈' : '모자라는 돈', won(Math.abs(r.left)), r.left >= 0 ? 'good' : 'bad') + '</table></section>';
+    h += '<section><h3>전세 끼고 살 때</h3><table>' + (v.deposit > 0 ? row('전세 보증금', won(v.deposit)) + row('전세가율', P(r.jeonseRatio)) + row('갭 + 부대비용 = 필요한 내 돈', won(r.gapNeed))
+      + row(v.cash - r.gapNeed >= 0 ? '가진 돈에서 남는 돈' : '모자라는 돈', won(Math.abs(v.cash - r.gapNeed)), v.cash - r.gapNeed >= 0 ? 'good' : 'bad') : row('해당 없음', '-')) + '</table></section>';
+    h += '<section><h3>팔 때 (' + ZW.pct(v.hold, 0) + '년 뒤 예상)</h3><table>' + (r.sale ? row('예상 파는 가격', won(v.sell)) + row(r.sale.gain >= 0 ? '차익 (세금 전)' : '손실', won(Math.abs(r.sale.gain)), r.sale.gain >= 0 ? 'good' : 'bad')
+      + row('집값 대비 / 한 해 평균', P(r.sale.totalPct) + ' / ' + P(r.sale.yearPct, 2)) + (v.deposit > 0 ? row('전세 끼면 내 돈 대비 / 한 해', P(r.sale.minePct) + ' / ' + P(r.sale.mineYearPct, 2)) : '') : row('예상 가격 미입력', '-')) + '</table></section>';
+    h += '<section><h3>청약 가점</h3><table>' + row('무주택 기간', r.cy.noHouse + ' / 32점') + row('부양가족', r.cy.family + ' / 35점') + row('통장 가입 기간', r.cy.account + ' / 17점')
+      + row('합계', r.cy.total + ' / 84점') + '</table></section>';
+    h += '<section><h3>상담 메모</h3><div class="memo">' + esc($('memo').value) + '</div></section>';
+    h += '</div><p class="fine">※ 넣은 값으로만 계산한 참고 자료이며 대출 승인·수익을 보장하지 않습니다. LTV·DSR·한도는 지역·상품·정부 발표에 따라 다르고 스트레스 DSR은 반영하지 않았습니다. 차익은 양도소득세·대출 이자 전 금액입니다. 청약 가점은 주택공급에 관한 규칙 [별표 1] 기준이며 실제 판정은 청약홈을 따르세요.</p>';
+    $('sheet').innerHTML = h;
+  };
+  ['price', 'cost', 'cash', 'income', 'other', 'cap', 'want', 'deposit', 'sell'].forEach(function (id) { get[id] = ZW.money(id, render); });
+  [['m2', 1000], ['ltv', 100], ['dsr', 100], ['rate', 30], ['years', 50], ['hold', 50], ['noHouse', 80], ['family', 20], ['account', 80]].forEach(function (a) { get[a[0]] = ZW.number(a[0], render, a[1]); });
+  ['who', 'home', 'memo'].forEach(function (id) { $(id).addEventListener('input', render); });
+  var b = $('houseSeg').querySelectorAll('button');
+  for (var i = 0; i < b.length; i++) b[i].addEventListener('click', function () { for (var j = 0; j < b.length; j++) b[j].className = ''; this.className = 'on'; house = this.getAttribute('data-t'); render(); });
+  render();
+})();
+</script>
+</body>
+</html>
