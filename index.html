@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>좌표나라 — 휴대폰·부동산 무료 도구 모음</title>
 <meta name="description" content="자급제와 성지 비교, 평수 계산, 평당 가격, 대출 한 달 상환액, 전월세 전환까지. 휴대폰 살 때와 집 볼 때 필요한 계산을 가입 없이 무료로.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff2d55">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" href="_common/icon-192.png">
+<link rel="apple-touch-icon" href="_common/icon-192.png">
 <link rel="stylesheet" href="_common/common.css">
 </head>
 <body>
@@ -92,8 +97,10 @@
   });
   q.addEventListener('input', draw);
   // 주소 끝의 #부동산 처럼 분류가 붙어 오면 그 탭을 연다(도구 쪽 머리의 분류 링크가 이렇게 들어온다)
-  window.addEventListener('hashchange', function () { pick(decodeURIComponent(location.hash.slice(1))); });
+  window.addEventListener('hashchange', function () { pick(decodeURIComponent(location.hash.slice(1)));
+  if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) { navigator.serviceWorker.register("./sw.js").catch(function(){}); } });
   pick(decodeURIComponent(location.hash.slice(1)));
+  if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) { navigator.serviceWorker.register("./sw.js").catch(function(){}); }
 })();
 </script>
 </body>
