@@ -13,6 +13,8 @@ var LINKS = {
 var YT_LIST = { '휴대폰': 'UUBvT1VuPrklJ9rV4a5-s-Sw', '부동산': '' };
 
 // ▼ 큰 분류(첫 화면의 탭). 순서대로 보인다.
+var CAT_PATH = { '휴대폰': 'phone', '부동산': 'realestate', '생활': 'life', '단축키': 'shortcuts', '재미': 'fun' };   // 하위 쪽(분류 첫 화면) 폴더. 2026-10-19 사용자 요청: 사이트를 상위(첫 화면)·하위(분류별 쪽)로 나눔
+var CAT_DESC = { '휴대폰': '살 때 비교, 바꾸기 전 확인표, 성지가 처음이라면', '부동산': '대출·전월세·청약·면적 계산과 상담지', '생활': '나이·퍼센트·큐알·사진 줄이기', '단축키': '윈도우·크롬·갤럭시·아이폰 숨은 기능', '재미': '테스트·추첨·사다리·간단한 게임' };
 var CATS = ['휴대폰', '부동산', '생활', '단축키', '재미'];   // 단축키 = 2026-10-15 사용자 요청(따로 한 분류) · 생활 = 누구나 쓰는 도구(공학용 계산기, 그림판 등). 2026-10-12 사용자 요청
 
 // ▼ 도구 목록: [폴더 이름, 화면에 보일 이름, 한 줄 설명, 큰 분류, 만들어졌는지, 작은 묶음]
@@ -87,7 +89,7 @@ var TOOLS = [
 
 // ▼ 숫자 도우미 — 도구마다 다시 만들지 않게 여기 둔다
 var ZW = {
-  LINKS: LINKS, CATS: CATS, TOOLS: TOOLS, YT_LIST: YT_LIST,
+  LINKS: LINKS, CATS: CATS, CAT_PATH: CAT_PATH, CAT_DESC: CAT_DESC, TOOLS: TOOLS, YT_LIST: YT_LIST,
   num: function (s) { return Number(String(s).replace(/[^\d]/g, '')) || 0; },                 // "1,500,000" → 1500000
   dec: function (s) { s = String(s).replace(/[^\d.]/g, ''); var i = s.indexOf('.'); return i < 0 ? s : s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, ''); },
   fmt: function (n) { return Math.round(n).toLocaleString('ko-KR'); },                         // 1500000 → "1,500,000"
@@ -187,7 +189,7 @@ ZW.app = function (cfg) {
   var head = document.createElement('header');
   head.className = 'zw-head';
   head.innerHTML = '<div class="in"><a class="zw-logo" href="' + home + '">좌표<b>나라</b></a><nav class="zw-nav">'
-    + CATS.map(function (c) { return '<a href="' + home + '#' + encodeURIComponent(c) + '"' + (here && here[3] === c ? ' class="on"' : '') + '>' + c + '</a>'; }).join('')
+    + CATS.map(function (c) { return '<a href="' + ROOT + CAT_PATH[c] + '/index.html"' + (((here && here[3] === c) || location.href.indexOf(ROOT + CAT_PATH[c] + '/') === 0) ? ' class="on"' : '') + '>' + c + '</a>'; }).join('')
     + '</nav></div>';
   document.body.insertBefore(head, document.body.firstChild);
 
@@ -202,7 +204,7 @@ ZW.app = function (cfg) {
     if (others.length) {
       var more = document.createElement('section');
       more.className = 'wrap more';
-      more.innerHTML = '<h2>다른 ' + here[3] + ' 도구</h2><div class="tools">' + others.map(function (t) {
+      more.innerHTML = '<h2>다른 ' + here[3] + ' 도구 <a class="allgo" href="' + ROOT + CAT_PATH[here[3]] + '/index.html">' + here[3] + ' 전체 보기</a></h2><div class="tools">' + others.map(function (t) {
         return '<a class="tool" href="' + ROOT + t[0] + '/index.html"><b>' + t[1] + '</b><span>' + t[2] + '</span></a>';
       }).join('') + '</div>';
       document.body.appendChild(more);
@@ -233,6 +235,36 @@ ZW.app = function (cfg) {
   var btns = document.querySelectorAll('[data-zw="kakao"]');
   for (var k = 0; k < btns.length; k++) { btns[k].href = kakao; btns[k].target = '_blank'; btns[k].rel = 'noopener'; }
 })();
+
+// ▼ 하위 쪽(분류별 첫 화면) 그리기 — phone/·realestate/·life/·shortcuts/·fun/ 의 index.html이 ZW.hub('휴대폰')처럼 부른다
+ZW.hub = function (cat) {
+  document.body.setAttribute('data-hub', cat);
+  var list = document.getElementById('list');
+  var base = location.href.slice(0, location.href.lastIndexOf(CAT_PATH[cat] + '/'));
+  var ready = function (t) { return t[4] && t[0]; };
+  var card = function (t) { return '<a class="tool' + (ready(t) ? '' : ' soon') + '" href="' + (ready(t) ? base + t[0] + '/index.html' : '#') + '"><b>' + t[1] + '</b><span>' + t[2] + '</span></a>'; };
+  var uses = ZW.uses ? ZW.uses() : {};
+  var mine = TOOLS.filter(function (t) { return t[3] === cat; });
+  var groups = {}, order = [];
+  mine.forEach(function (t) { if (!groups[t[5]]) { groups[t[5]] = []; order.push(t[5]); } groups[t[5]].push(t); });
+  var has = function (g) { return groups[g].some(ready) ? 0 : 1; };
+  order.sort(function (a, b) { return has(a) - has(b); });
+  var html = '';
+  var top = mine.filter(function (t) { return ready(t) && uses[t[0]] > 0; }).sort(function (a, b) { return uses[b[0]] - uses[a[0]]; }).slice(0, 4);
+  if (top.length) html += '<section class="cat"><h2>자주 쓴 도구 <small>이 기기에서 많이 연 순서</small></h2><div class="tools" style="margin-top:10px">' + top.map(card).join('') + '</div></section>';
+  html += order.map(function (g) {
+    groups[g].sort(function (a, b) { return ((ready(a) ? 0 : 1) - (ready(b) ? 0 : 1)) || ((uses[b[0]] || 0) - (uses[a[0]] || 0)); });
+    return '<div class="group"><h2>' + g + '</h2><div class="tools">' + groups[g].map(card).join('') + '</div></div>';
+  }).join('');
+  var yl = YT_LIST[cat], yu = LINKS.youtube[cat];
+  if (cat === '휴대폰' || cat === '부동산') {
+    html += yl
+      ? '<section class="cat"><h2>' + cat + ' 정보 유튜브 <small>새 영상이 올라오면 여기에도 보입니다</small></h2><div class="yt"><iframe loading="lazy" src="https://www.youtube.com/embed/videoseries?list=' + yl + '" title="' + cat + ' 정보 유튜브" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>' + (yu ? '<a class="ytgo" href="' + yu + '" target="_blank" rel="noopener">유튜브에서 ' + cat + ' 영상 더 보기</a>' : '') + '</section>'
+      : '<section class="cat"><h2>' + cat + ' 정보 유튜브 <small>준비 중</small></h2><div class="tool soon ytsoon"><b>' + cat + ' 영상</b><span>채널을 준비하고 있습니다. 열리면 여기에서 바로 볼 수 있어요.</span></div></section>';
+  }
+  list.innerHTML = html;
+  var sub = document.getElementById('hubcount'); if (sub) sub.textContent = '쓸 수 있는 도구 ' + mine.filter(ready).length + '개';
+};
 
 // ▼ 방문 수 세기(구글 애널리틱스 4). 2026-10-13 붙임 — 이 묶음은 맨 아래에 그대로 둔다. 쪽마다 따로 넣지 않는다.
 // GA_ID가 비어 있으면 아무 일도 하지 않는다. jwapyonara.com에서 열렸을 때만 센다(내 컴퓨터에서 열거나 시험할 때는 세지 않는다).

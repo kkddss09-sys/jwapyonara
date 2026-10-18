@@ -15,9 +15,8 @@
 <body>
 <main class="wrap">
   <h1>좌표나라<br>무료 도구 모음</h1>
-  <p class="lead">휴대폰 살 때, 집 볼 때 필요한 계산을 가입 없이 바로. 도구는 계속 늘어납니다.</p>
-  <input class="search" id="q" type="search" placeholder="찾기: 자급제, 평수, 대출, 전세…" aria-label="도구 찾기">
-  <div class="tabs" id="tabs" role="tablist" aria-label="분류"></div>
+  <p class="lead">휴대폰 살 때, 집 볼 때 필요한 계산을 가입 없이 바로. 아래에서 분야를 먼저 고르세요.</p>
+  <input class="search" id="q" type="search" placeholder="바로 찾기: 자급제, 평수, 대출, 전세…" aria-label="도구 찾기">
   <div id="list"></div>
   <p class="empty" id="empty">찾는 도구가 아직 없어요. 카톡방에 말씀해 주시면 만들어 볼게요.</p>
 </main>
@@ -25,81 +24,55 @@
 <script src="_common/common.js"></script>
 <script>
 (function () {
-  var T = ZW.TOOLS, CATS = ZW.CATS, list = document.getElementById('list'), q = document.getElementById('q'), tabs = document.getElementById('tabs');
-  var cur = '전체';
+  var T = ZW.TOOLS, CATS = ZW.CATS, list = document.getElementById('list'), q = document.getElementById('q');
   var ready = function (t) { return t[4] && t[0]; };
   var card = function (t) { return '<a class="tool' + (ready(t) ? '' : ' soon') + '" href="' + (ready(t) ? t[0] + '/index.html' : '#') + '"><b>' + t[1] + '</b><span>' + t[2] + '</span></a>'; };
-
-  // 유튜브 칸: 그 분류의 채널에 올라온 영상을 바로 보여 준다. 채널이 아직 없으면 "준비 중"
-  var YT = '유튜브', YTCATS = ['휴대폰', '부동산'];
-  function yt(c) {
-    var list = ZW.YT_LIST[c], url = ZW.LINKS.youtube[c];
-    if (!list) return '<section class="cat"><h2>' + c + ' 정보 유튜브 <small>준비 중</small></h2><div class="tool soon ytsoon"><b>' + c + ' 영상</b><span>채널을 준비하고 있습니다. 열리면 여기에서 바로 볼 수 있어요.</span></div></section>';
-    return '<section class="cat"><h2>' + c + ' 정보 유튜브 <small>새 영상이 올라오면 여기에도 보입니다</small></h2>'
-      + '<div class="yt"><iframe loading="lazy" src="https://www.youtube.com/embed/videoseries?list=' + list + '" title="' + c + ' 정보 유튜브" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>'
-      + (url ? '<a class="ytgo" href="' + url + '" target="_blank" rel="noopener">유튜브에서 ' + c + ' 영상 더 보기</a>' : '') + '</section>';
-  }
-
-  function drawTabs() {
-    tabs.innerHTML = ['전체'].concat(CATS).map(function (c) {
-      var n = T.filter(function (t) { return ready(t) && (c === '전체' || t[3] === c); }).length;
-      return '<button type="button" role="tab" data-c="' + c + '" class="' + (c === cur ? 'on' : '') + '">' + c + ' ' + n + '</button>';
-    }).join('') + '<button type="button" role="tab" data-c="' + YT + '" class="' + (cur === YT ? 'on' : '') + '">' + YT + '</button>';
-  }
+  var count = function (c) { return T.filter(function (t) { return ready(t) && t[3] === c; }).length; };
 
   // 찾기: 그냥 글자로 찾고, 초성만 넣었으면("ㄷㅊ") 초성끼리 견준다. 띄어쓰기와 영문 대소문자는 무시한다
   var CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ';
-  function cho(s) {
-    return s.replace(/[가-힣]/g, function (ch) { return CHO.charAt(Math.floor((ch.charCodeAt(0) - 0xAC00) / 588)); });
-  }
+  function cho(s) { return s.replace(/[가-힣]/g, function (ch) { return CHO.charAt(Math.floor((ch.charCodeAt(0) - 0xAC00) / 588)); }); }
   function hit(text, word) {
-    var t = text.toLowerCase().replace(/\s+/g, ''), w = word.toLowerCase().replace(/\s+/g, '');
+    var t = text.toLowerCase().replace(/s+/g, ''), w = word.toLowerCase().replace(/s+/g, '');
     if (!w) return true;
     if (t.indexOf(w) >= 0) return true;
     return /^[ㄱ-ㅎ]+$/.test(w) && cho(t).indexOf(w) >= 0;
   }
 
+  // 분야 카드: 휴대폰·부동산은 크게, 나머지는 작게
+  function catCard(c, big) {
+    return '<a class="catcard' + (big ? ' big' : '') + '" href="' + ZW.CAT_PATH[c] + '/index.html"><b>' + c + '</b><span>' + ZW.CAT_DESC[c] + '</span><small>쓸 수 있는 도구 ' + count(c) + '개 ›</small></a>';
+  }
+
   function draw() {
-    var word = q.value.trim(), shown = 0, html = '';
-    // 이 기기에서 자주 연 도구를 맨 위에(찾는 중이 아닐 때만). 묶음 안에서도 자주 연 것이 앞에 온다
-    var uses = ZW.uses(), used = function (t) { return uses[t[0]] || 0; };
-    var mineTop = T.filter(function (t) { return ready(t) && used(t) > 0 && (cur === '전체' || t[3] === cur); }).sort(function (a, b) { return used(b) - used(a); }).slice(0, 4);
-    if (!word && mineTop.length) html += '<section class="cat"><h2>자주 쓴 도구 <small>이 기기에서 많이 연 순서</small></h2><div class="tools" style="margin-top:10px">' + mineTop.map(card).join('') + '</div></section>';
-    CATS.forEach(function (c) {
-      if (cur !== '전체' && cur !== c) return;
-      var mine = T.filter(function (t) { return t[3] === c && (!word || hit(t[1] + ' ' + t[2] + ' ' + t[3] + ' ' + t[5], word)); });
-      if (!mine.length) return;
-      shown += mine.length;
-      // 작은 묶음별로, 쓸 수 있는 도구가 앞에 오게
-      var groups = {}, order = [];
-      mine.forEach(function (t) { if (!groups[t[5]]) { groups[t[5]] = []; order.push(t[5]); } groups[t[5]].push(t); });
-      var has = function (g) { return groups[g].some(ready) ? 0 : 1; };
-      order.sort(function (a, b) { return has(a) - has(b); });
-      html += '<section class="cat"><h2>' + c + ' <small>쓸 수 있는 도구 ' + mine.filter(ready).length + '개</small></h2>' + order.map(function (g) {
-        groups[g].sort(function (a, b) { return ((ready(a) ? 0 : 1) - (ready(b) ? 0 : 1)) || (used(b) - used(a)); });
-        return '<div class="group"><h2>' + g + '</h2><div class="tools">' + groups[g].map(card).join('') + '</div></div>';
-      }).join('') + '</section>';
-      // 분류 탭을 골랐을 때는 그 분류의 유튜브 칸을 도구 아래에 붙인다(찾는 중에는 붙이지 않는다)
-      if (!word && cur === c && YTCATS.indexOf(c) >= 0) html += yt(c);
-    });
-    // "유튜브" 탭: 두 칸을 다 보여 준다. "전체"에서는 맨 아래에 두 칸
-    if (!word && (cur === YT || cur === '전체')) { html += YTCATS.map(yt).join(''); shown += 1; }
+    var word = q.value.trim(), html = '', shown = 0;
+    if (!word) {
+      html += '<div class="catgrid">' + catCard('휴대폰', true) + catCard('부동산', true) + '</div>';
+      html += '<div class="catgrid small">' + CATS.slice(2).map(function (c) { return catCard(c, false); }).join('') + '</div>';
+      // 이 기기에서 자주 연 도구를 맨 위에
+      var uses = ZW.uses(), used = function (t) { return uses[t[0]] || 0; };
+      var mineTop = T.filter(function (t) { return ready(t) && used(t) > 0; }).sort(function (a, b) { return used(b) - used(a); }).slice(0, 4);
+      if (mineTop.length) html += '<section class="cat"><h2>자주 쓴 도구 <small>이 기기에서 많이 연 순서</small></h2><div class="tools" style="margin-top:10px">' + mineTop.map(card).join('') + '</div></section>';
+      shown = 1;
+    } else {
+      // 찾는 중에는 분야 상관없이 맞는 도구를 분야별로 모아 보여 준다
+      CATS.forEach(function (c) {
+        var mine = T.filter(function (t) { return t[3] === c && hit(t[1] + ' ' + t[2] + ' ' + t[3] + ' ' + t[5], word); });
+        if (!mine.length) return;
+        shown += mine.length;
+        mine.sort(function (a, b) { return (ready(a) ? 0 : 1) - (ready(b) ? 0 : 1); });
+        html += '<section class="cat"><h2><a class="catlink" href="' + ZW.CAT_PATH[c] + '/index.html">' + c + '</a> <small>' + mine.filter(ready).length + '개</small></h2><div class="tools" style="margin-top:10px">' + mine.map(card).join('') + '</div></section>';
+      });
+    }
     list.innerHTML = html;
     document.getElementById('empty').style.display = shown ? 'none' : 'block';
   }
 
-  function pick(c) { cur = (CATS.indexOf(c) >= 0 || c === YT) ? c : '전체'; drawTabs(); draw(); }
-  tabs.addEventListener('click', function (e) {
-    var b = e.target.closest ? e.target.closest('button') : null;
-    if (!b) return;
-    pick(b.getAttribute('data-c'));
-    history.replaceState(null, '', cur === '전체' ? location.pathname : '#' + encodeURIComponent(cur));
-  });
   q.addEventListener('input', draw);
-  // 주소 끝의 #부동산 처럼 분류가 붙어 오면 그 탭을 연다(도구 쪽 머리의 분류 링크가 이렇게 들어온다)
-  window.addEventListener('hashchange', function () { pick(decodeURIComponent(location.hash.slice(1)));
-  if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) { navigator.serviceWorker.register("./sw.js").catch(function(){}); } });
-  pick(decodeURIComponent(location.hash.slice(1)));
+  // 예전 주소(#부동산 처럼 분류가 붙은 것)로 들어오면 그 분야의 하위 쪽으로 보낸다
+  var old = decodeURIComponent(location.hash.slice(1));
+  if (ZW.CAT_PATH[old]) { location.replace(ZW.CAT_PATH[old] + '/index.html'); return; }
+  draw();
   if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) { navigator.serviceWorker.register("./sw.js").catch(function(){}); }
 })();
 </script>
