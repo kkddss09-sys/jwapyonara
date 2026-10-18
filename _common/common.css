@@ -191,3 +191,22 @@ html[data-theme="dark"] .zw-foot .links a { background:var(--card); }
 .zw-theme[aria-checked="true"] .sw::after { transform:translateX(18px); }
 /* 인쇄할 때는 다크 모드여도 흰 바탕·검은 글씨로(부동산 상담지 A4 등) */
 @media print { html[data-theme="dark"] { color-scheme:light; --bg:#fff; --card:#fff; --ink:#1d1d1f; --sub:#6e6e73; --line:#e3e3e8; --red:#1b64da; --soft:#e8f0fe; --danger:#d92d20; --dangerbg:#fdecea; --ok:#12805c; --okbg:#e6f6ef; --panel:#1d1d1f; --fill:#f2f2f7; --fill2:#e5e5ea; --warnbg:#fff8e6; } }
+
+/* 좌표나라 바로가기 단추와 안내창 */
+.zw-tools { display:flex; align-items:center; gap:10px; }
+.zw-pwa { font:inherit; font-size:13px; font-weight:800; color:#fff; background:var(--red); border:none; border-radius:999px; padding:7px 12px; min-height:32px; cursor:pointer; white-space:nowrap; }
+.zw-theme .lb { white-space:nowrap; }
+.zw-sheet { position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.55); display:flex; align-items:flex-end; justify-content:center; }
+.zw-sheet[hidden] { display:none; }
+.zw-sheet .box { width:100%; max-width:480px; background:var(--card); color:var(--ink); border-radius:22px 22px 0 0; padding:24px 20px calc(20px + env(safe-area-inset-bottom)); }
+.zw-sheet h2 { margin:0 0 6px; font-size:22px; }
+.zw-sheet .lead { margin:0 0 12px; color:var(--sub); font-size:15px; }
+.zw-sheet ul { margin:0 0 16px; padding:0; list-style:none; }
+.zw-sheet li { padding:5px 0 5px 26px; font-size:15px; position:relative; }
+.zw-sheet li::before { content:"✓"; position:absolute; left:4px; color:var(--red); font-weight:800; }
+.zw-sheet .go { display:block; width:100%; font:inherit; font-size:17px; font-weight:800; color:#fff; background:var(--red); border:none; border-radius:14px; padding:15px; min-height:48px; cursor:pointer; }
+.zw-sheet .later { display:block; width:100%; font:inherit; font-size:15px; font-weight:600; color:var(--sub); background:none; border:none; padding:12px; margin-top:4px; cursor:pointer; }
+.zw-sheet .how { margin:12px 2px 0; font-size:14px; line-height:1.55; }
+.zw-sheet .how:empty { display:none; }
+@media (max-width:360px) { .zw-pwa { font-size:12px; padding:7px 9px; } .zw-tools { gap:6px; } }
+@media print { .zw-pwa, .zw-sheet { display:none !important; } }

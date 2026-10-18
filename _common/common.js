@@ -222,7 +222,7 @@ ZW.app = function (cfg) {
 
   var head = document.createElement('header');
   head.className = 'zw-head';
-  head.innerHTML = '<div class="in"><a class="zw-logo" href="' + home + '">좌표<b>나라</b></a><button type="button" class="zw-theme" role="switch" aria-checked="true" aria-label="다크 모드"><span class="lb">다크 모드</span><span class="sw"></span></button><nav class="zw-nav">'
+  head.innerHTML = '<div class="in"><a class="zw-logo" href="' + home + '">좌표<b>나라</b></a><div class="zw-tools"><button type="button" class="zw-pwa" aria-haspopup="dialog">📲 좌표나라 바로가기</button><button type="button" class="zw-theme" role="switch" aria-checked="true" aria-label="다크 모드"><span class="lb">다크</span><span class="sw"></span></button></div><nav class="zw-nav">'
     + CATS.map(function (c) { return '<a href="' + ROOT + CAT_PATH[c] + '/index.html"' + (((here && here[3] === c) || location.href.indexOf(ROOT + CAT_PATH[c] + '/') === 0) ? ' class="on"' : '') + '>' + c + '</a>'; }).join('')
     + '</nav></div>';
   document.body.insertBefore(head, document.body.firstChild);
@@ -235,7 +235,7 @@ ZW.app = function (cfg) {
     var apply = function (dark) {
       root.setAttribute('data-theme', dark ? 'dark' : 'light');
       sw.setAttribute('aria-checked', dark ? 'true' : 'false');
-      lb.textContent = dark ? '다크 모드 켬' : '다크 모드 끔';
+      lb.textContent = dark ? '다크 켬' : '다크 끔';
       if (meta) meta.setAttribute('content', dark ? '#0e131c' : lightColor);
     };
     apply(root.getAttribute('data-theme') !== 'light');
@@ -284,23 +284,41 @@ ZW.app = function (cfg) {
   foot.innerHTML = '<div class="links">' + links + '</div><p>좌표나라 · 휴대폰과 부동산, 무료 도구 모음</p><p>좌표나라® 등록상표 제40-1790026호</p><p>가입 없이 쓰고, 넣은 값은 어디에도 저장하지 않습니다.</p>';
   document.body.appendChild(foot);
 
-  // 앱처럼 설치 단추 — 브라우저가 멋대로 설치를 권하는 창은 막고(preventDefault), 방문자가 이 단추를 눌렀을 때만 설치를 묻는다.
-  // manifest가 연결된 쪽(첫 화면·부동산 상담 한 장)에만 나오고, 이미 설치해서 연 화면에서는 나오지 않는다. 2026-10-19 사용자 요청
-  if (document.querySelector('link[rel="manifest"]') && !(window.matchMedia && matchMedia('(display-mode: standalone)').matches) && !navigator.standalone) {
-    var deferred = null, ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-    var box = document.createElement('div');
-    box.className = 'zw-install';
-    box.innerHTML = '<button type="button">앱처럼 설치하기 (선택)</button><p></p>';
-    foot.insertBefore(box, foot.querySelector('p'));
-    var ibtn = box.querySelector('button'), itip = box.querySelector('p');
+  // 좌표나라 바로가기(앱 설치) — 브라우저가 멋대로 설치를 권하는 창은 막고(preventDefault), 맨 위 단추를 눌렀을 때만 부드러운 안내창을 띄운다.
+  // 모든 쪽에서 쓸 수 있게 manifest와 서비스워커를 여기서 붙인다(쪽에 이미 manifest가 있으면 그것을 쓴다). 이미 설치해서 연 화면에서는 단추를 숨긴다. 2026-10-19 사용자 요청
+  (function () {
+    var btn = head.querySelector('.zw-pwa');
+    var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
+    if (standalone) { btn.style.display = 'none'; return; }
+    if (!document.querySelector('link[rel="manifest"]')) { var ml = document.createElement('link'); ml.rel = 'manifest'; ml.href = ROOT + 'manifest.json'; document.head.appendChild(ml); }
+    if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) { try { navigator.serviceWorker.register(ROOT + 'sw.js').catch(function () {}); } catch (e) {} }
+    var deferred = null, ua = navigator.userAgent, ios = /iphone|ipad|ipod/i.test(ua), kakao = /KAKAOTALK/i.test(ua);
     window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; });
-    window.addEventListener('appinstalled', function () { box.style.display = 'none'; });
-    ibtn.addEventListener('click', function () {
-      if (deferred) { deferred.prompt(); deferred.userChoice.then(function () { deferred = null; }); itip.textContent = ''; }
-      else if (ios) itip.textContent = '아래쪽 공유 단추(네모에 위쪽 화살표)를 누르고 "홈 화면에 추가"를 고르세요.';
-      else itip.textContent = '브라우저 메뉴(점 세 개)에서 "앱 설치" 또는 "홈 화면에 추가"를 고르세요.';
+    window.addEventListener('appinstalled', function () { btn.style.display = 'none'; close(); });
+
+    var sheet = document.createElement('div');
+    sheet.className = 'zw-sheet'; sheet.hidden = true;
+    sheet.innerHTML = '<div class="box" role="dialog" aria-modal="true" aria-labelledby="zwpt"><h2 id="zwpt">좌표나라 바로가기</h2>'
+      + '<p class="lead">휴대폰 첫 화면에 좌표나라를 올려 두면, 아이콘 한 번으로 바로 열려요.</p>'
+      + '<ul><li>가입도 결제도 없이 무료예요</li><li>용량은 거의 차지하지 않아요</li><li>마음에 안 들면 아이콘만 지우면 끝이에요</li></ul>'
+      + '<button type="button" class="go">내 휴대폰에 바로가기 추가</button>'
+      + '<p class="how" role="status"></p>'
+      + '<button type="button" class="later">다음에 할게요</button></div>';
+    document.body.appendChild(sheet);
+    var how = sheet.querySelector('.how');
+    function open() { how.textContent = ''; sheet.hidden = false; sheet.querySelector('.go').focus(); }
+    function close() { sheet.hidden = true; }
+    btn.addEventListener('click', open);
+    sheet.addEventListener('click', function (e) { if (e.target === sheet) close(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+    sheet.querySelector('.later').addEventListener('click', close);
+    sheet.querySelector('.go').addEventListener('click', function () {
+      if (deferred) { deferred.prompt(); deferred.userChoice.then(function (c) { deferred = null; if (c && c.outcome === 'accepted') close(); }); how.textContent = ''; return; }
+      if (kakao) how.textContent = '카카오톡 안에서는 추가가 안 돼요. 오른쪽 아래 점 세 개(⋮)를 누르고 "다른 브라우저로 열기"를 고른 뒤 다시 눌러 주세요.';
+      else if (ios) how.textContent = '화면 아래쪽 공유 단추(네모에 위쪽 화살표)를 누르고 "홈 화면에 추가"를 고르면 끝이에요.';
+      else how.textContent = '브라우저 메뉴(점 세 개 ⋮ 또는 줄 세 개 ≡)를 누르고 "홈 화면에 추가" 또는 "앱 설치"를 고르면 끝이에요.';
     });
-  }
+  })();
 
   // 게임 순위표 카드(서버 주소가 있을 때만)
   // 내 컴퓨터(localhost)에서 시험할 때만, 저장해 둔 시험 서버 주소를 쓴다
