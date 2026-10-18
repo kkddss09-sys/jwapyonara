@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>숫자 밀기 퍼즐 무료 (슬라이드 퍼즐) | 좌표나라</title>
+<meta name="description" content="가입 없이 즐기는 무료 숫자 밀기 퍼즐. 3x3, 4x4 크기를 선택해 1부터 순서대로 숫자를 정렬해 보세요.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.mode-seg { display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-bottom:14px; }
+.mode-seg button { font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:12px; padding:10px 4px; cursor:pointer; touch-action:manipulation; }
+.mode-seg button.on { border-color:var(--red); background:var(--soft); color:var(--red); }
+
+.status-bar { display:flex; justify-content:space-between; align-items:center; background:#2c2c2e; color:#fff; border-radius:14px; padding:12px 16px; margin-bottom:14px; }
+.status-item { font-size:13px; font-weight:700; display:flex; align-items:center; gap:6px; }
+.status-val { font-size:17px; font-weight:800; color:#ffd60a; }
+
+/* 퍼즐 판 */
+.puzzle-board-wrap { width:100%; max-width:340px; margin:0 auto 16px; aspect-ratio:1; display:flex; align-items:center; justify-content:center; }
+.puzzle-board { width:100%; height:100%; display:grid; gap:6px; background:var(--line); padding:6px; border-radius:16px; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
+.puzzle-board.size-3 { grid-template-columns:repeat(3, 1fr); grid-template-rows:repeat(3, 1fr); }
+.puzzle-board.size-4 { grid-template-columns:repeat(4, 1fr); grid-template-rows:repeat(4, 1fr); }
+
+.tile { border:none; border-radius:10px; background:#fff; color:var(--ink); display:flex; align-items:center; justify-content:center; font-weight:900; cursor:pointer; touch-action:manipulation; box-shadow:0 2px 4px rgba(0,0,0,0.06); transition:transform .1s ease, background-color .15s ease; padding:0; line-height:1; }
+.size-3 .tile { font-size:clamp(26px, 8vw, 36px); }
+.size-4 .tile { font-size:clamp(20px, 6vw, 28px); }
+
+.tile:active:not(.empty) { transform:scale(0.96); background:var(--soft); }
+.tile.correct { color:var(--red); background:#fff8f8; }
+.tile.empty { background:transparent; box-shadow:none; cursor:default; pointer-events:none; }
+
+.game-msg { text-align:center; padding:12px 14px; border-radius:12px; font-size:15px; font-weight:800; margin-bottom:14px; display:none; }
+.game-msg.win { background:#e6f6ef; color:var(--ok); display:block; }
+
+.control-bar { margin-bottom:14px; }
+.btn-reset { display:flex; align-items:center; justify-content:center; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; background:#2c2c2e; color:#fff; width:100%; touch-action:manipulation; }
+.btn-reset:active { background:#3a3a3c; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>숫자 밀기 퍼즐</h1>
+  <p class="lead">빈칸 주변의 숫자를 밀어 1부터 순서대로 완성해 보세요.</p>
+
+  <section class="card">
+    <div class="mode-seg" role="tablist">
+      <button type="button" class="on" data-size="3">3×3 (8퍼즐)</button>
+      <button type="button" data-size="4">4×4 (15퍼즐)</button>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-item">
+        <span>이동 횟수</span>
+        <span class="status-val" id="moveCount">0</span>
+      </div>
+      <div class="status-item">
+        <span>최고 기록</span>
+        <span class="status-val" id="bestRecord">-</span>
+      </div>
+    </div>
+
+    <div id="gameMsg" class="game-msg"></div>
+
+    <div class="puzzle-board-wrap">
+      <div class="puzzle-board size-3" id="puzzleBoard" aria-label="숫자 퍼즐 판"></div>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-reset" id="btnReset">다시 섞기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0;">
+      💡 빈칸과 맞닿은 숫자를 터치하면 빈칸 자리로 미끄러집니다.
+    </p>
+  </section>
+
+  <p class="note">모든 퍼즐 섞기와 판정은 기기 안에서만 실행되며 항상 풀 수 있는 상태로 생성됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>목표:</b> 왼쪽 위 1부터 시작해 오른쪽 아래까지 숫자를 순서대로 정렬하고, 맨 마지막 오른쪽 아래 칸을 빈칸으로 만들면 완성입니다.</li>
+      <li><b>이동 규칙:</b> 빈칸의 상하좌우(위·아래·왼쪽·오른쪽)에 있는 타일만 누르면 빈칸으로 이동합니다. 대각선은 이동할 수 없습니다.</li>
+      <li><b>100% 해결 보장:</b> 완성된 상태에서 빈칸을 무작위로 수백 번 움직여 섞으므로 언제나 해결 가능한 배치입니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var size = 3; // 3 or 4
+  var tiles = [];
+  var moves = 0;
+  var isWon = false;
+
+  var boardEl = document.getElementById('puzzleBoard');
+  var moveCountEl = document.getElementById('moveCount');
+  var bestRecordEl = document.getElementById('bestRecord');
+  var gameMsg = document.getElementById('gameMsg');
+  var btnReset = document.getElementById('btnReset');
+  var modeButtons = document.querySelectorAll('.mode-seg button');
+
+  function getStorageKey() {
+    return 'zw_slide-puzzle_best_' + size;
+  }
+
+  function getBestRecord() {
+    try {
+      var val = localStorage.getItem(getStorageKey());
+      return val ? parseInt(val, 10) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveBestRecord(m) {
+    try {
+      var prev = getBestRecord();
+      if (prev === null || m < prev) {
+        localStorage.setItem(getStorageKey(), String(m));
+        updateBestDisplay();
+      }
+    } catch (e) {}
+  }
+
+  function updateBestDisplay() {
+    var best = getBestRecord();
+    bestRecordEl.textContent = best ? (best + '회') : '-';
+  }
+
+  // 인덱스에서 행, 열 구하기
+  function getPos(idx) {
+    return { r: Math.floor(idx / size), c: idx % size };
+  }
+
+  // 행, 열에서 인덱스 구하기
+  function getIndex(r, c) {
+    return r * size + c;
+  }
+
+  // 완성 상태 검사
+  function checkWin() {
+    var total = size * size;
+    for (var i = 0; i < total - 1; i++) {
+      if (tiles[i] !== i + 1) return false;
+    }
+    return tiles[total - 1] === 0;
+  }
+
+  // 빈칸으로부터 무작위 이동으로 안전하게 섞기
+  function shuffle() {
+    var total = size * size;
+    tiles = [];
+    for (var i = 1; i < total; i++) tiles.push(i);
+    tiles.push(0); // 0은 빈칸
+
+    var emptyIdx = total - 1;
+    var shuffleSteps = size === 3 ? 160 : 250;
+    var lastMovedIdx = -1;
+
+    for (var step = 0; step < shuffleSteps; step++) {
+      var pos = getPos(emptyIdx);
+      var validNeighbors = [];
+
+      var deltas = [
+        { r: -1, c: 0 }, { r: 1, c: 0 },
+        { r: 0, c: -1 }, { r: 0, c: 1 }
+      ];
+
+      for (var d = 0; d < deltas.length; d++) {
+        var nr = pos.r + deltas[d].r;
+        var nc = pos.c + deltas[d].c;
+        if (nr >= 0 && nr < size && nc >= 0 && nc < size) {
+          var nIdx = getIndex(nr, nc);
+          // 직전 타일을 바로 다시 되돌리지 않도록 우선 배제
+          if (nIdx !== lastMovedIdx) {
+            validNeighbors.push(nIdx);
+          }
+        }
+      }
+
+      if (validNeighbors.length === 0) {
+        validNeighbors.push(lastMovedIdx);
+      }
+
+      var chosenIdx = validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
+      tiles[emptyIdx] = tiles[chosenIdx];
+      tiles[chosenIdx] = 0;
+      lastMovedIdx = emptyIdx;
+      emptyIdx = chosenIdx;
+    }
+
+    moves = 0;
+    isWon = false;
+    moveCountEl.textContent = '0';
+    gameMsg.style.display = 'none';
+    gameMsg.className = 'game-msg';
+  }
+
+  function renderBoard() {
+    boardEl.innerHTML = '';
+    boardEl.className = 'puzzle-board size-' + size;
+
+    var total = size * size;
+    for (var i = 0; i < total; i++) {
+      var val = tiles[i];
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tile';
+      btn.setAttribute('data-idx', String(i));
+
+      if (val === 0) {
+        btn.classList.add('empty');
+        btn.setAttribute('aria-label', '빈칸');
+      } else {
+        btn.textContent = String(val);
+        btn.setAttribute('aria-label', val + '번 타일');
+        if (val === i + 1) {
+          btn.classList.add('correct');
+        }
+      }
+
+      boardEl.appendChild(btn);
+    }
+  }
+
+  function moveTile(clickedIdx) {
+    if (isWon) return;
+    if (tiles[clickedIdx] === 0) return;
+
+    var cPos = getPos(clickedIdx);
+    var emptyIdx = tiles.indexOf(0);
+    var ePos = getPos(emptyIdx);
+
+    // 상하좌우 인접 여부 확인
+    var dist = Math.abs(cPos.r - ePos.r) + Math.abs(cPos.c - ePos.c);
+    if (dist === 1) {
+      // 교환
+      tiles[emptyIdx] = tiles[clickedIdx];
+      tiles[clickedIdx] = 0;
+      moves++;
+      moveCountEl.textContent = String(moves);
+
+      renderBoard();
+
+      if (checkWin()) {
+        isWon = true;
+        saveBestRecord(moves);
+        gameMsg.className = 'game-msg win';
+        gameMsg.textContent = '🎉 축하합니다! ' + moves + '번 만에 퍼즐을 모두 맞추셨습니다!';
+      }
+    }
+  }
+
+  boardEl.addEventListener('click', function (e) {
+    var target = e.target;
+    while (target && target !== boardEl && !target.hasAttribute('data-idx')) {
+      target = target.parentNode;
+    }
+    if (target && target.hasAttribute('data-idx')) {
+      var idx = parseInt(target.getAttribute('data-idx'), 10);
+      moveTile(idx);
+    }
+  });
+
+  for (var i = 0; i < modeButtons.length; i++) {
+    (function (btn) {
+      btn.addEventListener('click', function () {
+        var s = parseInt(btn.getAttribute('data-size'), 10);
+        if (size === s) return;
+        for (var j = 0; j < modeButtons.length; j++) modeButtons[j].className = '';
+        btn.className = 'on';
+        size = s;
+        init();
+      });
+    })(modeButtons[i]);
+  }
+
+  btnReset.addEventListener('click', function () {
+    shuffle();
+    renderBoard();
+  });
+
+  function init() {
+    shuffle();
+    renderBoard();
+    updateBestDisplay();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

@@ -204,7 +204,7 @@
     // 3. 선택된 경로 하이라이트
     if (selectedPersonIndex >= 0 && selectedPersonIndex < count) {
       var path = tracePath(currentRungs, count, selectedPersonIndex);
-      ctx.strokeStyle = '#ff2d55';
+      ctx.strokeStyle = '#1b64da';
       ctx.lineWidth = 4;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
@@ -232,7 +232,7 @@
 
       // 시작점 및 도착점 강조 원
       var destCol = currentMapping[selectedPersonIndex];
-      ctx.fillStyle = '#ff2d55';
+      ctx.fillStyle = '#1b64da';
       ctx.beginPath();
       ctx.arc(getX(selectedPersonIndex), topPad, 5, 0, Math.PI * 2);
       ctx.fill();
@@ -246,14 +246,14 @@
     ctx.textAlign = 'center';
     ctx.font = '700 13px Pretendard, -apple-system, sans-serif';
     for (var c = 0; c < count; c++) {
-      ctx.fillStyle = (selectedPersonIndex === c) ? '#ff2d55' : '#ffffff';
+      ctx.fillStyle = (selectedPersonIndex === c) ? '#1b64da' : '#ffffff';
       ctx.fillText(truncate(currentNames[c], 5), getX(c), topPad - 10);
     }
 
     // 5. 하단 결과
     for (var c = 0; c < count; c++) {
       var isDest = (selectedPersonIndex >= 0 && currentMapping[selectedPersonIndex] === c);
-      ctx.fillStyle = isDest ? '#ff2d55' : '#ffd60a';
+      ctx.fillStyle = isDest ? '#1b64da' : '#ffd60a';
       ctx.fillText(truncate(currentResults[c], 5), getX(c), topPad + numRows * rowH + 20);
     }
 

@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>나에게 맞는 주거 스타일 테스트 | 좌표나라</title>
+<meta name="description" content="질문 6개로 알아보는 나의 주거 취향! 출퇴근 시간, 공간 크기, 동네 분위기 등 나에게 잘 맞는 집 유형을 찾아보세요. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 진행률 바 */
+.step-bar { margin:0 0 16px; }
+.step-bar .top { display:flex; justify-content:space-between; font-size:13px; font-weight:700; color:var(--sub); margin-bottom:6px; }
+.step-bar .track { background:var(--line); height:6px; border-radius:3px; overflow:hidden; }
+.step-bar .fill { background:var(--red); height:100%; width:16.7%; transition:width 0.25s ease; }
+
+.q-box { margin-bottom:18px; }
+.q-title { font-size:19px; line-height:1.45; font-weight:800; color:var(--ink); margin:0 0 6px; word-break:keep-all; }
+.q-sub { font-size:13px; color:var(--sub); margin:0; }
+
+.btn-choice-opt {
+  display:block; width:100%; min-height:54px; padding:14px 16px;
+  background:#fff; color:var(--ink); border:2px solid var(--line); border-radius:14px;
+  font:inherit; font-size:15px; font-weight:700; text-align:left; line-height:1.45;
+  cursor:pointer; -webkit-tap-highlight-color:transparent; transition:border-color 0.15s, background-color 0.15s;
+  margin-bottom:10px;
+}
+.btn-choice-opt:active { background:var(--soft); border-color:var(--red); }
+
+.nav-row { margin-top:12px; display:flex; justify-content:flex-start; }
+.btn-prev {
+  font:inherit; font-size:14px; font-weight:600; color:var(--sub);
+  background:none; border:none; padding:8px 0; cursor:pointer; display:none;
+}
+
+/* 결과 카드 */
+.res-card {
+  display:none; background:#fff; border:1.5px solid var(--line); border-radius:16px;
+  padding:22px 18px; margin-bottom:16px; text-align:center;
+}
+.res-badge { display:inline-block; font-size:13px; font-weight:800; background:var(--soft); color:var(--red); padding:4px 10px; border-radius:8px; margin-bottom:8px; }
+.res-title { font-size:24px; font-weight:900; color:var(--ink); margin-bottom:8px; line-height:1.3; }
+.res-summary { font-size:15px; font-weight:700; color:var(--red); margin-bottom:12px; }
+.res-desc { font-size:14px; line-height:1.5; color:var(--sub); margin:0 0 18px; word-break:keep-all; text-align:left; }
+
+/* 살펴볼 점 3가지 */
+.tips-box {
+  background:var(--bg); border:1.5px solid var(--line); border-radius:14px;
+  padding:16px; text-align:left; margin-bottom:14px;
+}
+.tips-title { font-size:15px; font-weight:800; color:var(--ink); margin:0 0 10px; }
+.tips-list { margin:0; padding-left:18px; font-size:14px; color:var(--ink); line-height:1.55; word-break:keep-all; }
+.tips-list li { margin-bottom:6px; }
+.tips-list li:last-child { margin-bottom:0; }
+
+.action-grid { display:grid; gap:10px; margin-bottom:14px; }
+.btn-action {
+  font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line);
+  background:#fff; color:var(--ink); border-radius:14px; padding:13px; cursor:pointer; text-align:center;
+}
+.btn-action:active { background:var(--soft); }
+.btn-action-primary {
+  background:var(--red); color:#fff; border:none;
+}
+.btn-action-primary:active { opacity:0.85; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>나에게 맞는 주거 스타일</h1>
+  <p class="lead">질문 6개에 답하면 나에게 잘 맞는 주거 취향과 집 볼 때 팁이 나옵니다.</p>
+
+  <!-- 질문 카드 -->
+  <section class="card" id="qCard">
+    <div class="step-bar">
+      <div class="top"><span id="qStep">질문 1 / 6</span></div>
+      <div class="track"><div class="fill" id="qFill"></div></div>
+    </div>
+
+    <div class="q-box">
+      <h2 class="q-title" id="qTitle"></h2>
+      <p class="q-sub">나의 생각과 가장 가까운 것을 골라보세요.</p>
+    </div>
+
+    <div id="optList"></div>
+
+    <div class="nav-row">
+      <button type="button" class="btn-prev" id="btnPrev">← 이전 질문</button>
+    </div>
+  </section>
+
+  <!-- 결과 카드 -->
+  <section class="res-card" id="resCard">
+    <div class="res-badge">나의 주거 성향 분석</div>
+    <div class="res-title" id="resTitle"></div>
+    <div class="res-summary" id="resSummary"></div>
+    <p class="res-desc" id="resDesc"></p>
+
+    <div class="tips-box">
+      <div class="tips-title">💡 이 유형이 집을 볼 때 꼭 살펴볼 점 3가지</div>
+      <ol class="tips-list" id="resTips"></ol>
+    </div>
+
+    <div class="action-grid">
+      <button type="button" class="btn-action btn-action-primary" id="btnShare">친구에게 결과 공유하기</button>
+      <button type="button" class="btn-action" id="btnSaveImg">결과를 그림으로 저장</button>
+      <button type="button" class="btn-action" id="btnRestart">처음부터 다시 하기</button>
+    </div>
+
+    <div class="card" style="padding:14px; text-align:left; margin-top:14px;">
+      <a href="../housing-cost/" style="display:flex; justify-content:space-between; align-items:center; text-decoration:none; color:var(--ink);">
+        <div>
+          <b style="display:block; font-size:15px; margin-bottom:2px;">한 달 주거비 계산해 보기</b>
+          <span style="font-size:13px; color:var(--sub);">대출금, 관리비, 월세 등 매달 나가는 총비용</span>
+        </div>
+        <span style="font-size:18px; color:var(--sub); font-weight:700;">→</span>
+      </a>
+    </div>
+  </section>
+
+  <p class="note">※ 재미로 보는 취향 테스트이며 특정 지역·매물 권유나 계약 판단의 근거가 아닙니다.</p>
+
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떤 테스트인가요?</summary>
+    <ul>
+      <li>출퇴근, 주거 공간, 관리비, 주변 환경, 생활 습관 6개 질문을 통해 내 성향을 분석합니다.</li>
+      <li>편리제일 직주근접형, 안정제일 넓은보금자리형, 실속제일 자유유목형, 힐링제일 숲세권안식처형 4가지로 분류됩니다.</li>
+      <li>집을 구할 때 놓치기 쉬운 핵심 체크포인트를 알기 쉽게 알려드립니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var questions = [
+    {
+      q: '집을 고를 때 출퇴근 시간과 집의 크기 중 더 끌리는 쪽은?',
+      opts: [
+        { text: '출퇴근 30분 이내! 좁아도 역 가깝고 출퇴근 편한 집', type: 'commute', score: 2 },
+        { text: '출퇴근 1시간 걸려도 괜찮아! 퇴근 후 널찍하고 편안한 내 집', type: 'spacious', score: 2 }
+      ]
+    },
+    {
+      q: '한 집에서 거주하는 기간과 라이프스타일은?',
+      opts: [
+        { text: '이사 다니는 건 질색! 한 동네에서 안정적으로 오래 살고 싶다', type: 'spacious', score: 2 },
+        { text: '직장이나 취미에 따라 1~2년 주기로 유연하게 옮겨 다니는 게 좋아', type: 'nomad', score: 2 }
+      ]
+    },
+    {
+      q: '매달 나가는 관리비와 건물 편의시설에 대한 생각은?',
+      opts: [
+        { text: '주차, 분리수거, 관리가 잘 된다면 관리비는 아깝지 않다', type: 'commute', score: 2 },
+        { text: '쓰지도 않는 공용 시설 관리비는 아까워! 내가 쓴 만큼만 내는 실속형이 좋다', type: 'nomad', score: 2 }
+      ]
+    },
+    {
+      q: '집 문을 열고 나갔을 때 동네 풍경은 어떤 모습이 좋을까?',
+      opts: [
+        { text: '카페, 편의점, 음식점 등 상권이 가깝고 언제든 활기찬 분위기', type: 'commute', score: 2 },
+        { text: '차 소리 적고 조용하며 산책하기 좋은 한적한 주택가 분위기', type: 'quiet', score: 2 }
+      ]
+    },
+    {
+      q: '현재 나의 소지품과 집 안의 짐은 어떤가요?',
+      opts: [
+        { text: '옷, 책, 가구 등 짐이 많아 독립된 방과 넉넉한 수납공간이 꼭 필요하다', type: 'spacious', score: 2 },
+        { text: '필요한 물건만 두고 가볍고 깔끔하게 사는 미니멀 라이프', type: 'nomad', score: 2 },
+        { text: '짐은 보통이지만 아늑하게 쉴 수 있는 나만의 서재나 방 한 칸은 필수', type: 'quiet', score: 2 }
+      ]
+    },
+    {
+      q: '주말이나 쉬는 날 집에서 주로 어떻게 시간을 보내나요?',
+      opts: [
+        { text: '집은 잠자는 곳! 밖에서 사람 만나고 활동하느라 금방 외출한다', type: 'commute', score: 2 },
+        { text: '홈쿡, 인테리어, 영화 감상 등 온종일 집 안에서 푹 쉬기', type: 'spacious', score: 2 },
+        { text: '조용히 책 읽기, 음악 감상, 집 근처 산책로 걸으며 평화롭게 충전하기', type: 'quiet', score: 2 }
+      ]
+    }
+  ];
+
+  var types = {
+    commute: {
+      title: '편리제일 직주근접형',
+      summary: '시간이 곧 금! 출퇴근을 줄이고 일상의 활력을 챙기는 스타일',
+      desc: '길에서 버리는 시간을 최소화하여 나만의 여유 시간을 확보하는 것을 가장 소중하게 여깁니다. 집 자체의 크기보다는 지하철역 접근성과 주변 편의시설의 편리함이 삶의 질을 크게 좌우합니다.',
+      tips: [
+        '지하철역 및 버스 정류장까지 실제 도보 시간과 출근 시간대 배차 간격 확인',
+        '야간 귀갓길 가로등, CCTV 등 늦은 시간 보행 안전성 확인',
+        '집 주변 편의점, 세탁소, 마트 등 1인 생활 편의시설 인프라 체크'
+      ]
+    },
+    spacious: {
+      title: '안정제일 넓은보금자리형',
+      summary: '내 집이 곧 최고의 안식처! 널찍하고 아늑하게 오래 머무는 스타일',
+      desc: '답답한 공간을 싫어하며, 짐을 여유롭게 수납하고 집 안에서 온전한 휴식을 누릴 수 있는 넉넉한 면적을 선호합니다. 자주 이사하기보다 한곳에 정착하여 나만의 보금자리를 가꾸는 데서 행복을 느낍니다.',
+      tips: [
+        '실제 가구를 배치할 방 크기와 붙박이장, 팬트리 등 수납공간 실측',
+        '남향 여부 및 햇빛 채광, 맞통풍 구조, 벽면 결로·곰팡이 흔적 점검',
+        '세대당 주차 대수, 엘리베이터 여유 등 장기 거주를 고려한 주거 환경 확인'
+      ]
+    },
+    nomad: {
+      title: '실속제일 자유유목형',
+      summary: '불필요한 고정비는 NO! 상황에 맞춰 가볍고 유연하게 움직이는 실속파',
+      desc: '한곳에 오래 얽매이지 않고 라이프스타일 변화에 맞춰 유연하게 거처를 옮깁니다. 낭비되는 관리비나 고정비용을 아끼고 꼭 필요한 것만 갖춘 미니멀한 실속 주거를 지향합니다.',
+      tips: [
+        '매월 나가는 고정 관리비 금액과 포함 항목(인터넷, 청소비, 수도 등) 상세 확인',
+        '기본 제공 옵션(에어컨, 세탁기, 냉장고 등)의 정상 작동 여부와 상태 점검',
+        '계약 만료나 중도 퇴실 시 다음 세입자를 수월하게 구할 수 있는 대중적인 위치인지 확인'
+      ]
+    },
+    quiet: {
+      title: '힐링제일 숲세권안식처형',
+      summary: '번잡함은 멀리! 평화로운 동네에서 차분히 충전하는 힐링 스타일',
+      desc: '도심의 번화가나 유흥가 소음에서 벗어나 조용한 쉼과 자연의 여유를 사랑합니다. 창밖 풍경을 보며 사색하거나 집 근처 산책로를 걸으며 지친 몸과 마음을 치유하는 환경을 중요하게 생각합니다.',
+      tips: [
+        '낮 시간대뿐만 아니라 주말 야간의 주변 소음(도로 소음, 층간소음) 직접 체감하기',
+        '집 근처 도보로 걸어갈 수 있는 산책로, 공원, 하천길 연결 여부 체크',
+        '조용한 대신 병원, 약국, 생필품 마트 등 필수 인프라까지의 거리 확인'
+      ]
+    }
+  };
+
+  var curr = 0;
+  var scores = { commute: 0, spacious: 0, nomad: 0, quiet: 0 };
+  var history = [];
+  var finalResultTitle = '';
+  var finalResultSummary = '';
+
+  var qCard = document.getElementById('qCard');
+  var qStep = document.getElementById('qStep');
+  var qFill = document.getElementById('qFill');
+  var qTitle = document.getElementById('qTitle');
+  var optList = document.getElementById('optList');
+  var btnPrev = document.getElementById('btnPrev');
+
+  var resCard = document.getElementById('resCard');
+  var resTitle = document.getElementById('resTitle');
+  var resSummary = document.getElementById('resSummary');
+  var resDesc = document.getElementById('resDesc');
+  var resTips = document.getElementById('resTips');
+  var btnShare = document.getElementById('btnShare');
+  var btnSaveImg = document.getElementById('btnSaveImg');
+  var btnRestart = document.getElementById('btnRestart');
+
+  function renderQuestion() {
+    qCard.style.display = 'block';
+    resCard.style.display = 'none';
+
+    var item = questions[curr];
+    qStep.textContent = '질문 ' + (curr + 1) + ' / 6';
+    qFill.style.width = ((curr + 1) / 6 * 100) + '%';
+    qTitle.textContent = (curr + 1) + '. ' + item.q;
+
+    optList.innerHTML = '';
+    for (var i = 0; i < item.opts.length; i++) {
+      var opt = item.opts[i];
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-choice-opt';
+      btn.textContent = opt.text;
+      btn.setAttribute('data-idx', i);
+      btn.addEventListener('click', function () {
+        var idx = parseInt(this.getAttribute('data-idx'), 10);
+        pick(idx);
+      });
+      optList.appendChild(btn);
+    }
+
+    btnPrev.style.display = curr > 0 ? 'inline-block' : 'none';
+  }
+
+  function pick(choiceIdx) {
+    var item = questions[curr];
+    var opt = item.opts[choiceIdx];
+    history[curr] = opt;
+
+    if (curr < 5) {
+      curr++;
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  btnPrev.addEventListener('click', function () {
+    if (curr > 0) {
+      curr--;
+      renderQuestion();
+    }
+  });
+
+  function judge() {
+    var tallies = { commute: 0, spacious: 0, nomad: 0, quiet: 0 };
+    for (var i = 0; i < history.length; i++) {
+      var h = history[i];
+      if (h && tallies[h.type] !== undefined) {
+        tallies[h.type] += h.score;
+      }
+    }
+    var bestType = 'commute';
+    var maxVal = -1;
+    var order = ['commute', 'spacious', 'nomad', 'quiet'];
+    for (var j = 0; j < order.length; j++) {
+      var k = order[j];
+      if (tallies[k] > maxVal) {
+        maxVal = tallies[k];
+        bestType = k;
+      }
+    }
+    return types[bestType] || types.commute;
+  }
+
+  function showResult() {
+    var r = judge();
+    finalResultTitle = r.title;
+    finalResultSummary = r.summary;
+
+    qCard.style.display = 'none';
+    resCard.style.display = 'block';
+
+    resTitle.textContent = r.title;
+    resSummary.textContent = r.summary;
+    resDesc.textContent = r.desc;
+
+    resTips.innerHTML = '';
+    for (var i = 0; i < r.tips.length; i++) {
+      var li = document.createElement('li');
+      li.textContent = r.tips[i];
+      resTips.appendChild(li);
+    }
+
+    try {
+      localStorage.setItem('zw_home-type-test_best', r.title);
+    } catch (e) {}
+
+    try {
+      resCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {}
+  }
+
+  btnRestart.addEventListener('click', function () {
+    curr = 0;
+    history = [];
+    renderQuestion();
+    try {
+      qCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {}
+  });
+
+  // 친구에게 공유하기
+  function copyUrl() {
+    var originalText = btnShare.textContent;
+    function showOk() {
+      btnShare.textContent = '주소를 복사했어요! 친구에게 알려주세요';
+      setTimeout(function () { btnShare.textContent = originalText; }, 2000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(location.href).then(showOk).catch(function () {
+        fallbackCopy(showOk);
+      });
+    } else {
+      fallbackCopy(showOk);
+    }
+  }
+
+  function fallbackCopy(cb) {
+    try {
+      var t = document.createElement('textarea');
+      t.value = location.href;
+      t.style.position = 'fixed';
+      t.style.opacity = '0';
+      document.body.appendChild(t);
+      t.select();
+      document.execCommand('copy');
+      document.body.removeChild(t);
+      cb();
+    } catch (e) {}
+  }
+
+  btnShare.addEventListener('click', function () {
+    var shareData = {
+      title: '나에게 맞는 주거 스타일 테스트',
+      text: '나의 주거 성향은 "' + finalResultTitle + '" 나왔어! 너도 테스트해 봐',
+      url: location.href
+    };
+    if (navigator.share) {
+      try {
+        navigator.share(shareData).catch(function () {});
+      } catch (e) {
+        copyUrl();
+      }
+    } else {
+      copyUrl();
+    }
+  });
+
+  // 결과 1080×1080 캔버스 그림 저장
+  function wrapLines(ctx, text, maxWidth) {
+    var words = String(text).split(' '), lines = [], line = '';
+    for (var i = 0; i < words.length; i++) {
+      var tryLine = line ? line + ' ' + words[i] : words[i];
+      if (ctx.measureText(tryLine).width <= maxWidth || !line) line = tryLine;
+      else { lines.push(line); line = words[i]; }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function drawResultImage() {
+    var S = 1080, cv = document.createElement('canvas');
+    cv.width = S; cv.height = S;
+    var ctx = cv.getContext('2d');
+    var font = '"Pretendard","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Noto Sans KR",sans-serif';
+
+    ctx.fillStyle = '#1c1c1e';
+    ctx.fillRect(0, 0, S, S);
+    ctx.textBaseline = 'top';
+
+    ctx.fillStyle = '#c7c7cc';
+    ctx.font = '600 38px ' + font;
+    ctx.fillText('나에게 맞는 주거 스타일 테스트', 90, 110);
+
+    ctx.fillStyle = '#ffd60a';
+    ctx.font = '800 84px ' + font;
+    var y = 280, lines = wrapLines(ctx, finalResultTitle, S - 180);
+    for (var i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], 90, y);
+      y += 105;
+    }
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '600 44px ' + font;
+    y += 20;
+    lines = wrapLines(ctx, finalResultSummary, S - 180);
+    for (i = 0; i < lines.length; i++) {
+      ctx.fillText(lines[i], 90, y);
+      y += 64;
+    }
+
+    ctx.fillStyle = '#3a3a3c';
+    ctx.fillRect(90, 880, S - 180, 2);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '800 50px ' + font;
+    ctx.fillText('좌표', 90, 920);
+    var w = ctx.measureText('좌표').width;
+    ctx.fillStyle = '#1b64da';
+    ctx.fillText('나라', 90 + w, 920);
+
+    ctx.fillStyle = '#c7c7cc';
+    ctx.font = '600 38px ' + font;
+    ctx.textAlign = 'right';
+    ctx.fillText('jwapyonara.com', S - 90, 928);
+    ctx.textAlign = 'left';
+
+    ctx.fillStyle = '#8e8e93';
+    ctx.font = '400 28px ' + font;
+    ctx.fillText('재미로 보는 취향 테스트입니다', 90, 1000);
+    return cv;
+  }
+
+  btnSaveImg.addEventListener('click', function () {
+    if (!finalResultTitle) return;
+    var cv = drawResultImage();
+    var done = function () {
+      btnSaveImg.textContent = '저장했어요!';
+      setTimeout(function () { btnSaveImg.textContent = '결과를 그림으로 저장'; }, 1800);
+    };
+    var down = function (url, revoke) {
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = '좌표나라-주거스타일-테스트-결과.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      if (revoke) setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+      done();
+    };
+    if (cv.toBlob) {
+      cv.toBlob(function (blob) {
+        if (!blob) { down(cv.toDataURL('image/png'), false); return; }
+        down(URL.createObjectURL(blob), true);
+      }, 'image/png');
+    } else {
+      down(cv.toDataURL('image/png'), false);
+    }
+  });
+
+  renderQuestion();
+})();
+</script>
+</body>
+</html>

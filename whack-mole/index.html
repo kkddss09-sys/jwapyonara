@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>두더지 잡기 무료 게임 | 좌표나라</title>
+<meta name="description" content="30초 동안 튀어나오는 두더지를 빠르게 터치하세요! 가입 없이 바로 즐기는 추억의 두더지 잡기 반응속도 게임.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.status-bar { display:flex; justify-content:space-between; align-items:center; background:#2c2c2e; color:#fff; border-radius:14px; padding:12px 16px; margin-bottom:14px; }
+.status-item { font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; }
+.status-val { font-size:18px; font-weight:800; color:#ffd60a; }
+
+/* 3x3 두더지 보드 */
+.board-wrap { width:100%; display:flex; justify-content:center; margin:0 0 16px; }
+.mole-board { display:grid; grid-template-columns:repeat(3, 1fr); grid-template-rows:repeat(3, 1fr); gap:10px; width:100%; max-width:340px; background:#4a3525; padding:12px; border-radius:18px; box-shadow:inset 0 4px 10px rgba(0,0,0,0.3); user-select:none; -webkit-user-select:none; }
+
+.hole { aspect-ratio:1; min-height:80px; border-radius:50%; background:#2e1f16; border:3px solid #3c291d; position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer; touch-action:manipulation; padding:0; box-shadow:inset 0 6px 12px rgba(0,0,0,0.5); }
+.hole:active { filter:brightness(1.1); }
+
+/* 두더지 캐릭터 */
+.mole { font-size:clamp(36px, 11vw, 48px); line-height:1; position:absolute; bottom:-70px; transition:bottom .12s cubic-bezier(0.18, 0.89, 0.32, 1.28); pointer-events:none; }
+.hole.up .mole { bottom:12px; }
+.hole.hit .mole { transform:scale(1.15); }
+
+/* 결과 및 상태 메시지 */
+.game-msg { text-align:center; padding:12px; border-radius:12px; font-size:16px; font-weight:800; margin-bottom:14px; display:none; }
+.game-msg.over { background:#e6f6ef; color:var(--ok); display:block; }
+
+.control-bar { display:flex; gap:10px; margin-bottom:14px; }
+.btn-action { flex:1; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; display:flex; align-items:center; justify-content:center; }
+.btn-start { background:var(--red); color:#fff; }
+.btn-start:active { opacity:0.85; }
+.btn-reset { background:#2c2c2e; color:#fff; }
+.btn-reset:active { background:#3a3a3c; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>두더지 잡기</h1>
+  <p class="lead">30초 동안 쏙 올라오는 두더지를 재빠르게 터치해 보세요.</p>
+
+  <section class="card">
+    <div class="status-bar">
+      <div class="status-item">
+        <span>남은 시간</span>
+        <span class="status-val" id="timeLeft">30초</span>
+      </div>
+      <div class="status-item">
+        <span>잡은 수</span>
+        <span class="status-val" id="scoreText">0마리</span>
+      </div>
+      <div class="status-item">
+        <span>최고 기록</span>
+        <span class="status-val" id="bestScoreText">0마리</span>
+      </div>
+    </div>
+
+    <div id="gameMsg" class="game-msg"></div>
+
+    <div class="board-wrap">
+      <div class="mole-board" id="moleBoard">
+        <button type="button" class="hole" data-idx="0" aria-label="1번 구멍"><span class="mole">🐹</span></button>
+        <button type="button" class="hole" data-idx="1" aria-label="2번 구멍"><span class="mole">🐹</span></button>
+        <button type="button" class="hole" data-idx="2" aria-label="3번 구멍"><span class="mole">🐹</span></button>
+        <button type="button" class="hole" data-idx="3" aria-label="4번 구멍"><span class="mole">🐹</span></button>
+        <button type="button" class="hole" data-idx="4" aria-label="5번 구멍"><span class="mole">🐹</span></button>
+        <button type="button" class="hole" data-idx="5" aria-label="6번 구멍"><span class="mole">🐹</span></button>
+        <button type="button" class="hole" data-idx="6" aria-label="7번 구멍"><span class="mole">🐹</span></button>
+        <button type="button" class="hole" data-idx="7" aria-label="8번 구멍"><span class="mole">🐹</span></button>
+        <button type="button" class="hole" data-idx="8" aria-label="9번 구멍"><span class="mole">🐹</span></button>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-start" id="btnStart">게임 시작</button>
+      <button type="button" class="btn-action btn-reset" id="btnReset">다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0;">
+      💡 두더지가 튀어나왔을 때 터치하면 💥 이펙트와 함께 점수가 올라갑니다.
+    </p>
+  </section>
+
+  <p class="note">시간 제한은 30초이며, 두더지는 무작위 구멍에서 불쑥 나타납니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>게임 방법:</b> [게임 시작]을 누르면 30초 카운트다운과 함께 9개의 구멍에서 두더지가 무작위로 올라옵니다.</li>
+      <li><b>잡기:</b> 두더지(🐹)가 올라온 구멍을 터치하면 잡히며 1점을 획득합니다.</li>
+      <li><b>주의 사항:</b> 두더지는 금방 다시 구멍으로 들어가므로 재빠른 순발력이 필요합니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var GAME_DURATION = 30; // 30초
+  var timeLeft = GAME_DURATION;
+  var score = 0;
+  var isPlaying = false;
+  var gameTimer = null;
+  var moleTimer = null;
+  var lastHoleIdx = -1;
+
+  var timeLeftEl = document.getElementById('timeLeft');
+  var scoreTextEl = document.getElementById('scoreText');
+  var bestScoreTextEl = document.getElementById('bestScoreText');
+  var gameMsg = document.getElementById('gameMsg');
+  var btnStart = document.getElementById('btnStart');
+  var btnReset = document.getElementById('btnReset');
+  var holes = document.querySelectorAll('.hole');
+
+  function getBestScore() {
+    try {
+      var val = localStorage.getItem('zw_whack-mole_best');
+      return val ? parseInt(val, 10) : 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  function saveBestScore(val) {
+    try {
+      var prev = getBestScore();
+      if (val > prev) {
+        localStorage.setItem('zw_whack-mole_best', String(val));
+        bestScoreTextEl.textContent = val + '마리';
+      }
+    } catch (e) {}
+  }
+
+  bestScoreTextEl.textContent = getBestScore() + '마리';
+
+  function getRandomHole() {
+    var idx = Math.floor(Math.random() * holes.length);
+    if (idx === lastHoleIdx) {
+      return getRandomHole();
+    }
+    lastHoleIdx = idx;
+    return holes[idx];
+  }
+
+  function popupMole() {
+    if (!isPlaying) return;
+
+    var hole = getRandomHole();
+    var moleEl = hole.querySelector('.mole');
+    moleEl.textContent = '🐹';
+    hole.classList.remove('hit');
+    hole.classList.add('up');
+
+    // 600ms ~ 950ms 동안 나와있음
+    var stayTime = Math.floor(Math.random() * 350) + 600;
+
+    moleTimer = setTimeout(function () {
+      hole.classList.remove('up');
+      if (isPlaying) {
+        // 다음 두더지 출현까지 250~500ms 지연
+        var nextDelay = Math.floor(Math.random() * 250) + 250;
+        setTimeout(popupMole, nextDelay);
+      }
+    }, stayTime);
+  }
+
+  function whack(hole) {
+    if (!isPlaying || !hole.classList.contains('up') || hole.classList.contains('hit')) return;
+
+    score++;
+    scoreTextEl.textContent = score + '마리';
+    saveBestScore(score);
+
+    hole.classList.add('hit');
+    var moleEl = hole.querySelector('.mole');
+    moleEl.textContent = '💥';
+
+    setTimeout(function () {
+      hole.classList.remove('up');
+      hole.classList.remove('hit');
+    }, 200);
+  }
+
+  function startGame() {
+    if (isPlaying) return;
+
+    isPlaying = true;
+    score = 0;
+    timeLeft = GAME_DURATION;
+    scoreTextEl.textContent = '0마리';
+    timeLeftEl.textContent = timeLeft + '초';
+    gameMsg.style.display = 'none';
+    btnStart.disabled = true;
+    btnStart.style.opacity = '0.5';
+
+    // 30초 카운트다운 타이머
+    gameTimer = setInterval(function () {
+      timeLeft--;
+      timeLeftEl.textContent = timeLeft + '초';
+      if (timeLeft <= 0) {
+        endGame();
+      }
+    }, 1000);
+
+    popupMole();
+  }
+
+  function evaluateScore(s) {
+    if (s >= 30) return '👑 전설의 두더지 사냥꾼! 놀라운 순발력입니다.';
+    if (s >= 20) return '🔥 대단해요! 뛰어난 반응속도를 보여주셨습니다.';
+    if (s >= 10) return '👍 훌륭합니다! 조금만 더 연습하면 최고 기록!';
+    return '🌱 손가락을 풀고 한 번 더 도전해 보세요!';
+  }
+
+  function endGame() {
+    isPlaying = false;
+    clearInterval(gameTimer);
+    clearTimeout(moleTimer);
+
+    for (var i = 0; i < holes.length; i++) {
+      holes[i].classList.remove('up', 'hit');
+    }
+
+    saveBestScore(score);
+    btnStart.disabled = false;
+    btnStart.style.opacity = '1';
+    btnStart.textContent = '다시 시작';
+
+    var evalText = evaluateScore(score);
+    gameMsg.className = 'game-msg over';
+    gameMsg.innerHTML = '🎉 시간 종료! 총 <b>' + score + '마리</b>를 잡았습니다.<br><span style="font-size:14px; font-weight:600;">' + evalText + '</span>';
+  }
+
+  function resetGame() {
+    isPlaying = false;
+    clearInterval(gameTimer);
+    clearTimeout(moleTimer);
+
+    for (var i = 0; i < holes.length; i++) {
+      holes[i].classList.remove('up', 'hit');
+    }
+
+    score = 0;
+    timeLeft = GAME_DURATION;
+    scoreTextEl.textContent = '0마리';
+    timeLeftEl.textContent = timeLeft + '초';
+    gameMsg.style.display = 'none';
+    btnStart.disabled = false;
+    btnStart.style.opacity = '1';
+    btnStart.textContent = '게임 시작';
+  }
+
+  for (var i = 0; i < holes.length; i++) {
+    (function (h) {
+      h.addEventListener('click', function (e) {
+        e.preventDefault();
+        whack(h);
+      });
+    })(holes[i]);
+  }
+
+  btnStart.addEventListener('click', function () {
+    startGame();
+  });
+
+  btnReset.addEventListener('click', function () {
+    resetGame();
+  });
+})();
+</script>
+</body>
+</html>

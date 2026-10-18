@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>부동산 용어 퀴즈 무료 | 좌표나라</title>
+<meta name="description" content="전세, 월세, 등기부등본, 전용면적, DSR 등 헷갈리는 부동산 필수 용어를 10문제 퀴즈로 쉽게 풀어보세요. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.quiz-progress { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.quiz-step { font-size:14px; font-weight:800; color:var(--sub); }
+.quiz-score-badge { font-size:13px; font-weight:700; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:4px 10px; }
+
+.q-box { margin-bottom:18px; }
+.q-title { font-size:18px; font-weight:800; line-height:1.45; color:var(--ink); margin:0 0 8px; word-break:keep-all; }
+.q-sub { font-size:13px; color:var(--sub); margin:0; }
+
+.opt-list { display:grid; gap:10px; margin-bottom:16px; }
+.opt-btn {
+  display:block; width:100%; min-height:48px; padding:12px 14px;
+  background:#fff; color:var(--ink); border:1.5px solid var(--line); border-radius:12px;
+  font:inherit; font-size:15px; font-weight:600; text-align:left; line-height:1.4;
+  cursor:pointer; -webkit-tap-highlight-color:transparent; transition:border-color 0.15s, background-color 0.15s;
+}
+.opt-btn:active { background:var(--soft); }
+.opt-btn.correct { background:#e6f6ef !important; border-color:var(--ok) !important; color:var(--ok) !important; font-weight:800; }
+.opt-btn.wrong { background:#fff1f0 !important; border-color:var(--danger) !important; color:var(--danger) !important; font-weight:700; }
+.opt-btn:disabled { cursor:default; }
+
+/* 해설 박스 */
+.explain-box {
+  background:var(--bg); border:1.5px solid var(--line); border-radius:12px;
+  padding:14px 16px; margin-bottom:16px; display:none; animation:fadeIn 0.2s ease;
+}
+.explain-box.show { display:block; }
+.explain-badge { display:inline-block; font-size:13px; font-weight:800; padding:2px 8px; border-radius:6px; margin-bottom:6px; }
+.explain-badge.correct { background:#e6f6ef; color:var(--ok); }
+.explain-badge.wrong { background:#fff1f0; color:var(--danger); }
+.explain-text { font-size:14px; line-height:1.5; color:var(--ink); margin:0; word-break:keep-all; }
+
+/* 하단 버튼 */
+.btn-next {
+  display:none; width:100%; min-height:48px; border:none; border-radius:12px;
+  background:var(--red); color:#fff; font:inherit; font-size:16px; font-weight:800;
+  cursor:pointer; text-align:center;
+}
+.btn-next:active { opacity:0.85; }
+.btn-next.show { display:block; }
+
+/* 결과 화면 */
+.res-container { display:none; }
+.res-header { text-align:center; padding:20px 10px; background:#fff; border:1.5px solid var(--line); border-radius:16px; margin-bottom:16px; }
+.res-big-score { font-size:42px; font-weight:900; color:var(--red); line-height:1.1; margin-bottom:6px; }
+.res-msg { font-size:17px; font-weight:800; color:var(--ink); margin-bottom:6px; }
+.res-best { font-size:13px; color:var(--sub); }
+
+.review-list { display:grid; gap:12px; margin-bottom:18px; }
+.review-item {
+  background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:14px;
+}
+.review-num { font-size:13px; font-weight:800; color:var(--red); margin-bottom:4px; }
+.review-q { font-size:15px; font-weight:700; color:var(--ink); margin-bottom:6px; line-height:1.4; }
+.review-ans { font-size:14px; color:var(--ok); font-weight:700; margin-bottom:4px; }
+.review-exp { font-size:13px; color:var(--sub); line-height:1.45; margin:0; }
+
+.btn-restart {
+  display:block; width:100%; min-height:48px; border:none; border-radius:12px;
+  background:#2c2c2e; color:#fff; font:inherit; font-size:16px; font-weight:800;
+  cursor:pointer; text-align:center; margin-bottom:12px;
+}
+.btn-restart:active { background:#3a3a3c; }
+
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(4px); }
+  to { opacity:1; transform:translateY(0); }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>부동산 용어 퀴즈</h1>
+  <p class="lead">헷갈리기 쉬운 부동산 기초 용어 10문제를 풀어보세요.</p>
+
+  <!-- 퀴즈 진행 화면 -->
+  <section class="card" id="quizCard">
+    <div class="quiz-progress">
+      <span class="quiz-step" id="quizStep">문제 1 / 10</span>
+      <span class="quiz-score-badge" id="quizCurrentScore">맞힌 문제: 0개</span>
+    </div>
+
+    <div class="q-box">
+      <h2 class="q-title" id="qText"></h2>
+      <p class="q-sub">알맞은 설명을 골라보세요.</p>
+    </div>
+
+    <div class="opt-list" id="optList"></div>
+
+    <div class="explain-box" id="explainBox">
+      <div class="explain-badge" id="explainBadge"></div>
+      <p class="explain-text" id="explainText"></p>
+    </div>
+
+    <button type="button" class="btn-next" id="btnNext">다음 문제로 넘어가기</button>
+  </section>
+
+  <!-- 결과 화면 -->
+  <section class="res-container" id="resCard">
+    <div class="res-header">
+      <div class="res-big-score" id="resScore">0점</div>
+      <div class="res-msg" id="resMsg"></div>
+      <div class="res-best" id="resBest">최고 기록: -</div>
+    </div>
+
+    <div class="card" id="reviewCard" style="display:none;">
+      <h3 style="font-size:16px; margin:0 0 12px; color:var(--ink);">틀린 문제 다시 보기</h3>
+      <div class="review-list" id="reviewList"></div>
+    </div>
+
+    <button type="button" class="btn-restart" id="btnRestart">새로운 10문제 다시 풀기</button>
+
+    <div class="card" style="padding:14px; margin-bottom:14px;">
+      <a href="../pyeong/" style="display:flex; justify-content:space-between; align-items:center; text-decoration:none; color:var(--ink);">
+        <div>
+          <b style="display:block; font-size:15px; margin-bottom:2px;">평 ↔ 제곱미터 바꾸기</b>
+          <span style="font-size:13px; color:var(--sub);">아파트 몇 평인지 바로 계산해 보기</span>
+        </div>
+        <span style="font-size:18px; color:var(--sub); font-weight:700;">→</span>
+      </a>
+    </div>
+  </section>
+
+  <p class="note">※ 용어의 일반적인 뜻과 기초 개념이며, 실제 부동산 계약은 서류와 전문가를 통해 꼼꼼히 확인하세요.</p>
+
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 진행되나요?</summary>
+    <ul>
+      <li>20개 이상의 부동산 기초 개념 풀에서 10문제가 무작위로 출제됩니다.</li>
+      <li>문제를 풀 때마다 정답 여부와 핵심 요약 풀이를 바로 확인할 수 있습니다.</li>
+      <li>시험이 끝나면 맞힌 점수와 틀린 문제의 정답 풀이를 모아서 보여 줍니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // 22개 기초 부동산 용어 풀(법적 효과·세율·기간 같은 규정은 뺐다)
+  var QUESTION_POOL = [
+    {
+      q: '매달 내는 월세 없이, 계약할 때 목돈(보증금)을 맡겨두고 계약 만료 시 전액 돌려받는 우리나라 고유의 주거 형태는?',
+      ans: '전세',
+      opts: ['전세', '월세', '반전세', '매매'],
+      exp: '전세는 목돈의 보증금을 맡기고 월세 없이 거주한 뒤, 만기 때 보증금을 전액 돌려받는 임대차 방식입니다.'
+    },
+    {
+      q: '임대인에게 보증금을 맡기고, 매월 일정한 방세(차임)를 지급하며 집을 빌려 쓰는 방식은?',
+      ans: '월세',
+      opts: ['월세', '전세', '매매', '분양'],
+      exp: '월세는 매달 일정한 차임을 집주인에게 지불하며 거주하는 방식입니다.'
+    },
+    {
+      q: '일반적인 전세보다 보증금을 낮추는 대신, 매달 일정 금액의 월세를 함께 내는 임대차 방식은?',
+      ans: '반전세 (보증부 월세)',
+      opts: ['반전세 (보증부 월세)', '전세', '매매', '공공임대'],
+      exp: '반전세는 전세 보증금의 일부를 월세로 돌려 보증금과 월세를 동시에 부담하는 형태입니다.'
+    },
+    {
+      q: '임대차 계약 시 세입자의 월세 미납이나 시설 파손 등의 채무를 담보하기 위해 집주인에게 미리 맡겨두는 돈은?',
+      ans: '보증금',
+      opts: ['보증금', '중개보수', '관리비', '계약금'],
+      exp: '보증금은 세입자의 계약상 채무를 담보하기 위해 임대인에게 맡겨두며, 계약 종료 시 정산 후 반환받습니다.'
+    },
+    {
+      q: '부동산 거래에서 집이나 건물을 다른 사람에게 대가를 받고 빌려주는 사람(집주인)을 뜻하는 말은?',
+      ans: '임대인',
+      opts: ['임대인', '임차인', '매수인', '중개보조원'],
+      exp: '빌려주는 사람을 임대인, 대가를 치르고 빌려 쓰는 세입자를 임차인이라고 합니다.'
+    },
+    {
+      q: '대금을 지급하고 부동산의 소유권을 다른 사람으로부터 완전히 넘겨받는 거래 형태는?',
+      ans: '매매',
+      opts: ['매매', '임대차', '전세권설정', '점유'],
+      exp: '매매는 대금을 치르고 소유권을 이전받아 내 집으로 만드는 거래입니다.'
+    },
+    {
+      q: '아파트 현관문 안쪽에서 방, 거실, 주방, 화장실 등 거주자가 독립적으로 사용하는 순수 실내 바닥 면적은?',
+      ans: '전용면적',
+      opts: ['전용면적', '공급면적', '주거공용면적', '대지지분'],
+      exp: '전용면적은 현관문 안쪽의 순수한 독립 주거 공간을 뜻합니다.'
+    },
+    {
+      q: '전용면적에 복도, 계단, 엘리베이터 등 입주자들이 함께 쓰는 주거공용면적을 합한 면적은?',
+      ans: '공급면적',
+      opts: ['공급면적', '전용면적', '서비스면적', '연면적'],
+      exp: '공급면적은 전용면적과 주거공용면적(복도, 계단 등)을 합친 면적으로, 흔히 말하는 평형의 기준이 됩니다.'
+    },
+    {
+      q: '전용면적이나 공급면적 계산에 포함되지 않는 발코니(베란다)처럼 덧붙여진 서비스 공간 면적은?',
+      ans: '서비스면적',
+      opts: ['서비스면적', '공용면적', '대지면적', '바닥면적'],
+      exp: '서비스면적은 계약 면적이나 공용면적에 들어가지 않는 발코니 면적으로, 확장 시 실사용 공간이 넓어집니다.'
+    },
+    {
+      q: '부동산의 주소, 면적, 소유권과 근저당(대출 권리관계) 등이 적혀 있는 국가 공적 장부는?',
+      ans: '등기부등본 (등기사항전부증명서)',
+      opts: ['등기부등본 (등기사항전부증명서)', '건축물대장', '주민등록등본', '토지이용계획확인서'],
+      exp: '등기부등본은 해당 부동산의 실제 소유자가 누구인지, 대출 담보가 잡혀 있는지 확인할 수 있는 핵심 서류입니다.'
+    },
+    {
+      q: '대한민국 부동산의 등기부등본 열람 권한에 대한 올바른 설명은?',
+      ans: '누구나 주소만 알면 인터넷이나 등기소에서 열람·발급받을 수 있다',
+      opts: [
+        '누구나 주소만 알면 인터넷이나 등기소에서 열람·발급받을 수 있다',
+        '오직 집주인(소유자) 본인만 열람할 수 있다',
+        '공인중개사 자격증이 있는 사람만 열람할 수 있다',
+        '법원의 정식 허가를 받아야만 열람할 수 있다'
+      ],
+      exp: '등기부등본은 공적 장부이므로 누구나 수수료만 내면 주소 검색을 통해 자유롭게 열람 및 발급이 가능합니다.'
+    },
+    {
+      q: '집주인이 해당 집을 담보로 은행 등에서 돈을 빌렸을 때, 등기부등본에 설정되는 담보 권리는?',
+      ans: '근저당권',
+      opts: ['근저당권', '점유권', '지역권', '분양권'],
+      exp: '근저당권은 대출금을 갚지 못할 경우 은행이 해당 부동산을 경매에 넘겨 우선 변제받을 수 있는 담보 물권입니다.'
+    },
+    {
+      q: '부동산 계약을 체결할 때 계약 성립의 증거로서 가장 먼저 지불하는 착수금 성격의 대금은?',
+      ans: '계약금',
+      opts: ['계약금', '중도금', '잔금', '선수관리비'],
+      exp: '부동산 거래는 통상 계약금(계약 체결 시) → 중도금(진행 중) → 잔금(입주 시)의 순서로 지급합니다.'
+    },
+    {
+      q: '계약금 지급 후 최종 잔금을 치르기 전, 계약의 본격적인 이행 착수를 위해 중간에 지급하는 대금은?',
+      ans: '중도금',
+      opts: ['중도금', '계약금', '잔금', '취득세'],
+      exp: '중도금은 계약금과 잔금 사이에 나누어 치르는 대금입니다. 중도금이 없는 계약도 있습니다.'
+    },
+    {
+      q: '부동산 거래의 마지막 단계로, 남은 대금을 전부 치르고 집 열쇠와 등기 이전에 필요한 서류를 넘겨받는 돈은?',
+      ans: '잔금',
+      opts: ['잔금', '중도금', '계약금', '가계약금'],
+      exp: '잔금을 완납함으로써 사실상 대금 지급이 완료되며 실질적인 입주와 점유가 이루어집니다.'
+    },
+    {
+      q: '엘리베이터 유지보수, 공용 청소, 경비, 공용 전기료 등 건물을 유지·관리하기 위해 입주자가 매달 함께 부담하는 비용은?',
+      ans: '관리비',
+      opts: ['관리비', '보증금', '중개보수', '재산세'],
+      exp: '관리비는 건물의 공용 부분을 깨끗하고 안전하게 유지하기 위해 입주민들이 나누어 내는 실비용입니다.'
+    },
+    {
+      q: '대출 상환 시, 만기까지 매달 갚는 \'원금 + 이자\'의 총합 금액이 매달 똑같이 유지되는 상환 방식은?',
+      ans: '원리금균등분할상환',
+      opts: ['원리금균등분할상환', '원금균등분할상환', '만기일시상환', '거치식 상환'],
+      exp: '원리금균등은 매달 나가는 상환 금액이 일정하여 가계 지출 계획을 세우기에 가장 안정적입니다.'
+    },
+    {
+      q: '대출 상환 시, 매달 갚는 \'순수 원금\'을 똑같이 나누어 갚아 나가며 이자가 점차 줄어드는 상환 방식은?',
+      ans: '원금균등분할상환',
+      opts: ['원금균등분할상환', '원리금균등분할상환', '만기일시상환', '마이너스통장'],
+      exp: '원금균등은 처음에 내는 돈이 크고 갈수록 줄어듭니다. 같은 조건이면 원리금균등보다 총이자가 적습니다.'
+    },
+    {
+      q: '대출을 받은 뒤 원금을 바로 갚지 않고, 정해진 일정 기간 동안은 이자만 납부하는 기간을 무엇이라 하는가?',
+      ans: '거치 기간',
+      opts: ['거치 기간', '유예 기간', '약정 기간', '만기 기간'],
+      exp: '거치 기간 동안은 이자만 내므로 초기 부담은 적지만, 거치 기간이 끝나면 원금과 이자를 함께 갚아야 합니다.'
+    },
+    {
+      q: '연간 총소득 대비, 1년 동안 갚아야 하는 모든 대출의 원리금(원금+이자) 상환액이 차지하는 비율을 뜻하는 용어는?',
+      ans: 'DSR (총부채원리금상환비율)',
+      opts: ['DSR (총부채원리금상환비율)', 'LTV (주택담보인정비율)', 'DTI (총부채상환비율)', '전세가율'],
+      exp: 'DSR은 내 연봉으로 갚아야 할 모든 빚의 원금과 이자를 감당할 수 있는지 따지는 종합 상환 능력 지표입니다.'
+    },
+    {
+      q: '집의 평가 가치 대비 대출을 최대로 얼마나 받을 수 있는지 나타내는 비율을 뜻하는 용어는?',
+      ans: 'LTV (주택담보인정비율)',
+      opts: ['LTV (주택담보인정비율)', 'DSR (총부채원리금상환비율)', '용적률', '건폐율'],
+      exp: 'LTV는 집값을 기준으로 대출 가능한 상한선을 정하는 대표적인 주택담보대출 기준입니다.'
+    },
+    {
+      q: '새로 짓는 아파트의 입주자로 선정되어 완공 후 입주할 수 있는 법적인 권리를 뜻하는 말은?',
+      ans: '분양권',
+      opts: ['분양권', '입주권', '전세권', '저당권'],
+      exp: '분양권은 청약 당첨 등을 통해 건설사와 정식 분양 계약을 맺고 입주할 권리를 취득한 상태를 말합니다.'
+    }
+  ];
+
+  // 배열 섞기
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  var currentQuestions = [];
+  var currentIndex = 0;
+  var score = 0;
+  var wrongQuestions = [];
+  var answered = false;
+
+  var quizCard = document.getElementById('quizCard');
+  var quizStep = document.getElementById('quizStep');
+  var quizCurrentScore = document.getElementById('quizCurrentScore');
+  var qText = document.getElementById('qText');
+  var optList = document.getElementById('optList');
+  var explainBox = document.getElementById('explainBox');
+  var explainBadge = document.getElementById('explainBadge');
+  var explainText = document.getElementById('explainText');
+  var btnNext = document.getElementById('btnNext');
+
+  var resCard = document.getElementById('resCard');
+  var resScore = document.getElementById('resScore');
+  var resMsg = document.getElementById('resMsg');
+  var resBest = document.getElementById('resBest');
+  var reviewCard = document.getElementById('reviewCard');
+  var reviewList = document.getElementById('reviewList');
+  var btnRestart = document.getElementById('btnRestart');
+
+  function getBestScore() {
+    try {
+      var val = localStorage.getItem('zw_realestate-quiz_best');
+      return val !== null ? parseInt(val, 10) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveBestScore(val) {
+    try {
+      var prev = getBestScore();
+      if (prev === null || val > prev) {
+        localStorage.setItem('zw_realestate-quiz_best', String(val));
+      }
+    } catch (e) {}
+  }
+
+  function startQuiz() {
+    var shuffledPool = shuffle(QUESTION_POOL);
+    currentQuestions = shuffledPool.slice(0, 10);
+    currentIndex = 0;
+    score = 0;
+    wrongQuestions = [];
+    answered = false;
+
+    quizCard.style.display = 'block';
+    resCard.style.display = 'none';
+
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    answered = false;
+    var q = currentQuestions[currentIndex];
+
+    quizStep.textContent = '문제 ' + (currentIndex + 1) + ' / 10';
+    quizCurrentScore.textContent = '맞힌 문제: ' + score + '개';
+    qText.textContent = (currentIndex + 1) + '. ' + q.q;
+
+    explainBox.className = 'explain-box';
+    btnNext.className = 'btn-next';
+
+    var shuffledOpts = shuffle(q.opts);
+    optList.innerHTML = '';
+
+    for (var i = 0; i < shuffledOpts.length; i++) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'opt-btn';
+      btn.textContent = (i + 1) + ') ' + shuffledOpts[i];
+      btn.setAttribute('data-val', shuffledOpts[i]);
+      btn.addEventListener('click', onSelectAnswer);
+      optList.appendChild(btn);
+    }
+  }
+
+  function onSelectAnswer(e) {
+    if (answered) return;
+    answered = true;
+
+    var selectedBtn = e.currentTarget;
+    var selectedVal = selectedBtn.getAttribute('data-val');
+    var q = currentQuestions[currentIndex];
+    var isCorrect = (selectedVal === q.ans);
+
+    var allBtns = optList.querySelectorAll('.opt-btn');
+    for (var i = 0; i < allBtns.length; i++) {
+      allBtns[i].disabled = true;
+      if (allBtns[i].getAttribute('data-val') === q.ans) {
+        allBtns[i].classList.add('correct');
+      }
+    }
+
+    if (isCorrect) {
+      score++;
+      quizCurrentScore.textContent = '맞힌 문제: ' + score + '개';
+      explainBadge.className = 'explain-badge correct';
+      explainBadge.textContent = '정답입니다!';
+    } else {
+      selectedBtn.classList.add('wrong');
+      explainBadge.className = 'explain-badge wrong';
+      explainBadge.textContent = '아쉽네요! 정답: ' + q.ans;
+      wrongQuestions.push({
+        num: currentIndex + 1,
+        q: q.q,
+        ans: q.ans,
+        exp: q.exp
+      });
+    }
+
+    explainText.textContent = q.exp;
+    explainBox.className = 'explain-box show';
+
+    if (currentIndex < currentQuestions.length - 1) {
+      btnNext.textContent = '다음 문제로 넘어가기 ( ' + (currentIndex + 2) + ' / 10 )';
+    } else {
+      btnNext.textContent = '결과 확인하기';
+    }
+    btnNext.className = 'btn-next show';
+  }
+
+  btnNext.addEventListener('click', function () {
+    if (currentIndex < currentQuestions.length - 1) {
+      currentIndex++;
+      loadQuestion();
+    } else {
+      showResult();
+    }
+  });
+
+  function showResult() {
+    quizCard.style.display = 'none';
+    resCard.style.display = 'block';
+
+    saveBestScore(score);
+    var best = getBestScore();
+
+    resScore.textContent = (score * 10) + '점 (' + score + ' / 10)';
+    resBest.textContent = '최고 기록: ' + (best !== null ? (best * 10) + '점' : '-');
+
+    if (score === 10) {
+      resMsg.textContent = '🎉 완벽합니다! 부동산 용어 마스터!';
+    } else if (score >= 8) {
+      resMsg.textContent = '👏 훌륭해요! 기본기가 탄탄하십니다.';
+    } else if (score >= 5) {
+      resMsg.textContent = '💡 조금만 더 익히면 부동산 계약도 문제없어요!';
+    } else {
+      resMsg.textContent = '📖 기초 용어를 한 번 더 복습해 보세요!';
+    }
+
+    if (wrongQuestions.length > 0) {
+      reviewCard.style.display = 'block';
+      var html = '';
+      for (var i = 0; i < wrongQuestions.length; i++) {
+        var w = wrongQuestions[i];
+        html += '<div class="review-item">';
+        html += '<div class="review-num">Q' + w.num + '</div>';
+        html += '<div class="review-q">' + w.q + '</div>';
+        html += '<div class="review-ans">정답: ' + w.ans + '</div>';
+        html += '<p class="review-exp">' + w.exp + '</p>';
+        html += '</div>';
+      }
+      reviewList.innerHTML = html;
+    } else {
+      reviewCard.style.display = 'none';
+      reviewList.innerHTML = '';
+    }
+
+    try {
+      resCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {}
+  }
+
+  btnRestart.addEventListener('click', function () {
+    startQuiz();
+    try {
+      quizCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {}
+  });
+
+  startQuiz();
+})();
+</script>
+</body>
+</html>

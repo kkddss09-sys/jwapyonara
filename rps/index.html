@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>가위바위보 무료 게임 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 무료 가위바위보 게임. 컴퓨터와 한 판 승부를 펼치고 최고 연승 기록에 도전해 보세요.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.status-bar { display:flex; justify-content:space-between; align-items:center; background:#2c2c2e; color:#fff; border-radius:14px; padding:12px 14px; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
+.status-item { font-size:13px; font-weight:700; display:flex; align-items:center; gap:5px; }
+.status-val { font-size:17px; font-weight:800; color:#ffd60a; }
+
+/* 대결 화면 */
+.arena-box { background:#f2f2f7; border:1.5px solid var(--line); border-radius:16px; padding:18px 12px; margin-bottom:16px; text-align:center; }
+.vs-wrap { display:flex; align-items:center; justify-content:space-around; margin-bottom:12px; }
+.hand-card { display:flex; flex-direction:column; align-items:center; justify-content:center; width:110px; height:120px; background:#fff; border-radius:14px; border:2px solid var(--line); box-shadow:0 2px 6px rgba(0,0,0,0.06); transition:transform .2s ease; }
+.hand-card.winner { border-color:var(--ok); background:#f4fbf7; transform:scale(1.05); }
+.hand-card.loser { border-color:var(--line); opacity:0.6; }
+.hand-icon { font-size:48px; line-height:1.2; user-select:none; }
+.hand-owner { font-size:13px; font-weight:800; color:var(--muted); margin-top:6px; }
+.hand-choice { font-size:14px; font-weight:800; color:var(--ink); margin-top:2px; }
+.vs-badge { font-size:18px; font-weight:900; color:var(--red); padding:0 8px; user-select:none; }
+
+.result-banner { min-height:44px; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:800; border-radius:12px; padding:10px 14px; margin-bottom:4px; }
+.result-banner.win { background:#e6f6ef; color:var(--ok); }
+.result-banner.lose { background:var(--dangerbg); color:var(--danger); }
+.result-banner.draw { background:#e5e5ea; color:var(--ink); }
+.result-banner.ready { background:transparent; color:var(--muted); font-size:15px; }
+
+/* 선택 버튼 3개 */
+.choice-title { font-size:14px; font-weight:800; color:var(--ink); text-align:center; margin-bottom:10px; }
+.rps-buttons { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:14px; }
+.btn-rps { min-height:86px; border:2px solid var(--line); background:#fff; border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; touch-action:manipulation; user-select:none; -webkit-user-select:none; transition:all .15s ease; padding:8px 4px; }
+.btn-rps:active { background:var(--soft); border-color:var(--red); transform:scale(0.96); }
+.btn-rps .btn-emoji { font-size:36px; line-height:1; }
+.btn-rps .btn-label { font-size:15px; font-weight:800; color:var(--ink); margin-top:6px; }
+
+.control-bar { margin-bottom:14px; }
+.btn-reset { display:flex; align-items:center; justify-content:center; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; background:#2c2c2e; color:#fff; width:100%; touch-action:manipulation; }
+.btn-reset:active { background:#3a3a3c; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>가위바위보</h1>
+  <p class="lead">컴퓨터와 가위바위보 한 판! 연속으로 몇 번 이길 수 있을까요?</p>
+
+  <section class="card">
+    <div class="status-bar">
+      <div class="status-item">
+        <span>현재 연승</span>
+        <span class="status-val" id="currentStreak">0연승</span>
+      </div>
+      <div class="status-item">
+        <span>최고 연승</span>
+        <span class="status-val" id="bestStreak">0연승</span>
+      </div>
+      <div class="status-item">
+        <span>전적</span>
+        <span class="status-val" id="recordText">0승 0무 0패</span>
+      </div>
+    </div>
+
+    <div class="arena-box">
+      <div class="vs-wrap">
+        <div class="hand-card" id="playerCard">
+          <div class="hand-icon" id="playerIcon">❓</div>
+          <div class="hand-owner">나</div>
+          <div class="hand-choice" id="playerChoiceText">선택 대기</div>
+        </div>
+
+        <div class="vs-badge">VS</div>
+
+        <div class="hand-card" id="aiCard">
+          <div class="hand-icon" id="aiIcon">❓</div>
+          <div class="hand-owner">컴퓨터</div>
+          <div class="hand-choice" id="aiChoiceText">대기 중</div>
+        </div>
+      </div>
+
+      <div class="result-banner ready" id="resultBanner">
+        아래에서 가위, 바위, 보 중 하나를 골라보세요!
+      </div>
+    </div>
+
+    <div class="choice-title">내 손 고르기</div>
+    <div class="rps-buttons">
+      <button type="button" class="btn-rps" data-hand="scissors" aria-label="가위 내기">
+        <span class="btn-emoji">✌️</span>
+        <span class="btn-label">가위</span>
+      </button>
+      <button type="button" class="btn-rps" data-hand="rock" aria-label="바위 내기">
+        <span class="btn-emoji">✊</span>
+        <span class="btn-label">바위</span>
+      </button>
+      <button type="button" class="btn-rps" data-hand="paper" aria-label="보 내기">
+        <span class="btn-emoji">✋</span>
+        <span class="btn-label">보</span>
+      </button>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-reset" id="btnReset">전적 초기화</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0;">
+      💡 컴퓨터는 매 판 무작위로 손을 냅니다.
+    </p>
+  </section>
+
+  <p class="note">모든 게임 계산은 기기 안에서만 실행되며 외부로 데이터를 보내지 않습니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>게임 규칙:</b> 가위는 보를 이기고, 바위는 가위를 이기며, 보는 바위를 이깁니다.</li>
+      <li><b>연승 기록:</b> 승리할 때마다 연승이 쌓이고, 패배하면 연승이 0으로 초기화됩니다(무승부는 연승이 유지됩니다).</li>
+      <li><b>최고 연승:</b> 달성한 최고 연승 기록은 브라우저에 안전하게 보관됩니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var HANDS = {
+    scissors: { name: '가위', emoji: '✌️', beats: 'paper' },
+    rock: { name: '바위', emoji: '✊', beats: 'scissors' },
+    paper: { name: '보', emoji: '✋', beats: 'rock' }
+  };
+  var HAND_KEYS = ['scissors', 'rock', 'paper'];
+
+  var currentStreak = 0;
+  var wins = 0;
+  var draws = 0;
+  var losses = 0;
+
+  var currentStreakEl = document.getElementById('currentStreak');
+  var bestStreakEl = document.getElementById('bestStreak');
+  var recordTextEl = document.getElementById('recordText');
+  var playerCard = document.getElementById('playerCard');
+  var aiCard = document.getElementById('aiCard');
+  var playerIcon = document.getElementById('playerIcon');
+  var aiIcon = document.getElementById('aiIcon');
+  var playerChoiceText = document.getElementById('playerChoiceText');
+  var aiChoiceText = document.getElementById('aiChoiceText');
+  var resultBanner = document.getElementById('resultBanner');
+  var btnReset = document.getElementById('btnReset');
+  var choiceButtons = document.querySelectorAll('.btn-rps');
+
+  function getBestStreak() {
+    try {
+      var val = localStorage.getItem('zw_rps_best');
+      return val ? parseInt(val, 10) : 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  function saveBestStreak(streak) {
+    try {
+      var prev = getBestStreak();
+      if (streak > prev) {
+        localStorage.setItem('zw_rps_best', String(streak));
+        bestStreakEl.textContent = streak + '연승';
+      }
+    } catch (e) {}
+  }
+
+  function updateStatusDisplay() {
+    currentStreakEl.textContent = currentStreak + '연승';
+    bestStreakEl.textContent = getBestStreak() + '연승';
+    recordTextEl.textContent = wins + '승 ' + draws + '무 ' + losses + '패';
+  }
+
+  function play(playerHandKey) {
+    var playerHand = HANDS[playerHandKey];
+    var aiHandKey = HAND_KEYS[Math.floor(Math.random() * HAND_KEYS.length)];
+    var aiHand = HANDS[aiHandKey];
+
+    // 카드 초기화 및 표시
+    playerCard.className = 'hand-card';
+    aiCard.className = 'hand-card';
+    playerIcon.textContent = playerHand.emoji;
+    playerChoiceText.textContent = playerHand.name;
+    aiIcon.textContent = aiHand.emoji;
+    aiChoiceText.textContent = aiHand.name;
+
+    // 승패 판정
+    if (playerHandKey === aiHandKey) {
+      draws++;
+      resultBanner.className = 'result-banner draw';
+      resultBanner.textContent = '무승부입니다! 🤝 (연승 유지)';
+    } else if (playerHand.beats === aiHandKey) {
+      wins++;
+      currentStreak++;
+      saveBestStreak(currentStreak);
+      playerCard.classList.add('winner');
+      aiCard.classList.add('loser');
+      resultBanner.className = 'result-banner win';
+      resultBanner.textContent = '🎉 이겼습니다! (' + currentStreak + '연승 달성)';
+    } else {
+      losses++;
+      currentStreak = 0;
+      playerCard.classList.add('loser');
+      aiCard.classList.add('winner');
+      resultBanner.className = 'result-banner lose';
+      resultBanner.textContent = '😢 아쉽게 졌습니다. 연승이 끝났습니다.';
+    }
+
+    updateStatusDisplay();
+  }
+
+  for (var i = 0; i < choiceButtons.length; i++) {
+    (function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var hand = btn.getAttribute('data-hand');
+        if (hand) play(hand);
+      });
+    })(choiceButtons[i]);
+  }
+
+  btnReset.addEventListener('click', function () {
+    currentStreak = 0;
+    wins = 0;
+    draws = 0;
+    losses = 0;
+    playerCard.className = 'hand-card';
+    aiCard.className = 'hand-card';
+    playerIcon.textContent = '❓';
+    playerChoiceText.textContent = '선택 대기';
+    aiIcon.textContent = '❓';
+    aiChoiceText.textContent = '대기 중';
+    resultBanner.className = 'result-banner ready';
+    resultBanner.textContent = '새로운 대결! 가위, 바위, 보를 골라보세요.';
+    updateStatusDisplay();
+  });
+
+  updateStatusDisplay();
+})();
+</script>
+</body>
+</html>

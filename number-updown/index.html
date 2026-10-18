@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>숫자 맞히기 업다운 무료 게임 | 좌표나라</title>
+<meta name="description" content="1부터 100까지 숨겨진 숫자를 찾아라! UP & DOWN 힌트로 숫자를 맞히는 두뇌 추리 게임. 가입 없이 바로 즐겨보세요.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.status-bar { display:flex; justify-content:space-between; align-items:center; background:#2c2c2e; color:#fff; border-radius:14px; padding:12px 16px; margin-bottom:14px; }
+.status-item { font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; }
+.status-val { font-size:18px; font-weight:800; color:#ffd60a; }
+
+/* 범위 표시 카드 */
+.range-box { background:var(--bg); border:1.5px solid var(--line); border-radius:14px; padding:14px 16px; text-align:center; margin-bottom:14px; }
+.range-title { font-size:13px; font-weight:700; color:var(--sub); margin-bottom:6px; }
+.range-values { font-size:22px; font-weight:900; color:var(--ink); display:flex; justify-content:center; align-items:center; gap:12px; }
+.range-values span { color:var(--red); }
+
+/* 입력 폼 */
+.input-row { display:flex; gap:8px; margin-bottom:14px; }
+.inp-guess { flex:1; min-width:0; border:1.5px solid var(--line); border-radius:12px; background:#fff; font:inherit; font-size:20px; font-weight:800; padding:12px 14px; text-align:center; color:var(--ink); outline:none; }
+.inp-guess:focus { border-color:var(--red); }
+.btn-submit { flex:none; width:90px; min-height:48px; border:none; border-radius:12px; background:var(--red); color:#fff; font:inherit; font-size:16px; font-weight:800; cursor:pointer; }
+.btn-submit:active { opacity:0.85; }
+.btn-submit:disabled { background:var(--line); color:var(--sub); cursor:not-allowed; }
+
+/* 피드백 힌트 메시지 */
+.feedback-box { text-align:center; padding:16px; border-radius:14px; font-size:18px; font-weight:900; margin-bottom:14px; display:none; }
+.feedback-box.up { background:var(--soft); color:var(--red); display:block; }
+.feedback-box.down { background:#e8f2ff; color:#007aff; display:block; }
+.feedback-box.win { background:#e6f6ef; color:var(--ok); display:block; }
+
+/* 시도 기록 리스트 */
+.history-section { border-top:1px solid var(--line); padding-top:14px; margin-top:14px; }
+.history-title { font-size:14px; font-weight:700; color:var(--sub); margin-bottom:10px; display:flex; justify-content:space-between; }
+.history-chips { display:flex; flex-wrap:wrap; gap:8px; }
+.guess-chip { background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:6px 12px; font-size:14px; font-weight:800; display:flex; align-items:center; gap:6px; }
+.chip-up { border-color:var(--red); color:var(--red); background:var(--soft); }
+.chip-down { border-color:#007aff; color:#007aff; background:#e8f2ff; }
+.chip-win { border-color:var(--ok); color:var(--ok); background:#e6f6ef; }
+
+.control-bar { margin-top:14px; }
+.btn-reset { display:flex; align-items:center; justify-content:center; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; background:#2c2c2e; color:#fff; width:100%; }
+.btn-reset:active { background:#3a3a3c; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>숫자 맞히기</h1>
+  <p class="lead">1부터 100까지 숨겨진 숫자를 UP & DOWN 힌트로 맞혀 보세요.</p>
+
+  <section class="card">
+    <div class="status-bar">
+      <div class="status-item">
+        <span>시도 횟수</span>
+        <span class="status-val" id="tryCount">0회</span>
+      </div>
+      <div class="status-item">
+        <span>최소 시도 최고</span>
+        <span class="status-val" id="bestScore">-</span>
+      </div>
+    </div>
+
+    <div class="range-box">
+      <div class="range-title">현재 유력한 숫자 범위</div>
+      <div class="range-values">
+        <span id="rangeMin">1</span>
+        <div>~</div>
+        <span id="rangeMax">100</span>
+      </div>
+    </div>
+
+    <form class="input-row" id="guessForm" onsubmit="return false;">
+      <input type="number" class="inp-guess" id="guessInput" min="1" max="100" placeholder="1~100 숫자 입력" inputmode="numeric" autocomplete="off">
+      <button type="submit" class="btn-submit" id="btnSubmit">확인</button>
+    </form>
+
+    <div class="feedback-box" id="feedbackBox"></div>
+
+    <div class="history-section">
+      <div class="history-title">
+        <span>입력한 기록</span>
+        <span id="historyCountText">0개</span>
+      </div>
+      <div class="history-chips" id="historyChips">
+        <span style="color:var(--sub); font-size:14px;">숫자를 입력하고 확인을 누르세요.</span>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-reset" id="btnReset">새 숫자로 다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0;">
+      💡 숫자를 하나씩 넣을 때마다 범위가 줄어듭니다. 절반씩 좁혀 가면 더 빨리 맞힐 수 있어요!
+    </p>
+  </section>
+
+  <p class="note">정답 숫자는 매 게임마다 1부터 100 사이에서 완전히 무작위로 생성됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>게임 목표:</b> 컴퓨터가 마음속으로 정한 1~100 사이의 비밀 숫자를 최소한의 횟수로 알아내는 게임입니다.</li>
+      <li><b>UP / DOWN 힌트:</b> 내가 넣은 숫자보다 정답이 더 크면 <b>UP</b>, 더 작으면 <b>DOWN</b>을 알려줍니다.</li>
+      <li><b>이진 탐색 팁:</b> 50처럼 중간 숫자를 먼저 넣어 범위를 반씩 줄여 나가면 7번 안팎으로 무조건 맞힐 수 있습니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var targetNumber = 0;
+  var tryCount = 0;
+  var minRange = 1;
+  var maxRange = 100;
+  var isWon = false;
+  var guesses = []; // { num, result }
+
+  var tryCountEl = document.getElementById('tryCount');
+  var bestScoreEl = document.getElementById('bestScore');
+  var rangeMinEl = document.getElementById('rangeMin');
+  var rangeMaxEl = document.getElementById('rangeMax');
+  var guessForm = document.getElementById('guessForm');
+  var guessInput = document.getElementById('guessInput');
+  var btnSubmit = document.getElementById('btnSubmit');
+  var feedbackBox = document.getElementById('feedbackBox');
+  var historyChips = document.getElementById('historyChips');
+  var historyCountText = document.getElementById('historyCountText');
+  var btnReset = document.getElementById('btnReset');
+
+  function getBestScore() {
+    try {
+      var val = localStorage.getItem('zw_number-updown_best');
+      return val ? parseInt(val, 10) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveBestScore(count) {
+    try {
+      var prev = getBestScore();
+      if (prev === null || count < prev) {
+        localStorage.setItem('zw_number-updown_best', String(count));
+        updateBestDisplay();
+      }
+    } catch (e) {}
+  }
+
+  function updateBestDisplay() {
+    var best = getBestScore();
+    bestScoreEl.textContent = best !== null ? best + '회' : '-';
+  }
+
+  updateBestDisplay();
+
+  function startNewGame() {
+    targetNumber = Math.floor(Math.random() * 100) + 1;
+    tryCount = 0;
+    minRange = 1;
+    maxRange = 100;
+    isWon = false;
+    guesses = [];
+
+    tryCountEl.textContent = '0회';
+    rangeMinEl.textContent = '1';
+    rangeMaxEl.textContent = '100';
+    guessInput.value = '';
+    guessInput.disabled = false;
+    btnSubmit.disabled = false;
+    feedbackBox.style.display = 'none';
+    feedbackBox.className = 'feedback-box';
+    historyCountText.textContent = '0개';
+    historyChips.innerHTML = '<span style="color:var(--sub); font-size:14px;">숫자를 입력하고 확인을 누르세요.</span>';
+    guessInput.focus();
+  }
+
+  function renderHistory() {
+    historyCountText.textContent = guesses.length + '개';
+    if (guesses.length === 0) {
+      historyChips.innerHTML = '<span style="color:var(--sub); font-size:14px;">숫자를 입력하고 확인을 누르세요.</span>';
+      return;
+    }
+
+    var html = '';
+    for (var i = guesses.length - 1; i >= 0; i--) {
+      var g = guesses[i];
+      var cls = g.result === 'UP' ? 'chip-up' : (g.result === 'DOWN' ? 'chip-down' : 'chip-win');
+      var icon = g.result === 'UP' ? '▲ UP' : (g.result === 'DOWN' ? '▼ DOWN' : '★ 정답');
+      html += '<div class="guess-chip ' + cls + '"><span>' + g.num + '</span><b>' + icon + '</b></div>';
+    }
+    historyChips.innerHTML = html;
+  }
+
+  function handleGuess() {
+    if (isWon) return;
+
+    var val = parseInt(guessInput.value, 10);
+    if (isNaN(val) || val < 1 || val > 100) {
+      alert('1부터 100 사이의 숫자를 입력해 주세요.');
+      guessInput.focus();
+      return;
+    }
+
+    tryCount++;
+    tryCountEl.textContent = tryCount + '회';
+
+    if (val === targetNumber) {
+      isWon = true;
+      saveBestScore(tryCount);
+      guesses.push({ num: val, result: 'WIN' });
+      feedbackBox.className = 'feedback-box win';
+      feedbackBox.innerHTML = '🎉 정답입니다! <b>' + targetNumber + '</b>을(를) ' + tryCount + '번 만에 맞히셨습니다!';
+      guessInput.disabled = true;
+      btnSubmit.disabled = true;
+    } else if (val < targetNumber) {
+      if (val >= minRange) minRange = val + 1;
+      guesses.push({ num: val, result: 'UP' });
+      feedbackBox.className = 'feedback-box up';
+      feedbackBox.innerHTML = '🔼 <b>UP!</b> ' + val + '보다 더 큰 숫자입니다.';
+    } else {
+      if (val <= maxRange) maxRange = val - 1;
+      guesses.push({ num: val, result: 'DOWN' });
+      feedbackBox.className = 'feedback-box down';
+      feedbackBox.innerHTML = '🔽 <b>DOWN!</b> ' + val + '보다 더 작은 숫자입니다.';
+    }
+
+    rangeMinEl.textContent = String(minRange);
+    rangeMaxEl.textContent = String(maxRange);
+    renderHistory();
+
+    guessInput.value = '';
+    if (!isWon) {
+      guessInput.focus();
+    }
+  }
+
+  guessForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    handleGuess();
+  });
+
+  btnReset.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  startNewGame();
+})();
+</script>
+</body>
+</html>

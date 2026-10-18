@@ -13,9 +13,9 @@ var LINKS = {
 var YT_LIST = { '휴대폰': 'UUBvT1VuPrklJ9rV4a5-s-Sw', '부동산': '' };
 
 // ▼ 큰 분류(첫 화면의 탭). 순서대로 보인다.
-var CAT_PATH = { '휴대폰': 'phone', '부동산': 'realestate', '생활': 'life', '단축키': 'shortcuts', '재미': 'fun' };   // 하위 쪽(분류 첫 화면) 폴더. 2026-10-19 사용자 요청: 사이트를 상위(첫 화면)·하위(분류별 쪽)로 나눔
-var CAT_DESC = { '휴대폰': '살 때 비교, 바꾸기 전 확인표, 성지가 처음이라면', '부동산': '대출·전월세·청약·면적 계산과 상담지', '생활': '나이·퍼센트·큐알·사진 줄이기', '단축키': '윈도우·크롬·갤럭시·아이폰 숨은 기능', '재미': '테스트·추첨·사다리·간단한 게임' };
-var CATS = ['휴대폰', '부동산', '생활', '단축키', '재미'];   // 단축키 = 2026-10-15 사용자 요청(따로 한 분류) · 생활 = 누구나 쓰는 도구(공학용 계산기, 그림판 등). 2026-10-12 사용자 요청
+var CAT_PATH = { '휴대폰': 'phone', '부동산': 'realestate', '생활': 'life', '단축키': 'shortcuts', '재미': 'fun', '게임': 'games' };   // 하위 쪽(분류 첫 화면) 폴더. 2026-10-19 사용자 요청: 사이트를 상위(첫 화면)·하위(분류별 쪽)로 나눔
+var CAT_DESC = { '휴대폰': '살 때 비교, 바꾸기 전 확인표, 성지가 처음이라면', '부동산': '대출·전월세·청약·면적 계산과 상담지', '생활': '나이·퍼센트·큐알·사진 줄이기', '단축키': '윈도우·크롬·갤럭시·아이폰 숨은 기능', '재미': '성향 테스트·추첨·사다리 타기', '게임': '지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판' };
+var CATS = ['휴대폰', '부동산', '생활', '단축키', '재미', '게임'];   // 단축키 = 2026-10-15 사용자 요청(따로 한 분류) · 생활 = 누구나 쓰는 도구(공학용 계산기, 그림판 등). 2026-10-12 사용자 요청
 
 // ▼ 도구 목록: [폴더 이름, 화면에 보일 이름, 한 줄 설명, 큰 분류, 만들어졌는지, 작은 묶음]
 var TOOLS = [
@@ -61,6 +61,9 @@ var TOOLS = [
   ['cheongyak', '청약 가점 계산기', '84점 만점 내 점수', '부동산', true, '살 때와 팔 때'],
   ['', '취득세 계산기', '집 살 때 세금', '부동산', false, '세금과 비용'],
   ['', '중개 보수 계산기', '복비가 얼마일까', '부동산', false, '세금과 비용'],
+  ['realestate-quiz', '부동산 용어 퀴즈', '처음 듣는 말, 알고 있나요?', '부동산', true, '퀴즈와 테스트'],
+  ['pyeong-sense', '평수 감각 게임', '㎡를 보고 몇 평인지 맞혀 보기', '부동산', true, '퀴즈와 테스트'],
+  ['home-type-test', '나에게 맞는 주거 스타일', '질문 6개로 보는 내 취향', '부동산', true, '퀴즈와 테스트'],
 
   ['hogang-test', '나는 호갱일까? 테스트', '살 때 얼마나 준비됐는지', '휴대폰', true, '살 때 비교'],
   ['ask-ai', 'AI에게 물어볼 말 만들기', '견적·요금제·아파트·전세 질문 글을 대신 짜 줌', '휴대폰', true, '살 때 비교'],
@@ -68,9 +71,9 @@ var TOOLS = [
   ['phone-test', '나에게 맞는 폰 테스트', '갤럭시일까 아이폰일까', '재미', true, '테스트와 뽑기'],
   ['draw', '추첨기', '이름을 넣고 뽑기', '재미', true, '테스트와 뽑기'],
   ['ladder', '사다리 타기', '순서와 당번 정하기', '재미', true, '테스트와 뽑기'],
-  ['minesweeper', '지뢰찾기', '깃발 꽂고 지뢰 피하기', '재미', true, '게임'],
-  ['merge-numbers', '숫자 합치기', '같은 숫자를 밀어서 합치기', '재미', true, '게임'],
-  ['memory-match', '휴대폰 짝 맞추기', '같은 그림 두 장 찾기', '재미', true, '게임'],
+  ['minesweeper', '지뢰찾기', '깃발 꽂고 지뢰 피하기', '게임', true, '퍼즐'],
+  ['merge-numbers', '숫자 합치기', '같은 숫자를 밀어서 합치기', '게임', true, '퍼즐'],
+  ['memory-match', '휴대폰 짝 맞추기', '같은 그림 두 장 찾기', '게임', true, '퍼즐'],
   ['sci-calc', '공학용 계산기', '삼각함수, 로그, 제곱, 괄호', '생활', true, '계산'],
   ['paint', '그림판', '바로 그리고 저장하기', '생활', true, '글과 그림'],
   ['age', '만 나이 계산기', '만 나이, 연 나이, 다음 생일', '생활', true, '계산'],
@@ -84,12 +87,41 @@ var TOOLS = [
   ['shortcut-windows', '윈도우 단축키', '캡처, 창 나누기, 클립보드 기록', '단축키', true, '컴퓨터'],
   ['shortcut-chrome', '크롬 단축키', '닫은 탭 다시 열기, 시크릿 창', '단축키', true, '컴퓨터'],
   ['shortcut-galaxy', '갤럭시 단축키·숨은 기능', '캡처, 강제 재시작, 커서 이동', '단축키', true, '휴대폰'],
-  ['shortcut-iphone', '아이폰 단축키·숨은 기능', '캡처, 강제 재시작, 뒷면 탭', '단축키', true, '휴대폰']
+  ['shortcut-iphone', '아이폰 단축키·숨은 기능', '캡처, 강제 재시작, 뒷면 탭', '단축키', true, '휴대폰'],
+  ['snake', '뱀 게임', '먹이를 먹고 길어지기', '게임', true, '반응과 손맛'],
+  ['tictactoe', '틱택토', '컴퓨터와 세 줄 만들기', '게임', true, '두뇌'],
+  ['reaction-time', '반응속도 테스트', '화면이 바뀌면 바로 누르기', '게임', true, '반응과 손맛'],
+  ['number-updown', '숫자 맞히기', '업 다운으로 숫자 찾기', '게임', true, '두뇌'],
+  ['whack-mole', '두더지 잡기', '튀어나온 두더지 누르기', '게임', true, '반응과 손맛'],
+  ['rps', '가위바위보', '컴퓨터와 한 판', '게임', true, '두뇌'],
+  ['number-baseball', '숫자 야구', '스트라이크와 볼로 세 자리 맞히기', '게임', true, '두뇌'],
+  ['slide-puzzle', '숫자 밀기 퍼즐', '1부터 순서대로 맞추기', '게임', true, '퍼즐'],
+  ['lights-out', '불 끄기 퍼즐', '눌러서 모든 불 끄기', '게임', true, '퍼즐'],
+  ['color-memory', '색깔 기억하기', '불이 켜진 순서를 따라 누르기', '게임', true, '두뇌']
 ];
+
+// ▼ 게임 순위표 — 2026-10-19 사용자 요청. 서버 주소(RANK_API)가 비어 있으면 순위표 카드는 나오지 않는다.
+// 서버를 올린 뒤 주소를 넣는다(예: 'https://jwapyonara-rank.계정이름.workers.dev'). 서버 쪽 게임 목록은 _순위서버/src/index.js의 GAMES와 같게 둔다.
+// better: 'high' 클수록 좋음 · 'low' 작을수록 좋음 / unit: 점수 뒤에 붙는 말
+var RANK_API = '';
+var RANKS = {
+  'snake': { label: '뱀 게임 · 점수', better: 'high', unit: '점' },
+  'tictactoe': { label: '틱택토 · 최고 연승', better: 'high', unit: '연승' },
+  'reaction-time': { label: '반응속도 · 가장 빠른 기록', better: 'low', unit: 'ms' },
+  'number-updown': { label: '숫자 맞히기 · 가장 적은 횟수', better: 'low', unit: '번' },
+  'whack-mole': { label: '두더지 잡기 · 점수', better: 'high', unit: '점' },
+  'rps': { label: '가위바위보 · 최고 연승', better: 'high', unit: '연승' },
+  'number-baseball': { label: '숫자 야구 · 가장 적은 횟수', better: 'low', unit: '번' },
+  'slide-puzzle': { label: '숫자 밀기 · 가장 적게 움직인 횟수', better: 'low', unit: '번', variants: [{ id: 'slide-puzzle-3', key: 'zw_slide-puzzle_best_3', name: '3×3' }, { id: 'slide-puzzle-4', key: 'zw_slide-puzzle_best_4', name: '4×4' }] },
+  'lights-out': { label: '불 끄기 · 가장 적게 누른 횟수', better: 'low', unit: '번' },
+  'color-memory': { label: '색깔 기억하기 · 최고 단계', better: 'high', unit: '단계' },
+  'realestate-quiz': { label: '부동산 용어 퀴즈 · 맞힌 개수', better: 'high', unit: '개' },
+  'pyeong-sense': { label: '평수 감각 · 맞힌 개수', better: 'high', unit: '개' }
+};
 
 // ▼ 숫자 도우미 — 도구마다 다시 만들지 않게 여기 둔다
 var ZW = {
-  LINKS: LINKS, CATS: CATS, CAT_PATH: CAT_PATH, CAT_DESC: CAT_DESC, TOOLS: TOOLS, YT_LIST: YT_LIST,
+  LINKS: LINKS, RANK_API: RANK_API, RANKS: RANKS, CATS: CATS, CAT_PATH: CAT_PATH, CAT_DESC: CAT_DESC, TOOLS: TOOLS, YT_LIST: YT_LIST,
   num: function (s) { return Number(String(s).replace(/[^\d]/g, '')) || 0; },                 // "1,500,000" → 1500000
   dec: function (s) { s = String(s).replace(/[^\d.]/g, ''); var i = s.indexOf('.'); return i < 0 ? s : s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, ''); },
   fmt: function (n) { return Math.round(n).toLocaleString('ko-KR'); },                         // 1500000 → "1,500,000"
@@ -230,6 +262,34 @@ ZW.app = function (cfg) {
            : (LINKS.youtube['휴대폰'] ? out(LINKS.youtube['휴대폰'], '휴대폰 정보 유튜브') : '') + (LINKS.youtube['부동산'] ? out(LINKS.youtube['부동산'], '부동산 정보 유튜브') : ''));
   foot.innerHTML = '<div class="links">' + links + '</div><p>좌표나라 · 휴대폰과 부동산, 무료 도구 모음</p><p>좌표나라® 등록상표 제40-1790026호</p><p>가입 없이 쓰고, 넣은 값은 어디에도 저장하지 않습니다.</p>';
   document.body.appendChild(foot);
+
+  // 앱처럼 설치 단추 — 브라우저가 멋대로 설치를 권하는 창은 막고(preventDefault), 방문자가 이 단추를 눌렀을 때만 설치를 묻는다.
+  // manifest가 연결된 쪽(첫 화면·부동산 상담 한 장)에만 나오고, 이미 설치해서 연 화면에서는 나오지 않는다. 2026-10-19 사용자 요청
+  if (document.querySelector('link[rel="manifest"]') && !(window.matchMedia && matchMedia('(display-mode: standalone)').matches) && !navigator.standalone) {
+    var deferred = null, ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    var box = document.createElement('div');
+    box.className = 'zw-install';
+    box.innerHTML = '<button type="button">앱처럼 설치하기 (선택)</button><p></p>';
+    foot.insertBefore(box, foot.querySelector('p'));
+    var ibtn = box.querySelector('button'), itip = box.querySelector('p');
+    window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; });
+    window.addEventListener('appinstalled', function () { box.style.display = 'none'; });
+    ibtn.addEventListener('click', function () {
+      if (deferred) { deferred.prompt(); deferred.userChoice.then(function () { deferred = null; }); itip.textContent = ''; }
+      else if (ios) itip.textContent = '아래쪽 공유 단추(네모에 위쪽 화살표)를 누르고 "홈 화면에 추가"를 고르세요.';
+      else itip.textContent = '브라우저 메뉴(점 세 개)에서 "앱 설치" 또는 "홈 화면에 추가"를 고르세요.';
+    });
+  }
+
+  // 게임 순위표 카드(서버 주소가 있을 때만)
+  // 내 컴퓨터(localhost)에서 시험할 때만, 저장해 둔 시험 서버 주소를 쓴다
+  try { if (/^(localhost|127.0.0.1)$/.test(location.hostname) && localStorage.getItem('zw_rank_api')) ZW.RANK_API = localStorage.getItem('zw_rank_api'); } catch (e) {}
+  if (here && RANKS[here[0]] && ZW.RANK_API) {
+    ZW.RANK_GAME = here[0];
+    var rs = document.createElement('script');
+    rs.src = ROOT + '_common/rank.js';
+    document.body.appendChild(rs);
+  }
 
   // 쪽 안의 카톡방 단추(data-zw="kakao")에 주소를 넣는다
   var btns = document.querySelectorAll('[data-zw="kakao"]');

@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>평수 감각 게임 — ㎡를 보고 몇 평인지 맞히기 | 좌표나라</title>
+<meta name="description" content="화면에 나오는 ㎡ 숫자를 보고 몇 평인지 맞춰보세요! 10문제로 키우는 실전 아파트 평수 감각. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.game-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.round-badge { font-size:14px; font-weight:800; color:var(--sub); }
+.score-badge { font-size:13px; font-weight:700; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:4px 10px; }
+
+/* ㎡ 디스플레이 카드 */
+.target-card {
+  background:#fff; border:2px solid var(--ink); border-radius:16px;
+  padding:24px 16px; text-align:center; margin-bottom:16px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.03);
+}
+.target-label { font-size:13px; font-weight:700; color:var(--sub); margin-bottom:4px; letter-spacing:-0.2px; }
+.target-val { font-size:46px; font-weight:900; color:var(--ink); line-height:1.1; }
+.target-val span { font-size:28px; color:var(--red); font-weight:800; margin-left:4px; }
+
+/* 보기 목록 (2x2 그리드 또는 1열 그리드) */
+.choice-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+@media (max-width:340px) {
+  .choice-grid { grid-template-columns:1fr; }
+}
+.btn-choice {
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  min-height:64px; padding:10px; background:#fff; color:var(--ink);
+  border:1.5px solid var(--line); border-radius:14px;
+  font:inherit; font-size:18px; font-weight:800; cursor:pointer;
+  -webkit-tap-highlight-color:transparent; transition:all 0.15s ease;
+}
+.btn-choice:active { background:var(--soft); }
+.btn-choice.correct { background:#e6f6ef !important; border-color:var(--ok) !important; color:var(--ok) !important; }
+.btn-choice.wrong { background:#fff1f0 !important; border-color:var(--danger) !important; color:var(--danger) !important; }
+.btn-choice:disabled { cursor:default; }
+
+/* 라운드 결과 알림 */
+.feedback-box {
+  background:var(--bg); border:1.5px solid var(--line); border-radius:12px;
+  padding:12px 14px; text-align:center; margin-bottom:14px; display:none;
+}
+.feedback-box.show { display:block; }
+.feedback-title { font-size:15px; font-weight:800; margin-bottom:2px; }
+.feedback-title.correct { color:var(--ok); }
+.feedback-title.wrong { color:var(--danger); }
+.feedback-sub { font-size:13px; color:var(--sub); margin:0; }
+
+.btn-next-round {
+  display:none; width:100%; min-height:48px; border:none; border-radius:12px;
+  background:var(--red); color:#fff; font:inherit; font-size:16px; font-weight:800;
+  cursor:pointer; text-align:center;
+}
+.btn-next-round:active { opacity:0.85; }
+.btn-next-round.show { display:block; }
+
+/* 최종 결과 화면 */
+.res-container { display:none; }
+.res-header {
+  text-align:center; padding:22px 14px; background:#fff; border:1.5px solid var(--line);
+  border-radius:16px; margin-bottom:16px;
+}
+.res-big-score { font-size:44px; font-weight:900; color:var(--red); line-height:1.1; margin-bottom:8px; }
+.res-msg { font-size:18px; font-weight:800; color:var(--ink); margin-bottom:6px; }
+.res-best { font-size:13px; color:var(--sub); }
+
+.formula-tip {
+  background:var(--bg); border:1.5px solid var(--line); border-radius:12px;
+  padding:14px; margin-bottom:16px; text-align:center;
+}
+.formula-tip b { display:block; font-size:15px; color:var(--ink); margin-bottom:4px; }
+.formula-tip p { font-size:13px; color:var(--sub); margin:0; line-height:1.45; }
+
+.btn-restart {
+  display:block; width:100%; min-height:48px; border:none; border-radius:12px;
+  background:#2c2c2e; color:#fff; font:inherit; font-size:16px; font-weight:800;
+  cursor:pointer; text-align:center; margin-bottom:12px;
+}
+.btn-restart:active { background:#3a3a3c; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>평수 감각 게임</h1>
+  <p class="lead">화면에 나오는 ㎡ 숫자를 보고 몇 평인지 맞혀 보세요.</p>
+
+  <!-- 게임 라운드 카드 -->
+  <section class="card" id="gameCard">
+    <div class="game-header">
+      <span class="round-badge" id="roundBadge">라운드 1 / 10</span>
+      <span class="score-badge" id="scoreBadge">맞힌 개수: 0개</span>
+    </div>
+
+    <div class="target-card">
+      <div class="target-label">이 면적은 대략 몇 평일까요?</div>
+      <div class="target-val" id="targetM2">84<span>㎡</span></div>
+    </div>
+
+    <div class="choice-grid" id="choiceGrid"></div>
+
+    <div class="feedback-box" id="feedbackBox">
+      <div class="feedback-title" id="feedbackTitle"></div>
+      <p class="feedback-sub" id="feedbackSub"></p>
+    </div>
+
+    <button type="button" class="btn-next-round" id="btnNextRound">다음 라운드로 넘어가기</button>
+  </section>
+
+  <!-- 최종 결과 카드 -->
+  <section class="res-container" id="resCard">
+    <div class="res-header">
+      <div class="res-big-score" id="resScore">0점</div>
+      <div class="res-msg" id="resMsg"></div>
+      <div class="res-best" id="resBest">최고 기록: -</div>
+    </div>
+
+    <div class="formula-tip">
+      <b>💡 평수 계산의 핵심 공식</b>
+      <p>1평 = 400 ÷ 121 ㎡ (약 3.3058㎡)<br>제곱미터(㎡)에 0.3025를 곱하거나 3.3058로 나누면 평수가 됩니다.</p>
+    </div>
+
+    <button type="button" class="btn-restart" id="btnRestart">새로운 10문제 다시 하기</button>
+
+    <div class="card" style="padding:14px; margin-bottom:14px;">
+      <a href="../pyeong/" style="display:flex; justify-content:space-between; align-items:center; text-decoration:none; color:var(--ink);">
+        <div>
+          <b style="display:block; font-size:15px; margin-bottom:2px;">평 ↔ 제곱미터 바로 바꾸기</b>
+          <span style="font-size:13px; color:var(--sub);">숫자만 넣으면 바로 바꿔주는 계산기 도구</span>
+        </div>
+        <span style="font-size:18px; color:var(--sub); font-weight:700;">→</span>
+      </a>
+    </div>
+  </section>
+
+  <p class="note">※ 1평 = 약 3.3058㎡ 기준이며, 결과는 소수 첫째 자리까지 표시합니다.</p>
+
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 플레이하나요?</summary>
+    <ul>
+      <li>총 10라운드로 진행되며, 15㎡부터 200㎡까지 다양한 면적이 무작위로 나옵니다.</li>
+      <li>4개의 보기 중 가장 가까운 평수를 선택해 보세요.</li>
+      <li><b>암산 팁:</b> 제곱미터의 맨 끝자리를 떼고 3을 곱하면 대략적인 평수와 비슷해집니다 (예: 84㎡ → 8 × 3 = 24평 안팎).</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // 1평 = 400/121 ㎡ (약 3.3058㎡)
+  var M2_PER_PYEONG = 400 / 121;
+
+  function toPyeong(m2) {
+    return Math.round((m2 / M2_PER_PYEONG) * 10) / 10;
+  }
+
+  // 자주 쓰는 국민 평수 후보군과 일반 무작위 범위 (15~200) 혼합
+  var POPULAR_M2 = [24, 33, 49, 59, 74, 84, 101, 114, 135, 150];
+
+  function generateM2Pool(count) {
+    var pool = [];
+    var used = {};
+    // 자주 쓰는 평수 4~5개 포함
+    var shuffledPop = POPULAR_M2.slice().sort(function () { return 0.5 - Math.random(); });
+    for (var i = 0; i < 4 && i < shuffledPop.length; i++) {
+      pool.push(shuffledPop[i]);
+      used[shuffledPop[i]] = true;
+    }
+    // 나머지는 15~180 사이 랜덤
+    while (pool.length < count) {
+      var rand = Math.floor(Math.random() * (180 - 15 + 1)) + 15;
+      if (!used[rand]) {
+        used[rand] = true;
+        pool.push(rand);
+      }
+    }
+    return pool.sort(function () { return 0.5 - Math.random(); });
+  }
+
+  // 오답 보기 3개 생성 (정답 ± 2.0 ~ 8.0 사이, 서로 중복 없고 > 0)
+  function generateOptions(correctPy) {
+    var opts = [correctPy];
+    var used = {};
+    used[correctPy.toFixed(1)] = true;
+
+    var offsets = [-6.5, -4.5, -3.2, -2.1, 2.1, 3.4, 4.8, 6.7, 8.2];
+    offsets.sort(function () { return 0.5 - Math.random(); });
+
+    for (var i = 0; i < offsets.length; i++) {
+      if (opts.length >= 4) break;
+      var candidate = Math.round((correctPy + offsets[i]) * 10) / 10;
+      var str = candidate.toFixed(1);
+      if (candidate > 0 && !used[str]) {
+        used[str] = true;
+        opts.push(candidate);
+      }
+    }
+
+    // 혹시라도 4개가 덜 찼을 때를 위한 대비
+    var delta = 2.5;
+    while (opts.length < 4) {
+      var alt = Math.round((correctPy + delta) * 10) / 10;
+      var altStr = alt.toFixed(1);
+      if (alt > 0 && !used[altStr]) {
+        used[altStr] = true;
+        opts.push(alt);
+      }
+      delta += 2.0;
+    }
+
+    return opts.sort(function () { return 0.5 - Math.random(); });
+  }
+
+  var round = 0;
+  var score = 0;
+  var m2List = [];
+  var answered = false;
+
+  var gameCard = document.getElementById('gameCard');
+  var roundBadge = document.getElementById('roundBadge');
+  var scoreBadge = document.getElementById('scoreBadge');
+  var targetM2 = document.getElementById('targetM2');
+  var choiceGrid = document.getElementById('choiceGrid');
+  var feedbackBox = document.getElementById('feedbackBox');
+  var feedbackTitle = document.getElementById('feedbackTitle');
+  var feedbackSub = document.getElementById('feedbackSub');
+  var btnNextRound = document.getElementById('btnNextRound');
+
+  var resCard = document.getElementById('resCard');
+  var resScore = document.getElementById('resScore');
+  var resMsg = document.getElementById('resMsg');
+  var resBest = document.getElementById('resBest');
+  var btnRestart = document.getElementById('btnRestart');
+
+  function getBestScore() {
+    try {
+      var val = localStorage.getItem('zw_pyeong-sense_best');
+      return val !== null ? parseInt(val, 10) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveBestScore(val) {
+    try {
+      var prev = getBestScore();
+      if (prev === null || val > prev) {
+        localStorage.setItem('zw_pyeong-sense_best', String(val));
+      }
+    } catch (e) {}
+  }
+
+  function startGame() {
+    round = 0;
+    score = 0;
+    answered = false;
+    m2List = generateM2Pool(10);
+
+    gameCard.style.display = 'block';
+    resCard.style.display = 'none';
+
+    loadRound();
+  }
+
+  function loadRound() {
+    answered = false;
+    var currentM2 = m2List[round];
+    var correctPy = toPyeong(currentM2);
+
+    roundBadge.textContent = '라운드 ' + (round + 1) + ' / 10';
+    scoreBadge.textContent = '맞힌 개수: ' + score + '개';
+    targetM2.innerHTML = currentM2 + '<span>㎡</span>';
+
+    feedbackBox.className = 'feedback-box';
+    btnNextRound.className = 'btn-next-round';
+
+    var options = generateOptions(correctPy);
+    choiceGrid.innerHTML = '';
+
+    for (var i = 0; i < options.length; i++) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-choice';
+      btn.innerHTML = options[i].toFixed(1) + ' <span>평</span>';
+      btn.setAttribute('data-val', options[i].toFixed(1));
+      btn.setAttribute('data-correct', correctPy.toFixed(1));
+      btn.addEventListener('click', onSelectChoice);
+      choiceGrid.appendChild(btn);
+    }
+  }
+
+  function onSelectChoice(e) {
+    if (answered) return;
+    answered = true;
+
+    var selectedBtn = e.currentTarget;
+    var selectedVal = selectedBtn.getAttribute('data-val');
+    var correctVal = selectedBtn.getAttribute('data-correct');
+    var currentM2 = m2List[round];
+    var isCorrect = (selectedVal === correctVal);
+
+    var allBtns = choiceGrid.querySelectorAll('.btn-choice');
+    for (var i = 0; i < allBtns.length; i++) {
+      allBtns[i].disabled = true;
+      if (allBtns[i].getAttribute('data-val') === correctVal) {
+        allBtns[i].classList.add('correct');
+      }
+    }
+
+    if (isCorrect) {
+      score++;
+      scoreBadge.textContent = '맞힌 개수: ' + score + '개';
+      feedbackTitle.className = 'feedback-title correct';
+      feedbackTitle.textContent = '🎉 정답입니다! 정확한 감각이네요!';
+    } else {
+      selectedBtn.classList.add('wrong');
+      feedbackTitle.className = 'feedback-title wrong';
+      feedbackTitle.textContent = '아쉽네요! 정답은 ' + correctVal + '평입니다.';
+    }
+
+    feedbackSub.textContent = currentM2 + '㎡ ÷ 3.3058 = 약 ' + correctVal + '평';
+    feedbackBox.className = 'feedback-box show';
+
+    if (round < 9) {
+      btnNextRound.textContent = '다음 문제 ( ' + (round + 2) + ' / 10 )';
+    } else {
+      btnNextRound.textContent = '게임 결과 보기';
+    }
+    btnNextRound.className = 'btn-next-round show';
+  }
+
+  btnNextRound.addEventListener('click', function () {
+    if (round < 9) {
+      round++;
+      loadRound();
+    } else {
+      showResult();
+    }
+  });
+
+  function showResult() {
+    gameCard.style.display = 'none';
+    resCard.style.display = 'block';
+
+    saveBestScore(score);
+    var best = getBestScore();
+
+    resScore.textContent = score + ' / 10개';
+    resBest.textContent = '최고 기록: ' + (best !== null ? best + ' / 10개' : '-');
+
+    if (score === 10) {
+      resMsg.textContent = '🏆 완벽합니다! 부동산 전문가 수준의 평수 감각!';
+    } else if (score >= 8) {
+      resMsg.textContent = '👏 대단해요! 공인중개사 수준의 뛰어난 감각!';
+    } else if (score >= 5) {
+      resMsg.textContent = '👍 좋아요! 실전 집 보러 다닐 때 손색없는 감각입니다.';
+    } else {
+      resMsg.textContent = '🌱 평 ↔ ㎡ 계산기로 자주 변환해 보면 금방 늘어요!';
+    }
+
+    try {
+      resCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {}
+  }
+
+  btnRestart.addEventListener('click', function () {
+    startGame();
+    try {
+      gameCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (e) {}
+  });
+
+  startGame();
+})();
+</script>
+</body>
+</html>

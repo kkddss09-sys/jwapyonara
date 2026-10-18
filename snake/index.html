@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>뱀 게임 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 무료 뱀 게임. 사과를 먹고 길어지는 추억의 스네이크 게임을 휴대폰과 PC에서 즐겨보세요.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.status-bar { display:flex; justify-content:space-between; align-items:center; background:#2c2c2e; color:#fff; border-radius:14px; padding:12px 16px; margin-bottom:14px; }
+.status-item { font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; }
+.status-val { font-size:18px; font-weight:800; color:#ffd60a; }
+
+.game-canvas-wrap { position:relative; width:100%; max-width:360px; margin:0 auto 14px; aspect-ratio:1; border-radius:16px; overflow:hidden; background:#1c1c1e; box-shadow:0 4px 12px rgba(0,0,0,0.15); touch-action:none; }
+#snakeCanvas { width:100%; height:100%; display:block; image-rendering:pixelated; }
+
+.canvas-overlay { position:absolute; inset:0; background:rgba(0,0,0,0.75); display:flex; flex-direction:column; align-items:center; justify-content:center; color:#fff; padding:20px; text-align:center; }
+.canvas-overlay h2 { font-size:24px; margin:0 0 8px; color:#ffd60a; }
+.canvas-overlay p { font-size:15px; margin:0 0 16px; color:#e5e5ea; }
+.canvas-overlay .btn-start { font:inherit; font-size:16px; font-weight:800; background:var(--red); color:#fff; border:none; border-radius:12px; padding:12px 24px; min-height:48px; cursor:pointer; }
+.canvas-overlay .btn-start:active { opacity:0.85; }
+
+/* D-패드 방향키 (모바일용) */
+.dpad-wrap { display:grid; grid-template-columns:repeat(3, 1fr); grid-template-rows:repeat(3, 1fr); gap:6px; width:100%; max-width:240px; margin:0 auto 14px; }
+.dpad-btn { aspect-ratio:1; min-height:52px; font:inherit; font-size:20px; font-weight:800; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; -webkit-user-select:none; touch-action:manipulation; }
+.dpad-btn:active { background:var(--soft); border-color:var(--red); color:var(--red); transform:scale(0.95); }
+.dpad-up { grid-column:2; grid-row:1; }
+.dpad-left { grid-column:1; grid-row:2; }
+.dpad-right { grid-column:3; grid-row:2; }
+.dpad-down { grid-column:2; grid-row:3; }
+
+.control-bar { display:flex; gap:10px; margin-bottom:14px; }
+.btn-action { flex:1; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; display:flex; align-items:center; justify-content:center; }
+.btn-reset { background:#2c2c2e; color:#fff; }
+.btn-reset:active { background:#3a3a3c; }
+.btn-pause { background:#fff; border:1.5px solid var(--line); color:var(--ink); }
+.btn-pause:active { background:var(--soft); }
+
+.game-msg { text-align:center; padding:12px; border-radius:12px; font-size:15px; font-weight:800; margin-bottom:12px; display:none; }
+.game-msg.over { background:var(--dangerbg); color:var(--danger); display:block; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>뱀 게임</h1>
+  <p class="lead">먹이를 먹고 점점 길어지는 뱀을 조종해 보세요.</p>
+
+  <section class="card">
+    <div class="status-bar">
+      <div class="status-item">
+        <span>현재 점수</span>
+        <span class="status-val" id="scoreText">0</span>
+      </div>
+      <div class="status-item">
+        <span>뱀 길이</span>
+        <span class="status-val" id="lengthText">3</span>
+      </div>
+      <div class="status-item">
+        <span>최고 점수</span>
+        <span class="status-val" id="bestScoreText">0</span>
+      </div>
+    </div>
+
+    <div class="game-canvas-wrap" id="canvasWrap">
+      <canvas id="snakeCanvas" width="360" height="360"></canvas>
+      <div class="canvas-overlay" id="overlayBox">
+        <h2 id="overlayTitle">🐍 뱀 게임</h2>
+        <p id="overlayDesc">화면을 스와이프하거나 아래 방향키로 조종하세요.</p>
+        <button type="button" class="btn-start" id="btnOverlayStart">게임 시작</button>
+      </div>
+    </div>
+
+    <div id="gameOverMsg" class="game-msg over" style="display:none;"></div>
+
+    <div class="dpad-wrap" aria-label="방향 조종 버튼">
+      <button type="button" class="dpad-btn dpad-up" id="btnUp" aria-label="위쪽">▲</button>
+      <button type="button" class="dpad-btn dpad-left" id="btnLeft" aria-label="왼쪽">◀</button>
+      <button type="button" class="dpad-btn dpad-right" id="btnRight" aria-label="오른쪽">▶</button>
+      <button type="button" class="dpad-btn dpad-down" id="btnDown" aria-label="아래쪽">▼</button>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-pause" id="btnPause">일시정지</button>
+      <button type="button" class="btn-action btn-reset" id="btnReset">다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0;">
+      💡 화면을 손가락으로 <b>상하좌우 밀기(스와이프)</b>하거나 키보드 방향키로도 조종할 수 있어요.
+    </p>
+  </section>
+
+  <p class="note">벽이나 자신의 몸에 닿으면 게임이 끝납니다. 기기 안에서만 실행됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>조작 방법:</b> 화면의 방향 버튼(▲◀▶▼), 화면 스와이프(밀기), 또는 키보드 방향키(↑←↓→ / W,A,S,D)로 뱀의 방향을 바꿀 수 있습니다.</li>
+      <li><b>먹이 먹기:</b> 빨간색 먹이를 먹을 때마다 몸이 한 칸 길어지고 10점을 얻습니다.</li>
+      <li><b>주의 사항:</b> 벽에 부딪히거나 자기 몸과 충돌하면 게임이 종료됩니다. 진행 방향의 정반대로는 바로 꺾을 수 없습니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var GRID_SIZE = 18; // 18x18 그리드
+  var CELL_SIZE = 20; // 360 / 18 = 20px
+
+  var canvas = document.getElementById('snakeCanvas');
+  var ctx = canvas.getContext('2d');
+  var scoreTextEl = document.getElementById('scoreText');
+  var lengthTextEl = document.getElementById('lengthText');
+  var bestScoreTextEl = document.getElementById('bestScoreText');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var btnOverlayStart = document.getElementById('btnOverlayStart');
+  var btnReset = document.getElementById('btnReset');
+  var btnPause = document.getElementById('btnPause');
+  var gameOverMsg = document.getElementById('gameOverMsg');
+
+  var snake = [];
+  var food = { x: 5, y: 5 };
+  var dir = { x: 1, y: 0 };
+  var nextDir = { x: 1, y: 0 };
+  var score = 0;
+  var isRunning = false;
+  var isPaused = false;
+  var gameLoopId = null;
+  var speedMs = 120;
+
+  // 최고 점수 불러오기
+  function getBestScore() {
+    try {
+      var val = localStorage.getItem('zw_snake_best');
+      return val ? parseInt(val, 10) : 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  function saveBestScore(newScore) {
+    try {
+      var prev = getBestScore();
+      if (newScore > prev) {
+        localStorage.setItem('zw_snake_best', String(newScore));
+        bestScoreTextEl.textContent = String(newScore);
+      }
+    } catch (e) {}
+  }
+
+  bestScoreTextEl.textContent = String(getBestScore());
+
+  // 새로운 무작위 먹이 위치 생성
+  function spawnFood() {
+    var valid = false;
+    var newFood = { x: 0, y: 0 };
+    var attempts = 0;
+    while (!valid && attempts < 200) {
+      newFood.x = Math.floor(Math.random() * GRID_SIZE);
+      newFood.y = Math.floor(Math.random() * GRID_SIZE);
+      valid = true;
+      for (var i = 0; i < snake.length; i++) {
+        if (snake[i].x === newFood.x && snake[i].y === newFood.y) {
+          valid = false;
+          break;
+        }
+      }
+      attempts++;
+    }
+    food = newFood;
+  }
+
+  // 게임 초기화
+  function initGame() {
+    snake = [
+      { x: 5, y: 9 },
+      { x: 4, y: 9 },
+      { x: 3, y: 9 }
+    ];
+    dir = { x: 1, y: 0 };
+    nextDir = { x: 1, y: 0 };
+    score = 0;
+    scoreTextEl.textContent = '0';
+    lengthTextEl.textContent = '3';
+    gameOverMsg.style.display = 'none';
+    spawnFood();
+    draw();
+  }
+
+  function startGame() {
+    initGame();
+    isRunning = true;
+    isPaused = false;
+    btnPause.textContent = '일시정지';
+    overlayBox.style.display = 'none';
+    if (gameLoopId) clearInterval(gameLoopId);
+    gameLoopId = setInterval(tick, speedMs);
+  }
+
+  function pauseGame() {
+    if (!isRunning) return;
+    if (isPaused) {
+      isPaused = false;
+      btnPause.textContent = '일시정지';
+      overlayBox.style.display = 'none';
+      gameLoopId = setInterval(tick, speedMs);
+    } else {
+      isPaused = true;
+      btnPause.textContent = '계속하기';
+      overlayTitle.textContent = '⏸ 일시정지';
+      overlayDesc.textContent = '게임이 잠시 멈췄습니다.';
+      btnOverlayStart.textContent = '계속하기';
+      overlayBox.style.display = 'flex';
+      clearInterval(gameLoopId);
+    }
+  }
+
+  function gameOver() {
+    isRunning = false;
+    clearInterval(gameLoopId);
+    saveBestScore(score);
+    gameOverMsg.textContent = '벽이나 몸에 부딪혔습니다! 최종 점수: ' + score + '점 (길이 ' + snake.length + ')';
+    gameOverMsg.style.display = 'block';
+
+    overlayTitle.textContent = '💥 게임 종료';
+    overlayDesc.textContent = '점수: ' + score + '점 | 최고: ' + getBestScore() + '점';
+    btnOverlayStart.textContent = '다시 시작';
+    overlayBox.style.display = 'flex';
+  }
+
+  function setDirection(dx, dy) {
+    if (!isRunning || isPaused) return;
+    // 반대 방향으로 즉시 전환 방지
+    if (dx !== 0 && dir.x === -dx) return;
+    if (dy !== 0 && dir.y === -dy) return;
+    nextDir = { x: dx, y: dy };
+  }
+
+  function tick() {
+    dir = nextDir;
+    var head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+
+    // 벽 충돌 검사
+    if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
+      gameOver();
+      return;
+    }
+
+    // 자기 몸 충돌 검사
+    for (var i = 0; i < snake.length; i++) {
+      if (head.x === snake[i].x && head.y === snake[i].y) {
+        gameOver();
+        return;
+      }
+    }
+
+    snake.unshift(head);
+
+    // 먹이 먹음 검사
+    if (head.x === food.x && head.y === food.y) {
+      score += 10;
+      scoreTextEl.textContent = String(score);
+      lengthTextEl.textContent = String(snake.length);
+      saveBestScore(score);
+      spawnFood();
+    } else {
+      snake.pop();
+    }
+
+    draw();
+  }
+
+  function draw() {
+    // 배경 지우기
+    ctx.fillStyle = '#1c1c1e';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 미세한 격자선
+    ctx.strokeStyle = '#2c2c2e';
+    ctx.lineWidth = 1;
+    for (var x = 0; x <= canvas.width; x += CELL_SIZE) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+    for (var y = 0; y <= canvas.height; y += CELL_SIZE) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+
+    // 먹이 그리기
+    var fx = food.x * CELL_SIZE + CELL_SIZE / 2;
+    var fy = food.y * CELL_SIZE + CELL_SIZE / 2;
+    ctx.fillStyle = '#1b64da';
+    ctx.beginPath();
+    ctx.arc(fx, fy, CELL_SIZE / 2 - 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 먹이 광택
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(fx - 3, fy - 3, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 뱀 그리기
+    for (var i = 0; i < snake.length; i++) {
+      var seg = snake[i];
+      var px = seg.x * CELL_SIZE;
+      var py = seg.y * CELL_SIZE;
+
+      if (i === 0) {
+        // 머리 (밝은 녹색)
+        ctx.fillStyle = '#34c759';
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(px + 1, py + 1, CELL_SIZE - 2, CELL_SIZE - 2, 6) : ctx.fillRect(px + 1, py + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+        ctx.fill();
+
+        // 눈
+        ctx.fillStyle = '#000';
+        var eyeOffset1 = 5, eyeOffset2 = 13;
+        if (dir.x === 1) { // 오른쪽
+          ctx.fillRect(px + 13, py + 4, 3, 3);
+          ctx.fillRect(px + 13, py + 13, 3, 3);
+        } else if (dir.x === -1) { // 왼쪽
+          ctx.fillRect(px + 4, py + 4, 3, 3);
+          ctx.fillRect(px + 4, py + 13, 3, 3);
+        } else if (dir.y === 1) { // 아래
+          ctx.fillRect(px + 4, py + 13, 3, 3);
+          ctx.fillRect(px + 13, py + 13, 3, 3);
+        } else { // 위
+          ctx.fillRect(px + 4, py + 4, 3, 3);
+          ctx.fillRect(px + 13, py + 4, 3, 3);
+        }
+      } else {
+        // 몸통 (녹색 그러데이션 느낌)
+        ctx.fillStyle = i % 2 === 0 ? '#30b753' : '#28a745';
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(px + 2, py + 2, CELL_SIZE - 4, CELL_SIZE - 4, 4) : ctx.fillRect(px + 2, py + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+        ctx.fill();
+      }
+    }
+  }
+
+  // D-패드 이벤트 리스너
+  document.getElementById('btnUp').addEventListener('click', function (e) { e.preventDefault(); setDirection(0, -1); });
+  document.getElementById('btnDown').addEventListener('click', function (e) { e.preventDefault(); setDirection(0, 1); });
+  document.getElementById('btnLeft').addEventListener('click', function (e) { e.preventDefault(); setDirection(-1, 0); });
+  document.getElementById('btnRight').addEventListener('click', function (e) { e.preventDefault(); setDirection(1, 0); });
+
+  // 키보드 이벤트
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') { e.preventDefault(); setDirection(0, -1); }
+    else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') { e.preventDefault(); setDirection(0, 1); }
+    else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { e.preventDefault(); setDirection(-1, 0); }
+    else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); setDirection(1, 0); }
+    else if (e.key === ' ') { e.preventDefault(); pauseGame(); }
+  });
+
+  // 터치 스와이프 감지
+  var touchStartX = 0, touchStartY = 0;
+  var canvasWrap = document.getElementById('canvasWrap');
+
+  canvasWrap.addEventListener('touchstart', function (e) {
+    if (e.touches && e.touches.length === 1) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
+  }, { passive: false });
+
+  canvasWrap.addEventListener('touchmove', function (e) {
+    e.preventDefault(); // 스크롤 방지
+  }, { passive: false });
+
+  canvasWrap.addEventListener('touchend', function (e) {
+    if (!touchStartX || !touchStartY) return;
+    var touchEndX = e.changedTouches[0].clientX;
+    var touchEndY = e.changedTouches[0].clientY;
+    var dx = touchEndX - touchStartX;
+    var dy = touchEndY - touchStartY;
+    var minSwipe = 25;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (Math.abs(dx) > minSwipe) {
+        if (dx > 0) setDirection(1, 0);
+        else setDirection(-1, 0);
+      }
+    } else {
+      if (Math.abs(dy) > minSwipe) {
+        if (dy > 0) setDirection(0, 1);
+        else setDirection(0, -1);
+      }
+    }
+    touchStartX = 0;
+    touchStartY = 0;
+  }, { passive: false });
+
+  btnOverlayStart.addEventListener('click', function () {
+    if (isPaused) pauseGame();
+    else startGame();
+  });
+
+  btnReset.addEventListener('click', function () {
+    startGame();
+  });
+
+  btnPause.addEventListener('click', function () {
+    pauseGame();
+  });
+
+  initGame();
+})();
+</script>
+</body>
+</html>

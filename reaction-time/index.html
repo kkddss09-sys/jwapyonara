@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>반응속도 테스트 무료 | 좌표나라</title>
+<meta name="description" content="초록색으로 바뀌는 순간 화면을 터치하세요! 내 순발력과 반응속도(ms) 측정 테스트. 5회 평균과 최고 기록을 확인해보세요.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.status-bar { display:flex; justify-content:space-between; align-items:center; background:#2c2c2e; color:#fff; border-radius:14px; padding:12px 16px; margin-bottom:14px; }
+.status-item { font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; }
+.status-val { font-size:18px; font-weight:800; color:#ffd60a; }
+
+/* 커다란 반응 터치 영역 */
+.reaction-box { width:100%; min-height:280px; border-radius:18px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#fff; cursor:pointer; user-select:none; -webkit-user-select:none; touch-action:manipulation; padding:24px 20px; transition:background-color .12s ease; margin-bottom:14px; box-shadow:0 4px 16px rgba(0,0,0,0.1); }
+.reaction-box:active { transform:scale(0.99); }
+
+/* 상태별 배경색 */
+.state-idle { background:#007aff; }
+.state-waiting { background:#ff3b30; }
+.state-green { background:#34c759; }
+.state-early { background:#ff9500; }
+.state-result { background:#2c2c2e; }
+
+.rx-icon { font-size:44px; margin-bottom:12px; line-height:1; }
+.rx-title { font-size:24px; font-weight:900; line-height:1.3; margin:0 0 6px; }
+.rx-desc { font-size:15px; font-weight:600; opacity:0.9; margin:0; line-height:1.4; }
+
+/* 결과 및 최근 기록 리스트 */
+.history-card { background:var(--bg); border-radius:14px; padding:14px 16px; margin-bottom:14px; border:1px solid var(--line); }
+.history-head { display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:700; color:var(--sub); margin-bottom:10px; }
+.history-list { display:flex; flex-wrap:wrap; gap:8px; list-style:none; padding:0; margin:0; }
+.history-chip { background:#fff; border:1.5px solid var(--line); border-radius:999px; padding:6px 12px; font-size:14px; font-weight:800; color:var(--ink); display:flex; align-items:center; gap:4px; }
+.history-chip b { color:var(--red); }
+
+.grade-box { text-align:center; padding:10px; border-radius:12px; font-size:15px; font-weight:800; margin-bottom:14px; background:var(--soft); color:var(--red); display:none; }
+
+.control-bar { margin-bottom:14px; }
+.btn-reset { display:flex; align-items:center; justify-content:center; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; background:#2c2c2e; color:#fff; width:100%; }
+.btn-reset:active { background:#3a3a3c; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>반응속도 테스트</h1>
+  <p class="lead">화면이 초록색으로 바뀌는 바로 그 순간 빠르게 터치하세요.</p>
+
+  <section class="card">
+    <div class="status-bar">
+      <div class="status-item">
+        <span>이번 기록</span>
+        <span class="status-val" id="currentScore">0 ms</span>
+      </div>
+      <div class="status-item">
+        <span>최근 5회 평균</span>
+        <span class="status-val" id="avgScore">-</span>
+      </div>
+      <div class="status-item">
+        <span>최고 기록</span>
+        <span class="status-val" id="bestScore">-</span>
+      </div>
+    </div>
+
+    <div class="reaction-box state-idle" id="reactionBox" role="button" tabindex="0" aria-label="반응속도 테스트 터치 영역">
+      <div class="rx-icon" id="rxIcon">👆</div>
+      <div class="rx-title" id="rxTitle">터치해서 시작</div>
+      <div class="rx-desc" id="rxDesc">빨간색에서 초록색으로 바뀌면 바로 누르세요</div>
+    </div>
+
+    <div class="grade-box" id="gradeBox"></div>
+
+    <div class="history-card">
+      <div class="history-head">
+        <span>최근 5회 기록</span>
+        <span id="historyCount">0 / 5회</span>
+      </div>
+      <ul class="history-list" id="historyList">
+        <li style="color:var(--sub); font-size:14px;">아직 기록이 없습니다. 테스트를 시작해보세요.</li>
+      </ul>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-reset" id="btnReset">기록 초기화</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0;">
+      💡 초록색으로 바뀌기 전에 누르면 '부정 출발'로 처리되어 다시 시도해야 합니다.
+    </p>
+  </section>
+
+  <p class="note">모든 시간 측정은 브라우저의 고정밀 타이머(ms)로 기기 내에서만 이루어집니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>1단계:</b> 파란 화면을 누르면 준비 상태(빨간 화면)로 들어갑니다.</li>
+      <li><b>2단계:</b> 언제 초록색으로 바뀔지 모릅니다(1.5초~4초 랜덤). 집중해서 화면을 지켜보세요.</li>
+      <li><b>3단계:</b> 초록색이 되는 순간 화면을 최대한 빠르게 누릅니다. 걸린 시간(밀리초, ms)이 측정됩니다.</li>
+      <li><b>5회 평균:</b> 5번을 진행하면 내 평균 반응속도와 등급이 분석됩니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // 상태: 'idle', 'waiting', 'green', 'early', 'result'
+  var state = 'idle';
+  var waitTimer = null;
+  var startTime = 0;
+  var history = []; // 최근 5회 ms 배열
+
+  var reactionBox = document.getElementById('reactionBox');
+  var rxIcon = document.getElementById('rxIcon');
+  var rxTitle = document.getElementById('rxTitle');
+  var rxDesc = document.getElementById('rxDesc');
+  var currentScoreEl = document.getElementById('currentScore');
+  var avgScoreEl = document.getElementById('avgScore');
+  var bestScoreEl = document.getElementById('bestScore');
+  var historyCountEl = document.getElementById('historyCount');
+  var historyListEl = document.getElementById('historyList');
+  var gradeBox = document.getElementById('gradeBox');
+  var btnReset = document.getElementById('btnReset');
+
+  function getBestScore() {
+    try {
+      var val = localStorage.getItem('zw_reaction-time_best');
+      return val ? parseInt(val, 10) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveBestScore(ms) {
+    try {
+      var prev = getBestScore();
+      if (prev === null || ms < prev) {
+        localStorage.setItem('zw_reaction-time_best', String(ms));
+        updateBestDisplay();
+      }
+    } catch (e) {}
+  }
+
+  function updateBestDisplay() {
+    var best = getBestScore();
+    bestScoreEl.textContent = best !== null ? best + ' ms' : '-';
+  }
+
+  updateBestDisplay();
+
+  function evaluateGrade(ms) {
+    if (ms < 200) return '⚡ 신의 반응속도! 상위 0.1%의 순발력입니다.';
+    if (ms <= 240) return '🔥 프로게이머 수준! 놀라울 정도로 빠릅니다.';
+    if (ms <= 280) return '👍 평균 이상의 우수한 반응속도입니다.';
+    if (ms <= 330) return '👌 보통 성인의 일반적인 반응속도입니다.';
+    return '🐢 조금 여유로운 편이에요. 한 번 더 집중해보세요!';
+  }
+
+  function setBoxState(newState, icon, title, desc) {
+    state = newState;
+    reactionBox.className = 'reaction-box state-' + newState;
+    rxIcon.textContent = icon;
+    rxTitle.innerHTML = title;
+    rxDesc.innerHTML = desc;
+  }
+
+  function startWaiting() {
+    setBoxState('waiting', '⏳', '기다리세요...', '초록색으로 바뀌면 바로 누르세요!');
+    gradeBox.style.display = 'none';
+
+    // 1.5초 ~ 4.0초 무작위 지연
+    var delay = Math.floor(Math.random() * 2500) + 1500;
+    waitTimer = setTimeout(function () {
+      triggerGreen();
+    }, delay);
+  }
+
+  function triggerGreen() {
+    setBoxState('green', '🟢', '지금 누르세요!', '화면을 터치하세요!');
+    startTime = performance.now();
+  }
+
+  function handleEarly() {
+    clearTimeout(waitTimer);
+    setBoxState('early', '⚠️', '너무 빨라요!', '초록색이 되기 전에 눌렀습니다.<br>화면을 눌러 다시 시도하세요.');
+  }
+
+  function handleSuccess() {
+    var elapsed = Math.round(performance.now() - startTime);
+    currentScoreEl.textContent = elapsed + ' ms';
+    saveBestScore(elapsed);
+
+    // 최근 5회 기록 관리
+    history.push(elapsed);
+    if (history.length > 5) history.shift();
+
+    renderHistory();
+
+    var grade = evaluateGrade(elapsed);
+    gradeBox.textContent = grade;
+    gradeBox.style.display = 'block';
+
+    setBoxState('result', '🎯', elapsed + ' ms', '화면을 눌러 다음 테스트 진행하기');
+  }
+
+  function renderHistory() {
+    historyCountEl.textContent = history.length + ' / 5회';
+    if (history.length === 0) {
+      historyListEl.innerHTML = '<li style="color:var(--sub); font-size:14px;">아직 기록이 없습니다. 테스트를 시작해보세요.</li>';
+      avgScoreEl.textContent = '-';
+      return;
+    }
+
+    var sum = 0;
+    var html = '';
+    for (var i = 0; i < history.length; i++) {
+      var val = history[i];
+      sum += val;
+      html += '<li class="history-chip"><span>' + (i + 1) + '회</span><b>' + val + 'ms</b></li>';
+    }
+    historyListEl.innerHTML = html;
+
+    var avg = Math.round(sum / history.length);
+    avgScoreEl.textContent = avg + ' ms';
+  }
+
+  function onBoxClick() {
+    if (state === 'idle') {
+      startWaiting();
+    } else if (state === 'waiting') {
+      handleEarly();
+    } else if (state === 'green') {
+      handleSuccess();
+    } else if (state === 'early' || state === 'result') {
+      startWaiting();
+    }
+  }
+
+  reactionBox.addEventListener('click', function (e) {
+    e.preventDefault();
+    onBoxClick();
+  });
+
+  reactionBox.addEventListener('keydown', function (e) {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      onBoxClick();
+    }
+  });
+
+  btnReset.addEventListener('click', function () {
+    clearTimeout(waitTimer);
+    history = [];
+    currentScoreEl.textContent = '0 ms';
+    renderHistory();
+    gradeBox.style.display = 'none';
+    setBoxState('idle', '👆', '터치해서 시작', '빨간색에서 초록색으로 바뀌면 바로 누르세요');
+  });
+})();
+</script>
+</body>
+</html>

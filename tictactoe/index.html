@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>틱택토 무료 게임 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 무료 틱택토(Tic-Tac-Toe) 삼목 게임. 인공지능 컴퓨터와 두뇌 싸움을 펼쳐보세요.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.order-seg { display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-bottom:14px; }
+.order-seg button { font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:12px; padding:10px 4px; cursor:pointer; }
+.order-seg button.on { border-color:var(--red); background:var(--soft); color:var(--red); }
+
+.status-bar { display:flex; justify-content:space-between; align-items:center; background:#2c2c2e; color:#fff; border-radius:14px; padding:12px 16px; margin-bottom:14px; }
+.status-item { font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; }
+.status-val { font-size:18px; font-weight:800; color:#ffd60a; }
+
+.turn-indicator { text-align:center; font-size:16px; font-weight:800; padding:10px 14px; border-radius:12px; background:var(--bg); border:1.5px solid var(--line); margin-bottom:14px; color:var(--ink); }
+.turn-indicator b { color:var(--red); }
+
+.board-wrap { width:100%; display:flex; justify-content:center; margin:0 0 16px; }
+.ttt-board { display:grid; grid-template-columns:repeat(3, 1fr); grid-template-rows:repeat(3, 1fr); gap:8px; width:100%; max-width:340px; background:var(--line); padding:8px; border-radius:16px; user-select:none; -webkit-user-select:none; }
+
+.ttt-cell { aspect-ratio:1; min-height:80px; border:none; border-radius:12px; background:#fff; display:flex; align-items:center; justify-content:center; font-size:clamp(38px, 11vw, 52px); font-weight:900; cursor:pointer; line-height:1; transition:all .15s ease; touch-action:manipulation; padding:0; }
+.ttt-cell:active:not(.taken) { background:#f2f2f7; transform:scale(0.97); }
+.ttt-cell.o { color:#007aff; }
+.ttt-cell.x { color:var(--red); }
+.ttt-cell.win-cell { background:#ffd60a; color:#1d1d1f; }
+
+.game-msg { text-align:center; padding:12px; border-radius:12px; font-size:16px; font-weight:800; margin-bottom:14px; display:none; }
+.game-msg.win { background:#e6f6ef; color:var(--ok); display:block; }
+.game-msg.lose { background:var(--dangerbg); color:var(--danger); display:block; }
+.game-msg.draw { background:#f2f2f7; color:var(--ink); display:block; }
+
+.control-bar { margin-bottom:14px; }
+.btn-reset { display:flex; align-items:center; justify-content:center; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; background:#2c2c2e; color:#fff; width:100%; }
+.btn-reset:active { background:#3a3a3c; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>틱택토</h1>
+  <p class="lead">가로, 세로, 대각선으로 3줄을 먼저 완성해 보세요.</p>
+
+  <section class="card">
+    <div class="order-seg" role="tablist">
+      <button type="button" class="on" data-starter="player">내가 먼저 (O)</button>
+      <button type="button" data-starter="ai">컴퓨터 먼저 (X)</button>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-item">
+        <span>승리</span>
+        <span class="status-val" id="winCount">0</span>
+      </div>
+      <div class="status-item">
+        <span>무승부</span>
+        <span class="status-val" id="drawCount">0</span>
+      </div>
+      <div class="status-item">
+        <span>패배</span>
+        <span class="status-val" id="loseCount">0</span>
+      </div>
+      <div class="status-item">
+        <span>최고 연승</span>
+        <span class="status-val" id="bestStreak">0</span>
+      </div>
+    </div>
+
+    <div class="turn-indicator" id="turnIndicator">
+      내 차례입니다 <b>(O)</b>
+    </div>
+
+    <div id="gameMsg" class="game-msg"></div>
+
+    <div class="board-wrap">
+      <div class="ttt-board" id="boardEl">
+        <button type="button" class="ttt-cell" data-idx="0" aria-label="1번 칸"></button>
+        <button type="button" class="ttt-cell" data-idx="1" aria-label="2번 칸"></button>
+        <button type="button" class="ttt-cell" data-idx="2" aria-label="3번 칸"></button>
+        <button type="button" class="ttt-cell" data-idx="3" aria-label="4번 칸"></button>
+        <button type="button" class="ttt-cell" data-idx="4" aria-label="5번 칸"></button>
+        <button type="button" class="ttt-cell" data-idx="5" aria-label="6번 칸"></button>
+        <button type="button" class="ttt-cell" data-idx="6" aria-label="7번 칸"></button>
+        <button type="button" class="ttt-cell" data-idx="7" aria-label="8번 칸"></button>
+        <button type="button" class="ttt-cell" data-idx="8" aria-label="9번 칸"></button>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-reset" id="btnReset">판 새로 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0;">
+      💡 컴퓨터는 이길 수 있는 자리가 있으면 먼저 두고, 질 것 같으면 막아냅니다.
+    </p>
+  </section>
+
+  <p class="note">모든 게임 계산은 기기 안에서만 실행되며 외부로 데이터를 보내지 않습니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>게임 규칙:</b> 3×3 격자판에 번갈아가며 자신의 표식을 두고, 가로·세로·대각선 중 한 방향으로 3개를 먼저 잇는 쪽이 이깁니다.</li>
+      <li><b>선공 선택:</b> 상단에서 '내가 먼저' 또는 '컴퓨터 먼저'를 고를 수 있습니다.</li>
+      <li><b>인공지능:</b> 컴퓨터는 승리 기회나 위험한 순간을 판단하며 합리적인 두뇌 싸움을 펼칩니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var board = ['', '', '', '', '', '', '', '', ''];
+  var starter = 'player'; // 'player' or 'ai'
+  var isOver = false;
+  var isAiThinking = false;
+
+  var wins = 0, draws = 0, losses = 0, currentStreak = 0;
+
+  var orderButtons = document.querySelectorAll('.order-seg button');
+  var turnIndicator = document.getElementById('turnIndicator');
+  var gameMsg = document.getElementById('gameMsg');
+  var boardEl = document.getElementById('boardEl');
+  var cells = document.querySelectorAll('.ttt-cell');
+  var btnReset = document.getElementById('btnReset');
+  var winCountEl = document.getElementById('winCount');
+  var drawCountEl = document.getElementById('drawCount');
+  var loseCountEl = document.getElementById('loseCount');
+  var bestStreakEl = document.getElementById('bestStreak');
+
+  var WIN_LINES = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], // 가로
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], // 세로
+    [0, 4, 8], [2, 4, 6]             // 대각선
+  ];
+
+  function getBestStreak() {
+    try {
+      var val = localStorage.getItem('zw_tictactoe_best');
+      return val ? parseInt(val, 10) : 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  function saveBestStreak(streak) {
+    try {
+      var prev = getBestStreak();
+      if (streak > prev) {
+        localStorage.setItem('zw_tictactoe_best', String(streak));
+        bestStreakEl.textContent = String(streak);
+      }
+    } catch (e) {}
+  }
+
+  bestStreakEl.textContent = String(getBestStreak());
+
+  function checkWinner(b) {
+    for (var i = 0; i < WIN_LINES.length; i++) {
+      var line = WIN_LINES[i];
+      var p1 = b[line[0]], p2 = b[line[1]], p3 = b[line[2]];
+      if (p1 && p1 === p2 && p2 === p3) {
+        return { winner: p1, line: line };
+      }
+    }
+    var isFull = true;
+    for (var j = 0; j < 9; j++) {
+      if (!b[j]) { isFull = false; break; }
+    }
+    return isFull ? { winner: 'draw', line: null } : null;
+  }
+
+  // 컴퓨터 AI 로직 (이길 수 있으면 두고, 질 것 같으면 막고, 중앙/모서리 선호)
+  function findBestMove() {
+    // 1. 컴퓨터가 즉시 이길 수 있는 칸이 있는가?
+    for (var i = 0; i < 9; i++) {
+      if (!board[i]) {
+        board[i] = 'X';
+        var res = checkWinner(board);
+        board[i] = '';
+        if (res && res.winner === 'X') return i;
+      }
+    }
+
+    // 2. 사람이 다음 턴에 이길 수 있는 칸이 있는가? (반드시 막기)
+    for (var j = 0; j < 9; j++) {
+      if (!board[j]) {
+        board[j] = 'O';
+        var resP = checkWinner(board);
+        board[j] = '';
+        if (resP && resP.winner === 'O') return j;
+      }
+    }
+
+    // 3. 중앙(4)이 비어있으면 70% 확률로 중앙 차지
+    if (!board[4] && Math.random() < 0.7) return 4;
+
+    // 4. 모서리 칸(0, 2, 6, 8) 중 빈 곳 탐색
+    var corners = [0, 2, 6, 8].filter(function (idx) { return !board[idx]; });
+    if (corners.length > 0 && Math.random() < 0.6) {
+      return corners[Math.floor(Math.random() * corners.length)];
+    }
+
+    // 5. 남은 빈칸 중 무작위
+    var empties = [];
+    for (var k = 0; k < 9; k++) {
+      if (!board[k]) empties.push(k);
+    }
+    return empties.length > 0 ? empties[Math.floor(Math.random() * empties.length)] : -1;
+  }
+
+  function renderBoard() {
+    for (var i = 0; i < 9; i++) {
+      var cell = cells[i];
+      cell.textContent = board[i];
+      cell.className = 'ttt-cell';
+      if (board[i] === 'O') {
+        cell.classList.add('o', 'taken');
+      } else if (board[i] === 'X') {
+        cell.classList.add('x', 'taken');
+      }
+    }
+  }
+
+  function handleEnd(result) {
+    isOver = true;
+    isAiThinking = false;
+    if (result.winner === 'O') {
+      wins++;
+      currentStreak++;
+      winCountEl.textContent = String(wins);
+      saveBestStreak(currentStreak);
+      gameMsg.className = 'game-msg win';
+      gameMsg.textContent = '🎉 당신의 승리입니다! 멋진 3줄 완성!';
+      turnIndicator.innerHTML = '게임 종료: <b>사람 승리!</b>';
+      highlightLine(result.line);
+    } else if (result.winner === 'X') {
+      losses++;
+      currentStreak = 0;
+      loseCountEl.textContent = String(losses);
+      gameMsg.className = 'game-msg lose';
+      gameMsg.textContent = '컴퓨터가 이겼습니다! 다시 도전해 보세요.';
+      turnIndicator.innerHTML = '게임 종료: <b>컴퓨터 승리</b>';
+      highlightLine(result.line);
+    } else {
+      draws++;
+      drawCountEl.textContent = String(draws);
+      gameMsg.className = 'game-msg draw';
+      gameMsg.textContent = '비겼습니다! 막상막하의 승부였네요.';
+      turnIndicator.innerHTML = '게임 종료: <b>무승부</b>';
+    }
+  }
+
+  function highlightLine(line) {
+    if (!line) return;
+    for (var i = 0; i < line.length; i++) {
+      cells[line[i]].classList.add('win-cell');
+    }
+  }
+
+  function triggerAiMove() {
+    if (isOver) return;
+    isAiThinking = true;
+    turnIndicator.innerHTML = '컴퓨터가 생각 중입니다... <b>(X)</b>';
+
+    setTimeout(function () {
+      if (isOver) return;
+      var move = findBestMove();
+      if (move !== -1) {
+        board[move] = 'X';
+        renderBoard();
+        var res = checkWinner(board);
+        if (res) {
+          handleEnd(res);
+        } else {
+          isAiThinking = false;
+          turnIndicator.innerHTML = '내 차례입니다 <b>(O)</b>';
+        }
+      }
+    }, 400); // 0.4초 딜레이로 자연스러운 생각 시간 부여
+  }
+
+  function onCellClick(idx) {
+    if (isOver || isAiThinking || board[idx]) return;
+
+    board[idx] = 'O';
+    renderBoard();
+
+    var res = checkWinner(board);
+    if (res) {
+      handleEnd(res);
+      return;
+    }
+
+    triggerAiMove();
+  }
+
+  function resetGame() {
+    board = ['', '', '', '', '', '', '', '', ''];
+    isOver = false;
+    isAiThinking = false;
+    gameMsg.style.display = 'none';
+    gameMsg.className = 'game-msg';
+    renderBoard();
+
+    if (starter === 'player') {
+      turnIndicator.innerHTML = '내 차례입니다 <b>(O)</b>';
+    } else {
+      triggerAiMove();
+    }
+  }
+
+  // 선공 선택 버튼들
+  for (var i = 0; i < orderButtons.length; i++) {
+    orderButtons[i].addEventListener('click', function () {
+      for (var j = 0; j < orderButtons.length; j++) orderButtons[j].classList.remove('on');
+      this.classList.add('on');
+      starter = this.getAttribute('data-starter');
+      resetGame();
+    });
+  }
+
+  // 각 셀 클릭 이벤트
+  for (var c = 0; c < cells.length; c++) {
+    (function (index) {
+      cells[index].addEventListener('click', function (e) {
+        e.preventDefault();
+        onCellClick(index);
+      });
+    })(c);
+  }
+
+  btnReset.addEventListener('click', function () {
+    resetGame();
+  });
+
+  resetGame();
+})();
+</script>
+</body>
+</html>

@@ -1,18 +1,33 @@
 {
-  "name": "좌표나라 부동산 계산기",
-  "short_name": "좌표 부동산",
+  "name": "좌표나라 부동산",
+  "short_name": "좌표나라 부동산",
   "description": "대출·청약·차익·전월세 등 집 볼 때 필요한 계산을 가입 없이 바로.",
   "lang": "ko",
   "id": "./?app=realestate",
-  "start_url": "./index.html?app=realestate#%EB%B6%80%EB%8F%99%EC%82%B0",
+  "start_url": "./realestate/index.html?app=realestate",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#f5f5f7",
-  "theme_color": "#ff2d55",
+  "background_color": "#1b64da",
+  "theme_color": "#1b64da",
   "icons": [
-    { "src": "_common/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "_common/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "_common/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "_common/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "_common/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "_common/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
