@@ -8,19 +8,20 @@
 <link rel="stylesheet" href="../_common/common.css">
 <style>
 .topics { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-bottom:14px; }
-.topics button { font:inherit; font-size:15px; font-weight:700; line-height:1.35; text-align:left; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:14px; padding:12px; cursor:pointer; word-break:keep-all; }
+.topics button { font:inherit; font-size:15px; font-weight:700; line-height:1.35; text-align:left; border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:14px; padding:12px; cursor:pointer; word-break:keep-all; }
 .topics button small { display:block; font-size:12px; font-weight:500; color:var(--sub); margin-top:3px; }
 .topics button.on { border-color:var(--red); background:var(--soft); color:var(--red); }
 .topics button:last-child:nth-child(odd) { grid-column:1 / -1; }
 .inp.txt input { text-align:left; font-size:17px; }
 .pick { display:flex; flex-wrap:wrap; gap:6px; }
-.pick button { font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:12px; padding:10px 12px; cursor:pointer; }
+.pick button { font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:12px; padding:10px 12px; cursor:pointer; }
 .pick button.on { border-color:var(--red); background:var(--soft); color:var(--red); }
-.out { background:#fff; color:var(--ink); border-radius:12px; padding:14px; font-size:15px; line-height:1.6; white-space:pre-wrap; word-break:keep-all; max-height:360px; overflow:auto; margin-top:12px; }
+.out { background:var(--card); color:var(--ink); border-radius:12px; padding:14px; font-size:15px; line-height:1.6; white-space:pre-wrap; word-break:keep-all; max-height:360px; overflow:auto; margin-top:12px; }
 .copy { display:block; width:100%; font:inherit; font-size:18px; font-weight:800; border:0; border-radius:14px; background:#ffd60a; color:#1d1d1f; padding:15px; margin-top:12px; cursor:pointer; }
 .go { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; font-size:14px; color:#c7c7cc; align-items:center; }
 .go a { color:#fff; font-weight:700; border:1px solid #636366; border-radius:999px; padding:6px 12px; text-decoration:none; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

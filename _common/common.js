@@ -97,13 +97,14 @@ var TOOLS = [
   ['number-baseball', '숫자 야구', '스트라이크와 볼로 세 자리 맞히기', '게임', true, '두뇌'],
   ['slide-puzzle', '숫자 밀기 퍼즐', '1부터 순서대로 맞추기', '게임', true, '퍼즐'],
   ['lights-out', '불 끄기 퍼즐', '눌러서 모든 불 끄기', '게임', true, '퍼즐'],
-  ['color-memory', '색깔 기억하기', '불이 켜진 순서를 따라 누르기', '게임', true, '두뇌']
+  ['color-memory', '색깔 기억하기', '불이 켜진 순서를 따라 누르기', '게임', true, '두뇌'],
+  ['sudoku', '스도쿠', '빈칸에 1~9를 채워 보세요', '게임', true, '퍼즐']
 ];
 
 // ▼ 게임 순위표 — 2026-10-19 사용자 요청. 서버 주소(RANK_API)가 비어 있으면 순위표 카드는 나오지 않는다.
 // 서버를 올린 뒤 주소를 넣는다(예: 'https://jwapyonara-rank.계정이름.workers.dev'). 서버 쪽 게임 목록은 _순위서버/src/index.js의 GAMES와 같게 둔다.
 // better: 'high' 클수록 좋음 · 'low' 작을수록 좋음 / unit: 점수 뒤에 붙는 말
-var RANK_API = '';
+var RANK_API = 'https://jwapyonara-rank.kkddss09.workers.dev';
 var RANKS = {
   'snake': { label: '뱀 게임 · 점수', better: 'high', unit: '점' },
   'tictactoe': { label: '틱택토 · 최고 연승', better: 'high', unit: '연승' },
@@ -116,7 +117,8 @@ var RANKS = {
   'lights-out': { label: '불 끄기 · 가장 적게 누른 횟수', better: 'low', unit: '번' },
   'color-memory': { label: '색깔 기억하기 · 최고 단계', better: 'high', unit: '단계' },
   'realestate-quiz': { label: '부동산 용어 퀴즈 · 맞힌 개수', better: 'high', unit: '개' },
-  'pyeong-sense': { label: '평수 감각 · 맞힌 개수', better: 'high', unit: '개' }
+  'pyeong-sense': { label: '평수 감각 · 맞힌 개수', better: 'high', unit: '개' },
+  'sudoku': { label: '스도쿠 · 가장 빠른 시간(힌트 없이)', better: 'low', unit: '초', variants: [{ id: 'sudoku-easy', key: 'zw_sudoku_best_easy', name: '쉬움' }, { id: 'sudoku-normal', key: 'zw_sudoku_best_normal', name: '보통' }, { id: 'sudoku-hard', key: 'zw_sudoku_best_hard', name: '어려움' }] }
 };
 
 // ▼ 숫자 도우미 — 도구마다 다시 만들지 않게 여기 둔다
@@ -220,10 +222,29 @@ ZW.app = function (cfg) {
 
   var head = document.createElement('header');
   head.className = 'zw-head';
-  head.innerHTML = '<div class="in"><a class="zw-logo" href="' + home + '">좌표<b>나라</b></a><nav class="zw-nav">'
+  head.innerHTML = '<div class="in"><a class="zw-logo" href="' + home + '">좌표<b>나라</b></a><button type="button" class="zw-theme" role="switch" aria-checked="true" aria-label="다크 모드"><span class="lb">다크 모드</span><span class="sw"></span></button><nav class="zw-nav">'
     + CATS.map(function (c) { return '<a href="' + ROOT + CAT_PATH[c] + '/index.html"' + (((here && here[3] === c) || location.href.indexOf(ROOT + CAT_PATH[c] + '/') === 0) ? ' class="on"' : '') + '>' + c + '</a>'; }).join('')
     + '</nav></div>';
   document.body.insertBefore(head, document.body.firstChild);
+
+  // 다크 모드 스위치 — 처음 방문하면 켜져(어둡게) 있고, 누르면 끄고 켠다. 고른 것은 이 기기에만 기억한다(localStorage zw-theme)
+  (function () {
+    var root = document.documentElement, sw = head.querySelector('.zw-theme'), lb = sw.querySelector('.lb');
+    var meta = document.querySelector('meta[name="theme-color"]');
+    var lightColor = meta ? meta.getAttribute('content') : '#1b64da';
+    var apply = function (dark) {
+      root.setAttribute('data-theme', dark ? 'dark' : 'light');
+      sw.setAttribute('aria-checked', dark ? 'true' : 'false');
+      lb.textContent = dark ? '다크 모드 켬' : '다크 모드 끔';
+      if (meta) meta.setAttribute('content', dark ? '#0e131c' : lightColor);
+    };
+    apply(root.getAttribute('data-theme') !== 'light');
+    sw.addEventListener('click', function () {
+      var dark = root.getAttribute('data-theme') !== 'dark';
+      apply(dark);
+      try { localStorage.setItem('zw-theme', dark ? 'dark' : 'light'); } catch (e) { /* 저장이 막힌 브라우저에서는 이번 방문에만 적용 */ }
+    });
+  })();
 
   // 이 사람이 어떤 도구를 몇 번 열었는지 이 사람의 기기에만 적어 둔다(서버로 보내지 않는다).
   // 첫 화면이 이 숫자로 "자주 쓴 도구"를 앞에 보여 준다. 모든 사람의 합계 순서는 방문 통계를 붙인 뒤 TOOLS의 순서로 맞춘다.

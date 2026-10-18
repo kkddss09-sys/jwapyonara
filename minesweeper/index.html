@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../_common/common.css">
 <style>
 .diff-seg { display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-bottom:14px; }
-.diff-seg button { font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:12px; padding:10px 4px; cursor:pointer; }
+.diff-seg button { font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:12px; padding:10px 4px; cursor:pointer; }
 .diff-seg button.on { border-color:var(--red); background:var(--soft); color:var(--red); }
 
 .status-bar { display:flex; justify-content:space-between; align-items:center; background:#2c2c2e; color:#fff; border-radius:14px; padding:12px 16px; margin-bottom:12px; }
@@ -16,17 +16,17 @@
 .status-val { font-size:18px; font-weight:800; color:#ffd60a; }
 
 .control-bar { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
-.btn-mode { display:flex; align-items:center; justify-content:center; gap:6px; min-height:44px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:1.5px solid var(--line); background:#fff; color:var(--ink); }
+.btn-mode { display:flex; align-items:center; justify-content:center; gap:6px; min-height:44px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:1.5px solid var(--line); background:var(--card); color:var(--ink); }
 .btn-mode.flag-on { border-color:var(--red); background:var(--soft); color:var(--red); }
 .btn-reset { display:flex; align-items:center; justify-content:center; min-height:44px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; background:#2c2c2e; color:#fff; }
 .btn-reset:active { background:#3a3a3c; }
 
 .board-wrap { width:100%; display:flex; justify-content:center; margin:4px 0 16px; }
 .mine-board { display:grid; gap:2px; width:100%; max-width:380px; background:var(--line); padding:4px; border-radius:12px; user-select:none; -webkit-user-select:none; touch-action:manipulation; }
-.cell { aspect-ratio:1; width:100%; border:none; border-radius:4px; background:#fff; display:flex; align-items:center; justify-content:center; font-size:clamp(16px, 5vw, 22px); font-weight:800; cursor:pointer; padding:0; line-height:1; }
-.cell:active { background:#f0f0f3; }
-.cell.opened { background:#e5e5ea; cursor:default; }
-.cell.mine-hit { background:#ffe5e8; color:var(--danger); }
+.cell { aspect-ratio:1; width:100%; border:none; border-radius:4px; background:var(--card); display:flex; align-items:center; justify-content:center; font-size:clamp(16px, 5vw, 22px); font-weight:800; cursor:pointer; padding:0; line-height:1; }
+.cell:active { background:var(--fill); }
+.cell.opened { background:var(--fill2); cursor:default; }
+.cell.mine-hit { background:var(--dangerbg); color:var(--danger); }
 .cell.flagged { color:var(--danger); }
 
 /* 숫자별 색상 (원작 윈도우 스타일과 다른 현대적인 색상) */
@@ -36,13 +36,14 @@
 .cell[data-val="4"] { color:#5856d6; }
 .cell[data-val="5"] { color:#ff9500; }
 .cell[data-val="6"] { color:#00c7be; }
-.cell[data-val="7"] { color:#1d1d1f; }
+.cell[data-val="7"] { color:var(--ink); }
 .cell[data-val="8"] { color:#8e8e93; }
 
 .game-msg { text-align:center; padding:12px; border-radius:12px; font-size:16px; font-weight:800; margin-bottom:12px; display:none; }
-.game-msg.win { background:#e6f6ef; color:var(--ok); display:block; }
+.game-msg.win { background:var(--okbg); color:var(--ok); display:block; }
 .game-msg.lose { background:var(--dangerbg); color:var(--danger); display:block; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../_common/common.css">
 <style>
 .order-seg { display:grid; grid-template-columns:repeat(2, 1fr); gap:6px; margin-bottom:14px; }
-.order-seg button { font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:12px; padding:10px 4px; cursor:pointer; }
+.order-seg button { font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:12px; padding:10px 4px; cursor:pointer; }
 .order-seg button.on { border-color:var(--red); background:var(--soft); color:var(--red); }
 
 .status-bar { display:flex; justify-content:space-between; align-items:center; background:#2c2c2e; color:#fff; border-radius:14px; padding:12px 16px; margin-bottom:14px; }
@@ -21,21 +21,22 @@
 .board-wrap { width:100%; display:flex; justify-content:center; margin:0 0 16px; }
 .ttt-board { display:grid; grid-template-columns:repeat(3, 1fr); grid-template-rows:repeat(3, 1fr); gap:8px; width:100%; max-width:340px; background:var(--line); padding:8px; border-radius:16px; user-select:none; -webkit-user-select:none; }
 
-.ttt-cell { aspect-ratio:1; min-height:80px; border:none; border-radius:12px; background:#fff; display:flex; align-items:center; justify-content:center; font-size:clamp(38px, 11vw, 52px); font-weight:900; cursor:pointer; line-height:1; transition:all .15s ease; touch-action:manipulation; padding:0; }
-.ttt-cell:active:not(.taken) { background:#f2f2f7; transform:scale(0.97); }
+.ttt-cell { aspect-ratio:1; min-height:80px; border:none; border-radius:12px; background:var(--card); display:flex; align-items:center; justify-content:center; font-size:clamp(38px, 11vw, 52px); font-weight:900; cursor:pointer; line-height:1; transition:all .15s ease; touch-action:manipulation; padding:0; }
+.ttt-cell:active:not(.taken) { background:var(--fill); transform:scale(0.97); }
 .ttt-cell.o { color:#007aff; }
 .ttt-cell.x { color:var(--red); }
 .ttt-cell.win-cell { background:#ffd60a; color:#1d1d1f; }
 
 .game-msg { text-align:center; padding:12px; border-radius:12px; font-size:16px; font-weight:800; margin-bottom:14px; display:none; }
-.game-msg.win { background:#e6f6ef; color:var(--ok); display:block; }
+.game-msg.win { background:var(--okbg); color:var(--ok); display:block; }
 .game-msg.lose { background:var(--dangerbg); color:var(--danger); display:block; }
-.game-msg.draw { background:#f2f2f7; color:var(--ink); display:block; }
+.game-msg.draw { background:var(--fill); color:var(--ink); display:block; }
 
 .control-bar { margin-bottom:14px; }
 .btn-reset { display:flex; align-items:center; justify-content:center; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; background:#2c2c2e; color:#fff; width:100%; }
 .btn-reset:active { background:#3a3a3c; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

@@ -13,8 +13,8 @@
 
 /* 턴/상태 안내 바 */
 .turn-guide { text-align:center; font-size:15px; font-weight:800; padding:10px 14px; border-radius:12px; background:var(--bg); border:1.5px solid var(--line); margin-bottom:14px; color:var(--ink); }
-.turn-guide.ai { background:#fff8e6; border-color:#ffd60a; color:#8c6d00; }
-.turn-guide.player { background:#e6f6ef; border-color:var(--ok); color:var(--ok); }
+.turn-guide.ai { background:var(--warnbg); border-color:#ffd60a; color:#8c6d00; }
+.turn-guide.player { background:var(--okbg); border-color:var(--ok); color:var(--ok); }
 
 /* 2x2 컬러 패드 */
 .color-board-wrap { width:100%; max-width:320px; margin:0 auto 16px; aspect-ratio:1; display:flex; align-items:center; justify-content:center; }
@@ -34,7 +34,7 @@
 .pad-btn.lit { opacity:1; filter:brightness(1.5) drop-shadow(0 0 12px currentColor); transform:scale(1.03); }
 
 .game-msg { text-align:center; padding:12px 14px; border-radius:12px; font-size:15px; font-weight:800; margin-bottom:14px; display:none; }
-.game-msg.win { background:#e6f6ef; color:var(--ok); display:block; }
+.game-msg.win { background:var(--okbg); color:var(--ok); display:block; }
 .game-msg.lose { background:var(--dangerbg); color:var(--danger); display:block; }
 
 .control-bar { margin-bottom:14px; }
@@ -44,6 +44,7 @@
 .btn-reset { background:#2c2c2e; color:#fff; }
 .btn-reset:active { background:#3a3a3c; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

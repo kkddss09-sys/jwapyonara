@@ -7,24 +7,25 @@
 <meta name="description" content="새 폰으로 옮기기 전에 백업부터 앱 이동까지 꼭 챙겨야 할 체크리스트. 가입 없이 무료.">
 <link rel="stylesheet" href="../_common/common.css">
 <style>
-.prog-card { background:#fff; border:1.5px solid var(--line); border-radius:18px; padding:18px; margin-bottom:14px; transition:border-color .2s, background .2s; }
+.prog-card { background:var(--card); border:1.5px solid var(--line); border-radius:18px; padding:18px; margin-bottom:14px; transition:border-color .2s, background .2s; }
 .prog-card.all-done { background:var(--okbg); border-color:var(--ok); }
 .prog-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
 .prog-status { font-size:18px; font-weight:800; }
 .prog-card.all-done .prog-status { color:var(--ok); }
-.prog-track { height:10px; border-radius:999px; background:#e5e5ea; overflow:hidden; }
+.prog-track { height:10px; border-radius:999px; background:var(--fill2); overflow:hidden; }
 .prog-fill { height:100%; border-radius:999px; background:var(--red); width:0%; transition:width .25s ease; }
 .prog-card.all-done .prog-fill { background:var(--ok); }
 .check-list { display:grid; gap:8px; }
-.check-item { display:flex; align-items:center; min-height:52px; padding:12px 14px; border:1.5px solid var(--line); border-radius:14px; background:#fff; cursor:pointer; user-select:none; gap:12px; transition:border-color .15s, background .15s; }
+.check-item { display:flex; align-items:center; min-height:52px; padding:12px 14px; border:1.5px solid var(--line); border-radius:14px; background:var(--card); cursor:pointer; user-select:none; gap:12px; transition:border-color .15s, background .15s; }
 .check-item input[type="checkbox"] { width:22px; height:22px; margin:0; flex-shrink:0; cursor:pointer; accent-color:var(--red); }
-.check-item.done { background:#fbfbfd; border-color:#d2d2d7; }
+.check-item.done { background:var(--fill); border-color:#d2d2d7; }
 .check-item.done span { color:var(--sub); text-decoration:line-through; }
 .check-item span { font-size:15px; font-weight:600; line-height:1.45; color:var(--ink); flex:1; word-break:keep-all; }
 .btn-reset { display:block; width:100%; background:transparent; border:1.5px dashed var(--line); border-radius:14px; padding:14px; font:inherit; font-size:15px; font-weight:700; color:var(--sub); cursor:pointer; margin:14px 0 16px; text-align:center; transition:all .15s; }
-.btn-reset:hover { background:#ececee; color:var(--ink); border-color:var(--sub); }
+.btn-reset:hover { background:var(--fill); color:var(--ink); border-color:var(--sub); }
 .note a { color:var(--ink); font-weight:700; text-decoration:underline; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

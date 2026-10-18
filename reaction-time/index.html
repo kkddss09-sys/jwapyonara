@@ -30,7 +30,7 @@
 .history-card { background:var(--bg); border-radius:14px; padding:14px 16px; margin-bottom:14px; border:1px solid var(--line); }
 .history-head { display:flex; justify-content:space-between; align-items:center; font-size:14px; font-weight:700; color:var(--sub); margin-bottom:10px; }
 .history-list { display:flex; flex-wrap:wrap; gap:8px; list-style:none; padding:0; margin:0; }
-.history-chip { background:#fff; border:1.5px solid var(--line); border-radius:999px; padding:6px 12px; font-size:14px; font-weight:800; color:var(--ink); display:flex; align-items:center; gap:4px; }
+.history-chip { background:var(--card); border:1.5px solid var(--line); border-radius:999px; padding:6px 12px; font-size:14px; font-weight:800; color:var(--ink); display:flex; align-items:center; gap:4px; }
 .history-chip b { color:var(--red); }
 
 .grade-box { text-align:center; padding:10px; border-radius:12px; font-size:15px; font-weight:800; margin-bottom:14px; background:var(--soft); color:var(--red); display:none; }
@@ -39,6 +39,7 @@
 .btn-reset { display:flex; align-items:center; justify-content:center; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; background:#2c2c2e; color:#fff; width:100%; }
 .btn-reset:active { background:#3a3a3c; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

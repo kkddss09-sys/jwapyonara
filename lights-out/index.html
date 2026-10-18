@@ -24,12 +24,13 @@
 .light-btn.on:active { transform:scale(0.95); opacity:0.9; }
 
 .game-msg { text-align:center; padding:12px 14px; border-radius:12px; font-size:15px; font-weight:800; margin-bottom:14px; display:none; }
-.game-msg.win { background:#e6f6ef; color:var(--ok); display:block; }
+.game-msg.win { background:var(--okbg); color:var(--ok); display:block; }
 
 .control-bar { margin-bottom:14px; }
 .btn-reset { display:flex; align-items:center; justify-content:center; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; background:#2c2c2e; color:#fff; width:100%; touch-action:manipulation; }
 .btn-reset:active { background:#3a3a3c; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

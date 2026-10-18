@@ -9,14 +9,15 @@
 <style>
 .qr-preview-box { margin-top:14px; text-align:center; }
 .qr-preview-box img { max-height:200px; max-width:100%; border-radius:12px; border:1px solid var(--line); display:inline-block; vertical-align:middle; }
-.qr-content-box { display:none; margin-top:14px; background:#fff; border-radius:12px; padding:14px; border:1.5px solid var(--line); word-break:break-all; text-align:left; font-size:15px; line-height:1.6; color:var(--ink); }
+.qr-content-box { display:none; margin-top:14px; background:var(--card); border-radius:12px; padding:14px; border:1.5px solid var(--line); word-break:break-all; text-align:left; font-size:15px; line-height:1.6; color:var(--ink); }
 .qr-host-box { display:none; margin-top:10px; font-size:15px; font-weight:700; color:#c7c7cc; text-align:left; word-break:break-all; }
 .qr-host-box span { color:#ffd60a; }
 .qr-actions { display:none; gap:8px; margin-top:14px; flex-direction:column; }
 .btn-open { display:none; align-items:center; justify-content:center; min-height:48px; border-radius:12px; background:var(--red); color:#fff; text-decoration:none; font-weight:700; font-size:16px; width:100%; box-sizing:border-box; }
-.btn-copy { display:flex; align-items:center; justify-content:center; min-height:48px; border-radius:12px; border:1.5px solid var(--line); background:#fff; color:var(--ink); font-weight:700; font-size:16px; cursor:pointer; width:100%; box-sizing:border-box; }
-.btn-file-label { display:flex; align-items:center; justify-content:center; min-height:50px; border-radius:12px; background:var(--ink); color:#fff; font-size:16px; font-weight:700; cursor:pointer; width:100%; text-align:center; box-sizing:border-box; }
+.btn-copy { display:flex; align-items:center; justify-content:center; min-height:48px; border-radius:12px; border:1.5px solid var(--line); background:var(--card); color:var(--ink); font-weight:700; font-size:16px; cursor:pointer; width:100%; box-sizing:border-box; }
+.btn-file-label { display:flex; align-items:center; justify-content:center; min-height:50px; border-radius:12px; background:var(--panel); color:#fff; font-size:16px; font-weight:700; cursor:pointer; width:100%; text-align:center; box-sizing:border-box; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

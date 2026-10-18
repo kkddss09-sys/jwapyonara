@@ -7,7 +7,7 @@
 <meta name="description" content="링크나 글자를 넣으면 큐알코드(QR코드)가 바로 만들어집니다. 그림 파일로 저장해 인쇄하거나 보낼 수 있습니다. 가입 없이 무료, 넣은 내용은 전송되지 않습니다.">
 <link rel="stylesheet" href="../_common/common.css">
 <style>
-.qr-text { width:100%; border:1.5px solid var(--line); border-radius:12px; padding:14px; font:inherit; font-size:16px; line-height:1.5; resize:vertical; outline:0; background:#fff; color:var(--ink); display:block; word-break:break-all; }
+.qr-text { width:100%; border:1.5px solid var(--line); border-radius:12px; padding:14px; font:inherit; font-size:16px; line-height:1.5; resize:vertical; outline:0; background:var(--card); color:var(--ink); display:block; word-break:break-all; }
 .qr-text:focus { border-color:var(--red); }
 .qr-box { background:#fff; border-radius:14px; padding:14px; margin-top:14px; display:flex; justify-content:center; }
 .qr-box canvas { width:100%; max-width:260px; height:auto; display:block; image-rendering:pixelated; }
@@ -15,6 +15,7 @@
 .qr-save[disabled] { background:#3a3a3c; color:#8e8e93; cursor:default; }
 .qr-info { display:flex; justify-content:space-between; margin-top:6px; font-size:14px; color:var(--sub); }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

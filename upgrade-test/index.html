@@ -14,19 +14,20 @@
 .rec-label { font-size:14px; font-weight:700; color:var(--sub); margin:0 4px 8px; }
 .rec-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
 .rec-card { display:block; background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:14px; text-decoration:none; color:var(--ink); transition:border-color .15s, background .15s; }
-.rec-card:hover { border-color:var(--red); background:#e8f0fe; }
+.rec-card:hover { border-color:var(--red); background:var(--soft); }
 .rec-card b { display:block; font-size:15px; margin-bottom:3px; color:var(--ink); }
 .rec-card span { display:block; font-size:13px; color:var(--sub); line-height:1.35; }
 .check-list { display:grid; gap:8px; }
-.check-item { display:flex; align-items:center; min-height:52px; padding:12px 14px; border:1.5px solid var(--line); border-radius:14px; background:#fff; cursor:pointer; user-select:none; gap:12px; transition:border-color .15s, background .15s; }
+.check-item { display:flex; align-items:center; min-height:52px; padding:12px 14px; border:1.5px solid var(--line); border-radius:14px; background:var(--card); cursor:pointer; user-select:none; gap:12px; transition:border-color .15s, background .15s; }
 .check-item input[type="checkbox"] { width:22px; height:22px; margin:0; flex-shrink:0; cursor:pointer; accent-color:var(--red); }
-.check-item.done { background:#fbfbfd; border-color:var(--red); }
+.check-item.done { background:var(--fill); border-color:var(--red); }
 .check-item.done span { color:var(--ink); font-weight:700; }
 .check-item span { font-size:15px; font-weight:600; line-height:1.45; color:var(--ink); flex:1; word-break:keep-all; }
 @media (max-width:480px) {
   .rec-grid { grid-template-columns:1fr; }
 }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

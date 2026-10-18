@@ -22,11 +22,11 @@
 
 /* 좌표나라 스타일: 흰색 -> 연분홍(--soft) -> 빨강(--red) */
 .val-0    { background:#3a3a3c; color:transparent; }
-.val-2    { background:#ffffff; color:#1d1d1f; }
-.val-4    { background:#e8f0fe; color:#1d1d1f; }
-.val-8    { background:#ffe0e6; color:#1d1d1f; }
-.val-16   { background:#ffccd5; color:#1d1d1f; }
-.val-32   { background:#ffa3b4; color:#1d1d1f; }
+.val-2    { background:var(--card); color:var(--ink); }
+.val-4    { background:var(--soft); color:var(--ink); }
+.val-8    { background:var(--dangerbg); color:var(--ink); }
+.val-16   { background:#ffccd5; color:var(--ink); }
+.val-32   { background:#ffa3b4; color:var(--ink); }
 .val-64   { background:#ff7590; color:#ffffff; }
 .val-128  { background:#ff476d; color:#ffffff; font-size:clamp(16px, 5vw, 24px); }
 .val-256  { background:#1b64da; color:#ffffff; font-size:clamp(16px, 5vw, 24px); }
@@ -38,12 +38,13 @@
 /* 방향키 단추 모음 (화면 터치 편의) */
 .dpad-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; margin:10px 0 4px; }
 .dpad-row { display:flex; gap:6px; }
-.dpad-btn { width:52px; height:44px; border:1.5px solid var(--line); background:#fff; border-radius:10px; font-size:18px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.dpad-btn { width:52px; height:44px; border:1.5px solid var(--line); background:var(--card); border-radius:10px; font-size:18px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; }
 .dpad-btn:active { background:var(--soft); border-color:var(--red); color:var(--red); }
 
 .game-msg { text-align:center; padding:12px; border-radius:12px; font-size:16px; font-weight:800; margin-bottom:12px; display:none; }
 .game-msg.lose { background:var(--dangerbg); color:var(--danger); display:block; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

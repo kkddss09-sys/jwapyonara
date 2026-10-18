@@ -18,14 +18,15 @@
 .missed-item { background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:12px 14px; font-size:14px; color:var(--ink); line-height:1.45; word-break:keep-all; }
 .missed-item .tool-link { display:inline-block; margin-top:4px; font-size:13px; font-weight:700; color:var(--red); text-decoration:none; }
 .missed-item .tool-link:hover { text-decoration:underline; }
-.missed-none { background:#fbfbfd; border:1.5px dashed var(--line); border-radius:14px; padding:14px; text-align:center; font-size:14px; color:var(--sub); }
+.missed-none { background:var(--fill); border:1.5px dashed var(--line); border-radius:14px; padding:14px; text-align:center; font-size:14px; color:var(--sub); }
 .check-list { display:grid; gap:8px; }
-.check-item { display:flex; align-items:center; min-height:52px; padding:12px 14px; border:1.5px solid var(--line); border-radius:14px; background:#fff; cursor:pointer; user-select:none; gap:12px; transition:border-color .15s, background .15s; }
+.check-item { display:flex; align-items:center; min-height:52px; padding:12px 14px; border:1.5px solid var(--line); border-radius:14px; background:var(--card); cursor:pointer; user-select:none; gap:12px; transition:border-color .15s, background .15s; }
 .check-item input[type="checkbox"] { width:22px; height:22px; margin:0; flex-shrink:0; cursor:pointer; accent-color:var(--red); }
-.check-item.done { background:#fbfbfd; border-color:var(--red); }
+.check-item.done { background:var(--fill); border-color:var(--red); }
 .check-item.done span { color:var(--ink); font-weight:700; }
 .check-item span { font-size:15px; font-weight:600; line-height:1.45; color:var(--ink); flex:1; word-break:keep-all; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

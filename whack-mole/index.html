@@ -25,7 +25,7 @@
 
 /* 결과 및 상태 메시지 */
 .game-msg { text-align:center; padding:12px; border-radius:12px; font-size:16px; font-weight:800; margin-bottom:14px; display:none; }
-.game-msg.over { background:#e6f6ef; color:var(--ok); display:block; }
+.game-msg.over { background:var(--okbg); color:var(--ok); display:block; }
 
 .control-bar { display:flex; gap:10px; margin-bottom:14px; }
 .btn-action { flex:1; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; display:flex; align-items:center; justify-content:center; }
@@ -34,6 +34,7 @@
 .btn-reset { background:#2c2c2e; color:#fff; }
 .btn-reset:active { background:#3a3a3c; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

@@ -19,7 +19,7 @@
 
 .btn-choice-opt {
   display:block; width:100%; min-height:54px; padding:14px 16px;
-  background:#fff; color:var(--ink); border:2px solid var(--line); border-radius:14px;
+  background:var(--card); color:var(--ink); border:2px solid var(--line); border-radius:14px;
   font:inherit; font-size:15px; font-weight:700; text-align:left; line-height:1.45;
   cursor:pointer; -webkit-tap-highlight-color:transparent; transition:border-color 0.15s, background-color 0.15s;
   margin-bottom:10px;
@@ -34,7 +34,7 @@
 
 /* 결과 카드 */
 .res-card {
-  display:none; background:#fff; border:1.5px solid var(--line); border-radius:16px;
+  display:none; background:var(--card); border:1.5px solid var(--line); border-radius:16px;
   padding:22px 18px; margin-bottom:16px; text-align:center;
 }
 .res-badge { display:inline-block; font-size:13px; font-weight:800; background:var(--soft); color:var(--red); padding:4px 10px; border-radius:8px; margin-bottom:8px; }
@@ -55,7 +55,7 @@
 .action-grid { display:grid; gap:10px; margin-bottom:14px; }
 .btn-action {
   font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line);
-  background:#fff; color:var(--ink); border-radius:14px; padding:13px; cursor:pointer; text-align:center;
+  background:var(--card); color:var(--ink); border-radius:14px; padding:13px; cursor:pointer; text-align:center;
 }
 .btn-action:active { background:var(--soft); }
 .btn-action-primary {
@@ -63,6 +63,7 @@
 }
 .btn-action-primary:active { opacity:0.85; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

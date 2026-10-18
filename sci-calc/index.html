@@ -23,7 +23,7 @@
 .pad { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:7px; }
 .pad button {
   appearance:none; border:1px solid var(--line); border-radius:12px;
-  background:#fff; color:var(--ink);
+  background:var(--card); color:var(--ink);
   font:inherit; font-size:18px; font-weight:700;
   min-height:50px; padding:8px 2px;
   cursor:pointer; touch-action:manipulation;
@@ -32,11 +32,11 @@
 }
 .pad button:active { transform:scale(0.96); opacity:0.85; }
 
-.pad button.num { background:#f9f9fb; font-size:20px; }
-.pad button.fn { color:#48484a; font-size:16px; background:#fff; }
+.pad button.num { background:var(--fill); font-size:20px; }
+.pad button.fn { color:var(--sub); font-size:16px; background:var(--card); }
 .pad button.op { background:var(--soft); color:var(--red); border-color:#ffd1dc; font-size:20px; }
-.pad button.del { background:#f2f2f7; color:#ff3b30; font-size:16px; }
-.pad button.ac { background:#f2f2f7; color:#ff3b30; font-size:16px; }
+.pad button.del { background:var(--fill); color:#ff3b30; font-size:16px; }
+.pad button.ac { background:var(--fill); color:#ff3b30; font-size:16px; }
 .pad button.eq { grid-column:span 2; background:var(--red); color:#fff; border-color:var(--red); font-size:22px; }
 
 @media (max-width:380px) {
@@ -45,6 +45,7 @@
   .screen .ans-line { font-size:25px; }
 }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

@@ -22,7 +22,7 @@
 
 /* D-패드 방향키 (모바일용) */
 .dpad-wrap { display:grid; grid-template-columns:repeat(3, 1fr); grid-template-rows:repeat(3, 1fr); gap:6px; width:100%; max-width:240px; margin:0 auto 14px; }
-.dpad-btn { aspect-ratio:1; min-height:52px; font:inherit; font-size:20px; font-weight:800; border:1.5px solid var(--line); background:#fff; color:var(--ink); border-radius:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; -webkit-user-select:none; touch-action:manipulation; }
+.dpad-btn { aspect-ratio:1; min-height:52px; font:inherit; font-size:20px; font-weight:800; border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:14px; display:flex; align-items:center; justify-content:center; cursor:pointer; user-select:none; -webkit-user-select:none; touch-action:manipulation; }
 .dpad-btn:active { background:var(--soft); border-color:var(--red); color:var(--red); transform:scale(0.95); }
 .dpad-up { grid-column:2; grid-row:1; }
 .dpad-left { grid-column:1; grid-row:2; }
@@ -33,12 +33,13 @@
 .btn-action { flex:1; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; display:flex; align-items:center; justify-content:center; }
 .btn-reset { background:#2c2c2e; color:#fff; }
 .btn-reset:active { background:#3a3a3c; }
-.btn-pause { background:#fff; border:1.5px solid var(--line); color:var(--ink); }
+.btn-pause { background:var(--card); border:1.5px solid var(--line); color:var(--ink); }
 .btn-pause:active { background:var(--soft); }
 
 .game-msg { text-align:center; padding:12px; border-radius:12px; font-size:15px; font-weight:800; margin-bottom:12px; display:none; }
 .game-msg.over { background:var(--dangerbg); color:var(--danger); display:block; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

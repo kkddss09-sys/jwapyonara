@@ -14,7 +14,7 @@
 .tool-mode { display:flex; gap:4px; }
 .tool-mode button {
   appearance:none; border:1.5px solid var(--line); border-radius:10px;
-  background:#fff; color:var(--ink); font:inherit; font-size:14px; font-weight:700;
+  background:var(--card); color:var(--ink); font:inherit; font-size:14px; font-weight:700;
   padding:8px 14px; min-height:44px; cursor:pointer;
 }
 .tool-mode button.on { border-color:var(--red); background:var(--soft); color:var(--red); }
@@ -22,7 +22,7 @@
 .tool-actions { display:flex; gap:6px; }
 .tool-actions button {
   appearance:none; border:1.5px solid var(--line); border-radius:10px;
-  background:#fff; color:var(--ink); font:inherit; font-size:14px; font-weight:700;
+  background:var(--card); color:var(--ink); font:inherit; font-size:14px; font-weight:700;
   padding:8px 12px; min-height:44px; cursor:pointer;
 }
 .tool-actions button.save { background:var(--red); color:#fff; border-color:var(--red); }
@@ -50,14 +50,14 @@
 }
 
 /* 툴바 3: 굵기 조절 */
-.size-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; background:#f5f5f7; border-radius:12px; padding:8px 14px; }
+.size-row { display:flex; align-items:center; gap:10px; margin-bottom:12px; background:var(--fill); border-radius:12px; padding:8px 14px; }
 .size-row label { font-size:13px; font-weight:700; color:var(--sub); white-space:nowrap; }
 .size-row input[type="range"] { flex:1; accent-color:var(--red); cursor:pointer; }
 .size-preview {
   width:30px; height:30px; display:flex; align-items:center; justify-content:center;
-  background:#fff; border:1px solid var(--line); border-radius:8px;
+  background:var(--card); border:1px solid var(--line); border-radius:8px;
 }
-.size-dot { border-radius:50%; background:var(--ink); }
+.size-dot { border-radius:50%; background:var(--panel); }
 
 /* 캔버스 영역 */
 .canvas-wrap {
@@ -73,6 +73,7 @@
   .swatch { width:30px; height:30px; }
 }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

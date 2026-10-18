@@ -17,12 +17,12 @@
   @media (min-width:1000px) { .sd { grid-template-columns:380px 1fr; align-items:start; } .sd .card { position:sticky; top:12px; max-height:calc(100vh - 24px); overflow:auto; } main.wrap.wide { max-width:1240px; } }
   .grp { margin:16px 0 6px; font-weight:800; color:var(--red); font-size:15px; }
   .grp:first-child { margin-top:0; }
-  .txt { width:100%; border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:16px; font-family:inherit; background:#fff; }
+  .txt { width:100%; border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:16px; font-family:inherit; background:var(--card); }
   textarea.txt { min-height:70px; resize:vertical; }
   .printbtn { display:block; width:100%; border:0; border-radius:14px; background:var(--red); color:#fff; font-size:18px; font-weight:800; padding:16px; margin:14px 0 6px; cursor:pointer; font-family:inherit; }
   .padbtn { display:block; width:100%; border:0; border-radius:14px; background:#1d4ed8; color:#fff; font-size:17px; font-weight:800; padding:15px; margin:0 0 6px; cursor:pointer; font-family:inherit; }
   .mailbtn { display:block; width:100%; border:1.5px solid #1d4ed8; border-radius:14px; background:#eff6ff; color:#1d4ed8; font-size:16px; font-weight:800; padding:13px; margin:0 0 6px; cursor:pointer; font-family:inherit; }
-  .newbtn { display:block; width:100%; border:1.5px solid var(--line); border-radius:14px; background:#fff; color:var(--ink); font-size:15px; font-weight:700; padding:12px; cursor:pointer; font-family:inherit; }
+  .newbtn { display:block; width:100%; border:1.5px solid var(--line); border-radius:14px; background:var(--card); color:var(--ink); font-size:15px; font-weight:700; padding:12px; cursor:pointer; font-family:inherit; }
   .mail-msg { display:none; margin:6px 0 0; padding:10px 12px; border-radius:10px; background:#e6f4ed; color:#12805c; font-size:14px; font-weight:700; text-align:center; }
   /* 패드 크게 보기 상단 바 */
   .pad-bar { display:none; position:sticky; top:0; z-index:50; background:rgba(22,32,50,.96); color:#fff; padding:10px 16px; border-radius:14px; margin-bottom:14px; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; box-shadow:0 4px 14px rgba(0,0,0,.18); }
@@ -30,7 +30,7 @@
   .pad-bar .pad-actions { display:flex; gap:8px; flex-wrap:wrap; }
   .pad-bar button { border:0; border-radius:10px; padding:10px 16px; font-size:15px; font-weight:800; cursor:pointer; font-family:inherit; }
   .pad-bar .back-btn { background:#1b64da; color:#fff; }
-  .pad-bar .sub-btn { background:#fff; color:#111; }
+  .pad-bar .sub-btn { background:var(--card); color:var(--ink); }
   /* 패드에서 상담 내용만 크게 보기 모드 */
   body.pad-view .zw-head, body.pad-view main > h1, body.pad-view main > .lead, body.pad-view #form, body.pad-view .ad, body.pad-view details, body.pad-view .cta, body.pad-view .more, body.pad-view .zw-foot { display:none !important; }
   body.pad-view main.wrap.wide { max-width:1080px; padding-top:12px; }
@@ -57,13 +57,13 @@
   /* A4 상담지 */
   .sheet-wrap { overflow:hidden; }
   .sheet { transform-origin:0 0; }
-  .sheet { background:#fff; color:#111; width:210mm; min-height:297mm; margin:0 auto; padding:13mm 13mm 10mm; box-shadow:0 2px 16px rgba(0,0,0,.12); font-size:10.5pt; line-height:1.45; }
+  .sheet { --ink:#1d1d1f; --sub:#6e6e73; --line:#e3e3e8; --card:#fff; --bg:#f5f5f7; --soft:#e8f0fe; --fill:#f2f2f7; --fill2:#e5e5ea; --red:#1b64da; --danger:#d92d20; --ok:#12805c; background:#fff; color:#1d1d1f; width:210mm; min-height:297mm; margin:0 auto; padding:13mm 13mm 10mm; box-shadow:0 2px 16px rgba(0,0,0,.12); font-size:10.5pt; line-height:1.45; }
   .sheet h2 { margin:0; font-size:19pt; letter-spacing:-.02em; }
   .sheet .top { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid #1b64da; padding-bottom:6px; margin-bottom:10px; }
-  .sheet .meta { text-align:right; font-size:9.5pt; color:#444; }
+  .sheet .meta { text-align:right; font-size:9.5pt; color:var(--sub); }
   .sheet .big { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:10px; }
-  .sheet .big div { background:#e8f0fe; border-radius:8px; padding:7px 10px; }
-  .sheet .big span { display:block; font-size:8.5pt; color:#555; }
+  .sheet .big div { background:var(--soft); border-radius:8px; padding:7px 10px; }
+  .sheet .big span { display:block; font-size:8.5pt; color:var(--sub); }
   .sheet .big b { font-size:13pt; }
   .sheet .cols { display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; }
   .sheet section { break-inside:avoid; }
@@ -77,13 +77,13 @@
   .sheet .todo h3 { margin-top:2px; }
   .sheet .todo ul { margin:2px 0 4px; padding-left:0; list-style:none; }
   .sheet .todo li { margin:2px 0; }
-  .sheet .warn { background:#e8f0fe; border-radius:6px; padding:5px 8px; font-weight:700; color:#b0002a; margin-top:4px; }
+  .sheet .warn { background:var(--soft); border-radius:6px; padding:5px 8px; font-weight:700; color:#b0002a; margin-top:4px; }
   .sheet table.bank td { border:1px solid #ccc; height:7mm; text-align:left; font-weight:400; }
   .sheet table.bank tr:first-child td { height:auto; background:#f6f6f6; font-weight:700; font-size:9pt; }
   .sheet .fine { font-size:8pt; color:#666; margin-top:8px; line-height:1.4; }
   @media print {
     @page { size:A4; margin:0; }
-    body { background:#fff; }
+    body { background:var(--card); }
     body > *:not(main), main > *:not(.sd), .sd > .card, .pad-bar, .ad, details, .cta { display:none !important; }
     main.wrap { padding:0; max-width:none; margin:0; }
     .sd { display:block; }
@@ -91,6 +91,7 @@
     .sheet { transform:none !important; box-shadow:none; margin:0; width:210mm !important; max-width:none !important; min-height:0; height:296mm; padding:13mm 13mm 10mm !important; font-size:10.5pt !important; overflow:hidden; }
   }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap wide">

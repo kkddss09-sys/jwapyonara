@@ -12,9 +12,9 @@
 .status-val { font-size:17px; font-weight:800; color:#ffd60a; }
 
 /* 대결 화면 */
-.arena-box { background:#f2f2f7; border:1.5px solid var(--line); border-radius:16px; padding:18px 12px; margin-bottom:16px; text-align:center; }
+.arena-box { background:var(--fill); border:1.5px solid var(--line); border-radius:16px; padding:18px 12px; margin-bottom:16px; text-align:center; }
 .vs-wrap { display:flex; align-items:center; justify-content:space-around; margin-bottom:12px; }
-.hand-card { display:flex; flex-direction:column; align-items:center; justify-content:center; width:110px; height:120px; background:#fff; border-radius:14px; border:2px solid var(--line); box-shadow:0 2px 6px rgba(0,0,0,0.06); transition:transform .2s ease; }
+.hand-card { display:flex; flex-direction:column; align-items:center; justify-content:center; width:110px; height:120px; background:var(--card); border-radius:14px; border:2px solid var(--line); box-shadow:0 2px 6px rgba(0,0,0,0.06); transition:transform .2s ease; }
 .hand-card.winner { border-color:var(--ok); background:#f4fbf7; transform:scale(1.05); }
 .hand-card.loser { border-color:var(--line); opacity:0.6; }
 .hand-icon { font-size:48px; line-height:1.2; user-select:none; }
@@ -23,15 +23,15 @@
 .vs-badge { font-size:18px; font-weight:900; color:var(--red); padding:0 8px; user-select:none; }
 
 .result-banner { min-height:44px; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:800; border-radius:12px; padding:10px 14px; margin-bottom:4px; }
-.result-banner.win { background:#e6f6ef; color:var(--ok); }
+.result-banner.win { background:var(--okbg); color:var(--ok); }
 .result-banner.lose { background:var(--dangerbg); color:var(--danger); }
-.result-banner.draw { background:#e5e5ea; color:var(--ink); }
+.result-banner.draw { background:var(--fill2); color:var(--ink); }
 .result-banner.ready { background:transparent; color:var(--muted); font-size:15px; }
 
 /* 선택 버튼 3개 */
 .choice-title { font-size:14px; font-weight:800; color:var(--ink); text-align:center; margin-bottom:10px; }
 .rps-buttons { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:14px; }
-.btn-rps { min-height:86px; border:2px solid var(--line); background:#fff; border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; touch-action:manipulation; user-select:none; -webkit-user-select:none; transition:all .15s ease; padding:8px 4px; }
+.btn-rps { min-height:86px; border:2px solid var(--line); background:var(--card); border-radius:14px; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; touch-action:manipulation; user-select:none; -webkit-user-select:none; transition:all .15s ease; padding:8px 4px; }
 .btn-rps:active { background:var(--soft); border-color:var(--red); transform:scale(0.96); }
 .btn-rps .btn-emoji { font-size:36px; line-height:1; }
 .btn-rps .btn-label { font-size:15px; font-weight:800; color:var(--ink); margin-top:6px; }
@@ -40,6 +40,7 @@
 .btn-reset { display:flex; align-items:center; justify-content:center; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; background:#2c2c2e; color:#fff; width:100%; touch-action:manipulation; }
 .btn-reset:active { background:#3a3a3c; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

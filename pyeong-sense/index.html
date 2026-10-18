@@ -13,7 +13,7 @@
 
 /* ㎡ 디스플레이 카드 */
 .target-card {
-  background:#fff; border:2px solid var(--ink); border-radius:16px;
+  background:var(--card); border:2px solid var(--ink); border-radius:16px;
   padding:24px 16px; text-align:center; margin-bottom:16px;
   box-shadow:0 4px 12px rgba(0,0,0,0.03);
 }
@@ -28,14 +28,14 @@
 }
 .btn-choice {
   display:flex; flex-direction:column; justify-content:center; align-items:center;
-  min-height:64px; padding:10px; background:#fff; color:var(--ink);
+  min-height:64px; padding:10px; background:var(--card); color:var(--ink);
   border:1.5px solid var(--line); border-radius:14px;
   font:inherit; font-size:18px; font-weight:800; cursor:pointer;
   -webkit-tap-highlight-color:transparent; transition:all 0.15s ease;
 }
 .btn-choice:active { background:var(--soft); }
-.btn-choice.correct { background:#e6f6ef !important; border-color:var(--ok) !important; color:var(--ok) !important; }
-.btn-choice.wrong { background:#fff1f0 !important; border-color:var(--danger) !important; color:var(--danger) !important; }
+.btn-choice.correct { background:var(--okbg) !important; border-color:var(--ok) !important; color:var(--ok) !important; }
+.btn-choice.wrong { background:var(--dangerbg) !important; border-color:var(--danger) !important; color:var(--danger) !important; }
 .btn-choice:disabled { cursor:default; }
 
 /* 라운드 결과 알림 */
@@ -60,7 +60,7 @@
 /* 최종 결과 화면 */
 .res-container { display:none; }
 .res-header {
-  text-align:center; padding:22px 14px; background:#fff; border:1.5px solid var(--line);
+  text-align:center; padding:22px 14px; background:var(--card); border:1.5px solid var(--line);
   border-radius:16px; margin-bottom:16px;
 }
 .res-big-score { font-size:44px; font-weight:900; color:var(--red); line-height:1.1; margin-bottom:8px; }
@@ -81,6 +81,7 @@
 }
 .btn-restart:active { background:#3a3a3c; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

@@ -19,7 +19,7 @@
 
 /* 입력 폼 */
 .input-row { display:flex; gap:8px; margin-bottom:14px; }
-.inp-guess { flex:1; min-width:0; border:1.5px solid var(--line); border-radius:12px; background:#fff; font:inherit; font-size:20px; font-weight:800; padding:12px 14px; text-align:center; color:var(--ink); outline:none; }
+.inp-guess { flex:1; min-width:0; border:1.5px solid var(--line); border-radius:12px; background:var(--card); font:inherit; font-size:20px; font-weight:800; padding:12px 14px; text-align:center; color:var(--ink); outline:none; }
 .inp-guess:focus { border-color:var(--red); }
 .btn-submit { flex:none; width:90px; min-height:48px; border:none; border-radius:12px; background:var(--red); color:#fff; font:inherit; font-size:16px; font-weight:800; cursor:pointer; }
 .btn-submit:active { opacity:0.85; }
@@ -28,22 +28,23 @@
 /* 피드백 힌트 메시지 */
 .feedback-box { text-align:center; padding:16px; border-radius:14px; font-size:18px; font-weight:900; margin-bottom:14px; display:none; }
 .feedback-box.up { background:var(--soft); color:var(--red); display:block; }
-.feedback-box.down { background:#e8f2ff; color:#007aff; display:block; }
-.feedback-box.win { background:#e6f6ef; color:var(--ok); display:block; }
+.feedback-box.down { background:var(--soft); color:#007aff; display:block; }
+.feedback-box.win { background:var(--okbg); color:var(--ok); display:block; }
 
 /* 시도 기록 리스트 */
 .history-section { border-top:1px solid var(--line); padding-top:14px; margin-top:14px; }
 .history-title { font-size:14px; font-weight:700; color:var(--sub); margin-bottom:10px; display:flex; justify-content:space-between; }
 .history-chips { display:flex; flex-wrap:wrap; gap:8px; }
-.guess-chip { background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:6px 12px; font-size:14px; font-weight:800; display:flex; align-items:center; gap:6px; }
+.guess-chip { background:var(--card); border:1.5px solid var(--line); border-radius:10px; padding:6px 12px; font-size:14px; font-weight:800; display:flex; align-items:center; gap:6px; }
 .chip-up { border-color:var(--red); color:var(--red); background:var(--soft); }
-.chip-down { border-color:#007aff; color:#007aff; background:#e8f2ff; }
-.chip-win { border-color:var(--ok); color:var(--ok); background:#e6f6ef; }
+.chip-down { border-color:#007aff; color:#007aff; background:var(--soft); }
+.chip-win { border-color:var(--ok); color:var(--ok); background:var(--okbg); }
 
 .control-bar { margin-top:14px; }
 .btn-reset { display:flex; align-items:center; justify-content:center; min-height:46px; border-radius:12px; font:inherit; font-size:15px; font-weight:700; cursor:pointer; border:none; background:#2c2c2e; color:#fff; width:100%; }
 .btn-reset:active { background:#3a3a3c; }
 </style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
 <main class="wrap">

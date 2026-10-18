@@ -1,0 +1,812 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>스도쿠 무료 게임 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 즐기는 무료 9x9 스도쿠 퍼즐. 쉬움, 보통, 어려움 난이도를 선택해 빈칸에 1부터 9까지 채워보세요.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 탭 */
+.difficulty-seg { display:grid; grid-template-columns:repeat(3, 1fr); gap:6px; margin-bottom:12px; }
+.difficulty-seg button { font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:12px; padding:10px 4px; cursor:pointer; touch-action:manipulation; }
+.difficulty-seg button.on { border-color:var(--red); background:var(--soft); color:var(--red); }
+
+/* 상태 바 */
+.status-bar { display:flex; justify-content:space-between; align-items:center; background:#2c2c2e; color:#fff; border-radius:14px; padding:10px 14px; margin-bottom:12px; }
+.status-item { font-size:13px; font-weight:700; display:flex; align-items:center; gap:5px; }
+.status-val { font-size:15px; font-weight:800; color:#ffd60a; }
+
+/* 기능 도구 버튼 행 */
+.tools-row { display:flex; gap:8px; margin-bottom:12px; }
+.tool-btn { flex:1; min-height:44px; font:inherit; font-size:14px; font-weight:700; border:1.5px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink); cursor:pointer; touch-action:manipulation; display:flex; align-items:center; justify-content:center; gap:4px; user-select:none; -webkit-user-select:none; }
+.tool-btn:active { transform:scale(0.97); }
+.tool-btn.on { border-color:var(--red); background:var(--soft); color:var(--red); }
+.tool-btn.btn-reset { background:var(--panel); color:#fff; border-color:var(--panel); }
+.tool-btn.btn-reset:active { background:#3a3a3c; }
+
+/* 게임 결과/알림 메시지 */
+.game-msg { text-align:center; padding:12px 14px; border-radius:12px; font-size:14px; font-weight:800; margin-bottom:12px; display:none; line-height:1.45; }
+.game-msg.win { background:var(--okbg); color:var(--ok); display:block; border:1px solid rgba(18, 128, 92, 0.25); }
+.game-msg.info { background:var(--soft); color:var(--red); display:block; border:1px solid rgba(27, 100, 218, 0.25); }
+
+/* 스도쿠 보드 래퍼 */
+.sudoku-board-wrap { width:100%; max-width:360px; margin:0 auto 14px; aspect-ratio:1; display:flex; align-items:center; justify-content:center; }
+.sudoku-board { width:100%; height:100%; display:grid; grid-template-columns:repeat(9, 1fr); grid-template-rows:repeat(9, 1fr); border:2.5px solid var(--ink); border-radius:10px; overflow:hidden; background:var(--card); box-sizing:border-box; user-select:none; -webkit-user-select:none; }
+
+/* 각 셀 스타일 */
+.cell { display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer; touch-action:manipulation; font-size:clamp(16px, 4.6vw, 22px); font-weight:800; border-right:1px solid var(--line); border-bottom:1px solid var(--line); box-sizing:border-box; padding:0; line-height:1; }
+/* 3x3 굵은 경계선 */
+.cell[data-col="2"], .cell[data-col="5"] { border-right:2.5px solid var(--ink); }
+.cell[data-row="2"], .cell[data-row="5"] { border-bottom:2.5px solid var(--ink); }
+.cell[data-col="8"] { border-right:none; }
+.cell[data-row="8"] { border-bottom:none; }
+
+/* 셀 상태 */
+.cell.fixed { color:var(--ink); font-weight:800; }
+.cell.user { color:var(--red); font-weight:800; }
+.cell.related { background:var(--fill); }
+.cell.same-num { background:var(--soft); }
+.cell.selected { background:var(--soft) !important; outline:2.5px solid var(--red); outline-offset:-2.5px; z-index:2; }
+.cell.conflict { color:var(--danger) !important; background:var(--dangerbg) !important; }
+
+/* 메모(후보 숫자) 3x3 그리드 */
+.notes-grid { position:absolute; inset:2px; display:grid; grid-template-columns:repeat(3, 1fr); grid-template-rows:repeat(3, 1fr); pointer-events:none; }
+.note-digit { font-size:clamp(8px, 2.2vw, 10px); font-weight:700; color:var(--sub); display:flex; align-items:center; justify-content:center; line-height:1; }
+
+/* 숫자 키패드 */
+.keypad-grid { display:grid; grid-template-columns:repeat(5, 1fr); gap:6px; width:100%; max-width:360px; margin:0 auto; }
+.key-btn { min-height:48px; font:inherit; font-size:20px; font-weight:800; border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; touch-action:manipulation; user-select:none; -webkit-user-select:none; transition:all .1s ease; }
+.key-btn:active { transform:scale(0.96); background:var(--soft); border-color:var(--red); color:var(--red); }
+.key-btn.key-del { font-size:15px; font-weight:800; background:var(--fill); color:var(--ink); }
+.key-btn.key-del:active { background:var(--fill2); }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>스도쿠</h1>
+  <p class="lead">빈칸에 1~9를 채워 보세요.</p>
+
+  <section class="card">
+    <!-- 난이도 선택 -->
+    <div class="difficulty-seg" role="tablist">
+      <button type="button" class="on" data-diff="easy">쉬움</button>
+      <button type="button" data-diff="normal">보통</button>
+      <button type="button" data-diff="hard">어려움</button>
+    </div>
+
+    <!-- 상태 바 -->
+    <div class="status-bar">
+      <div class="status-item">
+        <span>⏱️ 시간</span>
+        <span class="status-val" id="timerDisplay">00:00</span>
+      </div>
+      <div class="status-item">
+        <span>빈칸</span>
+        <span class="status-val" id="blankCountDisplay">0</span>
+      </div>
+      <div class="status-item">
+        <span>최고 기록</span>
+        <span class="status-val" id="bestRecordDisplay">-</span>
+      </div>
+    </div>
+
+    <!-- 메시지 알림 -->
+    <div id="gameMsg" class="game-msg"></div>
+
+    <!-- 기능 단추 행 -->
+    <div class="tools-row">
+      <button type="button" class="tool-btn" id="btnMemo">✏️ 메모 OFF</button>
+      <button type="button" class="tool-btn" id="btnHint">💡 힌트 <span id="hintCountBadge">(0)</span></button>
+      <button type="button" class="tool-btn btn-reset" id="btnReset">🔄 새 판</button>
+    </div>
+
+    <!-- 스도쿠 퍼즐 판 -->
+    <div class="sudoku-board-wrap">
+      <div class="sudoku-board" id="sudokuBoard" aria-label="9x9 스도쿠 판"></div>
+    </div>
+
+    <!-- 숫자 입력 패드 -->
+    <div class="keypad-grid" id="keypadArea">
+      <button type="button" class="key-btn" data-key="1">1</button>
+      <button type="button" class="key-btn" data-key="2">2</button>
+      <button type="button" class="key-btn" data-key="3">3</button>
+      <button type="button" class="key-btn" data-key="4">4</button>
+      <button type="button" class="key-btn" data-key="5">5</button>
+      <button type="button" class="key-btn" data-key="6">6</button>
+      <button type="button" class="key-btn" data-key="7">7</button>
+      <button type="button" class="key-btn" data-key="8">8</button>
+      <button type="button" class="key-btn" data-key="9">9</button>
+      <button type="button" class="key-btn key-del" data-key="del">⌫ 지우기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-top:14px; margin-bottom:0;">
+      💡 칸을 터치하고 아래 숫자 버튼을 눌러 채웁니다. 키보드(1~9, Backspace, 방향키)도 지원됩니다.
+    </p>
+  </section>
+
+  <p class="note">모든 스도쿠 판은 기기 안에서 유일한 해를 갖도록 수학적으로 검증되어 100% 논리적으로 풀 수 있습니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요? (스도쿠 규칙)</summary>
+    <ul>
+      <li><b>기본 규칙:</b> 가로 9칸(행)과 세로 9칸(열)의 각 줄마다 1부터 9까지 숫자가 겹치지 않고 한 번씩만 들어갑니다.</li>
+      <li><b>3×3 블록 규칙:</b> 굵은 선으로 구분된 9개의 3×3 작은 상자 안에도 1부터 9까지 숫자가 중복 없이 하나씩 채워집니다.</li>
+      <li><b>중복 표시:</b> 규칙에 어긋나 같은 행·열·상자에 중복된 숫자가 있으면 빨간색으로 표시되어 바로 알아챌 수 있습니다.</li>
+      <li><b>메모(연필) 기능:</b> 메모 단추를 켜면 칸 안에 작은 글씨로 후보 숫자를 여러 개 적어 둘 수 있습니다.</li>
+      <li><b>유일한 정답 보장:</b> 컴퓨터가 완성된 정답판을 생성한 뒤 백트래킹(역추적) 알고리즘으로 해가 오직 하나뿐인지 확인하며 빈칸을 뚫으므로 언제나 깔끔하게 해결됩니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // 상태 변수
+  var currentDiff = 'easy'; // 'easy' | 'normal' | 'hard'
+  var solvedGrid = [];      // 81개 정답 숫자 (1..9)
+  var initialGrid = [];     // 81개 초기 문제 숫자 (0이면 빈칸)
+  var currentGrid = [];     // 81개 현재 플레이어 입력 상태
+  var notesGrid = [];       // 81개 배열, 각 원소는 [1..9] 후보 배열
+  var conflicts = {};       // 충돌 인덱스 맵
+  var selectedIdx = -1;     // 선택된 칸 (0..80)
+  var memoMode = false;     // 메모 모드 켜짐 여부
+  var hintCount = 0;        // 힌트 사용 횟수
+  var timerSeconds = 0;     // 타이머 초
+  var timerInterval = null; // setInterval 식별자
+  var isWon = false;        // 완성 여부
+
+  // DOM 요소
+  var boardEl = document.getElementById('sudokuBoard');
+  var timerEl = document.getElementById('timerDisplay');
+  var blankCountEl = document.getElementById('blankCountDisplay');
+  var bestRecordEl = document.getElementById('bestRecordDisplay');
+  var gameMsgEl = document.getElementById('gameMsg');
+  var btnMemo = document.getElementById('btnMemo');
+  var btnHint = document.getElementById('btnHint');
+  var hintBadge = document.getElementById('hintCountBadge');
+  var btnReset = document.getElementById('btnReset');
+  var keypadEl = document.getElementById('keypadArea');
+  var diffBtns = document.querySelectorAll('.difficulty-seg button');
+
+  // 난이도별 저장 키
+  var STORAGE_KEYS = {
+    easy: 'zw_sudoku_best_easy',
+    normal: 'zw_sudoku_best_normal',
+    hard: 'zw_sudoku_best_hard'
+  };
+
+  // 1. 유효성 검사 (규칙에 맞는지)
+  function isValid(grid, idx, num) {
+    var r = Math.floor(idx / 9);
+    var c = idx % 9;
+    var bRow = Math.floor(r / 3) * 3;
+    var bCol = Math.floor(c / 3) * 3;
+
+    for (var i = 0; i < 9; i++) {
+      if (grid[r * 9 + i] === num) return false;
+      if (grid[i * 9 + c] === num) return false;
+      var br = bRow + Math.floor(i / 3);
+      var bc = bCol + (i % 3);
+      if (grid[br * 9 + bc] === num) return false;
+    }
+    return true;
+  }
+
+  // 2. 무작위 셔플 (Fisher-Yates)
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  // 3. 완전한 정답판(Solved Grid) 생성
+  function generateSolvedGrid() {
+    var grid = new Array(81).fill(0);
+
+    // 대각선 3개 블록(0, 4, 8)을 먼저 독립적으로 채움
+    var boxStart = [0, 30, 60]; // 0*9+0, 3*9+3, 6*9+6
+    for (var b = 0; b < 3; b++) {
+      var nums = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      var startRow = b * 3;
+      var startCol = b * 3;
+      for (var i = 0; i < 9; i++) {
+        var r = startRow + Math.floor(i / 3);
+        var c = startCol + (i % 3);
+        grid[r * 9 + c] = nums[i];
+      }
+    }
+
+    // 나머지 칸을 백트래킹으로 채우기
+    function solve(g) {
+      var emptyIdx = -1;
+      for (var i = 0; i < 81; i++) {
+        if (g[i] === 0) { emptyIdx = i; break; }
+      }
+      if (emptyIdx === -1) return true;
+
+      var nums = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      for (var k = 0; k < 9; k++) {
+        var n = nums[k];
+        if (isValid(g, emptyIdx, n)) {
+          g[emptyIdx] = n;
+          if (solve(g)) return true;
+          g[emptyIdx] = 0;
+        }
+      }
+      return false;
+    }
+
+    solve(grid);
+    return grid;
+  }
+
+  // 4. 해의 개수를 세는 솔버 (유일해 검사용, 최대 2개까지만 카운트)
+  function countSolutions(grid, countObj) {
+    if (countObj.count >= 2) return;
+
+    // MRV 휴리스틱: 후보 숫자가 가장 적은 빈칸 우선 탐색
+    var minCount = 10;
+    var bestIdx = -1;
+    var bestCandidates = null;
+
+    for (var i = 0; i < 81; i++) {
+      if (grid[i] === 0) {
+        var candidates = [];
+        for (var n = 1; n <= 9; n++) {
+          if (isValid(grid, i, n)) candidates.push(n);
+        }
+        if (candidates.length === 0) return; // 해 없음
+        if (candidates.length < minCount) {
+          minCount = candidates.length;
+          bestIdx = i;
+          bestCandidates = candidates;
+          if (minCount === 1) break;
+        }
+      }
+    }
+
+    if (bestIdx === -1) {
+      countObj.count++;
+      return;
+    }
+
+    for (var c = 0; c < bestCandidates.length; c++) {
+      grid[bestIdx] = bestCandidates[c];
+      countSolutions(grid, countObj);
+      grid[bestIdx] = 0;
+      if (countObj.count >= 2) return;
+    }
+  }
+
+  // 5. 스도쿠 문제 생성 (유일해 보장)
+  function createPuzzle(difficulty) {
+    var targetBlanks = 36;
+    if (difficulty === 'normal') targetBlanks = 46;
+    if (difficulty === 'hard') targetBlanks = 54;
+
+    var solved = generateSolvedGrid();
+    var puzzle = solved.slice();
+
+    var positions = [];
+    for (var i = 0; i < 81; i++) positions.push(i);
+    shuffle(positions);
+
+    var removed = 0;
+    var startTime = Date.now();
+
+    for (var p = 0; p < positions.length; p++) {
+      var idx = positions[p];
+      var temp = puzzle[idx];
+      puzzle[idx] = 0;
+
+      var countObj = { count: 0 };
+      countSolutions(puzzle, countObj);
+
+      if (countObj.count === 1) {
+        removed++;
+        if (removed >= targetBlanks) break;
+      } else {
+        puzzle[idx] = temp; // 유일해가 깨지면 원복
+      }
+
+      // 0.4초 초과 시 지연 방지를 위해 빈칸 뚫기 종료
+      if (Date.now() - startTime > 400) break;
+    }
+
+    return {
+      solved: solved,
+      initial: puzzle
+    };
+  }
+
+  // 시간 포맷 (초 -> MM:SS)
+  function formatTime(sec) {
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  // 최고 기록 불러오기 및 표시
+  function updateBestRecordDisplay() {
+    var key = STORAGE_KEYS[currentDiff];
+    var best = null;
+    try {
+      best = localStorage.getItem(key);
+    } catch (e) {
+      best = null;
+    }
+    if (best != null && best !== '') {
+      var s = parseInt(best, 10);
+      if (!isNaN(s)) {
+        bestRecordEl.textContent = formatTime(s);
+        return;
+      }
+    }
+    bestRecordEl.textContent = '-';
+  }
+
+  // 충돌(오류) 검사
+  function updateConflicts() {
+    conflicts = {};
+
+    // 행 충돌 검사
+    for (var r = 0; r < 9; r++) {
+      var seen = {};
+      for (var c = 0; c < 9; c++) {
+        var idx = r * 9 + c;
+        var val = currentGrid[idx];
+        if (val !== 0) {
+          if (seen[val] != null) {
+            conflicts[idx] = true;
+            conflicts[seen[val]] = true;
+          } else {
+            seen[val] = idx;
+          }
+        }
+      }
+    }
+
+    // 열 충돌 검사
+    for (var c2 = 0; c2 < 9; c2++) {
+      var seen2 = {};
+      for (var r2 = 0; r2 < 9; r2++) {
+        var idx2 = r2 * 9 + c2;
+        var val2 = currentGrid[idx2];
+        if (val2 !== 0) {
+          if (seen2[val2] != null) {
+            conflicts[idx2] = true;
+            conflicts[seen2[val2]] = true;
+          } else {
+            seen2[val2] = idx2;
+          }
+        }
+      }
+    }
+
+    // 3x3 박스 충돌 검사
+    for (var b = 0; b < 9; b++) {
+      var seen3 = {};
+      var bRow = Math.floor(b / 3) * 3;
+      var bCol = (b % 3) * 3;
+      for (var i = 0; i < 9; i++) {
+        var r3 = bRow + Math.floor(i / 3);
+        var c3 = bCol + (i % 3);
+        var idx3 = r3 * 9 + c3;
+        var val3 = currentGrid[idx3];
+        if (val3 !== 0) {
+          if (seen3[val3] != null) {
+            conflicts[idx3] = true;
+            conflicts[seen3[val3]] = true;
+          } else {
+            seen3[val3] = idx3;
+          }
+        }
+      }
+    }
+  }
+
+  // 빈칸 수 갱신
+  function updateBlankCount() {
+    var count = 0;
+    for (var i = 0; i < 81; i++) {
+      if (currentGrid[i] === 0) count++;
+    }
+    blankCountEl.textContent = count;
+    return count;
+  }
+
+  // 보드 DOM 그리기 및 하이라이트 갱신
+  function renderBoard() {
+    var selectedRow = selectedIdx >= 0 ? Math.floor(selectedIdx / 9) : -1;
+    var selectedCol = selectedIdx >= 0 ? (selectedIdx % 9) : -1;
+    var selectedBoxRow = selectedRow >= 0 ? Math.floor(selectedRow / 3) : -1;
+    var selectedBoxCol = selectedCol >= 0 ? Math.floor(selectedCol / 3) : -1;
+    var selectedVal = selectedIdx >= 0 ? currentGrid[selectedIdx] : 0;
+
+    var cells = boardEl.children;
+    for (var i = 0; i < 81; i++) {
+      var cellEl = cells[i];
+      var r = Math.floor(i / 9);
+      var c = i % 9;
+      var br = Math.floor(r / 3);
+      var bc = Math.floor(c / 3);
+      var val = currentGrid[i];
+      var isFixed = initialGrid[i] !== 0;
+
+      // 클래스 초기화
+      var cls = 'cell';
+      if (isFixed) cls += ' fixed';
+      else if (val !== 0) cls += ' user';
+
+      if (i === selectedIdx) {
+        cls += ' selected';
+      } else if (selectedIdx >= 0) {
+        if (r === selectedRow || c === selectedCol || (br === selectedBoxRow && bc === selectedBoxCol)) {
+          cls += ' related';
+        }
+      }
+
+      if (val !== 0 && selectedVal !== 0 && val === selectedVal) {
+        cls += ' same-num';
+      }
+
+      if (conflicts[i]) {
+        cls += ' conflict';
+      }
+
+      cellEl.className = cls;
+
+      // 내용물 (숫자 또는 메모)
+      if (val !== 0) {
+        cellEl.textContent = val;
+      } else {
+        var notes = notesGrid[i] || [];
+        if (notes.length > 0) {
+          var noteHtml = '<div class="notes-grid">';
+          for (var n = 1; n <= 9; n++) {
+            if (notes.indexOf(n) !== -1) {
+              noteHtml += '<span class="note-digit">' + n + '</span>';
+            } else {
+              noteHtml += '<span></span>';
+            }
+          }
+          noteHtml += '</div>';
+          cellEl.innerHTML = noteHtml;
+        } else {
+          cellEl.textContent = '';
+        }
+      }
+    }
+  }
+
+  // 완성 확인
+  function checkWin() {
+    if (isWon) return;
+
+    var blanks = updateBlankCount();
+    if (blanks > 0) return;
+
+    updateConflicts();
+    var conflictCount = Object.keys(conflicts).length;
+    if (conflictCount > 0) return;
+
+    // 모든 칸이 정답과 일치하는지 최종 확인
+    for (var i = 0; i < 81; i++) {
+      if (currentGrid[i] !== solvedGrid[i]) return;
+    }
+
+    // 완성!
+    isWon = true;
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    var timeStr = formatTime(timerSeconds);
+    var key = STORAGE_KEYS[currentDiff];
+    var isNewBest = false;
+
+    if (hintCount === 0) {
+      try {
+        var prevBest = localStorage.getItem(key);
+        if (prevBest == null || prevBest === '' || timerSeconds < parseInt(prevBest, 10)) {
+          localStorage.setItem(key, String(timerSeconds));
+          isNewBest = true;
+        }
+      } catch (e) {
+        // localStorage 접근 제한 시 무시
+      }
+    }
+
+    updateBestRecordDisplay();
+
+    if (hintCount > 0) {
+      gameMsgEl.innerHTML = '🎉 <b>스도쿠 완성!</b> 걸린 시간: ' + timeStr + '<br><small style="font-weight:600; opacity:0.9;">💡 힌트를 사용하여 최고 기록에는 저장되지 않습니다.</small>';
+    } else if (isNewBest) {
+      gameMsgEl.innerHTML = '🏆 <b>최고 기록 달성!</b> 걸린 시간: ' + timeStr + ' (' + timerSeconds + '초)';
+    } else {
+      gameMsgEl.innerHTML = '🎉 <b>스도쿠 완성!</b> 걸린 시간: ' + timeStr;
+    }
+    gameMsgEl.className = 'game-msg win';
+  }
+
+  // 숫자 입력 처리 (1..9 또는 'del')
+  function handleInput(key) {
+    if (isWon || selectedIdx < 0) return;
+
+    // 초기 고정 숫자는 수정 불가
+    if (initialGrid[selectedIdx] !== 0) return;
+
+    if (key === 'del') {
+      currentGrid[selectedIdx] = 0;
+      notesGrid[selectedIdx] = [];
+    } else {
+      var num = parseInt(key, 10);
+      if (isNaN(num) || num < 1 || num > 9) return;
+
+      if (memoMode) {
+        // 메모 모드: 후보 숫자 토글
+        currentGrid[selectedIdx] = 0;
+        var notes = notesGrid[selectedIdx] || [];
+        var idxInNotes = notes.indexOf(num);
+        if (idxInNotes === -1) {
+          notes.push(num);
+          notes.sort();
+        } else {
+          notes.splice(idxInNotes, 1);
+        }
+        notesGrid[selectedIdx] = notes;
+      } else {
+        // 일반 모드: 숫자 확정
+        currentGrid[selectedIdx] = num;
+        notesGrid[selectedIdx] = [];
+
+        // 같은 행, 열, 3x3 박스 내 다른 칸의 메모에서 확정된 숫자 제거
+        var r = Math.floor(selectedIdx / 9);
+        var c = selectedIdx % 9;
+        var bRow = Math.floor(r / 3) * 3;
+        var bCol = Math.floor(c / 3) * 3;
+
+        for (var i = 0; i < 81; i++) {
+          var cr = Math.floor(i / 9);
+          var cc = i % 9;
+          var inSameRow = (cr === r);
+          var inSameCol = (cc === c);
+          var inSameBox = (cr >= bRow && cr < bRow + 3 && cc >= bCol && cc < bCol + 3);
+
+          if (inSameRow || inSameCol || inSameBox) {
+            if (notesGrid[i] && notesGrid[i].length > 0) {
+              var pos = notesGrid[i].indexOf(num);
+              if (pos !== -1) {
+                notesGrid[i].splice(pos, 1);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    updateConflicts();
+    updateBlankCount();
+    renderBoard();
+    checkWin();
+  }
+
+  // 힌트 실행
+  function useHint() {
+    if (isWon) return;
+
+    var targetIdx = -1;
+
+    // 1) 현재 선택된 칸이 있고, 고정 칸이 아니며 아직 미입력 또는 오답이면 우선 선택
+    if (selectedIdx >= 0 && initialGrid[selectedIdx] === 0) {
+      if (currentGrid[selectedIdx] !== solvedGrid[selectedIdx]) {
+        targetIdx = selectedIdx;
+      }
+    }
+
+    // 2) 선택된 칸이 없거나 이미 정답이면, 비어 있거나 틀린 칸 중 무작위 탐색
+    if (targetIdx === -1) {
+      var candidates = [];
+      for (var i = 0; i < 81; i++) {
+        if (initialGrid[i] === 0 && currentGrid[i] !== solvedGrid[i]) {
+          candidates.push(i);
+        }
+      }
+      if (candidates.length === 0) return; // 이미 모두 맞음
+      targetIdx = candidates[Math.floor(Math.random() * candidates.length)];
+    }
+
+    // 힌트 적용
+    currentGrid[targetIdx] = solvedGrid[targetIdx];
+    notesGrid[targetIdx] = [];
+    selectedIdx = targetIdx;
+    hintCount++;
+    hintBadge.textContent = '(' + hintCount + ')';
+
+    gameMsgEl.textContent = '💡 힌트를 썼습니다. 이번 판은 최고 기록에 저장되지 않습니다.';
+    gameMsgEl.className = 'game-msg info';
+
+    updateConflicts();
+    updateBlankCount();
+    renderBoard();
+    checkWin();
+  }
+
+  // 새 판 시작
+  function startNewGame() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    timerSeconds = 0;
+    timerEl.textContent = '00:00';
+    hintCount = 0;
+    hintBadge.textContent = '(0)';
+    selectedIdx = -1;
+    memoMode = false;
+    btnMemo.className = 'tool-btn';
+    btnMemo.textContent = '✏️ 메모 OFF';
+    isWon = false;
+    gameMsgEl.style.display = 'none';
+    gameMsgEl.className = 'game-msg';
+
+    updateBestRecordDisplay();
+
+    // 퍼즐 생성
+    var puzzle = createPuzzle(currentDiff);
+    solvedGrid = puzzle.solved;
+    initialGrid = puzzle.initial;
+    currentGrid = puzzle.initial.slice();
+    notesGrid = [];
+    for (var i = 0; i < 81; i++) notesGrid.push([]);
+
+    // 첫 빈칸을 기본 선택
+    for (var k = 0; k < 81; k++) {
+      if (initialGrid[k] === 0) {
+        selectedIdx = k;
+        break;
+      }
+    }
+
+    updateConflicts();
+    updateBlankCount();
+    renderBoard();
+
+    // 타이머 시작
+    timerInterval = setInterval(function () {
+      timerSeconds++;
+      timerEl.textContent = formatTime(timerSeconds);
+    }, 1000);
+  }
+
+  // 초기 81개 셀 생성
+  function initBoardDOM() {
+    boardEl.innerHTML = '';
+    for (var i = 0; i < 81; i++) {
+      var r = Math.floor(i / 9);
+      var c = i % 9;
+      var cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.setAttribute('data-idx', String(i));
+      cell.setAttribute('data-row', String(r));
+      cell.setAttribute('data-col', String(c));
+      boardEl.appendChild(cell);
+    }
+
+    // 보드 셀 클릭 이벤트 위임
+    boardEl.addEventListener('click', function (e) {
+      var target = e.target;
+      while (target && target !== boardEl && !target.classList.contains('cell')) {
+        target = target.parentElement;
+      }
+      if (target && target.classList.contains('cell')) {
+        var idx = parseInt(target.getAttribute('data-idx'), 10);
+        if (!isNaN(idx)) {
+          selectedIdx = idx;
+          renderBoard();
+        }
+      }
+    });
+  }
+
+  // 키패드 클릭 이벤트
+  keypadEl.addEventListener('click', function (e) {
+    var btn = e.target;
+    while (btn && btn !== keypadEl && !btn.classList.contains('key-btn')) {
+      btn = btn.parentElement;
+    }
+    if (btn && btn.classList.contains('key-btn')) {
+      var key = btn.getAttribute('data-key');
+      handleInput(key);
+    }
+  });
+
+  // 메모 모드 버튼
+  btnMemo.addEventListener('click', function () {
+    memoMode = !memoMode;
+    if (memoMode) {
+      btnMemo.className = 'tool-btn on';
+      btnMemo.textContent = '✏️ 메모 ON';
+    } else {
+      btnMemo.className = 'tool-btn';
+      btnMemo.textContent = '✏️ 메모 OFF';
+    }
+  });
+
+  // 힌트 버튼
+  btnHint.addEventListener('click', function () {
+    useHint();
+  });
+
+  // 새 판 버튼
+  btnReset.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  // 난이도 변경 버튼
+  for (var d = 0; d < diffBtns.length; d++) {
+    diffBtns[d].addEventListener('click', function () {
+      for (var j = 0; j < diffBtns.length; j++) diffBtns[j].classList.remove('on');
+      this.classList.add('on');
+      currentDiff = this.getAttribute('data-diff');
+      startNewGame();
+    });
+  }
+
+  // 물리 키보드 지원
+  window.addEventListener('keydown', function (e) {
+    if (isWon) return;
+
+    if (e.key >= '1' && e.key <= '9') {
+      handleInput(e.key);
+      e.preventDefault();
+    } else if (e.key === 'Backspace' || e.key === 'Delete') {
+      handleInput('del');
+      e.preventDefault();
+    } else if (e.key === 'm' || e.key === 'M') {
+      btnMemo.click();
+      e.preventDefault();
+    } else if (e.key === 'h' || e.key === 'H') {
+      btnHint.click();
+      e.preventDefault();
+    } else if (selectedIdx >= 0) {
+      var r = Math.floor(selectedIdx / 9);
+      var c = selectedIdx % 9;
+      if (e.key === 'ArrowUp' && r > 0) {
+        selectedIdx = (r - 1) * 9 + c;
+        renderBoard();
+        e.preventDefault();
+      } else if (e.key === 'ArrowDown' && r < 8) {
+        selectedIdx = (r + 1) * 9 + c;
+        renderBoard();
+        e.preventDefault();
+      } else if (e.key === 'ArrowLeft' && c > 0) {
+        selectedIdx = r * 9 + (c - 1);
+        renderBoard();
+        e.preventDefault();
+      } else if (e.key === 'ArrowRight' && c < 8) {
+        selectedIdx = r * 9 + (c + 1);
+        renderBoard();
+        e.preventDefault();
+      }
+    }
+  });
+
+  // 초기 시작
+  initBoardDOM();
+  startNewGame();
+})();
+</script>
+</body>
+</html>
