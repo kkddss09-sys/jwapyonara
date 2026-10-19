@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>수리할까, 새로 살까 — 한 달로 나눠 견주기 | 좌표나라</title>
+<meta name="description" content="액정·배터리가 고장 났을 때 수리비와 새 폰 값을 쓸 기간으로 나눠 한 달에 얼마꼴인지 견줍니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>수리할까,<br>새로 살까?</h1>
+  <p class="lead">수리비와 새 폰 값을 각각 쓸 기간으로 나눠 한 달에 얼마꼴인지 견줍니다. 아래 숫자는 예시이니 바꿔 넣으세요.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 수리한 폰은 배터리 상태와 보안 업데이트가 남은 기간도 함께 보세요. 위에 미리 넣어 둔 숫자는 예시입니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>수리 한 달 = 수리비 ÷ 수리하면 더 쓸 개월</li>
+      <li>새 폰 한 달 = (새 폰에 실제로 내는 돈 − 지금 폰 팔면 받을 돈) ÷ 새 폰 쓸 개월 (0원보다 작으면 0원)</li>
+      <li>한 달 값이 작은 쪽이 같은 기간 동안 덜 드는 쪽입니다.</li>
+    </ul>
+  </details>
+</main>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'repair', label: '수리비', type: 'money', value: '250,000', unit: '원' },
+    { id: 'keep', label: '수리하면 더 쓸 기간', type: 'num', value: '18', unit: '개월', max: 120 },
+    { id: 'price', label: '새 폰에 실제로 내는 돈', type: 'money', value: '900,000', unit: '원' },
+    { id: 'months', label: '새 폰 쓸 기간', type: 'num', value: '36', unit: '개월', max: 120 },
+    { id: 'resale', label: '지금 폰 팔면 받을 돈(없으면 0)', type: 'money', value: '100,000', unit: '원' }
+  ],
+  compute: function (v) {
+    var r = calcRepairOrNew(v.repair, v.keep, v.price, v.months, v.resale);
+    if (!r.ok) return { html: '쓸 기간을 넣어 주세요' };
+    return {
+      html: (r.better === 'repair' ? '<em>수리</em>가 한 달 ' : '<em>새 폰</em>이 한 달 ') + '<em>' + ZW.fmt(r.diff) + '원</em> 덜 듭니다',
+      sub: '쓸 기간으로 나눈 한 달 값 기준',
+      rows: [['수리하면 한 달', ZW.fmt(r.repairMonth) + '원'], ['새 폰이면 한 달', ZW.fmt(r.newMonth) + '원']]
+    };
+  }
+});
+</script>
+</body>
+</html>

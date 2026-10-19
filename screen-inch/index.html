@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>화면 크기, 인치를 센티로 — 지금 폰과 새 폰 견주기 | 좌표나라</title>
+<meta name="description" content="휴대폰 화면 인치를 센티미터로 바꾸고 가로·세로 길이와 새 폰 화면이 몇 % 넓은지 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>화면 크기,<br>센티로 보면?</h1>
+  <p class="lead">지금 폰과 새 폰의 화면 인치를 넣으면 센티미터와 넓이 차이를 보여 줍니다.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 화면 대각선 길이입니다. 실제 폰 몸체는 테두리만큼 더 큽니다. 위에 미리 넣어 둔 숫자는 예시입니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>대각선(cm) = 인치 × 2.54</li>
+      <li>짧은 변 = 대각선 ÷ √(비율² + 1), 긴 변 = 짧은 변 × 비율 (비율 = 19.5 ÷ 9 등)</li>
+      <li>넓이 차이 = (새 폰 인치² ÷ 지금 폰 인치² − 1) × 100 (같은 비율 기준)</li>
+    </ul>
+  </details>
+</main>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+var cm = function (x) { return (Math.round(x * 10) / 10).toFixed(1) + 'cm'; };
+ZW.app({
+  fields: [
+    { id: 'now', label: '지금 폰 화면', type: 'num', value: '6.1', unit: '인치', max: 20 },
+    { id: 'next', label: '새 폰 화면', type: 'num', value: '6.7', unit: '인치', max: 20, short: true },
+    { id: 'ratio', label: '화면 비율', type: 'seg', options: [[String(19.5 / 9), '19.5:9'], [String(20 / 9), '20:9'], [String(16 / 9), '16:9']] }
+  ],
+  compute: function (v) {
+    var a = calcScreen(v.now, v.ratio), b = calcScreen(v.next, v.ratio), d = areaDiff(v.now, v.next);
+    if (d == null) return { html: '두 화면 크기를 넣어 주세요' };
+    return {
+      html: d === 0 ? '두 화면이 <em>같습니다</em>' : '새 폰 화면이 <em>' + Math.abs(d) + '%</em> ' + (d > 0 ? '넓습니다' : '좁습니다'),
+      sub: '같은 화면 비율 기준',
+      rows: [['지금 폰 대각선', cm(a.diag)], ['지금 폰 가로 × 세로', cm(a.width) + ' × ' + cm(a.height)], ['새 폰 대각선', cm(b.diag)], ['새 폰 가로 × 세로', cm(b.width) + ' × ' + cm(b.height)]]
+    };
+  }
+});
+</script>
+</body>
+</html>

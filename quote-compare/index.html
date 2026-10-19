@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>매장 견적 견주기 — 들은 조건을 2년 총액으로 | 좌표나라</title>
+<meta name="description" content="매장 두 곳에서 들은 할부원금·요금제·부가서비스·현금 조건을 넣으면 약정 기간 동안 내는 총액으로 견줍니다. 넣은 값은 내 휴대폰에만 저장됩니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>매장 견적,<br>총액으로 견주기</h1>
+  <p class="lead">두 곳에서 들은 조건을 넣으면 약정 기간 동안 내는 돈으로 바꿔 견줍니다. 넣은 값은 이 휴대폰에만 저장되어 다시 열어도 남아 있습니다.</p>
+
+  <div id="app"></div>
+  <p><button type="button" id="clear" class="cta" style="border:0;width:100%">넣은 값 모두 지우기</button></p>
+
+  <p class="note">※ 위약금, 유심비, 카드 할인처럼 여기 없는 조건은 따로 챙기세요. 매장 이름은 쓰는 분이 적고, 이 사이트는 어느 매장도 권하지 않습니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>총액 = 할부원금 + 처음 요금 × 유지 개월 + 그 뒤 요금 × (약정 − 유지 개월) + 부가서비스 × 유지 개월 − 현금·사은품</li>
+      <li>유지 개월이 약정보다 길면 약정 개월까지만 셉니다.</li>
+      <li>한 달 평균 = 총액 ÷ 약정 개월</li>
+    </ul>
+  </details>
+</main>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+var KEY = 'zw-quote-compare', saved = {};
+try { saved = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
+var DEF = { months: 24,
+  a_device: 1000000, a_plan1: 69000, a_keep1: 24, a_plan2: 69000, a_addon: 10000, a_addonMonths: 6, a_cash: 0,
+  b_device: 500000, b_plan1: 89000, b_keep1: 6, b_plan2: 55000, b_addon: 0, b_addonMonths: 0, b_cash: 100000 };
+var val = function (id) { var x = saved[id] != null ? saved[id] : DEF[id]; return /keep|Months|months/.test(id) ? String(x) : ZW.fmt(x); };
+var F = [{ id: 'months', label: '약정 기간', type: 'num', value: val('months'), unit: '개월', max: 48 }];
+['a', 'b'].forEach(function (s) {
+  var L = s === 'a' ? '견적 A · ' : '견적 B · ';
+  F.push(
+    { id: s + '_device', label: L + '기기 할부원금', type: 'money', value: val(s + '_device'), unit: '원' },
+    { id: s + '_plan1', label: L + '처음 요금제 한 달', type: 'money', value: val(s + '_plan1'), unit: '원' },
+    { id: s + '_keep1', label: '유지', type: 'num', value: val(s + '_keep1'), unit: '개월', max: 48, short: true },
+    { id: s + '_plan2', label: L + '그 뒤 요금제 한 달', type: 'money', value: val(s + '_plan2'), unit: '원' },
+    { id: s + '_addon', label: L + '부가서비스 한 달', type: 'money', value: val(s + '_addon'), unit: '원' },
+    { id: s + '_addonMonths', label: '유지', type: 'num', value: val(s + '_addonMonths'), unit: '개월', max: 48, short: true },
+    { id: s + '_cash', label: L + '현금·사은품으로 받는 돈', type: 'money', value: val(s + '_cash'), unit: '원' });
+});
+var pick = function (v, s) { return { device: v[s + '_device'], plan1: v[s + '_plan1'], keep1: v[s + '_keep1'], plan2: v[s + '_plan2'], addon: v[s + '_addon'], addonMonths: v[s + '_addonMonths'], cash: v[s + '_cash'] }; };
+ZW.app({
+  fields: F,
+  compute: function (v) {
+    try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {}
+    var a = calcQuote(pick(v, 'a'), v.months), b = calcQuote(pick(v, 'b'), v.months), d = Math.abs(a.total - b.total);
+    return {
+      html: d === 0 ? '두 견적이 <em>같습니다</em>' : '견적 <em>' + (a.total < b.total ? 'A' : 'B') + '</em>가 <em>' + ZW.fmt(d) + '원</em> 덜 듭니다',
+      sub: (Number(v.months) || 0) + '개월 동안 내는 돈 기준',
+      rows: [['견적 A 총액', ZW.fmt(a.total) + '원'], ['견적 A 한 달 평균', ZW.fmt(a.perMonth) + '원'], ['견적 B 총액', ZW.fmt(b.total) + '원'], ['견적 B 한 달 평균', ZW.fmt(b.perMonth) + '원']]
+    };
+  }
+});
+document.getElementById('clear').addEventListener('click', function () { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); });
+</script>
+</body>
+</html>

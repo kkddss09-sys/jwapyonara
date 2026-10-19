@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>휴대폰 보험, 들까 말까 — 보험료와 수리비 견주기 | 좌표나라</title>
+<meta name="description" content="한 달 보험료와 가입 기간, 자기부담금, 수리비를 넣으면 보험을 들 때와 안 들 때 드는 돈과 몇 번 고장 나야 본전인지 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>휴대폰 보험,<br>들까 말까?</h1>
+  <p class="lead">낸 보험료와 고칠 때 드는 돈을 견줍니다. 보험료·부담금은 가입할 때 받은 안내서의 숫자로 바꿔 넣으세요.</p>
+
+  <div id="app"></div>
+
+  <p class="note">※ 보험마다 보상 횟수 한도, 분실 보상 여부, 부담금 방식(정액·비율)이 다릅니다. 이 계산은 정액 부담금 기준입니다. 위에 미리 넣어 둔 숫자는 예시입니다.</p>
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>낸 보험료 = 한 달 보험료 × 가입 개월</li>
+      <li>보험 있을 때 = 낸 보험료 + 고장 횟수 × 한 번 부담금</li>
+      <li>보험 없을 때 = 고장 횟수 × 보험 없이 고치는 돈</li>
+      <li>본전 횟수 = 낸 보험료 ÷ (보험 없이 고치는 돈 − 한 번 부담금)</li>
+    </ul>
+  </details>
+</main>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+ZW.app({
+  fields: [
+    { id: 'monthly', label: '한 달 보험료', type: 'money', value: '5,000', unit: '원' },
+    { id: 'months', label: '가입 기간', type: 'num', value: '24', unit: '개월', max: 60, short: true },
+    { id: 'deductible', label: '한 번 고칠 때 내 부담금', type: 'money', value: '80,000', unit: '원' },
+    { id: 'repair', label: '보험 없이 고치면 드는 돈', type: 'money', value: '300,000', unit: '원' },
+    { id: 'times', label: '기간 동안 고장 날 것 같은 횟수', type: 'seg', options: [['1', '1번'], ['2', '2번'], ['3', '3번'], ['0', '안 날 듯']] }
+  ],
+  compute: function (v) {
+    var r = calcInsurance(v.monthly, v.months, v.deductible, v.repair, v.times);
+    return {
+      html: r.diff === 0 ? '두 쪽이 <em>같습니다</em>' : (r.better === 'ins' ? '보험이 <em>' : '보험 없이가 <em>') + ZW.fmt(r.diff) + '원</em> 덜 듭니다',
+      sub: r.breakEven == null ? '수리비가 부담금보다 작아 보험이 이득인 경우가 없습니다' : '고장이 ' + r.breakEven + '번을 넘으면 보험이 이득',
+      rows: [['낸 보험료', ZW.fmt(r.premium) + '원'], ['보험 있을 때', ZW.fmt(r.withIns) + '원'], ['보험 없을 때', ZW.fmt(r.without) + '원']]
+    };
+  }
+});
+</script>
+</body>
+</html>

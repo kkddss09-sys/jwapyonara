@@ -1,6 +1,6 @@
 {
-  "name": "좌표나라 부동산",
-  "short_name": "좌표나라 부동산",
+  "name": "좌표나라",
+  "short_name": "좌표나라",
   "description": "대출·청약·차익·전월세 등 집 볼 때 필요한 계산을 가입 없이 바로.",
   "lang": "ko",
   "id": "./?app=realestate",
@@ -24,7 +24,7 @@
       "purpose": "any"
     },
     {
-      "src": "_common/icon-512.png",
+      "src": "_common/icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
