@@ -70,10 +70,15 @@
   ZW_BOARD.settings = {
     SUPABASE_CDN: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js',
     BOARDS: BOARDS,
+    // 분류 탭(한 줄). 순서·이름은 여기서만 바꾼다. 데이터의 구분(휴대폰·부동산) 또는 일반 글의 갈래와 같은 글자여야 한다.
     CARD_CATEGORIES: [
       { key: '휴대폰', subs: [] },
-      { key: '일반', subs: ['웃음', '감동', '기쁨', '슬픔', '공감'] },
-      { key: '부동산', subs: [] }
+      { key: '부동산', subs: [] },
+      { key: '재미', subs: [] },
+      { key: '감동', subs: [] },
+      { key: '기쁨', subs: [] },
+      { key: '슬픔', subs: [] },
+      { key: '공감', subs: [] }
     ],
     // 사진 주소 앞부분. 사진을 다른 서버(예: https://media.jwapyonara.com/board/)로 옮기면 이 값만 바꾼다. 끝에 / 필수
     MEDIA_BASE: '../',
@@ -82,7 +87,12 @@
     CARD_PAGE_SIZE: 12,
     VIDEO_CATEGORIES: [
       { key: '휴대폰' },
-      { key: '부동산' }
+      { key: '부동산' },
+      { key: '재미' },
+      { key: '감동' },
+      { key: '기쁨' },
+      { key: '슬픔' },
+      { key: '공감' }
     ],
     VIDEO_DATA_URL: '../_data/videos.json',
     VIDEO_GRID_COLUMNS: 3,

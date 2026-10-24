@@ -54,7 +54,8 @@
     if (!/^[A-Za-z0-9_-]{6,20}$/.test(id)) return null;
     return {
       id: id,
-      cat: String(raw['구분'] || '').trim(),
+      // 카드뉴스와 같은 분류(일반 글은 갈래가 분류)
+      cat: (String(raw['구분'] || '').trim() === '일반' && String(raw['갈래'] || '').trim()) ? String(raw['갈래']).trim() : String(raw['구분'] || '').trim(),
       date: String(raw['날짜'] || '').trim(),
       title: String(raw['제목'] || '(제목 없음)').trim()
     };

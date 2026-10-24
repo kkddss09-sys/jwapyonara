@@ -42,8 +42,9 @@
     if (!id || !photos.length) return null;
     return {
       id: id,
-      cat: String(raw['구분'] || '').trim(),
-      sub: String(raw['갈래'] || '').trim(),
+      // 분류 탭은 한 줄: '일반' 글은 갈래(재미·감동·기쁨·슬픔·공감)가 곧 분류, 나머지는 구분(휴대폰·부동산)
+      cat: (String(raw['구분'] || '').trim() === '일반' && String(raw['갈래'] || '').trim()) ? String(raw['갈래']).trim() : String(raw['구분'] || '').trim(),
+      sub: '',
       date: String(raw['날짜'] || '').trim(),
       title: String(raw['제목'] || '(제목 없음)').trim(),
       body: String(raw['본문'] || '').trim(),
