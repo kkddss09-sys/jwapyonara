@@ -15,6 +15,7 @@ var YT_LIST = { '휴대폰': 'UUBvT1VuPrklJ9rV4a5-s-Sw', '부동산': '' };
 // ▼ 큰 분류(첫 화면의 탭). 순서대로 보인다.
 var CAT_PATH = { '휴대폰': 'phone', '부동산': 'realestate', '생활': 'life', '단축키': 'shortcuts', '재미': 'fun', '게임': 'games' };   // 하위 쪽(분류 첫 화면) 폴더. 2026-10-19 사용자 요청: 사이트를 상위(첫 화면)·하위(분류별 쪽)로 나눔
 var CAT_DESC = { '휴대폰': '살 때 비교, 바꾸기 전 확인표, 성지가 처음이라면', '부동산': '대출·전월세·청약·면적 계산과 상담지', '생활': '나이·퍼센트·큐알·사진 줄이기', '단축키': '윈도우·크롬·갤럭시·아이폰 숨은 기능', '재미': '성향 테스트·추첨·사다리 타기', '게임': '지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판' };
+var BOARD_OPEN = false;   // 2026-10-24: 게시판 링크를 맨 위 메뉴에 보일지. 구글 로그인 공개 전환·시험 글 정리 뒤 true로 바꿔 올린다(사용자 "1004 게시판 마무리")
 var CATS = ['휴대폰', '부동산', '생활', '단축키', '재미', '게임'];   // 단축키 = 2026-10-15 사용자 요청(따로 한 분류) · 생활 = 누구나 쓰는 도구(공학용 계산기, 그림판 등). 2026-10-12 사용자 요청
 
 // ▼ 도구 목록: [폴더 이름, 화면에 보일 이름, 한 줄 설명, 큰 분류, 만들어졌는지, 작은 묶음]
@@ -228,6 +229,7 @@ ZW.app = function (cfg) {
   head.className = 'zw-head';
   head.innerHTML = '<div class="in"><a class="zw-logo" href="' + home + '">좌표<b>나라</b></a><div class="zw-tools"><button type="button" class="zw-pwa" aria-haspopup="dialog">📲 좌표나라 바로가기</button><button type="button" class="zw-theme" role="switch" aria-checked="true" aria-label="다크 모드"><span class="lb">다크</span><span class="sw"></span></button></div><nav class="zw-nav">'
     + CATS.map(function (c) { return '<a href="' + ROOT + CAT_PATH[c] + '/index.html"' + (((here && here[3] === c) || location.href.indexOf(ROOT + CAT_PATH[c] + '/') === 0) ? ' class="on"' : '') + '>' + c + '</a>'; }).join('')
+    + (BOARD_OPEN ? '<a href="' + ROOT + 'board/index.html"' + (location.pathname.indexOf('/board/') === 0 ? ' class="on"' : '') + '>게시판</a>' : '')
     + '</nav></div>';
   document.body.insertBefore(head, document.body.firstChild);
 

@@ -789,7 +789,7 @@
       rLabel.style.fontSize = '14px';
       rLabel.style.fontWeight = '700';
       rLabel.style.marginBottom = '6px';
-      rLabel.textContent = '신고 이유를 골라 주세요 (한 글에 한 번만 가능 · 3건 누적 시 자동 숨김)';
+      rLabel.textContent = '신고 이유를 골라 주세요 (한 글에 한 번만 가능 · 10건 누적 시 자동 숨김)';
 
       var rSelect = document.createElement('select');
       rSelect.className = 'bd-select';
@@ -836,7 +836,7 @@
           reportBtn.textContent = '신고 완료';
           reportBox.style.display = 'none';
           actionMsg.className = 'bd-msg ok';
-          actionMsg.textContent = '신고가 접수되었습니다. 신고가 3건 쌓이면 자동으로 숨겨집니다.';
+          actionMsg.textContent = '신고가 접수되었습니다. 신고가 10건 쌓이면 자동으로 숨겨집니다.';
         }).catch(function (err) {
           if (err && (String(err.code) === '23505' || String(err.message || '').toLowerCase().indexOf('duplicate') >= 0)) {
             markReported(post.id);
@@ -867,18 +867,20 @@
 
       // 내 글 삭제 (본인 또는 관리자)
       if (currentUser && (currentUser.id === post.user_id || isAdmin)) {
+        var deleteLabel = currentUser.id === post.user_id ? '내 글 삭제' : '관리자 삭제';
         var delBtn = document.createElement('button');
         delBtn.type = 'button';
         delBtn.className = 'bd-btn small danger';
-        delBtn.textContent = '내 글 삭제';
+        delBtn.textContent = deleteLabel;
         var confirming = false;
         delBtn.addEventListener('click', function () {
           if (!confirming) {
             confirming = true;
-            delBtn.textContent = '정말 삭제할까요? (한 번 더 누르면 삭제)';
+            delBtn.textContent = deleteLabel + ': 정말 삭제할까요? (한 번 더 누르면 삭제)';
             return;
           }
           delBtn.disabled = true;
+          delBtn.textContent = deleteLabel + ' 중…';
           var cfg = getConfig();
           var pathsToRemove = [];
           if (Array.isArray(post.image_paths)) pathsToRemove = pathsToRemove.concat(post.image_paths);
@@ -895,7 +897,7 @@
           }).catch(function (err) {
             confirming = false;
             delBtn.disabled = false;
-            delBtn.textContent = '내 글 삭제';
+            delBtn.textContent = deleteLabel;
             actionMsg.className = 'bd-msg err';
             actionMsg.textContent = friendlyError(err, boardType);
           });
