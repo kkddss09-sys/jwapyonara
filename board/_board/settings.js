@@ -70,6 +70,16 @@
   ZW_BOARD.settings = {
     SUPABASE_CDN: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js',
     BOARDS: BOARDS,
+    CARD_CATEGORIES: [
+      { key: '휴대폰', subs: [] },
+      { key: '일반', subs: ['웃음', '감동', '기쁨', '슬픔', '공감'] },
+      { key: '부동산', subs: [] }
+    ],
+    // 사진 주소 앞부분. 사진을 다른 서버(예: https://media.jwapyonara.com/board/)로 옮기면 이 값만 바꾼다. 끝에 / 필수
+    MEDIA_BASE: '../',
+    CARD_DATA_URL: '../_data/cardnews.json',
+    CARD_GRID_COLUMNS: 3,
+    CARD_PAGE_SIZE: 12,
     ALL_BOARD_ORDER: ['danga', 'story', 'review', 'cardnews'],
     ALL_PAGE_SIZES: [15, 30, 50],
     ALL_DEFAULT_PAGE_SIZE: 15,

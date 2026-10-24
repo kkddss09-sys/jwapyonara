@@ -17,6 +17,10 @@ var CAT_PATH = { '휴대폰': 'phone', '부동산': 'realestate', '생활': 'lif
 var CAT_DESC = { '휴대폰': '살 때 비교, 바꾸기 전 확인표, 성지가 처음이라면', '부동산': '대출·전월세·청약·면적 계산과 상담지', '생활': '나이·퍼센트·큐알·사진 줄이기', '단축키': '윈도우·크롬·갤럭시·아이폰 숨은 기능', '재미': '성향 테스트·추첨·사다리 타기', '게임': '지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판' };
 var BOARD_OPEN = true;   // 2026-10-24: 게시판 링크를 맨 위 메뉴에 보일지. 구글 로그인 공개 전환·시험 글 정리 뒤 true로 바꿔 올린다(사용자 "1004 게시판 마무리")
 var CATS = ['휴대폰', '부동산', '생활', '단축키', '재미', '게임'];   // 단축키 = 2026-10-15 사용자 요청(따로 한 분류) · 생활 = 누구나 쓰는 도구(공학용 계산기, 그림판 등). 2026-10-12 사용자 요청
+// ▼ 맨 위 메뉴와 휴대폰 아래 탭줄 구성 — NAV_MAIN과 NAV_TOOLS_GROUP만 고치면 위쪽 메뉴·도구 펼침·아래 탭줄·더보기 패널이 함께 바뀐다
+var NAV_MAIN = ['휴대폰', '부동산'];   // 위쪽 메뉴와 휴대폰 아래 탭줄에 바로 꺼내 둘 분류(CATS 안의 이름)
+var NAV_TOOLS_GROUP = CATS.filter(function (c) { return NAV_MAIN.indexOf(c) < 0; });   // 위쪽 '도구' 펼침과 아래 '더보기' 패널에 묶일 분류
+var CAT_ICON = { '휴대폰': '📱', '부동산': '🏢', '생활': '🧰', '단축키': '⌨️', '재미': '🎲', '게임': '🎮' };
 
 // ▼ 도구 목록: [폴더 이름, 화면에 보일 이름, 한 줄 설명, 큰 분류, 만들어졌는지, 작은 묶음]
 var TOOLS = [
@@ -128,7 +132,7 @@ var RANKS = {
 
 // ▼ 숫자 도우미 — 도구마다 다시 만들지 않게 여기 둔다
 var ZW = {
-  LINKS: LINKS, RANK_API: RANK_API, RANKS: RANKS, CATS: CATS, CAT_PATH: CAT_PATH, CAT_DESC: CAT_DESC, TOOLS: TOOLS, YT_LIST: YT_LIST,
+  LINKS: LINKS, RANK_API: RANK_API, RANKS: RANKS, CATS: CATS, CAT_PATH: CAT_PATH, CAT_DESC: CAT_DESC, CAT_ICON: CAT_ICON, BOARD_OPEN: BOARD_OPEN, NAV_MAIN: NAV_MAIN, NAV_TOOLS_GROUP: NAV_TOOLS_GROUP, TOOLS: TOOLS, YT_LIST: YT_LIST,
   num: function (s) { return Number(String(s).replace(/[^\d]/g, '')) || 0; },                 // "1,500,000" → 1500000
   dec: function (s) { s = String(s).replace(/[^\d.]/g, ''); var i = s.indexOf('.'); return i < 0 ? s : s.slice(0, i + 1) + s.slice(i + 1).replace(/\./g, ''); },
   fmt: function (n) { return Math.round(n).toLocaleString('ko-KR'); },                         // 1500000 → "1,500,000"
@@ -221,17 +225,51 @@ ZW.app = function (cfg) {
   var kakaoOf = function (cat) { return LINKS.kakao[cat] || LINKS.kakao['휴대폰'] || LINKS.cafe; };
   ZW.ROOT = ROOT;
 
-  // 지금 보고 있는 도구(폴더 이름으로 찾는다)
+  // 지금 보고 있는 도구(폴더 이름으로 찾는다)와 현재 분야·쪽 위치
   var here = null;
   for (var i = 0; i < TOOLS.length; i++) if (TOOLS[i][0] && location.href.indexOf(ROOT + TOOLS[i][0] + '/') === 0) here = TOOLS[i];
+  var cleanHref = location.href.split(/[?#]/)[0];
+  var isCatOn = function (c) {
+    return Boolean(c && CAT_PATH[c] && ((here && here[3] === c) || location.href.indexOf(ROOT + CAT_PATH[c] + '/') === 0));
+  };
+  var isBoardOn = location.href.indexOf(ROOT + 'board/') === 0 || location.pathname.indexOf('/board/') === 0;
+  var isToolsGroupOn = NAV_TOOLS_GROUP.some(isCatOn);
+  var isHomeOn = !here && !isBoardOn && !CATS.some(isCatOn) && (cleanHref === home || cleanHref === ROOT || cleanHref + 'index.html' === home);
 
   var head = document.createElement('header');
   head.className = 'zw-head';
-  head.innerHTML = '<div class="in"><a class="zw-logo" href="' + home + '">좌표<b>나라</b></a><div class="zw-tools"><button type="button" class="zw-pwa" aria-haspopup="dialog">📲 좌표나라 바로가기</button><button type="button" class="zw-theme" role="switch" aria-checked="true" aria-label="다크 모드"><span class="lb">다크</span><span class="sw"></span></button></div><nav class="zw-nav">'
-    + CATS.map(function (c) { return '<a href="' + ROOT + CAT_PATH[c] + '/index.html"' + (((here && here[3] === c) || location.href.indexOf(ROOT + CAT_PATH[c] + '/') === 0) ? ' class="on"' : '') + '>' + c + '</a>'; }).join('')
-    + (BOARD_OPEN ? '<a href="' + ROOT + 'board/index.html"' + (location.pathname.indexOf('/board/') === 0 ? ' class="on"' : '') + '>게시판</a>' : '')
+  head.innerHTML = '<div class="in"><a class="zw-logo" href="' + home + '">좌표<b>나라</b></a><div class="zw-tools"><button type="button" class="zw-pwa" aria-haspopup="dialog">📲 좌표나라 바로가기</button><button type="button" class="zw-theme" role="switch" aria-checked="true" aria-label="다크 모드"><span class="lb">다크</span><span class="sw"></span></button></div><nav class="zw-nav" aria-label="주요 메뉴">'
+    + NAV_MAIN.filter(function (c) { return CAT_PATH[c]; }).map(function (c) { return '<a href="' + ROOT + CAT_PATH[c] + '/index.html"' + (isCatOn(c) ? ' class="on"' : '') + '>' + c + '</a>'; }).join('')
+    + (BOARD_OPEN ? '<a href="' + ROOT + 'board/index.html"' + (isBoardOn ? ' class="on"' : '') + '>게시판</a>' : '')
+    + (NAV_TOOLS_GROUP.length ? '<div class="zw-nav-more"><button type="button" class="zw-nav-btn' + (isToolsGroupOn ? ' on' : '') + '" aria-haspopup="true" aria-expanded="false">도구 <span class="zw-caret" aria-hidden="true">▾</span></button><div class="zw-nav-drop" role="menu" hidden>'
+      + NAV_TOOLS_GROUP.filter(function (c) { return CAT_PATH[c]; }).map(function (c) { return '<a role="menuitem" href="' + ROOT + CAT_PATH[c] + '/index.html"' + (isCatOn(c) ? ' class="on"' : '') + '>' + c + '</a>'; }).join('')
+      + '</div></div>' : '')
     + '</nav></div>';
   document.body.insertBefore(head, document.body.firstChild);
+
+  // 위쪽 '도구' 펼침 목록 동작(누르면 열리고 바깥 클릭·Esc로 닫힘)
+  (function () {
+    var wrap = head.querySelector('.zw-nav-more');
+    if (!wrap) return;
+    var btn = wrap.querySelector('.zw-nav-btn'), drop = wrap.querySelector('.zw-nav-drop');
+    function closeDrop() {
+      if (drop.hidden) return;
+      drop.hidden = true;
+      btn.setAttribute('aria-expanded', 'false');
+    }
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var nextOpen = drop.hidden;
+      drop.hidden = !nextOpen;
+      btn.setAttribute('aria-expanded', nextOpen ? 'true' : 'false');
+    });
+    document.addEventListener('click', function (e) {
+      if (!drop.hidden && !wrap.contains(e.target)) closeDrop();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !drop.hidden) { closeDrop(); btn.focus(); }
+    });
+  })();
 
   // 다크 모드 스위치 — 처음 방문하면 켜져(어둡게) 있고, 누르면 끄고 켠다. 고른 것은 이 기기에만 기억한다(localStorage zw-theme)
   (function () {
@@ -290,17 +328,64 @@ ZW.app = function (cfg) {
   foot.innerHTML = '<div class="links">' + links + '</div><p>좌표나라 · 휴대폰과 부동산, 무료 도구 모음</p><p>좌표나라® 등록상표 제40-1790026호</p><p>' + (location.pathname.indexOf('/board/') === 0 ? '도구는 가입 없이 쓰고 넣은 값은 저장하지 않습니다. 게시판은 로그인이 필요하며 올린 글·사진·파일은 서버에 저장됩니다.' : '가입 없이 쓰고, 넣은 값은 어디에도 저장하지 않습니다.') + '</p>';
   document.body.appendChild(foot);
 
+  // 휴대폰 아래 고정 탭줄(폭 640px 이하)과 '더보기' 패널
+  var tabbar = document.createElement('nav');
+  tabbar.className = 'zw-tabbar';
+  tabbar.setAttribute('aria-label', '아래 고정 메뉴');
+  tabbar.innerHTML = '<a href="' + home + '"' + (isHomeOn ? ' class="on" aria-current="page"' : '') + '><i aria-hidden="true">🏠</i><span>홈</span></a>'
+    + NAV_MAIN.filter(function (c) { return CAT_PATH[c]; }).map(function (c) {
+      return '<a href="' + ROOT + CAT_PATH[c] + '/index.html"' + (isCatOn(c) ? ' class="on" aria-current="page"' : '') + '><i aria-hidden="true">' + (CAT_ICON[c] || '📌') + '</i><span>' + c + '</span></a>';
+    }).join('')
+    + (BOARD_OPEN ? '<a href="' + ROOT + 'board/index.html"' + (isBoardOn ? ' class="on" aria-current="page"' : '') + '><i aria-hidden="true">💬</i><span>게시판</span></a>' : '')
+    + '<button type="button" class="zw-tab-more' + (isToolsGroupOn ? ' on' : '') + '" aria-haspopup="dialog" aria-expanded="false"><i aria-hidden="true">➕</i><span>더보기</span></button>';
+  document.body.appendChild(tabbar);
+
+  var moreSheet = document.createElement('div');
+  moreSheet.className = 'zw-more-sheet';
+  moreSheet.hidden = true;
+  moreSheet.innerHTML = '<div class="zw-more-box" role="dialog" aria-modal="true" aria-labelledby="zwmt">'
+    + '<div class="zw-more-top"><b id="zwmt">도구 더보기</b><button type="button" class="zw-more-close" aria-label="닫기">✕</button></div>'
+    + '<div class="zw-more-grid">'
+    + NAV_TOOLS_GROUP.filter(function (c) { return CAT_PATH[c]; }).map(function (c) {
+      return '<a class="zw-more-item' + (isCatOn(c) ? ' on' : '') + '" href="' + ROOT + CAT_PATH[c] + '/index.html"><b>' + (CAT_ICON[c] ? CAT_ICON[c] + ' ' : '') + c + '</b><span>' + (CAT_DESC[c] || '') + '</span></a>';
+    }).join('')
+    + '</div>'
+    + '<button type="button" class="zw-more-pwa" aria-haspopup="dialog">📲 좌표나라 바로가기</button>'
+    + '</div>';
+  document.body.appendChild(moreSheet);
+
+  var moreBtn = tabbar.querySelector('.zw-tab-more');
+  var moreCloseBtn = moreSheet.querySelector('.zw-more-close');
+  var morePwaBtn = moreSheet.querySelector('.zw-more-pwa');
+  function openMore() {
+    moreSheet.hidden = false;
+    if (moreBtn) moreBtn.setAttribute('aria-expanded', 'true');
+  }
+  function closeMore() {
+    if (moreSheet.hidden) return;
+    moreSheet.hidden = true;
+    if (moreBtn) moreBtn.setAttribute('aria-expanded', 'false');
+  }
+  if (moreBtn) {
+    moreBtn.addEventListener('click', function () {
+      if (moreSheet.hidden) openMore(); else closeMore();
+    });
+  }
+  if (moreCloseBtn) moreCloseBtn.addEventListener('click', closeMore);
+  moreSheet.addEventListener('click', function (e) { if (e.target === moreSheet) closeMore(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !moreSheet.hidden) { closeMore(); if (moreBtn) moreBtn.focus(); }
+  });
+
   // 좌표나라 바로가기(앱 설치) — 브라우저가 멋대로 설치를 권하는 창은 막고(preventDefault), 맨 위 단추를 눌렀을 때만 부드러운 안내창을 띄운다.
   // 모든 쪽에서 쓸 수 있게 manifest와 서비스워커를 여기서 붙인다(쪽에 이미 manifest가 있으면 그것을 쓴다). 이미 설치해서 연 화면에서는 단추를 숨긴다. 2026-10-19 사용자 요청
   (function () {
     var btn = head.querySelector('.zw-pwa');
     var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
-    if (standalone) { btn.style.display = 'none'; return; }
     if (!document.querySelector('link[rel="manifest"]')) { var ml = document.createElement('link'); ml.rel = 'manifest'; ml.href = ROOT + 'manifest.json'; document.head.appendChild(ml); }
     if ('serviceWorker' in navigator && /^https?:/.test(location.protocol)) { try { navigator.serviceWorker.register(ROOT + 'sw.js').catch(function () {}); } catch (e) {} }
     var deferred = null, ua = navigator.userAgent, ios = /iphone|ipad|ipod/i.test(ua), kakao = /KAKAOTALK/i.test(ua);
     window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; });
-    window.addEventListener('appinstalled', function () { btn.style.display = 'none'; close(); });
 
     var sheet = document.createElement('div');
     sheet.className = 'zw-sheet'; sheet.hidden = true;
@@ -314,11 +399,20 @@ ZW.app = function (cfg) {
     var how = sheet.querySelector('.how');
     function open() { how.textContent = ''; sheet.hidden = false; sheet.querySelector('.go').focus(); }
     function close() { sheet.hidden = true; }
+    window.addEventListener('appinstalled', function () { btn.style.display = 'none'; close(); });
+    if (standalone) { btn.style.display = 'none'; }
     btn.addEventListener('click', open);
+    if (morePwaBtn) {
+      morePwaBtn.addEventListener('click', function () {
+        closeMore();
+        open();
+      });
+    }
     sheet.addEventListener('click', function (e) { if (e.target === sheet) close(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
     sheet.querySelector('.later').addEventListener('click', close);
     sheet.querySelector('.go').addEventListener('click', function () {
+      if (standalone) { how.textContent = '이미 바로가기 앱으로 열고 계세요.'; return; }
       if (deferred) { deferred.prompt(); deferred.userChoice.then(function (c) { deferred = null; if (c && c.outcome === 'accepted') close(); }); how.textContent = ''; return; }
       if (kakao) how.textContent = '카카오톡 안에서는 추가가 안 돼요. 오른쪽 아래 점 세 개(⋮)를 누르고 "다른 브라우저로 열기"를 고른 뒤 다시 눌러 주세요.';
       else if (ios) how.textContent = '화면 아래쪽 공유 단추(네모에 위쪽 화살표)를 누르고 "홈 화면에 추가"를 고르면 끝이에요.';

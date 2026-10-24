@@ -45,11 +45,107 @@
     return '<a class="catcard' + (big ? ' big' : '') + '" href="' + ZW.CAT_PATH[c] + '/index.html"><b>' + c + '</b><span>' + ZW.CAT_DESC[c] + '</span><small>쓸 수 있는 도구 ' + count(c) + '개 ›</small></a>';
   }
 
+  // 게시판 미리보기(새 카드뉴스 · 새 영상) — 검색이 비어 있고 BOARD_OPEN이 true일 때만 그린다
+  var previewRequested = false, previewCards = [], previewVideos = [];
+  function todayVer() {
+    var d = new Date(), m = d.getMonth() + 1, day = d.getDate();
+    return String(d.getFullYear()) + (m < 10 ? '0' : '') + m + (day < 10 ? '0' : '') + day;
+  }
+  function buildPreviewRow(heading, moreHref, items) {
+    var sec = document.createElement('section');
+    sec.className = 'cat zw-pv-sec';
+    var head = document.createElement('div');
+    head.className = 'zw-pv-head';
+    var h2 = document.createElement('h2');
+    h2.textContent = heading;
+    var more = document.createElement('a');
+    more.className = 'zw-pv-more';
+    more.href = moreHref;
+    more.textContent = '더 보기 ›';
+    head.appendChild(h2);
+    head.appendChild(more);
+    sec.appendChild(head);
+    var track = document.createElement('div');
+    track.className = 'zw-pv-track';
+    items.forEach(function (it) {
+      var a = document.createElement('a');
+      a.className = 'zw-pv-card';
+      a.href = it.href;
+      var thumb = document.createElement('div');
+      thumb.className = 'zw-pv-thumb';
+      var img = document.createElement('img');
+      img.loading = 'lazy';
+      img.alt = it.title;
+      img.src = it.img;
+      thumb.appendChild(img);
+      var ttl = document.createElement('div');
+      ttl.className = 'zw-pv-title';
+      ttl.textContent = it.title;
+      a.appendChild(thumb);
+      a.appendChild(ttl);
+      track.appendChild(a);
+    });
+    sec.appendChild(track);
+    return sec;
+  }
+  function paintBoardPreview() {
+    var slot = document.getElementById('boardPreview');
+    if (!slot) return;
+    slot.textContent = '';
+    if (previewCards.length) slot.appendChild(buildPreviewRow('새 카드뉴스', 'board/cardnews/', previewCards));
+    if (previewVideos.length) slot.appendChild(buildPreviewRow('새 영상', 'board/video/', previewVideos));
+  }
+  function loadBoardPreview() {
+    if (previewRequested || typeof fetch !== 'function') return;
+    previewRequested = true;
+    var ver = todayVer();
+    fetch('board/_data/cardnews.json?v=' + encodeURIComponent(ver))
+      .then(function (r) { return r && r.ok ? r.json() : null; })
+      .then(function (d) {
+        var list = (d && Array.isArray(d['항목'])) ? d['항목'] : [];
+        var out = [];
+        for (var i = 0; i < list.length && out.length < 8; i++) {
+          var it = list[i];
+          var id = String(it && it.id || '').trim();
+          var title = String(it && it['제목'] || '').trim();
+          var p0 = (it && it['썸네일']) ? String(it['썸네일']).trim() : ((it && Array.isArray(it['사진']) && it['사진'][0]) ? String(it['사진'][0]).trim() : '');
+          if (!id || !title || !p0) continue;
+          var img = /^(?:https?:\/\/|\/|board\/)/.test(p0) ? p0 : 'board/' + p0.replace(/^(?:\.\.?\/)+/, '');
+          out.push({ id: id, title: title, img: img, href: 'board/cardnews/index.html?card=' + encodeURIComponent(id) });
+        }
+        previewCards = out;
+        if (!q.value.trim()) paintBoardPreview();
+      })
+      .catch(function () {});
+    fetch('board/_data/videos.json?v=' + encodeURIComponent(ver))
+      .then(function (r) { return r && r.ok ? r.json() : null; })
+      .then(function (d) {
+        var list = (d && Array.isArray(d['항목'])) ? d['항목'] : [];
+        var out = [];
+        for (var i = 0; i < list.length && out.length < 8; i++) {
+          var it = list[i];
+          var id = String(it && it.id || '').trim();
+          var title = String(it && it['제목'] || '').trim();
+          if (!id || !title) continue;
+          out.push({ id: id, title: title, img: 'https://i.ytimg.com/vi/' + encodeURIComponent(id) + '/mqdefault.jpg', href: 'board/video/index.html?v=' + encodeURIComponent(id) });
+        }
+        previewVideos = out;
+        if (!q.value.trim()) paintBoardPreview();
+      })
+      .catch(function () {});
+  }
+
   function draw() {
     var word = q.value.trim(), html = '', shown = 0;
     if (!word) {
       html += '<div class="catgrid">' + catCard('휴대폰', true) + catCard('부동산', true) + '</div>';
       html += '<div class="catgrid small">' + CATS.slice(2).map(function (c) { return catCard(c, false); }).join('') + '</div>';
+      // 게시판 바로가기 (사진·영상 중심으로 먼저, 글 게시판은 작게). 줄 바꾸려면 아래 BOARDS 표만 고친다.
+      if (typeof BOARD_OPEN === 'undefined' || BOARD_OPEN) {
+        var BOARDS = [['카드뉴스', '좌우로 넘겨 보고 위로 쓸어 다음 글', 'board/cardnews/'], ['영상', '쇼츠 모아 보기', 'board/video/'], ['단가표', '업체가 올리는 휴대폰 단가', 'board/danga/'], ['이야기', '손님들의 이야기', 'board/story/'], ['후기', '직접 쓴 후기', 'board/review/'], ['전체글', '모든 글 최신순', 'board/all/']];
+        html += '<div id="boardPreview"></div>';
+        html += '<section class="cat"><h2><a class="catlink" href="board/index.html">게시판</a> <small>카드뉴스·영상·단가표</small></h2><div class="catgrid small" style="margin-top:10px">' + BOARDS.map(function (b) { return '<a class="catcard" href="' + b[2] + 'index.html"><b>' + b[0] + '</b><span>' + b[1] + '</span></a>'; }).join('') + '</div></section>';
+      }
       // 이 기기에서 자주 연 도구를 맨 위에
       var uses = ZW.uses(), used = function (t) { return uses[t[0]] || 0; };
       var mineTop = T.filter(function (t) { return ready(t) && used(t) > 0; }).sort(function (a, b) { return used(b) - used(a); }).slice(0, 4);
@@ -67,6 +163,10 @@
     }
     list.innerHTML = html;
     document.getElementById('empty').style.display = shown ? 'none' : 'block';
+    if (!word && (typeof BOARD_OPEN === 'undefined' || BOARD_OPEN)) {
+      loadBoardPreview();
+      paintBoardPreview();
+    }
   }
 
   q.addEventListener('input', draw);
