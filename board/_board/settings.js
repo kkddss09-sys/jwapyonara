@@ -74,6 +74,7 @@
     CARD_CATEGORIES: [
       { key: '휴대폰', subs: [] },
       { key: '부동산', subs: [] },
+      { key: 'AI학습', subs: [] },
       { key: '재미', subs: [] },
       { key: '감동', subs: [] },
       { key: '기쁨', subs: [] },
@@ -89,6 +90,7 @@
     VIDEO_CATEGORIES: [
       { key: '휴대폰' },
       { key: '부동산' },
+      { key: 'AI학습' },
       { key: '재미' },
       { key: '감동' },
       { key: '기쁨' },
