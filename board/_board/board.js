@@ -99,7 +99,18 @@
   }
 
   // DB·스토리지·인증 오류 메시지를 초보자가 읽기 쉬운 한국어로 바꾼다
-  function friendlyError(err, contextBoard) {
+  function friendlyError(err, contextBoard, stage) {
+    // 기술 정보는 message만 사용하고 개인정보·인증값으로 보이는 부분은 가린다.
+    var technical = String((err && err.message) || (typeof err === 'string' ? err : '') || '상세 오류 없음')
+      .replace(/https?:\/\/\S+/gi, '[주소 숨김]')
+      .replace(/[^\s<>"'()]+@[^\s<>"'()]+/g, '[이메일 숨김]')
+      .replace(/\b(?:bearer\s+\S+|(?:[\w-]*(?:key|token|secret|password)[\w-]*|authorization)\s*[:=]\s*[^\r\n]+)/gi, '[인증 정보 숨김]')
+      .replace(/[A-Za-z0-9_.\/-]{32,}/g, '[긴 식별값 숨김]')
+      .replace(/[\r\n]+/g, ' ').slice(0, 300);
+    var general = '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+    if (stage === 'storage-upload') {
+      return '첨부 파일을 올리지 못했습니다.\n(기술 정보: ' + technical + ')';
+    }
     if (!err) return '작업을 처리하지 못했습니다. 잠시 뒤 다시 시도해 주세요.';
     var raw = '';
     if (typeof err === 'string') raw = err;
@@ -115,8 +126,9 @@
     if (low.indexOf('banned') >= 0 || low.indexOf('금지어') >= 0 || low.indexOf('prohibit') >= 0 || low.indexOf('forbid') >= 0 || low.indexOf('bad_word') >= 0 || low.indexOf('word') >= 0) {
       return '글에 사용할 수 없는 말(금지어)이 들어 있어 올릴 수 없습니다. 내용을 다듬어 주세요.';
     }
-    if (low.indexOf('vendor') >= 0 || low.indexOf('업체') >= 0 || (contextBoard === 'danga' && (low.indexOf('row-level security') >= 0 || low.indexOf('permission') >= 0 || low.indexOf('policy') >= 0))) {
-      return '단가표는 등록된 업체만 올릴 수 있습니다. 업체 등록은 문의 페이지를 확인해 주세요.';
+    if (low.indexOf('vendor') >= 0 || low.indexOf('업체') >= 0 || low.indexOf('row-level security') >= 0 || low.indexOf('permission') >= 0 || low.indexOf('policy') >= 0) {
+      // 권한 조회 실패도 vendorInfo=null/isAdmin=false라 비업체라고 단정할 수 없다.
+      return general + (stage === 'posts-insert' ? '\n(기술 정보: ' + technical + ')' : '');
     }
     if (!currentUser || low.indexOf('jwt') >= 0 || low.indexOf('not authenticated') >= 0 || low.indexOf('auth') >= 0 || low.indexOf('login') >= 0 || low.indexOf('401') >= 0 || low.indexOf('row-level security') >= 0) {
       return '로그인이 필요합니다. 먼저 로그인한 뒤에 이용해 주세요.';
@@ -124,7 +136,7 @@
     if (low.indexOf('payload too large') >= 0 || low.indexOf('413') >= 0 || low.indexOf('size') >= 0 || low.indexOf('mime') >= 0 || low.indexOf('extension') >= 0) {
       return '첨부 파일 크기나 형식이 기준에 맞지 않습니다. (사진 jpg/png/webp 5MB 이하, 엑셀 xlsx 10MB 이하)';
     }
-    return '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+    return general + (stage === 'posts-insert' ? '\n(기술 정보: ' + technical + ')' : '');
   }
 
   // 이메일 전체가 다른 사람에게 노출되지 않게 앞부분 일부만 남긴다 (계약 3-7)
@@ -590,6 +602,7 @@
         var imagePaths = [];
         var filePath = null;
         var fileName = null;
+        var uploadStage = 'storage-upload';
 
         // 순서대로 사진 올리기 -> 엑셀 올리기 -> posts 행 추가
         var chain = Promise.resolve();
@@ -630,6 +643,7 @@
             file_path: filePath,
             file_name: fileName
           };
+          uploadStage = 'posts-insert';
           return sb.from('posts').insert(row);
         }).then(function (insRes) {
           if (insRes && insRes.error) throw insRes.error;
@@ -648,7 +662,14 @@
             try { sb.storage.from(bucket).remove(uploadedPaths); } catch (e) {}
           }
           formMsg.className = 'bd-msg err';
-          formMsg.textContent = friendlyError(err, boardType);
+          var errorLines = friendlyError(err, boardType, uploadStage).split('\n');
+          formMsg.textContent = errorLines[0];
+          if (errorLines.length > 1) {
+            formMsg.appendChild(document.createElement('br'));
+            var technicalInfo = document.createElement('small');
+            technicalInfo.textContent = errorLines.slice(1).join(' ');
+            formMsg.appendChild(technicalInfo);
+          }
           submitBtn.disabled = false;
           submitBtn.textContent = '글 올리기';
         });
