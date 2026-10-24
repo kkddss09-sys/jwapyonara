@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>좌표나라 게시판 — 단가표·이야기·영상</title>
+<meta name="description" content="등록된 업체가 올리는 휴대폰 단가표, 손님들의 자유로운 이야기, 재미있는 짧은 영상을 한곳에서 보세요. 좌표나라 게시판.">
+<meta name="theme-color" content="#1b64da">
+<link rel="icon" href="../_common/icon-192.png">
+<link rel="apple-touch-icon" href="../_common/icon-192.png">
+<link rel="stylesheet" href="../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <nav class="crumb" aria-label="현재 위치"><a href="../index.html">좌표나라</a> <span>›</span> 게시판</nav>
+  <h1>좌표나라 게시판</h1>
+  <p class="lead">원하시는 게시판을 골라 보세요. 글 읽기와 영상 보기는 로그인 없이 바로 됩니다.</p>
+
+  <nav class="bd-subnav" aria-label="게시판 메뉴">
+    <a href="index.html" class="on">게시판 첫 화면</a>
+    <a href="danga/index.html">단가표</a>
+    <a href="story/index.html">이야기</a>
+    <a href="video/index.html">영상</a>
+  </nav>
+
+  <div id="boardApp"></div>
+
+  <div style="display:grid; gap:12px; margin-top:14px;">
+    <a class="catcard big" href="danga/index.html">
+      <b>📋 단가표 게시판</b>
+      <span>등록된 업체가 직접 올리는 단가표 사진·안내 글·엑셀 파일(.xlsx)을 확인하고 내려받을 수 있습니다.</span>
+      <small>단가표 보러 가기 ›</small>
+    </a>
+
+    <a class="catcard big" href="story/index.html">
+      <b>💬 이야기 게시판</b>
+      <span>휴대폰·부동산 경험담과 일상 이야기를 로그인한 손님 누구나 자유롭게 나누는 공간입니다.</span>
+      <small>이야기 보러 가기 ›</small>
+    </a>
+
+    <a class="catcard big" href="video/index.html">
+      <b>🎬 영상 게시판</b>
+      <span>재미있는 이야기를 짧은 영상(쇼츠)으로 사이트 안에서 바로 재생해 볼 수 있습니다.</span>
+      <small>영상 보러 가기 ›</small>
+    </a>
+  </div>
+
+  <div class="ad" id="ad1"></div>
+
+  <nav class="bd-legal-links" aria-label="약관 및 안내">
+    <a href="legal/privacy.html">개인정보처리방침</a>
+    <span>·</span>
+    <a href="legal/terms.html">이용약관</a>
+    <span>·</span>
+    <a href="legal/about.html">사이트 소개</a>
+    <span>·</span>
+    <a href="legal/contact.html">문의</a>
+  </nav>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="_board/config.js"></script>
+<script src="_board/board.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+window.ZW_BOARD.init({ page: 'hub', targetId: 'boardApp' });
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>이야기 게시판 — 휴대폰·부동산 자유 이야기 | 좌표나라</title>
+<meta name="description" content="휴대폰과 부동산 경험담, 질문, 일상 이야기를 자유롭게 나누는 좌표나라 이야기 게시판입니다.">
+<meta name="theme-color" content="#1b64da">
+<link rel="icon" href="../../_common/icon-192.png">
+<link rel="apple-touch-icon" href="../../_common/icon-192.png">
+<link rel="stylesheet" href="../../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <nav class="crumb" aria-label="현재 위치"><a href="../../index.html">좌표나라</a> <span>›</span> <a href="../index.html">게시판</a> <span>›</span> 이야기</nav>
+  <h1>이야기 게시판</h1>
+  <p class="lead">로그인한 손님 누구나 경험담과 이야기를 올릴 수 있습니다. 사진은 한 글에 최대 5장까지 첨부됩니다.</p>
+
+  <nav class="bd-subnav" aria-label="게시판 메뉴">
+    <a href="../index.html">게시판 첫 화면</a>
+    <a href="../danga/index.html">단가표</a>
+    <a href="index.html" class="on">이야기</a>
+    <a href="../video/index.html">영상</a>
+  </nav>
+
+  <div class="bd-notice" role="note">
+    남의 글을 그대로 옮기지 말고 직접 쓴 이야기만. 욕설·정치·광고 글은 숨겨집니다.
+  </div>
+
+  <div id="boardApp"></div>
+
+  <div class="ad" id="ad1"></div>
+
+  <nav class="bd-legal-links" aria-label="약관 및 안내">
+    <a href="../legal/privacy.html">개인정보처리방침</a>
+    <span>·</span>
+    <a href="../legal/terms.html">이용약관</a>
+    <span>·</span>
+    <a href="../legal/about.html">사이트 소개</a>
+    <span>·</span>
+    <a href="../legal/contact.html">문의</a>
+  </nav>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../_board/config.js"></script>
+<script src="../_board/board.js"></script>
+<script src="../../_common/common.js"></script>
+<script>
+window.ZW_BOARD.init({ page: 'story', targetId: 'boardApp' });
+</script>
+</body>
+</html>
