@@ -285,7 +285,7 @@ ZW.app = function (cfg) {
     + (LINKS.cafe && cat !== '부동산' ? out(LINKS.cafe, '오늘 휴대폰 시세표') : '')
     + (cat ? (LINKS.youtube[cat] ? out(LINKS.youtube[cat], cat + ' 정보 유튜브') : '')
            : (LINKS.youtube['휴대폰'] ? out(LINKS.youtube['휴대폰'], '휴대폰 정보 유튜브') : '') + (LINKS.youtube['부동산'] ? out(LINKS.youtube['부동산'], '부동산 정보 유튜브') : ''));
-  foot.innerHTML = '<div class="links">' + links + '</div><p>좌표나라 · 휴대폰과 부동산, 무료 도구 모음</p><p>좌표나라® 등록상표 제40-1790026호</p><p>가입 없이 쓰고, 넣은 값은 어디에도 저장하지 않습니다.</p>';
+  foot.innerHTML = '<div class="links">' + links + '</div><p>좌표나라 · 휴대폰과 부동산, 무료 도구 모음</p><p>좌표나라® 등록상표 제40-1790026호</p><p>' + (location.pathname.indexOf('/board/') === 0 ? '도구는 가입 없이 쓰고 넣은 값은 저장하지 않습니다. 게시판은 로그인이 필요하며 올린 글·사진·파일은 서버에 저장됩니다.' : '가입 없이 쓰고, 넣은 값은 어디에도 저장하지 않습니다.') + '</p>';
   document.body.appendChild(foot);
 
   // 좌표나라 바로가기(앱 설치) — 브라우저가 멋대로 설치를 권하는 창은 막고(preventDefault), 맨 위 단추를 눌렀을 때만 부드러운 안내창을 띄운다.
