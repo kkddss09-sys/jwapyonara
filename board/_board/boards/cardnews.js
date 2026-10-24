@@ -53,6 +53,22 @@
     };
   }
 
+
+  // 네이버 블로그 글 주소(공식 RSS로 만든 목록 파일). 없거나 실패하면 단추만 없다. https://blog.naver.com/ 주소만 받는다.
+  var blogMap = {};
+  function loadBlogMap(settings) {
+    var url = (settings && settings.BLOG_DATA_URL) || '../_data/blog.json';
+    var ver = ZW_BOARD.BOARD_VERSION || '1';
+    return fetch(url + (url.indexOf('?') >= 0 ? '&' : '?') + 'v=' + encodeURIComponent(ver))
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (j) {
+        var m = (j && j['카드뉴스']) || {};
+        blogMap = {};
+        Object.keys(m).forEach(function (k) { if (typeof m[k] === 'string' && m[k].indexOf('https://blog.naver.com/') === 0) blogMap[k] = m[k]; });
+      })
+      .catch(function () { blogMap = {}; });
+  }
+
   function runCardnewsBoard(ctx) {
     var container = ctx && ctx.container;
     if (!container) return;
@@ -393,6 +409,11 @@
       metaRow.appendChild(el('span', item.date));
       var inlineCountEl = el('span', '1 / ' + item.photos.length);
       metaRow.appendChild(inlineCountEl);
+      if (blogMap[item.id]) {
+        var blogA = el('a', '네이버 블로그에서 보기 ↗', 'bd-cn-blog-link');
+        blogA.href = blogMap[item.id]; blogA.target = '_blank'; blogA.rel = 'noopener';
+        metaRow.appendChild(blogA);
+      }
 
       bottom.appendChild(dotsWrap);
       bottom.appendChild(metaRow);
@@ -573,7 +594,8 @@
       if (overlayEl) closeViewer(true);
     };
 
-    fetch(buildDataUrl(settings))
+    loadBlogMap(settings)
+      .then(function () { return fetch(buildDataUrl(settings)); })
       .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();

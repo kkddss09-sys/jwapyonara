@@ -82,6 +82,7 @@
     ],
     // 사진 주소 앞부분. 사진을 다른 서버(예: https://media.jwapyonara.com/board/)로 옮기면 이 값만 바꾼다. 끝에 / 필수
     MEDIA_BASE: '../',
+    BLOG_DATA_URL: '../_data/blog.json',
     CARD_DATA_URL: '../_data/cardnews.json',
     CARD_GRID_COLUMNS: 3,
     CARD_PAGE_SIZE: 12,

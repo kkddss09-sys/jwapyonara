@@ -61,6 +61,22 @@
     };
   }
 
+
+  // 네이버 블로그 글 주소(공식 RSS로 만든 목록 파일). 없거나 실패하면 단추만 없다. https://blog.naver.com/ 주소만 받는다.
+  var blogMap = {};
+  function loadBlogMap(settings) {
+    var url = (settings && settings.BLOG_DATA_URL) || '../_data/blog.json';
+    var ver = ZW_BOARD.BOARD_VERSION || '1';
+    return fetch(url + (url.indexOf('?') >= 0 ? '&' : '?') + 'v=' + encodeURIComponent(ver))
+      .then(function (r) { return r.ok ? r.json() : {}; })
+      .then(function (j) {
+        var m = (j && j['영상']) || {};
+        blogMap = {};
+        Object.keys(m).forEach(function (k) { if (typeof m[k] === 'string' && m[k].indexOf('https://blog.naver.com/') === 0) blogMap[k] = m[k]; });
+      })
+      .catch(function () { blogMap = {}; });
+  }
+
   function mountShortsSection(slot, ctx, myGen) {
     var settings = (ctx && ctx.settings) || ZW_BOARD.settings || {};
     var categories = Array.isArray(settings.VIDEO_CATEGORIES) && settings.VIDEO_CATEGORIES.length
@@ -87,6 +103,7 @@
     var badgeEl = null;
     var dateEl = null;
     var ytLinkEl = null;
+    var blogLinkEl = null;
     var titleEl = null;
     var adjHintEl = null;
     var prevBtnEl = null;
@@ -236,6 +253,10 @@
       if (badgeEl) badgeEl.textContent = cur.cat || '영상';
       if (dateEl) dateEl.textContent = cur.date;
       if (titleEl) titleEl.textContent = cur.title;
+      if (blogLinkEl) {
+        var bu = blogMap[cur.id];
+        if (bu) { blogLinkEl.href = bu; blogLinkEl.style.display = ''; } else { blogLinkEl.removeAttribute('href'); blogLinkEl.style.display = 'none'; }
+      }
       if (ytLinkEl) {
         ytLinkEl.href = 'https://www.youtube.com/watch?v=' + encodeURIComponent(cur.id);
         ytLinkEl.setAttribute('aria-label', cur.title + ' 유튜브에서 보기 (새 창)');
@@ -271,7 +292,7 @@
       }
       if (overlayEl.parentNode) overlayEl.parentNode.removeChild(overlayEl);
       overlayEl = null; iframeEl = null; pagePillEl = null;
-      badgeEl = null; dateEl = null; ytLinkEl = null; titleEl = null; adjHintEl = null;
+      badgeEl = null; dateEl = null; ytLinkEl = null; blogLinkEl = null; titleEl = null; adjHintEl = null;
       prevBtnEl = null; nextBtnEl = null;
       document.body.classList.remove('bd-vid-lock');
 
@@ -367,7 +388,12 @@
       ytLinkEl = el('a', '유튜브에서 보기 ↗', 'bd-vid-yt-link');
       ytLinkEl.target = '_blank';
       ytLinkEl.rel = 'noopener';
+      blogLinkEl = el('a', '네이버 블로그 ↗', 'bd-vid-yt-link');
+      blogLinkEl.target = '_blank';
+      blogLinkEl.rel = 'noopener';
+      blogLinkEl.style.display = 'none';
       metaRow.appendChild(metaLeft);
+      metaRow.appendChild(blogLinkEl);
       metaRow.appendChild(ytLinkEl);
 
       titleEl = el('h2', '', 'bd-vid-overlay-title');
@@ -443,7 +469,8 @@
       if (overlayEl) closeViewer(true);
     };
 
-    fetch(buildDataUrl(settings))
+    loadBlogMap(settings)
+      .then(function () { return fetch(buildDataUrl(settings)); })
       .then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
         return res.json();

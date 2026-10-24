@@ -234,6 +234,7 @@
       '.bd-vid-overlay-meta { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; color:var(--bd-vid-sub); font-weight:600; flex-wrap:wrap; }',
       '.bd-vid-overlay-meta-left { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }',
       '.bd-vid-overlay-badge { background:var(--bd-accent, var(--red)); color:var(--bd-vid-fg); padding:2px 8px; border-radius:6px; font-size:12px; font-weight:700; }',
+      '.bd-cn-blog-link { color:var(--bd-vid-fg, #fff); font-size:13px; font-weight:700; text-decoration:underline; margin-left:auto; }',
       '.bd-vid-yt-link { color:var(--bd-vid-fg); font-size:13px; font-weight:700; text-decoration:underline; }',
       '.bd-vid-overlay-title { font-size:15px; font-weight:800; line-height:1.35; color:var(--bd-vid-fg); margin:0; word-break:keep-all; overflow-wrap:anywhere; }',
       '.bd-vid-adj-hint { font-size:12px; color:var(--bd-vid-sub); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }',
