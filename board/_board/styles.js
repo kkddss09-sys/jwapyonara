@@ -194,6 +194,52 @@
       '@media(prefers-reduced-motion:reduce) { .bd-cn-vtrack, .bd-cn-htrack { scroll-behavior:auto !important; } .bd-cn-dot, .bd-cn-tab, .bd-cn-chip { transition:none !important; } }'
     ];
 
+    // 영상 목록 보기 (좌표나라 쇼츠)
+    var videoListSection = [
+      '.bd-vid-wrap { margin-bottom:22px; }',
+      '.bd-vid-heading { font-size:19px; font-weight:800; color:var(--ink); margin:0 0 12px; }',
+      '.bd-vid-tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }',
+      '.bd-vid-tab { font:inherit; font-size:15px; font-weight:700; padding:8px 16px; border-radius:999px; border:1.5px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }',
+      '.bd-vid-tab.on { background:var(--bd-accent, var(--red)); border-color:var(--bd-accent, var(--red)); color:var(--bd-vid-fg); }',
+      '.bd-vid-grid { display:grid; grid-template-columns:repeat(var(--bd-vid-cols, 3), minmax(0, 1fr)); gap:12px; margin-bottom:16px; }',
+      '@media(max-width:520px) { .bd-vid-grid { gap:8px; } }',
+      '.bd-vid-card { display:flex; flex-direction:column; align-items:stretch; text-align:left; padding:0; border:1px solid var(--line); border-radius:14px; overflow:hidden; background:var(--card); color:var(--ink); font:inherit; cursor:pointer; }',
+      '.bd-vid-card:hover, .bd-vid-card:focus-visible { border-color:var(--bd-accent, var(--red)); outline:none; }',
+      '.bd-vid-thumb-wrap { position:relative; width:100%; aspect-ratio:var(--bd-vid-thumb-ratio, 9 / 16); background:#000; overflow:hidden; border-bottom:1px solid var(--line); }',
+      '.bd-vid-thumb { width:100%; height:100%; object-fit:cover; object-position:center; display:block; }',
+      '.bd-vid-info { padding:10px; display:flex; flex-direction:column; gap:6px; flex:1; }',
+      '@media(max-width:520px) { .bd-vid-info { padding:8px; gap:4px; } }',
+      '.bd-vid-title { font-size:14px; font-weight:700; line-height:1.38; color:var(--ink); margin:0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis; word-break:keep-all; overflow-wrap:anywhere; }',
+      '@media(max-width:520px) { .bd-vid-title { font-size:13px; } }',
+      '.bd-vid-meta { font-size:12px; color:var(--sub); display:flex; flex-wrap:wrap; justify-content:space-between; gap:4px; margin-top:auto; }',
+      '.bd-vid-more-wrap { text-align:center; margin:8px 0 18px; }',
+      '.bd-vid-empty { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:24px 16px; text-align:center; font-size:15px; font-weight:600; color:var(--sub); margin-bottom:16px; }',
+      'body.bd-vid-lock { overflow:hidden !important; }',
+      '.bd-vid-overlay { position:fixed; inset:0; z-index:9999; background:var(--bd-vid-overlay-bg); color:var(--bd-vid-fg); display:flex; flex-direction:column; overscroll-behavior:contain; }',
+      '.bd-vid-topbar { position:absolute; top:0; left:0; right:0; z-index:25; display:flex; align-items:center; justify-content:space-between; padding:12px 16px; pointer-events:none; }',
+      '.bd-vid-topbar > * { pointer-events:auto; }',
+      '.bd-vid-page-pill { background:var(--bd-vid-ui-bg); color:var(--bd-vid-fg); border:1px solid var(--bd-vid-ui-border); border-radius:999px; padding:6px 12px; font-size:13px; font-weight:700; }',
+      '.bd-vid-top-actions { display:flex; align-items:center; gap:8px; }',
+      '.bd-vid-icon-btn { font:inherit; font-size:14px; font-weight:700; color:var(--bd-vid-fg); background:var(--bd-vid-ui-bg); border:1px solid var(--bd-vid-ui-border); border-radius:999px; padding:7px 14px; min-height:38px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px; text-decoration:none; }',
+      '.bd-vid-icon-btn:disabled { opacity:0.35; cursor:default; pointer-events:none; }',
+      '.bd-vid-body { flex:1; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:54px 12px 14px; box-sizing:border-box; gap:10px; }',
+      '.bd-vid-stage-row { flex:1; min-height:0; width:100%; display:flex; align-items:center; justify-content:center; gap:12px; }',
+      '.bd-vid-frame-box { position:relative; height:min(var(--bd-vid-stage-max-h, 90vh), calc(100vh - 150px)); max-height:var(--bd-vid-stage-max-h, 90vh); aspect-ratio:9 / 16; max-width:calc(100vw - 24px); background:var(--bd-vid-stage-bg); border-radius:16px; overflow:hidden; border:1px solid var(--bd-vid-ui-border); flex:none; }',
+      '.bd-vid-frame-box iframe { width:100%; height:100%; border:0; display:block; }',
+      '.bd-vid-nav-col { display:flex; flex-direction:column; gap:8px; z-index:20; }',
+      '@media(max-width:560px) { .bd-vid-nav-col { position:absolute; right:12px; top:50%; transform:translateY(-50%); } }',
+      '.bd-vid-nav-btn { width:44px; height:44px; border-radius:999px; border:1px solid var(--bd-vid-ui-border); background:var(--bd-vid-ui-bg); color:var(--bd-vid-fg); font:inherit; font-size:18px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; }',
+      '.bd-vid-nav-btn:disabled { opacity:0.3; cursor:default; pointer-events:none; }',
+      '.bd-vid-bottom { width:100%; max-width:520px; background:var(--bd-vid-ui-bg); border:1px solid var(--bd-vid-ui-border); border-radius:14px; padding:10px 14px; box-sizing:border-box; display:flex; flex-direction:column; gap:6px; z-index:20; }',
+      '.bd-vid-overlay-meta { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; color:var(--bd-vid-sub); font-weight:600; flex-wrap:wrap; }',
+      '.bd-vid-overlay-meta-left { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }',
+      '.bd-vid-overlay-badge { background:var(--bd-accent, var(--red)); color:var(--bd-vid-fg); padding:2px 8px; border-radius:6px; font-size:12px; font-weight:700; }',
+      '.bd-vid-yt-link { color:var(--bd-vid-fg); font-size:13px; font-weight:700; text-decoration:underline; }',
+      '.bd-vid-overlay-title { font-size:15px; font-weight:800; line-height:1.35; color:var(--bd-vid-fg); margin:0; word-break:keep-all; overflow-wrap:anywhere; }',
+      '.bd-vid-adj-hint { font-size:12px; color:var(--bd-vid-sub); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }',
+      '@media(prefers-reduced-motion:reduce) { .bd-vid-tab, .bd-vid-card, .bd-vid-icon-btn, .bd-vid-nav-btn { transition:none !important; animation:none !important; } }'
+    ];
+
     return []
       .concat(variablesSection)
       .concat(allBoardSection)
@@ -203,6 +249,7 @@
       .concat(detailAndReportSection)
       .concat(videoSection)
       .concat(cardnewsSection)
+      .concat(videoListSection)
       .join('\n');
   }
 
