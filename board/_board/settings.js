@@ -80,6 +80,13 @@
     CARD_DATA_URL: '../_data/cardnews.json',
     CARD_GRID_COLUMNS: 3,
     CARD_PAGE_SIZE: 12,
+    VIDEO_CATEGORIES: [
+      { key: '휴대폰' },
+      { key: '부동산' }
+    ],
+    VIDEO_DATA_URL: '../_data/videos.json',
+    VIDEO_GRID_COLUMNS: 3,
+    VIDEO_PAGE_SIZE: 12,
     ALL_BOARD_ORDER: ['danga', 'story', 'review', 'cardnews'],
     ALL_PAGE_SIZES: [15, 30, 50],
     ALL_DEFAULT_PAGE_SIZE: 15,

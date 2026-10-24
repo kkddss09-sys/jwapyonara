@@ -15,6 +15,7 @@
     var videoRatio = ui.videoAspectRatio || '16/9';
     var authBtnMin = ui.authBtnMinWidth || '140px';
     var cardCols = (ZW_BOARD.settings && ZW_BOARD.settings.CARD_GRID_COLUMNS) || 3;
+    var vidCols = (ZW_BOARD.settings && ZW_BOARD.settings.VIDEO_GRID_COLUMNS) || 3;
 
     var variablesSection = [
       ':root {',
@@ -35,6 +36,15 @@
       '  --bd-card-dot: rgba(255, 255, 255, 0.35);',
       '  --bd-card-dot-on: #ffffff;',
       '  --bd-card-grad: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.58) 68%, rgba(0, 0, 0, 0) 100%);',
+      '  --bd-vid-cols: ' + vidCols + ';',
+      '  --bd-vid-thumb-ratio: 9 / 16;',
+      '  --bd-vid-overlay-bg: rgba(10, 12, 16, 0.96);',
+      '  --bd-vid-stage-bg: #000000;',
+      '  --bd-vid-stage-max-h: 90vh;',
+      '  --bd-vid-fg: #ffffff;',
+      '  --bd-vid-sub: rgba(255, 255, 255, 0.74);',
+      '  --bd-vid-ui-bg: rgba(20, 24, 32, 0.78);',
+      '  --bd-vid-ui-border: rgba(255, 255, 255, 0.24);',
       '}'
     ];
 
