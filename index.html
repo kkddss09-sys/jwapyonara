@@ -12,6 +12,7 @@
 <link rel="apple-touch-icon" href="_common/icon-192.png">
 <link rel="stylesheet" href="_common/common.css">
 <script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+<style>.zw-pv-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:4px 0 2px;margin:18px 0 -6px}.zw-pv-chips::-webkit-scrollbar{display:none}.zw-pv-chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--sub);font:inherit;font-size:14px;font-weight:700;padding:8px 14px;border-radius:999px;cursor:pointer;min-height:40px}.zw-pv-chip.on{background:var(--red);border-color:var(--red);color:#fff}</style>
 </head>
 <body>
 <main class="wrap">
@@ -45,11 +46,19 @@
     return '<a class="catcard' + (big ? ' big' : '') + '" href="' + ZW.CAT_PATH[c] + '/index.html"><b>' + c + '</b><span>' + ZW.CAT_DESC[c] + '</span><small>쓸 수 있는 도구 ' + count(c) + '개 ›</small></a>';
   }
 
-  // 게시판 미리보기(새 카드뉴스 · 새 영상) — 검색이 비어 있고 BOARD_OPEN이 true일 때만 그린다
-  var previewRequested = false, previewCards = [], previewVideos = [];
+  // 게시판 미리보기 — 주제 칩(휴대폰·부동산·재미…)을 고르면 그 주제의 새 영상 → 새 카드뉴스 순서로 보인다. 검색이 비어 있고 BOARD_OPEN이 true일 때만.
+  // PV_TOPICS: 칩 순서·이름. 게시판 설정(board/_board/settings.js CARD_CATEGORIES)과 같은 글자로 맞춘다.
+  var PV_TOPICS = ['휴대폰', '부동산', '재미', '감동', '기쁨', '슬픔', '공감'];
+  var PV_KEY = 'zw-home-topic';
+  var previewRequested = false, rawCards = null, rawVideos = null, pvTopic = '';
   function todayVer() {
     var d = new Date(), m = d.getMonth() + 1, day = d.getDate();
     return String(d.getFullYear()) + (m < 10 ? '0' : '') + m + (day < 10 ? '0' : '') + day;
+  }
+  // 글 하나의 주제: '일반' 글은 갈래가 주제, 나머지는 구분이 주제
+  function topicOf(it) {
+    var g = String(it && it['구분'] || '').trim(), s = String(it && it['갈래'] || '').trim();
+    return (g === '일반' && s) ? s : g;
   }
   function buildPreviewRow(heading, moreHref, items) {
     var sec = document.createElement('section');
@@ -88,51 +97,76 @@
     sec.appendChild(track);
     return sec;
   }
+  function pvItems(list, topic, mk) {
+    var out = [];
+    for (var i = 0; i < list.length && out.length < 8; i++) {
+      var it = list[i];
+      if (topicOf(it) !== topic) continue;
+      var o = mk(it);
+      if (o) out.push(o);
+    }
+    return out;
+  }
+  function mkCard(it) {
+    var id = String(it && it.id || '').trim(), title = String(it && it['제목'] || '').trim();
+    var p0 = (it && it['썸네일']) ? String(it['썸네일']).trim() : ((it && Array.isArray(it['사진']) && it['사진'][0]) ? String(it['사진'][0]).trim() : '');
+    if (!id || !title || !p0) return null;
+    var img = (p0.indexOf("http") === 0 || p0.charAt(0) === "/" || p0.indexOf("board/") === 0) ? p0 : "board/" + p0.replace(/^(\.\.?\/)+/, "");
+    return { id: id, title: title, img: img, href: 'board/cardnews/index.html?card=' + encodeURIComponent(id) };
+  }
+  function mkVideo(it) {
+    var id = String(it && it.id || '').trim(), title = String(it && it['제목'] || '').trim();
+    if (!id || !title) return null;
+    return { id: id, title: title, img: 'https://i.ytimg.com/vi/' + encodeURIComponent(id) + '/mqdefault.jpg', href: 'board/video/index.html?v=' + encodeURIComponent(id) };
+  }
   function paintBoardPreview() {
     var slot = document.getElementById('boardPreview');
     if (!slot) return;
     slot.textContent = '';
-    if (previewCards.length) slot.appendChild(buildPreviewRow('새 카드뉴스', 'board/cardnews/', previewCards));
-    if (previewVideos.length) slot.appendChild(buildPreviewRow('새 영상', 'board/video/', previewVideos));
+    if (!rawCards && !rawVideos) return;
+    var cards = rawCards || [], videos = rawVideos || [];
+    var has = {};
+    cards.concat(videos).forEach(function (it) { has[topicOf(it)] = true; });
+    var topics = PV_TOPICS.filter(function (t) { return has[t]; });
+    if (!topics.length) return;
+    if (topics.indexOf(pvTopic) < 0) pvTopic = topics[0];
+    // 칩
+    var chips = document.createElement('div');
+    chips.className = 'zw-pv-chips';
+    chips.setAttribute('role', 'group');
+    chips.setAttribute('aria-label', '주제 고르기');
+    topics.forEach(function (t) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'zw-pv-chip' + (t === pvTopic ? ' on' : '');
+      b.setAttribute('aria-pressed', String(t === pvTopic));
+      b.textContent = t;
+      b.addEventListener('click', function () {
+        pvTopic = t;
+        try { localStorage.setItem(PV_KEY, t); } catch (e) {}
+        paintBoardPreview();
+      });
+      chips.appendChild(b);
+    });
+    slot.appendChild(chips);
+    var vs = pvItems(videos, pvTopic, mkVideo), cs = pvItems(cards, pvTopic, mkCard);
+    var q1 = '?' + (pvTopic ? 'vcat=' + encodeURIComponent(pvTopic) : ''), q2 = '?' + (pvTopic ? 'cat=' + encodeURIComponent(pvTopic) : '');
+    if (vs.length) slot.appendChild(buildPreviewRow('새 영상', 'board/video/' + q1, vs));
+    if (cs.length) slot.appendChild(buildPreviewRow('새 카드뉴스', 'board/cardnews/' + q2, cs));
   }
   function loadBoardPreview() {
     if (previewRequested || typeof fetch !== 'function') return;
     previewRequested = true;
+    try { pvTopic = localStorage.getItem(PV_KEY) || ''; } catch (e) { pvTopic = ''; }
     var ver = todayVer();
-    fetch('board/_data/cardnews.json?v=' + encodeURIComponent(ver))
-      .then(function (r) { return r && r.ok ? r.json() : null; })
-      .then(function (d) {
-        var list = (d && Array.isArray(d['항목'])) ? d['항목'] : [];
-        var out = [];
-        for (var i = 0; i < list.length && out.length < 8; i++) {
-          var it = list[i];
-          var id = String(it && it.id || '').trim();
-          var title = String(it && it['제목'] || '').trim();
-          var p0 = (it && it['썸네일']) ? String(it['썸네일']).trim() : ((it && Array.isArray(it['사진']) && it['사진'][0]) ? String(it['사진'][0]).trim() : '');
-          if (!id || !title || !p0) continue;
-          var img = /^(?:https?:\/\/|\/|board\/)/.test(p0) ? p0 : 'board/' + p0.replace(/^(?:\.\.?\/)+/, '');
-          out.push({ id: id, title: title, img: img, href: 'board/cardnews/index.html?card=' + encodeURIComponent(id) });
-        }
-        previewCards = out;
-        if (!q.value.trim()) paintBoardPreview();
-      })
-      .catch(function () {});
-    fetch('board/_data/videos.json?v=' + encodeURIComponent(ver))
-      .then(function (r) { return r && r.ok ? r.json() : null; })
-      .then(function (d) {
-        var list = (d && Array.isArray(d['항목'])) ? d['항목'] : [];
-        var out = [];
-        for (var i = 0; i < list.length && out.length < 8; i++) {
-          var it = list[i];
-          var id = String(it && it.id || '').trim();
-          var title = String(it && it['제목'] || '').trim();
-          if (!id || !title) continue;
-          out.push({ id: id, title: title, img: 'https://i.ytimg.com/vi/' + encodeURIComponent(id) + '/mqdefault.jpg', href: 'board/video/index.html?v=' + encodeURIComponent(id) });
-        }
-        previewVideos = out;
-        if (!q.value.trim()) paintBoardPreview();
-      })
-      .catch(function () {});
+    var get = function (u, set) {
+      fetch(u + '?v=' + encodeURIComponent(ver))
+        .then(function (r) { return r && r.ok ? r.json() : null; })
+        .then(function (d) { set((d && Array.isArray(d['항목'])) ? d['항목'] : []); if (!q.value.trim()) paintBoardPreview(); })
+        .catch(function () {});
+    };
+    get('board/_data/videos.json', function (l) { rawVideos = l; });
+    get('board/_data/cardnews.json', function (l) { rawCards = l; });
   }
 
   function draw() {
