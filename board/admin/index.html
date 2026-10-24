@@ -10,7 +10,17 @@
 <link rel="icon" href="../../_common/icon-192.png">
 <link rel="apple-touch-icon" href="../../_common/icon-192.png">
 <link rel="stylesheet" href="../../_common/common.css">
-<style>nav.bd-subnav{flex-wrap:wrap}</style>
+<style>
+nav.bd-subnav{flex-wrap:wrap}
+.adm-shortcuts{margin-bottom:16px;background:var(--card);border:1.5px solid var(--line);border-radius:16px;padding:14px 16px}
+.adm-shortcuts summary{font-size:17px;font-weight:800;cursor:pointer;color:var(--ink);list-style-position:inside}
+.adm-shortcuts-body{margin-top:14px;display:flex;flex-direction:column;gap:14px}
+.adm-shortcuts-group h3{font-size:14px;font-weight:700;color:var(--sub);margin:0 0 8px}
+.adm-shortcuts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.adm-shortcut-btn{display:inline-flex;align-items:center;min-height:44px;padding:10px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--fill);color:var(--ink);text-decoration:none;font-size:14px;font-weight:700;box-sizing:border-box;word-break:keep-all;overflow-wrap:anywhere}
+.adm-shortcut-btn:hover{border-color:var(--red);color:var(--red);background:var(--card)}
+@media(max-width:560px){.adm-shortcuts-grid{grid-template-columns:1fr}.adm-shortcut-btn{width:100%;min-height:46px}}
+</style>
 <script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 </head>
 <body>
@@ -47,6 +57,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="../_board/config.js"></script>
+<script src="../_board/settings.js"></script>
 <script src="admin.js"></script>
 <script src="../../_common/common.js"></script>
 </body>

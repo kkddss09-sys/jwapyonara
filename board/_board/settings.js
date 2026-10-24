@@ -124,6 +124,66 @@
       galleryThumbMaxHeight: '420px',
       videoAspectRatio: '16/9',
       authBtnMinWidth: '140px'
-    }
+    },
+    // 유튜브 채널 정보 (핸들·채널번호·이름)
+    YT_CHANNELS: {
+      '좌표나라': {
+        name: '좌표나라 김대성',
+        handle: '좌표나라',
+        channelId: 'UCBvT1VuPrklJ9rV4a5-s-Sw'
+      },
+      '좌표나라부동산': {
+        name: '좌표나라 부동산',
+        handle: '좌표나라부동산',
+        channelId: 'UCp-epN89FDsX6FTbiRInncg'
+      },
+      '좌표나라김대성': {
+        name: '좌표닷컴',
+        handle: '좌표나라김대성',
+        channelId: 'UCXt_llEWwRhPglCQJHKY0_A'
+      }
+    },
+    // 영상 및 카드뉴스 주제별 유튜브 채널 연결 (핸들로 YT_CHANNELS 참조)
+    YT_TOPIC_CHANNEL: {
+      '영상': {
+        '휴대폰': '좌표나라',
+        '부동산': '좌표나라부동산'
+      },
+      '카드뉴스': {
+        '휴대폰': '좌표나라김대성',
+        '부동산': '좌표나라부동산',
+        '그 밖의 주제': '좌표나라김대성'
+      }
+    },
+    getYtChannelUrl: function (handle) {
+      if (!handle) return '';
+      return 'https://www.youtube.com/@' + encodeURIComponent(handle);
+    },
+    getYtSubscribeUrl: function (handle) {
+      if (!handle) return '';
+      return 'https://www.youtube.com/@' + encodeURIComponent(handle) + '?sub_confirmation=1';
+    },
+    getYtPostsUrl: function (handle) {
+      if (!handle) return '';
+      return 'https://www.youtube.com/@' + encodeURIComponent(handle) + '/posts';
+    },
+    // 관리자 바로가기 링크 모음 (그룹, 이름, 주소)
+    ADMIN_SHORTCUTS: [
+      { group: '유튜브', name: '💬 휴대폰 채널 댓글 확인', url: 'https://studio.youtube.com/channel/UCBvT1VuPrklJ9rV4a5-s-Sw/comments/inbox' },
+      { group: '유튜브', name: '💬 부동산 채널 댓글 확인', url: 'https://studio.youtube.com/channel/UCp-epN89FDsX6FTbiRInncg/comments/inbox' },
+      { group: '유튜브', name: '💬 카드뉴스 채널(좌표닷컴) 댓글 확인', url: 'https://studio.youtube.com/channel/UCXt_llEWwRhPglCQJHKY0_A/comments/inbox' },
+      { group: '유튜브', name: '📝 휴대폰 채널 게시물', url: 'https://www.youtube.com/@%EC%A2%8C%ED%91%9C%EB%82%98%EB%9D%BC/posts' },
+      { group: '유튜브', name: '📝 부동산 채널 게시물', url: 'https://www.youtube.com/@%EC%A2%8C%ED%91%9C%EB%82%98%EB%9D%BC%EB%B6%80%EB%8F%99%EC%82%B0/posts' },
+      { group: '유튜브', name: '📝 카드뉴스 채널 게시물', url: 'https://www.youtube.com/@%EC%A2%8C%ED%91%9C%EB%82%98%EB%9D%BC%EA%B9%80%EB%8C%80%EC%84%B1/posts' },
+      { group: '네이버', name: '✍️ 블로그 글쓰기', url: 'https://blog.naver.com/kds099/postwrite' },
+      { group: '네이버', name: '⚙️ 블로그 관리', url: 'https://blog.naver.com/kds099' },
+      { group: '네이버', name: '☕ 카페 좌표나라', url: 'https://cafe.naver.com/whdrpzja' },
+      { group: '사이트 점검', name: '📊 구글 애널리틱스', url: 'https://analytics.google.com/analytics/web/#/p485160740/reports/intelligenthome' },
+      { group: '사이트 점검', name: '🔍 서치 콘솔', url: 'https://search.google.com/search-console?resource_id=https%3A%2F%2Fjwapyonara.com%2F' },
+      { group: '사이트 점검', name: '⚡ 수파베이스', url: 'https://supabase.com/dashboard/project/houqpzuwbdmzhkdruxmo' },
+      { group: '사이트 안', name: '🖼️ 카드뉴스 게시판', url: '../cardnews/index.html' },
+      { group: '사이트 안', name: '🎬 영상 게시판', url: '../video/index.html' },
+      { group: '사이트 안', name: '📋 전체글', url: '../all/index.html' }
+    ]
   };
 })(window);

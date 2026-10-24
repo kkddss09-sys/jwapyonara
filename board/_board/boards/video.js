@@ -104,6 +104,7 @@
     var dateEl = null;
     var ytLinkEl = null;
     var blogLinkEl = null;
+    var subLinkEl = null;
     var titleEl = null;
     var adjHintEl = null;
     var prevBtnEl = null;
@@ -261,6 +262,20 @@
         ytLinkEl.href = 'https://www.youtube.com/watch?v=' + encodeURIComponent(cur.id);
         ytLinkEl.setAttribute('aria-label', cur.title + ' 유튜브에서 보기 (새 창)');
       }
+      if (subLinkEl) {
+        var vMapping = (settings.YT_TOPIC_CHANNEL && settings.YT_TOPIC_CHANNEL['영상']) || {};
+        var vHandle = vMapping[cur.cat] || '';
+        var vChInfo = vHandle && settings.YT_CHANNELS && settings.YT_CHANNELS[vHandle];
+        if (vChInfo && vHandle) {
+          var subUrl = (settings.getYtSubscribeUrl && settings.getYtSubscribeUrl(vHandle)) || ('https://www.youtube.com/@' + encodeURIComponent(vHandle) + '?sub_confirmation=1');
+          subLinkEl.href = subUrl;
+          subLinkEl.setAttribute('aria-label', vChInfo.name + ' 유튜브 채널 구독하기 (새 창)');
+          subLinkEl.style.display = '';
+        } else {
+          subLinkEl.removeAttribute('href');
+          subLinkEl.style.display = 'none';
+        }
+      }
 
       if (prevBtnEl) {
         prevBtnEl.disabled = !prevItem;
@@ -292,7 +307,7 @@
       }
       if (overlayEl.parentNode) overlayEl.parentNode.removeChild(overlayEl);
       overlayEl = null; iframeEl = null; pagePillEl = null;
-      badgeEl = null; dateEl = null; ytLinkEl = null; blogLinkEl = null; titleEl = null; adjHintEl = null;
+      badgeEl = null; dateEl = null; ytLinkEl = null; blogLinkEl = null; subLinkEl = null; titleEl = null; adjHintEl = null;
       prevBtnEl = null; nextBtnEl = null;
       document.body.classList.remove('bd-vid-lock');
 
@@ -385,16 +400,34 @@
       metaLeft.appendChild(badgeEl);
       metaLeft.appendChild(dateEl);
 
+      var linksGroup = el('div', undefined, 'bd-vid-links-group');
+
       ytLinkEl = el('a', '유튜브에서 보기 ↗', 'bd-vid-yt-link');
       ytLinkEl.target = '_blank';
       ytLinkEl.rel = 'noopener';
+
       blogLinkEl = el('a', '네이버 블로그 ↗', 'bd-vid-yt-link');
       blogLinkEl.target = '_blank';
       blogLinkEl.rel = 'noopener';
       blogLinkEl.style.display = 'none';
+
+      subLinkEl = el('a', '구독하기 ↗', 'bd-vid-yt-link');
+      subLinkEl.target = '_blank';
+      subLinkEl.rel = 'noopener';
+      subLinkEl.style.display = 'none';
+
+      [blogLinkEl, ytLinkEl, subLinkEl].forEach(function (lnk) {
+        lnk.addEventListener('click', function (e) { e.stopPropagation(); });
+        lnk.addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+        lnk.addEventListener('touchend', function (e) { e.stopPropagation(); }, { passive: true });
+      });
+
+      linksGroup.appendChild(blogLinkEl);
+      linksGroup.appendChild(ytLinkEl);
+      linksGroup.appendChild(subLinkEl);
+
       metaRow.appendChild(metaLeft);
-      metaRow.appendChild(blogLinkEl);
-      metaRow.appendChild(ytLinkEl);
+      metaRow.appendChild(linksGroup);
 
       titleEl = el('h2', '', 'bd-vid-overlay-title');
       adjHintEl = el('div', '', 'bd-vid-adj-hint');
@@ -484,7 +517,17 @@
 
         slot.style.setProperty('--bd-vid-cols', String(gridCols));
         wrap = el('section', undefined, 'bd-vid-wrap');
-        wrap.appendChild(el('h2', '좌표나라 쇼츠', 'bd-vid-heading'));
+
+        var headRow = el('div', undefined, 'bd-vid-head-row');
+        headRow.appendChild(el('h2', '좌표나라 쇼츠', 'bd-vid-heading'));
+        var chLink = el('a', '유튜브 채널 ↗', 'bd-vid-channel-link');
+        var mainVidHandle = '좌표나라';
+        var mainVidUrl = (settings.getYtChannelUrl && settings.getYtChannelUrl(mainVidHandle)) || ('https://www.youtube.com/@' + encodeURIComponent(mainVidHandle));
+        chLink.href = mainVidUrl;
+        chLink.target = '_blank';
+        chLink.rel = 'noopener';
+        headRow.appendChild(chLink);
+        wrap.appendChild(headRow);
 
         tabsBar = el('div', undefined, 'bd-vid-tabs');
         tabsBar.setAttribute('role', 'tablist');

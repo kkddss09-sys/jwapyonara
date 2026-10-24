@@ -138,6 +138,9 @@
     // 카드뉴스 보기
     var cardnewsSection = [
       '.bd-cn-wrap { margin-bottom:18px; }',
+      '.bd-cn-head-bar { display:flex; justify-content:flex-end; align-items:center; margin-bottom:8px; }',
+      '.bd-cn-channel-link { font-size:13px; font-weight:700; color:var(--sub); text-decoration:underline; }',
+      '.bd-cn-channel-link:hover { color:var(--ink); }',
       '.bd-cn-tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px; }',
       '.bd-cn-tab { font:inherit; font-size:15px; font-weight:700; padding:8px 16px; border-radius:999px; border:1.5px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }',
       '.bd-cn-tab.on { background:var(--bd-accent, var(--red)); border-color:var(--bd-accent, var(--red)); color:var(--bd-card-fg); }',
@@ -197,7 +200,10 @@
     // 영상 목록 보기 (좌표나라 쇼츠)
     var videoListSection = [
       '.bd-vid-wrap { margin-bottom:22px; }',
-      '.bd-vid-heading { font-size:19px; font-weight:800; color:var(--ink); margin:0 0 12px; }',
+      '.bd-vid-head-row { display:flex; align-items:baseline; justify-content:space-between; gap:8px; margin-bottom:12px; }',
+      '.bd-vid-heading { font-size:19px; font-weight:800; color:var(--ink); margin:0; }',
+      '.bd-vid-channel-link { font-size:13px; font-weight:700; color:var(--sub); text-decoration:underline; }',
+      '.bd-vid-channel-link:hover { color:var(--ink); }',
       '.bd-vid-tabs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; }',
       '.bd-vid-tab { font:inherit; font-size:15px; font-weight:700; padding:8px 16px; border-radius:999px; border:1.5px solid var(--line); background:var(--card); color:var(--ink); cursor:pointer; }',
       '.bd-vid-tab.on { background:var(--bd-accent, var(--red)); border-color:var(--bd-accent, var(--red)); color:var(--bd-vid-fg); }',
@@ -234,8 +240,11 @@
       '.bd-vid-overlay-meta { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:13px; color:var(--bd-vid-sub); font-weight:600; flex-wrap:wrap; }',
       '.bd-vid-overlay-meta-left { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }',
       '.bd-vid-overlay-badge { background:var(--bd-accent, var(--red)); color:var(--bd-vid-fg); padding:2px 8px; border-radius:6px; font-size:12px; font-weight:700; }',
-      '.bd-cn-blog-link { color:var(--bd-vid-fg, #fff); font-size:13px; font-weight:700; text-decoration:underline; margin-left:auto; }',
-      '.bd-vid-yt-link { color:var(--bd-vid-fg); font-size:13px; font-weight:700; text-decoration:underline; }',
+      '.bd-cn-overlay-links { display:flex; align-items:center; gap:8px; margin-left:auto; flex-wrap:wrap; }',
+      '.bd-cn-blog-link { color:var(--bd-vid-fg, #fff); font-size:13px; font-weight:700; text-decoration:underline; white-space:nowrap; }',
+      '.bd-cn-yt-link { color:var(--bd-card-fg, #fff); font-size:13px; font-weight:700; text-decoration:underline; white-space:nowrap; }',
+      '.bd-vid-links-group { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }',
+      '.bd-vid-yt-link { color:var(--bd-vid-fg); font-size:13px; font-weight:700; text-decoration:underline; white-space:nowrap; }',
       '.bd-vid-overlay-title { font-size:15px; font-weight:800; line-height:1.35; color:var(--bd-vid-fg); margin:0; word-break:keep-all; overflow-wrap:anywhere; }',
       '.bd-vid-adj-hint { font-size:12px; color:var(--bd-vid-sub); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }',
       '@media(prefers-reduced-motion:reduce) { .bd-vid-tab, .bd-vid-card, .bd-vid-icon-btn, .bd-vid-nav-btn { transition:none !important; animation:none !important; } }'

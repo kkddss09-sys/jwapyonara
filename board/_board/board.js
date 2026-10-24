@@ -4,7 +4,7 @@
 (function (window) {
   'use strict';
 
-  var BOARD_VERSION = '20261025-5';
+  var BOARD_VERSION = '20261025-6';
   var MODULES = [
     'settings.js',
     'styles.js',

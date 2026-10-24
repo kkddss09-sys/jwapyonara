@@ -90,6 +90,17 @@
     container.style.setProperty('--bd-card-cols', String(gridCols));
 
     var wrap = el('section', undefined, 'bd-cn-wrap');
+
+    var headBar = el('div', undefined, 'bd-cn-head-bar');
+    var chLink = el('a', '유튜브 채널 ↗', 'bd-cn-channel-link');
+    var repHandle = '좌표나라김대성';
+    var repUrl = (settings.getYtChannelUrl && settings.getYtChannelUrl(repHandle)) || ('https://www.youtube.com/@' + encodeURIComponent(repHandle));
+    chLink.href = repUrl;
+    chLink.target = '_blank';
+    chLink.rel = 'noopener';
+    headBar.appendChild(chLink);
+    wrap.appendChild(headBar);
+
     var tabsBar = el('div', undefined, 'bd-cn-tabs');
     tabsBar.setAttribute('role', 'tablist');
     tabsBar.setAttribute('aria-label', '카드뉴스 구분');
@@ -409,10 +420,46 @@
       metaRow.appendChild(el('span', item.date));
       var inlineCountEl = el('span', '1 / ' + item.photos.length);
       metaRow.appendChild(inlineCountEl);
+
+      var linksGroup = el('div', undefined, 'bd-cn-overlay-links');
+
       if (blogMap[item.id]) {
         var blogA = el('a', '네이버 블로그에서 보기 ↗', 'bd-cn-blog-link');
         blogA.href = blogMap[item.id]; blogA.target = '_blank'; blogA.rel = 'noopener';
-        metaRow.appendChild(blogA);
+        blogA.addEventListener('click', function (e) { e.stopPropagation(); });
+        blogA.addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+        blogA.addEventListener('touchend', function (e) { e.stopPropagation(); }, { passive: true });
+        linksGroup.appendChild(blogA);
+      }
+
+      var cnMapping = (settings.YT_TOPIC_CHANNEL && settings.YT_TOPIC_CHANNEL['카드뉴스']) || {};
+      var cnHandle = cnMapping[item.cat] || cnMapping['그 밖의 주제'] || '';
+      var cnChInfo = cnHandle && settings.YT_CHANNELS && settings.YT_CHANNELS[cnHandle];
+      if (cnChInfo && cnHandle) {
+        var postsUrl = (settings.getYtPostsUrl && settings.getYtPostsUrl(cnHandle)) || ('https://www.youtube.com/@' + encodeURIComponent(cnHandle) + '/posts');
+        var subUrl = (settings.getYtSubscribeUrl && settings.getYtSubscribeUrl(cnHandle)) || ('https://www.youtube.com/@' + encodeURIComponent(cnHandle) + '?sub_confirmation=1');
+
+        var postsA = el('a', '유튜브 게시물 보기 ↗', 'bd-cn-yt-link');
+        postsA.href = postsUrl;
+        postsA.target = '_blank';
+        postsA.rel = 'noopener';
+        postsA.addEventListener('click', function (e) { e.stopPropagation(); });
+        postsA.addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+        postsA.addEventListener('touchend', function (e) { e.stopPropagation(); }, { passive: true });
+        linksGroup.appendChild(postsA);
+
+        var subA = el('a', '구독하기 ↗', 'bd-cn-yt-link');
+        subA.href = subUrl;
+        subA.target = '_blank';
+        subA.rel = 'noopener';
+        subA.addEventListener('click', function (e) { e.stopPropagation(); });
+        subA.addEventListener('touchstart', function (e) { e.stopPropagation(); }, { passive: true });
+        subA.addEventListener('touchend', function (e) { e.stopPropagation(); }, { passive: true });
+        linksGroup.appendChild(subA);
+      }
+
+      if (linksGroup.children.length > 0) {
+        metaRow.appendChild(linksGroup);
       }
 
       bottom.appendChild(dotsWrap);

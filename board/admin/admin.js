@@ -63,10 +63,19 @@
       '.adm-table td.adm-date { font-size:13px; color:var(--sub); white-space:nowrap; }',
       '.adm-table td.adm-act { text-align:right; white-space:nowrap; }',
       '.adm-empty { text-align:center; color:var(--sub); font-size:14px; padding:20px 8px; margin:0; }',
+      '.adm-shortcuts { margin-bottom:16px; background:var(--card); border:1.5px solid var(--line); border-radius:16px; padding:14px 16px; }',
+      '.adm-shortcuts summary { font-size:17px; font-weight:800; cursor:pointer; color:var(--ink); list-style-position:inside; }',
+      '.adm-shortcuts-body { margin-top:14px; display:flex; flex-direction:column; gap:14px; }',
+      '.adm-shortcuts-group h3 { font-size:14px; font-weight:700; color:var(--sub); margin:0 0 8px; }',
+      '.adm-shortcuts-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:8px; }',
+      '.adm-shortcut-btn { display:inline-flex; align-items:center; min-height:44px; padding:10px 14px; border-radius:12px; border:1.5px solid var(--line); background:var(--fill); color:var(--ink); text-decoration:none; font-size:14px; font-weight:700; box-sizing:border-box; word-break:keep-all; overflow-wrap:anywhere; }',
+      '.adm-shortcut-btn:hover { border-color:var(--red); color:var(--red); background:var(--card); }',
       '.bd-legal-links { margin-top:28px; padding-top:16px; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; gap:10px 14px; justify-content:center; font-size:14px; color:var(--sub); }',
       '.bd-legal-links a { color:var(--sub); text-decoration:none; font-weight:600; }',
       '.bd-legal-links a:hover { color:var(--red); text-decoration:underline; }',
       '@media (max-width:560px) {',
+      '  .adm-shortcuts-grid { grid-template-columns:1fr; }',
+      '  .adm-shortcut-btn { width:100%; min-height:46px; }',
       '  .adm-form { grid-template-columns:1fr; }',
       '  .adm-form .bd-btn { width:100%; }',
       '  .adm-table, .adm-table tbody { display:block; width:100%; }',
@@ -615,6 +624,62 @@
     return sec;
   }
 
+  // 관리자 전용 바로가기 구역 (<details> 접고 펼침, settings.js의 ADMIN_SHORTCUTS 참조)
+  function buildShortcutsSection() {
+    var rawShortcuts = (window.ZW_BOARD && window.ZW_BOARD.settings && window.ZW_BOARD.settings.ADMIN_SHORTCUTS) || [];
+    if (!rawShortcuts || !rawShortcuts.length) return null;
+
+    var details = document.createElement('details');
+    details.className = 'adm-shortcuts';
+    details.open = true;
+
+    var summary = document.createElement('summary');
+    summary.textContent = '바로가기';
+    details.appendChild(summary);
+
+    var body = document.createElement('div');
+    body.className = 'adm-shortcuts-body';
+
+    var groupOrder = [];
+    var groupMap = {};
+    rawShortcuts.forEach(function (item) {
+      var grp = String(item.group || '기타').trim();
+      if (!groupMap[grp]) {
+        groupMap[grp] = [];
+        groupOrder.push(grp);
+      }
+      groupMap[grp].push(item);
+    });
+
+    groupOrder.forEach(function (grpName) {
+      var grpBox = document.createElement('div');
+      grpBox.className = 'adm-shortcuts-group';
+
+      var h3 = document.createElement('h3');
+      h3.textContent = grpName;
+      grpBox.appendChild(h3);
+
+      var grid = document.createElement('div');
+      grid.className = 'adm-shortcuts-grid';
+
+      groupMap[grpName].forEach(function (item) {
+        var a = document.createElement('a');
+        a.className = 'adm-shortcut-btn';
+        a.href = item.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = item.name;
+        grid.appendChild(a);
+      });
+
+      grpBox.appendChild(grid);
+      body.appendChild(grpBox);
+    });
+
+    details.appendChild(body);
+    return details;
+  }
+
   function renderAdminPage(container) {
     if (!container) return;
     clearBox(container);
@@ -670,6 +735,13 @@
     }
 
     // 6. 운영진(관리자 또는 부매니저)인 경우: 이메일 안내 문구 + 업체 권한 칸 + (관리자 전용) 부매니저 권한 칸
+    if (roles.admin) {
+      var shortcutsEl = buildShortcutsSection();
+      if (shortcutsEl) {
+        container.appendChild(shortcutsEl);
+      }
+    }
+
     var notice = document.createElement('div');
     notice.className = 'bd-notice';
     notice.setAttribute('role', 'note');
