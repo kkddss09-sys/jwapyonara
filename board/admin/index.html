@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>게시판 관리자 페이지 | 좌표나라</title>
+<meta name="description" content="좌표나라 게시판 업체 권한 및 부매니저 권한 관리 페이지입니다.">
+<meta name="theme-color" content="#1b64da">
+<link rel="icon" href="../../_common/icon-192.png">
+<link rel="apple-touch-icon" href="../../_common/icon-192.png">
+<link rel="stylesheet" href="../../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <nav class="crumb" aria-label="현재 위치"><a href="../../index.html">좌표나라</a> <span>›</span> <a href="../index.html">게시판</a> <span>›</span> 관리자 페이지</nav>
+  <h1>게시판 관리자</h1>
+  <p class="lead">단가표 작성 업체 권한과 부매니저 권한을 관리합니다.</p>
+
+  <nav class="bd-subnav" aria-label="게시판 메뉴">
+    <a href="../index.html">게시판 첫 화면</a>
+    <a href="../danga/index.html">단가표</a>
+    <a href="../story/index.html">이야기</a>
+    <a href="../video/index.html">영상</a>
+    <a href="index.html" class="on">관리자</a>
+  </nav>
+
+  <div id="adminApp"></div>
+
+  <div class="ad" id="ad1"></div>
+
+  <nav class="bd-legal-links" aria-label="약관 및 안내">
+    <a href="../legal/privacy.html">개인정보처리방침</a>
+    <span>·</span>
+    <a href="../legal/terms.html">이용약관</a>
+    <span>·</span>
+    <a href="../legal/about.html">사이트 소개</a>
+    <span>·</span>
+    <a href="../legal/contact.html">문의</a>
+  </nav>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../_board/config.js"></script>
+<script src="admin.js"></script>
+<script src="../../_common/common.js"></script>
+</body>
+</html>

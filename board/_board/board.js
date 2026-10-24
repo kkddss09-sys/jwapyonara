@@ -14,8 +14,10 @@
 
   var sb = null;
   var currentUser = null;
-  var vendorInfo = null; // { email, name }
+  var vendorInfo = null; // { name }: my_roles()에서 받은 내 업체 정보
   var isAdmin = false;
+  var isSubmanager = false;
+  var permissionsRequest = 0;
 
   // 화면 모양 (common.css의 색상·글자 변수를 그대로 따른다)
   function injectStyles() {
@@ -51,6 +53,10 @@
       '.bd-file-box input[type="file"] { width:100%; font:inherit; font-size:14px; color:var(--ink); }',
       '.bd-list { display:grid; gap:10px; margin-bottom:14px; }',
       '.bd-item { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; display:flex; align-items:center; gap:12px; cursor:pointer; }',
+      '.bd-gallery { grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); }',
+      '.bd-gallery .bd-item { display:flex; flex-direction:column; align-items:stretch; }',
+      '.bd-gallery .bd-thumb { width:100%; height:auto; max-height:420px; object-fit:contain; }',
+      '.bd-gallery .bd-item-title { white-space:normal; overflow-wrap:anywhere; }',
       '.bd-item:hover { border-color:var(--red); }',
       '.bd-thumb { width:64px; height:64px; border-radius:12px; object-fit:cover; background:var(--fill); flex:none; border:1px solid var(--line); }',
       '.bd-item-body { flex:1; min-width:0; }',
@@ -116,6 +122,12 @@
     if (typeof err === 'string') raw = err;
     else raw = [err.message, err.details, err.hint, err.error_description, err.code].filter(Boolean).join(' ');
     var low = raw.toLowerCase();
+    if (contextBoard === 'video') {
+      if (low.indexOf('23505') >= 0 || low.indexOf('duplicate') >= 0) return '이미 등록된 영상입니다. 목록을 확인해 주세요.';
+      if (low.indexOf('23514') >= 0 || low.indexOf('23502') >= 0) return '영상 주소와 제목(1~80자)을 확인해 주세요.';
+      if (low.indexOf('42501') >= 0 || low.indexOf('permission') >= 0 || low.indexOf('row-level security') >= 0) return '영상 추가와 삭제는 운영진만 할 수 있습니다. 로그인 상태를 확인해 주세요.';
+    }
+    if (low.indexOf('카드뉴스는 운영진') >= 0) return '카드뉴스는 운영진만 올릴 수 있습니다.';
 
     if (low.indexOf('23505') >= 0 || low.indexOf('duplicate') >= 0 || low.indexOf('unique') >= 0 || low.indexOf('reports_post_id_user_id') >= 0) {
       return '이미 신고한 글입니다. 한 글에는 한 번만 신고할 수 있어요.';
@@ -199,8 +211,9 @@
   // 실제로 허용되지 않은 파일·용량·권한을 진짜 막는 것은 수파베이스 DB(RLS 정책)와 스토리지 보안 규칙입니다. (계약 4번)
   function validateFilesClientSide(imageFiles, excelFile, boardType) {
     var imgs = imageFiles ? Array.prototype.slice.call(imageFiles) : [];
-    if (imgs.length > MAX_IMAGES) {
-      return '사진은 한 글에 최대 ' + MAX_IMAGES + '장까지만 올릴 수 있습니다.';
+    var maxImages = boardType === 'cardnews' ? 10 : MAX_IMAGES;
+    if (imgs.length > maxImages) {
+      return '사진은 한 글에 최대 ' + maxImages + '장까지만 올릴 수 있습니다.';
     }
     for (var i = 0; i < imgs.length; i++) {
       var f = imgs[i];
@@ -277,17 +290,28 @@
   }
 
   function refreshUserPermissions() {
+    var request = ++permissionsRequest;
     vendorInfo = null;
     isAdmin = false;
-    if (!sb || !currentUser || !currentUser.email) return Promise.resolve();
-    var email = currentUser.email;
-    var pVendor = sb.from('vendors').select('email, name').eq('email', email).maybeSingle().then(function (r) {
-      if (r && r.data && r.data.email) vendorInfo = r.data;
-    }).catch(function () {});
-    var pAdmin = sb.from('admins').select('email').eq('email', email).maybeSingle().then(function (r) {
-      if (r && r.data && r.data.email) isAdmin = true;
-    }).catch(function () {});
-    return Promise.all([pVendor, pAdmin]);
+    isSubmanager = false;
+    if (!sb || !currentUser) return Promise.resolve();
+    var userId = currentUser.id;
+    return Promise.resolve().then(function () {
+      return sb.rpc('my_roles');
+    }).then(function (r) {
+      if (request !== permissionsRequest || !currentUser || currentUser.id !== userId) return;
+      if (!r || r.error || !r.data) throw (r && r.error) || new Error('역할 응답 없음');
+      isAdmin = r.data.admin === true;
+      isSubmanager = r.data.submanager === true;
+      vendorInfo = r.data.vendor === true ? { name: r.data.vendor_name || '' } : null;
+    }).catch(function () {
+      // 패치 적용 전/RPC 오류에도 로그인은 유지하고 일반 손님으로 계속 표시한다.
+      if (request !== permissionsRequest || !currentUser || currentUser.id !== userId) return;
+      vendorInfo = null;
+      isAdmin = false;
+      isSubmanager = false;
+      console.warn('게시판 my_roles 권한 조회 실패: 일반 손님으로 표시합니다.');
+    });
   }
 
   // 로그인 영역 그리기
@@ -305,7 +329,7 @@
 
       var who = document.createElement('div');
       who.className = 'bd-auth-user';
-      var badge = isAdmin ? ' (관리자)' : (vendorInfo ? ' (등록 업체: ' + vendorInfo.name + ')' : '');
+      var badge = isAdmin ? ' (관리자)' : (isSubmanager ? ' (부매니저)' : (vendorInfo ? ' (업체: ' + vendorInfo.name + ')' : ''));
       who.textContent = '로그인됨: ' + deriveAuthorName(currentUser, vendorInfo ? 'danga' : 'story') + badge;
 
       var outBtn = document.createElement('button');
@@ -318,6 +342,8 @@
           currentUser = null;
           vendorInfo = null;
           isAdmin = false;
+          isSubmanager = false;
+          ++permissionsRequest;
           if (onAuthChanged) onAuthChanged();
         }).catch(function () {
           outBtn.disabled = false;
@@ -325,6 +351,13 @@
       });
 
       top.appendChild(who);
+      if (isAdmin || isSubmanager) {
+        var adminLink = document.createElement('a');
+        adminLink.className = 'bd-btn small';
+        adminLink.href = '/board/admin/index.html';
+        adminLink.textContent = '관리자 페이지';
+        top.appendChild(adminLink);
+      }
       top.appendChild(outBtn);
       wrap.appendChild(top);
     } else {
@@ -398,7 +431,7 @@
 
     var listTitle = document.createElement('h2');
     listTitle.style.margin = '0';
-    listTitle.textContent = boardType === 'danga' ? '등록된 단가표 목록' : '이야기 글 목록';
+    listTitle.textContent = { danga: '등록된 단가표 목록', story: '이야기 글 목록', review: '후기 글 목록', cardnews: '카드뉴스 목록' }[boardType];
 
     var refreshBtn = document.createElement('button');
     refreshBtn.type = 'button';
@@ -409,7 +442,7 @@
     listHead.appendChild(refreshBtn);
 
     var listBox = document.createElement('div');
-    listBox.className = 'bd-list';
+    listBox.className = 'bd-list' + (boardType === 'cardnews' ? ' bd-gallery' : '');
 
     var listStatus = document.createElement('p');
     listStatus.className = 'note';
@@ -441,8 +474,15 @@
       var sec = document.createElement('section');
       sec.className = 'card bd-form';
 
+      if (boardType === 'cardnews' && !(currentUser && (isAdmin || isSubmanager))) {
+        var cardNotice = document.createElement('p');
+        cardNotice.textContent = '운영진이 올리는 카드뉴스입니다';
+        sec.appendChild(cardNotice);
+        writeSlot.appendChild(sec);
+        return;
+      }
       if (boardType === 'danga') {
-        var canWriteDanga = Boolean(currentUser && (vendorInfo || isAdmin));
+        var canWriteDanga = Boolean(currentUser && (vendorInfo || isAdmin || isSubmanager));
         if (!canWriteDanga) {
           var info = document.createElement('p');
           info.style.margin = '0';
@@ -465,7 +505,7 @@
           loginPrompt.style.margin = '0';
           loginPrompt.style.fontSize = '15px';
           loginPrompt.style.color = 'var(--sub)';
-          loginPrompt.textContent = '위에서 로그인하면 누구나 직접 쓴 이야기와 사진(최대 5장)을 올릴 수 있습니다.';
+          loginPrompt.textContent = '위에서 로그인하면 누구나 직접 쓴 ' + (boardType === 'review' ? '후기' : '이야기') + '와 사진(최대 5장)을 올릴 수 있습니다.';
           sec.appendChild(loginPrompt);
           writeSlot.appendChild(sec);
           return;
@@ -473,7 +513,7 @@
       }
 
       var h2 = document.createElement('h2');
-      h2.textContent = boardType === 'danga' ? '단가표 올리기 (등록 업체 전용)' : '새 이야기 쓰기';
+      h2.textContent = { danga: '단가표 올리기 (등록 업체 전용)', story: '새 이야기 쓰기', review: '새 후기 쓰기', cardnews: '카드뉴스 올리기 (운영진 전용)' }[boardType];
       sec.appendChild(h2);
 
       // 제목
@@ -507,12 +547,15 @@
       fBody.appendChild(tBody);
       sec.appendChild(fBody);
 
+      if (boardType === 'review') tBody.placeholder = '직접 경험한 후기를 적어 주세요. 남의 글을 옮기거나 개인정보를 적지 마세요.';
+      if (boardType === 'cardnews') tBody.placeholder = '카드뉴스 설명을 적어 주세요. 사진은 선택한 순서대로 표시됩니다.';
+
       // 사진 첨부
       var fImg = document.createElement('div');
       fImg.className = 'field';
       var lImg = document.createElement('label');
       lImg.setAttribute('for', 'bdImages');
-      lImg.textContent = '사진 첨부 (선택 · jpg/png/webp · 한 장 5MB 이하 · 최대 5장)';
+      lImg.textContent = '사진 첨부 (선택 · jpg/png/webp · 한 장 5MB 이하 · 최대 ' + (boardType === 'cardnews' ? 10 : 5) + '장)';
       var boxImg = document.createElement('div');
       boxImg.className = 'bd-file-box';
       var iImg = document.createElement('input');
@@ -732,7 +775,17 @@
           im.src = url;
           im.alt = (post.title || '첨부 사진') + ' (' + (i + 1) + ')';
           im.loading = 'lazy';
-          imgWrap.appendChild(im);
+          if (boardType === 'cardnews') {
+            var figure = document.createElement('figure');
+            figure.style.margin = '0';
+            var caption = document.createElement('figcaption');
+            caption.textContent = (i + 1) + ' / ' + imgs.length;
+            figure.appendChild(im);
+            figure.appendChild(caption);
+            imgWrap.appendChild(figure);
+          } else {
+            imgWrap.appendChild(im);
+          }
         });
         box.appendChild(imgWrap);
       }
@@ -865,9 +918,9 @@
 
       bar.appendChild(reportBtn);
 
-      // 내 글 삭제 (본인 또는 관리자)
-      if (currentUser && (currentUser.id === post.user_id || isAdmin)) {
-        var deleteLabel = currentUser.id === post.user_id ? '내 글 삭제' : '관리자 삭제';
+      // 내 글 삭제 (본인 또는 운영진)
+      if (currentUser && (currentUser.id === post.user_id || isAdmin || isSubmanager)) {
+        var deleteLabel = currentUser.id === post.user_id ? '내 글 삭제' : (isAdmin ? '관리자 삭제' : '부매니저 삭제');
         var delBtn = document.createElement('button');
         delBtn.type = 'button';
         delBtn.className = 'bd-btn small danger';
@@ -1051,9 +1104,103 @@
     loadPosts(true);
   }
 
+  // 허용한 유튜브 호스트와 경로만 해석한다. 외부 접속은 하지 않는다.
+  function extractYoutubeId(value) {
+    var invalid = '유튜브 영상 주소를 확인해 주세요. 공유 주소, watch, shorts 또는 embed 주소를 넣어 주세요.';
+    var url;
+    try { url = new URL(String(value || '').trim()); } catch (e) { throw new Error(invalid); }
+    if (!/^https?:$/.test(url.protocol) || url.username || url.password || url.port) throw new Error(invalid);
+    var host = url.hostname.toLowerCase();
+    var id = '';
+    var match;
+    if (host === 'youtu.be') {
+      match = url.pathname.match(/^\/([A-Za-z0-9_-]{11})\/?$/);
+      id = match ? match[1] : '';
+    } else if (['youtube.com', 'www.youtube.com', 'm.youtube.com'].indexOf(host) >= 0) {
+      if (url.pathname === '/watch') id = url.searchParams.get('v') || '';
+      else {
+        match = url.pathname.match(/^\/(?:shorts|embed)\/([A-Za-z0-9_-]{11})\/?$/);
+        id = match ? match[1] : '';
+      }
+    }
+    if (!/^[A-Za-z0-9_-]{11}$/.test(id)) throw new Error(invalid);
+    return id;
+  }
+
   // 영상 게시판 화면 (videos 테이블 sort 순, 클릭 시에만 youtube-nocookie iframe 삽입)
   function runVideoBoard(container) {
     container.innerHTML = '';
+
+    var authSlot = document.createElement('div');
+    container.appendChild(authSlot);
+    renderAuthBar(authSlot, function () {
+      refreshUserPermissions().then(function () { runVideoBoard(container); });
+    });
+    if (currentUser && (isAdmin || isSubmanager)) {
+      var form = document.createElement('form');
+      form.className = 'card bd-form';
+      var heading = document.createElement('h2');
+      heading.textContent = '영상 링크 추가';
+      form.appendChild(heading);
+      function addInput(id, labelText, maxLength) {
+        var field = document.createElement('div');
+        field.className = 'field';
+        var label = document.createElement('label');
+        label.htmlFor = id;
+        label.textContent = labelText;
+        var input = document.createElement('input');
+        input.id = id;
+        input.type = 'text';
+        input.required = true;
+        input.maxLength = maxLength;
+        field.appendChild(label);
+        field.appendChild(input);
+        form.appendChild(field);
+        return input;
+      }
+      var urlInput = addInput('bdVideoUrl', '유튜브 영상 주소', 2048);
+      var titleInput = addInput('bdVideoTitle', '제목 (1~80자)', 80);
+      var msg = document.createElement('div');
+      msg.className = 'bd-msg';
+      msg.setAttribute('role', 'status');
+      var addBtn = document.createElement('button');
+      addBtn.type = 'submit';
+      addBtn.className = 'bd-btn primary';
+      addBtn.textContent = '추가';
+      form.appendChild(msg);
+      form.appendChild(addBtn);
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        if (addBtn.disabled) return;
+        msg.className = 'bd-msg err';
+        if (!(currentUser && (isAdmin || isSubmanager))) {
+          msg.textContent = '영상은 운영진만 추가할 수 있습니다.';
+          return;
+        }
+        var youtubeId;
+        try { youtubeId = extractYoutubeId(urlInput.value); }
+        catch (err) { msg.textContent = err.message; urlInput.focus(); return; }
+        var title = titleInput.value.trim();
+        if (!title || title.length > 80) {
+          msg.textContent = '제목을 1자 이상 80자 이하로 입력해 주세요.';
+          titleInput.focus();
+          return;
+        }
+        msg.className = 'bd-msg';
+        addBtn.disabled = true;
+        addBtn.textContent = '추가하는 중…';
+        sb.from('videos').insert({ youtube_id: youtubeId, title: title }).then(function (res) {
+          if (res && res.error) throw res.error;
+          runVideoBoard(container);
+        }).catch(function (err) {
+          msg.className = 'bd-msg err';
+          msg.textContent = friendlyError(err, 'video');
+          addBtn.disabled = false;
+          addBtn.textContent = '추가';
+        });
+      });
+      container.appendChild(form);
+    }
 
     var listWrap = document.createElement('div');
     listWrap.className = 'bd-video-list';
@@ -1121,6 +1268,37 @@
           stage.appendChild(img);
           stage.appendChild(playBtn);
           card.appendChild(stage);
+          if (currentUser && (isAdmin || isSubmanager)) {
+            var deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'bd-btn small danger';
+            deleteBtn.textContent = '삭제';
+            var deleteMsg = document.createElement('div');
+            deleteMsg.className = 'bd-msg';
+            var confirming = false;
+            deleteBtn.addEventListener('click', function () {
+              if (!(currentUser && (isAdmin || isSubmanager))) return;
+              if (!confirming) {
+                confirming = true;
+                deleteBtn.textContent = '정말 삭제할까요? (한 번 더 누르면 삭제)';
+                return;
+              }
+              deleteBtn.disabled = true;
+              sb.from('videos').delete().eq('id', v.id).select('id').then(function (res) {
+                if (res && res.error) throw res.error;
+                if (!res || !res.data || !res.data.length) throw new Error('permission');
+                runVideoBoard(container);
+              }).catch(function (err) {
+                confirming = false;
+                deleteBtn.disabled = false;
+                deleteBtn.textContent = '삭제';
+                deleteMsg.className = 'bd-msg err';
+                deleteMsg.textContent = friendlyError(err, 'video');
+              });
+            });
+            card.appendChild(deleteBtn);
+            card.appendChild(deleteMsg);
+          }
           listWrap.appendChild(card);
         });
 
@@ -1130,7 +1308,7 @@
         }
       })
       .catch(function (err) {
-        status.innerHTML = '<b>곧 올라옵니다</b><p>' + friendlyError(err, 'video') + '</p>';
+        status.textContent = friendlyError(err, 'video');
       });
   }
 
@@ -1148,7 +1326,7 @@
     options = options || {};
     injectStyles();
 
-    var page = options.page || 'hub'; // 'hub' | 'danga' | 'story' | 'video'
+    var page = options.page || 'hub'; // 'hub' | 'danga' | 'story' | 'review' | 'cardnews' | 'video'
     var container = document.getElementById(options.targetId || 'boardApp');
     if (!container) return;
 
@@ -1178,7 +1356,7 @@
       }).catch(function () {
         currentUser = null;
       }).then(function () {
-        if (page === 'danga' || page === 'story') {
+        if (page === 'danga' || page === 'story' || page === 'review' || page === 'cardnews') {
           runPostBoard(container, page, options);
         } else if (page === 'video') {
           runVideoBoard(container);
@@ -1194,8 +1372,10 @@
         if (prevId === nextId) return;
         currentUser = nextUser;
         refreshUserPermissions().then(function () {
-          if (page === 'danga' || page === 'story') {
+          if (page === 'danga' || page === 'story' || page === 'review' || page === 'cardnews') {
             runPostBoard(container, page, options);
+          } else if (page === 'video') {
+            runVideoBoard(container);
           } else if (page === 'hub') {
             runHubBoard(container);
           }
@@ -1207,6 +1387,7 @@
   window.ZW_BOARD = {
     init: init,
     friendlyError: friendlyError,
-    validateFilesClientSide: validateFilesClientSide
+    validateFilesClientSide: validateFilesClientSide,
+    extractYoutubeId: extractYoutubeId
   };
 })();
