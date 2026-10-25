@@ -130,8 +130,21 @@
     refreshBtn.className = 'bd-btn small';
     refreshBtn.textContent = '새로고침';
 
+    // 글쓰기 버튼(2026-10-25 사용자 요청): 목록을 먼저 보여 주고, 글쓰기 영역은 이 버튼을 눌러야 열린다
+    var writeBtn = document.createElement('button');
+    writeBtn.type = 'button';
+    writeBtn.className = 'bd-btn small primary';
+    writeBtn.textContent = '글쓰기';
+    writeBtn.setAttribute('aria-expanded', 'false');
+
+    var headBtns = document.createElement('div');
+    headBtns.style.display = 'flex';
+    headBtns.style.gap = '8px';
+    headBtns.appendChild(writeBtn);
+    headBtns.appendChild(refreshBtn);
+
     listHead.appendChild(listTitle);
-    listHead.appendChild(refreshBtn);
+    listHead.appendChild(headBtns);
 
     var listBox = document.createElement('div');
     listBox.className = 'bd-list' + (isGallery ? ' bd-gallery' : '');
@@ -157,6 +170,15 @@
     container.appendChild(writeSlot);
     container.appendChild(detailSlot);
     container.appendChild(listCard);
+
+    writeSlot.style.display = 'none';
+    function setWriteOpen(open, scroll) {
+      writeSlot.style.display = open ? '' : 'none';
+      writeBtn.textContent = open ? '글쓰기 닫기' : '글쓰기';
+      writeBtn.setAttribute('aria-expanded', String(open));
+      if (open && scroll) { try { writeSlot.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }
+    }
+    writeBtn.addEventListener('click', function () { setWriteOpen(writeSlot.style.display === 'none', true); });
 
     var offset = 0;
     var activePostId = null;
@@ -221,6 +243,8 @@
       });
       write.renderWriteSection(writeSlot, boardType, opts, function () {
         loadPosts(true);
+        // 글이 올라가면 안내 문구를 잠깐 보여 준 뒤 글쓰기 영역을 닫고 목록 맨 위로 돌아간다
+        setTimeout(function () { setWriteOpen(false, false); try { listCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }, 1500);
       });
       if (activePostId) {
         detailSlot.innerHTML = '';
