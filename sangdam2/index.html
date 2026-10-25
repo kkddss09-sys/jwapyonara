@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>부동산 상담 종합 한 장 — 대출·전월세·경매·재건축까지 | 좌표나라</title>
+<meta name="description" content="대출 한도·상환액부터 전월세·경매·재건축·투자 분석까지 손님 조건 한 번에 A4 상담지로 정리해 인쇄합니다. 가입 없이 무료.">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1b64da">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="icon" href="../_common/icon-192.png">
+<link rel="apple-touch-icon" href="../_common/icon-192.png">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+  .sd { display:grid; gap:20px; }
+  @media (min-width:1200px) {
+    .sd { grid-template-columns:minmax(0, 1fr); align-items:start; }
+    .sd #form { min-width:0; }
+    main.wrap.wide { max-width:1560px; }
+  }
+  .client-notice { background:var(--soft); color:#1b64da; font-weight:800; font-size:15px; padding:12px 16px; border-radius:12px; margin-bottom:16px; text-align:center; border:1px solid rgba(27,100,218,.2); }
+  .grp { margin:16px 0 6px; font-weight:800; color:var(--red); font-size:15px; }
+  .grp:first-child { margin-top:0; }
+  .txt { width:100%; border:1px solid var(--line); border-radius:12px; padding:12px 14px; font-size:16px; font-family:inherit; background:var(--card); color:var(--ink); min-height:48px; box-sizing:border-box; }
+  textarea.txt { min-height:80px; resize:vertical; }
+  .inp { min-height:48px; }
+  .inp input { height:48px; font-size:16px; }
+  .field label { font-size:14.5px; font-weight:600; margin-bottom:4px; display:block; color:var(--ink); }
+  .field label small.eg { font-size:12px; color:var(--sub); font-weight:400; margin-left:4px; }
+  .seg button { min-height:46px; font-size:15px; }
+
+  /* 입력판 반응형 그리드 */
+  .form-base-grid { display:grid; grid-template-columns:1fr; gap:14px; margin-bottom:18px; }
+  @media (min-width:700px) {
+    .form-base-grid { grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); }
+  }
+  .form-section-box { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; }
+
+  /* 5개 묶음 그리드 */
+  .bundle-grid { display:grid; grid-template-columns:1fr; gap:16px; margin-bottom:18px; }
+  @media (min-width:700px) {
+    .bundle-grid { grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:14px; }
+  }
+  .bundle-box { background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:14px; transition:border-color .2s, background .2s, box-shadow .2s; }
+  .bundle-box.active { border-color:#1b64da; background:rgba(27,100,218,.03); box-shadow:0 2px 10px rgba(27,100,218,.08); }
+  .bundle-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:8px; border-bottom:1.5px solid var(--line); flex-wrap:wrap; gap:8px; }
+  .bundle-head h4 { margin:0; font-size:16px; color:var(--ink); font-weight:800; display:flex; align-items:center; gap:6px; }
+  .bundle-check { display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:14px; font-weight:700; color:#1b64da; background:var(--soft); padding:6px 12px; border-radius:8px; user-select:none; }
+  .bundle-check input[type="checkbox"] { width:18px; height:18px; cursor:pointer; accent-color:#1b64da; }
+  .bundle-subhead { font-size:13.5px; font-weight:700; color:var(--sub); margin:12px 0 6px; padding-top:6px; border-top:1px dashed var(--line); }
+
+  /* 단추들 */
+  .printbtn { display:block; width:100%; border:0; border-radius:14px; background:var(--red); color:#fff; font-size:18px; font-weight:800; padding:16px; margin:14px 0 6px; cursor:pointer; font-family:inherit; min-height:48px; }
+  .padbtn { display:block; width:100%; border:0; border-radius:14px; background:#1d4ed8; color:#fff; font-size:17px; font-weight:800; padding:15px; margin:0 0 6px; cursor:pointer; font-family:inherit; min-height:48px; }
+  .mailbtn { display:block; width:100%; border:1.5px solid #1d4ed8; border-radius:14px; background:#eff6ff; color:#1d4ed8; font-size:16px; font-weight:800; padding:13px; margin:0 0 6px; cursor:pointer; font-family:inherit; min-height:48px; }
+  .newbtn { display:block; width:100%; border:1.5px solid var(--line); border-radius:14px; background:var(--card); color:var(--ink); font-size:15px; font-weight:700; padding:12px; cursor:pointer; font-family:inherit; min-height:48px; }
+  .mail-msg { display:none; margin:6px 0 0; padding:10px 12px; border-radius:10px; background:#e6f4ed; color:#12805c; font-size:14px; font-weight:700; text-align:center; }
+
+  /* 패드 크게 보기 */
+  .pad-bar { display:none; position:sticky; top:0; z-index:50; background:rgba(22,32,50,.96); color:#fff; padding:10px 16px; border-radius:14px; margin-bottom:14px; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; box-shadow:0 4px 14px rgba(0,0,0,.18); }
+  .pad-bar strong { font-size:16px; }
+  .pad-bar .pad-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .pad-bar button { border:0; border-radius:10px; padding:10px 16px; font-size:15px; font-weight:800; cursor:pointer; font-family:inherit; }
+  .pad-bar .back-btn { background:#1b64da; color:#fff; }
+  .pad-bar .sub-btn { background:var(--card); color:var(--ink); }
+  body.pad-view .zw-head, body.pad-view main > h1, body.pad-view main > .lead, body.pad-view #form, body.pad-view .ad, body.pad-view details, body.pad-view .cta, body.pad-view .more, body.pad-view .zw-foot { display:none !important; }
+  body.pad-view main.wrap.wide { max-width:1080px; padding-top:12px; }
+  body.pad-view .pad-bar { display:flex; }
+  body.pad-view .sd { display:block; }
+  body.pad-view .sheet-wrap { height:auto !important; overflow:visible; }
+  body.pad-view .sheet { transform:none !important; width:100%; max-width:1040px; min-height:0; padding:24px 28px; font-size:13pt !important; line-height:1.55; border-radius:16px; }
+  body.pad-view .sheet h2 { font-size:24pt; }
+  body.pad-view .sheet .meta { font-size:11pt; }
+  body.pad-view .sheet .big { gap:10px; margin-bottom:16px; }
+  body.pad-view .sheet .big div { padding:12px 14px; border-radius:12px; }
+  body.pad-view .sheet .big span { font-size:11pt; }
+  body.pad-view .sheet .big b { font-size:18pt; }
+  body.pad-view .sheet .cols, body.pad-view .sheet .bundle-cols { gap:14px 22px; }
+  body.pad-view .sheet h3 { font-size:14pt; margin:10px 0 6px; }
+  body.pad-view .sheet td { padding:6px 4px; }
+  body.pad-view .sheet .todo { margin-top:14px; padding:12px 16px; }
+  body.pad-view .sheet .fine { font-size:10pt; margin-top:12px; }
+  @media (max-width:720px) {
+    body.pad-view .sheet { padding:16px; font-size:11.5pt !important; }
+    body.pad-view .sheet .big { grid-template-columns:1fr 1fr; }
+    body.pad-view .sheet .cols, body.pad-view .sheet .bundle-cols { grid-template-columns:1fr; }
+  }
+
+  /* A4 상담지 */
+  .sheet-wrap { overflow:hidden; }
+  .sheet { transform-origin:0 0; --ink:#1d1d1f; --sub:#6e6e73; --line:#e3e3e8; --card:#fff; --bg:#f5f5f7; --soft:#e8f0fe; --fill:#f2f2f7; --fill2:#e5e5ea; --red:#1b64da; --danger:#d92d20; --ok:#12805c; background:#fff; color:#1d1d1f; width:210mm; min-height:297mm; margin:0 auto; padding:13mm 13mm 10mm; box-shadow:0 2px 16px rgba(0,0,0,.12); font-size:10.5pt; line-height:1.45; box-sizing:border-box; }
+  .sheet h2 { margin:0; font-size:19pt; letter-spacing:-.02em; color:#1d1d1f; }
+  .sheet .top { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid #1b64da; padding-bottom:6px; margin-bottom:10px; }
+  .sheet .meta { text-align:right; font-size:9.5pt; color:var(--sub); }
+  .sheet .big { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:10px; }
+  .sheet .big div { background:var(--soft); border-radius:8px; padding:7px 10px; }
+  .sheet .big span { display:block; font-size:8.5pt; color:var(--sub); }
+  .sheet .big b { font-size:13pt; color:#1d1d1f; }
+  .sheet .cols { display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; }
+  .sheet .bundle-cols { display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; margin-top:8px; }
+  .sheet section { break-inside:avoid; page-break-inside:avoid; }
+  .sheet .bundle-sec { break-inside:avoid; page-break-inside:avoid; }
+  .sheet h3 { margin:6px 0 3px; font-size:11pt; padding-left:7px; border-left:4px solid #1b64da; color:#1d1d1f; }
+  .sheet .sub-who { font-size:9pt; font-weight:400; color:var(--sub); margin-left:6px; }
+  .sheet table { width:100%; border-collapse:collapse; }
+  .sheet td { padding:3.5px 2px; border-bottom:1px solid #eee; vertical-align:top; color:#1d1d1f; }
+  .sheet td:last-child { text-align:right; font-weight:700; white-space:nowrap; }
+  .sheet .bad { color:#d0021b; } .sheet .good { color:#12805c; }
+  .sheet .memo { border:1px solid #ccc; border-radius:6px; min-height:26mm; padding:6px 8px; white-space:pre-wrap; }
+  .sheet .todo { margin-top:8px; border:2px solid #1b64da; border-radius:8px; padding:6px 10px 8px; break-inside:avoid; page-break-inside:avoid; }
+  .sheet .todo h3 { margin-top:2px; }
+  .sheet .todo ul { margin:2px 0 4px; padding-left:0; list-style:none; }
+  .sheet .todo li { margin:2px 0; }
+  .sheet .warn { background:var(--soft); border-radius:6px; padding:5px 8px; font-weight:700; color:#b0002a; margin-top:4px; font-size:9pt; }
+  .sheet table.bank td { border:1px solid #ccc; height:7mm; text-align:left; font-weight:400; }
+  .sheet table.bank tr:first-child td { height:auto; background:#f6f6f6; font-weight:700; font-size:9pt; }
+  .sheet .fine { font-size:8pt; color:#666; margin-top:8px; line-height:1.4; }
+
+  /* 인쇄 시 스타일: 다장 인쇄 허용, 글씨 크기 유지 */
+  @media print {
+    @page { size:A4; margin:12mm 10mm; }
+    body { background:#fff !important; color:#1d1d1f !important; }
+    body > *:not(main), main > *:not(.sd), .sd > #form, .pad-bar, .ad, details, .cta, .zw-head, .zw-foot { display:none !important; }
+    main.wrap.wide { padding:0 !important; max-width:none !important; margin:0 !important; }
+    .sd { display:block !important; }
+    .sheet-wrap { height:auto !important; overflow:visible !important; }
+    .sheet { transform:none !important; box-shadow:none !important; margin:0 !important; width:100% !important; max-width:none !important; min-height:0 !important; height:auto !important; padding:0 !important; font-size:10.5pt !important; line-height:1.45 !important; overflow:visible !important; }
+    .sheet section, .sheet .bundle-sec, .sheet .todo { break-inside:avoid; page-break-inside:avoid; }
+  }
+  #form, .sheet-wrap, .bundle-box, .form-section-box, .field { min-width:0; }
+  #form label, #form button, .client-notice { font-size:16px; }
+  #form button, .pad-bar button, .bundle-check { min-height:48px; box-sizing:border-box; }
+  .sheet [data-client] { overflow-wrap:anywhere; white-space:pre-wrap; }
+  @media screen and (min-width:700px) { main.wrap.wide { max-width:1560px; } }
+  @media screen and (max-width:699px) {
+    .sheet { width:100%; min-height:0; padding:16px; font-size:16px; }
+    .sheet .top, .sheet .cols, .sheet .bundle-cols, .sheet .big { display:block; }
+    .sheet .top > *, .sheet section, .sheet .big > div { margin-bottom:12px; }
+    .sheet .meta { text-align:left; }
+    .sheet h2 { font-size:22px; }
+    .sheet h3, .sheet .meta, .sheet .sub-who, .sheet .big span, .sheet .fine, .sheet .warn { font-size:16px; }
+    .sheet td:last-child { white-space:normal; overflow-wrap:anywhere; }
+    .sheet table { table-layout:fixed; }
+  }
+  @media print {
+    .sheet .bundle-cols { display:block; }
+    .sheet .bundle-sec { margin-top:10mm; }
+    .sheet h3 { break-after:avoid; }
+    .sheet tr { break-inside:avoid; }
+  }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap wide">
+  <h1>부동산 상담 종합 한 장</h1>
+  <p class="lead">손님 조건을 한 번만 넣으면 오른쪽(휴대폰은 아래) 상담지가 바로 채워집니다. 아래 5개 묶음 중 <b>이번 상담에 쓸 묶음을 켜면</b> 대출 심화·전월세·경매·재건축·투자 분석까지 상담지에 함께 정리됩니다. <b>인쇄</b>를 누르면 A4 상담지(2~3장)로 깔끔하게 출력됩니다.</p>
+
+  <div class="pad-bar" id="padBar">
+    <strong>📱 패드 크게 보기 화면 (손님 브리핑용)</strong>
+    <div class="pad-actions">
+      <button type="button" class="back-btn" id="padBackBtn">✎ 조건 다시 입력하기</button>
+      <button type="button" class="sub-btn" id="padMailBtn">✉ 이메일 보내기</button>
+      <button type="button" class="sub-btn" onclick="window.print()">🖨 인쇄 · PDF</button>
+    </div>
+  </div>
+
+  <div class="sd">
+    <!-- 손님 입력판 (모든 칸이 접히지 않고 한 곳에 펼쳐짐) -->
+    <section class="card" id="form">
+      <div class="client-notice">손님 입력은 여기 한 곳에서 다 합니다</div>
+
+      <!-- 기본 입력 구역 -->
+      <div class="form-base-grid">
+        <div class="form-section-box">
+          <div class="grp">손님 정보</div>
+          <div class="field"><label for="who">손님 이름 (안 써도 됨)</label><input class="txt" id="who" value=""></div>
+          <div class="field"><label for="email">손님 이메일 (이메일 보낼 때만)</label><input class="txt" id="email" type="email" placeholder="예: guest@naver.com" value=""></div>
+          <div class="field"><label for="home">보는 집 (단지·동·호수)</label><input class="txt" id="home" value=""></div>
+        </div>
+
+        <div class="form-section-box">
+          <div class="grp">집</div>
+          <div class="field"><label for="price">집값 <b class="hint" id="priceHint"></b></label><div class="inp"><input id="price" inputmode="numeric" value="800,000,000"><span>원</span></div></div>
+          <div class="field"><label for="m2">전용면적</label><div class="inp"><input id="m2" inputmode="decimal" value="84"><span>㎡</span></div></div>
+          <div class="field"><label for="cost">취득세·중개보수 등 부대비용 <b class="hint" id="costHint"></b></label><div class="inp"><input id="cost" inputmode="numeric" value="15,000,000"><span>원</span></div></div>
+        </div>
+
+        <div class="form-section-box">
+          <div class="grp">손님 돈</div>
+          <div class="field"><label for="cash">가진 돈 (현금) <b class="hint" id="cashHint"></b></label><div class="inp"><input id="cash" inputmode="numeric" value="300,000,000"><span>원</span></div></div>
+          <div class="field"><label for="income">부부 합산 연소득 <b class="hint" id="incomeHint"></b></label><div class="inp"><input id="income" inputmode="numeric" value="70,000,000"><span>원</span></div></div>
+          <div class="field"><label for="other">다른 대출 1년 원리금 <b class="hint" id="otherHint"></b></label><div class="inp"><input id="other" inputmode="numeric" value="0"><span>원</span></div></div>
+          <div class="field"><label>소득 형태</label><div class="seg two" id="jobSeg"><button type="button" data-t="emp" class="on">직장인</button><button type="button" data-t="biz">사업자</button></div></div>
+        </div>
+
+        <div class="form-section-box">
+          <div class="grp">대출 기준 <small class="eg">(지역·상품마다 다름)</small></div>
+          <div class="row2">
+            <div class="field"><label for="ltv">LTV <small class="eg">(예시)</small></label><div class="inp"><input id="ltv" inputmode="decimal" value="70"><span>%</span></div></div>
+            <div class="field"><label for="dsr">DSR <small class="eg">(예시)</small></label><div class="inp"><input id="dsr" inputmode="decimal" value="40"><span>%</span></div></div>
+          </div>
+          <div class="field"><label for="cap">최대 한도 (없으면 0) <b class="hint" id="capHint"></b></label><div class="inp"><input id="cap" inputmode="numeric" value="600,000,000"><span>원</span></div></div>
+          <div class="row2">
+            <div class="field"><label for="rate">금리 <small class="eg">(예시)</small></label><div class="inp"><input id="rate" inputmode="decimal" value="4"><span>%</span></div></div>
+            <div class="field"><label for="years">기간</label><div class="inp"><input id="years" inputmode="decimal" value="30"><span>년</span></div></div>
+          </div>
+          <div class="field"><label for="want">빌릴 돈 (0이면 최대로) <b class="hint" id="wantHint"></b></label><div class="inp"><input id="want" inputmode="numeric" value="0"><span>원</span></div></div>
+        </div>
+
+        <div class="form-section-box">
+          <div class="grp">전세 끼고 살 때 · 팔 때</div>
+          <div class="field"><label for="deposit">전세 보증금 (해당 없으면 0) <b class="hint" id="depositHint"></b></label><div class="inp"><input id="deposit" inputmode="numeric" value="500,000,000"><span>원</span></div></div>
+          <div class="field"><label for="sell">예상 파는 가격 (모르면 0) <b class="hint" id="sellHint"></b></label><div class="inp"><input id="sell" inputmode="numeric" value="950,000,000"><span>원</span></div></div>
+          <div class="field"><label for="hold">가지고 있을 기간</label><div class="inp"><input id="hold" inputmode="decimal" value="5"><span>년</span></div></div>
+        </div>
+
+        <div class="form-section-box">
+          <div class="grp">청약</div>
+          <div class="field"><label>지금 집이 있나요? (세대원 포함)</label><div class="seg two" id="houseSeg"><button type="button" data-t="no" class="on">없어요</button><button type="button" data-t="yes">있어요</button></div></div>
+          <div class="row2">
+            <div class="field"><label for="noHouse">무주택 기간</label><div class="inp"><input id="noHouse" inputmode="decimal" value="5"><span>년</span></div></div>
+            <div class="field"><label for="family">부양가족</label><div class="inp"><input id="family" inputmode="decimal" value="2"><span>명</span></div></div>
+          </div>
+          <div class="field"><label for="account">청약통장 가입 기간</label><div class="inp"><input id="account" inputmode="decimal" value="6"><span>년</span></div></div>
+        </div>
+      </div>
+
+      <!-- 5개 묶음 구역 (체크박스로 켜기/끄기) -->
+      <div class="bundle-grid">
+        <!-- 묶음 1: 대출 더 보기 -->
+        <div class="bundle-box" id="bundleBox_loanPlus">
+          <div class="bundle-head">
+            <h4>💳 대출 더 보기</h4>
+            <label class="bundle-check"><input type="checkbox" id="use_loanPlus"> <span>이번 상담에 쓰기</span></label>
+          </div>
+          <div class="field"><label for="prepayAmount">중도상환할 금액 <b class="hint" id="prepayAmountHint"></b></label><div class="inp"><input id="prepayAmount" inputmode="numeric" value="50,000,000"><span>원</span></div></div>
+          <div class="row2">
+            <div class="field"><label for="newRate">갈아탈 새 금리 <small class="eg">(예시)</small></label><div class="inp"><input id="newRate" inputmode="decimal" value="3.5"><span>%</span></div></div>
+            <div class="field"><label for="refiFeePct">대환 수수료율 <small class="eg">(예시)</small></label><div class="inp"><input id="refiFeePct" inputmode="decimal" value="1.2"><span>%</span></div></div>
+          </div>
+          <div class="field"><label for="refiOtherCost">갈아타기 기타 비용 <b class="hint" id="refiOtherCostHint"></b></label><div class="inp"><input id="refiOtherCost" inputmode="numeric" value="500,000"><span>원</span></div></div>
+          <div class="row2">
+            <div class="field"><label for="graceYears">거치 기간</label><div class="inp"><input id="graceYears" inputmode="decimal" value="1"><span>년</span></div></div>
+            <div class="field"><label for="afterYears">몇 년 뒤 잔액 확인</label><div class="inp"><input id="afterYears" inputmode="decimal" value="5"><span>년</span></div></div>
+          </div>
+        </div>
+
+        <!-- 묶음 2: 전월세 · 투자 -->
+        <div class="bundle-box" id="bundleBox_rent">
+          <div class="bundle-head">
+            <h4>🏠 전월세 · 투자</h4>
+            <label class="bundle-check"><input type="checkbox" id="use_rent"> <span>이번 상담에 쓰기</span></label>
+          </div>
+          <div class="field"><label for="wolse">한 달 월세 <b class="hint" id="wolseHint"></b></label><div class="inp"><input id="wolse" inputmode="numeric" value="1,500,000"><span>원</span></div></div>
+          <div class="field"><label for="rentLoanAmt">낀 대출금 (투자 시) <b class="hint" id="rentLoanAmtHint"></b></label><div class="inp"><input id="rentLoanAmt" inputmode="numeric" value="200,000,000"><span>원</span></div></div>
+          <div class="row2">
+            <div class="field"><label for="rentLoanRate">낀 대출 금리 <small class="eg">(예시)</small></label><div class="inp"><input id="rentLoanRate" inputmode="decimal" value="4.5"><span>%</span></div></div>
+            <div class="field"><label for="conv">전월세 전환율 <small class="eg">(예시)</small></label><div class="inp"><input id="conv" inputmode="decimal" value="5"><span>%</span></div></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="raisePct">갱신 인상률 <small class="eg">(예시)</small></label><div class="inp"><input id="raisePct" inputmode="decimal" value="5"><span>%</span></div></div>
+            <div class="field"><label for="mine">내 돈 (전세 vs 월세용) <b class="hint" id="mineHint"></b></label><div class="inp"><input id="mine" inputmode="numeric" value="100,000,000"><span>원</span></div></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="mgmtFee">한 달 관리비 <b class="hint" id="mgmtFeeHint"></b></label><div class="inp"><input id="mgmtFee" inputmode="numeric" value="200,000"><span>원</span></div></div>
+            <div class="field"><label for="etcCost">그 밖 월 비용 <b class="hint" id="etcCostHint"></b></label><div class="inp"><input id="etcCost" inputmode="numeric" value="100,000"><span>원</span></div></div>
+          </div>
+        </div>
+
+        <!-- 묶음 3: 경매 -->
+        <div class="bundle-box" id="bundleBox_auction">
+          <div class="bundle-head">
+            <h4>⚖️ 경매</h4>
+            <label class="bundle-check"><input type="checkbox" id="use_auction"> <span>이번 상담에 쓰기</span></label>
+          </div>
+          <div class="field"><label for="bidPrice">예상 낙찰가 <b class="hint" id="bidPriceHint"></b></label><div class="inp"><input id="bidPrice" inputmode="numeric" value="600,000,000"><span>원</span></div></div>
+          <div class="row2">
+            <div class="field"><label for="auctionLtv">경락대출 LTV <small class="eg">(예시)</small></label><div class="inp"><input id="auctionLtv" inputmode="decimal" value="70"><span>%</span></div></div>
+            <div class="field"><label for="buyCostPct">취득비용률 <small class="eg">(예시)</small></label><div class="inp"><input id="buyCostPct" inputmode="decimal" value="3"><span>%</span></div></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="legalFee">법무사 수수료 <b class="hint" id="legalFeeHint"></b></label><div class="inp"><input id="legalFee" inputmode="numeric" value="1,000,000"><span>원</span></div></div>
+            <div class="field"><label for="evictionCost">명도 비용 <b class="hint" id="evictionCostHint"></b></label><div class="inp"><input id="evictionCost" inputmode="numeric" value="3,000,000"><span>원</span></div></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="repair">수리·인테리어비 <b class="hint" id="repairHint"></b></label><div class="inp"><input id="repair" inputmode="numeric" value="10,000,000"><span>원</span></div></div>
+            <div class="field"><label for="unpaidDues">체납 관리비 <b class="hint" id="unpaidDuesHint"></b></label><div class="inp"><input id="unpaidDues" inputmode="numeric" value="1,500,000"><span>원</span></div></div>
+          </div>
+          <div class="field"><label for="movingCost">이사비 <b class="hint" id="movingCostHint"></b></label><div class="inp"><input id="movingCost" inputmode="numeric" value="2,000,000"><span>원</span></div></div>
+          <div class="bundle-subhead">목표 수익 기준 적정 입찰가 역산</div>
+          <div class="field"><label for="auction_salePrice">예상 매도가 <b class="hint" id="auction_salePriceHint"></b></label><div class="inp"><input id="auction_salePrice" inputmode="numeric" value="750,000,000"><span>원</span></div></div>
+          <div class="row2">
+            <div class="field"><label for="auction_sellCost">매도 비용 <b class="hint" id="auction_sellCostHint"></b></label><div class="inp"><input id="auction_sellCost" inputmode="numeric" value="5,000,000"><span>원</span></div></div>
+            <div class="field"><label for="auction_otherCost">기타 비용 <b class="hint" id="auction_otherCostHint"></b></label><div class="inp"><input id="auction_otherCost" inputmode="numeric" value="2,000,000"><span>원</span></div></div>
+          </div>
+          <div class="field"><label for="targetProfit">목표 수익 <b class="hint" id="targetProfitHint"></b></label><div class="inp"><input id="targetProfit" inputmode="numeric" value="50,000,000"><span>원</span></div></div>
+          <div class="bundle-subhead">입찰 보증금 계산</div>
+          <div class="row2">
+            <div class="field"><label for="minPrice">최저매각가격 <b class="hint" id="minPriceHint"></b></label><div class="inp"><input id="minPrice" inputmode="numeric" value="500,000,000"><span>원</span></div></div>
+            <div class="field"><label for="depositPct">보증금 비율 <small class="eg">(예시)</small></label><div class="inp"><input id="depositPct" inputmode="decimal" value="10"><span>%</span></div></div>
+          </div>
+        </div>
+
+        <!-- 묶음 4: 단지 · 재건축 -->
+        <div class="bundle-box" id="bundleBox_complex">
+          <div class="bundle-head">
+            <h4>🏢 단지 · 재건축</h4>
+            <label class="bundle-check"><input type="checkbox" id="use_complex"> <span>이번 상담에 쓰기</span></label>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="builtYear">준공연도</label><div class="inp"><input id="builtYear" inputmode="decimal" value="1995"><span>년</span></div></div>
+            <div class="field"><label for="thisYear">기준연도</label><div class="inp"><input id="thisYear" inputmode="decimal" value="2026"><span>년</span></div></div>
+          </div>
+          <div class="field"><label for="requiredYears">재건축 가능 연한</label><div class="inp"><input id="requiredYears" inputmode="decimal" value="30"><span>년</span></div></div>
+          <div class="bundle-subhead">대지지분 및 전용률</div>
+          <div class="field"><label for="totalLandM2">단지 전체 대지면적</label><div class="inp"><input id="totalLandM2" inputmode="decimal" value="50,000"><span>㎡</span></div></div>
+          <div class="field"><label for="totalExclusiveM2">단지 전체 전용면적 합계</label><div class="inp"><input id="totalExclusiveM2" inputmode="decimal" value="80,000"><span>㎡</span></div></div>
+          <div class="field"><label for="supplyM2">해당 호수 공급면적</label><div class="inp"><input id="supplyM2" inputmode="decimal" value="110"><span>㎡</span></div></div>
+          <div class="bundle-subhead">건폐율 · 용적률 계산용</div>
+          <div class="field"><label for="landM2">대지면적</label><div class="inp"><input id="landM2" inputmode="decimal" value="500"><span>㎡</span></div></div>
+          <div class="row2">
+            <div class="field"><label for="buildingM2">건축면적</label><div class="inp"><input id="buildingM2" inputmode="decimal" value="250"><span>㎡</span></div></div>
+            <div class="field"><label for="totalFloorM2">연면적</label><div class="inp"><input id="totalFloorM2" inputmode="decimal" value="1,000"><span>㎡</span></div></div>
+          </div>
+        </div>
+
+        <!-- 묶음 5: 투자 · 상속 · 감정 · 분양 -->
+        <div class="bundle-box" id="bundleBox_extra">
+          <div class="bundle-head">
+            <h4>📈 투자 · 상속 · 감정</h4>
+            <label class="bundle-check"><input type="checkbox" id="use_extra"> <span>이번 상담에 쓰기</span></label>
+          </div>
+          <div class="bundle-subhead">리모델링 / 플립 투자</div>
+          <div class="field"><label for="rm_buyPrice">매수가 <b class="hint" id="rm_buyPriceHint"></b></label><div class="inp"><input id="rm_buyPrice" inputmode="numeric" value="400,000,000"><span>원</span></div></div>
+          <div class="row2">
+            <div class="field"><label for="rm_buyCost">매수비용 <b class="hint" id="rm_buyCostHint"></b></label><div class="inp"><input id="rm_buyCost" inputmode="numeric" value="15,000,000"><span>원</span></div></div>
+            <div class="field"><label for="rm_remodelCost">리모델링비 <b class="hint" id="rm_remodelCostHint"></b></label><div class="inp"><input id="rm_remodelCost" inputmode="numeric" value="40,000,000"><span>원</span></div></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="rm_otherCost">기타비용 <b class="hint" id="rm_otherCostHint"></b></label><div class="inp"><input id="rm_otherCost" inputmode="numeric" value="5,000,000"><span>원</span></div></div>
+            <div class="field"><label for="rm_months">보유기간</label><div class="inp"><input id="rm_months" inputmode="decimal" value="12"><span>개월</span></div></div>
+          </div>
+          <div class="field"><label for="rm_salePrice">매도가 <b class="hint" id="rm_salePriceHint"></b></label><div class="inp"><input id="rm_salePrice" inputmode="numeric" value="550,000,000"><span>원</span></div></div>
+          <div class="field"><label for="rm_sellCost">매도비용 <b class="hint" id="rm_sellCostHint"></b></label><div class="inp"><input id="rm_sellCost" inputmode="numeric" value="10,000,000"><span>원</span></div></div>
+
+          <div class="bundle-subhead">건물 잔존가치 (정액법)</div>
+          <div class="field"><label for="rs_cost">신축조달원가 <b class="hint" id="rs_costHint"></b></label><div class="inp"><input id="rs_cost" inputmode="numeric" value="500,000,000"><span>원</span></div></div>
+          <div class="row2">
+            <div class="field"><label for="rs_salvagePct">잔존율 <small class="eg">(예시)</small></label><div class="inp"><input id="rs_salvagePct" inputmode="decimal" value="10"><span>%</span></div></div>
+            <div class="field"><label for="rs_usefulLife">내용연수</label><div class="inp"><input id="rs_usefulLife" inputmode="decimal" value="40"><span>년</span></div></div>
+          </div>
+          <div class="field"><label for="rs_elapsedYears">경과연수</label><div class="inp"><input id="rs_elapsedYears" inputmode="decimal" value="15"><span>년</span></div></div>
+
+          <div class="bundle-subhead">법정 상속 지분</div>
+          <div class="field"><label for="ih_estate">상속 재산 총액 <b class="hint" id="ih_estateHint"></b></label><div class="inp"><input id="ih_estate" inputmode="numeric" value="1,000,000,000"><span>원</span></div></div>
+          <div class="field"><label>배우자 유무</label><div class="seg two" id="spouseSeg"><button type="button" data-t="yes" class="on">있음</button><button type="button" data-t="no">없음</button></div></div>
+          <div class="row2">
+            <div class="field"><label for="ih_children">자녀 수</label><div class="inp"><input id="ih_children" inputmode="decimal" value="2"><span>명</span></div></div>
+            <div class="field"><label for="ih_parents">부모 수 (자녀 없을 때)</label><div class="inp"><input id="ih_parents" inputmode="decimal" value="0"><span>명</span></div></div>
+          </div>
+
+          <div class="bundle-subhead">감정평가 (수익환원·원가·비교)</div>
+          <div class="field"><label for="ap_noiYear">연간 순영업소득 (NOI) <b class="hint" id="ap_noiYearHint"></b></label><div class="inp"><input id="ap_noiYear" inputmode="numeric" value="30,000,000"><span>원</span></div></div>
+          <div class="field"><label for="ap_capRatePct">환원이율 (Cap Rate) <small class="eg">(예시)</small></label><div class="inp"><input id="ap_capRatePct" inputmode="decimal" value="5"><span>%</span></div></div>
+          <div class="field"><label for="ap_replacementCost">재조달원가 <b class="hint" id="ap_replacementCostHint"></b></label><div class="inp"><input id="ap_replacementCost" inputmode="numeric" value="400,000,000"><span>원</span></div></div>
+          <div class="row2">
+            <div class="field"><label for="ap_usefulLife">내용연수</label><div class="inp"><input id="ap_usefulLife" inputmode="decimal" value="40"><span>년</span></div></div>
+            <div class="field"><label for="ap_elapsedYears">경과연수</label><div class="inp"><input id="ap_elapsedYears" inputmode="decimal" value="10"><span>년</span></div></div>
+          </div>
+          <div class="field"><label for="ap_salvagePct">잔존가치율 <small class="eg">(예시)</small></label><div class="inp"><input id="ap_salvagePct" inputmode="decimal" value="10"><span>%</span></div></div>
+          <div class="field"><label for="ap_casePricePerM2">거래사례 ㎡당 단가 <b class="hint" id="ap_casePricePerM2Hint"></b></label><div class="inp"><input id="ap_casePricePerM2" inputmode="numeric" value="10,000,000"><span>원</span></div></div>
+          <div class="row2">
+            <div class="field"><label for="ap_circumstance">사정보정치</label><div class="inp"><input id="ap_circumstance" inputmode="decimal" value="1.0"></div></div>
+            <div class="field"><label for="ap_timeAdj">시점수정치</label><div class="inp"><input id="ap_timeAdj" inputmode="decimal" value="1.02"></div></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="ap_regional">지역요인</label><div class="inp"><input id="ap_regional" inputmode="decimal" value="1.0"></div></div>
+            <div class="field"><label for="ap_individual">개별요인</label><div class="inp"><input id="ap_individual" inputmode="decimal" value="1.0"></div></div>
+          </div>
+
+          <div class="bundle-subhead">분양 대금 납부 일정</div>
+          <div class="row2">
+            <div class="field"><label for="ins_downPct">계약금 비율 <small class="eg">(예시)</small></label><div class="inp"><input id="ins_downPct" inputmode="decimal" value="10"><span>%</span></div></div>
+            <div class="field"><label for="ins_midPct">중도금 총비율 <small class="eg">(예시)</small></label><div class="inp"><input id="ins_midPct" inputmode="decimal" value="60"><span>%</span></div></div>
+          </div>
+          <div class="field"><label for="ins_midCount">중도금 분할 횟수</label><div class="inp"><input id="ins_midCount" inputmode="decimal" value="6"><span>회</span></div></div>
+
+          <div class="bundle-subhead">내집마련 목표 저축</div>
+          <div class="field"><label for="sv_target">목표 금액 <b class="hint" id="sv_targetHint"></b></label><div class="inp"><input id="sv_target" inputmode="numeric" value="300,000,000"><span>원</span></div></div>
+          <div class="field"><label for="sv_have">현재 모은 돈 <b class="hint" id="sv_haveHint"></b></label><div class="inp"><input id="sv_have" inputmode="numeric" value="50,000,000"><span>원</span></div></div>
+          <div class="row2">
+            <div class="field"><label for="sv_perMonth">매달 저축액 <b class="hint" id="sv_perMonthHint"></b></label><div class="inp"><input id="sv_perMonth" inputmode="numeric" value="2,000,000"><span>원</span></div></div>
+            <div class="field"><label for="sv_yearReturnPct">연수익률 <small class="eg">(예시)</small></label><div class="inp"><input id="sv_yearReturnPct" inputmode="decimal" value="3.5"><span>%</span></div></div>
+          </div>
+        </div>
+      </div>
+
+      <label class="grp" for="memo">상담 메모</label>
+      <textarea class="txt" id="memo" placeholder="손님이 원하는 조건, 다음에 볼 단지, 특약 사항 등"></textarea>
+
+      <button class="printbtn" type="button" onclick="window.print()">🖨 A4 상담지로 인쇄 · PDF 저장</button>
+      <button class="padbtn" type="button" id="padBtn">🔍 상담 내용만 패드에서 크게 보기</button>
+      <button class="mailbtn" type="button" id="mailBtn">✉ 이메일 보내기 (상담 내용 자동 입력)</button>
+      <button class="newbtn" type="button" id="newBtn">↺ 다음 손님 (이름·집·메모만 지우기)</button>
+      <p class="mail-msg" id="mailMsg"></p>
+    </section>
+
+    <!-- A4 상담지 출력 및 미리보기 -->
+    <div class="sheet-wrap"><article class="sheet" id="sheet"></article></div>
+  </div>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>기본 대출·상환액·가진 돈·전세·차익·청약</b>: 기존 부동산 상담 한 장과 동일한 공식(LTV, DSR, 원리금균등, 원금균등 첫 달, 갭투자, 주택공급에 관한 규칙 [별표 1] 가점제).</li>
+      <li><b>DTI</b>: <code>dti/calc.js</code> — (연간 신규 대출 원리금 + 기존 대출 연간 이자) ÷ 연소득 × 100.</li>
+      <li><b>대출 더 보기</b>: <code>_common/re-calc.js</code> — <code>compareRepay</code>(상환방식 비교), <code>prepay</code>(중도상환 이자절감), <code>refinance</code>(대환 손익분기), <code>grace</code>(거치기간 이자), <code>balanceAfter</code>(N년 후 잔액), <code>rateChange</code>(금리 1%p 상승).</li>
+      <li><b>전월세 · 투자</b>: <code>_common/re-calc.js</code>, <code>rti/calc.js</code> — <code>gap</code>(전세가율), <code>toWolse</code>/<code>toJeonse</code>(전월세 전환율 역산), <code>rentYield</code>(임대수익률), <code>calcRTI</code>(임대업이자상환비율), <code>raise</code>(인상률), <code>jeonseVsWolse</code>(전세 vs 월세 비교), <code>housingCost</code>(주거비용), <code>mgmtPer</code>(평당 관리비).</li>
+      <li><b>경매</b>: <code>auction-loan/calc.js</code>, <code>auction-cost/calc.js</code>, <code>bid-price/calc.js</code> — <code>calcAuctionLoan</code>(경락잔금대출), <code>calcAuctionCost</code>(경매 총 취득비용), <code>calcBidPrice</code>(목표수익 적정 입찰가), <code>calcDeposit</code>(입찰보증금).</li>
+      <li><b>단지 · 재건축</b>: <code>rebuild-year/calc.js</code>, <code>land-share/calc.js</code>, <code>_common/re-calc.js</code> — <code>calcRebuild</code>(재건축 연한), <code>calcLandShare</code>(대지지분), <code>perPyeong</code>(평당 가격), <code>exclusiveRatio</code>(전용률), <code>landRatio</code>(건폐율·용적률).</li>
+      <li><b>투자 · 상속 · 감정</b>: <code>remodel-profit/calc.js</code>, <code>building-residual/calc.js</code>, <code>inherit-share/calc.js</code>, <code>appraisal-income/calc.js</code>, <code>appraisal-cost/calc.js</code>, <code>appraisal-compare/calc.js</code>, <code>_common/re-calc.js</code> — <code>calcRemodel</code>(리모델링 수익률), <code>calcResidual</code>(정액법 잔존가치), <code>calcInherit</code>(민법 법정상속분), <code>calcDirectCap</code>(수익환원법), <code>calcCostMethod</code>(원가법), <code>calcComparable</code>(비교방식), <code>installments</code>(분양대금 분할), <code>savingMonths</code>(저축 달성기간).</li>
+      <li>모든 요율·비율은 지역·상품·정부 정책에 따라 달라 직접 수정할 수 있게 하였습니다. 넣은 값은 어디에도 저장되거나 외부로 전송되지 않습니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>기존 상담지와 무엇이 다른가요?</summary>
+    <ul>
+      <li>기존 <a href="../sangdam/">부동산 상담 한 장</a>은 집 한 채 매수 상담을 A4 1장에 맞춰 빠르게 요약하는 기본 도구입니다.</li>
+      <li>새 <b>부동산 상담 종합 한 장</b>은 기본 상담에 더해 대출 심화, 전월세 갭투자, 경매 입찰, 단지 재건축, 종합 투자(리모델링·상속·감정평가·분양)까지 5개 묶음을 자유롭게 켜서 손님의 다양한 상황에 맞춤형으로 확장할 수 있습니다.</li>
+      <li>필요한 묶음만 체크하면 결과와 A4 상담지가 실시간으로 자동 구성되며, 글씨 크기를 억지로 줄이지 않고 여러 장(2~3장)으로 여유 있게 인쇄할 수 있습니다.</li>
+    </ul>
+  </details>
+</main>
+
+<!-- 스펙에 명시된 순서대로 스크립트 불러오기 -->
+<script src="../_common/re-calc.js"></script>
+<script src="../cheongyak/calc.js"></script>
+<script src="../first-loan/calc.js"></script>
+<script src="../sangdam/calc.js"></script>
+<script src="../dti/calc.js"></script>
+<script src="../rti/calc.js"></script>
+<script src="../auction-loan/calc.js"></script>
+<script src="../auction-cost/calc.js"></script>
+<script src="../bid-price/calc.js"></script>
+<script src="../rebuild-year/calc.js"></script>
+<script src="../land-share/calc.js"></script>
+<script src="../remodel-profit/calc.js"></script>
+<script src="../building-residual/calc.js"></script>
+<script src="../inherit-share/calc.js"></script>
+<script src="../appraisal-income/calc.js"></script>
+<script src="../appraisal-cost/calc.js"></script>
+<script src="../appraisal-compare/calc.js"></script>
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var won = function (n) { return isFinite(n) && n != null ? ZW.fmt(n) + '원' : '없음'; };
+  var big = function (n) { return isFinite(n) && n != null ? (ZW.read(Math.abs(n)) || ZW.fmt(Math.abs(n)) + '원') : '-'; };
+  var P = function (x, d) { return isFinite(x) && x != null ? ZW.pct(x, d) + '%' : '-'; };
+  var checkOk = function (o, fn) {
+    if (!o) return '-';
+    if (o.missing) return '함수 확인 필요 (' + o.missing + ')';
+    if (o.ok === false) return '값을 확인해 주세요';
+    return fn(o);
+  };
+
+  var get = {}, house = 'no', job = 'emp', hasSpouse = true, lastData = null;
+
+  var render = function () {
+    var v = {};
+    for (var k in get) v[k] = get[k]();
+    v.hasHouse = house === 'yes';
+
+    // 5개 묶음 사용 여부
+    var use = {
+      loanPlus: $('use_loanPlus').checked,
+      rent: $('use_rent').checked,
+      auction: $('use_auction').checked,
+      complex: $('use_complex').checked,
+      extra: $('use_extra').checked
+    };
+    v.use = use;
+
+    // 묶음 박스 하이라이트 토글
+    $('bundleBox_loanPlus').classList.toggle('active', use.loanPlus);
+    $('bundleBox_rent').classList.toggle('active', use.rent);
+    $('bundleBox_auction').classList.toggle('active', use.auction);
+    $('bundleBox_complex').classList.toggle('active', use.complex);
+    $('bundleBox_extra').classList.toggle('active', use.extra);
+
+    // 경매 추가 매핑
+    v.salePrice = v.auction_salePrice;
+    v.sellCost = v.auction_sellCost;
+    v.otherCost = v.auction_otherCost;
+
+    // extra 객체 구조화
+    v.remodel = {
+      buyPrice: v.rm_buyPrice,
+      buyCost: v.rm_buyCost,
+      remodelCost: v.rm_remodelCost,
+      otherCost: v.rm_otherCost,
+      salePrice: v.rm_salePrice,
+      sellCost: v.rm_sellCost,
+      months: v.rm_months
+    };
+    v.residual = {
+      cost: v.rs_cost,
+      salvagePct: v.rs_salvagePct,
+      usefulLife: v.rs_usefulLife,
+      elapsedYears: v.rs_elapsedYears
+    };
+    v.inherit = {
+      hasSpouse: hasSpouse,
+      children: v.ih_children,
+      parents: v.ih_parents,
+      estate: v.ih_estate
+    };
+    v.appraisal = {
+      noiYear: v.ap_noiYear,
+      capRatePct: v.ap_capRatePct,
+      replacementCost: v.ap_replacementCost,
+      usefulLife: v.ap_usefulLife,
+      elapsedYears: v.ap_elapsedYears,
+      salvagePct: v.ap_salvagePct,
+      casePricePerM2: v.ap_casePricePerM2,
+      circumstance: v.ap_circumstance,
+      timeAdj: v.ap_timeAdj,
+      regional: v.ap_regional,
+      individual: v.ap_individual
+    };
+    v.installments = {
+      downPct: v.ins_downPct,
+      midPct: v.ins_midPct,
+      midCount: v.ins_midCount
+    };
+    v.saving = {
+      target: v.sv_target,
+      have: v.sv_have,
+      perMonth: v.sv_perMonth,
+      yearReturnPct: v.sv_yearReturnPct
+    };
+
+    var r = consultPlus(v);
+    var today = new Date();
+    var d = today.getFullYear() + '. ' + (today.getMonth() + 1) + '. ' + today.getDate() + '.';
+    var due = new Date(today.getTime() + 7 * 864e5), dd = (due.getMonth() + 1) + '월 ' + due.getDate() + '일';
+    lastData = { v: v, r: r, d: d, dd: dd };
+
+    var who = $('who').value.trim();
+    var home = $('home').value.trim();
+    var whoHome = '<span data-client="context"></span>';
+
+    var row = function (a, b, cls) { return '<tr><td>' + a + '</td><td' + (cls ? ' class="' + cls + '"' : '') + '>' + b + '</td></tr>'; };
+
+    // 상담지 HTML 빌드
+    var h = '<div class="top"><div><h2>부동산 상담 종합 한 장</h2><div data-client="home"></div></div>'
+      + '<div class="meta"><span data-client="who"></span><br>상담일 ' + d + '<br>좌표나라® jwapyonara.com<br>등록상표 제40-1790026호</div></div>';
+
+    // 핵심 수치 4종 (기본)
+    var base = r.base || {};
+    h += '<div class="big"><div><span>빌릴 수 있는 돈</span><b>' + big(base.loan) + '</b></div><div><span>한 달 상환액</span><b>' + ZW.fmt(base.monthly) + '원</b></div>'
+      + '<div><span>' + (base.left >= 0 ? '가진 돈에서 남는 돈' : '모자라는 돈') + '</span><b class="' + (base.left >= 0 ? 'good' : 'bad') + '">' + big(base.left) + '</b></div>'
+      + '<div><span>살 수 있는 집값 최대</span><b>' + (base.maxPrice > 0 ? big(base.maxPrice) : '-') + '</b></div></div>';
+
+    // 기본 상담 구역
+    h += '<div class="cols">';
+    h += '<section><h3>집</h3><table>' + row('집값', won(v.price)) + row('전용면적', v.m2 ? ZW.pct(v.m2) + '㎡ (약 ' + ZW.pct(base.pyeong) + '평)' : '-')
+      + row('평당 가격', base.perPyeong ? won(base.perPyeong) : '-') + row('부대비용', won(v.cost)) + '</table></section>';
+
+    var dtiStr = checkOk(r.dti, function (o) { return P(o.dtiPct) + ' (연 ' + won(o.annualPayment) + ')'; });
+    h += '<section><h3>대출 한도</h3><table>' + row('① 집값 기준 (LTV ' + ZW.pct(v.ltv, 0) + '%)', won(base.byLtv)) + row('② 최대 한도', won(base.byCap))
+      + row('③ 소득 기준 (DSR ' + ZW.pct(v.dsr, 0) + '%)', won(base.byDsr)) + row('DTI (참고)', dtiStr) + row('최대 · ' + base.why + '에 걸림', won(base.maxLoan)) + '</table></section>';
+
+    h += '<section><h3>갚는 돈 (' + ZW.pct(v.rate, 2).replace(/\.?0+$/, '') + '%, ' + ZW.pct(v.years, 0) + '년)</h3><table>' + row('빌리는 돈', won(base.loan))
+      + row('한 달 (원리금균등)', won(base.monthly)) + row('첫 달 (원금균등)', won(base.epFirst)) + row('이자 합계 (원리금균등)', won(base.interest))
+      + row('금리 1%p 오르면 한 달', won(base.monthlyUp) + ' (+' + ZW.fmt(base.monthlyUp - base.monthly) + ')')
+      + row('소득 대비 상환 비율', P(base.dsrPct), base.dsrPct > v.dsr + 0.05 ? 'bad' : '') + '</table></section>';
+
+    h += '<section><h3>직접 살 때 필요한 돈</h3><table>' + row('집값 − 대출', won(Math.max(0, v.price - base.loan))) + row('+ 부대비용', won(v.cost))
+      + row('필요한 내 돈', won(base.need)) + row('가진 돈', won(v.cash)) + row(base.left >= 0 ? '남는 돈' : '모자라는 돈', won(Math.abs(base.left)), base.left >= 0 ? 'good' : 'bad') + '</table></section>';
+
+    h += '<section><h3>전세 끼고 살 때</h3><table>' + (v.deposit > 0 ? row('전세 보증금', won(v.deposit)) + row('전세가율', P(base.jeonseRatio)) + row('갭 + 부대비용 = 필요한 내 돈', won(base.gapNeed))
+      + row(v.cash - base.gapNeed >= 0 ? '가진 돈에서 남는 돈' : '모자라는 돈', won(Math.abs(v.cash - base.gapNeed)), v.cash - base.gapNeed >= 0 ? 'good' : 'bad') : row('해당 없음', '-')) + '</table></section>';
+
+    h += '<section><h3>팔 때 (' + ZW.pct(v.hold, 0) + '년 뒤 예상)</h3><table>' + (base.sale ? row('예상 파는 가격', won(v.sell)) + row(base.sale.gain >= 0 ? '차익 (세금 전)' : '손실', won(Math.abs(base.sale.gain)), base.sale.gain >= 0 ? 'good' : 'bad')
+      + row('집값 대비 / 한 해 평균', P(base.sale.totalPct) + ' / ' + P(base.sale.yearPct, 2)) + (v.deposit > 0 ? row('전세 끼면 내 돈 대비 / 한 해', P(base.sale.minePct) + ' / ' + P(base.sale.mineYearPct, 2)) : '') : row('예상 가격 미입력', '-')) + '</table></section>';
+
+    var cy = base.cy || {};
+    h += '<section><h3>청약 가점</h3><table>' + row('무주택 기간', (cy.noHouse || 0) + ' / 32점') + row('부양가족', (cy.family || 0) + ' / 35점') + row('통장 가입 기간', (cy.account || 0) + ' / 17점')
+      + row('합계', (cy.total || 0) + ' / 84점') + '</table></section>';
+
+    h += '<section><h3>상담 메모</h3><div class="memo" data-client="memo"></div></section>';
+    h += '</div>'; // end .cols
+
+    // 켜진 묶음 결과 구역
+    var activeBundlesHtml = '';
+
+    // 1. 대출 더 보기
+    if (use.loanPlus && r.loanPlus) {
+      var lp = r.loanPlus;
+      activeBundlesHtml += '<section class="bundle-sec"><h3>대출 더 보기 <span class="sub-who">(' + whoHome + ')</span></h3><table>';
+      if (lp.compare) {
+        activeBundlesHtml += row('상환 방식 비교', '원리금균등 월 ' + won(lp.compare.equalMonthly) + ' / 원금균등 첫달 ' + won(lp.compare.pFirst) + ' (총이자 차이 ' + won(lp.compare.diff) + ')');
+      }
+      if (lp.prepay) {
+        activeBundlesHtml += row('중도상환 시 (' + won(v.prepayAmount) + ')', '월 ' + won(lp.prepay.monthSave) + ' 절감 · 총이자 ' + won(lp.prepay.interestSave) + ' 절감');
+      }
+      if (lp.refi) {
+        var beStr = isFinite(lp.refi.breakeven) ? lp.refi.breakeven + '개월 후' : '-';
+        activeBundlesHtml += row('대환(새 금리 ' + P(v.newRate) + ')', '월 ' + won(lp.refi.monthSave) + ' 절감 · 비용 ' + won(lp.refi.cost) + ' · 손익분기 ' + beStr);
+      }
+      if (lp.grace) {
+        activeBundlesHtml += row('거치 기간 (' + ZW.pct(v.graceYears, 0) + '년)', '거치 중 월 ' + won(lp.grace.during) + ' / 거치 후 월 ' + won(lp.grace.after));
+      }
+      if (lp.balanceAfter) {
+        activeBundlesHtml += row(ZW.pct(v.afterYears, 0) + '년 뒤 잔액', '남은 원금 ' + won(lp.balanceAfter.balance) + ' (낸 이자 합계 ' + won(lp.balanceAfter.paidInterest) + ')');
+      }
+      if (lp.rateUp1) {
+        activeBundlesHtml += row('금리 1%p 상승 시', won(lp.rateUp1.after) + ' (+' + won(lp.rateUp1.diff) + ')');
+      }
+      activeBundlesHtml += '</table></section>';
+    }
+
+    // 2. 전월세 · 투자
+    if (use.rent && r.rent) {
+      var rt = r.rent;
+      activeBundlesHtml += '<section class="bundle-sec"><h3>전월세 · 투자 <span class="sub-who">(' + whoHome + ')</span></h3><table>';
+      if (rt.gap) {
+        activeBundlesHtml += row('갭투자 (매매 − 전세)', '갭 ' + won(rt.gap.gap) + ' (전세가율 ' + P(rt.gap.ratio) + ')');
+      }
+      if (rt.toWolse != null) {
+        activeBundlesHtml += row('전세 보증금 → 월세 전환', won(rt.toWolse) + ' / 월 (전환율 ' + P(v.conv) + ')');
+      }
+      if (rt.toJeonse != null && v.wolse > 0) {
+        activeBundlesHtml += row('월세 조건 전세 환산', won(rt.toJeonse));
+      }
+      if (rt.yield) {
+        activeBundlesHtml += row('임대 수익률', P(rt.yield.pct, 2) + ' (연 순소득 ' + won(rt.yield.net) + ' / 실투자 ' + won(rt.yield.mine) + ')');
+      }
+      if (rt.rti) {
+        var rtiVal = checkOk(rt.rti, function (o) { return o.rti + '배 (' + P(o.rtiPct, 1) + ') · 연 이자 ' + won(o.interestYear); });
+        activeBundlesHtml += row('RTI (임대업이자상환비율)', rtiVal);
+      }
+      if (rt.raise) {
+        activeBundlesHtml += row('보증금·월세 ' + P(v.raisePct) + ' 인상', '보증금 ' + won(rt.raise.deposit) + '(+' + won(rt.raise.dDiff) + ') / 월세 ' + won(rt.raise.wolse) + '(+' + won(rt.raise.wDiff) + ')');
+      }
+      if (rt.jvw) {
+        var winStr = rt.jvw.winner === 'jeonse' ? '전세가 월 ' + won(rt.jvw.diff) + ' 유리' : rt.jvw.winner === 'wolse' ? '월세가 월 ' + won(rt.jvw.diff) + ' 유리' : '비용 동일';
+        activeBundlesHtml += row('전세 vs 월세 비교', winStr + ' (대출이자 ' + won(rt.jvw.interest) + ' vs 월세 ' + won(rt.jvw.wolse) + ')');
+      }
+      if (rt.housing) {
+        var hPct = isFinite(rt.housing.pct) ? ', 소득의 ' + P(rt.housing.pct) : '';
+        activeBundlesHtml += row('한 달 주거비용 합계', won(rt.housing.total) + ' (연 ' + won(rt.housing.year) + hPct + ')');
+      }
+      if (rt.mgmt && rt.mgmt.perPyeong > 0) {
+        activeBundlesHtml += row('관리비 단가', '평당 ' + won(rt.mgmt.perPyeong) + ' (㎡당 ' + won(rt.mgmt.perM2) + ')');
+      }
+      activeBundlesHtml += '</table></section>';
+    }
+
+    // 3. 경매
+    if (use.auction && r.auction) {
+      var ac = r.auction;
+      activeBundlesHtml += '<section class="bundle-sec"><h3>경매 분석 <span class="sub-who">(' + whoHome + ')</span></h3><table>';
+      activeBundlesHtml += row('예상 낙찰가', won(v.bidPrice));
+      if (ac.loan) {
+        var lLimit = checkOk(ac.loan, function (o) { return won(o.loanLimit); });
+        var eqVal = checkOk(ac.loan, function (o) { return won(o.equity); });
+        activeBundlesHtml += row('경락잔금대출 (LTV ' + P(v.auctionLtv, 0) + ')', lLimit);
+        activeBundlesHtml += row('필요 자기자본 (비용 포함)', eqVal);
+      }
+      if (ac.cost) {
+        var cTotal = checkOk(ac.cost, function (o) { return won(o.totalWithBid) + ' (취득세 ' + won(o.buyCost) + ' + 기타 ' + won(o.extras) + ')'; });
+        activeBundlesHtml += row('경매 총 취득비용 합계', cTotal);
+      }
+      if (ac.bid) {
+        var maxB = checkOk(ac.bid, function (o) { return won(o.maxBid) + ' (목표수익 ' + won(v.targetProfit) + ' 달성)'; });
+        activeBundlesHtml += row('적정 입찰가 역산 (매도가 ' + won(v.salePrice) + ')', maxB);
+      }
+      if (ac.deposit) {
+        var depB = checkOk(ac.deposit, function (o) { return won(o.deposit) + ' (' + P(v.depositPct, 0) + ')'; });
+        activeBundlesHtml += row('입찰 보증금 (최저가 ' + won(v.minPrice) + ')', depB);
+      }
+      activeBundlesHtml += '</table></section>';
+    }
+
+    // 4. 단지 · 재건축
+    if (use.complex && r.complex) {
+      var cx = r.complex;
+      activeBundlesHtml += '<section class="bundle-sec"><h3>단지 · 재건축 <span class="sub-who">(' + whoHome + ')</span></h3><table>';
+      if (cx.rebuild) {
+        var rbStr = checkOk(cx.rebuild, function (o) { return o.passed ? '연한 도래 완료 (' + o.eligibleYear + '년, ' + Math.abs(o.remaining) + '년 경과)' : o.eligibleYear + '년 예정 (' + o.remaining + '년 남음)'; });
+        activeBundlesHtml += row('재건축 연한 (' + ZW.pct(v.requiredYears, 0) + '년 기준)', rbStr);
+      }
+      if (cx.land) {
+        var lStr = checkOk(cx.land, function (o) { return ZW.pct(o.landM2, 2) + '㎡ (약 ' + ZW.pct(o.pyeong, 2) + '평, 지분율 ' + P(o.ratioPct, 2) + ')'; });
+        activeBundlesHtml += row('내 대지지분', lStr);
+      }
+      if (cx.perPyeong) {
+        activeBundlesHtml += row('평당 가격 / ㎡당 가격', won(cx.perPyeong.perPyeong) + ' / ' + won(cx.perPyeong.perM2));
+      }
+      if (cx.exclusive && isFinite(cx.exclusive.pct)) {
+        activeBundlesHtml += row('전용률', P(cx.exclusive.pct, 1) + ' (공급 ' + ZW.pct(v.supplyM2, 1) + '㎡ / 전용 ' + ZW.pct(v.m2, 1) + '㎡)');
+      }
+      if (cx.landRatio) {
+        activeBundlesHtml += row('건폐율 / 용적률', '건폐율 ' + P(cx.landRatio.cover, 1) + ' / 용적률 ' + P(cx.landRatio.floor, 1));
+      }
+      activeBundlesHtml += '</table></section>';
+    }
+
+    // 5. 투자 · 상속 · 감정
+    if (use.extra && r.extra) {
+      var ex = r.extra;
+      activeBundlesHtml += '<section class="bundle-sec"><h3>투자 · 상속 · 감정 <span class="sub-who">(' + whoHome + ')</span></h3><table>';
+      if (ex.remodel) {
+        var rmStr = checkOk(ex.remodel, function (o) { return won(o.profit) + ' (수익률 ' + P(o.roiPct, 1) + (o.annualRoiPct != null ? ', 연 ' + P(o.annualRoiPct, 1) : '') + ') / 총투자 ' + won(o.invest); });
+        activeBundlesHtml += row('리모델링/플립 세전이익', rmStr);
+      }
+      if (ex.residual) {
+        var rsStr = checkOk(ex.residual, function (o) { return won(o.currentValue) + ' (감가누계 ' + won(o.accumulated) + ', 연 ' + won(o.annualDep) + ')'; });
+        activeBundlesHtml += row('건물 잔존가치 (정액법)', rsStr);
+      }
+      if (ex.inherit) {
+        var ihStr = checkOk(ex.inherit, function (o) { return o.rows.map(function (rw) { return rw.who + (rw.count > 1 ? ' 각' : '') + ' ' + won(rw.amountEach) + ' (' + rw.weight + '지분)'; }).join(' / '); });
+        activeBundlesHtml += row('법정 상속 지분 (' + won(v.inherit.estate) + ')', ihStr);
+      }
+      if (ex.appraisal) {
+        if (ex.appraisal.direct) {
+          activeBundlesHtml += row('수익환원법 가치 (직접환원)', checkOk(ex.appraisal.direct, function (o) { return won(o.value) + ' (Cap Rate ' + P(v.appraisal.capRatePct) + ')'; }));
+        }
+        if (ex.appraisal.cost) {
+          activeBundlesHtml += row('원가법 가치 (재조달원가)', checkOk(ex.appraisal.cost, function (o) { return won(o.value) + ' (감가상각률 ' + P(o.depRatePct, 1) + ')'; }));
+        }
+        if (ex.appraisal.comparable) {
+          activeBundlesHtml += row('거래사례비교가액', checkOk(ex.appraisal.comparable, function (o) { return won(o.total) + ' (㎡당 ' + won(o.unitPrice) + ', 보정치 ' + o.factor + ')'; }));
+        }
+      }
+      if (ex.installments) {
+        activeBundlesHtml += row('분양대금 납부 일정', '계약금 ' + won(ex.installments.down) + ' / 중도금 회당 ' + won(ex.installments.midEach) + ' (' + ex.installments.count + '회) / 잔금 ' + won(ex.installments.rest));
+      }
+      if (ex.saving != null) {
+        activeBundlesHtml += row('내집마련 목표 저축', isFinite(ex.saving) ? '약 ' + ex.saving + '개월 (약 ' + (ex.saving / 12).toFixed(1) + '년)' : '달성 불가 또는 미입력');
+      }
+      activeBundlesHtml += '</table></section>';
+    }
+
+    if (activeBundlesHtml) {
+      h += '<div class="bundle-cols">' + activeBundlesHtml + '</div>';
+    }
+
+    // 다음 할 일
+    h += '<section class="todo"><h3>다음 할 일 (필수)</h3><ul>'
+      + '<li>☐ <b>' + dd + '까지(일주일 안에) 은행 두 군데 이상</b>에서 대출이 얼마 나오는지 상담받고 오세요.</li>'
+      + '<li>☐ 자기 자본(가진 돈) ' + won(v.cash) + ' — 바로 쓸 수 있는 돈인지 통장으로 확인해 오세요.</li>'
+      + (job === 'biz' ? '<li>☐ <b>사업자</b>: 최근 3개월 매출 증빙(세금계산서)을 준비하세요. 입주 후 보통 6개월 뒤 1억~2억 원 정도 추가 대출이 나오는 경우가 있습니다(은행·매출에 따라 다름).</li>' : '')
+      + '</ul><table class="bank"><tr><td style="width:22%">은행</td><td style="width:22%">한도</td><td style="width:14%">금리</td><td>조건·메모</td></tr><tr><td></td><td></td><td></td><td></td></tr><tr><td></td><td></td><td></td><td></td></tr></table>'
+      + '<div class="warn">⚠ 주의: 대출 한도·금리 등 조건값이 이 상담지와 달라지면 예약은 무조건 취소됩니다. 대출 여력과 금리 조건을 가장 먼저 확인하세요.</div></section>';
+
+    h += '<p class="fine">※ 넣은 값으로만 계산한 참고 자료이며 대출 승인·수익을 보장하지 않습니다. LTV·DSR·한도는 지역·상품·정부 발표에 따라 다르고 스트레스 DSR은 반영하지 않았습니다. 차익은 양도소득세·대출 이자 전 금액입니다. 청약 가점은 주택공급에 관한 규칙 [별표 1] 기준이며 실제 판정은 청약홈을 따르세요.</p>';
+
+    $('sheet').innerHTML = h;
+    var clientText = { home: home || '보는 집: ________________', who: who ? who + ' 님' : '',
+      context: (who ? who + ' 님 · ' : '') + (home || '보는 집'), memo: $('memo').value || '(상담 메모 없음)' };
+    $('sheet').querySelectorAll('[data-client]').forEach(function (el) {
+      el.textContent = clientText[el.dataset.client];
+    });
+    fit();
+  };
+
+  // 모바일 화면 폭에 맞춰 축소 배율만 맞춤 (글씨 크기는 줄이지 않고 다장 출력 유지)
+  var fit = function () {
+    var sh = $('sheet'), wrap = sh.parentNode;
+    if (document.body.classList.contains('pad-view') || window.innerWidth < 700) {
+      sh.style.transform = 'none'; sh.style.fontSize = ''; wrap.style.height = '';
+      return;
+    }
+    sh.style.transform = 'none';
+    var s = Math.min(1, wrap.clientWidth / sh.offsetWidth);
+    sh.style.transform = s < 1 ? 'scale(' + s + ')' : '';
+    wrap.style.height = s < 1 ? Math.ceil(sh.offsetHeight * s) + 'px' : '';
+  };
+
+  // 이메일 본문 생성
+  var buildMailText = function () {
+    if (!lastData) render();
+    var v = lastData.v, r = lastData.r, d = lastData.d, dd = lastData.dd;
+    var base = r.base || {};
+    var who = $('who').value.trim(), home = $('home').value.trim(), memo = $('memo').value.trim();
+
+    var lines = [
+      '[좌표나라 부동산 상담 종합 한 장 정리]',
+      '상담일: ' + d + (who ? ' · 손님: ' + who + ' 님' : ''),
+      '보는 집: ' + (home || '(미입력)'),
+      '',
+      '■ 핵심 요약',
+      '- 빌릴 수 있는 돈: ' + big(base.loan) + ' (' + won(base.loan) + ')',
+      '- 한 달 상환액(원리금균등): ' + won(base.monthly),
+      '- ' + (base.left >= 0 ? '가진 돈에서 남는 돈: ' : '모자라는 돈: ') + big(base.left) + ' (' + won(Math.abs(base.left)) + ')',
+      '- 살 수 있는 집값 최대: ' + (base.maxPrice > 0 ? big(base.maxPrice) + ' (' + won(base.maxPrice) + ')' : '-'),
+      '',
+      '■ 집 및 대출 상세',
+      '- 집값: ' + won(v.price) + ' / 전용면적: ' + (v.m2 ? ZW.pct(v.m2) + '㎡ (약 ' + ZW.pct(base.pyeong) + '평)' : '-') + ' / 평당가: ' + (base.perPyeong ? won(base.perPyeong) : '-'),
+      '- 부대비용(취득세·중개보수 등): ' + won(v.cost),
+      '- 대출 한도: 최대 ' + won(base.maxLoan) + ' (' + base.why + ' 기준 / LTV ' + ZW.pct(v.ltv, 0) + '%·DSR ' + ZW.pct(v.dsr, 0) + '%)',
+      '- 상환 조건(' + ZW.pct(v.rate, 2).replace(/\.?0+$/, '') + '%, ' + ZW.pct(v.years, 0) + '년): 원리금균등 월 ' + won(base.monthly) + ' / 원금균등 첫 달 ' + won(base.epFirst),
+      '- 직접 살 때 필요한 내 돈: ' + won(base.need) + ' (가진 돈 ' + won(v.cash) + ')',
+      v.deposit > 0 ? ('- 전세 끼고 살 때(보증금 ' + won(v.deposit) + ', 전세가율 ' + P(base.jeonseRatio) + '): 필요한 내 돈 ' + won(base.gapNeed)) : '- 전세 끼고 살 때: 해당 없음',
+      base.sale ? ('- ' + ZW.pct(v.hold, 0) + '년 뒤 예상 파는 가격 ' + won(v.sell) + ' 기준 세전 ' + (base.sale.gain >= 0 ? '차익 ' : '손실 ') + won(Math.abs(base.sale.gain))) : '- 예상 파는 가격: 미입력',
+      '- 청약 가점: 합계 ' + (base.cy ? base.cy.total : 0) + ' / 84점'
+    ];
+
+    if (v.use.loanPlus && r.loanPlus) {
+      lines.push('', '■ 대출 더 보기');
+      if (r.loanPlus.compare) lines.push('- 원리금균등 월 ' + won(r.loanPlus.compare.equalMonthly) + ' vs 원금균등 첫달 ' + won(r.loanPlus.compare.pFirst));
+      if (r.loanPlus.prepay) lines.push('- 중도상환 시(' + won(v.prepayAmount) + '): 월 ' + won(r.loanPlus.prepay.monthSave) + ' 절감');
+      if (r.loanPlus.refi) lines.push('- 대환(새 금리 ' + P(v.newRate) + '): 월 ' + won(r.loanPlus.refi.monthSave) + ' 절감');
+    }
+
+    if (v.use.rent && r.rent) {
+      lines.push('', '■ 전월세 · 투자');
+      if (r.rent.gap) lines.push('- 갭 ' + won(r.rent.gap.gap) + ' (전세가율 ' + P(r.rent.gap.ratio) + ')');
+      if (r.rent.yield) lines.push('- 임대수익률: ' + P(r.rent.yield.pct, 2) + ' (연 순소득 ' + won(r.rent.yield.net) + ')');
+    }
+
+    if (v.use.auction && r.auction) {
+      lines.push('', '■ 경매 분석');
+      lines.push('- 예상 낙찰가: ' + won(v.bidPrice));
+      if (r.auction.cost) lines.push('- 경매 총 취득비용: ' + checkOk(r.auction.cost, function (o) { return won(o.totalWithBid); }));
+      if (r.auction.bid) lines.push('- 적정 입찰가 역산: ' + checkOk(r.auction.bid, function (o) { return won(o.maxBid); }));
+    }
+
+    if (v.use.complex && r.complex) {
+      lines.push('', '■ 단지 · 재건축');
+      if (r.complex.rebuild) lines.push('- 재건축: ' + checkOk(r.complex.rebuild, function (o) { return o.passed ? '연한 도래 완료' : o.eligibleYear + '년 예정'; }));
+      if (r.complex.land) lines.push('- 대지지분: ' + checkOk(r.complex.land, function (o) { return ZW.pct(o.landM2, 2) + '㎡ (약 ' + ZW.pct(o.pyeong, 2) + '평)'; }));
+    }
+
+    if (v.use.extra && r.extra) {
+      lines.push('', '■ 투자 · 상속 · 감정');
+      if (r.extra.remodel) lines.push('- 리모델링 세전이익: ' + checkOk(r.extra.remodel, function (o) { return won(o.profit) + ' (수익률 ' + P(o.roiPct, 1) + ')'; }));
+      if (r.extra.inherit) lines.push('- 법정 상속: ' + checkOk(r.extra.inherit, function (o) { return o.rows.map(function (rw) { return rw.who + ' ' + won(rw.amountEach); }).join(' / '); }));
+    }
+
+    if (memo) lines.push('', '■ 상담 메모', memo);
+
+    lines.push(
+      '',
+      '■ 다음 할 일 (필수)',
+      '1) ' + dd + '까지(일주일 안에) 은행 두 군데 이상에서 대출 한도·금리 상담받기',
+      '2) 자기 자본(가진 돈) ' + won(v.cash) + ' 통장 확인',
+      job === 'biz' ? '3) 사업자: 최근 3개월 매출 증빙(세금계산서) 준비' : '',
+      '※ 주의: 대출 한도·금리 등 조건값이 이 상담지와 달라지면 예약은 무조건 취소됩니다.',
+      '※ 본 내용은 입력값 기준 참고 자료이며 대출 승인·수익을 보장하지 않습니다.',
+      '좌표나라 https://jwapyonara.com/sangdam2/'
+    );
+
+    var subj = '[좌표나라 부동산 상담 종합] ' + (home ? home + ' ' : '') + (who ? who + ' 님 ' : '') + '상담 정리 (' + d + ')';
+    return { to: $('email').value.trim(), subject: subj, body: lines.filter(Boolean).join('\n') };
+  };
+
+  var sendMail = function () {
+    var m = buildMailText();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(m.body).catch(function () {});
+    }
+    var msg = $('mailMsg');
+    if (msg) {
+      msg.style.display = 'block';
+      msg.textContent = '✓ 이메일 창을 열었습니다 (상담 내용이 클립보드에도 복사되어 카톡·메일에 바로 붙여넣을 수 있습니다)';
+      clearTimeout(window.__mailTimer);
+      window.__mailTimer = setTimeout(function () { msg.style.display = 'none'; }, 5000);
+    }
+    location.href = 'mailto:' + encodeURIComponent(m.to) + '?subject=' + encodeURIComponent(m.subject) + '&body=' + encodeURIComponent(m.body);
+  };
+
+  var togglePadView = function (on) {
+    if (on) document.body.classList.add('pad-view');
+    else document.body.classList.remove('pad-view');
+    fit();
+    window.scrollTo(0, 0);
+  };
+
+  window.addEventListener('resize', fit);
+  window.addEventListener('beforeprint', function () { $('sheet').style.transform = 'none'; });
+  window.addEventListener('afterprint', fit);
+
+  // 기본 돈 칸
+  ['price', 'cost', 'cash', 'income', 'other', 'cap', 'want', 'deposit', 'sell'].forEach(function (id) {
+    get[id] = ZW.money(id, render);
+  });
+  // 기본 숫자 칸
+  [['m2', 1000], ['ltv', 100], ['dsr', 100], ['rate', 30], ['years', 50], ['hold', 50], ['noHouse', 80], ['family', 20], ['account', 80]].forEach(function (a) {
+    get[a[0]] = ZW.number(a[0], render, a[1]);
+  });
+
+  // 1. 대출 더 보기 칸
+  ['prepayAmount', 'refiOtherCost'].forEach(function (id) { get[id] = ZW.money(id, render); });
+  [['newRate', 30], ['refiFeePct', 20], ['graceYears', 30], ['afterYears', 50]].forEach(function (a) { get[a[0]] = ZW.number(a[0], render, a[1]); });
+
+  // 2. 전월세 · 투자 칸
+  ['wolse', 'rentLoanAmt', 'mine', 'mgmtFee', 'etcCost'].forEach(function (id) { get[id] = ZW.money(id, render); });
+  [['rentLoanRate', 30], ['conv', 30], ['raisePct', 50]].forEach(function (a) { get[a[0]] = ZW.number(a[0], render, a[1]); });
+
+  // 3. 경매 칸
+  ['bidPrice', 'legalFee', 'evictionCost', 'repair', 'unpaidDues', 'movingCost', 'auction_salePrice', 'auction_sellCost', 'auction_otherCost', 'targetProfit', 'minPrice'].forEach(function (id) {
+    get[id] = ZW.money(id, render);
+  });
+  [['auctionLtv', 100], ['buyCostPct', 30], ['depositPct', 50]].forEach(function (a) { get[a[0]] = ZW.number(a[0], render, a[1]); });
+
+  // 4. 단지 · 재건축 칸
+  [['builtYear', 2100], ['thisYear', 2100], ['requiredYears', 100], ['totalLandM2', 10000000], ['totalExclusiveM2', 10000000], ['supplyM2', 10000], ['landM2', 10000000], ['buildingM2', 10000000], ['totalFloorM2', 10000000]].forEach(function (a) {
+    get[a[0]] = ZW.number(a[0], render, a[1]);
+  });
+
+  // 5. 투자 · 상속 · 감정 칸
+  ['rm_buyPrice', 'rm_buyCost', 'rm_remodelCost', 'rm_otherCost', 'rm_salePrice', 'rm_sellCost', 'rs_cost', 'ih_estate', 'ap_noiYear', 'ap_replacementCost', 'ap_casePricePerM2', 'sv_target', 'sv_have', 'sv_perMonth'].forEach(function (id) {
+    get[id] = ZW.money(id, render);
+  });
+  [['rm_months', 240], ['rs_salvagePct', 100], ['rs_usefulLife', 100], ['rs_elapsedYears', 100], ['ih_children', 20], ['ih_parents', 10], ['ap_capRatePct', 100], ['ap_usefulLife', 100], ['ap_elapsedYears', 100], ['ap_salvagePct', 100], ['ap_circumstance', 10], ['ap_timeAdj', 10], ['ap_regional', 10], ['ap_individual', 10], ['ins_downPct', 100], ['ins_midPct', 100], ['ins_midCount', 30], ['sv_yearReturnPct', 100]].forEach(function (a) {
+    get[a[0]] = ZW.number(a[0], render, a[1]);
+  });
+
+  // 손님·메모 텍스트 입력
+  ['who', 'email', 'home', 'memo'].forEach(function (id) { $(id).addEventListener('input', render); });
+
+  // 5개 묶음 체크박스
+  ['use_loanPlus', 'use_rent', 'use_auction', 'use_complex', 'use_extra'].forEach(function (id) {
+    $(id).addEventListener('change', render);
+  });
+
+  // 단추 이벤트
+  $('padBtn').addEventListener('click', function () { togglePadView(true); });
+  $('padBackBtn').addEventListener('click', function () { togglePadView(false); });
+  $('mailBtn').addEventListener('click', sendMail);
+  $('padMailBtn').addEventListener('click', sendMail);
+  $('newBtn').addEventListener('click', function () {
+    ['who', 'email', 'home', 'memo'].forEach(function (id) { $(id).value = ''; });
+    render();
+    $('who').focus();
+  });
+
+  // 세그먼트 버튼들
+  var b = $('houseSeg').querySelectorAll('button');
+  for (var i = 0; i < b.length; i++) b[i].addEventListener('click', function () {
+    for (var j = 0; j < b.length; j++) b[j].className = '';
+    this.className = 'on'; house = this.getAttribute('data-t'); render();
+  });
+
+  var jb = $('jobSeg').querySelectorAll('button');
+  for (var q = 0; q < jb.length; q++) jb[q].addEventListener('click', function () {
+    for (var j = 0; j < jb.length; j++) jb[j].className = '';
+    this.className = 'on'; job = this.getAttribute('data-t'); render();
+  });
+
+  var sb = $('spouseSeg').querySelectorAll('button');
+  for (var s = 0; s < sb.length; s++) sb[s].addEventListener('click', function () {
+    for (var j = 0; j < sb.length; j++) sb[j].className = '';
+    this.className = 'on'; hasSpouse = this.getAttribute('data-t') === 'yes'; render();
+  });
+
+  // 초기 렌더링
+  render();
+
+  if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) {
+    navigator.serviceWorker.register("../sw.js").catch(function () {});
+  }
+})();
+</script>
+</body>
+</html>
