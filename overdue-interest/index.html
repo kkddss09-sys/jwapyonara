@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>연체이자 계산기 — 밀린 돈 이자 얼마인지 | 좌표나라</title>
+<meta name="description" content="원금·연 이율·연체 일수나 날짜를 넣으면 연체이자를 계산합니다. 임대료·대여금 연체에도 씁니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.seg button { min-height:48px; }
+.inp input[type="date"] { text-align:left; font-size:17px; padding:12px 0; }
+.hint-text { font-size:12px; color:var(--sub); margin-left:4px; font-weight:normal; }
+.mode-panel { margin-top:14px; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>연체이자 계산기<br>밀린 돈 이자는?</h1>
+  <p class="lead">밀린 돈과 이율, 기간을 넣으면 이자를 보여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub">-</div>
+    <dl class="rows">
+      <div><dt>밀린 원금</dt><dd id="rowPrincipal">-</dd></div>
+      <div><dt>적용 연이율</dt><dd id="rowRate">-</dd></div>
+      <div><dt>연체 일수</dt><dd id="rowDays">-</dd></div>
+      <div><dt>연체이자</dt><dd id="rowInterest">-</dd></div>
+      <div><dt>총 상환 금액 (원금+이자)</dt><dd id="rowTotal">-</dd></div>
+      <div><dt>하루당 이자 (어림)</dt><dd id="rowPerDay">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="principal">밀린 원금</label>
+      <div class="inp">
+        <input id="principal" inputmode="numeric" value="10,000,000">
+        <span>원</span>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label for="annualRate">연체 이자율 <span class="hint-text">(예시)</span></label>
+      <div class="inp">
+        <input id="annualRate" inputmode="decimal" value="12">
+        <span>%</span>
+      </div>
+      <div class="chips">
+        <button type="button" data-rate="5">민법 5%</button>
+        <button type="button" data-rate="6">상법 6%</button>
+        <button type="button" data-rate="12" class="on">예시 12%</button>
+        <button type="button" data-rate="20">법정최고 20%</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:18px;">
+      <label>연체 기간 계산 방식</label>
+      <div class="seg two" id="modeSeg">
+        <button type="button" class="on" data-mode="days">일수로 입력</button>
+        <button type="button" data-mode="dates">시작일·종료일 지정</button>
+      </div>
+    </div>
+
+    <!-- 일수 입력 패널 -->
+    <div id="panelDays" class="mode-panel">
+      <div class="field">
+        <label for="days">연체 일수</label>
+        <div class="inp">
+          <input id="days" inputmode="numeric" value="30">
+          <span>일</span>
+        </div>
+        <div class="chips">
+          <button type="button" data-days="15">15일</button>
+          <button type="button" data-days="30">30일</button>
+          <button type="button" data-days="60">60일</button>
+          <button type="button" data-days="90">90일</button>
+          <button type="button" data-days="180">180일</button>
+          <button type="button" data-days="365">1년 (365일)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 날짜 입력 패널 -->
+    <div id="panelDates" class="mode-panel" style="display:none;">
+      <div class="field">
+        <label for="startDate">연체 시작일 (기산일)</label>
+        <div class="inp">
+          <input type="date" id="startDate">
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px;">
+        <label for="endDate">연체 종료일 (상환일)</label>
+        <div class="inp">
+          <input type="date" id="endDate">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 참고용 계산이며 실제 금액은 해당 기관·전문가에게 확인하세요. 계약서의 약정 이율이나 법정 이율(민법 연 5%, 상법 연 6%, 소송촉진법 등)에 따라 다를 수 있으며, 윤년 구분 없이 1년을 365일로 계산한 단순 일할 계산 결과입니다.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>연체이자:</b> 밀린 원금 × (연 이율 ÷ 100) × (연체 일수 ÷ 365) (원 단위 반올림)</li>
+      <li><b>총 상환 금액:</b> 밀린 원금 + 연체이자</li>
+      <li><b>연체 일수:</b> 시작일부터 종료일까지의 경과 일수(종료일 − 시작일)로 계산합니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>약정한 이율이 없을 때 법정 연체이율은 얼마인가요?</summary>
+    <p>계약서에 별도 연체이자 약정이 없는 경우 민사 채무는 민법상 연 5%, 상거래 채무는 상법상 연 6%가 기본 적용됩니다. 법원 소송 판결 후에는 소송촉진 등에 관한 특례법에 따른 법정 지연손해금 이율(현재 연 12%)이 적용될 수 있습니다.</p>
+  </details>
+
+  <details>
+    <summary>연체이자는 단리로 계산되나요, 월복리로 계산되나요?</summary>
+    <p>우리나라 법률과 금융 실무에서는 별도의 특별한 복리 약정이 없는 한 연체이자(지연손해금)를 원금에 대해서만 일할 계산하는 단리 방식을 기본으로 적용합니다. 본 계산기도 일반적인 단리 기준 일할 계산을 따릅니다.</p>
+  </details>
+
+  <details>
+    <summary>연체 시작일과 상환 당일은 날수에 어떻게 포함되나요?</summary>
+    <p>민법상 기간 계산은 '초일 불산입' 원칙에 따라 시작 다음 날부터 계산하는 것이 일반적입니다. 다만 금융기관 대출금 상환 실무나 특약에 따라 상환 당일 포함 여부가 다를 수 있으므로 채권자나 금융사 규정을 확인하세요.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var principal = document.getElementById('principal');
+  var annualRate = document.getElementById('annualRate');
+  var days = document.getElementById('days');
+  var startDate = document.getElementById('startDate');
+  var endDate = document.getElementById('endDate');
+
+  var modeSeg = document.getElementById('modeSeg');
+  var modeButtons = modeSeg.querySelectorAll('button');
+  var panelDays = document.getElementById('panelDays');
+  var panelDates = document.getElementById('panelDates');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowPrincipal = document.getElementById('rowPrincipal');
+  var rowRate = document.getElementById('rowRate');
+  var rowDays = document.getElementById('rowDays');
+  var rowInterest = document.getElementById('rowInterest');
+  var rowTotal = document.getElementById('rowTotal');
+  var rowPerDay = document.getElementById('rowPerDay');
+
+  var currentMode = 'days';
+
+  function parseVal(input) {
+    if (!input || !input.value) return 0;
+    var cleaned = input.value.replace(/,/g, '').trim();
+    if (cleaned === '') return 0;
+    var n = Number(cleaned);
+    return isNaN(n) ? -1 : n;
+  }
+
+  function formatInput(input) {
+    var raw = input.value.replace(/,/g, '').trim();
+    if (raw === '') return;
+    var n = Number(raw);
+    if (!isNaN(n) && n >= 0) {
+      input.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function render() {
+    var p = parseVal(principal);
+    var r = parseVal(annualRate);
+
+    if (p < 0 || r < 0) {
+      showError('원금과 이율을 올바르게 넣어 주세요.');
+      return;
+    }
+
+    if (currentMode === 'days') {
+      var d = parseVal(days);
+      if (d < 0) {
+        showError('연체 일수를 0 이상의 숫자로 넣어 주세요.');
+        return;
+      }
+      var res = calcOverdue(p, r, d);
+      if (!res.ok) {
+        showError('값을 확인해 주세요.');
+        return;
+      }
+      displayResult(p, r, d, res.interest, res.total);
+    } else {
+      if (!startDate.value || !endDate.value) {
+        showInfo('연체 시작일과 종료일을 선택해 주세요.');
+        return;
+      }
+      var resDate = calcOverdueDates(p, r, startDate.value, endDate.value);
+      if (!resDate.ok) {
+        showError('종료일은 시작일보다 같거나 늦은 날짜여야 합니다.');
+        return;
+      }
+      displayResult(p, r, resDate.days, resDate.interest, resDate.total);
+    }
+  }
+
+  function displayResult(p, r, d, interest, total) {
+    resVerdict.innerHTML = '총 연체이자 <em>' + interest.toLocaleString('ko-KR') + '원</em>';
+    resSub.textContent = '원금과 이자를 합한 총 상환 금액은 ' + total.toLocaleString('ko-KR') + '원입니다.';
+
+    rowPrincipal.textContent = p.toLocaleString('ko-KR') + '원';
+    rowRate.textContent = r + '%';
+    rowDays.textContent = d.toLocaleString('ko-KR') + '일';
+    rowInterest.textContent = interest.toLocaleString('ko-KR') + '원';
+    rowTotal.textContent = total.toLocaleString('ko-KR') + '원';
+
+    var perDay = d > 0 ? Math.round(interest / d) : Math.round((p * (r / 100)) / 365);
+    rowPerDay.textContent = '약 ' + perDay.toLocaleString('ko-KR') + '원 / 일';
+  }
+
+  function showError(msg) {
+    resVerdict.textContent = '값을 확인해 주세요';
+    resSub.textContent = msg || '올바른 값을 입력해 주세요.';
+    rowPrincipal.textContent = '-';
+    rowRate.textContent = '-';
+    rowDays.textContent = '-';
+    rowInterest.textContent = '-';
+    rowTotal.textContent = '-';
+    rowPerDay.textContent = '-';
+  }
+
+  function showInfo(msg) {
+    resVerdict.textContent = '날짜를 선택해 주세요';
+    resSub.textContent = msg;
+    rowPrincipal.textContent = '-';
+    rowRate.textContent = '-';
+    rowDays.textContent = '-';
+    rowInterest.textContent = '-';
+    rowTotal.textContent = '-';
+    rowPerDay.textContent = '-';
+  }
+
+  principal.addEventListener('input', render);
+  principal.addEventListener('change', function () {
+    formatInput(principal);
+    render();
+  });
+
+  annualRate.addEventListener('input', render);
+  days.addEventListener('input', render);
+  startDate.addEventListener('change', render);
+  endDate.addEventListener('change', render);
+
+  modeButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      modeButtons.forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      currentMode = btn.getAttribute('data-mode');
+      if (currentMode === 'days') {
+        panelDays.style.display = 'block';
+        panelDates.style.display = 'none';
+      } else {
+        panelDays.style.display = 'none';
+        panelDates.style.display = 'block';
+      }
+      render();
+    });
+  });
+
+  // 이율 칩 단추
+  var rateChips = document.querySelectorAll('.chips button[data-rate]');
+  rateChips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      rateChips.forEach(function (c) { c.classList.remove('on'); });
+      chip.classList.add('on');
+      annualRate.value = chip.getAttribute('data-rate');
+      render();
+    });
+  });
+
+  // 일수 칩 단추
+  var daysChips = document.querySelectorAll('.chips button[data-days]');
+  daysChips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      days.value = chip.getAttribute('data-days');
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

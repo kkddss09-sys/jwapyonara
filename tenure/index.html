@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>근속기간 계산기 — 입사일부터 몇 년 몇 개월 | 좌표나라</title>
+<meta name="description" content="입사일과 퇴사일(또는 오늘)로 근속기간을 몇 년 몇 개월 며칠로 계산합니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.inp input[type="date"] { text-align:left; font-size:17px; padding:12px 0; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>근속기간 계산기<br>몇 년 몇 개월?</h1>
+  <p class="lead">입사일과 기준일을 넣으면 근속기간을 보여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">총 <em>0일</em> 근무</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>근속 연수</dt><dd id="rowYears">-</dd></div>
+      <div><dt>남은 개월</dt><dd id="rowMonths">-</dd></div>
+      <div><dt>남은 일수</dt><dd id="rowDays">-</dd></div>
+      <div><dt>총 일수</dt><dd id="rowTotalDays">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="startYmd">입사일</label>
+      <div class="inp">
+        <input type="date" id="startYmd" value="2020-03-15">
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label for="endYmd">기준일 (오늘 또는 퇴사일)</label>
+      <div class="inp">
+        <input type="date" id="endYmd">
+      </div>
+    </div>
+  </section>
+
+  <p class="note">참고용 계산이며 실제 퇴직금 산정, 연차 계산 등의 근속일수는 취업규칙 및 관련 법령에 따라 차이가 있을 수 있습니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">오늘 시세는 카톡방에서<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>년과 개월:</b> 입사일로부터 매월 같은 날짜가 돌아올 때마다 1개월로 인정하며, 12개월마다 1년으로 환산합니다. (해당 월에 같은 날짜가 없으면 그 달의 마지막 날을 기준으로 삼습니다.)</li>
+      <li><b>남은 일수:</b> 마지막 만 개월 기준일로부터 기준일까지 남은 날짜 수를 계산합니다.</li>
+      <li><b>총 일수:</b> 입사일부터 기준일까지 달력상의 순수 일수 차이(기준일 − 입사일)입니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 31일 입사인데 2월처럼 짧은 달은 어떻게 계산되나요?</summary>
+    <p>해당 월에 같은 날짜가 없는 경우에는 그 달의 마지막 날(2월 28일 또는 윤년 2월 29일)을 만 1개월 도달 시점으로 계산합니다.</p>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 오늘 날짜를 기준일로 두면 오늘 하루도 포함되나요?</summary>
+    <p>본 계산기는 시작일과 종료일 사이의 순수 경과 일수(종료일 − 시작일)로 계산합니다. 회사 사규나 당일 포함 기준에 따라 하루 정도 차이가 있을 수 있습니다.</p>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 퇴직금 정산 시 계속근로기간과 완전히 같은가요?</summary>
+    <p>본 도구는 달력 기준의 기간을 확인하는 참고용 간이 계산기입니다. 실제 퇴직금 산정 시에는 무급휴직 등 제외 기간이나 취업규칙의 구체적 산정 방식에 따라 달라질 수 있습니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var startYmd = document.getElementById('startYmd');
+  var endYmd = document.getElementById('endYmd');
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowYears = document.getElementById('rowYears');
+  var rowMonths = document.getElementById('rowMonths');
+  var rowDays = document.getElementById('rowDays');
+  var rowTotalDays = document.getElementById('rowTotalDays');
+
+  var now = new Date();
+  var y = now.getFullYear();
+  var m = now.getMonth() + 1;
+  var d = now.getDate();
+  var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+  endYmd.value = y + '-' + pad(m) + '-' + pad(d);
+
+  function render() {
+    var r = calcTenure(startYmd.value, endYmd.value);
+    if (!r.ok) {
+      resVerdict.textContent = '날짜를 올바르게 넣어 주세요';
+      resSub.textContent = '기준일이 입사일보다 앞서거나 날짜 형식이 올바르지 않습니다.';
+      rowYears.textContent = '-';
+      rowMonths.textContent = '-';
+      rowDays.textContent = '-';
+      rowTotalDays.textContent = '-';
+      return;
+    }
+
+    var phrase = [];
+    if (r.years > 0) phrase.push(r.years + '년');
+    if (r.months > 0) phrase.push(r.months + '개월');
+    if (r.days > 0 || phrase.length === 0) phrase.push(r.days + '일');
+
+    resVerdict.innerHTML = '총 <em>' + phrase.join(' ') + '</em> 근무';
+    resSub.textContent = '달력 기준 총 ' + r.totalDays.toLocaleString('ko-KR') + '일 동안 재직하셨습니다.';
+
+    rowYears.textContent = r.years + '년';
+    rowMonths.textContent = r.months + '개월';
+    rowDays.textContent = r.days + '일';
+    rowTotalDays.textContent = r.totalDays.toLocaleString('ko-KR') + '일';
+  }
+
+  startYmd.addEventListener('change', render);
+  startYmd.addEventListener('input', render);
+  endYmd.addEventListener('change', render);
+  endYmd.addEventListener('input', render);
+
+  render();
+})();
+</script>
+</body>
+</html>

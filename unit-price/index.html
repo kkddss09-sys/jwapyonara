@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>단위가격 계산기 — 어느 쪽이 더 싼지 비교 | 좌표나라</title>
+<meta name="description" content="두 상품의 가격과 용량을 넣으면 100g(또는 100ml)당 가격을 비교해 더 싼 쪽을 알려 줍니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>단위가격 비교<br>어느 쪽이 더 쌀까?</h1>
+  <p class="lead">두 상품의 가격과 용량을 넣어 보세요.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>상품 A 단위가격</dt><dd id="rowAUnit">-</dd></div>
+      <div><dt>상품 B 단위가격</dt><dd id="rowBUnit">-</dd></div>
+      <div><dt>더 저렴한 상품</dt><dd id="rowCheaper">-</dd></div>
+      <div><dt>가격 차이(절약률)</dt><dd id="rowSavePct">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <h2 style="font-size:16px; margin:0 0 10px;">상품 A</h2>
+    <div class="row2">
+      <div class="field">
+        <label for="aPrice">가격</label>
+        <div class="inp"><input id="aPrice" type="text" inputmode="decimal" value="3,000"><span>원</span></div>
+      </div>
+      <div class="field">
+        <label for="aAmount">용량·수량</label>
+        <div class="inp"><input id="aAmount" type="text" inputmode="decimal" value="500"><span>g·ml</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 style="font-size:16px; margin:0 0 10px;">상품 B</h2>
+    <div class="row2">
+      <div class="field">
+        <label for="bPrice">가격</label>
+        <div class="inp"><input id="bPrice" type="text" inputmode="decimal" value="5,000"><span>원</span></div>
+      </div>
+      <div class="field">
+        <label for="bAmount">용량·수량</label>
+        <div class="inp"><input id="bAmount" type="text" inputmode="decimal" value="1,000"><span>g·ml</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="baseAmount">비교 기준 용량 <small class="hint" style="font-size:12px; color:var(--sub);">(예: 100g, 100ml, 1개당)</small></label>
+      <div class="inp"><input id="baseAmount" type="text" inputmode="decimal" value="100"><span>단위</span></div>
+    </div>
+  </section>
+
+  <p class="note">※ 참고용 계산이며 실제 금액은 해당 기관·판매처에 확인하세요.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>단위가격:</b> 각 상품의 가격을 용량으로 나눈 뒤 비교 기준 용량을 곱해 구합니다. (단위가격 = 가격 ÷ 용량 × 기준 용량)</li>
+      <li><b>절약 비율:</b> 비싼 쪽 단위가격과 싼 쪽 단위가격의 차이를 비싼 쪽 가격으로 나누어 퍼센트(%)로 표시합니다.</li>
+      <li><b>비교 원칙:</b> 두 상품의 용량 단위를 동일하게 맞추고(예: 둘 다 g 또는 ml) 입력해야 정확히 비교됩니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>단위가 g과 kg, ml와 L로 다르면 어떻게 하나요?</summary>
+    <p>두 상품의 단위를 일치시켜서 입력해야 올바른 비교가 됩니다. 예를 들어 500g과 1.5kg을 비교할 때는 1.5kg을 1,500g으로 변환하여 용량 칸에 1500을 넣어 주세요.</p>
+  </details>
+
+  <details>
+    <summary>기준 용량은 왜 기본값이 100인가요?</summary>
+    <p>대형마트의 가격표시제 등에서 100g 또는 100ml당 단가를 표준으로 사용하는 경우가 많기 때문입니다. 1개당 단가를 알고 싶다면 기준 용량을 1로 바꾸어 계산하시면 됩니다.</p>
+  </details>
+
+  <details>
+    <summary>대용량 상품이 항상 더 저렴한가요?</summary>
+    <p>보통 대용량이 경제적이지만, 특가 할인이나 프로모션 행사에 따라 소용량 묶음이 단위당 더 저렴한 경우도 있습니다. 장보실 때 직접 단위가격을 비교해 보시면 합리적인 소비를 할 수 있습니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var elAPrice = document.getElementById('aPrice');
+  var elAAmount = document.getElementById('aAmount');
+  var elBPrice = document.getElementById('bPrice');
+  var elBAmount = document.getElementById('bAmount');
+  var elBaseAmount = document.getElementById('baseAmount');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowAUnit = document.getElementById('rowAUnit');
+  var rowBUnit = document.getElementById('rowBUnit');
+  var rowCheaper = document.getElementById('rowCheaper');
+  var rowSavePct = document.getElementById('rowSavePct');
+
+  function parseVal(input) {
+    if (!input) return 0;
+    var str = String(input.value || '').replace(/,/g, '').trim();
+    var val = parseFloat(str);
+    return isNaN(val) ? 0 : val;
+  }
+
+  function formatInput(input) {
+    var raw = input.value.replace(/,/g, '').trim();
+    if (raw === '') return;
+    var n = parseFloat(raw);
+    if (!isNaN(n) && Number.isInteger(n) && raw.indexOf('.') === -1) {
+      input.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function render() {
+    var aPrice = parseVal(elAPrice);
+    var aAmount = parseVal(elAAmount);
+    var bPrice = parseVal(elBPrice);
+    var bAmount = parseVal(elBAmount);
+    var baseAmount = parseVal(elBaseAmount);
+
+    var res = calcUnitPrice(aPrice, aAmount, bPrice, bAmount, baseAmount);
+    if (!res.ok) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '모든 가격과 용량은 0보다 커야 합니다.';
+      rowAUnit.textContent = '-';
+      rowBUnit.textContent = '-';
+      rowCheaper.textContent = '-';
+      rowSavePct.textContent = '-';
+      return;
+    }
+
+    if (res.cheaper === 'a') {
+      resVerdict.innerHTML = '상품 A가 <em>' + res.savePct.toFixed(2) + '%</em> 더 저렴합니다';
+      resSub.textContent = '기준 ' + baseAmount.toLocaleString('ko-KR') + '당 상품 A가 ' + (res.bUnit - res.aUnit).toLocaleString('ko-KR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + '원 더 쌉니다.';
+      rowCheaper.textContent = '상품 A 선택 유리';
+      rowSavePct.textContent = res.savePct.toFixed(2) + '% 절약';
+    } else if (res.cheaper === 'b') {
+      resVerdict.innerHTML = '상품 B가 <em>' + res.savePct.toFixed(2) + '%</em> 더 저렴합니다';
+      resSub.textContent = '기준 ' + baseAmount.toLocaleString('ko-KR') + '당 상품 B가 ' + (res.aUnit - res.bUnit).toLocaleString('ko-KR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + '원 더 쌉니다.';
+      rowCheaper.textContent = '상품 B 선택 유리';
+      rowSavePct.textContent = res.savePct.toFixed(2) + '% 절약';
+    } else {
+      resVerdict.innerHTML = '두 상품의 단위가격이 <em>동일</em>합니다';
+      resSub.textContent = '기준 ' + baseAmount.toLocaleString('ko-KR') + '당 두 상품의 가격이 같습니다.';
+      rowCheaper.textContent = '동일함';
+      rowSavePct.textContent = '0%';
+    }
+
+    rowAUnit.textContent = res.aUnit.toLocaleString('ko-KR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + '원';
+    rowBUnit.textContent = res.bUnit.toLocaleString('ko-KR', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + '원';
+  }
+
+  [elAPrice, elAAmount, elBPrice, elBAmount, elBaseAmount].forEach(function (inp) {
+    inp.addEventListener('blur', function () { formatInput(inp); });
+    inp.addEventListener('input', render);
+    inp.addEventListener('change', render);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
