@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>기초대사량·하루 칼로리 계산기 | 좌표나라</title>
+<meta name="description" content="성별·나이·키·몸무게로 기초대사량과 하루 권장 열량(활동량 반영)을 계산합니다. 참고용입니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.seg button { min-height:48px; }
+select { -webkit-appearance:none; appearance:none; cursor:pointer; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>하루 칼로리 계산기<br>기초대사량은?</h1>
+  <p class="lead">내 정보와 활동량을 고르면 하루에 쓰는 열량을 보여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>기초대사량 (BMR)</dt><dd id="rowBmr">-</dd></div>
+      <div><dt>하루 유지 칼로리 (TDEE)</dt><dd id="rowTdee">-</dd></div>
+      <div><dt>건강 감량 칼로리 (-500 kcal)</dt><dd id="rowLose500">-</dd></div>
+      <div><dt>건강 증량 칼로리 (+500 kcal)</dt><dd id="rowGain500">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label>성별</label>
+      <div class="seg two" id="sexSeg">
+        <button type="button" class="on" data-val="m">남성</button>
+        <button type="button" data-val="f">여성</button>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="age">나이</label>
+        <div class="inp"><input id="age" type="text" inputmode="decimal" value="30"><span>세</span></div>
+      </div>
+      <div class="field">
+        <label for="heightCm">키</label>
+        <div class="inp"><input id="heightCm" type="text" inputmode="decimal" value="175"><span>cm</span></div>
+      </div>
+    </div>
+    <div class="field">
+      <label for="weightKg">몸무게</label>
+      <div class="inp"><input id="weightKg" type="text" inputmode="decimal" value="70"><span>kg</span></div>
+    </div>
+    <div class="field">
+      <label for="activity">활동량 수준</label>
+      <div class="inp">
+        <select id="activity" style="width:100%; border:0; background:transparent; font:inherit; font-size:16px; font-weight:600; padding:12px 0; color:var(--ink); outline:0;">
+          <option value="1.2">거의 안 움직임 (운동 안 함, 좌식 생활)</option>
+          <option value="1.375" selected>가벼운 활동 (주 1~3회 가벼운 운동)</option>
+          <option value="1.55">보통 활동 (주 3~5회 보통 운동)</option>
+          <option value="1.725">활발한 활동 (주 6~7회 격한 운동)</option>
+          <option value="1.9">매우 활발 (하루 2회 운동 또는 육체 노동)</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 참고용이며 의료·영양 상담을 대신하지 않습니다. 실제 필요한 열량은 개인의 건강 상태와 체질에 따라 다를 수 있습니다.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>미플린-지어(Mifflin-St Jeor) 공식:</b>
+        <br>· 남성: 10 × 체중(kg) + 6.25 × 키(cm) - 5 × 나이 + 5
+        <br>· 여성: 10 × 체중(kg) + 6.25 × 키(cm) - 5 × 나이 - 161
+      </li>
+      <li><b>하루 총 에너지 소비량 (TDEE):</b> 기초대사량(BMR)에 활동 수준 계수(1.2 ~ 1.9)를 곱해 산출합니다.</li>
+      <li><b>감량 권장 칼로리:</b> 하루 500 kcal를 줄여 섭취하면 주당 약 0.5kg의 체중을 무리 없이 감량할 수 있습니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>기초대사량보다 적게 먹으면 살이 더 빨리 빠지나요?</summary>
+    <p>기초대사량 미만으로 섭취를 지나치게 제한하면 몸이 비상 상태로 인식하여 근육을 분해하고 신진대사를 떨어뜨립니다. 이로 인해 요요 현상이 쉽게 올 수 있으므로 최소한 기초대사량 이상을 섭취하는 것이 좋습니다.</p>
+  </details>
+
+  <details>
+    <summary>TDEE(하루 유지 칼로리)란 무엇인가요?</summary>
+    <p>숨만 쉬어도 소비되는 기초대사량에 식사 소화열, 일상적인 활동과 운동으로 소모하는 모든 칼로리를 합한 총 에너지 소비량입니다. 이 수치만큼 음식을 섭취하면 현재 체중이 그대로 유지됩니다.</p>
+  </details>
+
+  <details>
+    <summary>체중을 늘리거나 근육을 키우려면 얼마나 먹어야 하나요?</summary>
+    <p>체중 증량이나 근육량 증가를 원할 경우 TDEE보다 매일 약 300~500 kcal를 더 섭취하는 것이 추천됩니다. 체지방만 늘지 않도록 충분한 단백질 섭취와 규칙적인 근력 운동을 함께 병행해야 합니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var sexSeg = document.getElementById('sexSeg');
+  var elAge = document.getElementById('age');
+  var elHeight = document.getElementById('heightCm');
+  var elWeight = document.getElementById('weightKg');
+  var elActivity = document.getElementById('activity');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowBmr = document.getElementById('rowBmr');
+  var rowTdee = document.getElementById('rowTdee');
+  var rowLose500 = document.getElementById('rowLose500');
+  var rowGain500 = document.getElementById('rowGain500');
+
+  var currentSex = 'm';
+
+  sexSeg.addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var btns = sexSeg.querySelectorAll('button');
+    btns.forEach(function (b) { b.classList.remove('on'); });
+    btn.classList.add('on');
+    currentSex = btn.getAttribute('data-val');
+    render();
+  });
+
+  function parseVal(input) {
+    if (!input) return 0;
+    var str = String(input.value || '').replace(/,/g, '').trim();
+    var val = parseFloat(str);
+    return isNaN(val) ? 0 : val;
+  }
+
+  function render() {
+    var age = parseVal(elAge);
+    var height = parseVal(elHeight);
+    var weight = parseVal(elWeight);
+    var activity = parseFloat(elActivity.value);
+
+    var res = calcCalorie(currentSex, age, height, weight, activity);
+    if (!res.ok) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '나이(10~100세), 키(100~250cm), 몸무게(20~300kg)를 확인해 주세요.';
+      rowBmr.textContent = '-';
+      rowTdee.textContent = '-';
+      rowLose500.textContent = '-';
+      rowGain500.textContent = '-';
+      return;
+    }
+
+    resVerdict.innerHTML = '하루 유지 칼로리 <em>' + res.tdee.toLocaleString('ko-KR') + ' kcal</em>';
+    resSub.textContent = '생명 유지에 필요한 기초대사량은 ' + res.bmr.toLocaleString('ko-KR') + ' kcal입니다.';
+    rowBmr.textContent = res.bmr.toLocaleString('ko-KR') + ' kcal';
+    rowTdee.textContent = res.tdee.toLocaleString('ko-KR') + ' kcal';
+    rowLose500.textContent = (res.lose500 > 0 ? res.lose500.toLocaleString('ko-KR') : '-') + ' kcal';
+    rowGain500.textContent = (res.tdee + 500).toLocaleString('ko-KR') + ' kcal';
+  }
+
+  [elAge, elHeight, elWeight].forEach(function (inp) {
+    inp.addEventListener('input', render);
+    inp.addEventListener('change', render);
+  });
+  elActivity.addEventListener('change', render);
+
+  render();
+})();
+</script>
+</body>
+</html>

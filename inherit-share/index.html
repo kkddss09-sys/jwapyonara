@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>법정상속분 계산기 — 배우자·자녀 상속 비율 | 좌표나라</title>
+<meta name="description" content="배우자와 자녀 수를 넣으면 법정상속분과 상속 금액을 계산합니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.seg button { min-height:48px; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>법정상속분<br>누가 얼마씩?</h1>
+  <p class="lead">가족 구성과 상속재산을 넣으면 법정상속분을 보여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">계산 중입니다</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows" id="resRows"></dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="estate">상속재산 총액</label>
+      <div class="inp">
+        <input id="estate" inputmode="decimal" value="700,000,000">
+        <span>원</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>배우자 여부</label>
+      <div class="seg two" id="spouseSeg">
+        <button type="button" class="on" data-val="true">배우자 있음</button>
+        <button type="button" data-val="false">배우자 없음</button>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="children">자녀 수</label>
+        <div class="inp">
+          <input id="children" inputmode="decimal" value="2">
+          <span>명</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="parents">생존 부모 수</label>
+        <div class="inp">
+          <input id="parents" inputmode="decimal" value="0">
+          <span>명</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 민법상 법정상속분의 간이 계산입니다. 유언, 기여분, 형제자매 등은 반영하지 않았습니다. 참고용 계산이며 실제 금액은 해당 기관·전문가에게 확인하세요.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>1순위: 자녀(직계비속)가 있으면 자녀와 배우자가 상속받습니다(부모는 상속 대상 제외). 이때 배우자는 자녀의 1.5배(가중치 1.5)를 받습니다.</li>
+      <li>2순위: 자녀가 없고 부모(직계존속)가 있으면 부모와 배우자가 상속받습니다. 배우자는 부모의 1.5배를 받습니다.</li>
+      <li>3순위: 자녀와 부모가 모두 없으면 배우자가 단독으로 상속받습니다. 배우자 없이 자녀나 부모만 있으면 균등하게 나눕니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 배우자는 왜 1.5배를 받나요?</summary>
+    <p>대한민국 민법 제1009조에 따르면 피상속인의 배우자는 동순위 상속인(직계비속 또는 직계존속)의 상속분에 5할(50%)을 가산하여 인정받기 때문입니다.</p>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 자녀와 부모가 둘 다 살아계시면 부모도 받나요?</summary>
+    <p>아닙니다. 민법상 직계비속(자녀)이 1순위 상속인이므로 자녀가 한 명이라도 살아 있으면 2순위인 직계존속(부모)에게는 법정상속권이 넘어가지 않습니다.</p>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 빚(채무)도 같은 비율로 나누어지나요?</summary>
+    <p>네, 유언이나 상속재산분할 협의가 따로 없다면 예금이나 부동산뿐만 아니라 피상속인이 남긴 채무도 법정상속분 비율대로 공동상속인에게 승계됩니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var estateInput = document.getElementById('estate');
+  var childrenInput = document.getElementById('children');
+  var parentsInput = document.getElementById('parents');
+  var spouseButtons = document.querySelectorAll('#spouseSeg button');
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var resRows = document.getElementById('resRows');
+
+  var hasSpouse = true;
+
+  function parseMoney(val) {
+    if (!val) return 0;
+    var clean = String(val).replace(/,/g, '').trim();
+    var n = parseFloat(clean);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function formatMoneyInput(el) {
+    var raw = el.value.replace(/,/g, '').trim();
+    if (!raw) return;
+    var n = parseFloat(raw);
+    if (!isNaN(n)) {
+      el.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function render() {
+    var estate = parseMoney(estateInput.value);
+    var children = parseInt(childrenInput.value, 10);
+    var parents = parseInt(parentsInput.value, 10);
+
+    if (isNaN(children) || children < 0) children = 0;
+    if (isNaN(parents) || parents < 0) parents = 0;
+
+    var r = calcInherit(hasSpouse, children, parents, estate);
+    if (!r.ok) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '상속재산은 0원보다 커야 하며, 배우자·자녀·부모 중 1명 이상의 상속인이 있어야 합니다.';
+      resRows.innerHTML = '';
+      return;
+    }
+
+    // verdict 구성
+    var verdictParts = [];
+    for (var i = 0; i < r.rows.length; i++) {
+      var row = r.rows[i];
+      if (row.who === '배우자') {
+        verdictParts.push('배우자 <em>' + row.amountEach.toLocaleString('ko-KR') + '원</em>');
+      } else if (row.who === '자녀') {
+        verdictParts.push('자녀 ' + (row.count > 1 ? '각 ' : '') + '<em>' + row.amountEach.toLocaleString('ko-KR') + '원</em>');
+      } else if (row.who === '부모') {
+        verdictParts.push('부모 ' + (row.count > 1 ? '각 ' : '') + '<em>' + row.amountEach.toLocaleString('ko-KR') + '원</em>');
+      }
+    }
+    resVerdict.innerHTML = verdictParts.join(' / ');
+    resSub.textContent = '총 상속재산 ' + estate.toLocaleString('ko-KR') + '원 기준 법정상속분입니다.';
+
+    resRows.innerHTML = '';
+    for (var i = 0; i < r.rows.length; i++) {
+      var row = r.rows[i];
+      var div = document.createElement('div');
+      var dt = document.createElement('dt');
+      var dd = document.createElement('dd');
+
+      var label = row.who;
+      if (row.count > 1) {
+        label += ' (' + row.count + '명, 지분 ' + row.weight + ')';
+        dd.textContent = '각 ' + row.amountEach.toLocaleString('ko-KR') + '원 (합계 ' + row.amountTotal.toLocaleString('ko-KR') + '원)';
+      } else {
+        label += ' (지분 ' + row.weight + ')';
+        dd.textContent = row.amountEach.toLocaleString('ko-KR') + '원';
+      }
+
+      dt.textContent = label;
+      div.appendChild(dt);
+      div.appendChild(dd);
+      resRows.appendChild(div);
+    }
+  }
+
+  estateInput.addEventListener('input', render);
+  estateInput.addEventListener('blur', function () { formatMoneyInput(estateInput); render(); });
+  childrenInput.addEventListener('input', render);
+  parentsInput.addEventListener('input', render);
+
+  spouseButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      spouseButtons.forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      hasSpouse = btn.getAttribute('data-val') === 'true';
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

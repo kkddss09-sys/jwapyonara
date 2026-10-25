@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>경매 배당 계산기 — 순위대로 얼마씩 받을까 | 좌표나라</title>
+<meta name="description" content="경매로 모인 돈을 채권자 순위대로 나누면 각자 얼마를 받는지 계산합니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.cred-area { width:100%; border:1.5px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink); padding:12px; font:inherit; font-size:16px; line-height:1.6; resize:vertical; min-height:110px; }
+.cred-area:focus { border-color:var(--red); outline:0; }
+.div-table { width:100%; border-collapse:collapse; margin-top:12px; font-size:15px; }
+.div-table th, .div-table td { padding:8px 4px; text-align:right; border-top:1px solid #3a3a3c; }
+.div-table th:first-child, .div-table td:first-child { text-align:left; }
+.div-table th { color:#c7c7cc; font-size:13px; font-weight:600; border-top:none; }
+.div-table tr.short-row td { color:#ffd60a; }
+.div-table tr.zero-row td { color:#8e8e93; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>경매 배당 계산기<br>순위대로 얼마씩?</h1>
+  <p class="lead">배당할 돈과 채권자(이름, 금액, 순위)를 적으면 받는 돈을 계산합니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">배당 결과를 계산 중입니다</div>
+    <div class="sub" id="resSub"></div>
+    <div id="tableWrap">
+      <table class="div-table">
+        <thead>
+          <tr>
+            <th>채권자</th>
+            <th>청구액</th>
+            <th>배당액</th>
+            <th>부족액</th>
+          </tr>
+        </thead>
+        <tbody id="rowsBody"></tbody>
+      </table>
+    </div>
+    <dl class="rows" style="margin-top:14px;">
+      <div><dt>배당 후 남은 돈</dt><dd id="rowRemaining">0원</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="fund">배당할 돈</label>
+      <div class="inp">
+        <input id="fund" inputmode="decimal" value="500,000,000">
+        <span>원</span>
+      </div>
+    </div>
+    <div class="field">
+      <label for="creditorsText">채권자 목록 <span class="help" style="display:inline; margin:0;">(한 줄에 한 명: 이름, 금액, 순위)</span></label>
+      <textarea id="creditorsText" class="cred-area" rows="4">가 은행, 300000000, 1
+나 세입자, 250000000, 2
+다 채권자, 100000000, 3</textarea>
+    </div>
+  </section>
+
+  <p class="note">※ 배당 순위(경매비용, 소액임차인 최우선변제, 당해세, 근저당 등 담보물권, 일반임금, 일반조세, 공과금, 일반채권)와 실제 배당표 작성은 집행법원의 결정에 따릅니다. 참고용 계산이며 실제 금액은 해당 기관·전문가에게 확인하세요.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>배당 순위 숫자가 작은 채권자부터 우선하여 배당합니다.</li>
+      <li>동일한 순위의 채권자들은 남은 배당금 범위에서 각자의 채권액 비율대로 공평하게 안분(반올림) 배당합니다.</li>
+      <li>배당받지 못한 잔액은 부족액으로 표시하며, 모든 순위 배당 후 잔여금이 있으면 남은 돈으로 표시합니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 배당 순위는 어떻게 정해지나요?</summary>
+    <p>경매 집행비용과 소액임차인의 최우선변제금이 가장 먼저 배당되며, 이후 당해세, 저당권·전세권·확정일자 임차권 등 물권 설정일 순으로 배당됩니다. 일반 채권은 가장 후순위로 안분 배당을 받게 됩니다.</p>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 같은 순위 채권자가 여러 명이면 어떻게 나누나요?</summary>
+    <p>배당할 잔여 금액이 동일 순위 채권자들의 채권 총액보다 적을 경우, 각 채권자의 청구 금액 비율에 비례하여 안분 배당합니다. 남은 돈이 전액을 충당하기에 충분하다면 각각 전액을 배당받습니다.</p>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 순위를 적지 않으면 어떻게 처리되나요?</summary>
+    <p>입력란에 순위를 따로 입력하지 않으면 위에서부터 작성된 줄 번호 순서(1, 2, 3...)대로 순위가 지정됩니다. 특정 순위로 지정하려면 세 번째 항목에 순위 숫자를 적어 주세요.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var fundInput = document.getElementById('fund');
+  var credInput = document.getElementById('creditorsText');
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowsBody = document.getElementById('rowsBody');
+  var rowRemaining = document.getElementById('rowRemaining');
+
+  function parseMoney(val) {
+    if (!val) return 0;
+    var clean = String(val).replace(/,/g, '').trim();
+    var n = parseFloat(clean);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function formatMoneyInput(el) {
+    var raw = el.value.replace(/,/g, '').trim();
+    if (!raw) return;
+    var n = parseFloat(raw);
+    if (!isNaN(n)) {
+      el.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function render() {
+    var fund = parseMoney(fundInput.value);
+    var creditors = parseCreditors(credInput.value);
+
+    if (fund < 0 || creditors.length === 0) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '배당할 금액과 1명 이상의 채권자 정보를 넣어 주세요.';
+      rowsBody.innerHTML = '';
+      rowRemaining.textContent = '-';
+      return;
+    }
+
+    var r = calcDividend(fund, creditors);
+    if (!r.ok) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '채권자 금액과 배당금을 다시 확인해 주세요.';
+      rowsBody.innerHTML = '';
+      rowRemaining.textContent = '-';
+      return;
+    }
+
+    var totalPaid = 0;
+    var fullyPaidCount = 0;
+    for (var i = 0; i < r.rows.length; i++) {
+      totalPaid += r.rows[i].paid;
+      if (r.rows[i].short === 0) {
+        fullyPaidCount++;
+      }
+    }
+
+    resVerdict.innerHTML = '총 <em>' + totalPaid.toLocaleString('ko-KR') + '원</em> 배당 완료';
+    resSub.textContent = '채권자 ' + r.rows.length + '명 중 ' + fullyPaidCount + '명이 전액 배당되었습니다.';
+
+    rowsBody.innerHTML = '';
+    for (var i = 0; i < r.rows.length; i++) {
+      var row = r.rows[i];
+      var tr = document.createElement('tr');
+      if (row.paid === 0) {
+        tr.className = 'zero-row';
+      } else if (row.short > 0) {
+        tr.className = 'short-row';
+      }
+
+      var tdName = document.createElement('td');
+      tdName.textContent = '[' + row.rank + '순위] ' + (row.name || '채권자');
+
+      var tdAmount = document.createElement('td');
+      tdAmount.textContent = row.amount.toLocaleString('ko-KR') + '원';
+
+      var tdPaid = document.createElement('td');
+      tdPaid.textContent = row.paid.toLocaleString('ko-KR') + '원';
+
+      var tdShort = document.createElement('td');
+      tdShort.textContent = row.short === 0 ? '-' : row.short.toLocaleString('ko-KR') + '원';
+
+      tr.appendChild(tdName);
+      tr.appendChild(tdAmount);
+      tr.appendChild(tdPaid);
+      tr.appendChild(tdShort);
+      rowsBody.appendChild(tr);
+    }
+
+    rowRemaining.textContent = r.remaining.toLocaleString('ko-KR') + '원';
+  }
+
+  fundInput.addEventListener('input', render);
+  fundInput.addEventListener('blur', function () { formatMoneyInput(fundInput); render(); });
+  credInput.addEventListener('input', render);
+
+  render();
+})();
+</script>
+</body>
+</html>

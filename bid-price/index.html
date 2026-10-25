@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>경매 적정 입찰가 계산기 — 목표 수익으로 거꾸로 계산 | 좌표나라</title>
+<meta name="description" content="예상 매도가와 목표 수익을 넣으면 얼마까지 입찰할 수 있는지 거꾸로 계산하고, 입찰보증금도 계산합니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>적정 입찰가<br>얼마까지 써낼까?</h1>
+  <p class="lead">팔 때 가격과 목표 수익을 넣으면 최대 입찰가를 보여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>예상 매도가</dt><dd id="rowSalePrice">-</dd></div>
+      <div><dt>총 비용 (매도·수리·기타)</dt><dd id="rowTotalExpense">-</dd></div>
+      <div><dt>목표 세전 수익</dt><dd id="rowTargetProfit">-</dd></div>
+      <div><dt>예상 취득 비용</dt><dd id="rowBuyCost">-</dd></div>
+      <div><dt>준비할 입찰보증금</dt><dd id="rowDeposit">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <h2>1. 목표 수익 기준 입찰가 계산</h2>
+    <div class="field">
+      <label for="salePrice">예상 매도가 (시세) <b class="hint" id="salePriceHint"></b></label>
+      <div class="inp"><input id="salePrice" type="text" inputmode="decimal" value="500,000,000"><span>원</span></div>
+    </div>
+    <div class="field">
+      <label for="targetProfit">목표 수익 <b class="hint" id="profitHint"></b></label>
+      <div class="inp"><input id="targetProfit" type="text" inputmode="decimal" value="50,000,000"><span>원</span></div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="repair">수리·인테리어비</label>
+        <div class="inp"><input id="repair" type="text" inputmode="decimal" value="20,000,000"><span>원</span></div>
+      </div>
+      <div class="field">
+        <label for="buyCostPct">취득 비용률 <small style="font-size:12px;color:var(--sub);">(예시)</small></label>
+        <div class="inp"><input id="buyCostPct" type="text" inputmode="decimal" value="5"><span>%</span></div>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="sellCost">매도 비용 (중개료 등)</label>
+        <div class="inp"><input id="sellCost" type="text" inputmode="decimal" value="3,000,000"><span>원</span></div>
+      </div>
+      <div class="field">
+        <label for="otherCost">기타 비용 (명도비 등)</label>
+        <div class="inp"><input id="otherCost" type="text" inputmode="decimal" value="2,000,000"><span>원</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>2. 법원 입찰보증금 계산</h2>
+    <div class="field">
+      <label for="minPrice">법원 최저매각가격 <b class="hint" id="minPriceHint"></b></label>
+      <div class="inp"><input id="minPrice" type="text" inputmode="decimal" value="400,000,000"><span>원</span></div>
+    </div>
+    <div class="field">
+      <label for="depositPct">보증금 비율 <small style="font-size:12px;color:var(--sub);">(예시)</small></label>
+      <div class="inp"><input id="depositPct" type="text" inputmode="decimal" value="10"><span>%</span></div>
+      <div class="chips" style="margin-top:8px;">
+        <button type="button" data-dep="10">일반 (10%)</button>
+        <button type="button" data-dep="20">재매각 (20%)</button>
+        <button type="button" data-dep="30">특별매각 (30%)</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 참고용 계산이며 실제 금액 및 입찰 결과는 해당 기관·전문가에게 확인하세요.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>최대 적정 입찰가:</b> (예상 매도가 − 매도 비용 − 수리비 − 기타 비용 − 목표 수익) ÷ (1 + 취득 비용률 ÷ 100)</li>
+      <li><b>예상 취득 비용:</b> 최대 적정 입찰가 × 취득 비용률 (취득세, 채권할인, 법무비용 등)</li>
+      <li><b>입찰보증금:</b> 최저매각가격 × 보증금 비율 (자신이 써내는 입찰가가 아닌 법원 최저가격 기준)</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>입찰보증금은 내가 쓴 입찰가의 10%가 아닌가요?</summary>
+    <p>경매 입찰보증금은 본인이 입찰표에 적어 내는 금액 기준이 아니라, 해당 회차 법원이 공고한 '최저매각가격'의 10%(또는 법원이 정한 비율)를 냅니다. 단 1원이라도 모자라면 입찰이 무효가 되므로 주의해야 합니다.</p>
+  </details>
+
+  <details>
+    <summary>취득 비용률 5%에는 무엇이 포함되나요?</summary>
+    <p>부동산 매수 시 납부하는 취득세(주택 수에 따라 1~12%), 지방교육세, 농어촌특별세와 법무사 수수료, 국민주택채권 매각 할인비용 등을 포함한 예시 수치입니다. 주택 수와 면적에 따라 세율이 다르므로 직접 조정해 보세요.</p>
+  </details>
+
+  <details>
+    <summary>적정 입찰가보다 높게 써내면 어떻게 되나요?</summary>
+    <p>적정 입찰가보다 높은 가격에 낙찰받으면 낙찰 확률은 높아지지만, 설정해 둔 목표 수익이 줄어들거나 예상치 못한 추가 비용 발생 시 손실이 발생할 위험이 커집니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var elSalePrice = document.getElementById('salePrice');
+  var elSellCost = document.getElementById('sellCost');
+  var elRepair = document.getElementById('repair');
+  var elOtherCost = document.getElementById('otherCost');
+  var elTargetProfit = document.getElementById('targetProfit');
+  var elBuyCostPct = document.getElementById('buyCostPct');
+
+  var elMinPrice = document.getElementById('minPrice');
+  var elDepositPct = document.getElementById('depositPct');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowSalePrice = document.getElementById('rowSalePrice');
+  var rowTotalExpense = document.getElementById('rowTotalExpense');
+  var rowTargetProfit = document.getElementById('rowTargetProfit');
+  var rowBuyCost = document.getElementById('rowBuyCost');
+  var rowDeposit = document.getElementById('rowDeposit');
+
+  var salePriceHint = document.getElementById('salePriceHint');
+  var profitHint = document.getElementById('profitHint');
+  var minPriceHint = document.getElementById('minPriceHint');
+
+  function parseVal(input) {
+    if (!input) return 0;
+    var str = String(input.value || '').replace(/,/g, '').trim();
+    var val = parseFloat(str);
+    return isNaN(val) ? 0 : val;
+  }
+
+  function formatKoreanMoney(val) {
+    if (!val || val <= 0) return '';
+    var eok = Math.floor(val / 100000000);
+    var man = Math.floor((val % 100000000) / 10000);
+    var res = '';
+    if (eok > 0) res += eok + '억 ';
+    if (man > 0) res += man.toLocaleString('ko-KR') + '만 ';
+    return res ? res.trim() + '원' : '';
+  }
+
+  function formatInput(input) {
+    var raw = input.value.replace(/,/g, '').trim();
+    if (raw === '') return;
+    var n = parseFloat(raw);
+    if (!isNaN(n) && Number.isInteger(n) && raw.indexOf('.') === -1) {
+      input.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function render() {
+    var salePrice = parseVal(elSalePrice);
+    var sellCost = parseVal(elSellCost);
+    var repair = parseVal(elRepair);
+    var otherCost = parseVal(elOtherCost);
+    var targetProfit = parseVal(elTargetProfit);
+    var buyCostPct = parseVal(elBuyCostPct);
+
+    var minPrice = parseVal(elMinPrice);
+    var depositPct = parseVal(elDepositPct);
+
+    salePriceHint.textContent = formatKoreanMoney(salePrice);
+    profitHint.textContent = formatKoreanMoney(targetProfit);
+    minPriceHint.textContent = formatKoreanMoney(minPrice);
+
+    var resBid = calcBidPrice(salePrice, sellCost, repair, otherCost, targetProfit, buyCostPct);
+    var resDep = calcDeposit(minPrice, depositPct);
+
+    if (!resBid.ok) {
+      resVerdict.textContent = '가격을 확인해 주세요';
+      resSub.textContent = '비용과 목표 수익의 합이 예상 매도가보다 크거나 올바르지 않은 값입니다.';
+      rowSalePrice.textContent = '-';
+      rowTotalExpense.textContent = '-';
+      rowTargetProfit.textContent = '-';
+      rowBuyCost.textContent = '-';
+      rowDeposit.textContent = resDep.ok ? resDep.deposit.toLocaleString('ko-KR') + '원' : '-';
+      return;
+    }
+
+    resVerdict.innerHTML = '최대 입찰가 <em>' + resBid.maxBid.toLocaleString('ko-KR') + '원</em>';
+    resSub.textContent = '취득 비용 약 ' + resBid.buyCost.toLocaleString('ko-KR') + '원 포함 시 총 취득가 ' + (resBid.maxBid + resBid.buyCost).toLocaleString('ko-KR') + '원';
+
+    var totalExpense = sellCost + repair + otherCost;
+    rowSalePrice.textContent = salePrice.toLocaleString('ko-KR') + '원';
+    rowTotalExpense.textContent = totalExpense.toLocaleString('ko-KR') + '원';
+    rowTargetProfit.textContent = targetProfit.toLocaleString('ko-KR') + '원';
+    rowBuyCost.textContent = resBid.buyCost.toLocaleString('ko-KR') + '원';
+    rowDeposit.textContent = resDep.ok ? resDep.deposit.toLocaleString('ko-KR') + '원' : '-';
+  }
+
+  [elSalePrice, elSellCost, elRepair, elOtherCost, elTargetProfit, elMinPrice].forEach(function (inp) {
+    inp.addEventListener('blur', function () { formatInput(inp); });
+  });
+
+  [elSalePrice, elSellCost, elRepair, elOtherCost, elTargetProfit, elBuyCostPct, elMinPrice, elDepositPct].forEach(function (inp) {
+    inp.addEventListener('input', render);
+    inp.addEventListener('change', render);
+  });
+
+  document.querySelectorAll('.chips button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      elDepositPct.value = btn.getAttribute('data-dep');
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

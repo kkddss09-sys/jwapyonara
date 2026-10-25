@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>비교방식 감정평가 계산기 — 사례 가격 보정 계산 | 좌표나라</title>
+<meta name="description" content="거래사례·임대사례의 가격에 사정·시점·지역·개별 보정치를 곱해 대상 부동산의 비준가액을 간이 계산합니다. | 좌표나라">
+<link rel="stylesheet" href="../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>비교방식 계산기<br>사례 가격을 보정하면?</h1>
+  <p class="lead">비슷한 사례의 ㎡당 가격에 보정치를 곱해 내 부동산 가격을 어림합니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>대상 부동산 ㎡당 단가</dt><dd id="rowUnitPrice">-</dd></div>
+      <div><dt>평당 환산 단가(약 3.3㎡)</dt><dd id="rowPyeongPrice">-</dd></div>
+      <div><dt>종합 보정 승수</dt><dd id="rowFactor">-</dd></div>
+      <div><dt>대상 면적</dt><dd id="rowArea">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="casePricePerM2">사례 부동산 ㎡당 가격 <b class="hint" id="casePriceHint"></b></label>
+      <div class="inp">
+        <input id="casePricePerM2" type="text" inputmode="decimal" value="1,000,000">
+        <span>원/㎡</span>
+      </div>
+      <p class="help">인근 유사 부동산의 실제 거래가격(또는 감정평가 사례)을 ㎡당으로 나눈 금액입니다.</p>
+    </div>
+
+    <div class="field" style="margin-top:12px;">
+      <label for="areaM2">내 부동산(대상) 면적 <b class="hint" id="areaHint"></b></label>
+      <div class="inp">
+        <input id="areaM2" type="text" inputmode="decimal" value="84">
+        <span>㎡</span>
+      </div>
+    </div>
+
+    <div class="row2" style="margin-top:12px;">
+      <div class="field">
+        <label for="circumstance">사정보정치</label>
+        <div class="inp">
+          <input id="circumstance" type="text" inputmode="decimal" value="1.00">
+          <span>배</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="timeAdj">시점수정치</label>
+        <div class="inp">
+          <input id="timeAdj" type="text" inputmode="decimal" value="1.02">
+          <span>배</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row2" style="margin-top:12px;">
+      <div class="field">
+        <label for="regional">지역요인 비교치</label>
+        <div class="inp">
+          <input id="regional" type="text" inputmode="decimal" value="1.00">
+          <span>배</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="individual">개별요인 비교치</label>
+        <div class="inp">
+          <input id="individual" type="text" inputmode="decimal" value="1.05">
+          <span>배</span>
+        </div>
+      </div>
+    </div>
+    <p class="help">※ 보정치 기준: 사례와 완전히 같으면 1.00, 내 물건이 5% 우세하면 1.05, 5% 열세하면 0.95를 입력합니다.</p>
+  </section>
+
+  <p class="note">※ 참고용 계산이며 실제 금액은 해당 기관·전문가에게 확인하세요. 보정치는 사람이 판단해 넣는 값입니다. 실제 감정평가는 자격 있는 감정평가사의 몫이며 이 계산은 간이 어림입니다.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>거래사례비교법(비교방식):</b> 유사한 부동산의 실제 거래사례 가격에 사정보정, 시점수정, 지역요인 및 개별요인 비교치를 순차적으로 곱하여 대상 부동산의 비준가액을 산정합니다.</li>
+      <li><b>종합 보정 승수:</b> 사정보정 × 시점수정 × 지역요인 × 개별요인</li>
+      <li><b>대상 부동산 비준가액:</b> 사례 ㎡당 가격 × 종합 보정 승수 × 대상 면적(㎡)</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>사정보정이란 무엇인가요?</summary>
+    <p>사례 부동산의 거래 시 급매, 특수관계인 간 거래, 경매 낙찰 등 특수한 사정이나 비정상적인 동기가 개입되어 있을 때, 이를 정상적인 자유 시장 가격 수준으로 바로잡는 보정 과정입니다.</p>
+  </details>
+
+  <details>
+    <summary>시점수정은 어떻게 산정하나요?</summary>
+    <p>사례 부동산이 거래된 과거 시점과 대상 부동산을 평가하는 기준시점 사이의 가격 변동률을 반영하는 것입니다. 국토교통부나 한국부동산원이 고시하는 지가변동률 또는 생산자물가지수 등을 기준으로 산출합니다.</p>
+  </details>
+
+  <details>
+    <summary>지역요인과 개별요인은 어떤 차이가 있나요?</summary>
+    <p>지역요인은 대상 부동산이 속한 동네나 상권 전체의 입지 조건(교통, 상권 발달도, 환경) 격차를 비교하는 것입니다. 개별요인은 같은 동네 안에서도 특정 건물의 층수, 일조·조망, 접한 도로의 너비, 건물의 노후도 등 개별적인 우열을 비교합니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var elCasePrice = document.getElementById('casePricePerM2');
+  var elAreaM2 = document.getElementById('areaM2');
+  var elCircumstance = document.getElementById('circumstance');
+  var elTimeAdj = document.getElementById('timeAdj');
+  var elRegional = document.getElementById('regional');
+  var elIndividual = document.getElementById('individual');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowUnitPrice = document.getElementById('rowUnitPrice');
+  var rowPyeongPrice = document.getElementById('rowPyeongPrice');
+  var rowFactor = document.getElementById('rowFactor');
+  var rowArea = document.getElementById('rowArea');
+
+  var casePriceHint = document.getElementById('casePriceHint');
+  var areaHint = document.getElementById('areaHint');
+
+  function parseVal(input) {
+    if (!input) return 0;
+    var str = String(input.value || '').replace(/,/g, '').trim();
+    var val = parseFloat(str);
+    return isNaN(val) ? 0 : val;
+  }
+
+  function formatKoreanMoney(val) {
+    if (!val || val <= 0) return '';
+    var eok = Math.floor(val / 100000000);
+    var man = Math.floor((val % 100000000) / 10000);
+    var res = '';
+    if (eok > 0) res += eok + '억 ';
+    if (man > 0) res += man.toLocaleString('ko-KR') + '만 ';
+    return res ? res.trim() + '원' : '';
+  }
+
+  function formatInput(input) {
+    var raw = input.value.replace(/,/g, '').trim();
+    if (raw === '') return;
+    var n = parseFloat(raw);
+    if (!isNaN(n) && Number.isInteger(n) && raw.indexOf('.') === -1) {
+      input.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function render() {
+    var casePrice = parseVal(elCasePrice);
+    var area = parseVal(elAreaM2);
+    var circumstance = parseVal(elCircumstance);
+    var timeAdj = parseVal(elTimeAdj);
+    var regional = parseVal(elRegional);
+    var individual = parseVal(elIndividual);
+
+    casePriceHint.textContent = formatKoreanMoney(casePrice);
+    if (area > 0) {
+      var pyeong = (area / 3.305785).toFixed(1);
+      areaHint.textContent = '약 ' + pyeong + '평';
+    } else {
+      areaHint.textContent = '';
+    }
+
+    var r = calcComparable(casePrice, circumstance, timeAdj, regional, individual, area);
+
+    if (!r.ok) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '사례 가격, 면적 및 모든 보정치는 0보다 커야 합니다.';
+      rowUnitPrice.textContent = '-';
+      rowPyeongPrice.textContent = '-';
+      rowFactor.textContent = '-';
+      rowArea.textContent = '-';
+      return;
+    }
+
+    var totalKorean = formatKoreanMoney(r.total);
+    resVerdict.innerHTML = '추정 비준가액 <em>' + r.total.toLocaleString('ko-KR') + '원</em>';
+    var diffPct = ((r.factor - 1) * 100).toFixed(2);
+    var diffSign = (r.factor >= 1 ? '+' : '') + diffPct + '%';
+    resSub.textContent = (totalKorean ? '(' + totalKorean + ' 상당) · ' : '') + '종합 보정 승수 ' + r.factor + '배 (' + diffSign + ')';
+
+    rowUnitPrice.textContent = r.unitPrice.toLocaleString('ko-KR') + '원';
+    var pyeongPrice = Math.round(r.unitPrice * 3.305785);
+    rowPyeongPrice.textContent = pyeongPrice.toLocaleString('ko-KR') + '원';
+    rowFactor.textContent = r.factor + '배';
+    rowArea.textContent = area.toLocaleString('ko-KR') + '㎡ (약 ' + (area / 3.305785).toFixed(1) + '평)';
+  }
+
+  elCasePrice.addEventListener('blur', function () { formatInput(elCasePrice); });
+
+  [elCasePrice, elAreaM2, elCircumstance, elTimeAdj, elRegional, elIndividual].forEach(function (inp) {
+    inp.addEventListener('input', render);
+    inp.addEventListener('change', render);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

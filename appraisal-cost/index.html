@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>원가법·적산법 계산기 — 건물 가격과 임대료 간이 계산 | 좌표나라</title>
+<meta name="description" content="재조달원가와 감가수정으로 건물 가격을, 기초가액과 기대이율로 적산 임대료를 계산합니다. | 좌표나라">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.seg button { min-height:48px; }
+.mode-panel { display:none; }
+.mode-panel.active { display:block; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>원가법·적산법<br>건물 가치와 임대료</h1>
+  <p class="lead">다시 짓는 데 드는 돈에서 낡은 만큼 빼 가치를 계산하고, 적산 임대료도 구합니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows" id="resRows"></dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label>계산 방식 선택</label>
+      <div class="seg two" id="modeSeg">
+        <button type="button" class="on" data-mode="cost">원가법 (건물 가격)</button>
+        <button type="button" data-mode="rent">적산법 (적정 임대료)</button>
+      </div>
+    </div>
+
+    <!-- 원가법 입력칸 -->
+    <div id="panelCost" class="mode-panel active" style="margin-top:14px;">
+      <div class="field">
+        <label for="replacementCost">재조달원가 (새로 짓는 비용) <b class="hint" id="repCostHint"></b></label>
+        <div class="inp">
+          <input id="replacementCost" type="text" inputmode="decimal" value="500,000,000">
+          <span>원</span>
+        </div>
+      </div>
+
+      <div class="row2" style="margin-top:12px;">
+        <div class="field">
+          <label for="usefulLife">내용연수 (총 수명)</label>
+          <div class="inp">
+            <input id="usefulLife" type="text" inputmode="decimal" value="40">
+            <span>년</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="elapsedYears">경과연수 (지난 세월)</label>
+          <div class="inp">
+            <input id="elapsedYears" type="text" inputmode="decimal" value="10">
+            <span>년</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:12px;">
+        <label for="salvagePct">잔존가치 비율</label>
+        <div class="inp">
+          <input id="salvagePct" type="text" inputmode="decimal" value="0">
+          <span>%</span>
+        </div>
+        <p class="help">수명이 다했을 때 남는 가치 비율입니다. 통상 0~10% 수준입니다.</p>
+      </div>
+    </div>
+
+    <!-- 적산법 입력칸 -->
+    <div id="panelRent" class="mode-panel" style="margin-top:14px;">
+      <div class="field">
+        <label for="baseValue">기초가액 (부동산 자산가치) <b class="hint" id="baseValueHint"></b></label>
+        <div class="inp">
+          <input id="baseValue" type="text" inputmode="decimal" value="1,000,000,000">
+          <span>원</span>
+        </div>
+      </div>
+
+      <div class="row2" style="margin-top:12px;">
+        <div class="field">
+          <label for="expectedRatePct">기대이율 <small style="color:var(--sub);">(예시)</small></label>
+          <div class="inp">
+            <input id="expectedRatePct" type="text" inputmode="decimal" value="4">
+            <span>%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="costsYear">필요제경비 (연간)</label>
+          <div class="inp">
+            <input id="costsYear" type="text" inputmode="decimal" value="5,000,000">
+            <span>원</span>
+          </div>
+        </div>
+      </div>
+      <p class="help">필요제경비: 감가상각비, 수선유지비, 제세공과금, 화재보험료, 결손충당금 등</p>
+    </div>
+  </section>
+
+  <p class="note">※ 참고용 계산이며 실제 금액은 해당 기관·전문가에게 확인하세요. 기대이율 및 잔존가치 비율은 대상 물건의 상태에 따라 달라질 수 있으므로 예시값으로 입력되어 있습니다.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>원가법(건물 가치 산정):</b> 건물을 기준시점에 새로 짓는 데 드는 비용(재조달원가)에서 사용 연수에 따른 감가누계액을 빼서 적산가액을 구합니다. 공식: 적산가액 = 재조달원가 − 감가누계액</li>
+      <li><b>정액법 감가수정:</b> 매년 일정액이 감가된다고 보아, (재조달원가 − 잔존가치) ÷ 내용연수 × 경과연수로 감가액을 산출합니다.</li>
+      <li><b>적산법(임대료 산정):</b> 임대 부동산의 기초가액에 기대이율을 곱한 순수익에 1년간 운영에 필요한 필요제경비를 더해 적산임대료를 구합니다. 공식: 적산임대료 = (기초가액 × 기대이율) + 필요제경비</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>원가법에서 감가수정은 어떻게 이루어지나요?</summary>
+    <p>감가수정은 건물 노후화에 따른 물리적 감가, 설계 결함이나 설비 구식화로 인한 기능적 감가, 주변 환경 쇠퇴나 부조화에 따른 경제적 감가를 종합 평가합니다. 본 계산기는 실무에서 가장 폭넓게 쓰이는 정액법을 기준으로 간이 산정합니다.</p>
+  </details>
+
+  <details>
+    <summary>적산법의 기대이율이란 무엇인가요?</summary>
+    <p>임대 부동산을 취득하거나 보유하는 데 투입된 기초가액에 대해 기대되는 연간 정상 수익률입니다. 일반적으로 국채나 정기예금 금리 같은 안전자산 수익률에 부동산 특유의 위험 프리미엄을 가산하여 결정됩니다.</p>
+  </details>
+
+  <details>
+    <summary>토지도 원가법으로 감정평가할 수 있나요?</summary>
+    <p>토지는 시간의 경과에 따라 마모되거나 소멸되지 않는 부증성과 영속성이 있으므로 원가법을 적용하지 않는 것이 원칙입니다. 토지는 국토교통부 표준지공시지가를 기준으로 하는 공시지가기준법이나 인근 실거래 사례를 기준으로 하는 거래사례비교법으로 평가합니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var mode = 'cost';
+  var modeButtons = document.querySelectorAll('#modeSeg button');
+  var panelCost = document.getElementById('panelCost');
+  var panelRent = document.getElementById('panelRent');
+
+  var elReplacementCost = document.getElementById('replacementCost');
+  var elUsefulLife = document.getElementById('usefulLife');
+  var elElapsedYears = document.getElementById('elapsedYears');
+  var elSalvagePct = document.getElementById('salvagePct');
+
+  var elBaseValue = document.getElementById('baseValue');
+  var elExpectedRatePct = document.getElementById('expectedRatePct');
+  var elCostsYear = document.getElementById('costsYear');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var resRows = document.getElementById('resRows');
+  var repCostHint = document.getElementById('repCostHint');
+  var baseValueHint = document.getElementById('baseValueHint');
+
+  function parseVal(input) {
+    if (!input) return 0;
+    var str = String(input.value || '').replace(/,/g, '').trim();
+    var val = parseFloat(str);
+    return isNaN(val) ? 0 : val;
+  }
+
+  function formatKoreanMoney(val) {
+    if (!val || val <= 0) return '';
+    var eok = Math.floor(val / 100000000);
+    var man = Math.floor((val % 100000000) / 10000);
+    var res = '';
+    if (eok > 0) res += eok + '억 ';
+    if (man > 0) res += man.toLocaleString('ko-KR') + '만 ';
+    return res ? res.trim() + '원' : '';
+  }
+
+  function formatInput(input) {
+    var raw = input.value.replace(/,/g, '').trim();
+    if (raw === '') return;
+    var n = parseFloat(raw);
+    if (!isNaN(n) && Number.isInteger(n) && raw.indexOf('.') === -1) {
+      input.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function renderRows(items) {
+    resRows.innerHTML = '';
+    items.forEach(function (item) {
+      var div = document.createElement('div');
+      var dt = document.createElement('dt');
+      dt.textContent = item[0];
+      var dd = document.createElement('dd');
+      dd.textContent = item[1];
+      div.appendChild(dt);
+      div.appendChild(dd);
+      resRows.appendChild(div);
+    });
+  }
+
+  function render() {
+    var repCost = parseVal(elReplacementCost);
+    repCostHint.textContent = formatKoreanMoney(repCost);
+    var baseVal = parseVal(elBaseValue);
+    baseValueHint.textContent = formatKoreanMoney(baseVal);
+
+    if (mode === 'cost') {
+      var usefulLife = parseVal(elUsefulLife);
+      var elapsedYears = parseVal(elElapsedYears);
+      var salvagePct = parseVal(elSalvagePct);
+
+      var rCost = calcCostMethod(repCost, usefulLife, elapsedYears, salvagePct);
+
+      if (!rCost.ok) {
+        resVerdict.textContent = '값을 확인해 주세요';
+        resSub.textContent = '재조달원가와 내용연수는 0보다 커야 하며, 잔존가치율은 0~100% 사이여야 합니다.';
+        renderRows([]);
+        return;
+      }
+
+      var costKorean = formatKoreanMoney(rCost.value);
+      resVerdict.innerHTML = '건물 적산가액 <em>' + rCost.value.toLocaleString('ko-KR') + '원</em>';
+      resSub.textContent = costKorean ? '(' + costKorean + ' 상당 · 감가율 ' + rCost.depRatePct.toFixed(2) + '%)' : '';
+
+      renderRows([
+        ['재조달원가', repCost.toLocaleString('ko-KR') + '원'],
+        ['감가누계액 (공제액)', rCost.depreciation.toLocaleString('ko-KR') + '원'],
+        ['잔존가치 비율', salvagePct.toFixed(1) + '%'],
+        ['경과 연수 / 내용연수', elapsedYears + '년 / ' + usefulLife + '년']
+      ]);
+    } else {
+      var expectedRate = parseVal(elExpectedRatePct);
+      var costsYear = parseVal(elCostsYear);
+
+      var rRent = calcRentCost(baseVal, expectedRate, costsYear);
+
+      if (!rRent.ok) {
+        resVerdict.textContent = '값을 확인해 주세요';
+        resSub.textContent = '기초가액은 0보다 커야 하며 기대이율과 필요제경비는 0 이상이어야 합니다.';
+        renderRows([]);
+        return;
+      }
+
+      var rentKorean = formatKoreanMoney(rRent.rentYear);
+      resVerdict.innerHTML = '연간 적산임대료 <em>' + rRent.rentYear.toLocaleString('ko-KR') + '원</em>';
+      resSub.textContent = '월 환산 약 ' + rRent.rentMonth.toLocaleString('ko-KR') + '원 ' + (rentKorean ? '(' + rentKorean + ')' : '');
+
+      var pureRent = Math.round(baseVal * expectedRate / 100);
+      renderRows([
+        ['기초가액 (대상 부동산 가치)', baseVal.toLocaleString('ko-KR') + '원'],
+        ['순수익 (기대이율 ' + expectedRate.toFixed(2) + '%)', pureRent.toLocaleString('ko-KR') + '원'],
+        ['연간 필요제경비', costsYear.toLocaleString('ko-KR') + '원'],
+        ['월 환산 적산임대료', rRent.rentMonth.toLocaleString('ko-KR') + '원']
+      ]);
+    }
+  }
+
+  modeButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      modeButtons.forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      mode = btn.getAttribute('data-mode');
+      if (mode === 'cost') {
+        panelCost.classList.add('active');
+        panelRent.classList.remove('active');
+      } else {
+        panelCost.classList.remove('active');
+        panelRent.classList.add('active');
+      }
+      render();
+    });
+  });
+
+  [elReplacementCost, elBaseValue, elCostsYear].forEach(function (inp) {
+    inp.addEventListener('blur', function () { formatInput(inp); });
+  });
+
+  [elReplacementCost, elUsefulLife, elElapsedYears, elSalvagePct, elBaseValue, elExpectedRatePct, elCostsYear].forEach(function (inp) {
+    inp.addEventListener('input', render);
+    inp.addEventListener('change', render);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

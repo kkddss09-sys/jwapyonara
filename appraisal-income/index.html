@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>수익환원법 계산기 — 임대수익으로 건물 가치 | 좌표나라</title>
+<meta name="description" content="순영업소득과 환원율(또는 할인율)로 수익형 부동산의 가치를 간이 계산합니다. | 좌표나라">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.seg button { min-height:48px; }
+.mode-panel { display:none; }
+.mode-panel.active { display:block; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>수익환원법 계산기<br>임대수익으로 본 가치</h1>
+  <p class="lead">직접환원법과 현금흐름할인(DCF)을 간이로 계산합니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows" id="resRows"></dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label>계산 방식 선택</label>
+      <div class="seg two" id="modeSeg">
+        <button type="button" class="on" data-mode="direct">직접환원법</button>
+        <button type="button" data-mode="dcf">현금흐름할인(DCF)</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label for="noi">첫해 순영업소득(NOI) <b class="hint" id="noiHint"></b></label>
+      <div class="inp">
+        <input id="noi" type="text" inputmode="decimal" value="50,000,000">
+        <span>원</span>
+      </div>
+      <p class="help">임대료 총수입에서 공실 손실과 운영경비를 뺀 1년간 순수익입니다.</p>
+    </div>
+
+    <!-- 직접환원법 입력칸 -->
+    <div id="panelDirect" class="mode-panel active" style="margin-top:12px;">
+      <div class="field">
+        <label for="capRate">환원율(Cap Rate) <small style="color:var(--sub);">(예시)</small></label>
+        <div class="inp">
+          <input id="capRate" type="text" inputmode="decimal" value="5">
+          <span>%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DCF 입력칸 -->
+    <div id="panelDcf" class="mode-panel" style="margin-top:12px;">
+      <div class="row2">
+        <div class="field">
+          <label for="growthPct">연 소득 증가율</label>
+          <div class="inp">
+            <input id="growthPct" type="text" inputmode="decimal" value="0">
+            <span>%</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="years">보유 기간</label>
+          <div class="inp">
+            <input id="years" type="text" inputmode="decimal" value="5">
+            <span>년</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:12px;">
+        <label for="discountPct">할인율 <small style="color:var(--sub);">(예시)</small></label>
+        <div class="inp">
+          <input id="discountPct" type="text" inputmode="decimal" value="8">
+          <span>%</span>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:12px;">
+        <label for="terminalValue">복귀가액(보유 말기 예상 매도가) <b class="hint" id="terminalHint"></b></label>
+        <div class="inp">
+          <input id="terminalValue" type="text" inputmode="decimal" value="1,000,000,000">
+          <span>원</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 참고용 계산이며 실제 금액은 해당 기관·전문가에게 확인하세요. 환원율 및 할인율은 시장 상황과 물건 특성에 따라 달라지므로 예시값으로 입력되어 있습니다.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>직접환원법:</b> 대상 부동산에서 산출되는 단 1년 차 순영업소득(NOI)을 적정 환원율(Cap Rate)로 나누어 현재가치를 구합니다. 공식: 부동산 가치 = NOI ÷ 환원율</li>
+      <li><b>현금흐름할인법(DCF):</b> 보유 기간 동안 매년 발생하는 순영업소득과, 기간 말 매각 시 회수되는 복귀가액을 각각 적정 할인율로 현재가치화하여 합산합니다.</li>
+      <li><b>순영업소득(NOI):</b> 총 임대 수입에서 공실 위험 비용과 건물 관리·유지비, 재산세 등 필수 운영경비를 차감한 순이익입니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>환원율(Cap Rate)은 어떻게 결정하나요?</summary>
+    <p>환원율은 인근 지역 유사 수익형 부동산의 최근 거래가격 대비 순수익 비율을 조사하거나, 국채 등 무위험 이자율에 부동산 투자에 따른 위험 부담률을 더해 산출합니다. 일반적으로 입지가 우수하고 공실 위험이 적을수록 환원율이 낮게 책정됩니다.</p>
+  </details>
+
+  <details>
+    <summary>직접환원법과 DCF의 차이는 무엇인가요?</summary>
+    <p>직접환원법은 단기간의 안정적인 소득 흐름을 가정한 간이 평가 방식으로 계산이 직관적입니다. 반면 DCF 방식은 임대료의 매년 인상률, 공실 변동, 장래 매각 시세까지 종합적으로 시뮬레이션하므로 복합 대형 빌딩이나 장기 투자 분석에 적합합니다.</p>
+  </details>
+
+  <details>
+    <summary>순영업소득(NOI) 계산에 대출 이자가 빠지는 이유는 무엇인가요?</summary>
+    <p>부동산 자체의 순수한 수익 창출 가치를 평가하기 위함입니다. 투자자 개인마다 대출 비율과 금리 조건이 다르므로, 자금 조달 방식과 무관한 본연의 자산 가치를 구하기 위해 부채서비스액(원리금) 차감 전 소득을 기준으로 계산합니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var mode = 'direct';
+  var modeButtons = document.querySelectorAll('#modeSeg button');
+  var panelDirect = document.getElementById('panelDirect');
+  var panelDcf = document.getElementById('panelDcf');
+
+  var elNoi = document.getElementById('noi');
+  var elCapRate = document.getElementById('capRate');
+  var elGrowthPct = document.getElementById('growthPct');
+  var elYears = document.getElementById('years');
+  var elDiscountPct = document.getElementById('discountPct');
+  var elTerminalValue = document.getElementById('terminalValue');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var resRows = document.getElementById('resRows');
+  var noiHint = document.getElementById('noiHint');
+  var terminalHint = document.getElementById('terminalHint');
+
+  function parseVal(input) {
+    if (!input) return 0;
+    var str = String(input.value || '').replace(/,/g, '').trim();
+    var val = parseFloat(str);
+    return isNaN(val) ? 0 : val;
+  }
+
+  function formatKoreanMoney(val) {
+    if (!val || val <= 0) return '';
+    var eok = Math.floor(val / 100000000);
+    var man = Math.floor((val % 100000000) / 10000);
+    var res = '';
+    if (eok > 0) res += eok + '억 ';
+    if (man > 0) res += man.toLocaleString('ko-KR') + '만 ';
+    return res ? res.trim() + '원' : '';
+  }
+
+  function formatInput(input) {
+    var raw = input.value.replace(/,/g, '').trim();
+    if (raw === '') return;
+    var n = parseFloat(raw);
+    if (!isNaN(n) && Number.isInteger(n) && raw.indexOf('.') === -1) {
+      input.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function renderRows(items) {
+    resRows.innerHTML = '';
+    items.forEach(function (item) {
+      var div = document.createElement('div');
+      var dt = document.createElement('dt');
+      dt.textContent = item[0];
+      var dd = document.createElement('dd');
+      dd.textContent = item[1];
+      div.appendChild(dt);
+      div.appendChild(dd);
+      resRows.appendChild(div);
+    });
+  }
+
+  function render() {
+    var noi = parseVal(elNoi);
+    noiHint.textContent = formatKoreanMoney(noi);
+    var terminal = parseVal(elTerminalValue);
+    terminalHint.textContent = formatKoreanMoney(terminal);
+
+    if (mode === 'direct') {
+      var capRate = parseVal(elCapRate);
+      var rDirect = calcDirectCap(noi, capRate);
+
+      if (!rDirect.ok) {
+        resVerdict.textContent = '값을 확인해 주세요';
+        resSub.textContent = '순영업소득은 0원 이상, 환원율은 0%보다 커야 합니다.';
+        renderRows([]);
+        return;
+      }
+
+      var valKorean = formatKoreanMoney(rDirect.value);
+      resVerdict.innerHTML = '추정 부동산 가치 <em>' + rDirect.value.toLocaleString('ko-KR') + '원</em>';
+      resSub.textContent = valKorean ? '(' + valKorean + ' 상당)' : '';
+
+      renderRows([
+        ['연간 순영업소득(NOI)', noi.toLocaleString('ko-KR') + '원'],
+        ['적용 환원율(Cap Rate)', capRate.toFixed(2) + '%'],
+        ['월 환산 순영업소득', Math.round(noi / 12).toLocaleString('ko-KR') + '원'],
+        ['수익환원가액', rDirect.value.toLocaleString('ko-KR') + '원']
+      ]);
+    } else {
+      var growthPct = parseVal(elGrowthPct);
+      var years = parseVal(elYears);
+      var discountPct = parseVal(elDiscountPct);
+      var rDcf = calcDCF(noi, growthPct, years, discountPct, terminal);
+
+      if (!rDcf.ok) {
+        resVerdict.textContent = '값을 확인해 주세요';
+        resSub.textContent = '보유기간은 1~50년 정수이며, 할인율은 -100%보다 커야 합니다.';
+        renderRows([]);
+        return;
+      }
+
+      var dcfKorean = formatKoreanMoney(rDcf.value);
+      resVerdict.innerHTML = 'DCF 평가 가치 <em>' + rDcf.value.toLocaleString('ko-KR') + '원</em>';
+      resSub.textContent = dcfKorean ? '(' + dcfKorean + ' 상당)' : '';
+
+      renderRows([
+        ['운영수익 현재가치 합계', rDcf.pvIncome.toLocaleString('ko-KR') + '원'],
+        ['말기 복귀가액 현재가치', rDcf.pvTerminal.toLocaleString('ko-KR') + '원'],
+        ['총 현재가치 (평가액)', rDcf.value.toLocaleString('ko-KR') + '원'],
+        ['보유 기간 및 할인율', years + '년 / 연 ' + discountPct.toFixed(2) + '%']
+      ]);
+    }
+  }
+
+  modeButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      modeButtons.forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      mode = btn.getAttribute('data-mode');
+      if (mode === 'direct') {
+        panelDirect.classList.add('active');
+        panelDcf.classList.remove('active');
+      } else {
+        panelDirect.classList.remove('active');
+        panelDcf.classList.add('active');
+      }
+      render();
+    });
+  });
+
+  [elNoi, elTerminalValue].forEach(function (inp) {
+    inp.addEventListener('blur', function () { formatInput(inp); });
+  });
+
+  [elNoi, elCapRate, elGrowthPct, elYears, elDiscountPct, elTerminalValue].forEach(function (inp) {
+    inp.addEventListener('input', render);
+    inp.addEventListener('change', render);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

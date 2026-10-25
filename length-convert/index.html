@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>길이 단위 변환 — cm·인치·피트·마일·자 | 좌표나라</title>
+<meta name="description" content="mm, cm, m, km, 인치, 피트, 야드, 마일, 자를 서로 바꿉니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.chips button { min-height:44px; }
+select { -webkit-appearance:none; appearance:none; cursor:pointer; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>길이 단위 변환<br>cm ↔ 인치 ↔ 피트</h1>
+  <p class="lead">값과 단위를 고르면 다른 단위로 한 번에 바꿔 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>센티미터 (cm)</dt><dd id="rowCm">-</dd></div>
+      <div><dt>미터 (m)</dt><dd id="rowM">-</dd></div>
+      <div><dt>밀리미터 (mm)</dt><dd id="rowMm">-</dd></div>
+      <div><dt>킬로미터 (km)</dt><dd id="rowKm">-</dd></div>
+      <div><dt>인치 (inch)</dt><dd id="rowInch">-</dd></div>
+      <div><dt>피트 (ft)</dt><dd id="rowFt">-</dd></div>
+      <div><dt>야드 (yd)</dt><dd id="rowYd">-</dd></div>
+      <div><dt>마일 (mile)</dt><dd id="rowMile">-</dd></div>
+      <div><dt>자 (척, 尺)</dt><dd id="rowJa">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="lengthVal">길이 값</label>
+      <div class="inp"><input id="lengthVal" type="text" inputmode="decimal" value="1"></div>
+    </div>
+    <div class="field">
+      <label for="lengthUnit">단위 선택</label>
+      <div class="inp">
+        <select id="lengthUnit" style="width:100%; border:0; background:transparent; font:inherit; font-size:16px; font-weight:700; padding:12px 0; color:var(--ink); outline:0;">
+          <option value="inch" selected>인치 (inch, in)</option>
+          <option value="cm">센티미터 (cm)</option>
+          <option value="m">미터 (m)</option>
+          <option value="mm">밀리미터 (mm)</option>
+          <option value="km">킬로미터 (km)</option>
+          <option value="ft">피트 (ft)</option>
+          <option value="yd">야드 (yd)</option>
+          <option value="mile">마일 (mile)</option>
+          <option value="ja">자 (척, 尺)</option>
+        </select>
+      </div>
+      <div class="chips" id="unitChips" style="margin-top:10px;">
+        <button type="button" data-unit="inch" class="on">인치</button>
+        <button type="button" data-unit="cm">cm</button>
+        <button type="button" data-unit="m">m</button>
+        <button type="button" data-unit="ft">피트</button>
+        <button type="button" data-unit="ja">자(척)</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 참고용 계산이며 표준 국제 단위(SI) 및 국가별 표준 환산율을 적용한 계산입니다.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>미터법 단위:</b>
+        <br>· 1 mm = 0.001 m
+        <br>· 1 cm = 0.01 m
+        <br>· 1 km = 1,000 m
+      </li>
+      <li><b>야드파운드법 단위:</b>
+        <br>· 1 inch = 0.0254 m (2.54 cm)
+        <br>· 1 ft = 0.3048 m (12 inch)
+        <br>· 1 yd = 0.9144 m (3 ft)
+        <br>· 1 mile = 1,609.344 m (1,760 yd)
+      </li>
+      <li><b>전통 척관법 단위:</b>
+        <br>· 1자(척) = 10/33 m ≈ 0.30303 m (약 30.303 cm)
+      </li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>1인치는 정확히 몇 cm인가요?</summary>
+    <p>국제 협정에 따라 1인치는 오차 없이 정확히 2.54 cm(0.0254 m)로 정의되어 있습니다. 스마트폰 화면이나 모니터 크기를 계산할 때도 이 기준이 적용됩니다.</p>
+  </details>
+
+  <details>
+    <summary>가구에서 말하는 '자'는 몇 cm인가요?</summary>
+    <p>우리나라 전통 길이 단위인 1자(1척)는 10/33 m로 약 30.303 cm입니다. 흔히 가구점에서 '10자 장롱'이라고 부르는 것은 가로 길이가 약 303 cm(약 3 m)인 옷장을 뜻합니다.</p>
+  </details>
+
+  <details>
+    <summary>피트(ft)와 인치(in)의 관계는 어떻게 되나요?</summary>
+    <p>1피트는 12인치와 같으며 미터법으로는 30.48 cm입니다. 항공기 고도, 키 표기, 해외 건축 규격 등에서 폭넓게 사용됩니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var elLengthVal = document.getElementById('lengthVal');
+  var elLengthUnit = document.getElementById('lengthUnit');
+  var unitChips = document.getElementById('unitChips');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowCm = document.getElementById('rowCm');
+  var rowM = document.getElementById('rowM');
+  var rowMm = document.getElementById('rowMm');
+  var rowKm = document.getElementById('rowKm');
+  var rowInch = document.getElementById('rowInch');
+  var rowFt = document.getElementById('rowFt');
+  var rowYd = document.getElementById('rowYd');
+  var rowMile = document.getElementById('rowMile');
+  var rowJa = document.getElementById('rowJa');
+
+  function syncChips(val) {
+    var btns = unitChips.querySelectorAll('button');
+    btns.forEach(function (btn) {
+      if (btn.getAttribute('data-unit') === val) {
+        btn.classList.add('on');
+      } else {
+        btn.classList.remove('on');
+      }
+    });
+  }
+
+  unitChips.addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var u = btn.getAttribute('data-unit');
+    elLengthUnit.value = u;
+    syncChips(u);
+    render();
+  });
+
+  elLengthUnit.addEventListener('change', function () {
+    syncChips(elLengthUnit.value);
+    render();
+  });
+
+  function formatLength(val) {
+    if (typeof val !== 'number' || isNaN(val)) return '-';
+    if (Number.isInteger(val)) return val.toLocaleString('ko-KR');
+    var str = val.toPrecision(6);
+    var num = parseFloat(str);
+    return num.toLocaleString('ko-KR', { maximumFractionDigits: 6 });
+  }
+
+  var UNIT_NAMES = {
+    mm: 'mm',
+    cm: 'cm',
+    m: 'm',
+    km: 'km',
+    inch: '인치',
+    ft: '피트',
+    yd: '야드',
+    mile: '마일',
+    ja: '자(척)'
+  };
+
+  function render() {
+    var rawText = elLengthVal.value.replace(/,/g, '').trim();
+    if (rawText === '') {
+      resVerdict.textContent = '값을 입력해 주세요';
+      resSub.textContent = '0 이상의 길이를 입력하세요.';
+      [rowCm, rowM, rowMm, rowKm, rowInch, rowFt, rowYd, rowMile, rowJa].forEach(function (el) { el.textContent = '-'; });
+      return;
+    }
+
+    var val = parseFloat(rawText);
+    var unit = elLengthUnit.value;
+    var res = convertLength(val, unit);
+
+    if (!res.ok) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '0 이상의 올바른 숫자를 입력해 주세요.';
+      [rowCm, rowM, rowMm, rowKm, rowInch, rowFt, rowYd, rowMile, rowJa].forEach(function (el) { el.textContent = '-'; });
+      return;
+    }
+
+    var primaryTarget = (unit === 'cm' || unit === 'm' || unit === 'mm' || unit === 'km') ? 'inch' : 'cm';
+    var targetVal = primaryTarget === 'cm' ? res.cm : res.inch;
+    var unitName = UNIT_NAMES[unit] || unit;
+    var targetName = UNIT_NAMES[primaryTarget] || primaryTarget;
+
+    resVerdict.innerHTML = formatLength(val) + unitName + ' = <em>' + formatLength(targetVal) + ' ' + targetName + '</em>';
+    resSub.textContent = formatLength(res.m) + ' m · ' + formatLength(res.cm) + ' cm · ' + formatLength(res.inch) + ' inch';
+
+    rowCm.textContent = formatLength(res.cm) + ' cm';
+    rowM.textContent = formatLength(res.m) + ' m';
+    rowMm.textContent = formatLength(res.mm) + ' mm';
+    rowKm.textContent = formatLength(res.km) + ' km';
+    rowInch.textContent = formatLength(res.inch) + ' in';
+    rowFt.textContent = formatLength(res.ft) + ' ft';
+    rowYd.textContent = formatLength(res.yd) + ' yd';
+    rowMile.textContent = formatLength(res.mile) + ' mile';
+    rowJa.textContent = formatLength(res.ja) + ' 자';
+  }
+
+  elLengthVal.addEventListener('input', render);
+  elLengthVal.addEventListener('change', render);
+
+  render();
+})();
+</script>
+</body>
+</html>

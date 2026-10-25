@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>시간 단위 변환 — 초·분·시간·일 바꾸기 | 좌표나라</title>
+<meta name="description" content="초, 분, 시간, 일, 주를 서로 바꾸고 시:분:초 모양으로도 보여 줍니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.unit-seg { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px; margin-top:6px; }
+.unit-seg button { min-height:48px; padding:10px 2px; font-size:15px; }
+@media (max-width:380px) { .unit-seg button { font-size:14px; } }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>시간 단위 변환<br>초·분·시간·일</h1>
+  <p class="lead">값과 단위를 고르면 나머지 단위로 한 번에 바꿔 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>초 (초)</dt><dd id="rowSec">-</dd></div>
+      <div><dt>분 (분)</dt><dd id="rowMin">-</dd></div>
+      <div><dt>시간 (시간)</dt><dd id="rowHour">-</dd></div>
+      <div><dt>일 (일)</dt><dd id="rowDay">-</dd></div>
+      <div><dt>주 (주)</dt><dd id="rowWeek">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="timeVal">시간 값 입력</label>
+      <div class="inp"><input id="timeVal" type="text" inputmode="decimal" value="1.5"></div>
+    </div>
+    <div class="field">
+      <label>기준 단위 선택</label>
+      <div class="seg unit-seg" id="unitSeg">
+        <button type="button" data-unit="second">초</button>
+        <button type="button" data-unit="minute">분</button>
+        <button type="button" data-unit="hour" class="on">시간</button>
+        <button type="button" data-unit="day">일</button>
+        <button type="button" data-unit="week">주</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 참고용 계산이며 윤초나 서머타임 등 역법상 예외는 고려하지 않은 표준 환산값입니다.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>환산 기준:</b>
+        <br>· 1분 = 60초
+        <br>· 1시간 = 60분 = 3,600초
+        <br>· 1일 = 24시간 = 1,440분 = 86,400초
+        <br>· 1주 = 7일 = 168시간 = 604,800초
+      </li>
+      <li><b>시:분:초 (H:MM:SS):</b> 총 초를 반올림하여 시, 분, 초 단위로 나눕니다. 24시간을 넘더라도 일수로 넘기지 않고 누적 시간 그대로 표시합니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>시:분:초 형식에서 24시간이 넘어가면 어떻게 나오나요?</summary>
+    <p>본 계산기에서는 하루(24시간)를 넘어가더라도 시간을 0으로 초기화하지 않고 누적된 시간(예: 48시간이면 48:00:00)으로 직관적으로 표시합니다.</p>
+  </details>
+
+  <details>
+    <summary>소수점 시간(예: 1.5시간, 0.25일)은 어떻게 변환되나요?</summary>
+    <p>소수점 값도 표준 비율에 따라 정확하게 환산됩니다. 예를 들어 1.5시간은 90분(5,400초)이며 시:분:초 형식으로는 1:30:00으로 계산됩니다.</p>
+  </details>
+
+  <details>
+    <summary>한 달이나 1년 단위는 왜 지원하지 않나요?</summary>
+    <p>한 달은 28일에서 31일까지 길이가 매달 다르고, 1년 역시 평년(365일)과 윤년(366일)에 따라 일수가 변하기 때문에 오차 없는 변환을 위해 일과 주 단위까지만 고정 환산합니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var elTimeVal = document.getElementById('timeVal');
+  var unitSeg = document.getElementById('unitSeg');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowSec = document.getElementById('rowSec');
+  var rowMin = document.getElementById('rowMin');
+  var rowHour = document.getElementById('rowHour');
+  var rowDay = document.getElementById('rowDay');
+  var rowWeek = document.getElementById('rowWeek');
+
+  var currentUnit = 'hour';
+
+  unitSeg.addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    var btns = unitSeg.querySelectorAll('button');
+    btns.forEach(function (b) { b.classList.remove('on'); });
+    btn.classList.add('on');
+    currentUnit = btn.getAttribute('data-unit');
+    render();
+  });
+
+  function parseVal(input) {
+    if (!input) return 0;
+    var str = String(input.value || '').replace(/,/g, '').trim();
+    var val = parseFloat(str);
+    return isNaN(val) ? 0 : val;
+  }
+
+  function formatOutput(val) {
+    if (typeof val !== 'number' || isNaN(val)) return '-';
+    if (Number.isInteger(val)) {
+      return val.toLocaleString('ko-KR');
+    }
+    var rounded = Math.round(val * 10000) / 10000;
+    return rounded.toLocaleString('ko-KR', { maximumFractionDigits: 4 });
+  }
+
+  function render() {
+    var rawText = elTimeVal.value.replace(/,/g, '').trim();
+    if (rawText === '') {
+      resVerdict.textContent = '값을 입력해 주세요';
+      resSub.textContent = '0 이상의 숫자를 넣어 주세요.';
+      rowSec.textContent = '-';
+      rowMin.textContent = '-';
+      rowHour.textContent = '-';
+      rowDay.textContent = '-';
+      rowWeek.textContent = '-';
+      return;
+    }
+
+    var val = parseFloat(rawText);
+    var res = convertTime(val, currentUnit);
+
+    if (!res.ok) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '0 이상의 올바른 숫자를 넣어 주세요.';
+      rowSec.textContent = '-';
+      rowMin.textContent = '-';
+      rowHour.textContent = '-';
+      rowDay.textContent = '-';
+      rowWeek.textContent = '-';
+      return;
+    }
+
+    resVerdict.innerHTML = '시:분:초 <em>' + res.hms + '</em>';
+    resSub.textContent = formatOutput(res.seconds) + '초 = ' + formatOutput(res.minutes) + '분 = ' + formatOutput(res.hours) + '시간';
+
+    rowSec.textContent = formatOutput(res.seconds) + '초';
+    rowMin.textContent = formatOutput(res.minutes) + '분';
+    rowHour.textContent = formatOutput(res.hours) + '시간';
+    rowDay.textContent = formatOutput(res.days) + '일';
+    rowWeek.textContent = formatOutput(res.weeks) + '주';
+  }
+
+  elTimeVal.addEventListener('input', render);
+  elTimeVal.addEventListener('change', render);
+
+  render();
+})();
+</script>
+</body>
+</html>

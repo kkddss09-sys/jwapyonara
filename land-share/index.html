@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>대지지분 계산기 — 내 집 대지권 면적 구하기 | 좌표나라</title>
+<meta name="description" content="단지 대지면적과 내 전용면적으로 대지지분(㎡·평)을 계산합니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>대지지분 계산기<br>내 땅은 몇 평?</h1>
+  <p class="lead">단지 전체 대지면적과 전용면적 합계를 넣으면 내 대지지분을 보여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">계산 중입니다</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>내 대지지분 (㎡)</dt><dd id="rowLandM2">-</dd></div>
+      <div><dt>내 대지지분 (평)</dt><dd id="rowPyeong">-</dd></div>
+      <div><dt>지분 비율</dt><dd id="rowRatioPct">-</dd></div>
+      <div><dt>단지 전체 대지면적</dt><dd id="rowTotalLand">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="totalLandM2">단지 전체 대지면적</label>
+      <div class="inp">
+        <input id="totalLandM2" inputmode="decimal" value="30,000">
+        <span>㎡</span>
+      </div>
+    </div>
+    <div class="field">
+      <label for="totalExclusiveM2">단지 전체 전용면적 합계</label>
+      <div class="inp">
+        <input id="totalExclusiveM2" inputmode="decimal" value="60,000">
+        <span>㎡</span>
+      </div>
+    </div>
+    <div class="field">
+      <label for="myExclusiveM2">내 집 전용면적</label>
+      <div class="inp">
+        <input id="myExclusiveM2" inputmode="decimal" value="84">
+        <span>㎡</span>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 정확한 대지권 비율은 등기부등본 값을 기준으로 하세요. 이 계산은 전용면적 비율로 나눈 간이 계산입니다. 참고용 계산이며 실제 금액은 해당 기관·전문가에게 확인하세요.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>단지 전체 전용면적 중에서 내 집 전용면적이 차지하는 비율(%)을 구합니다.</li>
+      <li>구한 비율을 단지 전체 대지면적에 곱하여 내가 소유한 대지지분(㎡)을 산출합니다.</li>
+      <li>대지지분(㎡)을 3.305785로 나누어 평 단위 면적으로 환산합니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 재건축에서 대지지분이 왜 중요한가요?</summary>
+    <p>재건축 사업 진행 시 기존 아파트 건물의 가치보다 깔고 앉은 토지 지분의 크기가 조합원 권리가액과 추가분담금을 결정하는 가장 중요한 기준이 되기 때문입니다.</p>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 등기부등본의 대지권 비율과 다른 이유는 무엇인가요?</summary>
+    <p>이 계산기는 전용면적 비율로 균등 배분한 간이 추정치입니다. 실제 아파트 단지는 동별 위치, 층수, 발코니나 공용면적 안분 차이 등에 따라 등기상 대지권 비율이 다를 수 있습니다.</p>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 단지 전체 면적은 어디서 확인하나요?</summary>
+    <p>아파트 표제부 건축물대장 총괄표제부나 인터넷 부동산 포털의 단지 상세 정보, 또는 관리사무소에 비치된 단지 개요에서 전체 대지면적과 연면적을 확인하실 수 있습니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var totalLandInput = document.getElementById('totalLandM2');
+  var totalExclusiveInput = document.getElementById('totalExclusiveM2');
+  var myExclusiveInput = document.getElementById('myExclusiveM2');
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowLandM2 = document.getElementById('rowLandM2');
+  var rowPyeong = document.getElementById('rowPyeong');
+  var rowRatioPct = document.getElementById('rowRatioPct');
+  var rowTotalLand = document.getElementById('rowTotalLand');
+
+  function parseNumber(val) {
+    if (!val) return 0;
+    var clean = String(val).replace(/,/g, '').trim();
+    var n = parseFloat(clean);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function formatNumberInput(el) {
+    var raw = el.value.replace(/,/g, '').trim();
+    if (!raw) return;
+    var n = parseFloat(raw);
+    if (!isNaN(n)) {
+      el.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function render() {
+    var totalLand = parseNumber(totalLandInput.value);
+    var totalExclusive = parseNumber(totalExclusiveInput.value);
+    var myExclusive = parseNumber(myExclusiveInput.value);
+
+    var r = calcLandShare(totalLand, totalExclusive, myExclusive);
+    if (!r.ok) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '모든 면적은 0보다 큰 숫자여야 합니다.';
+      rowLandM2.textContent = '-';
+      rowPyeong.textContent = '-';
+      rowRatioPct.textContent = '-';
+      rowTotalLand.textContent = '-';
+      return;
+    }
+
+    resVerdict.innerHTML = '대지지분 <em>' + r.landM2.toFixed(2) + '㎡</em> (' + r.pyeong.toFixed(2) + '평)';
+    resSub.textContent = '단지 전체 대지면적의 약 ' + r.ratioPct.toFixed(2) + '%에 해당합니다.';
+
+    rowLandM2.textContent = r.landM2.toFixed(2) + '㎡';
+    rowPyeong.textContent = r.pyeong.toFixed(2) + '평';
+    rowRatioPct.textContent = r.ratioPct.toFixed(2) + '%';
+    rowTotalLand.textContent = totalLand.toLocaleString('ko-KR') + '㎡';
+  }
+
+  totalLandInput.addEventListener('input', render);
+  totalLandInput.addEventListener('blur', function () { formatNumberInput(totalLandInput); render(); });
+  totalExclusiveInput.addEventListener('input', render);
+  totalExclusiveInput.addEventListener('blur', function () { formatNumberInput(totalExclusiveInput); render(); });
+  myExclusiveInput.addEventListener('input', render);
+
+  render();
+})();
+</script>
+</body>
+</html>

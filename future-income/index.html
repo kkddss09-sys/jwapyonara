@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>미래 소득 계산기 — 연봉 인상률로 앞으로 총소득 | 좌표나라</title>
+<meta name="description" content="현재 소득과 해마다 오르는 비율로 앞으로 몇 년간의 소득과 합계를 계산합니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.table-wrap { overflow-x:auto; margin-top:12px; }
+.breakdown-table { width:100%; border-collapse:collapse; font-size:14px; text-align:right; }
+.breakdown-table th, .breakdown-table td { padding:8px 10px; border-bottom:1px solid var(--line); }
+.breakdown-table th { background:var(--fill); font-weight:600; color:var(--sub); }
+.breakdown-table th:first-child, .breakdown-table td:first-child { text-align:left; }
+.hint-text { font-size:12px; color:var(--sub); margin-left:4px; font-weight:normal; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>미래 소득 계산기<br>앞으로 얼마 벌까?</h1>
+  <p class="lead">지금 연소득과 해마다 오르는 비율을 넣어 보세요.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub">-</div>
+    <dl class="rows">
+      <div><dt>1년 차 소득 (시작)</dt><dd id="rowFirst">-</dd></div>
+      <div><dt>마지막 해 소득</dt><dd id="rowLast">-</dd></div>
+      <div><dt>누적 총소득 합계</dt><dd id="rowTotal">-</dd></div>
+      <div><dt>연평균 소득</dt><dd id="rowAvg">-</dd></div>
+      <div><dt>총 증가액 (마지막 해 − 첫해)</dt><dd id="rowDiff">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="incomeYear">현재 연소득</label>
+      <div class="inp">
+        <input id="incomeYear" inputmode="numeric" value="40,000,000">
+        <span>원</span>
+      </div>
+      <div class="chips" id="incomeChips">
+        <button type="button" data-amt="30000000">3천만</button>
+        <button type="button" data-amt="40000000" class="on">4천만</button>
+        <button type="button" data-amt="50000000">5천만</button>
+        <button type="button" data-amt="70000000">7천만</button>
+        <button type="button" data-amt="100000000">1억</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label for="growthPct">연 인상률</label>
+      <div class="inp">
+        <input id="growthPct" inputmode="decimal" value="5">
+        <span>%</span>
+      </div>
+      <div class="chips" id="growthChips">
+        <button type="button" data-growth="0">동결 (0%)</button>
+        <button type="button" data-growth="3">3%</button>
+        <button type="button" data-growth="5" class="on">5%</button>
+        <button type="button" data-growth="7">7%</button>
+        <button type="button" data-growth="10">10%</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label for="years">계산 기간 <span class="hint-text">(1~50년)</span></label>
+      <div class="inp">
+        <input id="years" inputmode="numeric" value="5">
+        <span>년</span>
+      </div>
+      <div class="chips" id="yearChips">
+        <button type="button" data-years="3">3년</button>
+        <button type="button" data-years="5" class="on">5년</button>
+        <button type="button" data-years="10">10년</button>
+        <button type="button" data-years="20">20년</button>
+        <button type="button" data-years="30">30년</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="breakdownCard">
+    <h2 style="font-size:16px; margin:0 0 8px;">연차별 예상 소득 상세</h2>
+    <div class="table-wrap">
+      <table class="breakdown-table">
+        <thead>
+          <tr>
+            <th>연차</th>
+            <th>해당 연도 소득</th>
+            <th>누적 합계</th>
+          </tr>
+        </thead>
+        <tbody id="breakdownBody">
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="note">※ 참고용 계산이며 실제 금액은 해당 기관·전문가에게 확인하세요. 세전 기준의 단순 시뮬레이션이며 소득세·4대보험 공제, 물가상승률 및 승진·이직에 따른 연봉 점프는 반영되지 않았습니다.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>k년 차 연소득:</b> 현재 연소득 × (1 + 연 인상률 ÷ 100)^(k − 1) (원 단위 반올림)</li>
+      <li><b>총 누적 소득:</b> 해당 기간 매년 예상 소득의 총합계</li>
+      <li><b>연평균 소득:</b> 총 누적 소득 ÷ 기간(년)</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>물가상승률을 감안하면 실질 소득은 어떻게 되나요?</summary>
+    <p>연봉 인상률이 물가상승률보다 낮으면 명목 소득(통장에 찍히는 돈)이 늘어나도 구매력 기준 실질 소득은 오히려 줄어들 수 있습니다. 실질적인 가치를 따지려면 연봉 인상률에서 예상 소비자물가상승률(통상 연 2~3%)을 뺀 수치로 계산해 보는 것이 좋습니다.</p>
+  </details>
+
+  <details>
+    <summary>세후 실수령액과는 얼마나 차이가 있나요?</summary>
+    <p>우리나라 소득세율은 과세표준 구간에 따라 6%부터 45%까지 누진 적용됩니다. 따라서 연봉이 오를수록 높은 세율 구간에 진입하여 세금 및 4대 보험료 부담 비율이 커지므로, 실제 통장에 들어오는 세후 소득 증가는 세전 증가액보다 다소 낮습니다.</p>
+  </details>
+
+  <details>
+    <summary>연봉 동결(0%)이나 삭감(마이너스)도 계산할 수 있나요?</summary>
+    <p>네, 인상률 칸에 0을 입력하면 현재 연봉이 그대로 유지되는 동결 상태를 계산할 수 있으며, 마이너스 값(예: −5)을 넣으면 연봉이 삭감되었을 때의 미래 누적 소득도 정확히 계산할 수 있습니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var incomeYear = document.getElementById('incomeYear');
+  var growthPct = document.getElementById('growthPct');
+  var years = document.getElementById('years');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowFirst = document.getElementById('rowFirst');
+  var rowLast = document.getElementById('rowLast');
+  var rowTotal = document.getElementById('rowTotal');
+  var rowAvg = document.getElementById('rowAvg');
+  var rowDiff = document.getElementById('rowDiff');
+
+  var breakdownBody = document.getElementById('breakdownBody');
+
+  function parseVal(input) {
+    if (!input || !input.value) return 0;
+    var cleaned = input.value.replace(/,/g, '').trim();
+    if (cleaned === '') return 0;
+    var n = Number(cleaned);
+    return isNaN(n) ? -1 : n;
+  }
+
+  function formatInput(input) {
+    var raw = input.value.replace(/,/g, '').trim();
+    if (raw === '') return;
+    var n = Number(raw);
+    if (!isNaN(n) && n >= 0) {
+      input.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function render() {
+    var inc = parseVal(incomeYear);
+    var gr = parseVal(growthPct);
+    var yr = parseVal(years);
+
+    if (inc <= 0 || gr < -100 || yr < 1 || yr > 50) {
+      showError();
+      return;
+    }
+
+    var r = calcFutureIncome(inc, gr, yr);
+    if (!r.ok) {
+      showError();
+      return;
+    }
+
+    var numYears = r.rows.length;
+    resVerdict.innerHTML = numYears + '년간 총 소득 <em>' + r.total.toLocaleString('ko-KR') + '원</em>';
+
+    var diff = r.last - r.rows[0].income;
+    var diffSign = diff >= 0 ? '+' : '';
+    resSub.textContent = numYears + '년 차 연소득은 약 ' + r.last.toLocaleString('ko-KR') + '원 (첫해 대비 ' + diffSign + diff.toLocaleString('ko-KR') + '원)';
+
+    rowFirst.textContent = r.rows[0].income.toLocaleString('ko-KR') + '원';
+    rowLast.textContent = r.last.toLocaleString('ko-KR') + '원';
+    rowTotal.textContent = r.total.toLocaleString('ko-KR') + '원';
+
+    var avg = Math.round(r.total / numYears);
+    rowAvg.textContent = avg.toLocaleString('ko-KR') + '원';
+    rowDiff.textContent = diffSign + diff.toLocaleString('ko-KR') + '원';
+
+    // Render table
+    var html = '';
+    var runningSum = 0;
+    for (var i = 0; i < r.rows.length; i++) {
+      var item = r.rows[i];
+      runningSum += item.income;
+      html += '<tr>' +
+        '<td>' + item.year + '년 차</td>' +
+        '<td>' + item.income.toLocaleString('ko-KR') + '원</td>' +
+        '<td>' + runningSum.toLocaleString('ko-KR') + '원</td>' +
+        '</tr>';
+    }
+    breakdownBody.innerHTML = html;
+  }
+
+  function showError() {
+    resVerdict.textContent = '값을 확인해 주세요';
+    resSub.textContent = '연소득(0원 초과), 인상률(-100% 이상), 기간(1~50년)을 확인해 주세요.';
+    rowFirst.textContent = '-';
+    rowLast.textContent = '-';
+    rowTotal.textContent = '-';
+    rowAvg.textContent = '-';
+    rowDiff.textContent = '-';
+    breakdownBody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:var(--sub); padding:16px;">올바른 값을 입력해 주세요.</td></tr>';
+  }
+
+  incomeYear.addEventListener('input', render);
+  incomeYear.addEventListener('change', function () {
+    formatInput(incomeYear);
+    render();
+  });
+
+  growthPct.addEventListener('input', render);
+  years.addEventListener('input', render);
+
+  // 연소득 칩
+  var incChips = document.querySelectorAll('#incomeChips button');
+  incChips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      incChips.forEach(function (c) { c.classList.remove('on'); });
+      chip.classList.add('on');
+      var v = Number(chip.getAttribute('data-amt'));
+      incomeYear.value = v.toLocaleString('ko-KR');
+      render();
+    });
+  });
+
+  // 인상률 칩
+  var grChips = document.querySelectorAll('#growthChips button');
+  grChips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      grChips.forEach(function (c) { c.classList.remove('on'); });
+      chip.classList.add('on');
+      growthPct.value = chip.getAttribute('data-growth');
+      render();
+    });
+  });
+
+  // 기간 칩
+  var yrChips = document.querySelectorAll('#yearChips button');
+  yrChips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      yrChips.forEach(function (c) { c.classList.remove('on'); });
+      chip.classList.add('on');
+      years.value = chip.getAttribute('data-years');
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

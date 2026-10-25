@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>경매 총비용 계산기 — 낙찰 뒤 드는 돈 한눈에 | 좌표나라</title>
+<meta name="description" content="낙찰가와 취득·명도·수리 비용을 넣으면 실제로 드는 총비용을 계산합니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>경매 총비용<br>낙찰가 말고 얼마 더 들까?</h1>
+  <p class="lead">낙찰 뒤 드는 비용을 항목별로 넣어 보세요.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>낙찰가</dt><dd id="rowBid">-</dd></div>
+      <div><dt>취득 비용 (세금 등)</dt><dd id="rowBuyCost">-</dd></div>
+      <div><dt>기타 부대비용 합계</dt><dd id="rowExtras">-</dd></div>
+      <div><dt>낙찰가 포함 총비용</dt><dd id="rowTotalWithBid">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="bid">낙찰가 <b class="hint" id="bidHint"></b></label>
+      <div class="inp"><input id="bid" type="text" inputmode="decimal" value="300,000,000"><span>원</span></div>
+    </div>
+    <div class="field">
+      <label for="buyCostPct">취득 비용률 <small style="font-size:12px;color:var(--sub);">(예시)</small></label>
+      <div class="inp"><input id="buyCostPct" type="text" inputmode="decimal" value="4.6"><span>%</span></div>
+      <div class="chips" style="margin-top:8px;">
+        <button type="button" data-pct="1.1">주택 1주택 (1.1%)</button>
+        <button type="button" data-pct="4.6">상가·토지 (4.6%)</button>
+        <button type="button" data-pct="8.4">다주택 중과 (8.4%)</button>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="legalFee">법무 비용</label>
+        <div class="inp"><input id="legalFee" type="text" inputmode="decimal" value="1,500,000"><span>원</span></div>
+      </div>
+      <div class="field">
+        <label for="evictionCost">명도 비용 (강제집행 등)</label>
+        <div class="inp"><input id="evictionCost" type="text" inputmode="decimal" value="3,000,000"><span>원</span></div>
+      </div>
+    </div>
+    <div class="field">
+      <label for="repair">수리·인테리어비 <b class="hint" id="repairHint"></b></label>
+      <div class="inp"><input id="repair" type="text" inputmode="decimal" value="10,000,000"><span>원</span></div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="unpaidDues">밀린 관리비 (공용부)</label>
+        <div class="inp"><input id="unpaidDues" type="text" inputmode="decimal" value="2,000,000"><span>원</span></div>
+      </div>
+      <div class="field">
+        <label for="movingCost">이사 비용 (합의금)</label>
+        <div class="inp"><input id="movingCost" type="text" inputmode="decimal" value="1,000,000"><span>원</span></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 참고용 계산이며 실제 금액은 해당 기관·전문가에게 확인하세요.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>취득 비용:</b> 낙찰가 × 취득 비용률 (취득세, 지방교육세, 농특세, 채권할인비용 등)</li>
+      <li><b>부대비용:</b> 법무 비용 + 명도 비용 + 수리비 + 밀린 관리비 + 이사 비용</li>
+      <li><b>총 추가 비용:</b> 취득 비용 + 부대비용</li>
+      <li><b>최종 총 소요비용:</b> 낙찰가 + 총 추가 비용</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>밀린 관리비는 낙찰자가 전부 내야 하나요?</summary>
+    <p>판례상 공용부분 관리비(복도·엘리베이터 유지비 등)는 낙찰자가 승계해 부담하지만, 전유부분 관리비(세대 내 전기·수도)나 연체료는 승계되지 않습니다. 입찰 전 관리사무소에 공용부분 체납액을 미리 확인해 두는 것이 안전합니다.</p>
+  </details>
+
+  <details>
+    <summary>명도 비용과 이사비는 의무적으로 줘야 하나요?</summary>
+    <p>점유자에게 이사비를 주는 것은 법적 의무가 아닙니다. 다만 강제집행에 들어가는 시간과 비용(수백만 원 소요)을 고려해 원만한 인도 합의를 위해 소정의 이사비를 협의하는 경우가 많습니다.</p>
+  </details>
+
+  <details>
+    <summary>취득 비용률 4.6%는 어떤 기준인가요?</summary>
+    <p>오피스텔이나 상가, 토지 등 비주택 부동산을 매수할 때 기본으로 부과되는 취득세율(4.6%)을 적용한 예시 수치입니다. 주택은 보유 주택 수와 면적, 취득가액에 따라 1%에서 12%까지 달라지므로 본인의 상황에 맞게 수정해 계산하세요.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var elBid = document.getElementById('bid');
+  var elBuyCostPct = document.getElementById('buyCostPct');
+  var elLegalFee = document.getElementById('legalFee');
+  var elEvictionCost = document.getElementById('evictionCost');
+  var elRepair = document.getElementById('repair');
+  var elUnpaidDues = document.getElementById('unpaidDues');
+  var elMovingCost = document.getElementById('movingCost');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowBid = document.getElementById('rowBid');
+  var rowBuyCost = document.getElementById('rowBuyCost');
+  var rowExtras = document.getElementById('rowExtras');
+  var rowTotalWithBid = document.getElementById('rowTotalWithBid');
+
+  var bidHint = document.getElementById('bidHint');
+  var repairHint = document.getElementById('repairHint');
+
+  function parseVal(input) {
+    if (!input) return 0;
+    var str = String(input.value || '').replace(/,/g, '').trim();
+    var val = parseFloat(str);
+    return isNaN(val) ? 0 : val;
+  }
+
+  function formatKoreanMoney(val) {
+    if (!val || val <= 0) return '';
+    var eok = Math.floor(val / 100000000);
+    var man = Math.floor((val % 100000000) / 10000);
+    var res = '';
+    if (eok > 0) res += eok + '억 ';
+    if (man > 0) res += man.toLocaleString('ko-KR') + '만 ';
+    return res ? res.trim() + '원' : '';
+  }
+
+  function formatInput(input) {
+    var raw = input.value.replace(/,/g, '').trim();
+    if (raw === '') return;
+    var n = parseFloat(raw);
+    if (!isNaN(n) && Number.isInteger(n) && raw.indexOf('.') === -1) {
+      input.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function render() {
+    var bid = parseVal(elBid);
+    var buyCostPct = parseVal(elBuyCostPct);
+    var legalFee = parseVal(elLegalFee);
+    var evictionCost = parseVal(elEvictionCost);
+    var repair = parseVal(elRepair);
+    var unpaidDues = parseVal(elUnpaidDues);
+    var movingCost = parseVal(elMovingCost);
+
+    bidHint.textContent = formatKoreanMoney(bid);
+    repairHint.textContent = formatKoreanMoney(repair);
+
+    var res = calcAuctionCost(bid, buyCostPct, legalFee, evictionCost, repair, unpaidDues, movingCost);
+    if (!res.ok) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '낙찰가는 0보다 커야 하며, 모든 비용은 0 이상이어야 합니다.';
+      rowBid.textContent = '-';
+      rowBuyCost.textContent = '-';
+      rowExtras.textContent = '-';
+      rowTotalWithBid.textContent = '-';
+      return;
+    }
+
+    resVerdict.innerHTML = '추가 비용 합계 <em>' + res.total.toLocaleString('ko-KR') + '원</em>';
+    resSub.textContent = '낙찰가 포함 총 ' + res.totalWithBid.toLocaleString('ko-KR') + '원 (낙찰가의 약 ' + res.pctOfBid.toFixed(2) + '%)';
+    rowBid.textContent = bid.toLocaleString('ko-KR') + '원';
+    rowBuyCost.textContent = res.buyCost.toLocaleString('ko-KR') + '원';
+    rowExtras.textContent = res.extras.toLocaleString('ko-KR') + '원';
+    rowTotalWithBid.textContent = res.totalWithBid.toLocaleString('ko-KR') + '원';
+  }
+
+  [elBid, elLegalFee, elEvictionCost, elRepair, elUnpaidDues, elMovingCost].forEach(function (inp) {
+    inp.addEventListener('blur', function () { formatInput(inp); });
+  });
+
+  [elBid, elBuyCostPct, elLegalFee, elEvictionCost, elRepair, elUnpaidDues, elMovingCost].forEach(function (inp) {
+    inp.addEventListener('input', render);
+    inp.addEventListener('change', render);
+  });
+
+  document.querySelectorAll('.chips button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      elBuyCostPct.value = btn.getAttribute('data-pct');
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

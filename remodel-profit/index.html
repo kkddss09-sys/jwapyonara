@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>리모델링 수익 계산기 — 사서 고쳐 팔면 얼마 남을까 | 좌표나라</title>
+<meta name="description" content="매입가·공사비·매도가를 넣으면 수익과 수익률, 연 환산 수익률을 계산합니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.section-title { font-size:15px; font-weight:700; color:var(--ink); margin:18px 0 10px; }
+.section-title:first-child { margin-top:0; }
+.hint-text { font-size:12px; color:var(--sub); margin-left:4px; font-weight:normal; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>리모델링 수익<br>고쳐 팔면 얼마 남을까?</h1>
+  <p class="lead">들어간 돈과 판 돈을 넣으면 수익과 수익률을 보여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub">-</div>
+    <dl class="rows">
+      <div><dt>총 들어간 돈 (투자금)</dt><dd id="rowInvest">-</dd></div>
+      <div><dt>실제 손에 쥔 매도금 (비용 제외)</dt><dd id="rowNetSale">-</dd></div>
+      <div><dt>예상 순이익</dt><dd id="rowProfit">-</dd></div>
+      <div><dt>단순 수익률 (ROI)</dt><dd id="rowRoi">-</dd></div>
+      <div><dt>연 환산 수익률</dt><dd id="rowAnnualRoi">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="section-title">매입 및 공사 비용</div>
+    <div class="field">
+      <label for="buyPrice">부동산 매입가</label>
+      <div class="inp">
+        <input id="buyPrice" inputmode="numeric" value="400,000,000">
+        <span>원</span>
+      </div>
+    </div>
+    <div class="field">
+      <label for="buyCost">취득 부대비용 <span class="hint-text">(취득세·법무비 등 예시)</span></label>
+      <div class="inp">
+        <input id="buyCost" inputmode="numeric" value="18,000,000">
+        <span>원</span>
+      </div>
+    </div>
+    <div class="field">
+      <label for="remodelCost">공사비 / 인테리어 비용</label>
+      <div class="inp">
+        <input id="remodelCost" inputmode="numeric" value="60,000,000">
+        <span>원</span>
+      </div>
+    </div>
+    <div class="field">
+      <label for="otherCost">기타 보유비용 <span class="hint-text">(금융이자·공과금·관리비 등)</span></label>
+      <div class="inp">
+        <input id="otherCost" inputmode="numeric" value="5,000,000">
+        <span>원</span>
+      </div>
+    </div>
+
+    <div class="section-title">매도 금액 및 기간</div>
+    <div class="field">
+      <label for="salePrice">예상 매도가격</label>
+      <div class="inp">
+        <input id="salePrice" inputmode="numeric" value="560,000,000">
+        <span>원</span>
+      </div>
+    </div>
+    <div class="field">
+      <label for="sellCost">매도 부대비용 <span class="hint-text">(중개보수 등 예시)</span></label>
+      <div class="inp">
+        <input id="sellCost" inputmode="numeric" value="5,000,000">
+        <span>원</span>
+      </div>
+    </div>
+    <div class="field">
+      <label for="months">소요 기간 <span class="hint-text">(매입부터 매도까지 개월 수)</span></label>
+      <div class="inp">
+        <input id="months" inputmode="numeric" value="10">
+        <span>개월</span>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 양도소득세 등 세금과 대출 이자는 반영되지 않은 세전 단순 계산입니다. 실제 리모델링 및 매매 시 발생하는 세금·부대비용은 세무사 및 전문가에게 확인하세요.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>총 투자금:</b> 매입가 + 취득 비용 + 공사비 + 기타 비용</li>
+      <li><b>예상 순이익:</b> 매도가 − 매도 비용 − 총 투자금</li>
+      <li><b>단순 수익률:</b> (예상 순이익 ÷ 총 투자금) × 100</li>
+      <li><b>연 환산 수익률:</b> 기간이 0보다 클 때 (단순 수익률 × 12 ÷ 개월 수)</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>연 환산 수익률은 무엇인가요?</summary>
+    <p>공사와 매매에 걸린 기간이 1년(12개월)보다 짧거나 길 때, 이를 1년 단위 수익률로 환산해 비교할 수 있도록 만든 수치입니다. 예를 들어 6개월 만에 10%의 수익을 냈다면 1년 환산 시 연 20% 수준의 성과로 평가할 수 있습니다.</p>
+  </details>
+
+  <details>
+    <summary>양도소득세나 법인세는 왜 제외되었나요?</summary>
+    <p>부동산 세금은 보유 주택 수, 규제지역 여부, 개인 또는 법인 사업자 등록 상태에 따라 세율과 공제 폭이 크게 달라집니다. 본 도구는 사업성 기본 검토를 위한 세전 계산기이므로, 정확한 세후 실익은 세무 전문가에게 상담하시기 바랍니다.</p>
+  </details>
+
+  <details>
+    <summary>공사 기간이 길어지면 수익성에 어떤 영향이 있나요?</summary>
+    <p>공사나 매도가 지연되면 대출 금융이자, 보유세, 관리비 등 기타 비용이 계속 누적되어 실제 순이익이 줄어듭니다. 또한 기간이 늘어날수록 연 환산 수익률도 감소하므로 정해진 공기 안에 매도를 마치는 것이 중요합니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var buyPrice = document.getElementById('buyPrice');
+  var buyCost = document.getElementById('buyCost');
+  var remodelCost = document.getElementById('remodelCost');
+  var otherCost = document.getElementById('otherCost');
+  var salePrice = document.getElementById('salePrice');
+  var sellCost = document.getElementById('sellCost');
+  var months = document.getElementById('months');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowInvest = document.getElementById('rowInvest');
+  var rowNetSale = document.getElementById('rowNetSale');
+  var rowProfit = document.getElementById('rowProfit');
+  var rowRoi = document.getElementById('rowRoi');
+  var rowAnnualRoi = document.getElementById('rowAnnualRoi');
+
+  function parseVal(input) {
+    if (!input || !input.value) return 0;
+    var cleaned = input.value.replace(/,/g, '').trim();
+    if (cleaned === '') return 0;
+    var n = Number(cleaned);
+    return isNaN(n) ? -1 : n;
+  }
+
+  function formatInput(input) {
+    var raw = input.value.replace(/,/g, '').trim();
+    if (raw === '') return;
+    var n = Number(raw);
+    if (!isNaN(n) && n >= 0) {
+      input.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function render() {
+    var bp = parseVal(buyPrice);
+    var bc = parseVal(buyCost);
+    var rc = parseVal(remodelCost);
+    var oc = parseVal(otherCost);
+    var sp = parseVal(salePrice);
+    var sc = parseVal(sellCost);
+    var mo = parseVal(months);
+
+    if (bp < 0 || bc < 0 || rc < 0 || oc < 0 || sp < 0 || sc < 0 || mo < 0) {
+      showError();
+      return;
+    }
+
+    var r = calcRemodel(bp, bc, rc, oc, sp, sc, mo);
+    if (!r.ok) {
+      showError();
+      return;
+    }
+
+    var profitSign = r.profit >= 0 ? '+' : '';
+    resVerdict.innerHTML = '예상 순이익 <em>' + profitSign + r.profit.toLocaleString('ko-KR') + '원</em>';
+    
+    if (r.annualRoiPct !== null) {
+      resSub.textContent = '단순 수익률 ' + r.roiPct.toFixed(2) + '%, ' + mo + '개월 기준 연 환산 ' + r.annualRoiPct.toFixed(2) + '%';
+      rowAnnualRoi.textContent = '연 ' + r.annualRoiPct.toFixed(2) + '%';
+    } else {
+      resSub.textContent = '단순 수익률 ' + r.roiPct.toFixed(2) + '% (소요 기간 미입력)';
+      rowAnnualRoi.textContent = '-';
+    }
+
+    rowInvest.textContent = r.invest.toLocaleString('ko-KR') + '원';
+    rowNetSale.textContent = (sp - sc).toLocaleString('ko-KR') + '원';
+    rowProfit.textContent = profitSign + r.profit.toLocaleString('ko-KR') + '원';
+    rowRoi.textContent = r.roiPct.toFixed(2) + '%';
+  }
+
+  function showError() {
+    resVerdict.textContent = '값을 확인해 주세요';
+    resSub.textContent = '0 이상의 올바른 숫자를 입력해 주세요.';
+    rowInvest.textContent = '-';
+    rowNetSale.textContent = '-';
+    rowProfit.textContent = '-';
+    rowRoi.textContent = '-';
+    rowAnnualRoi.textContent = '-';
+  }
+
+  var inputs = [buyPrice, buyCost, remodelCost, otherCost, salePrice, sellCost, months];
+  inputs.forEach(function (inp) {
+    inp.addEventListener('input', render);
+    inp.addEventListener('change', function () {
+      if (inp !== months) {
+        formatInput(inp);
+      }
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

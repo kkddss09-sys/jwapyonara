@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>유류비 계산기 — 거리와 연비로 기름값 계산 | 좌표나라</title>
+<meta name="description" content="이동 거리·연비·리터당 가격으로 한 번 갈 때와 한 달 유류비를 계산합니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.chk-wrap { display:flex; align-items:center; gap:8px; margin-top:8px; font-weight:600; font-size:15px; cursor:pointer; }
+.chk-wrap input[type="checkbox"] { width:20px; height:20px; accent-color:var(--red); cursor:pointer; }
+.unit-hint { font-size:12px; color:var(--sub); font-weight:normal; margin-left:4px; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>유류비 계산기<br>가는 데 기름값은?</h1>
+  <p class="lead">거리와 연비, 기름 값을 넣어 보세요.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">예상 유류비 <em>0원</em></div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>총 주행 거리</dt><dd id="rowDistance">-</dd></div>
+      <div><dt>예상 소모 기름양</dt><dd id="rowLiters">-</dd></div>
+      <div><dt>1회 이동 유류비</dt><dd id="rowCost">-</dd></div>
+      <div><dt>한 달 유류비</dt><dd id="rowMonthCost">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="distanceKm">이동 거리</label>
+      <div class="inp">
+        <input type="number" id="distanceKm" inputmode="decimal" value="100" min="0.1" step="any">
+        <span>km</span>
+      </div>
+      <label class="chk-wrap">
+        <input type="checkbox" id="roundTrip">
+        <span>왕복으로 계산하기 (거리 2배)</span>
+      </label>
+    </div>
+
+    <div class="row2" style="margin-top:14px;">
+      <div class="field">
+        <label for="kmPerLiter">차량 연비</label>
+        <div class="inp">
+          <input type="number" id="kmPerLiter" inputmode="decimal" value="12" min="0.1" step="any">
+          <span>km/L</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="pricePerLiter">리터당 가격 <span class="unit-hint">(예시)</span></label>
+        <div class="inp">
+          <input type="number" id="pricePerLiter" inputmode="decimal" value="1650" min="0" step="any">
+          <span>원</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label for="tripsPerMonth">한 달 이동 횟수</label>
+      <div class="inp">
+        <input type="number" id="tripsPerMonth" inputmode="decimal" value="20" min="0" step="1">
+        <span>회</span>
+      </div>
+      <p class="help">출퇴근 시 보통 한 달 20~22회 정도 이동합니다.</p>
+    </div>
+  </section>
+
+  <p class="note">참고용 계산이며 실제 기름값은 주행 환경, 도로 정체, 급가속 여부 등에 따라 달라질 수 있습니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">오늘 시세는 카톡방에서<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>주행 거리:</b> 왕복 선택 시 편도 거리에 2를 곱합니다.</li>
+      <li><b>소모 기름양:</b> 주행 거리 ÷ 연비로 필요한 연료 리터(L)를 구합니다.</li>
+      <li><b>1회 유류비:</b> 소모 기름양 × 리터당 유가를 곱해 원 단위로 반올림합니다.</li>
+      <li><b>한 달 유류비:</b> 1회 유류비에 한 달 이동 횟수를 곱해 계산합니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 복합연비와 실연비 중 어떤 것을 넣어야 하나요?</summary>
+    <p>차량 등록증의 공인 연비보다는 자동차 계기판(트립 컴퓨터)에 표시되는 실제 평균 연비를 넣으시는 것이 실제 주유비와 가장 잘 맞습니다.</p>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 고속도로 통행료도 함께 계산되나요?</summary>
+    <p>본 도구는 차량 유류비 전용 계산기이므로 하이패스 통행료나 주차 요금은 포함되어 있지 않습니다.</p>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 경유(디젤)나 LPG 차량도 쓸 수 있나요?</summary>
+    <p>네, 유종과 관계없이 내 차량의 연비(km/L)와 주유소·충전소의 리터당 단가를 입력하시면 동일하게 계산됩니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var distanceKm = document.getElementById('distanceKm');
+  var roundTrip = document.getElementById('roundTrip');
+  var kmPerLiter = document.getElementById('kmPerLiter');
+  var pricePerLiter = document.getElementById('pricePerLiter');
+  var tripsPerMonth = document.getElementById('tripsPerMonth');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowDistance = document.getElementById('rowDistance');
+  var rowLiters = document.getElementById('rowLiters');
+  var rowCost = document.getElementById('rowCost');
+  var rowMonthCost = document.getElementById('rowMonthCost');
+
+  function render() {
+    var dist = parseFloat(distanceKm.value);
+    var rt = roundTrip.checked;
+    var kpl = parseFloat(kmPerLiter.value);
+    var ppl = parseFloat(pricePerLiter.value);
+    var tpm = parseFloat(tripsPerMonth.value);
+
+    var r = calcFuel(dist, kpl, ppl, rt, tpm);
+    if (!r.ok) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '이동 거리와 연비는 0보다 커야 하며, 가격과 횟수는 0 이상이어야 합니다.';
+      rowDistance.textContent = '-';
+      rowLiters.textContent = '-';
+      rowCost.textContent = '-';
+      rowMonthCost.textContent = '-';
+      return;
+    }
+
+    var totalDist = rt ? dist * 2 : dist;
+    var litersRound = Math.round(r.liters * 100) / 100;
+
+    resVerdict.innerHTML = '예상 유류비 <em>' + r.cost.toLocaleString('ko-KR') + '원</em>';
+    if (tpm > 0) {
+      resSub.textContent = '한 달(' + tpm + '회) 기준 약 ' + r.monthCost.toLocaleString('ko-KR') + '원이 듭니다.';
+    } else {
+      resSub.textContent = '1회 편도(또는 왕복) 주행 시 필요한 기름값입니다.';
+    }
+
+    rowDistance.textContent = totalDist.toLocaleString('ko-KR') + 'km' + (rt ? ' (왕복)' : ' (편도)');
+    rowLiters.textContent = '약 ' + litersRound.toLocaleString('ko-KR') + 'L';
+    rowCost.textContent = r.cost.toLocaleString('ko-KR') + '원';
+    rowMonthCost.textContent = r.monthCost.toLocaleString('ko-KR') + '원';
+  }
+
+  distanceKm.addEventListener('input', render);
+  roundTrip.addEventListener('change', render);
+  kmPerLiter.addEventListener('input', render);
+  pricePerLiter.addEventListener('input', render);
+  tripsPerMonth.addEventListener('input', render);
+
+  render();
+})();
+</script>
+</body>
+</html>

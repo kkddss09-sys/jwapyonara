@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>건물 감가상각 계산기 — 건물 잔존가치 계산 | 좌표나라</title>
+<meta name="description" content="취득가와 내용연수로 건물의 연간 감가상각비와 현재 잔존가치를 계산합니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>건물 잔존가치<br>지금 얼마로 볼까?</h1>
+  <p class="lead">정액법으로 해마다 줄어드는 건물 가치를 계산합니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">계산 중입니다</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>현재 잔존가치</dt><dd id="rowCurrentValue">-</dd></div>
+      <div><dt>연간 감가상각비</dt><dd id="rowAnnualDep">-</dd></div>
+      <div><dt>누적 감가상각액</dt><dd id="rowAccumulated">-</dd></div>
+      <div><dt>최종 잔존가액</dt><dd id="rowSalvage">-</dd></div>
+      <div><dt>내용연수 진행률</dt><dd id="rowProgress">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="cost">건물 취득가</label>
+      <div class="inp">
+        <input id="cost" inputmode="decimal" value="500,000,000">
+        <span>원</span>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="usefulLife">내용연수</label>
+        <div class="inp">
+          <input id="usefulLife" inputmode="decimal" value="40">
+          <span>년</span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="elapsedYears">경과 연수</label>
+        <div class="inp">
+          <input id="elapsedYears" inputmode="decimal" value="10">
+          <span>년</span>
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label for="salvagePct">잔존가치 비율 <b class="hint">(예시)</b></label>
+      <div class="inp">
+        <input id="salvagePct" inputmode="decimal" value="5">
+        <span>%</span>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 정액법 기준의 간이 계산입니다. 실제 세무·감정평가 시에는 내용연수 기준과 상각 방식이 다를 수 있습니다. 참고용 계산이며 실제 금액은 해당 기관·전문가에게 확인하세요.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li>취득가에서 최종 잔존가치(취득가 × 잔존비율)를 뺀 상각 대상 금액을 내용연수로 나누어 1년에 줄어드는 감가상각비를 구합니다(정액법).</li>
+      <li>연간 감가상각비에 경과 연수를 곱해 지금까지 쌓인 누적 감가상각액을 계산합니다.</li>
+      <li>취득가에서 누적 감가상각액을 빼서 현재 잔존가치를 산출합니다(최종 잔존가액 미만으로는 떨어지지 않습니다).</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 건물의 내용연수는 보통 몇 년인가요?</summary>
+    <p>철근콘크리트 구조 아파트나 상가 건물은 보통 40년~50년, 벽돌조나 목조 건축물은 20년~30년을 기준으로 많이 적용합니다.</p>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 내용연수가 지나면 건물 가치는 0원이 되나요?</summary>
+    <p>아닙니다. 설정해 둔 잔존가치 비율(예: 5%)에 해당하는 최소 금액은 내용연수가 완전히 지나도 장부상 잔존가치로 남게 됩니다.</p>
+  </details>
+
+  <details>
+    <summary>자주 묻는 질문: 세무서에 신고하는 감가상각비와 같나요?</summary>
+    <p>소득세법과 법인세법에서 규정하는 내용연수 범위표 및 정률법·정액법 신고 여부에 따라 실제 세무 장부상 감가상각비와 차이가 날 수 있습니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var costInput = document.getElementById('cost');
+  var usefulLifeInput = document.getElementById('usefulLife');
+  var elapsedYearsInput = document.getElementById('elapsedYears');
+  var salvagePctInput = document.getElementById('salvagePct');
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowCurrentValue = document.getElementById('rowCurrentValue');
+  var rowAnnualDep = document.getElementById('rowAnnualDep');
+  var rowAccumulated = document.getElementById('rowAccumulated');
+  var rowSalvage = document.getElementById('rowSalvage');
+  var rowProgress = document.getElementById('rowProgress');
+
+  function parseNumber(val) {
+    if (!val) return 0;
+    var clean = String(val).replace(/,/g, '').trim();
+    var n = parseFloat(clean);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function formatMoneyInput(el) {
+    var raw = el.value.replace(/,/g, '').trim();
+    if (!raw) return;
+    var n = parseFloat(raw);
+    if (!isNaN(n)) {
+      el.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function render() {
+    var cost = parseNumber(costInput.value);
+    var usefulLife = parseNumber(usefulLifeInput.value);
+    var elapsedYears = parseNumber(elapsedYearsInput.value);
+    var salvagePct = parseNumber(salvagePctInput.value);
+
+    var r = calcResidual(cost, salvagePct, usefulLife, elapsedYears);
+    if (!r.ok) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '취득가와 내용연수는 0보다 커야 하며, 비율은 0~100% 사이여야 합니다.';
+      rowCurrentValue.textContent = '-';
+      rowAnnualDep.textContent = '-';
+      rowAccumulated.textContent = '-';
+      rowSalvage.textContent = '-';
+      rowProgress.textContent = '-';
+      return;
+    }
+
+    var salvage = Math.round(cost * salvagePct / 100);
+    var pctOfCost = (r.currentValue / cost) * 100;
+
+    resVerdict.innerHTML = '현재 잔존가치 <em>' + Math.round(r.currentValue).toLocaleString('ko-KR') + '원</em>';
+    resSub.textContent = '취득가 대비 약 ' + pctOfCost.toFixed(1) + '% 수준입니다.';
+
+    rowCurrentValue.textContent = Math.round(r.currentValue).toLocaleString('ko-KR') + '원';
+    rowAnnualDep.textContent = Math.round(r.annualDep).toLocaleString('ko-KR') + '원 / 년';
+    rowAccumulated.textContent = Math.round(r.accumulated).toLocaleString('ko-KR') + '원';
+    rowSalvage.textContent = salvage.toLocaleString('ko-KR') + '원 (' + salvagePct + '%)';
+    rowProgress.textContent = elapsedYears + '년 / ' + usefulLife + '년 (' + Math.min(100, (elapsedYears / usefulLife * 100)).toFixed(1) + '%)';
+  }
+
+  costInput.addEventListener('input', render);
+  costInput.addEventListener('blur', function () { formatMoneyInput(costInput); render(); });
+  usefulLifeInput.addEventListener('input', render);
+  elapsedYearsInput.addEventListener('input', render);
+  salvagePctInput.addEventListener('input', render);
+
+  render();
+})();
+</script>
+</body>
+</html>
