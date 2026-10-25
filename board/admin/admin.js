@@ -29,6 +29,11 @@
       '.bd-subnav::-webkit-scrollbar { display:none; }',
       '.bd-subnav a { flex:none; text-decoration:none; font-size:15px; font-weight:700; padding:8px 16px; border-radius:999px; border:1.5px solid var(--line); background:var(--card); color:var(--sub); }',
       '.bd-subnav a.on { background:var(--panel); border-color:var(--panel); color:#fff; }',
+      '.adm-tabs { display:flex; gap:8px; overflow-x:auto; margin:0 0 16px; padding-bottom:4px; scrollbar-width:none; }',
+      '.adm-tabs::-webkit-scrollbar { display:none; }',
+      '.adm-tab { font:inherit; font-size:15px; font-weight:700; padding:10px 18px; border-radius:999px; border:1.5px solid var(--line); background:var(--card); color:var(--sub); cursor:pointer; min-height:42px; display:inline-flex; align-items:center; justify-content:center; }',
+      '.adm-tab:hover { color:var(--ink); border-color:var(--sub); }',
+      '.adm-tab.on { background:var(--panel); border-color:var(--panel); color:#fff; }',
       '.bd-notice { background:var(--warnbg); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin-bottom:14px; font-size:15px; line-height:1.55; color:var(--ink); font-weight:600; }',
       '.bd-ready { background:var(--card); border:1.5px solid var(--line); border-radius:18px; padding:28px 18px; margin-bottom:16px; text-align:center; }',
       '.bd-ready b { display:block; font-size:20px; margin-bottom:6px; color:var(--ink); }',
@@ -289,6 +294,9 @@
           currentUser = null;
           roleState = 'none';
           roles = { admin: false, submanager: false, vendor: false, vendor_name: null };
+          if (window.ZW_BOARD_STATS && typeof window.ZW_BOARD_STATS.resetCache === 'function') {
+            window.ZW_BOARD_STATS.resetCache();
+          }
           if (onLoggedOut) onLoggedOut();
         }).catch(function () {
           outBtn.disabled = false;
@@ -734,11 +742,81 @@
       return;
     }
 
-    // 6. 운영진(관리자 또는 부매니저)인 경우: 이메일 안내 문구 + 업체 권한 칸 + (관리자 전용) 부매니저 권한 칸
+    // 6. 운영진(관리자 또는 부매니저)인 경우: 상단 탭 3개 + 권한 관리/회원 현황/일간 현황 화면
+    var tabNav = document.createElement('nav');
+    tabNav.className = 'adm-tabs';
+    tabNav.setAttribute('role', 'tablist');
+    tabNav.setAttribute('aria-label', '관리자 메뉴');
+
+    var tabPermsBtn = document.createElement('button');
+    tabPermsBtn.type = 'button';
+    tabPermsBtn.className = 'adm-tab on';
+    tabPermsBtn.setAttribute('role', 'tab');
+    tabPermsBtn.setAttribute('aria-selected', 'true');
+    tabPermsBtn.textContent = '권한 관리';
+
+    var tabMembersBtn = document.createElement('button');
+    tabMembersBtn.type = 'button';
+    tabMembersBtn.className = 'adm-tab';
+    tabMembersBtn.setAttribute('role', 'tab');
+    tabMembersBtn.setAttribute('aria-selected', 'false');
+    tabMembersBtn.textContent = '회원 현황';
+
+    var tabDailyBtn = document.createElement('button');
+    tabDailyBtn.type = 'button';
+    tabDailyBtn.className = 'adm-tab';
+    tabDailyBtn.setAttribute('role', 'tab');
+    tabDailyBtn.setAttribute('aria-selected', 'false');
+    tabDailyBtn.textContent = '일간 현황';
+
+    tabNav.appendChild(tabPermsBtn);
+    tabNav.appendChild(tabMembersBtn);
+    tabNav.appendChild(tabDailyBtn);
+    container.appendChild(tabNav);
+
+    var panelPerms = document.createElement('div');
+    panelPerms.id = 'admPanelPerms';
+
+    var panelMembers = document.createElement('div');
+    panelMembers.id = 'admPanelMembers';
+    panelMembers.style.display = 'none';
+
+    var panelDaily = document.createElement('div');
+    panelDaily.id = 'admPanelDaily';
+    panelDaily.style.display = 'none';
+
+    container.appendChild(panelPerms);
+    container.appendChild(panelMembers);
+    container.appendChild(panelDaily);
+
+    function setTab(tabId) {
+      tabPermsBtn.className = 'adm-tab' + (tabId === 'perms' ? ' on' : '');
+      tabPermsBtn.setAttribute('aria-selected', tabId === 'perms' ? 'true' : 'false');
+      tabMembersBtn.className = 'adm-tab' + (tabId === 'members' ? ' on' : '');
+      tabMembersBtn.setAttribute('aria-selected', tabId === 'members' ? 'true' : 'false');
+      tabDailyBtn.className = 'adm-tab' + (tabId === 'daily' ? ' on' : '');
+      tabDailyBtn.setAttribute('aria-selected', tabId === 'daily' ? 'true' : 'false');
+
+      panelPerms.style.display = tabId === 'perms' ? '' : 'none';
+      panelMembers.style.display = tabId === 'members' ? '' : 'none';
+      panelDaily.style.display = tabId === 'daily' ? '' : 'none';
+
+      if (tabId === 'members' && window.ZW_BOARD_STATS && typeof window.ZW_BOARD_STATS.loadMembersTab === 'function') {
+        window.ZW_BOARD_STATS.loadMembersTab(panelMembers, sb, roles);
+      } else if (tabId === 'daily' && window.ZW_BOARD_STATS && typeof window.ZW_BOARD_STATS.loadDailyTab === 'function') {
+        window.ZW_BOARD_STATS.loadDailyTab(panelDaily, sb, roles);
+      }
+    }
+
+    tabPermsBtn.addEventListener('click', function () { setTab('perms'); });
+    tabMembersBtn.addEventListener('click', function () { setTab('members'); });
+    tabDailyBtn.addEventListener('click', function () { setTab('daily'); });
+
+    // [권한 관리] 패널 내용 (기존 바로가기, 안내 문구, 업체 권한, 부매니저 권한)
     if (roles.admin) {
       var shortcutsEl = buildShortcutsSection();
       if (shortcutsEl) {
-        container.appendChild(shortcutsEl);
+        panelPerms.appendChild(shortcutsEl);
       }
     }
 
@@ -746,10 +824,10 @@
     notice.className = 'bd-notice';
     notice.setAttribute('role', 'note');
     notice.textContent = '상대방이 구글 또는 카카오로 로그인한 계정의 이메일과 같아야 적용됩니다. 이메일을 주지 않는 카카오 계정은 연결할 수 없습니다.';
-    container.appendChild(notice);
+    panelPerms.appendChild(notice);
 
     // 업체 권한 칸 (관리자 + 부매니저 모두 표시)
-    container.appendChild(buildPermissionSection({
+    panelPerms.appendChild(buildPermissionSection({
       table: 'vendors',
       title: '업체 권한 (단가표 작성 허용)',
       nameLabel: '업체 이름',
@@ -761,7 +839,7 @@
 
     // 부매니저 권한 칸 (관리자에게만 보임)
     if (roles.admin) {
-      container.appendChild(buildPermissionSection({
+      panelPerms.appendChild(buildPermissionSection({
         table: 'submanagers',
         title: '부매니저 권한 (관리자 전용)',
         nameLabel: '부매니저 이름',
@@ -819,6 +897,9 @@
         var nextId = nextUser ? nextUser.id : null;
         if (prevId === nextId) return;
         currentUser = nextUser;
+        if (window.ZW_BOARD_STATS && typeof window.ZW_BOARD_STATS.resetCache === 'function') {
+          window.ZW_BOARD_STATS.resetCache();
+        }
         fetchMyRoles().then(function () {
           renderAdminPage(container);
         });
