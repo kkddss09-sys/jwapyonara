@@ -338,6 +338,11 @@ ZW.app = function (cfg) {
     }
   }
 
+  // 옆에서 밀려 나오는 계층 사이드바(분류 > 묶음 > 도구, 조각 순서 바꾸기) — 2026-10-26 사용자 요청. 따로 파일이라 이 줄만 지우면 빠진다
+  var sideJs = document.createElement('script');
+  sideJs.src = ROOT + '_common/sidebar.js';
+  document.body.appendChild(sideJs);
+
   var cat = here ? here[3] : '';
   var kakao = kakaoOf(cat || '휴대폰');
   var out = function (href, text) { return '<a href="' + href + '" target="_blank" rel="noopener">' + text + '</a>'; };
