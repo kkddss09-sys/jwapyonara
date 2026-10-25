@@ -57,6 +57,7 @@
     + '.zw-mv .gp{cursor:grab}'
     + '.zw-side.edit .zw-blk{background:var(--fill)}'
     + '.zw-none{padding:18px 12px;color:var(--sub);font-size:14px}'
+    + '.zw-dot{color:var(--red);font-size:10px;margin-left:2px}'
     + '.zw-side [hidden]{display:none !important}';
   var style = document.createElement('style');
   style.textContent = css;
@@ -69,6 +70,10 @@
     return out;
   };
   var here = location.href.split(/[?#]/)[0];
+  var hereCat = '', hereGrp = '';   // 지금 보고 있는 곳(분류·묶음) — 줄 옆에 ● 표시
+  TOOLS.forEach(function (t) { if (t[0] && here === ROOT + t[0] + '/index.html') { hereCat = t[3]; hereGrp = t[5] || '기타'; } });
+  CATS.forEach(function (c) { if (!hereCat && CAT_PATH[c] && (here === ROOT + CAT_PATH[c] + '/index.html' || here === ROOT + CAT_PATH[c] + '/')) hereCat = c; });
+  var hereDot = '<span class="zw-dot" title="지금 보고 있는 곳">●</span>';
   var keyOf = function (b) { return (b.getAttribute('data-kind') === 'cat' ? 'c:' : 'g:' + b.getAttribute('data-cat') + '/') + b.getAttribute('data-key'); };
   var mv = function () {
     return '<span class="zw-mv"><button type="button" class="gp" draggable="true" aria-label="끌어서 옮기기" title="끌어서 옮기기">⠿</button>'
@@ -96,13 +101,13 @@
       tools.forEach(function (t) { var g = t[5] || '기타'; if (names.indexOf(g) < 0) names.push(g); });
       names = sortBy(names, st.order.groups[c]);
       html += '<section class="zw-blk' + (st.opened['c:' + c] ? '' : ' shut') + '" data-kind="cat" data-key="' + esc(c) + '">'
-        + '<div class="zw-cat-h"><button type="button" class="tg" aria-expanded="' + (!!st.opened['c:' + c]) + '"><span class="zw-car">▼</span>' + (CAT_ICON[c] || '📌') + ' ' + esc(c) + '<span class="n">' + tools.length + '</span></button>' + mv() + '</div>'
+        + '<div class="zw-cat-h"><button type="button" class="tg" aria-expanded="' + (!!st.opened['c:' + c]) + '"><span class="zw-car">▼</span>' + (CAT_ICON[c] || '📌') + ' ' + esc(c) + (c === hereCat ? hereDot : '') + '<span class="n">' + tools.length + '</span></button>' + mv() + '</div>'
         + '<div class="zw-kids"><a class="t zw-hub" href="' + ROOT + CAT_PATH[c] + '/index.html">' + esc(c) + ' 첫 화면 →</a>'
         + names.map(function (g) {
           var list = tools.filter(function (t) { return (t[5] || '기타') === g; });
           var gk = 'g:' + c + '/' + g;
           return '<div class="zw-blk' + (st.opened[gk] ? '' : ' shut') + '" data-kind="grp" data-key="' + esc(g) + '" data-cat="' + esc(c) + '">'
-            + '<div class="zw-grp-h"><button type="button" class="tg" aria-expanded="' + (!!st.opened[gk]) + '"><span class="zw-car">▼</span>' + esc(g) + '<span class="n">' + list.length + '</span></button>' + mv() + '</div>'
+            + '<div class="zw-grp-h"><button type="button" class="tg" aria-expanded="' + (!!st.opened[gk]) + '"><span class="zw-car">▼</span>' + esc(g) + (c === hereCat && g === hereGrp ? hereDot : '') + '<span class="n">' + list.length + '</span></button>' + mv() + '</div>'
             + '<div class="zw-kids">' + list.map(function (t) {
               var href = ROOT + t[0] + '/index.html';
               return '<a class="t' + (here === href ? ' on' : '') + '"' + (here === href ? ' aria-current="page"' : '') + ' href="' + href + '" data-s="' + esc((t[1] + ' ' + t[2] + ' ' + g + ' ' + c).toLowerCase()) + '">' + esc(t[1]) + '<small>' + esc(t[2]) + '</small></a>';
