@@ -12,7 +12,7 @@
   };
   var st = store.get();
   st.order = st.order || { cats: [], groups: {} };   // 바꾼 순서. 없으면 TOOLS에 적힌 순서
-  st.closed = st.closed || {};                        // 접어 둔 덩어리
+  st.opened = st.opened || {};                        // 펼쳐 둔 덩어리(처음에는 모두 접힌 상태)
 
   var css = '.zw-side-btn{font:inherit;font-size:20px;line-height:1;background:none;border:none;color:var(--ink);cursor:pointer;padding:6px 10px 6px 0;margin-right:2px}'
     + '.zw-side-btn:focus-visible,.zw-side button:focus-visible,.zw-side a:focus-visible{outline:2px solid var(--red);outline-offset:2px}'
@@ -80,7 +80,7 @@
   wrap.innerHTML = '<div class="zw-side-dim"></div><aside class="zw-side" role="dialog" aria-modal="true" aria-label="전체 메뉴">'
     + '<div class="zw-side-top"><b>좌표<i>나라</i> 전체 메뉴</b><button type="button" class="zw-side-x" aria-label="닫기">✕</button></div>'
     + '<input class="zw-side-q" type="search" placeholder="도구 찾기 (예: 대출, 평)" aria-label="도구 찾기">'
-    + '<div class="zw-side-bar"><button type="button" class="b-fold">모두 접기</button><button type="button" class="b-edit">↕ 순서 바꾸기</button><button type="button" class="b-reset" hidden>처음 순서로</button></div>'
+    + '<div class="zw-side-bar"><button type="button" class="b-fold">모두 펴기</button><button type="button" class="b-edit">↕ 순서 바꾸기</button><button type="button" class="b-reset" hidden>처음 순서로</button></div>'
     + '<nav class="zw-side-body" aria-label="분류별 도구"></nav></aside>';
   document.body.appendChild(wrap);
   var side = wrap.querySelector('.zw-side'), body = wrap.querySelector('.zw-side-body'), q = wrap.querySelector('.zw-side-q');
@@ -95,14 +95,14 @@
       var names = [];
       tools.forEach(function (t) { var g = t[5] || '기타'; if (names.indexOf(g) < 0) names.push(g); });
       names = sortBy(names, st.order.groups[c]);
-      html += '<section class="zw-blk' + (st.closed['c:' + c] ? ' shut' : '') + '" data-kind="cat" data-key="' + esc(c) + '">'
-        + '<div class="zw-cat-h"><button type="button" class="tg" aria-expanded="' + (!st.closed['c:' + c]) + '"><span class="zw-car">▼</span>' + (CAT_ICON[c] || '📌') + ' ' + esc(c) + '<span class="n">' + tools.length + '</span></button>' + mv() + '</div>'
+      html += '<section class="zw-blk' + (st.opened['c:' + c] ? '' : ' shut') + '" data-kind="cat" data-key="' + esc(c) + '">'
+        + '<div class="zw-cat-h"><button type="button" class="tg" aria-expanded="' + (!!st.opened['c:' + c]) + '"><span class="zw-car">▼</span>' + (CAT_ICON[c] || '📌') + ' ' + esc(c) + '<span class="n">' + tools.length + '</span></button>' + mv() + '</div>'
         + '<div class="zw-kids"><a class="t zw-hub" href="' + ROOT + CAT_PATH[c] + '/index.html">' + esc(c) + ' 첫 화면 →</a>'
         + names.map(function (g) {
           var list = tools.filter(function (t) { return (t[5] || '기타') === g; });
           var gk = 'g:' + c + '/' + g;
-          return '<div class="zw-blk' + (st.closed[gk] ? ' shut' : '') + '" data-kind="grp" data-key="' + esc(g) + '" data-cat="' + esc(c) + '">'
-            + '<div class="zw-grp-h"><button type="button" class="tg" aria-expanded="' + (!st.closed[gk]) + '"><span class="zw-car">▼</span>' + esc(g) + '<span class="n">' + list.length + '</span></button>' + mv() + '</div>'
+          return '<div class="zw-blk' + (st.opened[gk] ? '' : ' shut') + '" data-kind="grp" data-key="' + esc(g) + '" data-cat="' + esc(c) + '">'
+            + '<div class="zw-grp-h"><button type="button" class="tg" aria-expanded="' + (!!st.opened[gk]) + '"><span class="zw-car">▼</span>' + esc(g) + '<span class="n">' + list.length + '</span></button>' + mv() + '</div>'
             + '<div class="zw-kids">' + list.map(function (t) {
               var href = ROOT + t[0] + '/index.html';
               return '<a class="t' + (here === href ? ' on' : '') + '"' + (here === href ? ' aria-current="page"' : '') + ' href="' + href + '" data-s="' + esc((t[1] + ' ' + t[2] + ' ' + g + ' ' + c).toLowerCase()) + '">' + esc(t[1]) + '<small>' + esc(t[2]) + '</small></a>';
@@ -111,9 +111,6 @@
     });
     if (typeof BOARD_OPEN !== 'undefined' && BOARD_OPEN) html += '<div class="zw-kids" style="border:none;margin-left:0"><a class="t zw-hub" href="' + ROOT + 'board/index.html">💬 게시판 →</a></div>';
     body.innerHTML = html || '<p class="zw-none">아직 목록이 없어요.</p>';
-    // 현재 보고 있는 도구가 든 덩어리는 펼쳐 둔다
-    var on = body.querySelector('a.t.on');
-    for (var p = on && on.parentNode; p && p !== body; p = p.parentNode) if (p.classList && p.classList.contains('shut')) p.classList.remove('shut');
   }
 
   function saveOrder() {   // 화면에 보이는 순서를 그대로 저장
@@ -142,7 +139,7 @@
     var blk = tg.closest('.zw-blk'), key = keyOf(blk);
     var shut = blk.classList.toggle('shut');
     tg.setAttribute('aria-expanded', String(!shut));
-    if (shut) st.closed[key] = 1; else delete st.closed[key];
+    if (shut) delete st.opened[key]; else st.opened[key] = 1;
     store.set(st);
   });
   // 끌어서 옮기기(컴퓨터). 같은 종류끼리, 같은 부모 안에서만 바뀐다
@@ -186,7 +183,7 @@
     var shut = foldBtn.textContent === '모두 접기';
     [].forEach.call(body.querySelectorAll('.zw-blk'), function (b) {
       b.classList.toggle('shut', shut);
-      if (shut) st.closed[keyOf(b)] = 1; else delete st.closed[keyOf(b)];
+      if (shut) delete st.opened[keyOf(b)]; else st.opened[keyOf(b)] = 1;
       var tg = b.querySelector('.tg'); if (tg) tg.setAttribute('aria-expanded', String(!shut));
     });
     store.set(st);
@@ -215,7 +212,7 @@
   function open(from) {
     opener = from || document.activeElement;
     wrap.classList.add('open'); document.documentElement.style.overflow = 'hidden';
-    setTimeout(function () { var on = body.querySelector('a.t.on'); if (on && on.scrollIntoView) on.scrollIntoView({ block: 'center' }); }, 60);
+    body.scrollTop = 0;
   }
   function close() {
     if (!wrap.classList.contains('open')) return;
