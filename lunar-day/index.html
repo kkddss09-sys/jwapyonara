@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>손 없는 날 달력 — 양력 날짜의 음력과 손 없는 날 | 좌표나라</title>
+<meta name="description" content="양력 날짜를 음력으로 바꾸고, 이사·개업 날짜 고를 때 보는 손 없는 날을 달력으로 보여 줍니다. | 좌표나라">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.inp input[type="date"] { text-align:left; font-size:16px; padding:12px 0; }
+.cal-nav { display:flex; justify-content:space-between; align-items:center; margin-top:16px; margin-bottom:8px; }
+.cal-nav button { font:inherit; font-size:15px; font-weight:700; border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:12px; padding:8px 14px; min-height:48px; cursor:pointer; }
+.cal-nav h3 { margin:0; font-size:17px; font-weight:800; }
+.cal-grid { display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:4px; margin-top:8px; }
+.cal-th { font-size:13px; font-weight:700; text-align:center; padding:6px 0; color:var(--sub); }
+.cal-th.sun { color:var(--danger); }
+.cal-th.sat { color:var(--red); }
+.cal-day { background:var(--fill); border:1px solid transparent; border-radius:10px; padding:5px 2px; text-align:center; min-height:56px; display:flex; flex-direction:column; justify-content:space-between; }
+.cal-day.empty { background:transparent; border-color:transparent; }
+.cal-day.son { background:var(--warnbg); border-color:#e5a000; }
+.cal-day.selected { border-color:var(--red); box-shadow:0 0 0 1px var(--red); }
+.cal-day .d-num { font-size:14px; font-weight:700; }
+.cal-day.sun .d-num { color:var(--danger); }
+.cal-day.sat .d-num { color:var(--red); }
+.cal-day .d-lunar { font-size:11px; color:var(--sub); white-space:nowrap; }
+.cal-day .d-tag { font-size:10px; font-weight:700; color:#b45309; background:#fef3c7; border-radius:4px; padding:1px 2px; display:block; margin-top:2px; letter-spacing:-0.05em; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>손 없는 날 달력<br>이번 달 언제?</h1>
+  <p class="lead">달을 고르면 날짜마다 음력과 손 없는 날을 표시합니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>선택일 음력 날짜</dt><dd id="rowSelectedLunar">-</dd></div>
+      <div><dt>다음 손 없는 날</dt><dd id="rowNextSon">-</dd></div>
+      <div><dt>다음 손 없는 날 (음력)</dt><dd id="rowNextSonLunar">-</dd></div>
+      <div><dt>이번 달 손 없는 날 수</dt><dd id="rowMonthSonCount">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="targetDate">확인할 특정 날짜</label>
+      <div class="inp">
+        <input type="date" id="targetDate">
+      </div>
+    </div>
+
+    <div class="cal-nav">
+      <button type="button" id="btnPrevMonth">◀ 이전 달</button>
+      <h3 id="calTitle">-</h3>
+      <button type="button" id="btnNextMonth">다음 달 ▶</button>
+    </div>
+
+    <div class="cal-grid" id="calHeader">
+      <div class="cal-th sun">일</div>
+      <div class="cal-th">월</div>
+      <div class="cal-th">화</div>
+      <div class="cal-th">수</div>
+      <div class="cal-th">목</div>
+      <div class="cal-th">금</div>
+      <div class="cal-th sat">토</div>
+    </div>
+    <div class="cal-grid" id="calBody"></div>
+  </section>
+
+  <p class="note">※ 손 없는 날은 이사·개업 날짜를 정할 때 쓰는 민속 풍습이며 과학적 근거는 없습니다. 날짜는 이사 업체 일정과 함께 정하세요. 참고용 계산이며 실제 일정은 상황에 맞게 결정하세요.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>손 없는 날이란:</b> 악귀나 귀신('손')이 사람을 방해하지 않는다고 믿어 온 길일(吉日)입니다.</li>
+      <li><b>손 없는 날 날짜:</b> 음력 날짜의 끝자리가 9 또는 0인 날(음력 9일, 10일, 19일, 20일, 29일, 30일)에 해당합니다.</li>
+      <li><b>음력 변환:</b> 한국천문연구원의 단기력 역법 기준(ko-KR-u-ca-dangi)을 적용하여 양력 날짜를 음력으로 변환해 판별합니다. 윤달인 경우에도 동일하게 끝자리 9·0 규칙이 적용됩니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>손 없는 날에 꼭 이사해야 하나요?</summary>
+    <p>손 없는 날은 민속 신앙에서 유래한 풍습으로 과학적이거나 법적인 근거는 전혀 없습니다. 실제로 손 없는 날은 이사 수요가 크게 몰려 이사업체 비용이 평소보다 10~30%가량 비싸질 수 있으므로, 개인 일정과 예산에 맞추어 유연하게 날짜를 잡는 것이 실속 있습니다.</p>
+  </details>
+
+  <details>
+    <summary>음력 윤달인 경우에도 손 없는 날 규칙이 같나요?</summary>
+    <p>네, 윤달 여부와 상관없이 음력 날짜의 끝자리가 9나 0(9일, 10일, 19일, 20일, 29일, 30일)이면 동일하게 손 없는 날로 분류됩니다. 민간에서는 윤달 자체를 덤으로 얻은 달이라 여겨 부정이 타지 않는 길한 달로 보기도 합니다.</p>
+  </details>
+
+  <details>
+    <summary>방위에 따른 '손(귀신)'이 머무는 날은 무엇인가요?</summary>
+    <p>전통 풍습에 따르면 음력 끝자리 1·2일은 동쪽, 3·4일은 남쪽, 5·6일은 서쪽, 7·8일은 북쪽에 손이 머무른다고 합니다. 반면 9와 0으로 끝나는 날에는 손이 하늘로 올라가 사방 어느 방향으로 이동해도 해가 없다고 전해집니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var elTargetDate = document.getElementById('targetDate');
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowSelectedLunar = document.getElementById('rowSelectedLunar');
+  var rowNextSon = document.getElementById('rowNextSon');
+  var rowNextSonLunar = document.getElementById('rowNextSonLunar');
+  var rowMonthSonCount = document.getElementById('rowMonthSonCount');
+
+  var calTitle = document.getElementById('calTitle');
+  var calBody = document.getElementById('calBody');
+  var btnPrevMonth = document.getElementById('btnPrevMonth');
+  var btnNextMonth = document.getElementById('btnNextMonth');
+
+  var now = new Date();
+  var curYear = now.getFullYear();
+  var curMonth = now.getMonth() + 1;
+  var curDate = now.getDate();
+
+  var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+  var todayStr = curYear + '-' + pad(curMonth) + '-' + pad(curDate);
+
+  elTargetDate.value = todayStr;
+  var viewYear = curYear;
+  var viewMonth = curMonth;
+
+  function renderCalendar() {
+    calTitle.textContent = viewYear + '년 ' + viewMonth + '월';
+    calBody.innerHTML = '';
+
+    var days = listMonth(viewYear, viewMonth);
+    if (!days || days.length === 0) return;
+
+    var firstDayOfWeek = days[0].weekday;
+    for (var i = 0; i < firstDayOfWeek; i++) {
+      var emptyEl = document.createElement('div');
+      emptyEl.className = 'cal-day empty';
+      calBody.appendChild(emptyEl);
+    }
+
+    var selectedYmd = elTargetDate.value;
+    var monthSonCount = 0;
+
+    days.forEach(function (dInfo) {
+      if (dInfo.son) monthSonCount++;
+
+      var dayEl = document.createElement('div');
+      var cls = ['cal-day'];
+      if (dInfo.weekday === 0) cls.push('sun');
+      if (dInfo.weekday === 6) cls.push('sat');
+      if (dInfo.son) cls.push('son');
+      if (dInfo.ymd === selectedYmd) cls.push('selected');
+      dayEl.className = cls.join(' ');
+
+      var dNum = parseInt(dInfo.ymd.split('-')[2], 10);
+      var topSpan = document.createElement('span');
+      topSpan.className = 'd-num';
+      topSpan.textContent = dNum;
+      dayEl.appendChild(topSpan);
+
+      var lunarSpan = document.createElement('span');
+      lunarSpan.className = 'd-lunar';
+      if (dInfo.lunarMonth && dInfo.lunarDay) {
+        lunarSpan.textContent = (dInfo.leap ? '윤' : '음 ') + dInfo.lunarMonth + '.' + dInfo.lunarDay;
+      }
+      dayEl.appendChild(lunarSpan);
+
+      if (dInfo.son) {
+        var tagSpan = document.createElement('span');
+        tagSpan.className = 'd-tag';
+        tagSpan.textContent = '손없는날';
+        dayEl.appendChild(tagSpan);
+      }
+
+      dayEl.addEventListener('click', function () {
+        elTargetDate.value = dInfo.ymd;
+        render();
+      });
+
+      calBody.appendChild(dayEl);
+    });
+
+    rowMonthSonCount.textContent = monthSonCount + '일';
+  }
+
+  function render() {
+    var ymd = elTargetDate.value;
+    var lunar = toLunar(ymd);
+
+    if (!lunar.ok) {
+      resVerdict.textContent = '날짜를 올바르게 넣어 주세요';
+      resSub.textContent = '형식: YYYY-MM-DD';
+      rowSelectedLunar.textContent = '-';
+      rowNextSon.textContent = '-';
+      rowNextSonLunar.textContent = '-';
+      return;
+    }
+
+    var son = isSonEopneun(lunar.day);
+    var lunarText = (lunar.leap ? '윤달 ' : '') + '음력 ' + lunar.month + '월 ' + lunar.day + '일';
+    rowSelectedLunar.textContent = lunarText;
+
+    if (son) {
+      resVerdict.innerHTML = '선택하신 날은 <em>손 없는 날</em>입니다!';
+      resSub.textContent = ymd + ' (' + lunarText + ')';
+    } else {
+      resVerdict.innerHTML = '선택하신 날은 <em>손 있는 날</em>입니다';
+      resSub.textContent = ymd + ' (' + lunarText + ')';
+    }
+
+    var next = nextSon(ymd);
+    if (next.ok) {
+      rowNextSon.textContent = next.ymd;
+      rowNextSonLunar.textContent = '음력 ' + next.lunarMonth + '월 ' + next.lunarDay + '일';
+    } else {
+      rowNextSon.textContent = '40일 이내 없음';
+      rowNextSonLunar.textContent = '-';
+    }
+
+    // 선택된 날짜에 맞추어 달력 연/월 동기화
+    var p = ymd.split('-');
+    var py = parseInt(p[0], 10);
+    var pm = parseInt(p[1], 10);
+    if (!isNaN(py) && !isNaN(pm) && (py !== viewYear || pm !== viewMonth)) {
+      viewYear = py;
+      viewMonth = pm;
+    }
+
+    renderCalendar();
+  }
+
+  btnPrevMonth.addEventListener('click', function () {
+    viewMonth--;
+    if (viewMonth < 1) {
+      viewMonth = 12;
+      viewYear--;
+    }
+    renderCalendar();
+  });
+
+  btnNextMonth.addEventListener('click', function () {
+    viewMonth++;
+    if (viewMonth > 12) {
+      viewMonth = 1;
+      viewYear++;
+    }
+    renderCalendar();
+  });
+
+  elTargetDate.addEventListener('input', render);
+  elTargetDate.addEventListener('change', render);
+
+  render();
+})();
+</script>
+</body>
+</html>

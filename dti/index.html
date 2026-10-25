@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DTI 계산기 — 내 소득 대비 대출 원리금 비율 | 좌표나라</title>
+<meta name="description" content="연소득과 대출 조건을 넣으면 총부채상환비율(DTI)을 바로 계산합니다. 가입 없이 무료.">
+<link rel="stylesheet" href="../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>DTI 계산기<br>소득 대비 대출 부담은?</h1>
+  <p class="lead">연소득과 새 대출 조건을 넣으면 DTI가 몇 %인지 보여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>새 대출 월 원리금</dt><dd id="rowMonthly">-</dd></div>
+      <div><dt>새 대출 연간 원리금</dt><dd id="rowAnnual">-</dd></div>
+      <div><dt>기존 대출 연간 이자</dt><dd id="rowExisting">-</dd></div>
+      <div><dt>연간 총 상환 부담액</dt><dd id="rowTotalAnnual">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label for="income">연소득 <b class="hint" id="incomeHint"></b></label>
+      <div class="inp"><input id="income" type="text" inputmode="decimal" value="60,000,000"><span>원</span></div>
+    </div>
+    <div class="field">
+      <label for="principal">새 대출 원금 <b class="hint" id="principalHint"></b></label>
+      <div class="inp"><input id="principal" type="text" inputmode="decimal" value="200,000,000"><span>원</span></div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="ratePct">대출 연 금리</label>
+        <div class="inp"><input id="ratePct" type="text" inputmode="decimal" value="4"><span>%</span></div>
+      </div>
+      <div class="field">
+        <label for="years">대출 기간</label>
+        <div class="inp"><input id="years" type="text" inputmode="decimal" value="30"><span>년</span></div>
+      </div>
+    </div>
+    <div class="field">
+      <label for="existingInterestYear">기존 대출 연간 이자 (없으면 0) <b class="hint" id="existingHint"></b></label>
+      <div class="inp"><input id="existingInterestYear" type="text" inputmode="decimal" value="0"><span>원</span></div>
+    </div>
+  </section>
+
+  <p class="note">※ 참고용 계산이며 실제 금액 및 대출 가능 여부는 해당 기관·전문가에게 확인하세요.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>DTI(총부채상환비율):</b> (새 대출 연간 원리금 + 기존 대출 연간 이자) ÷ 연소득 × 100</li>
+      <li><b>새 대출 상환액:</b> 원리금균등분할상환 방식을 기준으로 매월 같은 금액을 갚는다고 계산합니다.</li>
+      <li><b>기존 대출:</b> 기존 대출의 원금 상환액은 제외하고 1년간 내는 이자 금액만 합산합니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>DTI와 DSR은 무엇이 다른가요?</summary>
+    <p>DTI는 새 대출의 원리금과 기존 대출의 '이자'만 더해 소득과 비교합니다. 반면 DSR은 기존 대출의 '원금' 상환액까지 모두 포함하므로 더 엄격한 기준입니다. 금융기관 규제 현황에 따라 적용되는 지표가 다를 수 있습니다.</p>
+  </details>
+
+  <details>
+    <summary>상환 기간을 늘리면 DTI는 어떻게 되나요?</summary>
+    <p>대출 만기를 20년에서 30년 등으로 늘리면 매달 갚는 원리금이 줄어들어 DTI 수치가 낮아집니다. 다만 전체 대출 기간 동안 납부해야 하는 총 이자 금액은 늘어나므로 주의가 필요합니다.</p>
+  </details>
+
+  <details>
+    <summary>DTI가 높으면 대출을 받을 수 없나요?</summary>
+    <p>지역과 주택 가격, 규제 여부에 따라 금융당국이 정한 DTI 상한선이 정해져 있습니다. 이 상한을 넘으면 대출 한도가 깎이거나 승인이 나오지 않을 수 있으므로 미리 비율을 점검하는 것이 안전합니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var elIncome = document.getElementById('income');
+  var elPrincipal = document.getElementById('principal');
+  var elRatePct = document.getElementById('ratePct');
+  var elYears = document.getElementById('years');
+  var elExisting = document.getElementById('existingInterestYear');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowMonthly = document.getElementById('rowMonthly');
+  var rowAnnual = document.getElementById('rowAnnual');
+  var rowExisting = document.getElementById('rowExisting');
+  var rowTotalAnnual = document.getElementById('rowTotalAnnual');
+
+  var incomeHint = document.getElementById('incomeHint');
+  var principalHint = document.getElementById('principalHint');
+  var existingHint = document.getElementById('existingHint');
+
+  function parseVal(input) {
+    if (!input) return 0;
+    var str = String(input.value || '').replace(/,/g, '').trim();
+    var val = parseFloat(str);
+    return isNaN(val) ? 0 : val;
+  }
+
+  function formatKoreanMoney(val) {
+    if (!val || val <= 0) return '';
+    var eok = Math.floor(val / 100000000);
+    var man = Math.floor((val % 100000000) / 10000);
+    var res = '';
+    if (eok > 0) res += eok + '억 ';
+    if (man > 0) res += man.toLocaleString('ko-KR') + '만 ';
+    return res ? res.trim() + '원' : '';
+  }
+
+  function formatInput(input) {
+    var raw = input.value.replace(/,/g, '').trim();
+    if (raw === '') return;
+    var n = parseFloat(raw);
+    if (!isNaN(n) && Number.isInteger(n) && raw.indexOf('.') === -1) {
+      input.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function render() {
+    var income = parseVal(elIncome);
+    var principal = parseVal(elPrincipal);
+    var ratePct = parseVal(elRatePct);
+    var years = parseVal(elYears);
+    var existing = parseVal(elExisting);
+
+    incomeHint.textContent = formatKoreanMoney(income);
+    principalHint.textContent = formatKoreanMoney(principal);
+    existingHint.textContent = formatKoreanMoney(existing);
+
+    var res = calcDTI(income, principal, ratePct, years, existing);
+    if (!res.ok) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '연소득과 대출 기간은 0보다 커야 합니다.';
+      rowMonthly.textContent = '-';
+      rowAnnual.textContent = '-';
+      rowExisting.textContent = '-';
+      rowTotalAnnual.textContent = '-';
+      return;
+    }
+
+    resVerdict.innerHTML = 'DTI <em>' + res.dtiPct.toFixed(2) + '%</em>';
+    resSub.textContent = '연간 총 상환액이 연소득의 ' + res.dtiPct.toFixed(2) + '%를 차지합니다.';
+    rowMonthly.textContent = res.monthlyPayment.toLocaleString('ko-KR') + '원';
+    rowAnnual.textContent = res.annualPayment.toLocaleString('ko-KR') + '원';
+    rowExisting.textContent = existing.toLocaleString('ko-KR') + '원';
+    rowTotalAnnual.textContent = (res.annualPayment + existing).toLocaleString('ko-KR') + '원';
+  }
+
+  [elIncome, elPrincipal, elExisting].forEach(function (inp) {
+    inp.addEventListener('blur', function () { formatInput(inp); });
+  });
+
+  [elIncome, elPrincipal, elRatePct, elYears, elExisting].forEach(function (inp) {
+    inp.addEventListener('input', render);
+    inp.addEventListener('change', render);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

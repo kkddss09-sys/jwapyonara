@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BMI 계산기 — 키와 몸무게로 체질량지수 | 좌표나라</title>
+<meta name="description" content="키와 몸무게로 BMI와 비만도 구간, 적정 체중 범위를 계산합니다. 참고용입니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>BMI 계산기<br>내 체질량지수는?</h1>
+  <p class="lead">키와 몸무게를 넣으면 BMI와 적정 체중 범위를 보여 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub"></div>
+    <dl class="rows">
+      <div><dt>체질량지수 (BMI)</dt><dd id="rowBmi">-</dd></div>
+      <div><dt>비만도 분류</dt><dd id="rowCategory">-</dd></div>
+      <div><dt>적정 체중 범위</dt><dd id="rowIdealRange">-</dd></div>
+      <div><dt>체중 조절 제안</dt><dd id="rowDiff">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="row2">
+      <div class="field">
+        <label for="heightCm">키</label>
+        <div class="inp"><input id="heightCm" type="text" inputmode="decimal" value="170"><span>cm</span></div>
+      </div>
+      <div class="field">
+        <label for="weightKg">몸무게</label>
+        <div class="inp"><input id="weightKg" type="text" inputmode="decimal" value="70"><span>kg</span></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 참고용 수치이며 진단이 아닙니다. 근육량·나이에 따라 다를 수 있어 건강 상태는 의료진과 상담하세요.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>BMI 공식:</b> 몸무게(kg) ÷ [키(m)]²</li>
+      <li><b>비만도 기준 (아시아-태평양 기준):</b>
+        <br>· 18.5 미만: 저체중
+        <br>· 18.5 ~ 22.9: 정상
+        <br>· 23.0 ~ 24.9: 과체중(비만 전 단계)
+        <br>· 25.0 ~ 29.9: 1단계 비만
+        <br>· 30.0 ~ 34.9: 2단계 비만
+        <br>· 35.0 이상: 3단계 비만
+      </li>
+      <li><b>적정 체중:</b> 정상 범위 지수(BMI 18.5 ~ 22.9)를 키의 제곱에 곱하여 산출합니다.</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>근육량이 많은 사람도 비만으로 나오나요?</summary>
+    <p>BMI는 체지방량과 근육량을 구분하지 않고 키와 몸무게만으로 산출합니다. 따라서 근육량이 많은 운동선수 등은 체지방이 적어도 비만 판정이 나올 수 있으며, 보다 정확한 진단은 체성분 검사를 권장합니다.</p>
+  </details>
+
+  <details>
+    <summary>서양 기준과 아시아 기준의 비만도 수치가 왜 다른가요?</summary>
+    <p>세계보건기구(WHO) 아시아-태평양 지역 기준은 서양인에 비해 체지방 비율이 높고 당뇨 등 만성질환 발병 위험이 낮은 BMI 구간에서도 높아질 수 있어 정상 기준을 22.9까지로 더 엄격하게 적용합니다.</p>
+  </details>
+
+  <details>
+    <summary>적정 체중을 유지하려면 어떻게 해야 하나요?</summary>
+    <p>극단적인 식이 제한보다는 영양 균형이 잡힌 식단과 유산소 및 근력 운동을 꾸준히 실천하는 것이 좋습니다. 만성질환이나 건강에 우려가 있다면 전문 의료진과 상의하여 단계적인 목표를 세우는 것을 추천합니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var elHeight = document.getElementById('heightCm');
+  var elWeight = document.getElementById('weightKg');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowBmi = document.getElementById('rowBmi');
+  var rowCategory = document.getElementById('rowCategory');
+  var rowIdealRange = document.getElementById('rowIdealRange');
+  var rowDiff = document.getElementById('rowDiff');
+
+  function parseVal(input) {
+    if (!input) return 0;
+    var str = String(input.value || '').replace(/,/g, '').trim();
+    var val = parseFloat(str);
+    return isNaN(val) ? 0 : val;
+  }
+
+  function render() {
+    var height = parseVal(elHeight);
+    var weight = parseVal(elWeight);
+
+    var res = calcBMI(height, weight);
+    if (!res.ok) {
+      resVerdict.textContent = '값을 확인해 주세요';
+      resSub.textContent = '키는 50~250cm, 몸무게는 10~400kg 사이로 입력해 주세요.';
+      rowBmi.textContent = '-';
+      rowCategory.textContent = '-';
+      rowIdealRange.textContent = '-';
+      rowDiff.textContent = '-';
+      return;
+    }
+
+    resVerdict.innerHTML = 'BMI <em>' + res.bmi.toFixed(2) + '</em> (' + res.category + ')';
+    resSub.textContent = '적정 체중 범위는 ' + res.minKg.toFixed(1) + 'kg ~ ' + res.maxKg.toFixed(1) + 'kg입니다.';
+    rowBmi.textContent = res.bmi.toFixed(2);
+    rowCategory.textContent = res.category;
+    rowIdealRange.textContent = res.minKg.toFixed(1) + 'kg ~ ' + res.maxKg.toFixed(1) + 'kg';
+
+    if (weight < res.minKg) {
+      var under = Math.round((res.minKg - weight) * 10) / 10;
+      rowDiff.textContent = '적정 하한보다 약 ' + under.toFixed(1) + 'kg 부족';
+    } else if (weight > res.maxKg) {
+      var over = Math.round((weight - res.maxKg) * 10) / 10;
+      rowDiff.textContent = '적정 상한보다 약 ' + over.toFixed(1) + 'kg 초과';
+    } else {
+      rowDiff.textContent = '적정 체중 범위 내 유지 중';
+    }
+  }
+
+  [elHeight, elWeight].forEach(function (inp) {
+    inp.addEventListener('input', render);
+    inp.addEventListener('change', render);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

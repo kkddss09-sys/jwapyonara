@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>월급 시급 환산 계산기 — 주휴수당 포함 시급 | 좌표나라</title>
+<meta name="description" content="월급을 시급으로, 시급을 월급으로 바꿉니다. 주 근로시간과 주휴시간을 포함해 계산합니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.seg button { min-height:48px; }
+.hint-text { font-size:12px; color:var(--sub); margin-left:4px; font-weight:normal; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>월급 ↔ 시급<br>바꿔 보기</h1>
+  <p class="lead">주 근로시간을 넣으면 월 환산 시간을 계산해 월급과 시급을 서로 바꿔 드립니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub">-</div>
+    <dl class="rows">
+      <div><dt>주당 소정근로시간</dt><dd id="rowWeekHours">-</dd></div>
+      <div><dt>주휴수당 인정시간</dt><dd id="rowHolidayHours">-</dd></div>
+      <div><dt>월 환산 유급시간</dt><dd id="rowMonthlyHours">-</dd></div>
+      <div><dt>환산 시급</dt><dd id="rowHourly">-</dd></div>
+      <div><dt>환산 월급</dt><dd id="rowMonthly">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label>계산 방향</label>
+      <div class="seg two" id="modeSeg">
+        <button type="button" class="on" data-mode="monthToHour">월급을 시급으로</button>
+        <button type="button" data-mode="hourToMonth">시급을 월급으로</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label for="wageValue" id="valueLabel">기본 월급 금액</label>
+      <div class="inp">
+        <input id="wageValue" inputmode="numeric" value="2,090,000">
+        <span>원</span>
+      </div>
+      <div class="chips" id="valueChips">
+        <button type="button" data-val="2090000" class="on">209만</button>
+        <button type="button" data-val="2500000">250만</button>
+        <button type="button" data-val="3000000">300만</button>
+        <button type="button" data-val="3500000">350만</button>
+        <button type="button" data-val="4000000">400만</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label for="weekHours">주당 실근로시간 <span class="hint-text">(법정 기준 주 40시간)</span></label>
+      <div class="inp">
+        <input id="weekHours" inputmode="decimal" value="40">
+        <span>시간</span>
+      </div>
+      <div class="chips" id="hourChips">
+        <button type="button" data-hours="40" class="on">주 40시간 (기본)</button>
+        <button type="button" data-hours="30">주 30시간</button>
+        <button type="button" data-hours="20">주 20시간</button>
+        <button type="button" data-hours="15">주 15시간</button>
+        <button type="button" data-hours="10">주 10시간 (주휴 없음)</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 주 15시간 이상 일하면 주휴시간이 더해지는 일반적인 계산입니다. 실제 급여는 근로계약을 확인하세요. 최저임금 등은 고용노동부 고시를 확인하세요. 세전 기준의 기본급 환산이며 연장·야간수당이나 4대 보험 공제액은 반영되지 않았습니다.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>주휴시간:</b> 주 15시간 이상 일할 때 주 근로시간 ÷ 5 (최대 8시간). 15시간 미만이면 0시간</li>
+      <li><b>월 유급 시간:</b> (주 근로시간 + 주휴시간) × 365 ÷ 7 ÷ 12 (주 40시간 기준 약 209시간)</li>
+      <li><b>시급 환산:</b> 월급 ÷ 월 환산 유급시간 (원 단위 반올림)</li>
+      <li><b>월급 환산:</b> 시급 × 월 환산 유급시간 (원 단위 반올림)</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>주휴수당은 누구나 받을 수 있나요?</summary>
+    <p>근로기준법상 1주일 소정근로시간이 15시간 이상이고, 약속한 근무일을 개근한 근로자라면 정규직·계약직·아르바이트에 관계없이 주휴수당(유급휴일)을 받을 권리가 있습니다. 4인 이하 사업장에도 동일하게 적용됩니다.</p>
+  </details>
+
+  <details>
+    <summary>한 달 기준 유급시간 209시간은 어떻게 계산된 숫자인가요?</summary>
+    <p>주 40시간 일하는 경우 주휴 8시간을 더해 주당 48시간이 유급 처리됩니다. 1년 365일을 7일로 나누면 약 52.14주이고, 이를 12개월로 나누면 한 달은 평균 약 4.345주가 됩니다. 따라서 48시간 × 4.345주 ≒ 208.57시간이며, 이를 반올림한 수치가 바로 209시간입니다.</p>
+  </details>
+
+  <details>
+    <summary>세금(4대 보험 및 소득세) 공제 후 실수령액은 어떻게 다른가요?</summary>
+    <p>본 계산 결과는 세전 기본급 기준입니다. 실제 수령 시에는 국민연금, 건강보험, 고용보험 등 4대 보험료와 근로소득세(간이세액표 기준)가 공제되므로, 실제 통장에 입금되는 금액은 환산 월급보다 약 9~10%가량 적을 수 있습니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var modeSeg = document.getElementById('modeSeg');
+  var modeButtons = modeSeg.querySelectorAll('button');
+
+  var valueLabel = document.getElementById('valueLabel');
+  var wageValue = document.getElementById('wageValue');
+  var weekHours = document.getElementById('weekHours');
+  var valueChips = document.getElementById('valueChips');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowWeekHours = document.getElementById('rowWeekHours');
+  var rowHolidayHours = document.getElementById('rowHolidayHours');
+  var rowMonthlyHours = document.getElementById('rowMonthlyHours');
+  var rowHourly = document.getElementById('rowHourly');
+  var rowMonthly = document.getElementById('rowMonthly');
+
+  var currentMode = 'monthToHour';
+
+  function parseVal(input) {
+    if (!input || !input.value) return 0;
+    var cleaned = input.value.replace(/,/g, '').trim();
+    if (cleaned === '') return 0;
+    var n = Number(cleaned);
+    return isNaN(n) ? -1 : n;
+  }
+
+  function formatInput(input) {
+    var raw = input.value.replace(/,/g, '').trim();
+    if (raw === '') return;
+    var n = Number(raw);
+    if (!isNaN(n) && n >= 0) {
+      input.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function renderChips() {
+    if (currentMode === 'monthToHour') {
+      valueChips.innerHTML =
+        '<button type="button" data-val="2090000" class="on">209만</button>' +
+        '<button type="button" data-val="2500000">250만</button>' +
+        '<button type="button" data-val="3000000">300만</button>' +
+        '<button type="button" data-val="3500000">350만</button>' +
+        '<button type="button" data-val="4000000">400만</button>';
+    } else {
+      valueChips.innerHTML =
+        '<button type="button" data-val="10000" class="on">10,000원</button>' +
+        '<button type="button" data-val="11000">11,000원</button>' +
+        '<button type="button" data-val="12000">12,000원</button>' +
+        '<button type="button" data-val="15000">15,000원</button>' +
+        '<button type="button" data-val="20000">20,000원</button>';
+    }
+    attachChipEvents();
+  }
+
+  function attachChipEvents() {
+    var chips = valueChips.querySelectorAll('button');
+    chips.forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        chips.forEach(function (c) { c.classList.remove('on'); });
+        chip.classList.add('on');
+        var v = Number(chip.getAttribute('data-val'));
+        wageValue.value = v.toLocaleString('ko-KR');
+        render();
+      });
+    });
+  }
+
+  function render() {
+    var val = parseVal(wageValue);
+    var wh = parseVal(weekHours);
+
+    if (val <= 0 || wh <= 0 || wh > 84) {
+      showError();
+      return;
+    }
+
+    var r = calcWage(currentMode, val, wh);
+    if (!r.ok) {
+      showError();
+      return;
+    }
+
+    if (currentMode === 'monthToHour') {
+      resVerdict.innerHTML = '환산 시급 <em>' + r.hourly.toLocaleString('ko-KR') + '원</em>';
+      resSub.textContent = '주휴시간 ' + r.weeklyHolidayHours + '시간 포함 월 ' + r.monthlyHours + '시간 기준';
+    } else {
+      resVerdict.innerHTML = '환산 월급 <em>' + r.monthly.toLocaleString('ko-KR') + '원</em>';
+      resSub.textContent = '주휴시간 ' + r.weeklyHolidayHours + '시간 포함 월 ' + r.monthlyHours + '시간 기준';
+    }
+
+    rowWeekHours.textContent = wh + '시간';
+    rowHolidayHours.textContent = r.weeklyHolidayHours > 0 ? '주 ' + r.weeklyHolidayHours + '시간' : '해당 없음 (주 15시간 미만)';
+    rowMonthlyHours.textContent = r.monthlyHours + '시간';
+    rowHourly.textContent = r.hourly.toLocaleString('ko-KR') + '원';
+    rowMonthly.textContent = r.monthly.toLocaleString('ko-KR') + '원';
+  }
+
+  function showError() {
+    resVerdict.textContent = '값을 확인해 주세요';
+    resSub.textContent = '금액과 주당 근로시간(1~84시간)을 올바르게 넣어 주세요.';
+    rowWeekHours.textContent = '-';
+    rowHolidayHours.textContent = '-';
+    rowMonthlyHours.textContent = '-';
+    rowHourly.textContent = '-';
+    rowMonthly.textContent = '-';
+  }
+
+  modeButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      modeButtons.forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      currentMode = btn.getAttribute('data-mode');
+
+      if (currentMode === 'monthToHour') {
+        valueLabel.textContent = '기본 월급 금액';
+        wageValue.value = '2,090,000';
+      } else {
+        valueLabel.textContent = '시급 금액';
+        wageValue.value = '10,000';
+      }
+
+      renderChips();
+      render();
+    });
+  });
+
+  wageValue.addEventListener('input', render);
+  wageValue.addEventListener('change', function () {
+    formatInput(wageValue);
+    render();
+  });
+
+  weekHours.addEventListener('input', render);
+
+  var hourChips = document.querySelectorAll('#hourChips button');
+  hourChips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      hourChips.forEach(function (c) { c.classList.remove('on'); });
+      chip.classList.add('on');
+      weekHours.value = chip.getAttribute('data-hours');
+      render();
+    });
+  });
+
+  attachChipEvents();
+  render();
+})();
+</script>
+</body>
+</html>

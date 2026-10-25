@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>예적금 이자 계산기 — 단리·복리 이자 세후 계산 | 좌표나라</title>
+<meta name="description" content="예금·적금 금액과 이율, 기간으로 단리·복리 이자와 세후 이자를 계산합니다.">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.seg button { min-height:48px; }
+.hint-text { font-size:12px; color:var(--sub); margin-left:4px; font-weight:normal; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>예적금 이자 계산기<br>만기에 얼마 받을까?</h1>
+  <p class="lead">예금인지 적금인지 고르고 금액과 이율을 넣어 보세요.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="resVerdict">-</div>
+    <div class="sub" id="resSub">-</div>
+    <dl class="rows">
+      <div><dt>원금 합계</dt><dd id="rowPrincipal">-</dd></div>
+      <div><dt>세전 이자</dt><dd id="rowInterestBefore">-</dd></div>
+      <div><dt>이자소득세</dt><dd id="rowTax">-</dd></div>
+      <div><dt>세후 실수령 이자</dt><dd id="rowInterestAfter">-</dd></div>
+      <div><dt>만기 총 수령액 (원금+이자)</dt><dd id="rowTotal">-</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <div class="field">
+      <label>상품 종류</label>
+      <div class="seg two" id="kindSeg">
+        <button type="button" class="on" data-kind="deposit">정기예금 (한 번에 맡김)</button>
+        <button type="button" data-kind="installment">정기적금 (매달 모음)</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label>이자 계산 방식</label>
+      <div class="seg two" id="modeSeg">
+        <button type="button" class="on" data-mode="simple">단리</button>
+        <button type="button" data-mode="compound">월복리</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label for="amount" id="amountLabel">예치 금액</label>
+      <div class="inp">
+        <input id="amount" inputmode="numeric" value="10,000,000">
+        <span>원</span>
+      </div>
+      <div class="chips" id="amountChips">
+        <button type="button" data-amt="5000000">5백만</button>
+        <button type="button" data-amt="10000000" class="on">1천만</button>
+        <button type="button" data-amt="30000000">3천만</button>
+        <button type="button" data-amt="50000000">5천만</button>
+        <button type="button" data-amt="100000000">1억</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label for="annualRate">연 이자율</label>
+      <div class="inp">
+        <input id="annualRate" inputmode="decimal" value="3.0">
+        <span>%</span>
+      </div>
+      <div class="chips" id="rateChips">
+        <button type="button" data-rate="2.5">2.5%</button>
+        <button type="button" data-rate="3.0" class="on">3.0%</button>
+        <button type="button" data-rate="3.5">3.5%</button>
+        <button type="button" data-rate="4.0">4.0%</button>
+        <button type="button" data-rate="5.0">5.0%</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label for="months">적립 / 예치 기간</label>
+      <div class="inp">
+        <input id="months" inputmode="numeric" value="12">
+        <span>개월</span>
+      </div>
+      <div class="chips" id="monthChips">
+        <button type="button" data-months="6">6개월</button>
+        <button type="button" data-months="12" class="on">12개월 (1년)</button>
+        <button type="button" data-months="24">24개월 (2년)</button>
+        <button type="button" data-months="36">36개월 (3년)</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px;">
+      <label for="taxRate">이자소득세율 <span class="hint-text">(예시)</span></label>
+      <div class="inp">
+        <input id="taxRate" inputmode="decimal" value="15.4">
+        <span>%</span>
+      </div>
+      <div class="chips" id="taxChips">
+        <button type="button" data-tax="15.4" class="on">일반과세 15.4%</button>
+        <button type="button" data-tax="9.5">세금우대 9.5%</button>
+        <button type="button" data-tax="0">비과세 0%</button>
+      </div>
+    </div>
+  </section>
+
+  <p class="note">※ 참고용 계산이며 실제 금액은 해당 금융기관에서 확인하세요. 금융기관의 이자 계산 방식(일수 계산, 세금 원 단위 절사 등)에 따라 몇십 원 단위의 오차가 발생할 수 있습니다.</p>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 계산했나요?</summary>
+    <ul>
+      <li><b>정기예금(단리):</b> 예치금 × (연 이율 ÷ 100) × (개월 수 ÷ 12)</li>
+      <li><b>정기적금(단리):</b> 월 납입금 × (연 이율 ÷ 100 ÷ 12) × 개월 수 × (개월 수 + 1) ÷ 2</li>
+      <li><b>월복리:</b> 매월 불어난 원리금에 다음 달 이자가 더해지는 복리 산식 적용</li>
+      <li><b>세후 이자:</b> 세전 이자 − 이자소득세 (기본 15.4% = 소득세 14% + 지방소득세 1.4%)</li>
+    </ul>
+  </details>
+
+  <details>
+    <summary>예금과 적금의 이자가 왜 다른가요?</summary>
+    <p>정기예금은 목돈 전체를 첫날부터 만기까지 온전히 예치하므로 원금 전액에 대해 1년 치 이자가 붙습니다. 반면 정기적금은 매월 쪼개어 저축하므로 첫 달 납입금만 1년 치 이자가 붙고, 마지막 달 납입금은 1개월 치 이자만 붙어 실제 이자 총액이 예금보다 적습니다.</p>
+  </details>
+
+  <details>
+    <summary>단리와 복리는 어떤 차이가 있나요?</summary>
+    <p>단리는 처음 넣은 원금에 대해서만 이자가 붙는 방식이고, 월복리는 매월 붙은 이자가 원금에 합쳐져 다음 달 이자를 낳는 방식입니다. 저축 기간이 길고 금리가 높을수록 복리 효과가 커져 만기 수령액이 더 늘어납니다.</p>
+  </details>
+
+  <details>
+    <summary>이자소득세 15.4%는 어떻게 구성되어 있나요?</summary>
+    <p>우리나라에서 예적금 이자가 발생하면 국세인 소득세 14%와 지방자치단체에 납부하는 지방소득세 1.4%(소득세의 10%)가 합쳐져 총 15.4%가 원천징수됩니다. 조세특례제한법에 따른 비과세종합저축이나 조합원 세금우대 상품은 세율이 낮거나 면제됩니다.</p>
+  </details>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var kindSeg = document.getElementById('kindSeg');
+  var kindButtons = kindSeg.querySelectorAll('button');
+  var modeSeg = document.getElementById('modeSeg');
+  var modeButtons = modeSeg.querySelectorAll('button');
+
+  var amountLabel = document.getElementById('amountLabel');
+  var amount = document.getElementById('amount');
+  var annualRate = document.getElementById('annualRate');
+  var months = document.getElementById('months');
+  var taxRate = document.getElementById('taxRate');
+
+  var resVerdict = document.getElementById('resVerdict');
+  var resSub = document.getElementById('resSub');
+  var rowPrincipal = document.getElementById('rowPrincipal');
+  var rowInterestBefore = document.getElementById('rowInterestBefore');
+  var rowTax = document.getElementById('rowTax');
+  var rowInterestAfter = document.getElementById('rowInterestAfter');
+  var rowTotal = document.getElementById('rowTotal');
+
+  var currentKind = 'deposit';
+  var currentMode = 'simple';
+
+  function parseVal(input) {
+    if (!input || !input.value) return 0;
+    var cleaned = input.value.replace(/,/g, '').trim();
+    if (cleaned === '') return 0;
+    var n = Number(cleaned);
+    return isNaN(n) ? -1 : n;
+  }
+
+  function formatInput(input) {
+    var raw = input.value.replace(/,/g, '').trim();
+    if (raw === '') return;
+    var n = Number(raw);
+    if (!isNaN(n) && n >= 0) {
+      input.value = n.toLocaleString('ko-KR');
+    }
+  }
+
+  function render() {
+    var amt = parseVal(amount);
+    var rate = parseVal(annualRate);
+    var mo = parseVal(months);
+    var tax = parseVal(taxRate);
+
+    if (amt <= 0 || rate < 0 || mo <= 0 || tax < 0 || tax > 100) {
+      showError();
+      return;
+    }
+
+    var r = calcSaving(currentKind, currentMode, amt, rate, mo, tax);
+    if (!r.ok) {
+      showError();
+      return;
+    }
+
+    resVerdict.innerHTML = '만기 수령액 <em>' + r.total.toLocaleString('ko-KR') + '원</em>';
+    resSub.textContent = '세후 이자 ' + r.interestAfter.toLocaleString('ko-KR') + '원 (세전 ' + r.interestBefore.toLocaleString('ko-KR') + '원 − 세금 ' + r.tax.toLocaleString('ko-KR') + '원)';
+
+    rowPrincipal.textContent = r.principalTotal.toLocaleString('ko-KR') + '원';
+    rowInterestBefore.textContent = r.interestBefore.toLocaleString('ko-KR') + '원';
+    rowTax.textContent = r.tax.toLocaleString('ko-KR') + '원 (' + tax + '%)';
+    rowInterestAfter.textContent = r.interestAfter.toLocaleString('ko-KR') + '원';
+    rowTotal.textContent = r.total.toLocaleString('ko-KR') + '원';
+  }
+
+  function showError() {
+    resVerdict.textContent = '값을 확인해 주세요';
+    resSub.textContent = '금액, 이율, 기간을 올바르게 입력해 주세요.';
+    rowPrincipal.textContent = '-';
+    rowInterestBefore.textContent = '-';
+    rowTax.textContent = '-';
+    rowInterestAfter.textContent = '-';
+    rowTotal.textContent = '-';
+  }
+
+  // 종류 선택
+  kindButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      kindButtons.forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      currentKind = btn.getAttribute('data-kind');
+      if (currentKind === 'deposit') {
+        amountLabel.textContent = '예치 금액';
+      } else {
+        amountLabel.textContent = '월 납입 금액';
+        if (parseVal(amount) > 10000000) {
+          amount.value = '500,000';
+        }
+      }
+      render();
+    });
+  });
+
+  // 방식 선택
+  modeButtons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      modeButtons.forEach(function (b) { b.classList.remove('on'); });
+      btn.classList.add('on');
+      currentMode = btn.getAttribute('data-mode');
+      render();
+    });
+  });
+
+  amount.addEventListener('input', render);
+  amount.addEventListener('change', function () {
+    formatInput(amount);
+    render();
+  });
+
+  annualRate.addEventListener('input', render);
+  months.addEventListener('input', render);
+  taxRate.addEventListener('input', render);
+
+  // 금액 칩
+  var amtChips = document.querySelectorAll('#amountChips button');
+  amtChips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      amtChips.forEach(function (c) { c.classList.remove('on'); });
+      chip.classList.add('on');
+      var v = Number(chip.getAttribute('data-amt'));
+      amount.value = v.toLocaleString('ko-KR');
+      render();
+    });
+  });
+
+  // 이율 칩
+  var rChips = document.querySelectorAll('#rateChips button');
+  rChips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      rChips.forEach(function (c) { c.classList.remove('on'); });
+      chip.classList.add('on');
+      annualRate.value = chip.getAttribute('data-rate');
+      render();
+    });
+  });
+
+  // 개월 칩
+  var mChips = document.querySelectorAll('#monthChips button');
+  mChips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      mChips.forEach(function (c) { c.classList.remove('on'); });
+      chip.classList.add('on');
+      months.value = chip.getAttribute('data-months');
+      render();
+    });
+  });
+
+  // 세금 칩
+  var tChips = document.querySelectorAll('#taxChips button');
+  tChips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      tChips.forEach(function (c) { c.classList.remove('on'); });
+      chip.classList.add('on');
+      taxRate.value = chip.getAttribute('data-tax');
+      render();
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
