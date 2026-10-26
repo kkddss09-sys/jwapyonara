@@ -15,7 +15,7 @@
   // 슬라이드 퍼즐처럼 한 게임에 기록이 둘이면 보고 있는 쪽의 것을 읽는다
   var variants = cfg.variants || null;
   var current = function () {
-    if (!variants) return { id: gameId, key: 'zw_' + gameId + '_best' };
+    if (!variants) return { id: gameId, key: cfg.key || ('zw_' + gameId + '_best') };
     var v = variants[ZW.rankVariant ? ZW.rankVariant() : 0] || variants[0];
     return { id: v.id, key: v.key };
   };
@@ -43,7 +43,11 @@
   } else tabs.style.display = 'none';
   if (variants) ZW.rankVariant = function () { return ZW.rankPick || 0; };
 
-  function myBest() { var v = parseInt(lsGet(current().key), 10); return isFinite(v) ? v : null; }
+  function myBest() {
+    var raw = lsGet(current().key), v = parseInt(raw, 10);
+    if (!isFinite(v) && raw) { try { v = Number(JSON.parse(raw).moves); } catch (e) { v = NaN; } }   // 짝 맞추기는 {moves, sec}로 저장한다
+    return isFinite(v) ? v : null;
+  }
   function sentKey() { return 'zw_rank_sent_' + current().id; }
 
   function paint() {
