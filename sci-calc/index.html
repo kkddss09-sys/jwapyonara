@@ -131,6 +131,39 @@
       <li><b>로그</b>: <code>log</code>는 밑이 10인 상용로그, <code>ln</code>은 밑이 자연상수 e인 자연로그입니다.</li>
     </ul>
   </details>
+
+  <section class="guide">
+    <h2>이렇게 사용하세요</h2>
+    <ol>
+      <li>삼각함수(sin, cos, tan)를 계산하기 전에 상단의 각도 단위에서 '도(DEG)'와 '라디안(RAD)' 중 원하는 단위를 먼저 선택합니다.</li>
+      <li>숫자 패드와 함수 버튼(log, ln, 루트, 거듭제곱 ^, 괄호 등)을 순서대로 눌러 수식을 완성합니다. 키보드로도 직접 숫자를 입력할 수 있습니다.</li>
+      <li>수식을 작성하는 동안 실시간으로 결과가 미리 보이며, 등호(=) 버튼이나 엔터 키를 누르면 최종 계산값이 확정되어 화면에 표시됩니다.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>중고등학교 수학 숙제, 대학교 공학 및 자연과학 전공 과제를 풀거나 자격증 공부를 할 때 무거운 실물 공학용 계산기를 미처 챙기지 못한 상황에서 매우 유용합니다. 복잡한 거듭제곱, 괄호가 여러 겹 중첩된 수식, 삼각함수와 자연로그가 섞인 복잡한 계산을 브라우저에서 프로그램 설치 없이 빠르게 처리하고 싶을 때 즉시 활용해 보세요.</p>
+    <h2>용어 쉽게 보기</h2>
+    <dl>
+      <dt>DEG(도)와 RAD(라디안)</dt>
+      <dd>각도를 표현하는 두 가지 단위 체계입니다. 원 한 바퀴를 360도로 나누는 일상적 단위를 도(DEG), 호의 길이를 기준으로 각을 재는 수학·공학적 단위를 라디안(RAD)이라 부릅니다.</dd>
+      <dt>상용로그(log)와 자연로그(ln)</dt>
+      <dd>상용로그는 밑수를 10으로 하는 로그이며, 자연로그는 자연상수 e(약 2.718)를 밑수로 삼아 자연과학 및 미적분학에서 폭넓게 쓰이는 로그입니다.</dd>
+      <dt>계승(팩토리얼, !)</dt>
+      <dd>어떤 양의 정수부터 1까지의 모든 자연수를 차례대로 곱하는 연산으로, 경우의 수와 확률 계산에 널리 사용됩니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>음수 거듭제곱을 계산할 때 주의할 점이 있나요?</summary>
+      <p>수학 표준 표기법에 따라 -3^2처럼 앞에 부호를 붙이면 3의 제곱에 마이너스가 붙어 -9가 됩니다. 만약 음수 -3 전체를 제곱하여 양수 9를 얻고 싶다면 (-3)^2처럼 괄호 버튼을 활용하여 감싸주셔야 의도한 연산 순서로 계산됩니다.</p>
+    </details>
+    <details>
+      <summary>PC 키보드로 수식을 직접 칠 수도 있나요?</summary>
+      <p>네, 컴퓨터 키보드의 숫자 키패드와 사칙연산 기호(+,-,*,/), 괄호, 엔터(=), 백스페이스(⌫), Esc(AC) 키가 완벽하게 연동됩니다. 또한 알파벳 s(sin), c(cos), t(tan), l(log), n(ln), r(루트), p(π) 등의 영문 단축키도 지원합니다.</p>
+    </details>
+    <details>
+      <summary>수식이 너무 길어져도 계산이 잘 되나요?</summary>
+      <p>상단 화면 영역이 수식 길이에 맞추어 자동으로 가로 스크롤되므로 긴 복잡식도 문제없이 이어서 입력하실 수 있습니다. 괄호의 짝이 맞지 않거나 연산자가 비정상적으로 끝나는 경우 등 유효하지 않은 식은 등호를 눌렀을 때 오류 안내가 표시됩니다.</p>
+    </details>
+  </section>
 </main>
 
 <script src="calc.js"></script>
@@ -292,5 +325,6 @@
   updatePreview();
 })();
 </script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 생활 도구"><h2>다른 생활 도구</h2><h3><a href="/life/">🧰 생활</a> <small>나이·퍼센트·큐알·사진 줄이기</small></h3><ul><li><a href="/sci-calc/">공학용 계산기</a> — 삼각함수, 로그, 제곱, 괄호</li><li><a href="/paint/">그림판</a> — 바로 그리고 저장하기</li><li><a href="/age/">만 나이 계산기</a> — 만 나이, 연 나이, 다음 생일</li><li><a href="/days-between/">날짜 사이 며칠</a> — 두 날짜 사이의 날 수</li><li><a href="/percent/">퍼센트 계산기</a> — 몇 %인지, 몇 % 변했는지</li><li><a href="/lunar-day/">손 없는 날 달력</a> — 이사 날짜 고를 때 보는 음력</li><li><a href="/deposit-interest/">예적금 이자 계산기</a> — 단리·복리, 세후 이자까지</li><li><a href="/hourly-wage/">월급 ↔ 시급</a> — 주휴시간 넣어 바꿔 보기</li><li><a href="/bmi/">BMI 계산기</a> — 키와 몸무게로 보는 체질량지수</li><li><a href="/tenure/">근속기간 계산기</a> — 입사일부터 몇 년 몇 개월</li><li><a href="/workdays/">근무일수 계산기</a> — 두 날짜 사이 평일은 며칠</li><li><a href="/unit-price/">단위가격 비교</a> — 어느 쪽이 더 싼지</li><li><a href="/overdue-interest/">연체이자 계산기</a> — 밀린 돈 이자는 얼마인지</li><li><a href="/future-income/">미래 소득 계산기</a> — 해마다 오르면 앞으로 총소득은</li><li><a href="/commute/">출퇴근 시간 계산기</a> — 길에서 보내는 시간은 얼마나</li><li><a href="/trip-expense/">출장비 정산 계산기</a> — 항목별 합계와 하루 평균</li><li><a href="/fuel-cost/">유류비 계산기</a> — 거리와 연비로 기름값</li><li><a href="/time-convert/">시간 단위 변환</a> — 초·분·시간·일 바꾸기</li><li><a href="/length-convert/">길이 단위 변환</a> — cm·인치·피트·마일·자</li><li><a href="/calorie/">하루 칼로리 계산기</a> — 기초대사량과 활동량</li><li><a href="/dutch/">더치페이 계산기</a> — 여럿이 나눠 낼 때</li><li><a href="/count/">글자 수 세기</a> — 띄어쓰기 포함·제외, 낱말, 줄</li><li><a href="/qr/">큐알코드 만들기</a> — 링크를 큐알코드 그림으로</li><li><a href="/qr-read/">큐알코드 읽기</a> — 열기 전에 링크 확인</li><li><a href="/photo-shrink/">사진 용량 줄이기</a> — 사진이 커서 안 올라갈 때</li></ul></nav><!--/zw-static-links-->
 </body>
 </html>

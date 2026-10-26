@@ -112,6 +112,39 @@
       <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
     </ul>
   </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단에서 '내가 먼저(O)'로 시작할지 '컴퓨터 먼저(X)'로 시작할지 선공 차례를 선택합니다.</li>
+      <li>3×3 격자판의 빈칸 중 원하는 자리를 터치하여 자신의 표식(O)을 표시합니다.</li>
+      <li>가로, 세로, 대각선 방향 중 어느 한 줄로 세 개의 표식을 상대방보다 먼저 일렬로 완성하면 승리합니다.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>친구와의 간단한 커피 내기나 순번 정하기 등 결정을 내려야 할 때 공정하고 가벼운 승부 도구로 제격입니다. 종이나 펜이 없어도 모바일 브라우저에서 바로 열어 똑똑한 컴퓨터 AI를 상대로 팽팽한 두뇌 싸움을 즐길 수 있습니다. 심심할 때 잠깐씩 짧은 턴제 전략 게임의 묘미를 느껴보세요.</p>
+    <h2>알아 두면 좋은 것</h2>
+    <dl>
+      <dt>정중앙 칸(센터)의 중요성</dt>
+      <dd>3×3 판에서 정중앙 칸은 무려 4개의 승리 라인(가로 1개, 세로 1개, 대각선 2개)이 교차하는 최고 요충지이므로 초반에 선점하는 것이 유리합니다.</dd>
+      <dt>양방향 노림수(포크, Fork) 전략</dt>
+      <dd>상대방이 한쪽을 막아도 다른 한쪽으로 반드시 3줄이 완성되도록 동시에 두 개의 승리 경로를 만드는 고급 전술입니다.</dd>
+      <dt>최선의 수와 무승부</dt>
+      <dd>수학적으로 틱택토는 양쪽 플레이어가 모두 완벽한 최선의 수를 둘 경우 100% 무승부로 끝나는 완전 정보 게임입니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>컴퓨터 AI는 어떤 알고리즘으로 수를 두나요?</summary>
+      <p>본 게임의 컴퓨터는 자신이 한 수로 즉시 승리할 수 있는 자리가 있으면 먼저 공격하고, 플레이어가 3줄을 완성하려는 위기 상황이면 우선적으로 방어하도록 합리적인 규칙 기반 알고리즘이 적용되어 있습니다.</p>
+    </details>
+    <details>
+      <summary>후공(컴퓨터 먼저)으로 이기는 것이 가능한가요?</summary>
+      <p>선공에 비해 후공은 상대의 수를 방어하며 기회를 노려야 하므로 난도가 조금 더 높습니다. 하지만 컴퓨터가 틈을 보일 때 모서리와 중앙을 영리하게 공략하면 후공으로도 충분히 승리하거나 무승부를 이끌어낼 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>연승 기록이 초기화되는 조건은 무엇인가요?</summary>
+      <p>컴퓨터에게 패배하면 현재 연승 숫자가 0으로 초기화됩니다. 단, 무승부로 끝난 경우에는 연승 기록이 끊기지 않고 그대로 유지되므로 안심하고 승부를 겨루셔도 됩니다.</p>
+    </details>
+  </section>
 </main>
 
 <script src="../_common/common.js"></script>
@@ -344,5 +377,6 @@
   resetGame();
 })();
 </script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li></ul></nav><!--/zw-static-links-->
 </body>
 </html>

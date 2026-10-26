@@ -27,6 +27,39 @@
       <li>한 달 평균 = 총액 ÷ 약정 개월</li>
     </ul>
   </details>
+
+  <section class="guide">
+    <h2>이렇게 사용하세요</h2>
+    <ol>
+      <li>상단에 전체 비교 기준이 되는 약정 기간(예: 24개월)을 먼저 확인합니다.</li>
+      <li>견적 A와 B에 각각 안내받은 단말기 할부원금, 의무 요금제와 유지 개월 수, 부가서비스 조건을 차례로 넣습니다.</li>
+      <li>약정 만료 시점까지 실제로 지출되는 총 납부 금액과 월평균 지출액을 한눈에 비교합니다.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>휴대폰 대리점이나 판매점 여러 곳을 돌아다니며 복잡한 계약 조건을 상담받았을 때 어느 쪽이 진짜 실속 있는지 판단하기 좋습니다. 겉으로 보이는 단말기 할부원금은 낮지만 비싼 요금제나 부가서비스를 오래 유지해야 하는 조건과, 기기 부담은 조금 있어도 저렴한 요금제를 쓰는 조건 사이의 총비용 차이를 명확하게 밝혀 줍니다.</p>
+    <h2>용어 쉽게 보기</h2>
+    <dl>
+      <dt>할부원금</dt>
+      <dd>출고가에서 각종 기기 할인이 모두 반영된 후 소비자가 실제 분할 납부해야 하는 순수 기기 대금입니다.</dd>
+      <dt>의무 유지 개월</dt>
+      <dd>단말기 구매 시 약속한 초기 고가 요금제나 부가서비스를 하향 변경 없이 의무적으로 유지해야 하는 기간입니다.</dd>
+      <dt>총비용</dt>
+      <dd>약정 기간 동안 청구되는 단말기 할부금, 매월 통신 요금, 부가서비스 요금을 모두 합산하고 페이백 혜택을 뺀 총지출액입니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>할부원금이 0원이어도 손해인 경우가 있나요?</summary>
+      <p>기기 할부원금이 0원이라 하더라도 10만 원대의 높은 요금제와 수만 원대 부가서비스를 6개월 이상 의무 유지해야 한다면 총비용 측면에서는 저렴한 요금제를 유지하는 다른 조건보다 오히려 더 많은 지출이 발생할 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>여기에 적은 견적 내용이 외부로 유출되거나 사라지나요?</summary>
+      <p>입력하신 견적 데이터는 서버로 전송되지 않고 사용 중인 스마트폰이나 컴퓨터의 로컬 브라우저 저장소에만 보관됩니다. 창을 닫았다가 다시 열어도 그대로 남아 있으며 '넣은 값 모두 지우기'를 누르면 언제든 초기화됩니다.</p>
+    </details>
+    <details>
+      <summary>제휴 카드 청구 할인이나 인터넷 결합은 어떻게 반영하나요?</summary>
+      <p>카드 전월 실적 할인이나 유무선 결합 할인은 매장 조건과 무관하게 본인의 소비 패턴에 따라 적용되는 별개 항목입니다. 객관적인 매장 견적 비교를 위해서는 이러한 부가 조건을 제외한 순수 통신사 계약 조건만으로 먼저 비교하는 것이 현명합니다.</p>
+    </details>
+  </section>
 </main>
 <script src="calc.js"></script>
 <script src="../_common/common.js"></script>
@@ -64,5 +97,6 @@ ZW.app({
 });
 document.getElementById('clear').addEventListener('click', function () { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); });
 </script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 휴대폰 도구"><h2>다른 휴대폰 도구</h2><h3><a href="/phone/">📱 휴대폰</a> <small>살 때 비교, 바꾸기 전 확인표, 성지가 처음이라면</small></h3><ul><li><a href="/jagupje-seongji/">자급제 vs 성지 비교</a> — 2년 동안 어느 쪽이 덜 드는지</li><li><a href="/monthly-phone/">한 달 납부액 계산기</a> — 기기 할부와 요금을 합쳐서</li><li><a href="/plan-diff/">요금제 바꾸면 얼마 차이</a> — 한 달과 약정 기간으로 보면</li><li><a href="/storage/">저장 공간 계산기</a> — 사진과 영상으로 필요한 용량</li><li><a href="/per-day/">폰값, 하루로 치면</a> — 오래 쓸수록 얼마나 싸지는지</li><li><a href="/upgrade-test/">지금 폰, 바꿀 때가 됐나</a> — 해당하는 것을 누르면 결과가</li><li><a href="/switch-checklist/">폰 바꾸기 전 할 일</a> — 백업부터 옮기기까지 하나씩</li><li><a href="/sell-checklist/">중고폰 팔기 전 확인표</a> — 넘기기 전에 꼭 할 것</li><li><a href="/contract-end/">약정 끝나는 날</a> — 언제 바꿔도 되는지</li><li><a href="/repair-or-new/">수리할까, 새로 살까</a> — 한 달로 나눠 보면 어느 쪽이 덜 드는지</li><li><a href="/phone-insurance/">휴대폰 보험, 들까 말까</a> — 낸 보험료와 고칠 때 드는 돈을 견주면</li><li><a href="/screen-inch/">화면 크기, 인치를 센티로</a> — 지금 폰과 새 폰 화면 견주기</li><li><a href="/quote-compare/">매장 견적 견주기</a> — 두 곳에서 들은 조건을 총액으로</li><li><a href="/hogang-test/">나는 호갱일까? 테스트</a> — 살 때 얼마나 준비됐는지</li><li><a href="/ask-ai/">AI에게 물어볼 말 만들기</a> — 견적·요금제·아파트·전세 질문 글을 대신 짜 줌</li><li><a href="/story-first-visit/">성지 처음 가는 날</a> — 가상의 이야기로 보는 방문 순서</li></ul></nav><!--/zw-static-links-->
 </body>
 </html>

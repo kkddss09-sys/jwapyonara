@@ -104,6 +104,40 @@
       <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
     </ul>
   </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>4×4 크기의 판 위에 놓인 숫자 타일들을 키보드 방향키, 화면의 방향 버튼(▲◀▼▶), 또는 화면을 손가락으로 쓱 미는 스와이프 제스처로 한쪽 방향으로 밉니다.</li>
+      <li>동일한 숫자가 적힌 두 타일이 이동 중에 부딪히면 하나로 합쳐지면서 숫자가 두 배(2→4→8→16…→2048)로 커지고, 합쳐진 수치만큼 득점합니다.</li>
+      <li>매번 움직일 때마다 빈칸에 새로운 숫자 타일(2 또는 4)이 무작위로 생성되므로, 판이 꽉 차지 않도록 전략적으로 숫자를 합쳐나갑니다.</li>
+      <li>더 이상 상하좌우 어느 방향으로도 타일을 이동하거나 합칠 수 없게 되면 게임이 종료되며 최종 점수가 확정됩니다.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>단순한 조작으로 깊은 두뇌 플레이의 몰입감을 느끼고 싶을 때 즐기기 좋습니다. 자투리 시간에 가볍게 시작했다가 기록을 경신하기 위해 고도의 전략을 세우게 되는 중독성 강한 숫자 퍼즐 게임으로, 숫자의 배치와 이동 경로를 몇 수 앞서 내다보는 논리적 사고력을 기르는 데 큰 도움이 됩니다.</p>
+    <h2>알아 두면 좋은 것</h2>
+    <dl>
+      <dt>모서리 고정 전략</dt>
+      <dd>가장 큰 숫자를 한쪽 구석(예: 왼쪽 아래 또는 오른쪽 아래)에 고정해 두고 주변으로 숫자가 순차적으로 작아지도록 정렬하는 것이 고득점을 얻는 대표적인 정석 플레이입니다.</dd>
+      <dt>점수 획득 공식</dt>
+      <dd>타일이 합쳐질 때마다 새로 탄생한 타일의 숫자 값만큼 실시간 점수에 합산되므로, 큰 숫자를 합칠수록 점수가 기하급수적으로 높아집니다.</dd>
+      <dt>디패드와 터치 지원</dt>
+      <dd>모바일 기기 사용자를 위해 제스처 스와이프 기능뿐만 아니라 화면 하단에 편리한 가상 방향키(D-Pad)를 제공하여 오작동 없이 쾌적하게 조작할 수 있습니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>2048 타일을 만든 뒤에도 게임을 계속 이어갈 수 있나요?</summary>
+      <p>네, 숫자 2048을 완성한 이후에도 판 위의 공간이 남아있고 합칠 수 있는 타일이 존재하는 한 4096, 8192 등 더 높은 숫자를 향해 무제한으로 플레이를 이어가며 한계 점수에 도전할 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>되돌리기(Undo) 기능은 지원되나요?</summary>
+      <p>본 게임은 순수한 판단력과 긴장감을 유지하기 위해 직전 수로 되돌리는 기능을 지원하지 않습니다. 한 번의 조작 실수가 판 전체의 흐름을 바꿀 수 있으므로 신중하게 방향을 선택하는 묘미가 있습니다.</p>
+    </details>
+    <details>
+      <summary>새로 생성되는 숫자의 확률은 어떻게 되나요?</summary>
+      <p>타일을 이동할 때마다 비어있는 무작위 위치에 숫자 2가 90%의 확률로, 숫자 4가 10%의 확률로 새롭게 출현하도록 표준 알고리즘이 적용되어 있습니다.</p>
+    </details>
+  </section>
 </main>
 
 <script src="calc.js"></script>
@@ -274,5 +308,6 @@
   initGame();
 })();
 </script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li></ul></nav><!--/zw-static-links-->
 </body>
 </html>

@@ -105,6 +105,40 @@
       <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
     </ul>
   </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단에서 원하는 난이도를 고릅니다. 가볍게 즐기는 '쉬움(9×9, 지뢰 10개)'과 넓은 판에서 즐기는 '보통(9×13, 지뢰 20개)'이 있습니다.</li>
+      <li>판 위에서 아무 칸이나 하나 터치해 게임을 시작합니다. 첫 번째로 누른 칸과 그 주변은 절대 지뢰가 나오지 않도록 안전하게 열립니다.</li>
+      <li>열린 칸에 표시된 숫자를 보고 그 칸을 둘러싼 주변 8칸 안에 숨겨진 지뢰 위치를 논리적으로 추리합니다.</li>
+      <li>지뢰가 확실한 칸에는 깃발 단추(또는 길게 누르기·우클릭)로 깃발(🚩)을 꽂아두고, 지뢰가 없는 안전한 칸을 모두 찾아 열면 승리합니다.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>컴퓨터 보급 초기부터 전 세계인의 사랑을 받아온 전설적인 논리 퍼즐로, 순발력보다는 차분한 연역적 추론과 관찰력을 발휘하고 싶을 때 최고의 선택입니다. 모바일 터치 환경에 완벽하게 맞춘 직관적인 깃발 모드 전환과 진동 피드백 덕분에 스마트폰에서도 오작동 없이 쾌적하게 클래식 지뢰찾기의 스릴을 맛볼 수 있습니다.</p>
+    <h2>알아 두면 좋은 것</h2>
+    <dl>
+      <dt>주변 8칸 힌트 숫자</dt>
+      <dd>숫자 1은 자신과 맞닿은 8칸 중 지뢰가 딱 1개 있다는 뜻이며, 숫자가 클수록 주변에 많은 지뢰가 밀집해 있음을 나타냅니다.</dd>
+      <dt>안전한 첫 클릭 보장</dt>
+      <dd>처음 누른 칸에서 즉시 폭발하는 허무한 상황을 방지하기 위해, 첫 클릭 좌표와 인접 영역을 피해 지뢰가 사후 생성되는 알고리즘이 적용되어 있습니다.</dd>
+      <dt>연속 빈칸 자동 확장</dt>
+      <dd>주변에 지뢰가 하나도 없는 빈칸(0)을 누르면 연결된 안전 영역이 자동으로 시원하게 한 번에 열려 쾌적한 플레이가 가능합니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>스마트폰 화면에서 깃발은 어떻게 꽂나요?</summary>
+      <p>상단의 모드 전환 버튼을 눌러 '깃발 모드(🚩)'로 바꾼 뒤 원하는 칸을 터치하거나, '열기 모드(⛏️)' 상태에서 해당 칸을 약 0.4초 동안 손가락으로 길게 누르면 간편하게 깃발을 꽂거나 뽑을 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>승리 조건은 지뢰에 깃발을 다 꽂는 것인가요?</summary>
+      <p>지뢰를 뺀 나머지 모든 안전한 칸을 열었을 때 자동으로 게임에서 승리하게 됩니다. 지뢰 칸에 깃발을 전부 꽂지 않았더라도 안전한 타일이 모두 공개되면 남은 지뢰 칸에 깃발이 자동으로 완성되며 클리어됩니다.</p>
+    </details>
+    <details>
+      <summary>찍기(운에 맡기는 상황)를 피하는 팁이 있나요?</summary>
+      <p>벽면이나 모서리에 위치한 숫자 1과 2의 조합 패턴을 눈여겨보세요. 가장자리에서 확실하게 안전하거나 지뢰인 칸을 먼저 처리하고 중앙으로 파고들면 불필요한 확률 찍기 상황을 크게 줄일 수 있습니다.</p>
+    </details>
+  </section>
 </main>
 
 <script src="calc.js"></script>
@@ -440,5 +474,6 @@
   initGame();
 })();
 </script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li></ul></nav><!--/zw-static-links-->
 </body>
 </html>

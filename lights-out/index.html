@@ -83,6 +83,40 @@
       <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
     </ul>
   </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>5×5 크기의 판 위에 무작위로 켜져 있는 노란색 전구들을 살펴봅니다.</li>
+      <li>전구 칸을 하나 누르면 해당 전구와 함께 바로 맞닿아 있는 상·하·좌·우 네 방향의 이웃 전구 상태가 동시에 반전(켜짐↔꺼짐)됩니다.</li>
+      <li>전략적으로 전구들을 클릭하면서 판 위에 있는 모든 노란 불을 끄고 전체를 검은색으로 만들면 퍼즐이 완성됩니다.</li>
+      <li>판이 너무 꼬였다면 '새로 섞기'를 눌러 언제든 새로운 문제로 다시 도전할 수 있으며 최소 클릭 최고 기록 경신에 도전해 보세요.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>복잡한 일상에서 잠시 벗어나 짧은 시간 동안 깊은 집중력을 발휘해 두뇌를 풀고 싶을 때 제격입니다. 대중교통 이동 중이나 휴식 시간에 논리적 사고력과 공간 지각력을 시험해 볼 수 있는 고전 두뇌 퍼즐로, 무작위로 누르기보다는 역연산 규칙을 고민하며 최소한의 조작 횟수로 해결하는 재미가 쏠쏠합니다.</p>
+    <h2>알아 두면 좋은 것</h2>
+    <dl>
+      <dt>상하좌우 십자 반전</dt>
+      <dd>하나의 전구를 클릭할 때 상하좌우 인접 셀이 함께 바뀌는 대칭적 반전 특성 때문에, 가장자리나 모서리 칸을 누를 때는 영향을 받는 인접 셀의 개수가 달라집니다.</dd>
+      <dt>100% 풀이 보장 알고리즘</dt>
+      <dd>모든 불이 꺼진 완성 상태에서 컴퓨터가 역순으로 무작위 클릭을 가해 문제를 출제하므로, 수학적으로 반드시 해답이 존재하는 배치만 제공됩니다.</dd>
+      <dt>브라우저 최고 기록 저장</dt>
+      <dd>클리어에 성공한 최소 클릭 기록은 사용 중인 기기의 로컬 스토리지에 안전하게 기록되어 언제든 이전 기록에 재도전할 수 있습니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>같은 전구를 두 번 누르면 어떻게 되나요?</summary>
+      <p>불 끄기 퍼즐의 모든 반전 동작은 짝수 번 누르면 원래 상태로 되돌아옵니다. 따라서 어떤 전구든 두 번 누르는 것은 클릭 횟수만 낭비할 뿐 결과적으로 아무것도 누르지 않은 것과 같으므로 각 칸은 최대 한 번만 누른다는 전략으로 접근하는 것이 좋습니다.</p>
+    </details>
+    <details>
+      <summary>퍼즐을 쉽게 풀 수 있는 요령이나 공략법이 있나요?</summary>
+      <p>가장 널리 알려진 공략법은 위쪽 첫 번째 줄부터 차례대로 바로 아래 칸(두 번째 줄)을 눌러 윗줄의 불을 하나씩 꺼 내려가는 '체이스 더 라이츠(Chase the Lights)' 방식입니다. 마지막 줄까지 불을 몰아넣은 뒤 남은 패턴에 따라 상단 특정 칸을 조작하면 손쉽게 해결할 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>게임 도중 인터넷 연결이 끊겨도 계속 플레이할 수 있나요?</summary>
+      <p>네, 모든 퍼즐 로직과 화면 제어가 웹 브라우저 자체 스크립트로 동작하므로 인터넷 연결이 불안정하거나 끊긴 오프라인 환경에서도 문제없이 끝까지 즐기실 수 있습니다.</p>
+    </details>
+  </section>
 </main>
 
 <script src="../_common/common.js"></script>
@@ -237,5 +271,6 @@
   init();
 })();
 </script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li></ul></nav><!--/zw-static-links-->
 </body>
 </html>

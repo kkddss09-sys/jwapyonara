@@ -125,6 +125,40 @@
       <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
     </ul>
   </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>0부터 9까지의 숫자 중 중복되지 않는 서로 다른 3자리 숫자를 키패드로 입력합니다. 이미 입력한 숫자는 자동으로 비활성화됩니다.</li>
+      <li>세 자리를 모두 채운 뒤 [확인] 버튼을 누르면 컴퓨터가 판정 결과를 스트라이크(S), 볼(B), 아웃(OUT)으로 즉시 알려줍니다.</li>
+      <li>자리와 숫자가 모두 맞으면 스트라이크, 숫자는 맞지만 자리가 다르면 볼, 세 숫자 모두 포함되지 않으면 아웃입니다.</li>
+      <li>이전 추측 기록들의 힌트를 단계적으로 대조해 가며 총 10번의 기회 안에 3 스트라이크를 달성해 정답을 맞혀보세요.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>학창 시절 친구들과 공책에 적어가며 즐기던 추억의 숫자 야구를 언제 어디서나 혼자서 가볍게 즐기고 싶을 때 좋습니다. 직관적인 단서들을 바탕으로 가능한 경우의 수를 좁혀나가는 논리적 연역 추리 게임으로, 두뇌를 깨우는 지적 훈련과 집중력 향상에 아주 훌륭한 휴식 도구입니다.</p>
+    <h2>알아 두면 좋은 것</h2>
+    <dl>
+      <dt>스트라이크(Strike)와 볼(Ball)</dt>
+      <dd>스트라이크는 숫자와 위치가 완벽히 일치하는 상태를 뜻하고, 볼은 숫자는 숨겨진 정답에 들어있지만 현재 위치가 잘못되었음을 뜻합니다.</dd>
+      <dt>아웃(OUT)의 가치</dt>
+      <dd>추측한 세 숫자가 모두 정답이 아닐 때 아웃 판정이 나오며, 이는 후보 숫자 목록에서 한 번에 3개의 숫자를 완벽히 배제할 수 있는 매우 강력한 단서가 됩니다.</dd>
+      <dt>중복 방지 가상 키패드</dt>
+      <dd>숫자 야구 규칙상 중복 숫자는 허용되지 않으므로, 한 번 누른 숫자는 입력창에서 자동으로 잠겨 오입력을 사전에 방지합니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>맨 앞자리 숫자로 0이 나올 수도 있나요?</summary>
+      <p>네, 일반적인 3자리 정수와 달리 숫자 야구에서는 0부터 9까지의 10개 숫자 풀에서 무작위로 추출하므로 첫 번째 자리에 0이 오는 조합(예: 012, 095 등)도 모두 정상적인 정답 후보가 됩니다.</p>
+    </details>
+    <details>
+      <summary>초보자를 위한 추천 첫 번째 추측 숫자가 있나요?</summary>
+      <p>첫 턴에는 1-2-3, 두 번째 턴에는 4-5-6, 세 번째 턴에는 7-8-9처럼 서로 겹치지 않는 숫자들을 연속으로 입력해 정답에 포함된 유효 숫자 후보군을 빠르게 걸러내는 탐색 전략이 효과적입니다.</p>
+    </details>
+    <details>
+      <summary>10번 안에 맞히지 못하면 정답을 알 수 있나요?</summary>
+      <p>10회의 기회가 모두 소진되면 게임 종료 메시지와 함께 컴퓨터가 숨겨두었던 3자리 비밀 숫자가 화면에 공개되므로 자신의 추리 과정에서 어떤 점이 엇갈렸는지 복기해 볼 수 있습니다.</p>
+    </details>
+  </section>
 </main>
 
 <script src="../_common/common.js"></script>
@@ -327,5 +361,6 @@
   startNewGame();
 })();
 </script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li></ul></nav><!--/zw-static-links-->
 </body>
 </html>
