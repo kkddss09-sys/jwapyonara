@@ -346,6 +346,10 @@ ZW.app = function (cfg) {
   var sideJs = document.createElement('script');
   sideJs.src = ROOT + '_common/sidebar.js';
   document.body.appendChild(sideJs);
+  // 게임 이름 옆에 1·2·3등을 작게 보여 준다(2026-10-26 사용자 요청). 따로 파일이라 이 세 줄만 지우면 빠진다
+  var t3Js = document.createElement('script');
+  t3Js.src = ROOT + '_common/top3.js';
+  document.body.appendChild(t3Js);
 
   var cat = here ? here[3] : '';
   var kakao = kakaoOf(cat || '휴대폰');
