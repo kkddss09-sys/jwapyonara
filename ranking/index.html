@@ -30,6 +30,9 @@
   .rk-sum th, .rk-sum td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); }
   .rk-sum th { color:var(--sub); font-weight:600; }
   .rk-sum a { color:inherit; font-weight:700; }
+  .rk-del { margin-left:8px; font:inherit; font-size:12px; font-weight:800; line-height:1.2; padding:1px 7px; border-radius:6px; border:1px solid var(--red); background:transparent; color:var(--red); cursor:pointer; }
+  .rk-adm { margin:8px 0; padding:6px 10px; border-radius:10px; background:var(--soft); font-size:12px; font-weight:700; color:var(--red); }
+  .rk-adm u { margin-left:8px; cursor:pointer; text-decoration:underline; }
 </style>
 </head>
 <body>
@@ -66,6 +69,18 @@
   var nameOf = function (g) { var t = ZW.TOOLS.filter(function (x) { return x[0] === g; })[0]; return t ? t[1] : g; };
   var apiId = function (g, i) { var c = R[g]; return c.variants ? c.variants[i || 0].id : g; };
   var cache = {};
+  // ── 운영자 모드(2026-10-27): 주소 끝에 #admin → 열쇠(이 탭 sessionStorage만) → 순위 옆 삭제 단추. 열쇠는 코드에 적지 않고 서버가 확인한다 ──
+  var ssGet = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
+  var ssSet = function (k, v) { try { if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} };
+  var isAdmin = function () { return !!ssGet('zw_admin_key'); };
+  var delBtn = function (name) { return isAdmin() ? '<button type="button" class="rk-del" data-name="' + esc(name) + '" aria-label="' + esc(name) + ' 기록 지우기">삭제</button>' : ''; };
+  function adminFromHash() {
+    if (location.hash !== '#admin') return false;
+    if (!ssGet('zw_admin_key')) { var k0 = window.prompt('운영자 열쇠를 넣어 주세요(이 탭에서만 기억해요)'); if (k0 && k0.trim()) ssSet('zw_admin_key', k0.trim()); }
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    return true;
+  }
+  adminFromHash();
   function top(id) {
     if (cache[id]) return cache[id];
     cache[id] = fetch(API + '/api/rank?game=' + encodeURIComponent(id)).then(function (r) { return r.json(); }).then(function (d) { return d.top || []; }).catch(function () { return null; });
@@ -81,15 +96,42 @@
     board.innerHTML = '<p class="rk-empty">불러오는 중…</p>';
     top(id).then(function (t) {
       var head = '<h2>' + esc(nameOf(cur)) + (cfg.variants ? ' · ' + esc(cfg.variants[sub].name) : '') + '</h2><p class="rule">' + esc(cfg.label) + ' · ' + (cfg.better === 'high' ? '높은 점수 순' : '빠르거나 적은 기록 순') + '</p>';
-      var body = t === null ? '<p class="rk-empty">순위판을 불러오지 못했어요. 잠시 뒤에 다시 열어 주세요.</p>' : (t.length ? '<ol>' + t.map(function (x, i) { return '<li><span class="n">' + (i + 1) + '</span><span class="nm">' + esc(x.name) + '</span><b>' + fmt(cfg, x.score) + '</b></li>'; }).join('') + '</ol>' : '<p class="rk-empty">아직 기록이 없어요. 첫 번째가 되어 보세요!</p>');
+      var body = t === null ? '<p class="rk-empty">순위판을 불러오지 못했어요. 잠시 뒤에 다시 열어 주세요.</p>' : (t.length ? '<ol>' + t.map(function (x, i) { return '<li><span class="n">' + (i + 1) + '</span><span class="nm">' + esc(x.name) + '</span><b>' + fmt(cfg, x.score) + '</b>' + delBtn(x.name) + '</li>'; }).join('') + '</ol>' : '<p class="rk-empty">아직 기록이 없어요. 첫 번째가 되어 보세요!</p>');
       board.innerHTML = head + body + '<a class="rk-go" href="../' + cur + '/index.html">' + esc(nameOf(cur)) + ' 하러 가기 →</a>';
     });
   }
   chips.innerHTML = ids.map(function (g) { return '<button type="button" data-g="' + g + '">' + esc(nameOf(g)) + '</button>'; }).join('');
   chips.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; cur = b.getAttribute('data-g'); sub = 0; show(); });
   subEl.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; sub = Number(b.getAttribute('data-i')); show(); });
+  var adm = document.createElement('p');
+  adm.className = 'rk-adm';
+  adm.hidden = true;
+  board.parentNode.insertBefore(adm, board);
+  function paintAdmin(text) {
+    adm.hidden = !isAdmin() && !text;
+    adm.innerHTML = text ? esc(text) : (isAdmin() ? '🛠 운영자 모드 — 순위 옆 삭제 단추로 기록을 지울 수 있어요 <u role="button" tabindex="0" id="rk-adm-off">끄기</u>' : '');
+  }
+  function delEntry(name) {
+    var id = apiId(cur, sub);
+    if (!window.confirm('"' + name + '" 기록을 지울까요? 되돌릴 수 없어요.')) return;
+    paintAdmin('지우는 중…');
+    fetch(API + '/api/rank?game=' + encodeURIComponent(id) + '&name=' + encodeURIComponent(name), { method: 'DELETE', headers: { 'X-Admin-Key': ssGet('zw_admin_key') || '' } })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, status: r.status, d: d }; }); })
+      .then(function (x) {
+        delete cache[id];
+        if (x.ok) { show(); paintAdmin(); }
+        else if (x.status === 403) { ssSet('zw_admin_key', null); show(); paintAdmin('운영자 열쇠가 달라요. 주소 끝에 #admin을 붙여 다시 열어 주세요.'); }
+        else { show(); paintAdmin((x.d && x.d.error) || '지우지 못했어요.'); }
+      }).catch(function () { paintAdmin('연결이 안 돼요. 잠시 뒤에 다시 해 주세요.'); });
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target && e.target.closest ? e.target.closest('.rk-del') : null;
+    if (b) { e.preventDefault(); delEntry(b.getAttribute('data-name')); return; }
+    if (e.target && e.target.id === 'rk-adm-off') { ssSet('zw_admin_key', null); delete cache[apiId(cur, sub)]; show(); paintAdmin(); }
+  });
+  window.addEventListener('hashchange', function () { if (adminFromHash()) { delete cache[apiId(cur, sub)]; show(); paintAdmin(); } });
   var q = new URLSearchParams(location.search).get('g');
-  cur = (q && R[q]) ? q : ids[0]; show();
+  cur = (q && R[q]) ? q : ids[0]; show(); paintAdmin();
   // 게임별 1등 요약
   var tb = document.querySelector('#sum tbody');
   ids.forEach(function (g) {

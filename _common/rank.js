@@ -17,10 +17,15 @@
   // 열쇠가 있는 탭에서만 순위 옆에 삭제 단추가 보이고, 실제 삭제는 서버가 X-Admin-Key를 확인해서 한다(열쇠가 틀리면 403, 방문자는 지울 수 없다).
   var ssGet = function (k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
   var ssSet = function (k, v) { try { if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} };
-  if (location.hash === '#admin') {
+  function adminFromHash() {
+    if (location.hash !== '#admin') return false;
     if (!ssGet('zw_admin_key')) { var k0 = window.prompt('운영자 열쇠를 넣어 주세요(이 탭에서만 기억해요)'); if (k0 && k0.trim()) ssSet('zw_admin_key', k0.trim()); }
     try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    return true;
   }
+  adminFromHash();
+  // 이미 열려 있는 쪽 주소 끝에 #admin만 붙여도(새로고침 없이) 열쇠를 묻는다
+  window.addEventListener('hashchange', function () { if (adminFromHash()) { showAdmin(); load(true); } });
   var isAdmin = function () { return !!ssGet('zw_admin_key'); };
   var delBtn = function (name) { return isAdmin() ? '<button type="button" class="rk-del" data-name="' + esc(name) + '" aria-label="' + esc(name) + ' 기록 지우기">삭제</button>' : ''; };
 
