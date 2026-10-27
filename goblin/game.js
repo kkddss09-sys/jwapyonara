@@ -2217,6 +2217,678 @@
     return battle;
   }
 
+  // ==========================================
+  // 조각 9: 던전 레이드 기본 규칙 (판 위 몬스터 칸)
+  // ==========================================
+
+  var RAID_SPAWN_RATES = {
+    sword: 0.28,
+    shield: 0.18,
+    potion: 0.18,
+    coin: 0.18,
+    monster: 0.18
+  };
+
+  /**
+   * 확률 분포에 따른 단일 레이드 칸 객체 생성 (순수 함수)
+   * @param {number} [stage] 스테이지 번호
+   * @param {function(): number} [rng] 난수 생성기
+   * @returns {{ type: string, hp: number, maxHp: number, atk: number }}
+   */
+  function createRaidCell(stage, rng) {
+    var safeRng = typeof rng === 'function' ? rng : Math.random;
+    var roll = safeRng();
+    var stg = (typeof stage === 'number' && stage >= 1) ? stage : 1;
+
+    var type = 'sword';
+    if (roll < 0.28) {
+      type = 'sword';
+    } else if (roll < 0.46) {
+      type = 'shield';
+    } else if (roll < 0.64) {
+      type = 'potion';
+    } else if (roll < 0.82) {
+      type = 'coin';
+    } else {
+      type = 'monster';
+    }
+
+    if (type === 'monster') {
+      var maxHp = 3 + stg;
+      var atk = (stg >= 5) ? 2 : 1;
+      return {
+        type: 'monster',
+        hp: maxHp,
+        maxHp: maxHp,
+        atk: atk
+      };
+    }
+
+    return {
+      type: type,
+      hp: 0,
+      maxHp: 0,
+      atk: 0
+    };
+  }
+
+  /**
+   * 칼 3칸 연속 연결 가능 경로 탐색 DFS 헬퍼
+   */
+  function findSwordChainDFS(board, path, targetLen) {
+    if (path.length >= targetLen) return path;
+    var last = path[path.length - 1];
+    var size = board.length;
+    for (var dr = -1; dr <= 1; dr++) {
+      for (var dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        var nr = last.r + dr;
+        var nc = last.c + dc;
+        if (nr >= 0 && nr < size && nc >= 0 && nc < board[nr].length) {
+          if (board[nr][nc] && board[nr][nc].type === 'sword') {
+            var alreadyIn = false;
+            for (var p = 0; p < path.length; p++) {
+              if (path[p].r === nr && path[p].c === nc) {
+                alreadyIn = true;
+                break;
+              }
+            }
+            if (!alreadyIn) {
+              var found = findSwordChainDFS(board, path.concat([{ r: nr, c: nc }]), targetLen);
+              if (found) return found;
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * 7x7 레이드 보드 2차원 배열 생성 (순수 함수)
+   * 규칙: 몬스터 4마리 이상 보장, 처음부터 3칸 이상 칼 줄 보장
+   * @param {number} [size] 보드 크기 (기본 7)
+   * @param {number} [stage] 스테이지 번호 (기본 1)
+   * @param {function(): number} [rng] 난수 생성기
+   * @returns {Array<Array<{ type: string, hp: number, maxHp: number, atk: number }>>}
+   */
+  function createRaidBoard(size, stage, rng) {
+    var boardSize = (typeof size === 'number' && size >= 3) ? size : 7;
+    var stg = (typeof stage === 'number' && stage >= 1) ? stage : 1;
+    var safeRng = typeof rng === 'function' ? rng : Math.random;
+
+    var board = [];
+    var monsterCount = 0;
+
+    for (var r = 0; r < boardSize; r++) {
+      var row = [];
+      for (var c = 0; c < boardSize; c++) {
+        var cell = createRaidCell(stg, safeRng);
+        if (cell.type === 'monster') {
+          monsterCount++;
+        }
+        row.push(cell);
+      }
+      board.push(row);
+    }
+
+    // 1. 최소 3칸 이상 바로 이을 수 있는 칼 줄 보장
+    var hasSwordChain = false;
+    for (var r1 = 0; r1 < boardSize; r1++) {
+      for (var c1 = 0; c1 < boardSize; c1++) {
+        if (board[r1][c1].type === 'sword') {
+          var chain = findSwordChainDFS(board, [{ r: r1, c: c1 }], 3);
+          if (chain && chain.length >= 3) {
+            hasSwordChain = true;
+            break;
+          }
+        }
+      }
+      if (hasSwordChain) break;
+    }
+
+    // 만약 3칸 이상 칼 줄이 없으면 row 0의 첫 3칸을 칼로 강제 설정
+    if (!hasSwordChain) {
+      for (var sc = 0; sc < 3; sc++) {
+        if (board[0][sc].type === 'monster') {
+          monsterCount--;
+        }
+        board[0][sc] = { type: 'sword', hp: 0, maxHp: 0, atk: 0 };
+      }
+    }
+
+    // 2. 몬스터 4마리 이상 보장
+    if (monsterCount < 4) {
+      for (var mr = boardSize - 1; mr >= 0; mr--) {
+        for (var mc = boardSize - 1; mc >= 0; mc--) {
+          if (board[mr][mc].type !== 'monster' && board[mr][mc].type !== 'sword') {
+            var mHp = 3 + stg;
+            var mAtk = (stg >= 5) ? 2 : 1;
+            board[mr][mc] = { type: 'monster', hp: mHp, maxHp: mHp, atk: mAtk };
+            monsterCount++;
+            if (monsterCount >= 4) break;
+          }
+        }
+        if (monsterCount >= 4) break;
+      }
+    }
+
+    return board;
+  }
+
+  /**
+   * 레이드 선 잇기 경로 확장 및 뒤로 가기 (순수 함수)
+   * 규칙:
+   * 1. 몬스터로 시작 불가
+   * 2. 칼로 시작한 줄에는 인접한 칼 또는 몬스터 칸 포함 가능 (몬스터끼리도 연결 가능)
+   * 3. 방패·물약·금화 줄은 오직 동일 종류만 연결 가능
+   * 4. 8방향 이웃, 중복 방지, 끝에서 2번째 칸이면 뒤로 가기(마지막 칸 취소)
+   * @param {Array<Array<Object>>} board 현재 레이드 보드
+   * @param {Array<{r: number, c: number}>} path 현재 경로
+   * @param {{r: number, c: number}} cell 잇고자 하는 좌표
+   * @returns {Array<{r: number, c: number}>} 새 경로 배열
+   */
+  function extendRaidPath(board, path, cell) {
+    if (!cell || typeof cell.r !== 'number' || typeof cell.c !== 'number') {
+      return Array.isArray(path) ? path : [];
+    }
+    var currentPath = Array.isArray(path) ? path : [];
+    var size = board ? board.length : 0;
+
+    // 보드 유효 범위 검사
+    if (cell.r < 0 || cell.r >= size || cell.c < 0 || !board[cell.r] || cell.c >= board[cell.r].length) {
+      return currentPath;
+    }
+
+    var targetCell = board[cell.r][cell.c];
+    if (!targetCell) {
+      return currentPath;
+    }
+
+    // 1. 비어 있으면 [cell] (단, 몬스터로 시작 거부)
+    if (currentPath.length === 0) {
+      if (targetCell.type === 'monster') {
+        return [];
+      }
+      return [{ r: cell.r, c: cell.c }];
+    }
+
+    // 2. 뒤로 가기: 끝에서 두 번째 칸이면 마지막 칸 취소
+    if (currentPath.length >= 2) {
+      var secondToLast = currentPath[currentPath.length - 2];
+      if (secondToLast.r === cell.r && secondToLast.c === cell.c) {
+        return currentPath.slice(0, currentPath.length - 1);
+      }
+    }
+
+    // 3-1. 이미 경로에 존재하는 칸 거부 (중복 방지)
+    for (var i = 0; i < currentPath.length; i++) {
+      if (currentPath[i].r === cell.r && currentPath[i].c === cell.c) {
+        return currentPath;
+      }
+    }
+
+    // 3-2. 직전 칸의 8방향 이웃 검사
+    var last = currentPath[currentPath.length - 1];
+    if (!isAdjacent(last, cell)) {
+      return currentPath;
+    }
+
+    // 3-3. 종류 연결 규칙 검사
+    var firstPos = currentPath[0];
+    if (firstPos.r < 0 || firstPos.r >= size || firstPos.c < 0 || !board[firstPos.r] || firstPos.c >= board[firstPos.r].length) {
+      return currentPath;
+    }
+    var firstCell = board[firstPos.r][firstPos.c];
+    if (!firstCell || firstCell.type === 'monster') {
+      return currentPath;
+    }
+
+    if (firstCell.type === 'sword') {
+      // 칼 줄: 칼 또는 몬스터만 허용
+      if (targetCell.type !== 'sword' && targetCell.type !== 'monster') {
+        return currentPath;
+      }
+    } else {
+      // 그 외(방패, 물약, 금화): 동일 종류만 허용
+      if (targetCell.type !== firstCell.type) {
+        return currentPath;
+      }
+    }
+
+    // 4. 경로 추가
+    var nextPath = currentPath.slice();
+    nextPath.push({ r: cell.r, c: cell.c });
+    return nextPath;
+  }
+
+  /**
+   * 새 레이드 상태 객체 생성 (순수 함수)
+   * @param {Object} [options] { stage, profile, rng }
+   * @returns {Object} { board, player, gold, stage, kills, goalKills, status, logs, lastEvents, activeBuffs, lastDiceBuff, profile }
+   */
+  function createRaidState(options) {
+    var opts = options || {};
+    var stg = (typeof opts.stage === 'number' && opts.stage >= 1) ? opts.stage : 1;
+    var safeRng = typeof opts.rng === 'function' ? opts.rng : Math.random;
+    var prof = opts.profile ? Object.assign({}, opts.profile, { stats: Object.assign({}, opts.profile.stats) }) : createGoblinProfile();
+
+    var maxHp = (prof && prof.stats && typeof prof.stats.maxHp === 'number') ? prof.stats.maxHp : 20;
+    var player = {
+      maxHp: maxHp,
+      hp: maxHp,
+      shield: 0
+    };
+
+    var goalKills = stg + 4;
+    var board = createRaidBoard(7, stg, safeRng);
+
+    return {
+      board: board,
+      player: player,
+      gold: (typeof opts.gold === 'number' && !isNaN(opts.gold)) ? opts.gold : 0,
+      stage: stg,
+      kills: 0,
+      goalKills: goalKills,
+      status: 'playing',
+      logs: ['[' + stg + '스테이지] 던전 레이드 전투 시작! 판 위의 몬스터 ' + goalKills + '마리를 처치하세요!'],
+      lastEvents: [],
+      activeBuffs: [],
+      lastDiceBuff: null,
+      profile: prof
+    };
+  }
+
+  /**
+   * 레이드 체인 해결 및 효과·중력·반격·주사위·승패 판정 (순수 함수)
+   * 원본 raidState는 변경하지 않고 깊은 복사된 새 raidState 반환
+   * @param {Object} raidState 현재 레이드 상태 객체
+   * @param {Array<{r: number, c: number}>} path 연결한 경로
+   * @param {function(): number} [rng] 난수 생성기
+   * @returns {Object} 새 레이드 상태 객체
+   */
+  function resolveRaidChain(raidState, path, rng) {
+    if (!raidState || typeof raidState !== 'object') {
+      return raidState;
+    }
+    if (raidState.status !== 'playing') {
+      return raidState;
+    }
+    if (!path || !Array.isArray(path) || path.length < 3) {
+      return raidState;
+    }
+
+    var board = raidState.board;
+    if (!board || !Array.isArray(board) || board.length === 0) {
+      return raidState;
+    }
+    var size = board.length;
+
+    // 1. 경로 유효성 검사 (범위, 중복 없음, 8방향 이웃)
+    var visited = {};
+    for (var i = 0; i < path.length; i++) {
+      var pt = path[i];
+      if (!pt || typeof pt.r !== 'number' || typeof pt.c !== 'number') {
+        return raidState;
+      }
+      if (pt.r < 0 || pt.r >= size || pt.c < 0 || !board[pt.r] || pt.c >= board[pt.r].length) {
+        return raidState;
+      }
+      var key = pt.r + ',' + pt.c;
+      if (visited[key]) {
+        return raidState;
+      }
+      visited[key] = true;
+
+      if (i > 0) {
+        if (!isAdjacent(path[i - 1], pt)) {
+          return raidState;
+        }
+      }
+    }
+
+    // 2. 종류 규칙 검사
+    var firstCell = board[path[0].r][path[0].c];
+    if (!firstCell || firstCell.type === 'monster') {
+      return raidState; // 몬스터 시작 거부
+    }
+
+    var chainType = firstCell.type;
+    var swordCount = 0;
+
+    for (var j = 0; j < path.length; j++) {
+      var cell = board[path[j].r][path[j].c];
+      if (!cell) return raidState;
+      if (chainType === 'sword') {
+        if (cell.type === 'sword') {
+          swordCount++;
+        } else if (cell.type !== 'monster') {
+          return raidState; // 칼 줄에 다른 종류 포함 거부
+        }
+      } else {
+        if (cell.type !== chainType) {
+          return raidState; // 동일 종류가 아니면 거부
+        }
+      }
+    }
+
+    // 규칙 2: 칼이 최소 1칸은 있어야 함 (칼 0개 줄 거부)
+    if (chainType === 'sword' && swordCount < 1) {
+      return raidState;
+    }
+
+    var safeRng = typeof rng === 'function' ? rng : Math.random;
+
+    // 3. 깊은 복사 (원본 불변 보장)
+    var newBoard = [];
+    for (var r = 0; r < size; r++) {
+      var newRow = [];
+      for (var c = 0; c < board[r].length; c++) {
+        var oldC = board[r][c];
+        newRow.push({
+          type: oldC.type,
+          hp: oldC.hp,
+          maxHp: oldC.maxHp,
+          atk: oldC.atk
+        });
+      }
+      newBoard.push(newRow);
+    }
+
+    var playerCopy = {
+      maxHp: raidState.player ? raidState.player.maxHp : 20,
+      hp: raidState.player ? raidState.player.hp : 20,
+      shield: raidState.player ? raidState.player.shield : 0
+    };
+
+    var nextState = {
+      board: newBoard,
+      player: playerCopy,
+      gold: typeof raidState.gold === 'number' ? raidState.gold : 0,
+      stage: typeof raidState.stage === 'number' ? raidState.stage : 1,
+      kills: typeof raidState.kills === 'number' ? raidState.kills : 0,
+      goalKills: typeof raidState.goalKills === 'number' ? raidState.goalKills : (typeof raidState.stage === 'number' ? raidState.stage + 4 : 5),
+      status: raidState.status,
+      logs: Array.isArray(raidState.logs) ? raidState.logs.slice() : [],
+      lastEvents: [],
+      activeBuffs: Array.isArray(raidState.activeBuffs)
+        ? raidState.activeBuffs.map(function(b) {
+            return Object.assign({}, b, { effect: Object.assign({}, b.effect) });
+          })
+        : [],
+      lastDiceBuff: null,
+      profile: raidState.profile ? Object.assign({}, raidState.profile, { stats: Object.assign({}, raidState.profile.stats) }) : null
+    };
+
+    var toRemove = {};
+    var actionLog = '';
+
+    // 4. 줄 종류별 효과 적용
+    if (chainType === 'sword') {
+      var atkMul = 1;
+      var bonusDmg = 0;
+      for (var b = 0; b < nextState.activeBuffs.length; b++) {
+        var ab = nextState.activeBuffs[b];
+        if (ab.effect) {
+          if (typeof ab.effect.multiplier === 'number' && ab.effect.multiplier > atkMul) {
+            atkMul = ab.effect.multiplier;
+          }
+          if (typeof ab.effect.bonusDmg === 'number') {
+            bonusDmg += ab.effect.bonusDmg;
+          }
+        }
+      }
+
+      var roleBonus = nextState.profile ? applyRoleBonus(nextState.profile, { type: 4, cleared: swordCount }) : null;
+      var famBonus = nextState.profile ? applyFamilyBonus(nextState.profile, { type: 4, cleared: swordCount }, safeRng) : null;
+
+      var baseDamage = swordCount + (roleBonus && roleBonus.bonusDamage ? roleBonus.bonusDamage : 0) + bonusDmg;
+      var finalDamage = baseDamage * atkMul;
+      if (famBonus && famBonus.isCrit) {
+        finalDamage = Math.floor(finalDamage * famBonus.critMultiplier);
+      }
+
+      // 칼 칸은 전부 제거
+      for (var k = 0; k < path.length; k++) {
+        var pPos = path[k];
+        if (nextState.board[pPos.r][pPos.c].type === 'sword') {
+          toRemove[pPos.r + ',' + pPos.c] = true;
+        }
+      }
+
+      // 몬스터 칸 타격
+      var hitCount = 0;
+      var killedCount = 0;
+      var goldEarned = 0;
+
+      for (var m = 0; m < path.length; m++) {
+        var mPos = path[m];
+        var mCell = nextState.board[mPos.r][mPos.c];
+        if (mCell.type === 'monster') {
+          hitCount++;
+          mCell.hp -= finalDamage;
+          nextState.lastEvents.push({ kind: 'hit', row: mPos.r, col: mPos.c, dmg: finalDamage });
+
+          if (mCell.hp <= 0) {
+            mCell.hp = 0;
+            killedCount++;
+            nextState.kills++;
+            toRemove[mPos.r + ',' + mPos.c] = true;
+
+            var dropGold = Math.floor(safeRng() * 2) + 1;
+            if (famBonus && famBonus.goldMultiplier) {
+              dropGold = Math.round(dropGold * famBonus.goldMultiplier);
+            }
+            goldEarned += dropGold;
+            nextState.gold += dropGold;
+            nextState.lastEvents.push({ kind: 'kill', row: mPos.r, col: mPos.c, gold: dropGold });
+          }
+        }
+      }
+
+      actionLog = '⚔️ 칼 ' + swordCount + '개 타격(' + finalDamage + ' 피해) -> 👹 몬스터 ' + hitCount + '마리 피격(' + killedCount + '마리 처치, 🪙+' + goldEarned + ')';
+
+    } else if (chainType === 'shield') {
+      var famBonusShield = nextState.profile ? applyFamilyBonus(nextState.profile, { type: 1, cleared: path.length }, safeRng) : null;
+      var shieldMul = (famBonusShield && famBonusShield.shieldMultiplier) ? famBonusShield.shieldMultiplier : 1.0;
+      var shieldGain = Math.round(path.length * shieldMul);
+      nextState.player.shield += shieldGain;
+      nextState.lastEvents.push({ kind: 'shield', amount: shieldGain });
+      for (var s = 0; s < path.length; s++) {
+        toRemove[path[s].r + ',' + path[s].c] = true;
+      }
+      actionLog = '🛡️ 방패 ' + path.length + '개 연결 -> 방어막 +' + shieldGain + ' (현재 ' + nextState.player.shield + ')';
+
+    } else if (chainType === 'potion') {
+      var roleBonusPotion = nextState.profile ? applyRoleBonus(nextState.profile, { type: 2, cleared: path.length }) : null;
+      var healMul = (roleBonusPotion && roleBonusPotion.healMultiplier) ? roleBonusPotion.healMultiplier : 1.0;
+      var healGain = Math.floor(path.length * healMul);
+      var oldHp = nextState.player.hp;
+      var newHp = oldHp + healGain;
+      if (newHp > nextState.player.maxHp) {
+        if (roleBonusPotion && roleBonusPotion.overflowToShield) {
+          var overflow = newHp - nextState.player.maxHp;
+          nextState.player.shield += overflow;
+        }
+        nextState.player.hp = nextState.player.maxHp;
+      } else {
+        nextState.player.hp = newHp;
+      }
+      var actualHeal = nextState.player.hp - oldHp;
+      nextState.lastEvents.push({ kind: 'heal', amount: actualHeal });
+      for (var p = 0; p < path.length; p++) {
+        toRemove[path[p].r + ',' + path[p].c] = true;
+      }
+      actionLog = '🧪 물약 ' + path.length + '개 연결 -> 체력 +' + actualHeal + ' (현재 ' + nextState.player.hp + '/' + nextState.player.maxHp + ')';
+
+    } else if (chainType === 'coin') {
+      var famBonusCoin = nextState.profile ? applyFamilyBonus(nextState.profile, { type: 3, cleared: path.length }, safeRng) : null;
+      var coinMul = (famBonusCoin && famBonusCoin.goldMultiplier) ? famBonusCoin.goldMultiplier : 1.0;
+      var coinGain = Math.round(path.length * coinMul);
+      nextState.gold += coinGain;
+      nextState.lastEvents.push({ kind: 'gold', amount: coinGain });
+      for (var c = 0; c < path.length; c++) {
+        toRemove[path[c].r + ',' + path[c].c] = true;
+      }
+      actionLog = '🪙 금화 ' + path.length + '개 연결 -> 골드 +' + coinGain + ' (총 ' + nextState.gold + ')';
+    }
+
+    // 5. 중력 및 새 칸 보충 (Rule 5)
+    for (var col = 0; col < size; col++) {
+      var kept = [];
+      for (var row = size - 1; row >= 0; row--) {
+        if (!toRemove[row + ',' + col]) {
+          kept.push(nextState.board[row][col]);
+        }
+      }
+      for (var row2 = size - 1; row2 >= 0; row2--) {
+        if (kept.length > 0) {
+          nextState.board[row2][col] = kept.shift();
+        } else {
+          nextState.board[row2][col] = createRaidCell(nextState.stage, safeRng);
+        }
+      }
+    }
+
+    // 6. 10칸 이상 줄이면 주사위 버프 발동 (Rule 7)
+    var diceLog = '';
+    if (path.length >= 10) {
+      var diceBuff;
+      if (nextState.profile && nextState.profile.family === 'gold_finger') {
+        var d1 = rollDiceBuff(safeRng);
+        var d2 = rollDiceBuff(safeRng);
+        diceBuff = (d2.dice > d1.dice) ? d2 : d1;
+      } else {
+        diceBuff = rollDiceBuff(safeRng);
+      }
+      nextState.lastDiceBuff = diceBuff;
+
+      var eff = diceBuff.effect || {};
+      if (typeof eff.heal === 'number' && eff.heal > 0) {
+        nextState.player.hp = Math.min(nextState.player.maxHp, nextState.player.hp + eff.heal);
+      }
+      if (typeof eff.damage === 'number' && eff.damage > 0) {
+        for (var br = 0; br < size; br++) {
+          for (var bc = 0; bc < size; bc++) {
+            if (nextState.board[br][bc].type === 'monster' && nextState.board[br][bc].hp > 0) {
+              nextState.board[br][bc].hp -= eff.damage;
+              nextState.lastEvents.push({ kind: 'hit', row: br, col: bc, dmg: eff.damage });
+              if (nextState.board[br][bc].hp <= 0) {
+                nextState.board[br][bc].hp = 0;
+                nextState.kills++;
+                nextState.gold += 1;
+                nextState.board[br][bc] = createRaidCell(nextState.stage, safeRng);
+              }
+              break;
+            }
+          }
+        }
+      }
+      if (typeof diceBuff.turns === 'number' && diceBuff.turns > 0) {
+        nextState.activeBuffs.push({
+          dice: diceBuff.dice,
+          id: diceBuff.id,
+          name: diceBuff.name,
+          desc: diceBuff.desc,
+          emoji: diceBuff.emoji,
+          turns: diceBuff.turns,
+          effect: Object.assign({}, eff)
+        });
+      }
+      diceLog = '🎲 ' + diceBuff.emoji + ' 눈금 ' + diceBuff.dice + ' [' + diceBuff.name + '] 발동! (' + diceBuff.desc + ')';
+    }
+
+    // 7. 승리 판정 (Rule 8: kills >= goalKills)
+    if (nextState.kills >= nextState.goalKills) {
+      nextState.status = 'victory';
+      if (nextState.profile) {
+        nextState.profile = addExpToProfile(nextState.profile, 30);
+      }
+      var winLog = actionLog + (diceLog ? ' | ' + diceLog : '') + ' -> 👹 목표 몬스터 ' + nextState.goalKills + '마리 처치! 스테이지 승리!';
+      nextState.logs.push(winLog);
+      return nextState;
+    }
+
+    // 8. 몬스터의 반격 (Rule 6)
+    var skipEnemy = false;
+    var absorbAll = false;
+    for (var aIdx = 0; aIdx < nextState.activeBuffs.length; aIdx++) {
+      var abf = nextState.activeBuffs[aIdx];
+      if (abf.effect) {
+        if (abf.effect.skipEnemyTurn) skipEnemy = true;
+        if (abf.effect.absorbAll) absorbAll = true;
+      }
+    }
+
+    var aliveMonsters = 0;
+    var totalEnemyAtk = 0;
+    for (var ar = 0; ar < size; ar++) {
+      for (var ac = 0; ac < size; ac++) {
+        var aCell = nextState.board[ar][ac];
+        if (aCell.type === 'monster' && aCell.hp > 0) {
+          aliveMonsters++;
+          totalEnemyAtk += (typeof aCell.atk === 'number' && aCell.atk > 0) ? aCell.atk : 1;
+        }
+      }
+    }
+
+    var enemyLog = '';
+    if (aliveMonsters === 0) {
+      enemyLog = '판 위에 몬스터가 없어 반격 없음';
+    } else if (skipEnemy) {
+      enemyLog = '몬스터 반격 스킵! [⚡ 질풍노도]';
+    } else if (absorbAll) {
+      enemyLog = '몬스터 반격! [🛡️ 돌가죽 0 피해 완전 흡수]';
+    } else {
+      var remainAtk = totalEnemyAtk;
+      var absorbedShield = 0;
+      if (nextState.player.shield > 0) {
+        if (nextState.player.shield >= remainAtk) {
+          absorbedShield = remainAtk;
+          nextState.player.shield -= remainAtk;
+          remainAtk = 0;
+        } else {
+          absorbedShield = nextState.player.shield;
+          remainAtk -= nextState.player.shield;
+          nextState.player.shield = 0;
+        }
+      }
+
+      if (remainAtk > 0) {
+        nextState.player.hp -= remainAtk;
+        if (nextState.player.hp <= 0) {
+          nextState.player.hp = 0;
+          nextState.status = 'defeat';
+        }
+      }
+
+      nextState.lastEvents.push({
+        kind: 'enemyAttack',
+        total: totalEnemyAtk,
+        absorbed: absorbedShield,
+        dmg: remainAtk
+      });
+
+      enemyLog = '👹 몬스터 ' + aliveMonsters + '마리 반격(총 ' + totalEnemyAtk + ' 피해)! 실드 ' + absorbedShield + ' 흡수, HP -' + remainAtk;
+      if (nextState.status === 'defeat') {
+        enemyLog += ' -> 고블린 쓰러짐 (패배)';
+      }
+    }
+
+    // 9. 버프 지속 턴 차감
+    nextState.activeBuffs = nextState.activeBuffs
+      .map(function(b) { return Object.assign({}, b, { turns: b.turns - 1 }); })
+      .filter(function(b) { return b.turns > 0; });
+
+    // 10. 로그 기록
+    var finalLog = actionLog;
+    if (diceLog) finalLog += ' | ' + diceLog;
+    finalLog += ' | ' + enemyLog;
+    nextState.logs.push(finalLog);
+
+    return nextState;
+  }
+
   return {
     createRng: createRng,
     createBoard: createBoard,
@@ -2251,6 +2923,13 @@
     validateNickname: validateNickname,
     filterProfanity: filterProfanity,
     generateMockLeaderboard: generateMockLeaderboard,
-    createChallengeBattle: createChallengeBattle
+    createChallengeBattle: createChallengeBattle,
+    // 조각 9 추가 (던전 레이드 기본 규칙)
+    RAID_SPAWN_RATES: RAID_SPAWN_RATES,
+    createRaidCell: createRaidCell,
+    createRaidBoard: createRaidBoard,
+    extendRaidPath: extendRaidPath,
+    createRaidState: createRaidState,
+    resolveRaidChain: resolveRaidChain
   };
 });
