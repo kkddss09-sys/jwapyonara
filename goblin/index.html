@@ -1,0 +1,3734 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <title>고블린 성장기 — 퍼즐 레이드</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background-color: #0b1120;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 10px 10px 24px;
+      touch-action: manipulation;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 8px;
+      position: relative;
+    }
+
+    /* 상단 헤더 */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 4px 4px;
+    }
+
+    .title-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .title-icon {
+      font-size: 26px;
+    }
+
+    .title-text h1 {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #38bdf8;
+      text-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+    }
+
+    .title-text p {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .header-buttons {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-action {
+      background: #0284c7;
+      color: #ffffff;
+      border: 1px solid #0369a1;
+      padding: 6px 10px;
+      border-radius: 9px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .btn-action:active {
+      transform: scale(0.95);
+      background: #0369a1;
+    }
+
+    .btn-reset {
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      padding: 6px 10px;
+      border-radius: 9px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .btn-reset:active {
+      transform: scale(0.95);
+      background: #334155;
+    }
+
+    /* 조각 4: 내 고블린 프로필 카드 */
+    .profile-card {
+      background: linear-gradient(135deg, #131d31 0%, #1e1b4b 100%);
+      border: 1px solid #3b82f6;
+      border-radius: 14px;
+      padding: 9px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 4px 14px rgba(59, 130, 246, 0.15);
+    }
+
+    .profile-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .profile-badge-group {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .badge-rank {
+      font-size: 11px;
+      font-weight: 900;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(245, 158, 11, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .badge-role-btn {
+      background: #1e293b;
+      border: 1px solid #38bdf8;
+      color: #38bdf8;
+      padding: 2px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .badge-role-btn:active {
+      transform: scale(0.95);
+      background: #0284c7;
+      color: #ffffff;
+    }
+
+    .badge-family {
+      font-size: 10px;
+      font-weight: 800;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+      padding: 2px 6px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .profile-stats-mini {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #cbd5e1;
+      white-space: nowrap;
+    }
+
+    .exp-bar-wrapper {
+      position: relative;
+      width: 100%;
+      height: 14px;
+      background: #0f172a;
+      border-radius: 7px;
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+
+    .exp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #a855f7);
+      transition: width 0.4s ease;
+    }
+
+    .exp-bar-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      font-size: 9px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 전투 상황판 */
+    .battle-card {
+      background: #131d31;
+      border: 1px solid #1e293b;
+      border-radius: 14px;
+      padding: 9px 12px;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 8px;
+      align-items: start;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .combatant {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .combatant-top {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .combatant-top.enemy-side {
+      justify-content: flex-end;
+    }
+
+    .combatant-avatar {
+      font-size: 22px;
+    }
+
+    .combatant-meta {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      overflow: hidden;
+    }
+
+    .combatant-meta.enemy-meta {
+      flex-direction: row-reverse;
+    }
+
+    .combatant-name {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f1f5f9;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .badge-shield {
+      font-size: 10px;
+      font-weight: 800;
+      background: #0284c7;
+      color: #f0f9ff;
+      padding: 1px 5px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .badge-atk {
+      font-size: 10px;
+      font-weight: 800;
+      background: #e11d48;
+      color: #fff1f2;
+      padding: 1px 5px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .hp-gauge-wrapper {
+      position: relative;
+      width: 100%;
+      height: 16px;
+      background: #1e293b;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+
+    .hp-gauge-fill {
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .hp-gauge-fill.player {
+      background: linear-gradient(90deg, #059669, #34d399);
+    }
+
+    .hp-gauge-fill.enemy {
+      background: linear-gradient(90deg, #dc2626, #f87171);
+    }
+
+    .hp-gauge-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      font-size: 10px;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .battle-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      padding: 6px 4px 0;
+    }
+
+    .turn-indicator {
+      font-size: 11px;
+      font-weight: 800;
+      background: #3b82f6;
+      color: #eff6ff;
+      padding: 2px 7px;
+      border-radius: 10px;
+      white-space: nowrap;
+    }
+
+    .vs-label {
+      font-size: 9px;
+      font-weight: 900;
+      color: #64748b;
+    }
+
+    /* 활성 버프 뱃지 바 */
+    .buffs-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+      min-height: 18px;
+    }
+
+    .buff-badge {
+      font-size: 10px;
+      font-weight: 800;
+      background: #1e293b;
+      border: 1px solid #3b82f6;
+      color: #93c5fd;
+      padding: 1px 6px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      animation: popIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .buff-badge.fury {
+      border-color: #ef4444;
+      color: #fca5a5;
+      background: rgba(239, 68, 68, 0.2);
+    }
+
+    .buff-badge.stone_skin {
+      border-color: #38bdf8;
+      color: #bae6fd;
+      background: rgba(56, 189, 248, 0.2);
+    }
+
+    .buff-badge.wind_walk {
+      border-color: #eab308;
+      color: #fef08a;
+      background: rgba(234, 179, 8, 0.2);
+    }
+
+    .buff-badge.blessing {
+      border-color: #a855f7;
+      color: #e9d5ff;
+      background: rgba(168, 85, 247, 0.2);
+    }
+
+    /* 조각 5: 스테이지 선택 탭 및 보스전 레이아웃 */
+    .stage-selector {
+      display: flex;
+      gap: 5px;
+      width: 100%;
+    }
+
+    .stage-tab-btn {
+      flex: 1;
+      background: #131d31;
+      border: 1px solid #1e293b;
+      color: #94a3b8;
+      padding: 6px 4px;
+      border-radius: 9px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+
+    .stage-tab-btn:hover {
+      background: #1e293b;
+      color: #f1f5f9;
+    }
+
+    .stage-tab-btn.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+    }
+
+    .boss-battle-card {
+      background: linear-gradient(180deg, #131d31 0%, #0f172a 100%);
+      border: 2px solid #e11d48;
+      border-radius: 14px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(225, 29, 72, 0.25);
+    }
+
+    .boss-player-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.6);
+      padding: 4px 8px;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+    }
+
+    .boss-player-info {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .boss-player-hp-wrap {
+      flex: 1;
+    }
+
+    .reflect-banner {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(239, 68, 68, 0.3));
+      border: 1px solid #c084fc;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #f5d0fe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 0 12px rgba(192, 132, 252, 0.4);
+      animation: pulse 1s infinite alternate;
+    }
+
+    .boss-main-panel {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+    }
+
+    .boss-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .boss-identity {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .boss-avatar-large {
+      font-size: 28px;
+    }
+
+    .boss-meta-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .boss-name-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .boss-name-large {
+      font-size: 13px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    .boss-stage-badge {
+      font-size: 10px;
+      color: #f59e0b;
+      font-weight: 700;
+    }
+
+    .btn-target-action {
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: #94a3b8;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-target-action.targeted {
+      background: rgba(52, 211, 153, 0.2);
+      border-color: #34d399;
+      color: #34d399;
+      box-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
+    }
+
+    .boss-hp-wrapper-large {
+      position: relative;
+      width: 100%;
+      height: 20px;
+      background: #0b1120;
+      border-radius: 10px;
+      overflow: visible;
+      border: 1px solid #475569;
+    }
+
+    .boss-hp-fill-large {
+      height: 100%;
+      border-radius: 9px;
+      background: linear-gradient(90deg, #dc2626, #f43f5e);
+      transition: width 0.3s ease;
+    }
+
+    .boss-hp-text-large {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      font-size: 11px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .boss-float-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    .boss-float-text {
+      position: absolute;
+      top: -24px;
+      right: 12px;
+      color: #ef4444;
+      font-size: 16px;
+      font-weight: 900;
+      text-shadow: 0 0 8px rgba(239, 68, 68, 0.9);
+      animation: floatDamage 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    }
+
+    @keyframes floatDamage {
+      0% { opacity: 0; transform: translateY(6px) scale(0.7); }
+      20% { opacity: 1; transform: translateY(0) scale(1.15); }
+      75% { opacity: 1; transform: translateY(-16px) scale(1); }
+      100% { opacity: 0; transform: translateY(-30px); }
+    }
+
+    .minions-section {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .minions-title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .minions-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+
+    .minions-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      width: 100%;
+    }
+
+    .minions-grid.two-cols {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .minion-card {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 9px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+
+    .minion-card:hover {
+      border-color: #38bdf8;
+    }
+
+    .minion-card.targeted {
+      border: 2px solid #34d399;
+      background: rgba(52, 211, 153, 0.12);
+      box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+    }
+
+    .minion-card.dead {
+      opacity: 0.4;
+      filter: grayscale(0.85);
+      border-color: #1e293b;
+      cursor: not-allowed;
+    }
+
+    .minion-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2px;
+    }
+
+    .minion-name {
+      font-size: 11px;
+      font-weight: 700;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .minion-target-tag {
+      font-size: 9px;
+      font-weight: 900;
+      color: #34d399;
+      display: none;
+    }
+
+    .minion-card.targeted .minion-target-tag {
+      display: inline-block;
+    }
+
+    .minion-hp-wrapper {
+      position: relative;
+      width: 100%;
+      height: 12px;
+      background: #1e293b;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid #334155;
+    }
+
+    .minion-hp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ea580c, #f97316);
+      transition: width 0.3s ease;
+    }
+
+    .minion-hp-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      font-size: 9px;
+      font-weight: 800;
+      color: #ffffff;
+      text-shadow: 0 1px 1px rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .minion-badges {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      flex-wrap: wrap;
+    }
+
+    .minion-buff-badge {
+      font-size: 9px;
+      font-weight: 800;
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid #a855f7;
+      color: #e9d5ff;
+      padding: 0 4px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    /* 통계 대시보드 */
+    .stats-card {
+      background: #131d31;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 7px 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #64748b;
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 14px;
+      font-weight: 800;
+      color: #f8fafc;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-value.gold {
+      color: #fbbf24;
+    }
+
+    .stat-item.current .stat-value {
+      color: #34d399;
+    }
+
+    .stat-item.best .stat-value {
+      color: #38bdf8;
+    }
+
+    /* 안내 메시지 / 알림 배너 */
+    .message-banner {
+      min-height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      text-align: center;
+      transition: all 0.2s ease;
+      padding: 2px 8px;
+      border-radius: 8px;
+    }
+
+    .message-banner.big-bonus {
+      color: #fbbf24;
+      font-weight: 800;
+      animation: pulse 0.8s infinite alternate;
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+      background: rgba(251, 191, 36, 0.1);
+    }
+
+    .message-banner.cleared-info {
+      color: #38bdf8;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.03); }
+    }
+
+    /* 보드 래퍼 및 그리드 */
+    .board-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #111a2e;
+      border: 2px solid #1e293b;
+      border-radius: 18px;
+      padding: 8px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.05);
+      touch-action: none;
+    }
+
+    .board-grid {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      gap: 6px;
+    }
+
+    /* 타일 (셀) */
+    .cell {
+      position: relative;
+      background: #1e293b;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      cursor: pointer;
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.08);
+      user-select: none;
+    }
+
+    .cell:hover {
+      background: #273549;
+    }
+
+    /* 연결 중인 칸 강조 */
+    .cell.selected {
+      background: #065f46;
+      border: 2px solid #34d399;
+      transform: scale(1.06);
+      box-shadow: 0 0 16px rgba(52, 211, 153, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+      z-index: 2;
+    }
+
+    .cell.selected.first {
+      background: #047857;
+      border-color: #6ee7b7;
+      box-shadow: 0 0 20px rgba(110, 231, 183, 0.8);
+    }
+
+    /* 연결 순서 번호 배지 */
+    .badge {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      background: #10b981;
+      color: #022c22;
+      font-size: 10px;
+      font-weight: 900;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+      pointer-events: none;
+    }
+
+    /* SVG 선 잇기 오버레이 */
+    .svg-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    .chain-line {
+      fill: none;
+      stroke: #34d399;
+      stroke-width: 6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.9));
+      opacity: 0.9;
+    }
+
+    /* 주사위 발동 토스트 팝업 */
+    .dice-toast {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.6);
+      background: rgba(15, 23, 42, 0.95);
+      border: 2px solid #fbbf24;
+      border-radius: 18px;
+      padding: 16px 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      z-index: 90;
+      box-shadow: 0 0 30px rgba(251, 191, 36, 0.65), 0 10px 40px rgba(0,0,0,0.9);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+      width: 82%;
+      max-width: 320px;
+      text-align: center;
+    }
+
+    .dice-toast.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .dice-toast-icon {
+      font-size: 42px;
+      animation: diceSpin 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes diceSpin {
+      0% { transform: scale(0.4) rotate(-180deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    .dice-toast-title {
+      font-size: 16px;
+      font-weight: 900;
+      color: #fbbf24;
+      text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+    }
+
+    .dice-toast-desc {
+      font-size: 12px;
+      color: #f1f5f9;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    /* 하단 설명 */
+    .footer-help {
+      margin-top: 2px;
+      background: #131d31;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 8px 12px;
+      font-size: 11px;
+      line-height: 1.4;
+      color: #94a3b8;
+    }
+
+    .footer-help ul {
+      padding-left: 16px;
+      margin-top: 2px;
+    }
+
+    .footer-help li {
+      margin-bottom: 2px;
+    }
+
+    .footer-help .highlight-dice {
+      color: #fbbf24;
+      font-weight: 700;
+    }
+
+    .footer-help .highlight-role {
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    /* 팝업 모달 공통 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(11, 17, 32, 0.85);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-card {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 18px;
+      padding: 22px 18px;
+      max-width: 340px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-icon {
+      font-size: 44px;
+    }
+
+    .modal-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+
+    .modal-desc {
+      font-size: 13px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+
+    .modal-loot {
+      color: #fbbf24;
+      font-weight: 800;
+      display: block;
+      margin-top: 4px;
+    }
+
+    .modal-promo-banner {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      width: 100%;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+      animation: pulse 1s infinite alternate;
+    }
+
+    .btn-modal-action {
+      margin-top: 6px;
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      padding: 11px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+      transition: all 0.15s ease;
+    }
+
+    .btn-modal-action:active {
+      transform: scale(0.97);
+      background: #0369a1;
+    }
+
+    /* 보직 선택 모달 전용 리스트 */
+    .role-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      margin: 6px 0;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .role-option-btn {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+      color: #f1f5f9;
+    }
+
+    .role-option-btn:hover {
+      border-color: #38bdf8;
+      background: #1e293b;
+    }
+
+    .role-option-btn.selected {
+      border: 2px solid #38bdf8;
+      background: rgba(56, 189, 248, 0.15);
+    }
+
+    .role-option-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+
+    .role-option-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .role-option-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+
+    .role-option-desc {
+      font-size: 10px;
+      color: #94a3b8;
+      line-height: 1.3;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    /* 조각 6: 마을 배경 테마 전환 */
+    body {
+      transition: background 0.4s ease, background-color 0.4s ease;
+    }
+    body.theme-ant {
+      background: radial-gradient(circle at 50% 10%, #2b1f14 0%, #17110a 70%, #0a0705 100%);
+    }
+    body.theme-human {
+      background: radial-gradient(circle at 50% 10%, #3a151b 0%, #1f0b0f 70%, #0d0406 100%);
+    }
+
+    /* 조각 6: 현재 스테이지 안내 배너 */
+    .current-stage-bar {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 12px;
+      padding: 6px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 11px;
+      backdrop-filter: blur(4px);
+    }
+    .stage-indicator-text {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 800;
+    }
+    .stage-difficulty-tag {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 6px;
+      font-weight: 800;
+    }
+    .stage-difficulty-tag.easy {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid #10b981;
+      color: #6ee7b7;
+    }
+    .stage-difficulty-tag.hard {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid #ef4444;
+      color: #fca5a5;
+    }
+    .btn-open-map-mini {
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.15s ease;
+    }
+    .btn-open-map-mini:active {
+      transform: scale(0.95);
+      background: #0369a1;
+    }
+
+    /* 조각 6: 마을 지도 모달 */
+    .map-modal-card {
+      background: #151e2e;
+      border: 2px solid #38bdf8;
+      border-radius: 20px;
+      padding: 16px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.85);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .map-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 8px;
+    }
+    .map-title {
+      font-size: 17px;
+      font-weight: 900;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-close-map {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 2px 6px;
+    }
+    .village-tabs {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+    .village-tab-btn {
+      flex: 1;
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 8px 6px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .village-tab-btn.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+    }
+    .stage-card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+    .stage-card-item {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: left;
+    }
+    .stage-card-item:hover:not(.locked) {
+      border-color: #38bdf8;
+      background: #1e293b;
+      transform: translateY(-1px);
+    }
+    .stage-card-item.current {
+      border: 2px solid #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+    }
+    .stage-card-item.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+      border-color: #1e293b;
+      background: #090d16;
+    }
+    .stage-card-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .stage-num-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: #1e293b;
+      color: #38bdf8;
+      font-size: 13px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #334155;
+    }
+    .stage-card-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .stage-card-name {
+      font-size: 13px;
+      font-weight: 800;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .stage-card-stats {
+      font-size: 10px;
+      color: #94a3b8;
+    }
+    .stage-card-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stage-clear-star {
+      font-size: 15px;
+    }
+    .village-locked-panel {
+      padding: 24px 12px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      background: #090d16;
+      border-radius: 12px;
+      border: 1px dashed #334155;
+    }
+    .village-locked-icon {
+      font-size: 36px;
+    }
+    .village-locked-text {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.5;
+    }
+
+    /* 조각 6: 스토리 대화 컷씬 모달 */
+    .dialogue-modal-card {
+      background: rgba(15, 23, 42, 0.95);
+      border: 2px solid #38bdf8;
+      border-radius: 20px;
+      padding: 18px;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+    .dialogue-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .dialogue-speaker-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dialogue-avatar {
+      font-size: 28px;
+    }
+    .dialogue-speaker-name {
+      font-size: 13px;
+      font-weight: 900;
+      color: #38bdf8;
+    }
+    .dialogue-skip-btn {
+      background: #334155;
+      color: #cbd5e1;
+      border: 1px solid #475569;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      transition: all 0.15s ease;
+    }
+    .dialogue-skip-btn:active {
+      transform: scale(0.95);
+      background: #475569;
+    }
+    .dialogue-bubble {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #f8fafc;
+      min-height: 70px;
+      text-align: left;
+      position: relative;
+    }
+    .dialogue-cursor {
+      display: inline-block;
+      width: 6px;
+      height: 14px;
+      background: #38bdf8;
+      margin-left: 2px;
+      animation: blink 0.7s infinite;
+      vertical-align: middle;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .dialogue-next-btn {
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      align-self: flex-end;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .dialogue-next-btn:active {
+      transform: scale(0.95);
+      background: #0369a1;
+    }
+
+    /* 조각 6: 10스테이지 엔딩 전체 화면 */
+    .ending-modal-card {
+      background: radial-gradient(circle at 50% 20%, #451a03 0%, #1c0d02 60%, #0a0501 100%);
+      border: 3px solid #fbbf24;
+      border-radius: 24px;
+      padding: 28px 20px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 60px rgba(251, 191, 36, 0.5), 0 20px 60px rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .ending-banner {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #ffffff;
+      padding: 8px 18px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.5);
+    }
+    .ending-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #fde047;
+      text-shadow: 0 0 16px rgba(253, 224, 71, 0.6);
+    }
+    .ending-desc {
+      font-size: 13px;
+      color: #fef08a;
+      line-height: 1.6;
+    }
+    .ending-stats-box {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid #78350f;
+      border-radius: 12px;
+      padding: 10px 14px;
+      width: 100%;
+      font-size: 12px;
+      color: #fef3c7;
+      display: flex;
+      justify-content: space-around;
+    }
+
+    /* 조각 7: 순위표 (Leaderboard) 모달 스타일 */
+    .leaderboard-modal-card {
+      background: #0f172a;
+      border: 2px solid #8b5cf6;
+      border-radius: 20px;
+      padding: 16px;
+      max-width: 420px;
+      width: 100%;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 20px rgba(139, 92, 246, 0.25);
+      animation: popIn 0.25s ease-out;
+      position: relative;
+    }
+    .leaderboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 10px;
+    }
+    .leaderboard-title {
+      font-size: 15px;
+      font-weight: 900;
+      color: #c4b5fd;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .leaderboard-subtitle {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.4;
+    }
+    .leaderboard-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      max-height: 48vh;
+      padding-right: 4px;
+    }
+    .leaderboard-list::-webkit-scrollbar {
+      width: 5px;
+    }
+    .leaderboard-list::-webkit-scrollbar-track {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    .leaderboard-list::-webkit-scrollbar-thumb {
+      background: #8b5cf6;
+      border-radius: 4px;
+    }
+    .leaderboard-row {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: all 0.15s ease;
+    }
+    .leaderboard-row:hover {
+      border-color: #8b5cf6;
+      background: #242f47;
+    }
+    .leaderboard-row.rank-1 {
+      border-color: #fbbf24;
+      background: linear-gradient(90deg, rgba(251, 191, 36, 0.15), #1e293b);
+    }
+    .leaderboard-row.rank-2 {
+      border-color: #cbd5e1;
+      background: linear-gradient(90deg, rgba(203, 213, 225, 0.12), #1e293b);
+    }
+    .leaderboard-row.rank-3 {
+      border-color: #d97706;
+      background: linear-gradient(90deg, rgba(217, 119, 6, 0.15), #1e293b);
+    }
+    .leaderboard-row-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .leaderboard-rank-badge {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      font-size: 11px;
+      font-weight: 900;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .leaderboard-rank-badge.top-1 {
+      background: #fbbf24;
+      color: #78350f;
+      border-color: #f59e0b;
+      font-size: 14px;
+    }
+    .leaderboard-rank-badge.top-2 {
+      background: #e2e8f0;
+      color: #334155;
+      border-color: #cbd5e1;
+      font-size: 14px;
+    }
+    .leaderboard-rank-badge.top-3 {
+      background: #b45309;
+      color: #fef3c7;
+      border-color: #d97706;
+      font-size: 14px;
+    }
+    .leaderboard-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+    .leaderboard-name-line {
+      font-size: 12px;
+      font-weight: 800;
+      color: #f1f5f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .leaderboard-score-line {
+      font-size: 10px;
+      color: #94a3b8;
+    }
+    .btn-challenge {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      color: #ffffff;
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+    }
+    .btn-challenge:active {
+      transform: scale(0.95);
+      background: #991b1b;
+    }
+    .my-rank-fixed-bar {
+      background: #111827;
+      border: 2px solid #38bdf8;
+      border-radius: 12px;
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .my-rank-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .my-rank-text {
+      font-size: 12px;
+      font-weight: 900;
+      color: #38bdf8;
+    }
+    .my-rank-nick {
+      font-size: 10px;
+      color: #94a3b8;
+    }
+    .btn-open-nickname {
+      background: #334155;
+      color: #f1f5f9;
+      border: 1px solid #475569;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .btn-open-nickname:active {
+      transform: scale(0.95);
+      background: #475569;
+    }
+
+    /* 조각 7: 닉네임 변경(아이디 깨기) 모달 */
+    .nickname-modal-card {
+      background: #0f172a;
+      border: 2px solid #38bdf8;
+      border-radius: 20px;
+      padding: 18px;
+      max-width: 380px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.9);
+      animation: popIn 0.25s ease-out;
+    }
+    .nickname-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nickname-icon {
+      font-size: 22px;
+    }
+    .nickname-title {
+      font-size: 15px;
+      font-weight: 900;
+      color: #38bdf8;
+    }
+    .nickname-law-notice {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 9px 11px;
+      font-size: 11px;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+    .nickname-input-wrap {
+      width: 100%;
+    }
+    .nickname-input {
+      width: 100%;
+      background: #1e293b;
+      border: 2px solid #475569;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    .nickname-input:focus {
+      border-color: #38bdf8;
+      background: #19253b;
+    }
+    .nickname-error-msg {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 11px;
+      color: #fca5a5;
+      line-height: 1.4;
+      font-weight: 700;
+    }
+    .nickname-btn-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-nickname-confirm {
+      flex: 1;
+      background: #0284c7;
+      color: #ffffff;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-nickname-confirm:active {
+      transform: scale(0.95);
+      background: #0369a1;
+    }
+    .btn-nickname-cancel {
+      background: #334155;
+      color: #cbd5e1;
+      border: 1px solid #475569;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-nickname-cancel:active {
+      transform: scale(0.95);
+      background: #475569;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- 헤더 -->
+    <header class="header">
+      <div class="title-area">
+        <span class="title-icon">🧌</span>
+        <div class="title-text">
+          <h1>고블린 성장기</h1>
+          <p>퍼즐 레이드 · 조각 7 (순위표 & 도전장 & 닉네임)</p>
+        </div>
+      </div>
+      <div class="header-buttons">
+        <button id="btn-leaderboard" class="btn-action" type="button" title="Top 100 순위표 및 도전장" style="background:#7c3aed; border-color:#6d28d9;">
+          <span>순위표</span> 🏆
+        </button>
+        <button id="btn-map" class="btn-action" type="button" title="마을 지도 열기" style="background:#059669; border-color:#047857;">
+          <span>마을 지도</span> 🗺️
+        </button>
+        <button id="btn-new-battle" class="btn-action" type="button" title="새로운 전투 시작">
+          <span>새 전투</span> ⚔️
+        </button>
+        <button id="btn-reset" class="btn-reset" type="button" title="새로운 판으로 다시 시작">
+          <span>새 판</span> 🔄
+        </button>
+      </div>
+    </header>
+
+    <!-- 조각 4 & 7: 내 고블린 프로필 카드 -->
+    <section class="profile-card">
+      <div class="profile-top-name-row" style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 2px;">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span style="font-size:14px;">🧌</span>
+          <span id="profile-name-text" style="font-size:13px; font-weight:800; color:#38bdf8;">고블린 대장</span>
+          <span id="profile-rank-points-badge" style="font-size:10px; background:rgba(139,92,246,0.3); border:1px solid #8b5cf6; color:#c4b5fd; padding:1px 6px; border-radius:6px;">0 RP</span>
+        </div>
+        <button id="btn-quick-nickname" type="button" style="background:#1e293b; border:1px solid #475569; color:#94a3b8; font-size:10px; font-weight:700; padding:2px 7px; border-radius:6px; cursor:pointer;">
+          ✏️ 아이디 깨기
+        </button>
+      </div>
+      <div class="profile-main">
+        <div class="profile-badge-group">
+          <span id="profile-rank-badge" class="badge-rank">🎖️ 이등병</span>
+          <button id="btn-change-role" class="badge-role-btn" type="button" title="보직 변경">
+            <span id="profile-role-badge">🪖 보병</span> ▾
+          </button>
+          <span id="profile-family-badge" class="badge-family">🔥 불꽃 이빨</span>
+        </div>
+        <div class="profile-stats-mini">
+          <span id="profile-hp-stat" title="최대 체력">❤️ 20</span>
+          <span id="profile-atk-stat" title="기본 공격력">⚔️ 1</span>
+        </div>
+      </div>
+      <div class="exp-bar-wrapper">
+        <div id="profile-exp-fill" class="exp-bar-fill" style="width: 0%;"></div>
+        <span id="profile-exp-text" class="exp-bar-text">EXP 0 / 50</span>
+      </div>
+    </section>
+
+    <!-- 조각 6: 현재 마을 및 스테이지 안내 바 -->
+    <div class="current-stage-bar">
+      <div class="stage-indicator-text">
+        <span id="current-stage-village-icon">🐜</span>
+        <span id="current-stage-title">[거대 개미 마을] 1스테이지: 거대 일개미</span>
+        <span id="current-stage-diff-tag" class="stage-difficulty-tag easy">쉬움</span>
+      </div>
+      <button id="btn-open-map-bar" class="btn-open-map-mini" type="button">
+        🗺️ 지도
+      </button>
+    </div>
+
+    <!-- 조각 5: 스테이지 선택 탭 -->
+    <div class="stage-selector">
+      <button id="tab-stage-normal" class="stage-tab-btn active" type="button">🐜 일반 전투</button>
+      <button id="tab-stage-9" class="stage-tab-btn" type="button">🛡️ 9스테이지 (수문장)</button>
+      <button id="tab-stage-10" class="stage-tab-btn" type="button">👑 10스테이지 (영주)</button>
+    </div>
+
+    <!-- 일반 전투 상황판 -->
+    <section id="normal-battle-card" class="battle-card">
+      <!-- 좌측: 내 고블린 -->
+      <div class="combatant player">
+        <div class="combatant-top">
+          <span id="player-avatar" class="combatant-avatar">🧌</span>
+          <div class="combatant-meta">
+            <span id="player-name-display" class="combatant-name">고블린 대장</span>
+            <span id="player-shield-badge" class="badge-shield" style="display: none;">🛡️ 0</span>
+          </div>
+        </div>
+        <div class="hp-gauge-wrapper">
+          <div id="player-hp-fill" class="hp-gauge-fill player" style="width: 100%;"></div>
+          <span id="player-hp-text" class="hp-gauge-text">20 / 20</span>
+        </div>
+        <!-- 현재 활성 버프 목록 -->
+        <div id="player-buffs-list" class="buffs-container"></div>
+      </div>
+
+      <!-- 중앙: 턴 정보 -->
+      <div class="battle-center">
+        <div id="battle-turn" class="turn-indicator">1턴</div>
+        <span class="vs-label">VS</span>
+      </div>
+
+      <!-- 우측: 적 상태 -->
+      <div class="combatant enemy">
+        <div class="combatant-top enemy-side">
+          <div class="combatant-meta enemy-meta">
+            <span id="enemy-name" class="combatant-name">거대 개미 훈련병</span>
+            <span id="enemy-atk-badge" class="badge-atk">⚔️ 2</span>
+          </div>
+          <span id="enemy-avatar" class="combatant-avatar">🐜</span>
+        </div>
+        <div class="hp-gauge-wrapper">
+          <div id="enemy-hp-fill" class="hp-gauge-fill enemy" style="width: 100%;"></div>
+          <span id="enemy-hp-text" class="hp-gauge-text">15 / 15</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 조각 5: 보스전 전용 상황판 (9·10 스테이지) -->
+    <section id="boss-battle-card" class="boss-battle-card" style="display: none;">
+      <!-- 상단: 고블린 상태 바 (미니) -->
+      <div class="boss-player-bar">
+        <div class="boss-player-info">
+          <span class="combatant-avatar">🧌</span>
+          <span id="boss-player-name" class="combatant-name">고블린 대장</span>
+          <span id="boss-player-shield" class="badge-shield" style="display: none;">🛡️ 0</span>
+        </div>
+        <div class="boss-player-hp-wrap">
+          <div class="hp-gauge-wrapper" style="height: 14px;">
+            <div id="boss-player-hp-fill" class="hp-gauge-fill player" style="width: 100%;"></div>
+            <span id="boss-player-hp-text" class="hp-gauge-text">20 / 20</span>
+          </div>
+        </div>
+        <div id="boss-battle-turn" class="turn-indicator">1턴</div>
+      </div>
+      <div id="boss-player-buffs" class="buffs-container" style="min-height: 0;"></div>
+
+      <!-- 10스테이지 반사 방어막 경고 배너 -->
+      <div id="boss-reflect-banner" class="reflect-banner" style="display: none;">
+        <span>🪞</span>
+        <span>⚠️ 보스가 반사 방어막을 켰습니다! (공격 시 30% 반사 피해)</span>
+      </div>
+
+      <!-- 대형 보스 메인 패널 -->
+      <div id="boss-main-panel" class="boss-main-panel">
+        <div class="boss-header-bar">
+          <div class="boss-identity">
+            <span id="boss-avatar-large" class="boss-avatar-large">👑</span>
+            <div class="boss-meta-text">
+              <div class="boss-name-row">
+                <span id="boss-name-large" class="boss-name-large">인간 마을 영주</span>
+                <span id="boss-atk-badge-large" class="badge-atk">⚔️ 6</span>
+              </div>
+              <span id="boss-stage-badge" class="boss-stage-badge">스테이지 10 최종 보스</span>
+            </div>
+          </div>
+          <button id="btn-target-boss" class="btn-target-action targeted" type="button">
+            <span id="boss-target-icon">🎯</span> <span id="boss-target-text">공격 대상</span>
+          </button>
+        </div>
+
+        <!-- 대형 보스 체력 게이지바 -->
+        <div class="boss-hp-wrapper-large">
+          <div id="boss-hp-fill-large" class="boss-hp-fill-large" style="width: 100%;"></div>
+          <span id="boss-hp-text-large" class="boss-hp-text-large">HP 50 / 50</span>
+          <div id="boss-float-container" class="boss-float-container"></div>
+        </div>
+      </div>
+
+      <!-- 신하 목록 (2~3장 카드 그리드) -->
+      <div class="minions-section">
+        <div class="minions-title-bar">
+          <span class="minions-title">👥 보스의 신하들 (클릭하여 타겟 조준):</span>
+        </div>
+        <div id="minions-grid" class="minions-grid">
+          <!-- 동적 생성: 신하 카드들 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 상태 통계 -->
+    <section class="stats-card">
+      <div class="stat-item">
+        <span class="stat-label">전리품(골드)</span>
+        <span id="stat-gold" class="stat-value gold">💰 0</span>
+      </div>
+      <div class="stat-item best">
+        <span class="stat-label">전적 (승/전)</span>
+        <span id="stat-record" class="stat-value">0승 / 0전</span>
+      </div>
+      <div class="stat-item current">
+        <span class="stat-label">최고 연결 기록</span>
+        <span id="stat-best" class="stat-value">0</span>
+      </div>
+    </section>
+
+    <!-- 알림 및 안내 텍스트 -->
+    <div id="msg-banner" class="message-banner">
+      손가락으로 같은 종류 칸을 이어보세요! (10칸 이상 시 🎲주사위 버프 발동)
+    </div>
+
+    <!-- 퍼즐 보드 판 (6x6) -->
+    <div id="board-wrapper" class="board-wrapper">
+      <svg id="svg-overlay" class="svg-overlay"></svg>
+      <div id="board-grid" class="board-grid"></div>
+
+      <!-- 주사위 발동 토스트 연출 -->
+      <div id="dice-toast" class="dice-toast">
+        <div id="dice-toast-icon" class="dice-toast-icon">🎲</div>
+        <div id="dice-toast-title" class="dice-toast-title">🎲 1: 고블린 대분노!</div>
+        <div id="dice-toast-desc" class="dice-toast-desc">다음 공격 데미지 2배!</div>
+      </div>
+    </div>
+
+    <!-- 하단 설명 및 규칙 가이드 -->
+    <footer class="footer-help">
+      <div><strong class="highlight-role">👑 보스전(9·10스테이지) 레이드 규칙:</strong></div>
+      <ul>
+        <li>🛡️ <strong>9스테이지</strong>: 성문 수문장(30HP) + 경비병 2마리</li>
+        <li>👑 <strong>10스테이지</strong>: 영주(50HP) + 신하 3마리 · 3턴마다 🪞 반사 방어막(30% 반사)</li>
+        <li>💥 <strong>신하 처치 시 보스 체력 즉시 −1</strong> · 신하를 먼저 처치하여 보스를 약화시키세요!</li>
+        <li>🎯 상단 신하 카드나 보스 카드를 터치하여 공격 대상(타겟)을 조준할 수 있습니다.</li>
+      </ul>
+      <div style="margin-top: 4px;"><strong class="highlight-role">🪖 보직별 고유 효과:</strong></div>
+      <ul>
+        <li>🚜 <strong>운전병</strong>: ⛏️ 곡괭이 연결 시 전방 2칸 관통 타격 (적 체력 −2)</li>
+        <li>🪖 <strong>보병</strong>: ☠️ 해골 연결 시 기본 공격력 +1 보너스</li>
+        <li>💣 <strong>포병</strong>: 5칸 이상 연결 시 주변 폭발 (적 체력 추가 −3)</li>
+        <li>📻 <strong>통신병</strong>: 턴 시작 시 인접 칸 주파수 동기화</li>
+        <li>💉 <strong>의무병</strong>: 🧪 물약 회복량 1.5배 및 최대체력 초과분 실드 전환</li>
+      </ul>
+      <div style="margin-top: 4px;"><strong class="highlight-dice">🎲 10칸 이상 대형 연결 시 6종 주사위 버프:</strong></div>
+      <ul>
+        <li>⚔️1: 대분노(공격 2배) · 🛡️2: 돌가죽(피해 0 흡수) · 💖3: 응급처치(+10 HP)</li>
+        <li>⚡4: 질풍노도(적 턴 스킵) · 💣5: 폭탄(-8 HP) · 👑6: 대장의 축복(+5 HP, 3턴 공격력+1)</li>
+      </ul>
+    </footer>
+
+    <!-- 승리/패배 팝업 모달 -->
+    <div id="battle-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card">
+        <div id="modal-icon" class="modal-icon">🎉</div>
+        <h2 id="modal-title" class="modal-title">전투 승리!</h2>
+        <div id="modal-promo-banner" class="modal-promo-banner" style="display: none;">
+          🎖️ 상병으로 승급했습니다! (최대 체력 +3, 공격력 +1)
+        </div>
+        <p id="modal-desc" class="modal-desc">
+          🐜 거대 개미를 물리쳤습니다!<br>
+          <span id="modal-loot-text" class="modal-loot">전리품: +0 골드 · 경험치: +30 EXP</span>
+        </p>
+        <button id="modal-action-btn" class="btn-modal-action" type="button">다음 전투 ⚔️</button>
+      </div>
+    </div>
+
+    <!-- 조각 4: 보직 변경 팝업 모달 -->
+    <div id="role-modal" class="modal-overlay" style="display: none;">
+      <div class="modal-card">
+        <div class="modal-icon">🪖</div>
+        <h2 class="modal-title">고블린 보직 선택</h2>
+        <p class="modal-desc" style="font-size: 11px;">보직을 변경하여 특화된 전투 능력을 활용하세요.</p>
+        <div id="role-list" class="role-list"></div>
+        <button id="btn-close-role-modal" class="btn-modal-action" type="button" style="background:#475569;">닫기</button>
+      </div>
+    </div>
+
+    <!-- 조각 6: 마을 지도 모달 -->
+    <div id="map-modal" class="modal-overlay" style="display: none;">
+      <div class="map-modal-card">
+        <div class="map-header">
+          <div class="map-title">🗺️ 마을 지도 탐험</div>
+          <button id="btn-close-map" class="btn-close-map" type="button" title="지도 닫기">✕</button>
+        </div>
+        <div class="village-tabs">
+          <button id="btn-village-ant" class="village-tab-btn active" type="button">
+            🐜 거대 개미 마을 (1~5)
+          </button>
+          <button id="btn-village-human" class="village-tab-btn" type="button">
+            👨‍🌾 인간 마을 (6~10)
+          </button>
+        </div>
+        <!-- 거대 개미 마을 스테이지 목록 -->
+        <div id="village-ant-list" class="stage-card-list"></div>
+        <!-- 인간 마을 스테이지 목록 -->
+        <div id="village-human-list" class="stage-card-list" style="display: none;"></div>
+        <!-- 인간 마을 잠금 안내 패널 -->
+        <div id="village-human-locked" class="village-locked-panel" style="display: none;">
+          <span class="village-locked-icon">🔒</span>
+          <div class="village-locked-text">
+            <strong style="color: #f87171; font-size: 13px;">인간 마을 진입 불가 (잠김)</strong><br>
+            거대 개미 마을 5스테이지(여왕개미 신하부대)를 클리어해야<br>
+            인간 마을 성벽을 넘을 수 있습니다!
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 조각 6: 스토리 대화 컷씬 모달 -->
+    <div id="dialogue-modal" class="modal-overlay" style="display: none;">
+      <div class="dialogue-modal-card">
+        <div class="dialogue-top-bar">
+          <div class="dialogue-speaker-wrap">
+            <span id="dialogue-avatar" class="dialogue-avatar">🧌</span>
+            <span id="dialogue-speaker-name" class="dialogue-speaker-name">원스타 고블린 대장</span>
+          </div>
+          <button id="btn-dialogue-skip" class="dialogue-skip-btn" type="button">
+            스킵 ⏩
+          </button>
+        </div>
+        <div class="dialogue-bubble">
+          <span id="dialogue-text"></span><span id="dialogue-cursor" class="dialogue-cursor"></span>
+        </div>
+        <button id="btn-dialogue-next" class="dialogue-next-btn" type="button">
+          다음 ▶
+        </button>
+      </div>
+    </div>
+
+    <!-- 조각 6: 투스타 달성 축하 엔딩 모달 -->
+    <div id="ending-modal" class="modal-overlay" style="display: none;">
+      <div class="ending-modal-card">
+        <span style="font-size: 52px; animation: bounce 1s infinite alternate;">👑</span>
+        <div class="ending-banner">⭐⭐ 투스타 고블린 대장 등극! ⭐⭐</div>
+        <h2 class="ending-title">전설의 정복자 탄생!</h2>
+        <p class="ending-desc">
+          인간 마을 영주를 굴복시키고 성채를 완전히 평정했습니다!<br>
+          위대한 원스타 대장은 마침내 고블린 전설에 영원히 기록될<br>
+          <strong style="color:#fbbf24;">투스타(⭐⭐) 고블린 대장</strong>으로 진급했습니다!
+        </p>
+        <div class="ending-stats-box">
+          <span>🏆 10개 전 스테이지 정복</span>
+          <span id="ending-best-chain">🔗 최고 체인: 0</span>
+        </div>
+        <button id="btn-ending-map" class="btn-modal-action" type="button" style="background:#f59e0b; color:#0f172a; font-weight:900;">
+          마을 지도 열기 🗺️
+        </button>
+        <button id="btn-ending-restart" class="btn-modal-action" type="button" style="background:#334155;">
+          처음부터 다시 도전 🔄
+        </button>
+      </div>
+    </div>
+
+    <!-- 조각 7: 순위표 (Top 100) 모달 -->
+    <div id="leaderboard-modal" class="modal-overlay" style="display: none;">
+      <div class="leaderboard-modal-card">
+        <div class="leaderboard-header">
+          <div class="leaderboard-title">
+            <span>🏆</span>
+            <span>고블린 명예의 전당 (Top 100)</span>
+          </div>
+          <button id="btn-close-leaderboard" class="btn-close-map" type="button" title="순위표 닫기">✕</button>
+        </div>
+        <div class="leaderboard-subtitle">
+          상위 100위 랭커들에게 도전장(⚔️)을 보내고 명예를 겨루세요!
+        </div>
+        <!-- 1~100위 가짜 랭커 스크롤 목록 -->
+        <div id="leaderboard-list" class="leaderboard-list"></div>
+        <!-- 하단: 내 순위 고정 바 -->
+        <div id="my-rank-bar" class="my-rank-fixed-bar">
+          <div class="my-rank-info">
+            <span id="my-rank-text" class="my-rank-text">내 순위: 계산 중...</span>
+            <span id="my-rank-nick" class="my-rank-nick">🧌 [이등병] 고블린 대장</span>
+          </div>
+          <button id="btn-open-nickname-modal" class="btn-open-nickname" type="button">
+            ✏️ 아이디 깨기
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 조각 7: 아이디 깨기 (닉네임 변경) 모달 -->
+    <div id="nickname-modal" class="modal-overlay" style="display: none; z-index: 1001;">
+      <div class="nickname-modal-card">
+        <div class="nickname-header">
+          <span class="nickname-icon">✏️</span>
+          <h3 class="nickname-title">아이디 깨기 (닉네임 변경)</h3>
+        </div>
+        <p class="nickname-law-notice">
+          📜 <strong>고블린 법칙</strong>: 욕설·비속어·패드립은 절대 금지되어 있습니다. 바르고 고운 말을 쓰십시오.
+        </p>
+        <div class="nickname-input-wrap">
+          <input type="text" id="input-new-nickname" class="nickname-input" maxlength="12" placeholder="새 닉네임 입력 (2~12자)">
+        </div>
+        <div id="nickname-error-msg" class="nickname-error-msg" style="display: none;"></div>
+        <div class="nickname-btn-group">
+          <button id="btn-confirm-nickname" class="btn-nickname-confirm" type="button">변경 완료 ✨</button>
+          <button id="btn-cancel-nickname" class="btn-nickname-cancel" type="button">취소</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 게임 규칙 계산 스크립트 -->
+  <script src="game.js"></script>
+  <script>
+    (function() {
+      'use strict';
+
+      // 1. 기본 설정 및 상수
+      var BOARD_SIZE = 6;
+      var NUM_TYPES = 5;
+      var EMOJIS = ['⛏️', '🛡️', '🧪', '💰', '☠️'];
+
+      // 2. 저장 데이터 및 프로필 불러오기
+      var savedData = GoblinCore.loadGameState();
+      if (!savedData.profile) {
+        savedData.profile = GoblinCore.createGoblinProfile();
+      }
+      if (typeof savedData.maxStage !== 'number' || savedData.maxStage < 1) {
+        savedData.maxStage = 1;
+      }
+      if (typeof savedData.unlockedHumanVillage !== 'boolean') {
+        savedData.unlockedHumanVillage = (savedData.maxStage >= 6);
+      }
+      if (!Array.isArray(savedData.clearedStages)) {
+        savedData.clearedStages = [];
+      }
+      GoblinCore.saveGameState(savedData);
+
+      // 조각 6: 현재 진행 스테이지 및 모드
+      var currentStage = Math.max(1, Math.min(10, savedData.maxStage || 1));
+      var currentMode = (currentStage >= 9) ? 'boss' : 'normal'; // 'normal' | 'boss'
+      var currentBossStage = (currentStage >= 9) ? currentStage : 9;
+      var bossBattleState = null;
+      var selectedTargetType = 'boss'; // 'boss' | 'minion'
+      var selectedTargetIndex = -1; // 0, 1, 2
+
+      // 전투 상태 초기화 (현재 스테이지 설정 반영)
+      var curStageCfg = GoblinCore.getStageConfig(currentStage);
+      var battleState = GoblinCore.createBattleState({
+        enemy: curStageCfg.enemy,
+        gold: savedData.gold,
+        profile: savedData.profile
+      });
+
+      // 3. 퍼즐 보드 상태
+      var rng = GoblinCore.createRng(Date.now());
+      var board = GoblinCore.createBoard(BOARD_SIZE, NUM_TYPES, rng);
+      var currentPath = [];
+      var isDragging = false;
+      var activePointerId = null;
+      var diceToastTimer = null;
+
+      // 조각 6: 대화 컷씬 상태
+      var currentDialogueQueue = [];
+      var currentDialogueIndex = 0;
+      var dialogueTimer = null;
+      var isTyping = false;
+      var dialogueCallback = null;
+
+      // 4. DOM 요소 참조
+      var boardWrapper = document.getElementById('board-wrapper');
+      var boardGrid = document.getElementById('board-grid');
+      var svgOverlay = document.getElementById('svg-overlay');
+      var msgBanner = document.getElementById('msg-banner');
+      var btnReset = document.getElementById('btn-reset');
+      var btnNewBattle = document.getElementById('btn-new-battle');
+      var btnMap = document.getElementById('btn-map');
+      var btnOpenMapBar = document.getElementById('btn-open-map-bar');
+
+      // 조각 6: 상단 현재 스테이지 안내 바 DOM
+      var currentStageVillageIcon = document.getElementById('current-stage-village-icon');
+      var currentStageTitle = document.getElementById('current-stage-title');
+      var currentStageDiffTag = document.getElementById('current-stage-diff-tag');
+
+      // 스테이지 탭 DOM
+      var tabStageNormal = document.getElementById('tab-stage-normal');
+      var tabStage9 = document.getElementById('tab-stage-9');
+      var tabStage10 = document.getElementById('tab-stage-10');
+
+      // 일반 전투 카드 vs 보스전 카드 DOM
+      var normalBattleCard = document.getElementById('normal-battle-card');
+      var bossBattleCard = document.getElementById('boss-battle-card');
+
+      // 보스전 UI DOM
+      var bossPlayerName = document.getElementById('boss-player-name');
+      var bossPlayerShield = document.getElementById('boss-player-shield');
+      var bossPlayerHpFill = document.getElementById('boss-player-hp-fill');
+      var bossPlayerHpText = document.getElementById('boss-player-hp-text');
+      var bossBattleTurn = document.getElementById('boss-battle-turn');
+      var bossPlayerBuffs = document.getElementById('boss-player-buffs');
+      var bossReflectBanner = document.getElementById('boss-reflect-banner');
+      var bossAvatarLarge = document.getElementById('boss-avatar-large');
+      var bossNameLarge = document.getElementById('boss-name-large');
+      var bossAtkBadgeLarge = document.getElementById('boss-atk-badge-large');
+      var bossStageBadge = document.getElementById('boss-stage-badge');
+      var btnTargetBoss = document.getElementById('btn-target-boss');
+      var bossTargetText = document.getElementById('boss-target-text');
+      var bossHpFillLarge = document.getElementById('boss-hp-fill-large');
+      var bossHpTextLarge = document.getElementById('boss-hp-text-large');
+      var bossFloatContainer = document.getElementById('boss-float-container');
+      var minionsGrid = document.getElementById('minions-grid');
+
+      // 프로필 UI DOM
+      var profileRankBadge = document.getElementById('profile-rank-badge');
+      var profileRoleBadge = document.getElementById('profile-role-badge');
+      var profileFamilyBadge = document.getElementById('profile-family-badge');
+      var profileHpStat = document.getElementById('profile-hp-stat');
+      var profileAtkStat = document.getElementById('profile-atk-stat');
+      var profileExpFill = document.getElementById('profile-exp-fill');
+      var profileExpText = document.getElementById('profile-exp-text');
+      var btnChangeRole = document.getElementById('btn-change-role');
+      var playerNameDisplay = document.getElementById('player-name-display');
+
+      // 전투 UI DOM
+      var playerHpFill = document.getElementById('player-hp-fill');
+      var playerHpText = document.getElementById('player-hp-text');
+      var playerShieldBadge = document.getElementById('player-shield-badge');
+      var playerBuffsList = document.getElementById('player-buffs-list');
+      var enemyHpFill = document.getElementById('enemy-hp-fill');
+      var enemyHpText = document.getElementById('enemy-hp-text');
+      var enemyNameEl = document.getElementById('enemy-name');
+      var enemyAtkBadge = document.getElementById('enemy-atk-badge');
+      var enemyAvatarEl = document.getElementById('enemy-avatar');
+      var battleTurnEl = document.getElementById('battle-turn');
+
+      // 주사위 토스트 DOM
+      var diceToast = document.getElementById('dice-toast');
+      var diceToastIcon = document.getElementById('dice-toast-icon');
+      var diceToastTitle = document.getElementById('dice-toast-title');
+      var diceToastDesc = document.getElementById('dice-toast-desc');
+
+      // 통계 DOM
+      var statGold = document.getElementById('stat-gold');
+      var statRecord = document.getElementById('stat-record');
+      var statBest = document.getElementById('stat-best');
+
+      // 모달 DOM
+      var battleModal = document.getElementById('battle-modal');
+      var modalIcon = document.getElementById('modal-icon');
+      var modalTitle = document.getElementById('modal-title');
+      var modalDesc = document.getElementById('modal-desc');
+      var modalLootText = document.getElementById('modal-loot-text');
+      var modalPromoBanner = document.getElementById('modal-promo-banner');
+      var modalActionBtn = document.getElementById('modal-action-btn');
+
+      // 보직 선택 모달 DOM
+      var roleModal = document.getElementById('role-modal');
+      var roleList = document.getElementById('role-list');
+      var btnCloseRoleModal = document.getElementById('btn-close-role-modal');
+
+      // 조각 6: 마을 지도 모달 DOM
+      var mapModal = document.getElementById('map-modal');
+      var btnCloseMap = document.getElementById('btn-close-map');
+      var btnVillageAnt = document.getElementById('btn-village-ant');
+      var btnVillageHuman = document.getElementById('btn-village-human');
+      var villageAntList = document.getElementById('village-ant-list');
+      var villageHumanList = document.getElementById('village-human-list');
+      var villageHumanLocked = document.getElementById('village-human-locked');
+
+      // 조각 6: 대화 컷씬 모달 DOM
+      var dialogueModal = document.getElementById('dialogue-modal');
+      var dialogueAvatar = document.getElementById('dialogue-avatar');
+      var dialogueSpeakerName = document.getElementById('dialogue-speaker-name');
+      var dialogueText = document.getElementById('dialogue-text');
+      var dialogueCursor = document.getElementById('dialogue-cursor');
+      var btnDialogueSkip = document.getElementById('btn-dialogue-skip');
+      var btnDialogueNext = document.getElementById('btn-dialogue-next');
+
+      // 조각 6: 투스타 엔딩 모달 DOM
+      var endingModal = document.getElementById('ending-modal');
+      var endingBestChain = document.getElementById('ending-best-chain');
+      var btnEndingMap = document.getElementById('btn-ending-map');
+      var btnEndingRestart = document.getElementById('btn-ending-restart');
+
+      // 조각 7: 순위표 및 닉네임 DOM
+      var btnLeaderboard = document.getElementById('btn-leaderboard');
+      var leaderboardModal = document.getElementById('leaderboard-modal');
+      var btnCloseLeaderboard = document.getElementById('btn-close-leaderboard');
+      var leaderboardList = document.getElementById('leaderboard-list');
+      var myRankText = document.getElementById('my-rank-text');
+      var myRankNick = document.getElementById('my-rank-nick');
+      var btnOpenNicknameModal = document.getElementById('btn-open-nickname-modal');
+      var btnQuickNickname = document.getElementById('btn-quick-nickname');
+      var profileNameText = document.getElementById('profile-name-text');
+      var profileRankPointsBadge = document.getElementById('profile-rank-points-badge');
+
+      // 닉네임 모달 DOM
+      var nicknameModal = document.getElementById('nickname-modal');
+      var inputNewNickname = document.getElementById('input-new-nickname');
+      var nicknameErrorMsg = document.getElementById('nickname-error-msg');
+      var btnConfirmNickname = document.getElementById('btn-confirm-nickname');
+      var btnCancelNickname = document.getElementById('btn-cancel-nickname');
+
+      // ==========================================
+      // 조각 6: 테마 및 상단 배너 갱신
+      // ==========================================
+
+      function applyStageTheme(stageNum) {
+        var cfg = GoblinCore.getStageConfig(stageNum);
+        var isHuman = (cfg.village === 'human');
+        document.body.className = isHuman ? 'theme-human' : 'theme-ant';
+
+        if (currentStageVillageIcon) {
+          currentStageVillageIcon.textContent = isHuman ? '👨‍🌾' : '🐜';
+        }
+        if (currentStageTitle) {
+          currentStageTitle.textContent = '[' + cfg.villageName + '] ' + cfg.stage + '스테이지: ' + cfg.enemy.name;
+        }
+        if (currentStageDiffTag) {
+          currentStageDiffTag.textContent = (cfg.difficulty === 'hard') ? '하드' : '쉬움';
+          currentStageDiffTag.className = 'stage-difficulty-tag ' + cfg.difficulty;
+        }
+      }
+
+      // ==========================================
+      // 조각 6: 대화 컷씬 함수
+      // ==========================================
+
+      function getSpeakerAvatar(speaker) {
+        if (!speaker) return '💬';
+        if (speaker.indexOf('고블린') !== -1) return '🧌';
+        if (speaker.indexOf('개미') !== -1) return '🐜';
+        if (speaker.indexOf('자경단') !== -1 || speaker.indexOf('농민') !== -1) return '👨‍🌾';
+        if (speaker.indexOf('영주') !== -1) return '👑';
+        if (speaker.indexOf('수문장') !== -1 || speaker.indexOf('경비병') !== -1) return '🛡️';
+        if (speaker.indexOf('기사') !== -1) return '⚔️';
+        return '👤';
+      }
+
+      function startDialogue(dialogueList, onComplete) {
+        if (!Array.isArray(dialogueList) || dialogueList.length === 0) {
+          if (typeof onComplete === 'function') onComplete();
+          return;
+        }
+        currentDialogueQueue = dialogueList;
+        currentDialogueIndex = 0;
+        dialogueCallback = onComplete || null;
+        dialogueModal.style.display = 'flex';
+        renderCurrentDialogue();
+      }
+
+      function renderCurrentDialogue() {
+        if (currentDialogueIndex >= currentDialogueQueue.length) {
+          closeDialogue();
+          return;
+        }
+
+        var item = currentDialogueQueue[currentDialogueIndex];
+        dialogueAvatar.textContent = getSpeakerAvatar(item.speaker);
+        dialogueSpeakerName.textContent = item.speaker;
+        dialogueText.textContent = '';
+        dialogueCursor.style.display = 'inline-block';
+
+        var isLast = (currentDialogueIndex === currentDialogueQueue.length - 1);
+        btnDialogueNext.textContent = isLast ? '확인 ⚔️' : '다음 ▶';
+
+        if (dialogueTimer) clearInterval(dialogueTimer);
+        isTyping = true;
+        var charIdx = 0;
+        var full = item.text || '';
+
+        dialogueTimer = setInterval(function() {
+          if (charIdx < full.length) {
+            dialogueText.textContent += full.charAt(charIdx);
+            charIdx++;
+          } else {
+            clearInterval(dialogueTimer);
+            dialogueTimer = null;
+            isTyping = false;
+            dialogueCursor.style.display = 'none';
+          }
+        }, 22);
+      }
+
+      function skipOrNextDialogue() {
+        if (isTyping) {
+          if (dialogueTimer) {
+            clearInterval(dialogueTimer);
+            dialogueTimer = null;
+          }
+          var item = currentDialogueQueue[currentDialogueIndex];
+          if (item) {
+            dialogueText.textContent = item.text || '';
+          }
+          isTyping = false;
+          dialogueCursor.style.display = 'none';
+        } else {
+          currentDialogueIndex++;
+          renderCurrentDialogue();
+        }
+      }
+
+      function closeDialogue() {
+        if (dialogueTimer) {
+          clearInterval(dialogueTimer);
+          dialogueTimer = null;
+        }
+        isTyping = false;
+        dialogueModal.style.display = 'none';
+        var cb = dialogueCallback;
+        dialogueCallback = null;
+        if (typeof cb === 'function') {
+          cb();
+        }
+      }
+
+      // ==========================================
+      // 조각 6: 마을 지도 모달 렌더링
+      // ==========================================
+
+      function openMapModal(tab) {
+        var activeTab = tab || ((currentStage >= 6) ? 'human' : 'ant');
+        setVillageTab(activeTab);
+        renderVillageLists();
+        mapModal.style.display = 'flex';
+      }
+
+      function closeMapModal() {
+        mapModal.style.display = 'none';
+      }
+
+      function setVillageTab(tab) {
+        btnVillageAnt.classList.toggle('active', tab === 'ant');
+        btnVillageHuman.classList.toggle('active', tab === 'human');
+
+        if (tab === 'ant') {
+          villageAntList.style.display = 'flex';
+          villageHumanList.style.display = 'none';
+          villageHumanLocked.style.display = 'none';
+        } else {
+          villageAntList.style.display = 'none';
+          var isUnlocked = Boolean(savedData.unlockedHumanVillage || savedData.maxStage >= 6);
+          if (isUnlocked) {
+            villageHumanList.style.display = 'flex';
+            villageHumanLocked.style.display = 'none';
+          } else {
+            villageHumanList.style.display = 'none';
+            villageHumanLocked.style.display = 'flex';
+          }
+        }
+      }
+
+      function renderVillageLists() {
+        // 1. 거대 개미 마을 (1~5 스테이지)
+        villageAntList.innerHTML = '';
+        var maxStg = savedData.maxStage || 1;
+        var cleared = savedData.clearedStages || [];
+
+        for (var s = 1; s <= 5; s++) {
+          var cfg = GoblinCore.getStageConfig(s);
+          var isCurrent = (s === currentStage);
+          var isCleared = cleared.indexOf(s) !== -1;
+          var isAccessible = (s <= maxStg);
+
+          var card = document.createElement('div');
+          card.className = 'stage-card-item' + (isCurrent ? ' current' : '') + (!isAccessible ? ' locked' : '');
+          card.innerHTML =
+            '<div class="stage-card-left">' +
+            '  <span class="stage-num-badge">' + s + '</span>' +
+            '  <div class="stage-card-info">' +
+            '    <div class="stage-card-name">' + cfg.enemy.emoji + ' ' + cfg.enemy.name + (isCurrent ? ' (현재)' : '') + '</div>' +
+            '    <div class="stage-card-stats">체력 ' + cfg.enemy.hp + ' · 공격력 ' + cfg.enemy.atk + ' · 난이도: 쉬움</div>' +
+            '  </div>' +
+            '</div>' +
+            '<div class="stage-card-right">' +
+            '  <span class="stage-clear-star">' + (isCleared ? '⭐' : (isAccessible ? '🔘' : '🔒')) + '</span>' +
+            '</div>';
+
+          if (isAccessible) {
+            card.addEventListener('click', (function(stg) {
+              return function() {
+                closeMapModal();
+                loadStage(stg, true);
+              };
+            })(s));
+          }
+
+          villageAntList.appendChild(card);
+        }
+
+        // 2. 인간 마을 (6~10 스테이지)
+        villageHumanList.innerHTML = '';
+        var isHumanUnlocked = Boolean(savedData.unlockedHumanVillage || savedData.maxStage >= 6);
+
+        for (var s = 6; s <= 10; s++) {
+          var cfg = GoblinCore.getStageConfig(s);
+          var isCurrent = (s === currentStage);
+          var isCleared = cleared.indexOf(s) !== -1;
+          var isAccessible = isHumanUnlocked && (s <= maxStg);
+
+          var card = document.createElement('div');
+          card.className = 'stage-card-item' + (isCurrent ? ' current' : '') + (!isAccessible ? ' locked' : '');
+          var bossTag = cfg.isBoss ? ' <span style="color:#f59e0b; font-size:10px; font-weight:900;">[👑보스]</span>' : '';
+
+          card.innerHTML =
+            '<div class="stage-card-left">' +
+            '  <span class="stage-num-badge" style="background:#2d1519; color:#f87171; border-color:#7f1d1d;">' + s + '</span>' +
+            '  <div class="stage-card-info">' +
+            '    <div class="stage-card-name">' + cfg.enemy.emoji + ' ' + cfg.enemy.name + bossTag + (isCurrent ? ' (현재)' : '') + '</div>' +
+            '    <div class="stage-card-stats">체력 ' + cfg.enemy.hp + ' · 공격력 ' + cfg.enemy.atk + ' · 난이도: 하드</div>' +
+            '  </div>' +
+            '</div>' +
+            '<div class="stage-card-right">' +
+            '  <span class="stage-clear-star">' + (isCleared ? '⭐' : (isAccessible ? '🔘' : '🔒')) + '</span>' +
+            '</div>';
+
+          if (isAccessible) {
+            card.addEventListener('click', (function(stg) {
+              return function() {
+                closeMapModal();
+                loadStage(stg, true);
+              };
+            })(s));
+          }
+
+          villageHumanList.appendChild(card);
+        }
+      }
+
+      // ==========================================
+      // 조각 6: 엔딩 모달 표시
+      // ==========================================
+
+      function showEndingModal() {
+        if (endingBestChain) {
+          endingBestChain.textContent = '🔗 최고 연결 체인: ' + (savedData.bestChain || 0) + '칸';
+        }
+        endingModal.style.display = 'flex';
+      }
+
+      function hideEndingModal() {
+        endingModal.style.display = 'none';
+      }
+
+      // 프로필 카드 UI 갱신
+      function updateProfileUI() {
+        var prof = savedData.profile;
+        if (!prof) return;
+
+        profileRankBadge.textContent = '🎖️ ' + prof.rankTitle;
+        var roleDef = GoblinCore.ROLE_DEFINITIONS[prof.role] || { emoji: '🪖', name: prof.roleName };
+        profileRoleBadge.textContent = roleDef.emoji + ' ' + roleDef.name;
+
+        var famDef = GoblinCore.FAMILY_DEFINITIONS[prof.family] || { emoji: '🔥', name: '불꽃 이빨' };
+        profileFamilyBadge.textContent = famDef.emoji + ' ' + famDef.name;
+
+        profileHpStat.textContent = '❤️ ' + prof.stats.maxHp;
+        profileAtkStat.textContent = '⚔️ ' + prof.stats.atk;
+
+        var uNick = savedData.userNickname || prof.name || '고블린 대장';
+        var rPoints = (typeof savedData.rankPoints === 'number') ? savedData.rankPoints : 0;
+        if (profileNameText) profileNameText.textContent = uNick;
+        if (profileRankPointsBadge) profileRankPointsBadge.textContent = rPoints.toLocaleString() + ' RP';
+        playerNameDisplay.textContent = uNick + ' (' + prof.rankTitle + ')';
+        if (bossPlayerName) bossPlayerName.textContent = uNick + ' (' + prof.rankTitle + ')';
+
+        // 경험치 게이지 계산
+        var currentExp = prof.exp || 0;
+        var nextExp = prof.nextExp;
+        if (nextExp === Infinity) {
+          profileExpFill.style.width = '100%';
+          profileExpText.textContent = 'EXP ' + currentExp + ' (MAX 대령)';
+        } else {
+          var curRankInfo = GoblinCore.RANK_TABLE[prof.rankIndex] || { reqExp: 0 };
+          var range = nextExp - curRankInfo.reqExp;
+          var inRangeExp = Math.max(0, currentExp - curRankInfo.reqExp);
+          var pct = range > 0 ? Math.min(100, Math.round((inRangeExp / range) * 100)) : 100;
+          profileExpFill.style.width = pct + '%';
+          profileExpText.textContent = 'EXP ' + currentExp + ' / ' + nextExp + ' (' + pct + '%)';
+        }
+      }
+
+      // 전투 상황판 및 통계 갱신
+      function updateBattleUI() {
+        updateProfileUI();
+
+        // 플레이어 HP 및 방어막
+        var p = battleState.player;
+        var pHpPct = Math.max(0, Math.min(100, Math.round((p.hp / p.maxHp) * 100)));
+        playerHpFill.style.width = pHpPct + '%';
+        playerHpText.textContent = p.hp + ' / ' + p.maxHp;
+
+        if (p.shield > 0) {
+          playerShieldBadge.style.display = 'inline-flex';
+          playerShieldBadge.textContent = '🛡️ ' + p.shield;
+        } else {
+          playerShieldBadge.style.display = 'none';
+        }
+
+        // 플레이어 활성 버프 뱃지 갱신
+        playerBuffsList.innerHTML = '';
+        if (battleState.activeBuffs && battleState.activeBuffs.length > 0) {
+          for (var i = 0; i < battleState.activeBuffs.length; i++) {
+            var buff = battleState.activeBuffs[i];
+            var badge = document.createElement('span');
+            badge.className = 'buff-badge ' + (buff.id || '');
+            badge.textContent = buff.emoji + ' ' + buff.name + ' (' + buff.turns + '턴)';
+            playerBuffsList.appendChild(badge);
+          }
+        }
+
+        // 적 HP 및 스탯
+        var e = battleState.enemy;
+        var eHpPct = Math.max(0, Math.min(100, Math.round((e.hp / e.maxHp) * 100)));
+        enemyHpFill.style.width = eHpPct + '%';
+        enemyHpText.textContent = e.hp + ' / ' + e.maxHp;
+        enemyNameEl.textContent = e.name;
+        enemyAvatarEl.textContent = e.emoji || '🐜';
+        enemyAtkBadge.textContent = '⚔️ ' + e.atk;
+
+        // 턴 수
+        battleTurnEl.textContent = battleState.turn + '턴';
+
+        // 통계 대시보드
+        statGold.textContent = '💰 ' + battleState.gold;
+        statRecord.textContent = (savedData.totalWins || 0) + '승 / ' + (savedData.totalBattles || 0) + '전';
+        statBest.textContent = savedData.bestChain || 0;
+      }
+
+      // 조각 5: 보스전 상황판 갱신
+      function updateBossUI() {
+        if (!bossBattleState) return;
+        updateProfileUI();
+
+        // 플레이어 미니 바
+        var prof = savedData.profile;
+        bossPlayerName.textContent = prof.name + ' (' + prof.rankTitle + ')';
+        var p = bossBattleState.player;
+        var pHpPct = Math.max(0, Math.min(100, Math.round((p.hp / p.maxHp) * 100)));
+        bossPlayerHpFill.style.width = pHpPct + '%';
+        bossPlayerHpText.textContent = p.hp + ' / ' + p.maxHp;
+
+        if (p.shield > 0) {
+          bossPlayerShield.style.display = 'inline-flex';
+          bossPlayerShield.textContent = '🛡️ ' + p.shield;
+        } else {
+          bossPlayerShield.style.display = 'none';
+        }
+
+        bossBattleTurn.textContent = bossBattleState.turn + '턴';
+
+        // 플레이어 활성 버프 뱃지
+        bossPlayerBuffs.innerHTML = '';
+        if (bossBattleState.activeBuffs && bossBattleState.activeBuffs.length > 0) {
+          for (var bIdx = 0; bIdx < bossBattleState.activeBuffs.length; bIdx++) {
+            var buff = bossBattleState.activeBuffs[bIdx];
+            var bBadge = document.createElement('span');
+            bBadge.className = 'buff-badge ' + (buff.id || '');
+            bBadge.textContent = buff.emoji + ' ' + buff.name + ' (' + buff.turns + '턴)';
+            bossPlayerBuffs.appendChild(bBadge);
+          }
+        }
+
+        // 반사 버프 경고 배너
+        if (bossBattleState.boss.reflectTurns && bossBattleState.boss.reflectTurns > 0) {
+          bossReflectBanner.style.display = 'flex';
+        } else {
+          bossReflectBanner.style.display = 'none';
+        }
+
+        // 대형 보스 정보
+        bossAvatarLarge.textContent = bossBattleState.boss.emoji || (currentBossStage === 10 ? '👑' : '🛡️');
+        bossNameLarge.textContent = bossBattleState.boss.name;
+        bossAtkBadgeLarge.textContent = '⚔️ ' + bossBattleState.boss.atk;
+        bossStageBadge.textContent = (currentBossStage === 10) ? '10스테이지 인간 마을 영주' : '9스테이지 성문 수문장';
+
+        var bHpPct = Math.max(0, Math.min(100, Math.round((bossBattleState.boss.hp / bossBattleState.boss.maxHp) * 100)));
+        bossHpFillLarge.style.width = bHpPct + '%';
+        bossHpTextLarge.textContent = 'HP ' + bossBattleState.boss.hp + ' / ' + bossBattleState.boss.maxHp;
+
+        // 보스 타겟 버튼
+        if (selectedTargetType === 'boss') {
+          btnTargetBoss.classList.add('targeted');
+          bossTargetText.textContent = '공격 대상 (🎯)';
+        } else {
+          btnTargetBoss.classList.remove('targeted');
+          bossTargetText.textContent = '타겟 조준';
+        }
+
+        // 신하 목록 카드 렌더링
+        minionsGrid.className = 'minions-grid' + (bossBattleState.minions.length === 2 ? ' two-cols' : '');
+        minionsGrid.innerHTML = '';
+
+        for (var i = 0; i < bossBattleState.minions.length; i++) {
+          var m = bossBattleState.minions[i];
+          var isTargeted = (selectedTargetType === 'minion' && selectedTargetIndex === i);
+          var isDead = (m.hp <= 0);
+
+          var card = document.createElement('div');
+          card.className = 'minion-card' + (isTargeted ? ' targeted' : '') + (isDead ? ' dead' : '');
+          card.dataset.minionIndex = i;
+
+          var mHpPct = Math.max(0, Math.min(100, Math.round((m.hp / m.maxHp) * 100)));
+
+          var cardHtml = '<div class="minion-top">' +
+                         '  <span class="minion-name">' + m.name + '</span>' +
+                         '  <span class="minion-target-tag">🎯</span>' +
+                         '</div>' +
+                         '<div class="minion-hp-wrapper">' +
+                         '  <div class="minion-hp-fill" style="width:' + mHpPct + '%;"></div>' +
+                         '  <span class="minion-hp-text">' + (isDead ? '💀 처치됨' : m.hp + '/' + m.maxHp) + '</span>' +
+                         '</div>' +
+                         '<div class="minion-badges">' +
+                         '  <span class="badge-atk" style="font-size:9px;">⚔️ ' + m.atk + '</span>';
+          if (m.shield && m.shield > 0) {
+            cardHtml += '  <span class="badge-shield" style="font-size:9px;">🛡️ ' + m.shield + '</span>';
+          }
+          if (m.buff) {
+            cardHtml += '  <span class="minion-buff-badge">' + (m.buff.label || '버프') + '</span>';
+          }
+          cardHtml += '</div>';
+
+          card.innerHTML = cardHtml;
+
+          if (!isDead) {
+            card.addEventListener('click', (function(idx) {
+              return function() {
+                selectedTargetType = 'minion';
+                selectedTargetIndex = idx;
+                updateBossUI();
+                updateBanner('[' + bossBattleState.minions[idx].name + '] 조준 완료! 🎯');
+              };
+            })(i));
+          }
+
+          minionsGrid.appendChild(card);
+        }
+
+        // 통계 갱신
+        statGold.textContent = '💰 ' + bossBattleState.gold;
+        statRecord.textContent = (savedData.totalWins || 0) + '승 / ' + (savedData.totalBattles || 0) + '전';
+        statBest.textContent = savedData.bestChain || 0;
+      }
+
+      // 신하 처치 시 보스 체력바에서 "피 -1!" 붉은 글씨가 떠오르는 연출
+      function triggerBossDamageFloat(text) {
+        if (!bossFloatContainer) return;
+        var floatEl = document.createElement('span');
+        floatEl.className = 'boss-float-text';
+        floatEl.textContent = text || '💥 피 -1!';
+        bossFloatContainer.appendChild(floatEl);
+        setTimeout(function() {
+          if (floatEl.parentNode === bossFloatContainer) {
+            bossFloatContainer.removeChild(floatEl);
+          }
+        }, 1500);
+      }
+
+      // 주사위 발동 토스트 연출
+      function triggerDiceToast(buff) {
+        if (!buff) return;
+        if (diceToastTimer) {
+          clearTimeout(diceToastTimer);
+        }
+
+        diceToastIcon.textContent = buff.emoji || '🎲';
+        diceToastTitle.textContent = '🎲 ' + buff.dice + ': ' + buff.name + '!';
+        diceToastDesc.textContent = buff.desc;
+
+        diceToast.classList.add('active');
+
+        diceToastTimer = setTimeout(function() {
+          diceToast.classList.remove('active');
+        }, 1800);
+      }
+
+      // 승리/패배 팝업 모달 표시
+      function showModal(type, gainedGold, leveledUp, promotedTitle) {
+        if (type === 'victory') {
+          // 조각 7: 랭커 도전장 승리 분기
+          if (battleState && battleState.battleType === 'challenge') {
+            modalIcon.textContent = '⚔️';
+            modalTitle.textContent = '도전장 모의 대전 승리!';
+            modalTitle.style.color = '#c084fc';
+            modalPromoBanner.style.display = 'none';
+
+            var gainRank = 80;
+            savedData.rankPoints = (savedData.rankPoints || 0) + gainRank;
+            GoblinCore.saveGameState(savedData);
+            updateProfileUI();
+
+            var chName = battleState.challenger ? (battleState.challenger.rankTitle + ' ' + battleState.challenger.nickname) : '랭커';
+            modalDesc.innerHTML =
+              '상위 랭커 <strong>' + chName + '</strong>에게 도전장을 보내 승리했습니다!<br>' +
+              '<span class="modal-loot" style="color:#c084fc;">명예 전리품: +' + (gainedGold || 0) + ' 골드 · 랭킹 점수: +' + gainRank + ' RP (총 ' + savedData.rankPoints.toLocaleString() + ' RP)</span>';
+
+            modalActionBtn.textContent = '순위표 확인하기 🏆';
+            modalActionBtn.style.background = '#7c3aed';
+            battleModal.style.display = 'flex';
+            return;
+          }
+
+          // 일반 스테이지 승리 시 랭킹 점수 소량 지급
+          var stageRp = (currentStage === 10) ? 50 : ((currentStage >= 6) ? 25 : 15);
+          savedData.rankPoints = (savedData.rankPoints || 0) + stageRp;
+          GoblinCore.saveGameState(savedData);
+          updateProfileUI();
+
+          modalIcon.textContent = (currentStage >= 9) ? '🏆' : '🎉';
+          modalTitle.textContent = (currentStage >= 9) ? (currentStage + '스테이지 보스 격파!') : (currentStage + '스테이지 승리!');
+          modalTitle.style.color = '#38bdf8';
+
+          if (leveledUp && promotedTitle) {
+            modalPromoBanner.style.display = 'block';
+            modalPromoBanner.textContent = '🎖️ ' + promotedTitle + '으로 승급했습니다! (스탯 대폭 상승!)';
+          } else {
+            modalPromoBanner.style.display = 'none';
+          }
+
+          var rewardExp = (currentStage === 10) ? 100 : ((currentStage === 9) ? 50 : 30);
+          var nextStgNum = Math.min(10, currentStage + 1);
+          var nextCfg = GoblinCore.getStageConfig(nextStgNum);
+
+          modalDesc.innerHTML =
+            '[' + curStageCfg.villageName + '] <strong>' + curStageCfg.enemy.name + '</strong>을(를) 물리쳤습니다!<br>' +
+            '<span class="modal-loot">전리품: +' + (gainedGold || 0) + ' 골드 · 경험치: +' + rewardExp + ' EXP · 랭킹: +' + stageRp + ' RP</span>';
+
+          if (currentStage < 10) {
+            modalActionBtn.textContent = nextStgNum + '스테이지 (' + nextCfg.enemy.name + ') 도전 ⚔️';
+            modalActionBtn.style.background = '#0284c7';
+          } else {
+            modalActionBtn.textContent = '마을 지도 보기 🗺️';
+            modalActionBtn.style.background = '#10b981';
+          }
+        } else {
+          modalPromoBanner.style.display = 'none';
+          modalIcon.textContent = '💀';
+          modalTitle.textContent = '고블린 패배...';
+          modalTitle.style.color = '#f87171';
+          modalDesc.innerHTML = '적의 공격을 버티지 못하고 쓰러졌습니다.<br><span style="color:#94a3b8; font-size:12px;">다시 도전하여 복수하세요!</span>';
+          modalActionBtn.textContent = '다시 도전 🔄';
+          modalActionBtn.style.background = '#e11d48';
+        }
+        battleModal.style.display = 'flex';
+      }
+
+      function hideModal() {
+        battleModal.style.display = 'none';
+      }
+
+      // 보직 선택 모달 열기/닫기
+      function openRoleModal() {
+        roleList.innerHTML = '';
+        var curRole = savedData.profile.role;
+        var roles = GoblinCore.ROLE_DEFINITIONS;
+
+        for (var key in roles) {
+          if (Object.prototype.hasOwnProperty.call(roles, key)) {
+            var r = roles[key];
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'role-option-btn' + (key === curRole ? ' selected' : '');
+            btn.dataset.roleKey = key;
+            btn.innerHTML =
+              '<span class="role-option-icon">' + r.emoji + '</span>' +
+              '<div class="role-option-text">' +
+              '  <span class="role-option-title">' + r.name + (key === curRole ? ' (현재 장착)' : '') + '</span>' +
+              '  <span class="role-option-desc">' + r.desc + '</span>' +
+              '</div>';
+
+            btn.addEventListener('click', (function(selectedKey) {
+              return function() {
+                savedData.profile.role = selectedKey;
+                savedData.profile.roleName = GoblinCore.ROLE_DEFINITIONS[selectedKey].name;
+                GoblinCore.saveGameState(savedData);
+                if (currentMode === 'normal') {
+                  battleState.profile = savedData.profile;
+                  updateBattleUI();
+                } else {
+                  bossBattleState.profile = savedData.profile;
+                  updateBossUI();
+                }
+                closeRoleModal();
+                updateBanner('보직이 [' + GoblinCore.ROLE_DEFINITIONS[selectedKey].name + ']으로 변경되었습니다!');
+              };
+            })(key));
+
+            roleList.appendChild(btn);
+          }
+        }
+
+        roleModal.style.display = 'flex';
+      }
+
+      function closeRoleModal() {
+        roleModal.style.display = 'none';
+      }
+
+      // ==========================================
+      // 조각 7: 순위표 (Top 100) & 도전장 & 닉네임 변경
+      // ==========================================
+
+      function openLeaderboardModal() {
+        renderLeaderboard();
+        leaderboardModal.style.display = 'flex';
+      }
+
+      function closeLeaderboardModal() {
+        leaderboardModal.style.display = 'none';
+      }
+
+      function renderLeaderboard() {
+        var uScore = (typeof savedData.rankPoints === 'number') ? savedData.rankPoints : 0;
+        var uNick = savedData.userNickname || (savedData.profile ? savedData.profile.name : '고블린 대장');
+        var uTitle = (savedData.profile && savedData.profile.rankTitle) ? savedData.profile.rankTitle : '이등병';
+
+        var boardData = GoblinCore.generateMockLeaderboard(77777, uScore, uNick, uTitle);
+        leaderboardList.innerHTML = '';
+
+        for (var i = 0; i < boardData.top100.length; i++) {
+          var ranker = boardData.top100[i];
+          var rankNum = ranker.rank;
+          var rankClass = (rankNum === 1) ? 'rank-1' : ((rankNum === 2) ? 'rank-2' : ((rankNum === 3) ? 'rank-3' : ''));
+          var badgeClass = (rankNum <= 3) ? ('top-' + rankNum) : '';
+          var badgeText = (rankNum === 1) ? '🥇' : ((rankNum === 2) ? '🥈' : ((rankNum === 3) ? '🥉' : rankNum));
+
+          var row = document.createElement('div');
+          row.className = 'leaderboard-row ' + rankClass;
+          row.innerHTML =
+            '<div class="leaderboard-row-left">' +
+            '  <span class="leaderboard-rank-badge ' + badgeClass + '">' + badgeText + '</span>' +
+            '  <div class="leaderboard-info">' +
+            '    <div class="leaderboard-name-line">' +
+            '      <span style="color:#f59e0b; font-size:11px;">[' + ranker.rankTitle + ']</span> ' + ranker.nickname +
+            '      <span style="font-size:10px; color:#94a3b8;">(' + ranker.role + ')</span>' +
+            '    </div>' +
+            '    <div class="leaderboard-score-line">최고 점수: ' + ranker.score.toLocaleString() + '점 · 최고 ' + ranker.bestChain + '체인</div>' +
+            '  </div>' +
+            '</div>' +
+            '<button class="btn-challenge" type="button" data-ranker-index="' + i + '">' +
+            '  도전장 ⚔️' +
+            '</button>';
+
+          var challengeBtn = row.querySelector('.btn-challenge');
+          challengeBtn.addEventListener('click', (function(r) {
+            return function(e) {
+              e.stopPropagation();
+              sendChallenge(r);
+            };
+          })(ranker));
+
+          leaderboardList.appendChild(row);
+        }
+
+        // 하단 내 순위 고정 바 갱신
+        if (myRankText) {
+          myRankText.textContent = '내 순위: ' + boardData.myRank + '위 / ' + uScore.toLocaleString() + ' RP';
+        }
+        if (myRankNick) {
+          myRankNick.textContent = '🧌 [' + uTitle + '] ' + uNick;
+        }
+      }
+
+      function sendChallenge(ranker) {
+        closeLeaderboardModal();
+        hideModal();
+
+        // 일반 전투 화면으로 전환
+        currentMode = 'normal';
+        tabStageNormal.classList.add('active');
+        tabStage9.classList.remove('active');
+        tabStage10.classList.remove('active');
+        normalBattleCard.style.display = 'grid';
+        bossBattleCard.style.display = 'none';
+
+        // 1:1 대전 상태 생성
+        battleState = GoblinCore.createChallengeBattle(ranker, savedData.profile);
+        currentPath = [];
+        rng = GoblinCore.createRng(Date.now());
+        board = GoblinCore.createBoard(BOARD_SIZE, NUM_TYPES, rng);
+
+        renderBoard();
+        updateBattleUI();
+
+        updateBanner('✉️ [' + ranker.rankTitle + ' ' + ranker.nickname + '] 님에게 도전장을 보냈습니다! 1:1 모의 대전을 시작합니다. ⚔️');
+      }
+
+      function openNicknameModal() {
+        var curNick = savedData.userNickname || (savedData.profile ? savedData.profile.name : '고블린 대장');
+        inputNewNickname.value = curNick;
+        nicknameErrorMsg.style.display = 'none';
+        nicknameErrorMsg.textContent = '';
+        nicknameModal.style.display = 'flex';
+        inputNewNickname.focus();
+      }
+
+      function closeNicknameModal() {
+        nicknameModal.style.display = 'none';
+      }
+
+      function submitNicknameChange() {
+        var inputVal = inputNewNickname.value;
+        var result = GoblinCore.validateNickname(inputVal);
+
+        if (!result.valid) {
+          nicknameErrorMsg.style.display = 'block';
+          if (result.code === 'GOBLIN_LAW_VIOLATION') {
+            nicknameErrorMsg.textContent = '⚠️ ' + result.reason + ' 바르고 고운 말을 쓰십시오.';
+          } else {
+            nicknameErrorMsg.textContent = '⚠️ ' + result.reason;
+          }
+          return;
+        }
+
+        savedData.userNickname = result.nickname;
+        if (savedData.profile) {
+          savedData.profile.name = result.nickname;
+        }
+        GoblinCore.saveGameState(savedData);
+        updateProfileUI();
+        closeNicknameModal();
+
+        if (leaderboardModal.style.display === 'flex') {
+          renderLeaderboard();
+        }
+
+        updateBanner('✨ 아이디 깨기 완료! 닉네임이 [' + result.nickname + '] (으)로 변경되었습니다.');
+      }
+
+      // 조각 6: 스테이지 로드 및 초기화 핵심 함수
+      function loadStage(stageNum, showEnterDialogue) {
+        hideModal();
+        hideEndingModal();
+        closeMapModal();
+
+        currentStage = Math.max(1, Math.min(10, stageNum || 1));
+        curStageCfg = GoblinCore.getStageConfig(currentStage);
+        applyStageTheme(currentStage);
+
+        if (curStageCfg.isBoss) {
+          currentMode = 'boss';
+          currentBossStage = currentStage;
+          tabStageNormal.classList.remove('active');
+          tabStage9.classList.toggle('active', currentStage === 9);
+          tabStage10.classList.toggle('active', currentStage === 10);
+          normalBattleCard.style.display = 'none';
+          bossBattleCard.style.display = 'flex';
+
+          startNewBossBattle(currentStage);
+        } else {
+          currentMode = 'normal';
+          tabStageNormal.classList.add('active');
+          tabStage9.classList.remove('active');
+          tabStage10.classList.remove('active');
+          normalBattleCard.style.display = 'grid';
+          bossBattleCard.style.display = 'none';
+
+          startNewBattle();
+        }
+
+        if (showEnterDialogue) {
+          var enterTalks = GoblinCore.getStoryDialogue(currentStage, 'enter');
+          if (enterTalks && enterTalks.length > 0) {
+            startDialogue(enterTalks);
+          }
+        }
+      }
+
+      function startNewBattle() {
+        hideModal();
+        curStageCfg = GoblinCore.getStageConfig(currentStage);
+        battleState = GoblinCore.createBattleState({
+          enemy: curStageCfg.enemy,
+          gold: savedData.gold,
+          profile: savedData.profile
+        });
+        currentPath = [];
+        rng = GoblinCore.createRng(Date.now());
+        board = GoblinCore.createBoard(BOARD_SIZE, NUM_TYPES, rng);
+        renderBoard();
+        updateBattleUI();
+        updateBanner('[' + curStageCfg.villageName + '] ' + currentStage + '스테이지 (' + curStageCfg.enemy.name + ') 전투 시작!');
+      }
+
+      function startNewBossBattle(stageNum) {
+        hideModal();
+        currentBossStage = stageNum || (currentStage >= 9 ? currentStage : 9);
+        currentStage = currentBossStage;
+        curStageCfg = GoblinCore.getStageConfig(currentStage);
+        applyStageTheme(currentStage);
+
+        bossBattleState = GoblinCore.createBossBattle(currentBossStage, savedData.profile);
+        selectedTargetType = 'boss';
+        selectedTargetIndex = -1;
+        currentPath = [];
+        rng = GoblinCore.createRng(Date.now());
+        board = GoblinCore.createBoard(BOARD_SIZE, NUM_TYPES, rng);
+        renderBoard();
+        updateBossUI();
+        var bossTitle = (currentBossStage === 10) ? '10스테이지 인간 마을 영주전' : '9스테이지 관문 수문장 돌파전';
+        updateBanner(bossTitle + ' 시작! 신하를 처치하면 보스 피가 -1 깎입니다!');
+      }
+
+      function switchMode(mode, stageNum) {
+        if (mode === 'normal') {
+          var targetStage = (currentStage <= 8) ? currentStage : 1;
+          loadStage(targetStage, false);
+        } else {
+          var targetBoss = stageNum || 9;
+          loadStage(targetBoss, false);
+        }
+      }
+
+      // 보드 DOM 전체 생성
+      function renderBoard() {
+        boardGrid.innerHTML = '';
+        for (var r = 0; r < BOARD_SIZE; r++) {
+          for (var c = 0; c < BOARD_SIZE; c++) {
+            var cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.dataset.r = r;
+            cell.dataset.c = c;
+            cell.textContent = EMOJIS[board[r][c]] || '❓';
+            boardGrid.appendChild(cell);
+          }
+        }
+        updatePathVisuals();
+      }
+
+      // 현재 경로(선 및 칸 강조) 시각적 갱신
+      function updatePathVisuals() {
+        var pathMap = {};
+        for (var i = 0; i < currentPath.length; i++) {
+          var key = currentPath[i].r + ',' + currentPath[i].c;
+          pathMap[key] = i + 1;
+        }
+
+        // 셀 강조 및 뱃지 업데이트
+        var cells = boardGrid.children;
+        for (var idx = 0; idx < cells.length; idx++) {
+          var cell = cells[idx];
+          var r = parseInt(cell.dataset.r, 10);
+          var c = parseInt(cell.dataset.c, 10);
+          var key = r + ',' + c;
+
+          var oldBadge = cell.querySelector('.badge');
+          if (oldBadge) {
+            cell.removeChild(oldBadge);
+          }
+
+          if (pathMap[key] !== undefined) {
+            cell.classList.add('selected');
+            if (pathMap[key] === 1) {
+              cell.classList.add('first');
+            } else {
+              cell.classList.remove('first');
+            }
+            var badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.textContent = pathMap[key];
+            cell.appendChild(badge);
+          } else {
+            cell.classList.remove('selected', 'first');
+          }
+        }
+
+        // SVG 연결 선 그리기
+        drawPathLine();
+        if (isDragging) {
+          updateBanner();
+        }
+      }
+
+      // SVG 선 그리기
+      function drawPathLine() {
+        svgOverlay.innerHTML = '';
+        if (currentPath.length < 2) return;
+
+        var wrapperRect = boardWrapper.getBoundingClientRect();
+        var points = [];
+
+        for (var i = 0; i < currentPath.length; i++) {
+          var p = currentPath[i];
+          var cell = boardGrid.querySelector('[data-r="' + p.r + '"][data-c="' + p.c + '"]');
+          if (cell) {
+            var rect = cell.getBoundingClientRect();
+            var x = rect.left + rect.width / 2 - wrapperRect.left;
+            var y = rect.top + rect.height / 2 - wrapperRect.top;
+            points.push(x.toFixed(1) + ',' + y.toFixed(1));
+          }
+        }
+
+        if (points.length >= 2) {
+          var polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+          polyline.setAttribute('class', 'chain-line');
+          polyline.setAttribute('points', points.join(' '));
+          svgOverlay.appendChild(polyline);
+        }
+      }
+
+      // 안내 문구 갱신
+      function updateBanner(customText, isBonus) {
+        if (customText) {
+          msgBanner.textContent = customText;
+          msgBanner.className = 'message-banner' + (isBonus ? ' big-bonus' : ' cleared-info');
+          return;
+        }
+
+        var len = currentPath.length;
+        if (len === 0) {
+          msgBanner.textContent = (currentMode === 'boss')
+            ? '손가락으로 칸을 이어 보스나 신하를 공격하세요! (10칸 이상 시 🎲주사위 버프)'
+            : '손가락으로 같은 종류 칸을 이어보세요! (10칸 이상 시 🎲주사위 버프)';
+          msgBanner.className = 'message-banner';
+        } else if (len < 3) {
+          msgBanner.textContent = '3칸 이상 이어야 발동합니다 (현재 ' + len + '칸)';
+          msgBanner.className = 'message-banner';
+        } else if (len >= 10) {
+          msgBanner.textContent = '🎲 ' + len + '칸 대형 연결! 손을 떼면 주사위 버프가 발동합니다!';
+          msgBanner.className = 'message-banner big-bonus';
+        } else {
+          var firstType = board[currentPath[0].r][currentPath[0].c];
+          var typeNames = ['일반 공격', '방어막 충전', '체력 회복', '전리품 골드', '강력 타격'];
+          var targetNotice = '';
+          if (currentMode === 'boss') {
+            targetNotice = (selectedTargetType === 'boss')
+              ? ' -> [보스] 타격'
+              : ' -> [' + (bossBattleState.minions[selectedTargetIndex] ? bossBattleState.minions[selectedTargetIndex].name : '신하') + '] 타격';
+          }
+          msgBanner.textContent = len + '칸 연결 중: ' + (typeNames[firstType] || '행동') + targetNotice;
+          msgBanner.className = 'message-banner cleared-info';
+        }
+      }
+
+      // 포인터 위치로부터 대상 셀 찾기 (중심 40% 영역 판정)
+      function getCellFromPoint(clientX, clientY) {
+        var el = document.elementFromPoint(clientX, clientY);
+        if (!el) return null;
+        var cell = el.closest('.cell');
+        if (!cell) return null;
+        var r = parseInt(cell.dataset.r, 10);
+        var c = parseInt(cell.dataset.c, 10);
+        if (isNaN(r) || isNaN(c)) return null;
+
+        var rect = cell.getBoundingClientRect();
+        var cx = rect.left + rect.width / 2;
+        var cy = rect.top + rect.height / 2;
+        var radius = Math.min(rect.width, rect.height) / 2;
+        var dx = clientX - cx;
+        var dy = clientY - cy;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist <= radius * 0.4) {
+          return { r: r, c: c };
+        }
+        return null;
+      }
+
+      // 포인터 입력 처리
+      function onPointerDown(e) {
+        var isPlaying = (currentMode === 'normal')
+          ? (battleState.status === 'playing')
+          : (bossBattleState && bossBattleState.status === 'playing');
+        if (!isPlaying) return;
+        if (activePointerId !== null) return;
+
+        var cell = getCellFromPoint(e.clientX, e.clientY);
+        if (!cell) return;
+
+        activePointerId = e.pointerId;
+        isDragging = true;
+        try {
+          boardWrapper.setPointerCapture(e.pointerId);
+        } catch (err) {}
+
+        currentPath = GoblinCore.extendPath(board, [], cell);
+        updatePathVisuals();
+      }
+
+      function onPointerMove(e) {
+        if (!isDragging || e.pointerId !== activePointerId) return;
+
+        var cell = getCellFromPoint(e.clientX, e.clientY);
+        if (!cell) return;
+
+        var nextPath = GoblinCore.extendPath(board, currentPath, cell);
+        if (nextPath !== currentPath) {
+          currentPath = nextPath;
+          updatePathVisuals();
+        }
+      }
+
+      function onPointerUp(e) {
+        if (!isDragging || e.pointerId !== activePointerId) return;
+
+        var pid = activePointerId;
+        isDragging = false;
+        activePointerId = null;
+        try {
+          boardWrapper.releasePointerCapture(pid);
+        } catch (err) {}
+
+        var pathToResolve = currentPath;
+        currentPath = [];
+
+        var result = GoblinCore.resolve(board, pathToResolve, rng, NUM_TYPES);
+
+        if (result.cleared >= 3) {
+          board = result.board;
+
+          // 최고 연결 기록 갱신
+          if (result.cleared > (savedData.bestChain || 0)) {
+            savedData.bestChain = result.cleared;
+          }
+
+          if (currentMode === 'normal') {
+            // 일반 전투 계산
+            var prevGold = battleState.gold;
+            battleState = GoblinCore.applyPlayerTurn(battleState, result, rng, savedData.profile);
+            var gainedGold = battleState.gold - prevGold;
+
+            renderBoard();
+            updateBattleUI();
+
+            if (battleState.lastDiceBuff) {
+              triggerDiceToast(battleState.lastDiceBuff);
+            }
+
+            var latestLog = battleState.logs.length > 0 ? battleState.logs[battleState.logs.length - 1] : '';
+            updateBanner(latestLog, result.big);
+
+            if (battleState.status === 'victory') {
+              savedData.totalWins = (savedData.totalWins || 0) + 1;
+              savedData.totalBattles = (savedData.totalBattles || 0) + 1;
+              savedData.gold = battleState.gold;
+
+              var leveledUp = false;
+              var promotedTitle = null;
+
+              if (battleState.profile) {
+                leveledUp = battleState.profile.leveledUp;
+                promotedTitle = battleState.profile.promotedTitle;
+                savedData.profile = battleState.profile;
+              }
+
+              // 조각 6: 진행도 갱신 순수 함수 호출
+              savedData = GoblinCore.checkProgression(savedData, currentStage);
+              GoblinCore.saveGameState(savedData);
+              updateBattleUI();
+
+              // 클리어 대사 확인 및 대화 모달/승리 모달 연계
+              var clearTalks = GoblinCore.getStoryDialogue(currentStage, 'clear');
+              if (clearTalks && clearTalks.length > 0) {
+                setTimeout(function() {
+                  startDialogue(clearTalks, function() {
+                    showModal('victory', gainedGold, leveledUp, promotedTitle);
+                  });
+                }, 350);
+              } else {
+                setTimeout(function() {
+                  showModal('victory', gainedGold, leveledUp, promotedTitle);
+                }, 450);
+              }
+            } else if (battleState.status === 'defeat') {
+              savedData.totalBattles = (savedData.totalBattles || 0) + 1;
+              savedData.gold = battleState.gold;
+              GoblinCore.saveGameState(savedData);
+              updateBattleUI();
+
+              setTimeout(function() {
+                showModal('defeat');
+              }, 450);
+            }
+          } else {
+            // 조각 5: 보스전 턴 계산
+            var prevMinionHps = bossBattleState.minions.map(function(m) { return m.hp; });
+            var prevGold = bossBattleState.gold;
+
+            bossBattleState = GoblinCore.applyPlayerBossTurn(
+              bossBattleState,
+              result,
+              selectedTargetType,
+              selectedTargetIndex,
+              rng
+            );
+
+            // 신하 처치 시 피 -1 연출 (설계서 핵심 반영)
+            var minionKilled = bossBattleState.minions.some(function(m, idx) {
+              return m.hp <= 0 && prevMinionHps[idx] > 0;
+            });
+            if (minionKilled || bossBattleState.minionKilledThisTurn) {
+              triggerBossDamageFloat('💥 피 -1!');
+            }
+
+            // 보스 페이즈: 신하 버프 부여 및 10스테이지 반사 방어막 발동
+            if (bossBattleState.status === 'playing') {
+              bossBattleState = GoblinCore.applyBossPhase(bossBattleState, rng);
+            }
+
+            var gainedGold = bossBattleState.gold - prevGold;
+            renderBoard();
+            updateBossUI();
+
+            if (bossBattleState.lastDiceBuff) {
+              triggerDiceToast(bossBattleState.lastDiceBuff);
+            }
+
+            var latestLog = bossBattleState.logs.length > 0 ? bossBattleState.logs[bossBattleState.logs.length - 1] : '';
+            updateBanner(latestLog, result.big);
+
+            if (bossBattleState.status === 'victory') {
+              savedData.totalWins = (savedData.totalWins || 0) + 1;
+              savedData.totalBattles = (savedData.totalBattles || 0) + 1;
+              savedData.gold = bossBattleState.gold;
+
+              var leveledUp = false;
+              var promotedTitle = null;
+
+              if (bossBattleState.profile) {
+                leveledUp = bossBattleState.profile.leveledUp;
+                promotedTitle = bossBattleState.profile.promotedTitle;
+                savedData.profile = bossBattleState.profile;
+              }
+
+              // 조각 6: 진행도 갱신 순수 함수 호출
+              savedData = GoblinCore.checkProgression(savedData, currentStage);
+              GoblinCore.saveGameState(savedData);
+              updateBossUI();
+
+              // 클리어 대사 확인 및 대화 모달/엔딩 모달 연계
+              var clearTalks = GoblinCore.getStoryDialogue(currentStage, 'clear');
+              if (clearTalks && clearTalks.length > 0) {
+                setTimeout(function() {
+                  startDialogue(clearTalks, function() {
+                    if (currentStage === 10) {
+                      showEndingModal();
+                    } else {
+                      showModal('victory', gainedGold, leveledUp, promotedTitle);
+                    }
+                  });
+                }, 350);
+              } else {
+                setTimeout(function() {
+                  if (currentStage === 10) {
+                    showEndingModal();
+                  } else {
+                    showModal('victory', gainedGold, leveledUp, promotedTitle);
+                  }
+                }, 450);
+              }
+            } else if (bossBattleState.status === 'defeat') {
+              savedData.totalBattles = (savedData.totalBattles || 0) + 1;
+              savedData.gold = bossBattleState.gold;
+              GoblinCore.saveGameState(savedData);
+              updateBossUI();
+
+              setTimeout(function() {
+                showModal('defeat');
+              }, 450);
+            }
+          }
+        } else {
+          renderBoard();
+          updateBanner('3칸 미만이라 턴이 발동하지 않았습니다.');
+        }
+      }
+
+      function onPointerCancel(e) {
+        if (e.pointerId !== activePointerId) return;
+
+        var pid = activePointerId;
+        isDragging = false;
+        activePointerId = null;
+        try {
+          boardWrapper.releasePointerCapture(pid);
+        } catch (err) {}
+
+        currentPath = [];
+        renderBoard();
+        updateBanner('입력이 취소되었습니다.');
+      }
+
+      // 이벤트 리스너 등록
+      boardWrapper.addEventListener('pointerdown', onPointerDown);
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
+      window.addEventListener('pointercancel', onPointerCancel);
+
+      boardWrapper.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+      }, { passive: false });
+
+      // 버튼 이벤트
+      btnReset.addEventListener('click', function() {
+        if (activePointerId !== null) {
+          try {
+            boardWrapper.releasePointerCapture(activePointerId);
+          } catch (err) {}
+        }
+        activePointerId = null;
+        isDragging = false;
+        currentPath = [];
+        rng = GoblinCore.createRng(Date.now());
+        board = GoblinCore.createBoard(BOARD_SIZE, NUM_TYPES, rng);
+        renderBoard();
+        updateBanner('퍼즐 판을 새로 배치했습니다.');
+      });
+
+      btnNewBattle.addEventListener('click', function() {
+        loadStage(currentStage, false);
+      });
+
+      // 조각 6 버튼 이벤트 연동
+      if (btnMap) btnMap.addEventListener('click', function() { openMapModal(); });
+      if (btnOpenMapBar) btnOpenMapBar.addEventListener('click', function() { openMapModal(); });
+      if (btnCloseMap) btnCloseMap.addEventListener('click', closeMapModal);
+
+      if (btnVillageAnt) btnVillageAnt.addEventListener('click', function() { setVillageTab('ant'); });
+      if (btnVillageHuman) btnVillageHuman.addEventListener('click', function() { setVillageTab('human'); });
+
+      if (btnDialogueNext) btnDialogueNext.addEventListener('click', skipOrNextDialogue);
+      if (btnDialogueSkip) btnDialogueSkip.addEventListener('click', closeDialogue);
+
+      if (btnEndingMap) {
+        btnEndingMap.addEventListener('click', function() {
+          hideEndingModal();
+          openMapModal('human');
+        });
+      }
+
+      if (btnEndingRestart) {
+        btnEndingRestart.addEventListener('click', function() {
+          hideEndingModal();
+          loadStage(1, true);
+        });
+      }
+
+      modalActionBtn.addEventListener('click', function() {
+        hideModal();
+        if (battleState && battleState.battleType === 'challenge') {
+          openLeaderboardModal();
+          return;
+        }
+        if (currentStage >= 10) {
+          openMapModal();
+        } else {
+          loadStage(currentStage + 1, true);
+        }
+      });
+
+      // 조각 7 버튼 이벤트 연동
+      if (btnLeaderboard) btnLeaderboard.addEventListener('click', openLeaderboardModal);
+      if (btnCloseLeaderboard) btnCloseLeaderboard.addEventListener('click', closeLeaderboardModal);
+      if (btnOpenNicknameModal) btnOpenNicknameModal.addEventListener('click', openNicknameModal);
+      if (btnQuickNickname) btnQuickNickname.addEventListener('click', openNicknameModal);
+      if (btnConfirmNickname) btnConfirmNickname.addEventListener('click', submitNicknameChange);
+      if (btnCancelNickname) btnCancelNickname.addEventListener('click', closeNicknameModal);
+      if (inputNewNickname) {
+        inputNewNickname.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') submitNicknameChange();
+        });
+      }
+
+      btnChangeRole.addEventListener('click', openRoleModal);
+      btnCloseRoleModal.addEventListener('click', closeRoleModal);
+
+      // 스테이지 탭 및 보스 타겟 이벤트
+      tabStageNormal.addEventListener('click', function() { switchMode('normal'); });
+      tabStage9.addEventListener('click', function() { switchMode('boss', 9); });
+      tabStage10.addEventListener('click', function() { switchMode('boss', 10); });
+
+      btnTargetBoss.addEventListener('click', function() {
+        selectedTargetType = 'boss';
+        selectedTargetIndex = -1;
+        updateBossUI();
+        updateBanner('보스 [' + bossBattleState.boss.name + '] 직접 공격 조준! 🎯');
+      });
+
+      // 창 크기 조절 시 선 위치 보정
+      window.addEventListener('resize', drawPathLine);
+
+      // 초기 실행: 저장된 현재 스테이지로 로드
+      loadStage(currentStage, false);
+    })();
+  </script>
+</body>
+</html>
