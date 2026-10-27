@@ -1098,6 +1098,11 @@
       ? state.rankPoints
       : 0;
 
+    // 조각 10: 던전 레이드 최고 점수 (raidBest)
+    var raidBest = (state && typeof state.raidBest === 'number' && !isNaN(state.raidBest) && state.raidBest >= 0)
+      ? state.raidBest
+      : 0;
+
     if (profileData) {
       profileData.name = userNickname;
     }
@@ -1115,7 +1120,8 @@
       endingSeen: endingSeen,
       clearedStages: clearedStages,
       userNickname: userNickname,
-      rankPoints: rankPoints
+      rankPoints: rankPoints,
+      raidBest: raidBest
     };
 
     try {
@@ -1146,7 +1152,8 @@
       endingSeen: false,
       clearedStages: [],
       userNickname: '고블린 대장',
-      rankPoints: 0
+      rankPoints: 0,
+      raidBest: 0
     };
 
     try {
@@ -1166,6 +1173,7 @@
             ? parsed.userNickname.trim()
             : (restoredProfile ? restoredProfile.name : '고블린 대장');
           var rankPoints = (typeof parsed.rankPoints === 'number' && !isNaN(parsed.rankPoints)) ? parsed.rankPoints : 0;
+          var raidBest = (typeof parsed.raidBest === 'number' && !isNaN(parsed.raidBest) && parsed.raidBest >= 0) ? parsed.raidBest : 0;
           if (restoredProfile) {
             restoredProfile.name = userNickname;
           }
@@ -1183,7 +1191,8 @@
             endingSeen: endingSeen,
             clearedStages: clearedStages,
             userNickname: userNickname,
-            rankPoints: rankPoints
+            rankPoints: rankPoints,
+            raidBest: raidBest
           };
         }
       }
@@ -2218,49 +2227,72 @@
   }
 
   // ==========================================
-  // 조각 9: 던전 레이드 기본 규칙 (판 위 몬스터 칸)
+  // 조각 9 & 10: 던전 레이드 기본 규칙 (6x6, 무한 서바이벌, 특수 몬스터)
   // ==========================================
 
+  var DEFAULT_RAID_BOARD_SIZE = 6;
+
   var RAID_SPAWN_RATES = {
-    sword: 0.28,
+    sword: 0.26,
     shield: 0.18,
     potion: 0.18,
     coin: 0.18,
-    monster: 0.18
+    monster: 0.20
   };
 
   /**
    * 확률 분포에 따른 단일 레이드 칸 객체 생성 (순수 함수)
-   * @param {number} [stage] 스테이지 번호
+   * 규칙: 몬스터는 hp = 2 + level, atk = 1 + floor(level / 3)
+   * level 2부터 새 몬스터의 15%는 특수 몬스터(spiky 또는 regen)
+   * 판에 몬스터가 40% 초과 시 몬스터 대신 칼 생성
+   * @param {number} [level] 레벨/난이도 (기본 1)
    * @param {function(): number} [rng] 난수 생성기
-   * @returns {{ type: string, hp: number, maxHp: number, atk: number }}
+   * @param {number} [currentMonsterRatio] 현재 판의 몬스터 비율 (0.40 초과 시 몬스터 대신 칼)
+   * @returns {{ type: string, hp: number, maxHp: number, atk: number, trait: string|null }}
    */
-  function createRaidCell(stage, rng) {
+  function createRaidCell(level, rng, currentMonsterRatio) {
     var safeRng = typeof rng === 'function' ? rng : Math.random;
     var roll = safeRng();
-    var stg = (typeof stage === 'number' && stage >= 1) ? stage : 1;
+    var lvl = (typeof level === 'number' && level >= 1) ? level : 1;
 
     var type = 'sword';
-    if (roll < 0.28) {
+    if (roll < 0.26) {
       type = 'sword';
-    } else if (roll < 0.46) {
+    } else if (roll < 0.44) {
       type = 'shield';
-    } else if (roll < 0.64) {
+    } else if (roll < 0.62) {
       type = 'potion';
-    } else if (roll < 0.82) {
+    } else if (roll < 0.80) {
       type = 'coin';
     } else {
       type = 'monster';
     }
 
+    // 판에 몬스터가 이미 40% 넘으면 그 칸은 몬스터 대신 칼
+    if (type === 'monster' && typeof currentMonsterRatio === 'number' && currentMonsterRatio > 0.40) {
+      type = 'sword';
+    }
+
     if (type === 'monster') {
-      var maxHp = 3 + stg;
-      var atk = (stg >= 5) ? 2 : 1;
+      var maxHp = 2 + lvl;
+      var atk = 1 + Math.floor(lvl / 3);
+      var trait = null;
+
+      // 특수 몬스터 (level 2부터 새 몬스터의 15%)
+      if (lvl >= 2) {
+        var tRoll = safeRng();
+        if (tRoll < 0.15) {
+          // 절반은 가시(spiky), 절반은 재생(regen)
+          trait = (tRoll < 0.075) ? 'spiky' : 'regen';
+        }
+      }
+
       return {
         type: 'monster',
         hp: maxHp,
         maxHp: maxHp,
-        atk: atk
+        atk: atk,
+        trait: trait
       };
     }
 
@@ -2268,7 +2300,8 @@
       type: type,
       hp: 0,
       maxHp: 0,
-      atk: 0
+      atk: 0,
+      trait: null
     };
   }
 
@@ -2305,25 +2338,27 @@
   }
 
   /**
-   * 7x7 레이드 보드 2차원 배열 생성 (순수 함수)
+   * 6x6 레이드 보드 2차원 배열 생성 (순수 함수)
    * 규칙: 몬스터 4마리 이상 보장, 처음부터 3칸 이상 칼 줄 보장
-   * @param {number} [size] 보드 크기 (기본 7)
-   * @param {number} [stage] 스테이지 번호 (기본 1)
+   * @param {number} [size] 보드 크기 (기본 DEFAULT_RAID_BOARD_SIZE = 6)
+   * @param {number} [stageOrLevel] 레벨/난이도 (기본 1)
    * @param {function(): number} [rng] 난수 생성기
-   * @returns {Array<Array<{ type: string, hp: number, maxHp: number, atk: number }>>}
+   * @returns {Array<Array<{ type: string, hp: number, maxHp: number, atk: number, trait: string|null }>>}
    */
-  function createRaidBoard(size, stage, rng) {
-    var boardSize = (typeof size === 'number' && size >= 3) ? size : 7;
-    var stg = (typeof stage === 'number' && stage >= 1) ? stage : 1;
+  function createRaidBoard(size, stageOrLevel, rng) {
+    var boardSize = (typeof size === 'number' && size >= 3) ? size : DEFAULT_RAID_BOARD_SIZE;
+    var lvl = (typeof stageOrLevel === 'number' && stageOrLevel >= 1) ? stageOrLevel : 1;
     var safeRng = typeof rng === 'function' ? rng : Math.random;
 
     var board = [];
     var monsterCount = 0;
+    var totalCells = boardSize * boardSize;
 
     for (var r = 0; r < boardSize; r++) {
       var row = [];
       for (var c = 0; c < boardSize; c++) {
-        var cell = createRaidCell(stg, safeRng);
+        var curRatio = monsterCount / totalCells;
+        var cell = createRaidCell(lvl, safeRng, curRatio);
         if (cell.type === 'monster') {
           monsterCount++;
         }
@@ -2353,7 +2388,7 @@
         if (board[0][sc].type === 'monster') {
           monsterCount--;
         }
-        board[0][sc] = { type: 'sword', hp: 0, maxHp: 0, atk: 0 };
+        board[0][sc] = { type: 'sword', hp: 0, maxHp: 0, atk: 0, trait: null };
       }
     }
 
@@ -2362,9 +2397,16 @@
       for (var mr = boardSize - 1; mr >= 0; mr--) {
         for (var mc = boardSize - 1; mc >= 0; mc--) {
           if (board[mr][mc].type !== 'monster' && board[mr][mc].type !== 'sword') {
-            var mHp = 3 + stg;
-            var mAtk = (stg >= 5) ? 2 : 1;
-            board[mr][mc] = { type: 'monster', hp: mHp, maxHp: mHp, atk: mAtk };
+            var mHp = 2 + lvl;
+            var mAtk = 1 + Math.floor(lvl / 3);
+            var mTrait = null;
+            if (lvl >= 2) {
+              var tr = safeRng();
+              if (tr < 0.15) {
+                mTrait = (tr < 0.075) ? 'spiky' : 'regen';
+              }
+            }
+            board[mr][mc] = { type: 'monster', hp: mHp, maxHp: mHp, atk: mAtk, trait: mTrait };
             monsterCount++;
             if (monsterCount >= 4) break;
           }
@@ -2379,8 +2421,8 @@
   /**
    * 레이드 선 잇기 경로 확장 및 뒤로 가기 (순수 함수)
    * 규칙:
-   * 1. 몬스터로 시작 불가
-   * 2. 칼로 시작한 줄에는 인접한 칼 또는 몬스터 칸 포함 가능 (몬스터끼리도 연결 가능)
+   * 1. 몬스터만 3칸 이상 이어도 됨 (몬스터로 시작 가능, 칼 0개 가능)
+   * 2. 칼 줄에는 인접한 칼 또는 몬스터 칸 포함 가능 (몬스터로 시작해 칼을 잇는 것도 허용, 몬스터끼리 연결도 허용)
    * 3. 방패·물약·금화 줄은 오직 동일 종류만 연결 가능
    * 4. 8방향 이웃, 중복 방지, 끝에서 2번째 칸이면 뒤로 가기(마지막 칸 취소)
    * @param {Array<Array<Object>>} board 현재 레이드 보드
@@ -2405,11 +2447,8 @@
       return currentPath;
     }
 
-    // 1. 비어 있으면 [cell] (단, 몬스터로 시작 거부)
+    // 1. 비어 있으면 [cell] (몬스터로 시작 허용)
     if (currentPath.length === 0) {
-      if (targetCell.type === 'monster') {
-        return [];
-      }
       return [{ r: cell.r, c: cell.c }];
     }
 
@@ -2440,12 +2479,12 @@
       return currentPath;
     }
     var firstCell = board[firstPos.r][firstPos.c];
-    if (!firstCell || firstCell.type === 'monster') {
+    if (!firstCell) {
       return currentPath;
     }
 
-    if (firstCell.type === 'sword') {
-      // 칼 줄: 칼 또는 몬스터만 허용
+    if (firstCell.type === 'sword' || firstCell.type === 'monster') {
+      // 칼/몬스터 줄: 칼 또는 몬스터만 허용 (칼로 시작해 몬스터 연결, 몬스터로 시작해 칼 연결, 몬스터끼리 연결 모두 허용)
       if (targetCell.type !== 'sword' && targetCell.type !== 'monster') {
         return currentPath;
       }
@@ -2464,44 +2503,297 @@
 
   /**
    * 새 레이드 상태 객체 생성 (순수 함수)
-   * @param {Object} [options] { stage, profile, rng }
-   * @returns {Object} { board, player, gold, stage, kills, goalKills, status, logs, lastEvents, activeBuffs, lastDiceBuff, profile }
+   * 조각 10: 6x6 보드, 무한 서바이벌 모드 (turn, kills, score, level)
+   * @param {Object} [options] { level, stage, profile, rng, boardSize, player, gold }
+   * @returns {Object} { board, player, gold, turn, kills, score, level, status, logs, lastEvents, activeBuffs, lastDiceBuff, profile, stage, goalKills }
+   */
+  /**
+   * 새 레이드 상태 객체 생성 (순수 함수)
+   * 조각 10 & 11: 6x6 보드, 무한 서바이벌 모드, 장비 강화·골드 상점·경험치 게이지
+   * @param {Object} [options] { level, stage, profile, rng, boardSize, player, gold, upgradeGauge, goldGauge, pendingChoices, pendingChoice }
+   * @returns {Object}
    */
   function createRaidState(options) {
     var opts = options || {};
-    var stg = (typeof opts.stage === 'number' && opts.stage >= 1) ? opts.stage : 1;
+    var lvl = (typeof opts.level === 'number' && opts.level >= 1)
+      ? opts.level
+      : ((typeof opts.stage === 'number' && opts.stage >= 1) ? opts.stage : 1);
+    var boardSize = (typeof opts.boardSize === 'number' && opts.boardSize >= 3) ? opts.boardSize : DEFAULT_RAID_BOARD_SIZE;
     var safeRng = typeof opts.rng === 'function' ? opts.rng : Math.random;
     var prof = opts.profile ? Object.assign({}, opts.profile, { stats: Object.assign({}, opts.profile.stats) }) : createGoblinProfile();
 
     var maxHp = (prof && prof.stats && typeof prof.stats.maxHp === 'number') ? prof.stats.maxHp : 20;
+    var baseAtk = (opts.player && typeof opts.player.baseAtk === 'number') ? opts.player.baseAtk : 1;
+    var weaponAtk = (opts.player && typeof opts.player.weaponAtk === 'number') ? opts.player.weaponAtk : 1;
+    var maxShield = (opts.player && typeof opts.player.maxShield === 'number') ? opts.player.maxShield : 8;
+    var shield = (opts.player && typeof opts.player.shield === 'number') ? opts.player.shield : 0;
+    var playerLevel = (opts.player && typeof opts.player.playerLevel === 'number') ? opts.player.playerLevel : 1;
+    var exp = (opts.player && typeof opts.player.exp === 'number') ? opts.player.exp : 0;
+    var shieldBonus = (opts.player && typeof opts.player.shieldBonus === 'number') ? opts.player.shieldBonus : 0;
+    var potionBonus = (opts.player && typeof opts.player.potionBonus === 'number') ? opts.player.potionBonus : 0;
+
     var player = {
-      maxHp: maxHp,
-      hp: maxHp,
-      shield: 0
+      maxHp: (opts.player && typeof opts.player.maxHp === 'number') ? opts.player.maxHp : maxHp,
+      hp: (opts.player && typeof opts.player.hp === 'number') ? opts.player.hp : maxHp,
+      shield: shield,
+      maxShield: maxShield,
+      baseAtk: baseAtk,
+      weaponAtk: weaponAtk,
+      playerLevel: playerLevel,
+      exp: exp,
+      shieldBonus: shieldBonus,
+      potionBonus: potionBonus
     };
 
-    var goalKills = stg + 4;
-    var board = createRaidBoard(7, stg, safeRng);
+    var board = createRaidBoard(boardSize, lvl, safeRng);
+    var pendingChoices = Array.isArray(opts.pendingChoices)
+      ? opts.pendingChoices.slice()
+      : (opts.pendingChoice ? [opts.pendingChoice] : []);
+    var pendingChoice = pendingChoices.length > 0 ? pendingChoices[0] : null;
 
     return {
       board: board,
       player: player,
       gold: (typeof opts.gold === 'number' && !isNaN(opts.gold)) ? opts.gold : 0,
-      stage: stg,
-      kills: 0,
-      goalKills: goalKills,
+      upgradeGauge: (typeof opts.upgradeGauge === 'number' && !isNaN(opts.upgradeGauge)) ? opts.upgradeGauge : 0,
+      goldGauge: (typeof opts.goldGauge === 'number' && !isNaN(opts.goldGauge)) ? opts.goldGauge : 0,
+      pendingChoices: pendingChoices,
+      pendingChoice: pendingChoice,
+      turn: (typeof opts.turn === 'number' && !isNaN(opts.turn)) ? opts.turn : 0,
+      kills: (typeof opts.kills === 'number' && !isNaN(opts.kills)) ? opts.kills : 0,
+      score: (typeof opts.score === 'number' && !isNaN(opts.score)) ? opts.score : 0,
+      level: lvl,
       status: 'playing',
-      logs: ['[' + stg + '스테이지] 던전 레이드 전투 시작! 판 위의 몬스터 ' + goalKills + '마리를 처치하세요!'],
+      logs: ['[Lv.' + lvl + ' 난이도] 던전 레이드 서바이벌 시작! 끝까지 생존하여 최고 점수를 기록하세요!'],
       lastEvents: [],
       activeBuffs: [],
       lastDiceBuff: null,
-      profile: prof
+      profile: prof,
+      // 하위 호환 필드 유지
+      stage: lvl,
+      goalKills: Infinity
     };
   }
 
   /**
-   * 레이드 체인 해결 및 효과·중력·반격·주사위·승패 판정 (순수 함수)
+   * 플레이어 레벨에 따른 다음 레벨업 필요 경험치 계산 (순수 함수)
+   * 공식: 8 + playerLevel * 4
+   * @param {number} [playerLevel]
+   * @returns {number}
+   */
+  function getRaidExpToNext(playerLevel) {
+    var lvl = (typeof playerLevel === 'number' && playerLevel >= 1) ? Math.floor(playerLevel) : 1;
+    return 8 + lvl * 4;
+  }
+
+  /**
+   * 레이드 선택지 적용 (순수 함수)
+   * 원본 raidState는 변경하지 않고 깊은 복사본을 반환
+   * 범위 밖 인덱스이거나 선택 대기 중이 아니면 raidState 그대로 반환
+   * @param {Object} raidState
+   * @param {number} choiceIndex 0, 1, 2
+   * @returns {Object}
+   */
+  function applyRaidChoice(raidState, choiceIndex) {
+    if (!raidState || typeof raidState !== 'object') {
+      return raidState;
+    }
+    var choices = Array.isArray(raidState.pendingChoices)
+      ? raidState.pendingChoices
+      : (raidState.pendingChoice ? [raidState.pendingChoice] : []);
+    if (choices.length === 0) {
+      return raidState;
+    }
+
+    var curChoice = choices[0];
+    if (!curChoice || !Array.isArray(curChoice.options)) {
+      return raidState;
+    }
+
+    if (typeof choiceIndex !== 'number' || isNaN(choiceIndex)) {
+      return raidState;
+    }
+    var idx = Math.floor(choiceIndex);
+    if (idx < 0 || idx >= curChoice.options.length) {
+      return raidState;
+    }
+
+    var selectedOption = curChoice.options[idx];
+
+    // 깊은 복사
+    var nextState = JSON.parse(JSON.stringify(raidState));
+    if (raidState.profile) {
+      nextState.profile = Object.assign({}, raidState.profile, { stats: Object.assign({}, raidState.profile.stats) });
+    }
+
+    var player = nextState.player || {};
+    var pShield = typeof player.shield === 'number' ? player.shield : 0;
+    var pMaxShield = typeof player.maxShield === 'number' ? player.maxShield : 8;
+    var pMaxHp = typeof player.maxHp === 'number' ? player.maxHp : 20;
+    var pHp = typeof player.hp === 'number' ? player.hp : pMaxHp;
+    var pWeaponAtk = typeof player.weaponAtk === 'number' ? player.weaponAtk : 1;
+    var pBaseAtk = typeof player.baseAtk === 'number' ? player.baseAtk : 1;
+    var pShieldBonus = typeof player.shieldBonus === 'number' ? player.shieldBonus : 0;
+    var pPotionBonus = typeof player.potionBonus === 'number' ? player.potionBonus : 0;
+
+    var logMsg = '';
+
+    if (curChoice.kind === 'upgrade') {
+      // 선택지 3개: 0: 무기 강화(weaponAtk +1) / 1: 갑옷 강화(maxShield +3) / 2: 체력 강화(maxHp +3 이고 hp +3)
+      var uEff = selectedOption.effect || selectedOption.id;
+      if (uEff === 'weaponAtk' || uEff === 'weapon') {
+        player.weaponAtk = pWeaponAtk + (selectedOption.amount || 1);
+        logMsg = '🔨 [장비 강화] 무기 강화 (+1) -> 무기 공격력: ' + player.weaponAtk;
+      } else if (uEff === 'maxShield' || uEff === 'shield') {
+        player.maxShield = pMaxShield + (selectedOption.amount || 3);
+        logMsg = '🛡️ [장비 강화] 갑옷 강화 (+3) -> 최대 방어막: ' + player.maxShield;
+      } else if (uEff === 'maxHp' || uEff === 'health') {
+        player.maxHp = pMaxHp + (selectedOption.amount || 3);
+        player.hp = pHp + (selectedOption.amount || 3);
+        logMsg = '💖 [장비 강화] 체력 강화 (+3) -> 체력: ' + player.hp + '/' + player.maxHp;
+      } else {
+        if (idx === 0) {
+          player.weaponAtk = pWeaponAtk + 1;
+          logMsg = '🔨 [장비 강화] 무기 강화 (+1) -> 무기 공격력: ' + player.weaponAtk;
+        } else if (idx === 1) {
+          player.maxShield = pMaxShield + 3;
+          logMsg = '🛡️ [장비 강화] 갑옷 강화 (+3) -> 최대 방어막: ' + player.maxShield;
+        } else if (idx === 2) {
+          player.maxHp = pMaxHp + 3;
+          player.hp = pHp + 3;
+          logMsg = '💖 [장비 강화] 체력 강화 (+3) -> 체력: ' + player.hp + '/' + player.maxHp;
+        }
+      }
+    } else if (curChoice.kind === 'shop') {
+      // 상점 선택지: 무기 +1 / 갑옷 +3 / 체력 회복 전부 / 최대 체력 +3 / 방어막 가득
+      var eff = selectedOption.effect || selectedOption.id;
+      if (eff === 'weaponAtk' || eff === 'shop_weapon') {
+        player.weaponAtk = pWeaponAtk + 1;
+        logMsg = '🪙 [금화 상점] 무기 강화 구매 (+1) -> 무기 공격력: ' + player.weaponAtk;
+      } else if (eff === 'maxShield' || eff === 'shop_shield') {
+        player.maxShield = pMaxShield + 3;
+        logMsg = '🪙 [금화 상점] 갑옷 강화 구매 (+3) -> 최대 방어막: ' + player.maxShield;
+      } else if (eff === 'healAll' || eff === 'shop_heal_all') {
+        player.hp = player.maxHp;
+        logMsg = '🪙 [금화 상점] 체력 회복 구매 -> 체력 완전 회복 (' + player.hp + '/' + player.maxHp + ')';
+      } else if (eff === 'maxHp' || eff === 'shop_max_hp') {
+        player.maxHp = pMaxHp + 3;
+        player.hp = pHp + 3;
+        logMsg = '🪙 [금화 상점] 최대 체력 구매 (+3) -> 체력: ' + player.hp + '/' + player.maxHp;
+      } else if (eff === 'shieldFull' || eff === 'shop_shield_full') {
+        player.shield = player.maxShield;
+        logMsg = '🪙 [금화 상점] 방어막 보강 구매 -> 방어막 가득 (' + player.shield + '/' + player.maxShield + ')';
+      }
+    } else if (curChoice.kind === 'levelup') {
+      // 레벨업 선택지: 힘(baseAtk +1) / 체력(maxHp +3, hp +3) / 방패효율(shieldBonus +1) / 운(potionBonus +1)
+      var lEff = selectedOption.effect || selectedOption.id;
+      if (lEff === 'baseAtk' || lEff === 'str') {
+        player.baseAtk = pBaseAtk + 1;
+        logMsg = '⚡ [레벨업] 힘 특성 선택 -> 기본 공격력: ' + player.baseAtk;
+      } else if (lEff === 'maxHp' || lEff === 'con') {
+        player.maxHp = pMaxHp + 3;
+        player.hp = pHp + 3;
+        logMsg = '💖 [레벨업] 체력 특성 선택 -> 체력: ' + player.hp + '/' + player.maxHp;
+      } else if (lEff === 'shieldBonus' || lEff === 'shield_eff') {
+        player.shieldBonus = pShieldBonus + 1;
+        logMsg = '🛡️ [레벨업] 방패효율 특성 선택 -> 방패 줄 방어막 +' + player.shieldBonus;
+      } else if (lEff === 'potionBonus' || lEff === 'luck') {
+        player.potionBonus = pPotionBonus + 1;
+        logMsg = '🧪 [레벨업] 운 특성 선택 -> 물약 회복량 +' + player.potionBonus;
+      }
+    }
+
+    nextState.player = player;
+    nextState.pendingChoices.shift();
+    nextState.pendingChoice = nextState.pendingChoices.length > 0 ? nextState.pendingChoices[0] : null;
+
+    if (logMsg && Array.isArray(nextState.logs)) {
+      nextState.logs.push(logMsg);
+    }
+
+    return nextState;
+  }
+
+  /**
+   * 레이드 체인에서 몬스터들이 받을 예상 피해량 계산 (순수 함수)
+   * 공식: 기본 공격력(player.baseAtk) + 칼 개수 x 무기 공격력(player.weaponAtk) + 보직/버프 보너스
+   * 칼만 있는 줄(몬스터 0마리)이거나 비공격 줄이면 0 반환
+   * @param {Object} raidState 현재 레이드 상태
+   * @param {Array<{r: number, c: number}>} path 경로 좌표 배열
+   * @returns {number} 몬스터 각각이 받는 피해량
+   */
+  function getRaidChainDamage(raidState, path) {
+    if (!raidState || !path || !Array.isArray(path) || path.length < 3) {
+      return 0;
+    }
+    var board = raidState.board;
+    if (!board || !Array.isArray(board) || board.length === 0) {
+      return 0;
+    }
+
+    var firstPt = path[0];
+    if (!firstPt || !board[firstPt.r] || !board[firstPt.r][firstPt.c]) {
+      return 0;
+    }
+    var firstCell = board[firstPt.r][firstPt.c];
+    if (firstCell.type !== 'sword' && firstCell.type !== 'monster') {
+      return 0;
+    }
+
+    var swordCount = 0;
+    var monsterCount = 0;
+    for (var i = 0; i < path.length; i++) {
+      var pt = path[i];
+      if (!pt || !board[pt.r] || !board[pt.r][pt.c]) return 0;
+      var cell = board[pt.r][pt.c];
+      if (cell.type === 'sword') {
+        swordCount++;
+      } else if (cell.type === 'monster') {
+        monsterCount++;
+      } else {
+        return 0; // 유효하지 않은 칸
+      }
+    }
+
+    // 칼만 있는 줄이면 몬스터가 없으므로 몬스터 피해는 0
+    if (monsterCount === 0) {
+      return 0;
+    }
+
+    var player = raidState.player || {};
+    var baseAtk = (typeof player.baseAtk === 'number') ? player.baseAtk : 1;
+    var weaponAtk = (typeof player.weaponAtk === 'number') ? player.weaponAtk : 1;
+
+    // 버프 배율 및 추가 피해
+    var atkMul = 1;
+    var bonusDmg = 0;
+    var buffs = raidState.activeBuffs || [];
+    for (var b = 0; b < buffs.length; b++) {
+      var ab = buffs[b];
+      if (ab.effect) {
+        if (typeof ab.effect.multiplier === 'number' && ab.effect.multiplier > atkMul) {
+          atkMul = ab.effect.multiplier;
+        }
+        if (typeof ab.effect.bonusDmg === 'number') {
+          bonusDmg += ab.effect.bonusDmg;
+        }
+      }
+    }
+
+    // 보직 보너스 (보병, 운전병, 포병 등)
+    var roleBonus = raidState.profile ? applyRoleBonus(raidState.profile, { type: 4, cleared: swordCount }) : null;
+    var roleBonusDmg = (roleBonus && roleBonus.bonusDamage) ? roleBonus.bonusDamage : 0;
+
+    var rawDmg = baseAtk + (swordCount * weaponAtk) + roleBonusDmg + bonusDmg;
+    var finalDmg = rawDmg * atkMul;
+
+    return finalDmg;
+  }
+
+  /**
+   * 레이드 체인 해결 및 효과·중력·반격·주사위·특수몬스터 판정 (순수 함수)
    * 원본 raidState는 변경하지 않고 깊은 복사된 새 raidState 반환
+   * 무한 서바이벌 모드: 스테이지 승리 없이 체력 0 도달 시 defeat
    * @param {Object} raidState 현재 레이드 상태 객체
    * @param {Array<{r: number, c: number}>} path 연결한 경로
    * @param {function(): number} [rng] 난수 생성기
@@ -2512,6 +2804,10 @@
       return raidState;
     }
     if (raidState.status !== 'playing') {
+      return raidState;
+    }
+    // 조각 11: pendingChoice가 있는 동안 resolveRaidChain은 줄을 무시한다 (상태 그대로 반환)
+    if (raidState.pendingChoice || (Array.isArray(raidState.pendingChoices) && raidState.pendingChoices.length > 0)) {
       return raidState;
     }
     if (!path || !Array.isArray(path) || path.length < 3) {
@@ -2549,32 +2845,31 @@
 
     // 2. 종류 규칙 검사
     var firstCell = board[path[0].r][path[0].c];
-    if (!firstCell || firstCell.type === 'monster') {
-      return raidState; // 몬스터 시작 거부
+    if (!firstCell) {
+      return raidState;
     }
 
+    var isCombatChain = (firstCell.type === 'sword' || firstCell.type === 'monster');
     var chainType = firstCell.type;
     var swordCount = 0;
+    var monsterCount = 0;
 
     for (var j = 0; j < path.length; j++) {
       var cell = board[path[j].r][path[j].c];
       if (!cell) return raidState;
-      if (chainType === 'sword') {
+      if (isCombatChain) {
         if (cell.type === 'sword') {
           swordCount++;
-        } else if (cell.type !== 'monster') {
-          return raidState; // 칼 줄에 다른 종류 포함 거부
+        } else if (cell.type === 'monster') {
+          monsterCount++;
+        } else {
+          return raidState; // 칼/몬스터 줄에 다른 종류 포함 거부
         }
       } else {
         if (cell.type !== chainType) {
           return raidState; // 동일 종류가 아니면 거부
         }
       }
-    }
-
-    // 규칙 2: 칼이 최소 1칸은 있어야 함 (칼 0개 줄 거부)
-    if (chainType === 'sword' && swordCount < 1) {
-      return raidState;
     }
 
     var safeRng = typeof rng === 'function' ? rng : Math.random;
@@ -2589,25 +2884,58 @@
           type: oldC.type,
           hp: oldC.hp,
           maxHp: oldC.maxHp,
-          atk: oldC.atk
+          atk: oldC.atk,
+          trait: oldC.trait || null
         });
       }
       newBoard.push(newRow);
     }
 
+    var maxShield = (raidState.player && typeof raidState.player.maxShield === 'number') ? raidState.player.maxShield : 8;
+    var playerLevel = (raidState.player && typeof raidState.player.playerLevel === 'number') ? raidState.player.playerLevel : 1;
+    var exp = (raidState.player && typeof raidState.player.exp === 'number') ? raidState.player.exp : 0;
+    var shieldBonus = (raidState.player && typeof raidState.player.shieldBonus === 'number') ? raidState.player.shieldBonus : 0;
+    var potionBonus = (raidState.player && typeof raidState.player.potionBonus === 'number') ? raidState.player.potionBonus : 0;
+
     var playerCopy = {
       maxHp: raidState.player ? raidState.player.maxHp : 20,
       hp: raidState.player ? raidState.player.hp : 20,
-      shield: raidState.player ? raidState.player.shield : 0
+      shield: raidState.player ? raidState.player.shield : 0,
+      maxShield: maxShield,
+      baseAtk: (raidState.player && typeof raidState.player.baseAtk === 'number') ? raidState.player.baseAtk : 1,
+      weaponAtk: (raidState.player && typeof raidState.player.weaponAtk === 'number') ? raidState.player.weaponAtk : 1,
+      playerLevel: playerLevel,
+      exp: exp,
+      shieldBonus: shieldBonus,
+      potionBonus: potionBonus
     };
+
+    var currentTurn = (typeof raidState.turn === 'number') ? raidState.turn : 0;
+    var nextTurn = currentTurn + 1;
+    var nextLevel = 1 + Math.floor(nextTurn / 8);
+
+    var upgradeGauge = (typeof raidState.upgradeGauge === 'number') ? raidState.upgradeGauge : 0;
+    var goldGauge = (typeof raidState.goldGauge === 'number') ? raidState.goldGauge : 0;
+    var pendingChoices = Array.isArray(raidState.pendingChoices)
+      ? raidState.pendingChoices.map(function(c) {
+          return Object.assign({}, c, { options: Array.isArray(c.options) ? c.options.map(function(o) { return Object.assign({}, o); }) : [] });
+        })
+      : (raidState.pendingChoice ? [Object.assign({}, raidState.pendingChoice)] : []);
 
     var nextState = {
       board: newBoard,
       player: playerCopy,
       gold: typeof raidState.gold === 'number' ? raidState.gold : 0,
-      stage: typeof raidState.stage === 'number' ? raidState.stage : 1,
+      upgradeGauge: upgradeGauge,
+      goldGauge: goldGauge,
+      pendingChoices: pendingChoices,
+      pendingChoice: null,
+      turn: nextTurn,
       kills: typeof raidState.kills === 'number' ? raidState.kills : 0,
-      goalKills: typeof raidState.goalKills === 'number' ? raidState.goalKills : (typeof raidState.stage === 'number' ? raidState.stage + 4 : 5),
+      score: 0,
+      level: nextLevel,
+      stage: nextLevel, // 하위 호환
+      goalKills: Infinity, // 무한 서바이벌 모드
       status: raidState.status,
       logs: Array.isArray(raidState.logs) ? raidState.logs.slice() : [],
       lastEvents: [],
@@ -2624,26 +2952,10 @@
     var actionLog = '';
 
     // 4. 줄 종류별 효과 적용
-    if (chainType === 'sword') {
-      var atkMul = 1;
-      var bonusDmg = 0;
-      for (var b = 0; b < nextState.activeBuffs.length; b++) {
-        var ab = nextState.activeBuffs[b];
-        if (ab.effect) {
-          if (typeof ab.effect.multiplier === 'number' && ab.effect.multiplier > atkMul) {
-            atkMul = ab.effect.multiplier;
-          }
-          if (typeof ab.effect.bonusDmg === 'number') {
-            bonusDmg += ab.effect.bonusDmg;
-          }
-        }
-      }
-
-      var roleBonus = nextState.profile ? applyRoleBonus(nextState.profile, { type: 4, cleared: swordCount }) : null;
+    if (isCombatChain) {
+      var baseDamage = getRaidChainDamage(nextState, path);
       var famBonus = nextState.profile ? applyFamilyBonus(nextState.profile, { type: 4, cleared: swordCount }, safeRng) : null;
-
-      var baseDamage = swordCount + (roleBonus && roleBonus.bonusDamage ? roleBonus.bonusDamage : 0) + bonusDmg;
-      var finalDamage = baseDamage * atkMul;
+      var finalDamage = baseDamage;
       if (famBonus && famBonus.isCrit) {
         finalDamage = Math.floor(finalDamage * famBonus.critMultiplier);
       }
@@ -2656,10 +2968,11 @@
         }
       }
 
-      // 몬스터 칸 타격
+      // 몬스터 칸 타격 및 특수 몬스터(가시) 반사 처리
       var hitCount = 0;
       var killedCount = 0;
       var goldEarned = 0;
+      var totalSpikyReflect = 0;
 
       for (var m = 0; m < path.length; m++) {
         var mPos = path[m];
@@ -2667,7 +2980,40 @@
         if (mCell.type === 'monster') {
           hitCount++;
           mCell.hp -= finalDamage;
-          nextState.lastEvents.push({ kind: 'hit', row: mPos.r, col: mPos.c, dmg: finalDamage });
+
+          // 특수 몬스터 trait: 'spiky' (가시 몬스터: 맞을 때 받은 피해의 절반(올림)을 플레이어에게 반사, 방어막 우선 흡수)
+          if (mCell.trait === 'spiky' && finalDamage > 0) {
+            var reflectDmg = Math.ceil(finalDamage / 2);
+            totalSpikyReflect += reflectDmg;
+            var absorbReflect = 0;
+            var remainReflect = reflectDmg;
+            if (nextState.player.shield > 0) {
+              if (nextState.player.shield >= remainReflect) {
+                absorbReflect = remainReflect;
+                nextState.player.shield -= remainReflect;
+                remainReflect = 0;
+              } else {
+                absorbReflect = nextState.player.shield;
+                remainReflect -= nextState.player.shield;
+                nextState.player.shield = 0;
+              }
+            }
+            if (remainReflect > 0) {
+              nextState.player.hp -= remainReflect;
+              if (nextState.player.hp <= 0) {
+                nextState.player.hp = 0;
+                nextState.status = 'defeat';
+              }
+            }
+            nextState.lastEvents.push({
+              kind: 'spikyReflect',
+              row: mPos.r,
+              col: mPos.c,
+              dmg: reflectDmg,
+              absorbed: absorbReflect,
+              hpDmg: remainReflect
+            });
+          }
 
           if (mCell.hp <= 0) {
             mCell.hp = 0;
@@ -2675,40 +3021,110 @@
             nextState.kills++;
             toRemove[mPos.r + ',' + mPos.c] = true;
 
+            // 조각 11: 처치 시 경험치 획득 (maxHp, 특수 몬스터는 +2)
+            var gainedExp = (mCell.trait === 'spiky' || mCell.trait === 'regen') ? (mCell.maxHp + 2) : mCell.maxHp;
+            nextState.player.exp += gainedExp;
+
             var dropGold = Math.floor(safeRng() * 2) + 1;
             if (famBonus && famBonus.goldMultiplier) {
               dropGold = Math.round(dropGold * famBonus.goldMultiplier);
             }
             goldEarned += dropGold;
             nextState.gold += dropGold;
-            nextState.lastEvents.push({ kind: 'kill', row: mPos.r, col: mPos.c, gold: dropGold });
+            nextState.lastEvents.push({ kind: 'kill', row: mPos.r, col: mPos.c, gold: dropGold, exp: gainedExp });
+          } else {
+            nextState.lastEvents.push({ kind: 'hit', row: mPos.r, col: mPos.c, dmg: finalDamage });
           }
         }
       }
 
-      actionLog = '⚔️ 칼 ' + swordCount + '개 타격(' + finalDamage + ' 피해) -> 👹 몬스터 ' + hitCount + '마리 피격(' + killedCount + '마리 처치, 🪙+' + goldEarned + ')';
+      // 조각 11: 몬스터 처치 후 레벨업 체크 루프
+      var expToNext = getRaidExpToNext(nextState.player.playerLevel);
+      while (nextState.player.exp >= expToNext) {
+        nextState.player.exp -= expToNext;
+        nextState.player.playerLevel += 1;
+        expToNext = getRaidExpToNext(nextState.player.playerLevel);
+
+        var lvlPool = [
+          { id: 'str', label: '힘', desc: '기본 공격력 +1', effect: 'baseAtk', amount: 1 },
+          { id: 'con', label: '체력', desc: '최대 체력 +3 & 체력 +3', effect: 'maxHp', amount: 3 },
+          { id: 'shield_eff', label: '방패효율', desc: '방패 줄 방어막을 줄 길이 +1 만큼', effect: 'shieldBonus', amount: 1 },
+          { id: 'luck', label: '운', desc: '물약 줄 회복 +1', effect: 'potionBonus', amount: 1 }
+        ];
+        var shuffledLvl = lvlPool.slice();
+        for (var li = shuffledLvl.length - 1; li > 0; li--) {
+          var lRand = Math.floor(safeRng() * (li + 1));
+          var tempL = shuffledLvl[li];
+          shuffledLvl[li] = shuffledLvl[lRand];
+          shuffledLvl[lRand] = tempL;
+        }
+        nextState.pendingChoices.push({
+          kind: 'levelup',
+          title: '레벨 업!',
+          desc: '새로운 능력을 하나 선택하세요 (Lv.' + nextState.player.playerLevel + ')',
+          options: shuffledLvl.slice(0, 3)
+        });
+      }
+
+      if (swordCount > 0 && hitCount === 0) {
+        actionLog = '⚔️ 칼 ' + swordCount + '개 정리 (몬스터 타격 없음)';
+      } else {
+        actionLog = '⚔️ 공격 (칼 ' + swordCount + '개, 피해 ' + finalDamage + ') -> 👹 몬스터 ' + hitCount + '마리 피격(' + killedCount + '마리 처치, 🪙+' + goldEarned + ')';
+      }
+      if (totalSpikyReflect > 0) {
+        actionLog += ' 🌵 가시 반사(' + totalSpikyReflect + ' 피해)';
+      }
 
     } else if (chainType === 'shield') {
       var famBonusShield = nextState.profile ? applyFamilyBonus(nextState.profile, { type: 1, cleared: path.length }, safeRng) : null;
       var shieldMul = (famBonusShield && famBonusShield.shieldMultiplier) ? famBonusShield.shieldMultiplier : 1.0;
-      var shieldGain = Math.round(path.length * shieldMul);
-      nextState.player.shield += shieldGain;
-      nextState.lastEvents.push({ kind: 'shield', amount: shieldGain });
+      var shieldGain = Math.round(path.length * shieldMul) + (nextState.player.shieldBonus || 0);
+
+      var curShield = nextState.player.shield;
+      var maxShieldVal = nextState.player.maxShield || 8;
+      var newShield = curShield + shieldGain;
+      var gainedToShield = shieldGain;
+      var overflowShield = 0;
+
+      if (newShield > maxShieldVal) {
+        nextState.player.shield = maxShieldVal;
+        overflowShield = newShield - maxShieldVal;
+        gainedToShield = Math.max(0, maxShieldVal - curShield);
+        nextState.upgradeGauge += overflowShield * 10;
+      } else {
+        nextState.player.shield = newShield;
+      }
+
+      while (nextState.upgradeGauge >= 100) {
+        nextState.upgradeGauge -= 100;
+        nextState.pendingChoices.push({
+          kind: 'upgrade',
+          title: '장비를 강화해요',
+          desc: '원하는 장비 능력을 하나 선택하세요',
+          options: [
+            { id: 'weapon', label: '무기 강화', desc: '무기 공격력 +1', effect: 'weapon', amount: 1 },
+            { id: 'shield', label: '갑옷 강화', desc: '최대 방어막 +3', effect: 'shield', amount: 3 },
+            { id: 'health', label: '체력 강화', desc: '최대 체력 +3 & 체력 +3', effect: 'health', amount: 3 }
+          ]
+        });
+      }
+
+      nextState.lastEvents.push({ kind: 'shield', amount: gainedToShield, overflow: overflowShield });
       for (var s = 0; s < path.length; s++) {
         toRemove[path[s].r + ',' + path[s].c] = true;
       }
-      actionLog = '🛡️ 방패 ' + path.length + '개 연결 -> 방어막 +' + shieldGain + ' (현재 ' + nextState.player.shield + ')';
+      actionLog = '🛡️ 방패 ' + path.length + '개 연결 -> 방어막 +' + gainedToShield + (overflowShield > 0 ? ' (초과 +' + overflowShield + ' -> 강화 게이지 +' + (overflowShield * 10) + ')' : '') + ' (현재 ' + nextState.player.shield + '/' + nextState.player.maxShield + ')';
 
     } else if (chainType === 'potion') {
       var roleBonusPotion = nextState.profile ? applyRoleBonus(nextState.profile, { type: 2, cleared: path.length }) : null;
       var healMul = (roleBonusPotion && roleBonusPotion.healMultiplier) ? roleBonusPotion.healMultiplier : 1.0;
-      var healGain = Math.floor(path.length * healMul);
+      var healGain = Math.floor(path.length * healMul) + (nextState.player.potionBonus || 0);
       var oldHp = nextState.player.hp;
       var newHp = oldHp + healGain;
       if (newHp > nextState.player.maxHp) {
         if (roleBonusPotion && roleBonusPotion.overflowToShield) {
           var overflow = newHp - nextState.player.maxHp;
-          nextState.player.shield += overflow;
+          nextState.player.shield = Math.min(nextState.player.maxShield || 8, nextState.player.shield + overflow);
         }
         nextState.player.hp = nextState.player.maxHp;
       } else {
@@ -2726,14 +3142,69 @@
       var coinMul = (famBonusCoin && famBonusCoin.goldMultiplier) ? famBonusCoin.goldMultiplier : 1.0;
       var coinGain = Math.round(path.length * coinMul);
       nextState.gold += coinGain;
+      nextState.goldGauge += path.length * 8;
+
+      while (nextState.goldGauge >= 100) {
+        nextState.goldGauge -= 100;
+        var shopPool = [
+          { id: 'shop_weapon', label: '무기 구매', desc: '무기 공격력 +1', effect: 'weaponAtk', amount: 1 },
+          { id: 'shop_shield', label: '갑옷 구매', desc: '최대 방어막 +3', effect: 'maxShield', amount: 3 },
+          { id: 'shop_heal_all', label: '치료 물약', desc: '체력 회복 전부', effect: 'healAll' },
+          { id: 'shop_max_hp', label: '생명력 영약', desc: '최대 체력 +3 & 체력 +3', effect: 'maxHp', amount: 3 },
+          { id: 'shop_shield_full', label: '방어막 보강', desc: '방어막 가득', effect: 'shieldFull' }
+        ];
+        var shuffledShop = shopPool.slice();
+        for (var si = shuffledShop.length - 1; si > 0; si--) {
+          var sRand = Math.floor(safeRng() * (si + 1));
+          var tempS = shuffledShop[si];
+          shuffledShop[si] = shuffledShop[sRand];
+          shuffledShop[sRand] = tempS;
+        }
+        nextState.pendingChoices.push({
+          kind: 'shop',
+          title: '상점이 열렸어요',
+          desc: '골드로 구매할 아이템을 하나 고르세요',
+          options: shuffledShop.slice(0, 3)
+        });
+      }
+
       nextState.lastEvents.push({ kind: 'gold', amount: coinGain });
       for (var c = 0; c < path.length; c++) {
         toRemove[path[c].r + ',' + path[c].c] = true;
       }
-      actionLog = '🪙 금화 ' + path.length + '개 연결 -> 골드 +' + coinGain + ' (총 ' + nextState.gold + ')';
+      actionLog = '🪙 금화 ' + path.length + '개 연결 -> 골드 +' + coinGain + ' (상점 게이지 +' + (path.length * 8) + ')';
     }
 
-    // 5. 중력 및 새 칸 보충 (Rule 5)
+    // 5. 점수 갱신: score = kills * 10 + turn
+    nextState.score = nextState.kills * 10 + nextState.turn;
+
+    // 6. 중력 및 새 칸 보충
+    // 중력 전 살아남은 피격 몬스터의 중력 후 위치(afterRow, afterCol) 사전 계산
+    for (var evIdx = 0; evIdx < nextState.lastEvents.length; evIdx++) {
+      var evItem = nextState.lastEvents[evIdx];
+      if (evItem.kind === 'hit') {
+        var removedBelow = 0;
+        for (var rCheck = evItem.row + 1; rCheck < size; rCheck++) {
+          if (toRemove[rCheck + ',' + evItem.col]) {
+            removedBelow++;
+          }
+        }
+        evItem.afterRow = evItem.row + removedBelow;
+        evItem.afterCol = evItem.col;
+      }
+    }
+
+    // 판에 살아남은 몬스터 수 계산 (40% 초과 방지용)
+    var remainingMonsters = 0;
+    var totalGridCells = size * size;
+    for (var countR = 0; countR < size; countR++) {
+      for (var countC = 0; countC < size; countC++) {
+        if (!toRemove[countR + ',' + countC] && nextState.board[countR][countC].type === 'monster') {
+          remainingMonsters++;
+        }
+      }
+    }
+
     for (var col = 0; col < size; col++) {
       var kept = [];
       for (var row = size - 1; row >= 0; row--) {
@@ -2745,12 +3216,17 @@
         if (kept.length > 0) {
           nextState.board[row2][col] = kept.shift();
         } else {
-          nextState.board[row2][col] = createRaidCell(nextState.stage, safeRng);
+          var curRatio = remainingMonsters / totalGridCells;
+          var newCell = createRaidCell(nextState.level, safeRng, curRatio);
+          if (newCell.type === 'monster') {
+            remainingMonsters++;
+          }
+          nextState.board[row2][col] = newCell;
         }
       }
     }
 
-    // 6. 10칸 이상 줄이면 주사위 버프 발동 (Rule 7)
+    // 7. 10칸 이상 줄이면 주사위 버프 발동 (원작에 없는 우리 고유 규칙 유지)
     var diceLog = '';
     if (path.length >= 10) {
       var diceBuff;
@@ -2772,12 +3248,13 @@
           for (var bc = 0; bc < size; bc++) {
             if (nextState.board[br][bc].type === 'monster' && nextState.board[br][bc].hp > 0) {
               nextState.board[br][bc].hp -= eff.damage;
-              nextState.lastEvents.push({ kind: 'hit', row: br, col: bc, dmg: eff.damage });
+              nextState.lastEvents.push({ kind: 'hit', row: br, col: bc, afterRow: br, afterCol: bc, dmg: eff.damage });
               if (nextState.board[br][bc].hp <= 0) {
                 nextState.board[br][bc].hp = 0;
                 nextState.kills++;
                 nextState.gold += 1;
-                nextState.board[br][bc] = createRaidCell(nextState.stage, safeRng);
+                nextState.score = nextState.kills * 10 + nextState.turn;
+                nextState.board[br][bc] = createRaidCell(nextState.level, safeRng);
               }
               break;
             }
@@ -2798,18 +3275,16 @@
       diceLog = '🎲 ' + diceBuff.emoji + ' 눈금 ' + diceBuff.dice + ' [' + diceBuff.name + '] 발동! (' + diceBuff.desc + ')';
     }
 
-    // 7. 승리 판정 (Rule 8: kills >= goalKills)
-    if (nextState.kills >= nextState.goalKills) {
-      nextState.status = 'victory';
-      if (nextState.profile) {
-        nextState.profile = addExpToProfile(nextState.profile, 30);
-      }
-      var winLog = actionLog + (diceLog ? ' | ' + diceLog : '') + ' -> 👹 목표 몬스터 ' + nextState.goalKills + '마리 처치! 스테이지 승리!';
-      nextState.logs.push(winLog);
+    // 가시 반사로 인해 이미 플레이어가 쓰러졌는지 확인
+    if (nextState.status === 'defeat') {
+      var failLog = actionLog;
+      if (diceLog) failLog += ' | ' + diceLog;
+      failLog += ' | 💀 가시 반사로 인해 고블린 쓰러짐 (게임 오버)';
+      nextState.logs.push(failLog);
       return nextState;
     }
 
-    // 8. 몬스터의 반격 (Rule 6)
+    // 8. 살아남은 모든 몬스터의 반격 (원작 핵심 메커니즘)
     var skipEnemy = false;
     var absorbAll = false;
     for (var aIdx = 0; aIdx < nextState.activeBuffs.length; aIdx++) {
@@ -2827,7 +3302,7 @@
         var aCell = nextState.board[ar][ac];
         if (aCell.type === 'monster' && aCell.hp > 0) {
           aliveMonsters++;
-          totalEnemyAtk += (typeof aCell.atk === 'number' && aCell.atk > 0) ? aCell.atk : 1;
+          totalEnemyAtk += (typeof aCell.atk === 'number') ? Math.max(0, aCell.atk) : 1;
         }
       }
     }
@@ -2871,20 +3346,38 @@
 
       enemyLog = '👹 몬스터 ' + aliveMonsters + '마리 반격(총 ' + totalEnemyAtk + ' 피해)! 실드 ' + absorbedShield + ' 흡수, HP -' + remainAtk;
       if (nextState.status === 'defeat') {
-        enemyLog += ' -> 고블린 쓰러짐 (패배)';
+        enemyLog += ' -> 고블린 쓰러짐 (게임 오버)';
       }
     }
 
-    // 9. 버프 지속 턴 차감
+    // 9. 특수 몬스터 trait: 'regen' (반격 뒤에 살아있으면 체력 +1, maxHp까지)
+    if (nextState.status !== 'defeat') {
+      for (var rr = 0; rr < size; rr++) {
+        for (var rc = 0; rc < size; rc++) {
+          var rCell = nextState.board[rr][rc];
+          if (rCell.type === 'monster' && rCell.hp > 0 && rCell.trait === 'regen') {
+            if (rCell.hp < rCell.maxHp) {
+              rCell.hp = Math.min(rCell.maxHp, rCell.hp + 1);
+              nextState.lastEvents.push({ kind: 'regen', row: rr, col: rc, hp: rCell.hp });
+            }
+          }
+        }
+      }
+    }
+
+    // 10. 버프 지속 턴 차감
     nextState.activeBuffs = nextState.activeBuffs
       .map(function(b) { return Object.assign({}, b, { turns: b.turns - 1 }); })
       .filter(function(b) { return b.turns > 0; });
 
-    // 10. 로그 기록
+    // 11. 로그 기록
     var finalLog = actionLog;
     if (diceLog) finalLog += ' | ' + diceLog;
     finalLog += ' | ' + enemyLog;
     nextState.logs.push(finalLog);
+
+    // 조각 11: pendingChoices 동기화
+    nextState.pendingChoice = nextState.pendingChoices.length > 0 ? nextState.pendingChoices[0] : null;
 
     return nextState;
   }
@@ -2924,12 +3417,17 @@
     filterProfanity: filterProfanity,
     generateMockLeaderboard: generateMockLeaderboard,
     createChallengeBattle: createChallengeBattle,
-    // 조각 9 추가 (던전 레이드 기본 규칙)
+    // 조각 9 & 10 추가 (던전 레이드 기본 규칙 및 원작 1차 규칙)
+    DEFAULT_RAID_BOARD_SIZE: DEFAULT_RAID_BOARD_SIZE,
     RAID_SPAWN_RATES: RAID_SPAWN_RATES,
     createRaidCell: createRaidCell,
     createRaidBoard: createRaidBoard,
     extendRaidPath: extendRaidPath,
     createRaidState: createRaidState,
-    resolveRaidChain: resolveRaidChain
+    getRaidChainDamage: getRaidChainDamage,
+    resolveRaidChain: resolveRaidChain,
+    // 조각 11 추가 (장비 강화 게이지, 금화 상점, 경험치 레벨업)
+    getRaidExpToNext: getRaidExpToNext,
+    applyRaidChoice: applyRaidChoice
   };
 });

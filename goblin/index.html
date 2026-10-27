@@ -869,14 +869,34 @@
     }
 
     .board-grid.raid-grid {
-      grid-template-columns: repeat(7, 1fr);
-      grid-template-rows: repeat(7, 1fr);
-      gap: 5px;
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-rows: repeat(6, 1fr);
+      gap: 6px;
     }
 
     .board-grid.raid-grid .cell {
-      font-size: 20px;
-      border-radius: 8px;
+      font-size: 24px;
+      border-radius: 9px;
+    }
+
+    .monster-trait-badge {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      font-size: 11px;
+      line-height: 1;
+      pointer-events: none;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.8));
+    }
+
+    @keyframes shieldFlashGlow {
+      0% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.25); filter: brightness(2); box-shadow: 0 0 16px #38bdf8; }
+      100% { transform: scale(1); filter: brightness(1); }
+    }
+
+    .shield-flash {
+      animation: shieldFlashGlow 0.4s ease;
     }
 
     /* 조각 9: 판 위 몬스터 칸 스타일 */
@@ -1990,6 +2010,167 @@
       transform: scale(0.95);
       background: #475569;
     }
+
+    /* 조각 11: 상단 장비 스탯 & 3대 게이지 막대 */
+    .raid-hud {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .raid-stats-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+    .raid-stat-pill {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      justify-content: center;
+    }
+    .raid-gauges-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
+    }
+    .raid-gauge-wrap {
+      background: #182235;
+      border: 1px solid #283548;
+      border-radius: 8px;
+      padding: 4px 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .raid-gauge-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .raid-gauge-name {
+      color: #94a3b8;
+    }
+    .raid-gauge-val {
+      color: #f8fafc;
+      font-size: 9px;
+    }
+    .raid-gauge-track {
+      background: #0f172a;
+      border-radius: 4px;
+      height: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+    .raid-gauge-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.25s ease;
+    }
+    .raid-gauge-fill.upgrade {
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    }
+    .raid-gauge-fill.gold {
+      background: linear-gradient(90deg, #d97706, #fbbf24);
+    }
+    .raid-gauge-fill.exp {
+      background: linear-gradient(90deg, #10b981, #34d399);
+    }
+    .gauge-flash {
+      animation: gaugeGlow 0.4s ease;
+    }
+    @keyframes gaugeGlow {
+      0% { filter: brightness(1); }
+      50% { filter: brightness(2.2); box-shadow: 0 0 10px #fbbf24; }
+      100% { filter: brightness(1); }
+    }
+
+    /* 조각 11: 선택지 모달 (카드 3장 팝업) */
+    .choice-modal-card {
+      background: #0f172a;
+      border: 2px solid #38bdf8;
+      border-radius: 20px;
+      padding: 18px 14px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .choice-modal-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: #38bdf8;
+    }
+    .choice-modal-desc {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .choice-cards-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      margin-top: 4px;
+    }
+    .choice-card-btn {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 12px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+      color: #f1f5f9;
+      width: 100%;
+    }
+    .choice-card-btn:hover, .choice-card-btn:active {
+      transform: scale(0.98);
+      border-color: #38bdf8;
+      background: #1e3a5f;
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.3);
+    }
+    .choice-card-icon {
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+    .choice-card-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .choice-card-label {
+      font-size: 14px;
+      font-weight: 800;
+      color: #f8fafc;
+    }
+    .choice-card-sub {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.3;
+    }
   </style>
 </head>
 <body>
@@ -2067,6 +2248,47 @@
       <button id="tab-stage-normal" class="stage-tab-btn active" type="button">🐜 일반 전투</button>
       <button id="tab-stage-9" class="stage-tab-btn" type="button">🛡️ 9스테이지 (수문장)</button>
       <button id="tab-stage-10" class="stage-tab-btn" type="button">👑 10스테이지 (영주)</button>
+    </div>
+
+    <!-- 조각 11: 던전 레이드 장비 스탯 & 3대 게이지 막대 -->
+    <div id="raid-hud" class="raid-hud" style="display: none;">
+      <div class="raid-stats-row">
+        <div class="raid-stat-pill" title="플레이어 레벨"><span class="raid-stat-icon">🧌</span> <span id="raid-player-level">Lv.1</span></div>
+        <div class="raid-stat-pill" title="무기 공격력"><span class="raid-stat-icon">⚔️</span> 무기 <span id="raid-weapon-atk">1</span></div>
+        <div class="raid-stat-pill" title="방어막"><span class="raid-stat-icon">🛡️</span> <span id="raid-shield-display">0/8</span></div>
+      </div>
+      <div class="raid-gauges-grid">
+        <!-- 1. 강화 게이지 -->
+        <div class="raid-gauge-wrap" title="방어막 초과 시 누적 (+10/초과분 1)">
+          <div class="raid-gauge-header">
+            <span class="raid-gauge-name">🔨 강화</span>
+            <span id="raid-upgrade-gauge-text" class="raid-gauge-val">0/100</span>
+          </div>
+          <div class="raid-gauge-track">
+            <div id="raid-upgrade-gauge-fill" class="raid-gauge-fill upgrade" style="width: 0%;"></div>
+          </div>
+        </div>
+        <!-- 2. 상점 게이지 -->
+        <div class="raid-gauge-wrap" title="금화 줄 연결 시 누적 (길이 x 8)">
+          <div class="raid-gauge-header">
+            <span class="raid-gauge-name">🪙 상점</span>
+            <span id="raid-gold-gauge-text" class="raid-gauge-val">0/100</span>
+          </div>
+          <div class="raid-gauge-track">
+            <div id="raid-gold-gauge-fill" class="raid-gauge-fill gold" style="width: 0%;"></div>
+          </div>
+        </div>
+        <!-- 3. 경험치 게이지 -->
+        <div class="raid-gauge-wrap" title="몬스터 처치 시 누적">
+          <div class="raid-gauge-header">
+            <span class="raid-gauge-name">✨ 경험치</span>
+            <span id="raid-exp-gauge-text" class="raid-gauge-val">0/12</span>
+          </div>
+          <div class="raid-gauge-track">
+            <div id="raid-exp-gauge-fill" class="raid-gauge-fill exp" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 일반 전투 상황판 -->
@@ -2190,16 +2412,16 @@
 
     <!-- 알림 및 안내 텍스트 -->
     <div id="msg-banner" class="message-banner">
-      손가락으로 같은 종류 칸을 이어보세요! (10칸 이상 시 🎲주사위 버프 발동)
+      같은 칸 3개 이상을 이어요. 칼로 몬스터까지 이으면 몬스터가 맞아요. 몬스터만 이어도 돼요. 끝까지 버텨서 점수를 올려요.
     </div>
 
-    <!-- 조각 9: 던전 레이드 규칙 가이드 (접기 가능, localStorage 기억) -->
+    <!-- 조각 10: 던전 레이드 규칙 가이드 (접기 가능, localStorage 기억) -->
     <div id="raid-guide-box" class="raid-guide-box" style="display: none;">
       <div class="raid-guide-content">
         <span class="guide-icon">💡</span>
         <div class="guide-text">
-          같은 칸 3개 이상을 이어요. 칼로 몬스터까지 이으면 몬스터가 맞아요.<br>
-          <span style="color:#f1f5f9; font-weight:800;">⚔️=공격 🛡️=방어 🧪=회복 🪙=금화 👹=몬스터</span>
+          같은 칸 3개 이상을 이어요. 칼로 몬스터까지 이으면 몬스터가 맞아요. 몬스터만 이어도 돼요. 끝까지 버텨서 점수를 올려요.<br>
+          <span style="color:#f1f5f9; font-weight:800;">⚔️=무기 🛡️=방패 🧪=물약 🪙=금화 👹=몬스터 (🌵가시반사 💚턴재생)</span>
         </div>
       </div>
       <button id="btn-close-raid-guide" class="btn-close-guide" type="button" title="안내 닫기">✕</button>
@@ -2266,6 +2488,18 @@
         <p class="modal-desc" style="font-size: 11px;">보직을 변경하여 특화된 전투 능력을 활용하세요.</p>
         <div id="role-list" class="role-list"></div>
         <button id="btn-close-role-modal" class="btn-modal-action" type="button" style="background:#475569;">닫기</button>
+      </div>
+    </div>
+
+    <!-- 조각 11: pendingChoice 모달 (장비 강화 / 금화 상점 / 레벨 업 선택지 3장) -->
+    <div id="choice-modal" class="modal-overlay" style="display: none; z-index: 120;">
+      <div class="choice-modal-card">
+        <div id="choice-modal-icon" class="modal-icon">✨</div>
+        <h2 id="choice-modal-title" class="choice-modal-title">레벨 업!</h2>
+        <p id="choice-modal-desc" class="choice-modal-desc">원하는 능력을 하나 선택하세요.</p>
+        <div id="choice-options-container" class="choice-cards-container">
+          <!-- 카드 3장 동적 렌더링 -->
+        </div>
       </div>
     </div>
 
@@ -2544,6 +2778,24 @@
       var roleModal = document.getElementById('role-modal');
       var roleList = document.getElementById('role-list');
       var btnCloseRoleModal = document.getElementById('btn-close-role-modal');
+
+      // 조각 11: 레이드 HUD 및 선택지 모달 DOM
+      var raidHud = document.getElementById('raid-hud');
+      var raidPlayerLevel = document.getElementById('raid-player-level');
+      var raidWeaponAtk = document.getElementById('raid-weapon-atk');
+      var raidShieldDisplay = document.getElementById('raid-shield-display');
+      var raidUpgradeGaugeText = document.getElementById('raid-upgrade-gauge-text');
+      var raidUpgradeGaugeFill = document.getElementById('raid-upgrade-gauge-fill');
+      var raidGoldGaugeText = document.getElementById('raid-gold-gauge-text');
+      var raidGoldGaugeFill = document.getElementById('raid-gold-gauge-fill');
+      var raidExpGaugeText = document.getElementById('raid-exp-gauge-text');
+      var raidExpGaugeFill = document.getElementById('raid-exp-gauge-fill');
+
+      var choiceModal = document.getElementById('choice-modal');
+      var choiceModalIcon = document.getElementById('choice-modal-icon');
+      var choiceModalTitle = document.getElementById('choice-modal-title');
+      var choiceModalDesc = document.getElementById('choice-modal-desc');
+      var choiceOptionsContainer = document.getElementById('choice-options-container');
 
       // 조각 6: 마을 지도 모달 DOM
       var mapModal = document.getElementById('map-modal');
@@ -2871,8 +3123,10 @@
       function updateBattleUI() {
         updateProfileUI();
 
-        // 조각 9: 던전 레이드 모드 (판 위 몬스터 칸)
+        // 조각 10 & 11: 던전 레이드 모드 (판 위 몬스터 칸, 6x6 무한 서바이벌, 3대 게이지 막대)
         if (currentMode === 'normal' && raidState) {
+          if (raidHud) raidHud.style.display = 'flex';
+
           var p = raidState.player;
           var pHpPct = Math.max(0, Math.min(100, Math.round((p.hp / p.maxHp) * 100)));
           playerHpFill.style.width = pHpPct + '%';
@@ -2883,6 +3137,46 @@
             playerShieldBadge.textContent = '🛡️ ' + p.shield;
           } else {
             playerShieldBadge.style.display = 'none';
+          }
+
+          // 조각 11: 상단 장비 스탯 및 3대 게이지 막대 갱신
+          if (raidPlayerLevel) raidPlayerLevel.textContent = 'Lv.' + (p.playerLevel || 1);
+          if (raidWeaponAtk) raidWeaponAtk.textContent = p.weaponAtk || 1;
+          if (raidShieldDisplay) raidShieldDisplay.textContent = (p.shield || 0) + '/' + (p.maxShield || 8);
+
+          // 1. 강화 게이지
+          var upGauge = Math.min(100, raidState.upgradeGauge || 0);
+          if (raidUpgradeGaugeText) raidUpgradeGaugeText.textContent = upGauge + '/100';
+          if (raidUpgradeGaugeFill) {
+            raidUpgradeGaugeFill.style.width = upGauge + '%';
+            if (raidState.upgradeGauge >= 100) {
+              raidUpgradeGaugeFill.classList.add('gauge-flash');
+              setTimeout(function() { if (raidUpgradeGaugeFill) raidUpgradeGaugeFill.classList.remove('gauge-flash'); }, 400);
+            }
+          }
+
+          // 2. 상점 게이지
+          var gGauge = Math.min(100, raidState.goldGauge || 0);
+          if (raidGoldGaugeText) raidGoldGaugeText.textContent = gGauge + '/100';
+          if (raidGoldGaugeFill) {
+            raidGoldGaugeFill.style.width = gGauge + '%';
+            if (raidState.goldGauge >= 100) {
+              raidGoldGaugeFill.classList.add('gauge-flash');
+              setTimeout(function() { if (raidGoldGaugeFill) raidGoldGaugeFill.classList.remove('gauge-flash'); }, 400);
+            }
+          }
+
+          // 3. 경험치 게이지
+          var curExp = p.exp || 0;
+          var expToNext = GoblinCore.getRaidExpToNext ? GoblinCore.getRaidExpToNext(p.playerLevel) : (8 + (p.playerLevel || 1) * 4);
+          var expPct = Math.min(100, Math.round((curExp / expToNext) * 100));
+          if (raidExpGaugeText) raidExpGaugeText.textContent = curExp + '/' + expToNext;
+          if (raidExpGaugeFill) {
+            raidExpGaugeFill.style.width = expPct + '%';
+            if (curExp >= expToNext) {
+              raidExpGaugeFill.classList.add('gauge-flash');
+              setTimeout(function() { if (raidExpGaugeFill) raidExpGaugeFill.classList.remove('gauge-flash'); }, 400);
+            }
           }
 
           playerBuffsList.innerHTML = '';
@@ -2896,22 +3190,28 @@
             }
           }
 
-          // 우측: 레이드 처치 현황
-          enemyNameEl.textContent = '처치 목표: ' + raidState.goalKills + '마리';
-          enemyAvatarEl.textContent = '👹';
-          enemyAtkBadge.textContent = '⚔️ ' + (currentStage >= 5 ? 2 : 1);
-          var killPct = Math.max(0, Math.min(100, Math.round((raidState.kills / raidState.goalKills) * 100)));
-          enemyHpFill.style.width = killPct + '%';
-          enemyHpFill.style.background = 'linear-gradient(90deg, #ea580c, #f59e0b)';
-          enemyHpText.textContent = '처치 ' + raidState.kills + ' / ' + raidState.goalKills;
+          // 중앙: 턴 정보
+          battleTurnEl.textContent = raidState.turn + '턴';
 
-          battleTurnEl.textContent = '레이드';
+          // 우측: 레벨(난이도) 및 처치/점수 현황
+          enemyNameEl.textContent = '난이도 Lv.' + raidState.level;
+          enemyAvatarEl.textContent = '👹';
+          enemyAtkBadge.textContent = '처치 ' + raidState.kills + '마리';
+          var curScore = raidState.score || (raidState.kills * 10 + raidState.turn);
+          var lvlProgress = Math.min(100, Math.round(((raidState.turn % 8) / 8) * 100));
+          enemyHpFill.style.width = lvlProgress + '%';
+          enemyHpFill.style.background = 'linear-gradient(90deg, #ea580c, #f59e0b)';
+          enemyHpText.textContent = '점수 ' + curScore + '점';
 
           statGold.textContent = '💰 ' + raidState.gold;
-          statRecord.textContent = (savedData.totalWins || 0) + '승 / ' + (savedData.totalBattles || 0) + '전';
-          statBest.textContent = savedData.bestChain || 0;
+          statRecord.textContent = raidState.kills + '처치 / ' + raidState.turn + '턴';
+          statBest.textContent = (savedData.raidBest || 0) + '점';
+
+          checkPendingChoiceModal();
           return;
         }
+
+        if (raidHud) raidHud.style.display = 'none';
 
         // 플레이어 HP 및 방어막
         var p = battleState.player;
@@ -2956,8 +3256,89 @@
         statBest.textContent = savedData.bestChain || 0;
       }
 
+      // 조각 11: 선택지 모달 팝업 체크 및 렌더링
+      function checkPendingChoiceModal() {
+        if (!choiceModal || !raidState) return;
+        var choices = Array.isArray(raidState.pendingChoices)
+          ? raidState.pendingChoices
+          : (raidState.pendingChoice ? [raidState.pendingChoice] : []);
+        if (choices.length === 0) {
+          choiceModal.style.display = 'none';
+          return;
+        }
+
+        var curChoice = choices[0];
+        if (!curChoice || !Array.isArray(curChoice.options) || curChoice.options.length === 0) {
+          choiceModal.style.display = 'none';
+          return;
+        }
+
+        // 아이콘 및 초보자 친화적 제목/설명
+        var icon = '✨';
+        var title = curChoice.title || '능력 선택';
+        var desc = curChoice.desc || '원하는 것을 하나 선택하세요.';
+
+        if (curChoice.kind === 'upgrade') {
+          icon = '🔨';
+          title = '장비를 강화해요';
+          desc = '방어막 게이지가 찼어요! 원하는 장비 능력을 골라요.';
+        } else if (curChoice.kind === 'shop') {
+          icon = '🪙';
+          title = '상점이 열렸어요';
+          desc = '골드 게이지가 찼어요! 상점에서 원하는 물건을 골라요.';
+        } else if (curChoice.kind === 'levelup') {
+          icon = '✨';
+          title = '레벨 업!';
+          desc = '경험치를 모아 레벨이 올랐어요! 새 특성을 골라요.';
+        }
+
+        choiceModalIcon.textContent = icon;
+        choiceModalTitle.textContent = title;
+        choiceModalDesc.textContent = desc;
+        choiceOptionsContainer.innerHTML = '';
+
+        for (var optIdx = 0; optIdx < curChoice.options.length; optIdx++) {
+          var opt = curChoice.options[optIdx];
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'choice-card-btn';
+
+          var optIcon = '⭐';
+          if (opt.id === 'weapon' || opt.effect === 'weaponAtk' || opt.effect === 'weapon') optIcon = '⚔️';
+          else if (opt.id === 'shield' || opt.effect === 'maxShield' || opt.effect === 'shield') optIcon = '🛡️';
+          else if (opt.id === 'health' || opt.effect === 'maxHp' || opt.effect === 'con' || opt.effect === 'health') optIcon = '💖';
+          else if (opt.effect === 'healAll') optIcon = '🧪';
+          else if (opt.effect === 'shieldFull') optIcon = '🛡️';
+          else if (opt.effect === 'baseAtk' || opt.id === 'str') optIcon = '⚡';
+          else if (opt.effect === 'shieldBonus' || opt.id === 'shield_eff') optIcon = '🛡️';
+          else if (opt.effect === 'potionBonus' || opt.id === 'luck') optIcon = '🍀';
+
+          btn.innerHTML =
+            '<span class="choice-card-icon">' + optIcon + '</span>' +
+            '<div class="choice-card-text">' +
+            '  <span class="choice-card-label">' + opt.label + '</span>' +
+            '  <span class="choice-card-sub">' + opt.desc + '</span>' +
+            '</div>';
+
+          btn.addEventListener('click', (function(choiceIndex) {
+            return function() {
+              raidState = GoblinCore.applyRaidChoice(raidState, choiceIndex);
+              updateBattleUI();
+              renderBoard();
+              checkPendingChoiceModal();
+            };
+          })(optIdx));
+
+          choiceOptionsContainer.appendChild(btn);
+        }
+
+        choiceModal.style.display = 'flex';
+      }
+
       // 조각 5: 보스전 상황판 갱신
       function updateBossUI() {
+        if (raidHud) raidHud.style.display = 'none';
+        if (choiceModal) choiceModal.style.display = 'none';
         if (!bossBattleState) return;
         updateProfileUI();
 
@@ -3175,6 +3556,26 @@
 
       function hideModal() {
         battleModal.style.display = 'none';
+      }
+
+      // 조각 10: 던전 레이드 게임 오버 전용 팝업 (점수, 최고기록, 처치수, 버틴턴, 다시 시작)
+      function showRaidGameOverModal(state) {
+        modalPromoBanner.style.display = 'none';
+        modalIcon.textContent = '💀';
+        modalTitle.textContent = '게임 오버';
+        modalTitle.style.color = '#f87171';
+        var finalScore = (state && typeof state.score === 'number') ? state.score : ((state.kills || 0) * 10 + (state.turn || 0));
+        var bestScore = (savedData && typeof savedData.raidBest === 'number') ? savedData.raidBest : finalScore;
+        modalDesc.innerHTML =
+          '<div style="display:flex; flex-direction:column; gap:6px; margin:8px 0; font-size:12px; line-height:1.5;">' +
+          '  <div>최종 점수: <strong style="color:#fbbf24; font-size:16px;">' + finalScore + '점</strong></div>' +
+          '  <div>최고 기록: <strong style="color:#38bdf8; font-size:14px;">' + bestScore + '점</strong></div>' +
+          '  <div>처치한 몬스터: <strong style="color:#f87171;">' + (state.kills || 0) + '마리</strong></div>' +
+          '  <div>버틴 턴: <strong style="color:#34d399;">' + (state.turn || 0) + '턴</strong> (난이도 Lv.' + (state.level || 1) + ')</div>' +
+          '</div>';
+        modalActionBtn.textContent = '다시 시작 🔄';
+        modalActionBtn.style.background = '#e11d48';
+        battleModal.style.display = 'flex';
       }
 
       // 보직 선택 모달 열기/닫기
@@ -3428,7 +3829,7 @@
         curStageCfg = GoblinCore.getStageConfig(currentStage);
         rng = GoblinCore.createRng(Date.now());
         raidState = GoblinCore.createRaidState({
-          stage: currentStage,
+          level: 1,
           profile: savedData.profile,
           rng: rng
         });
@@ -3437,7 +3838,7 @@
         renderBoard();
         updateBattleUI();
         initRaidGuide();
-        updateBanner('[' + curStageCfg.villageName + '] ' + currentStage + '스테이지 던전 레이드 시작! (목표: 몬스터 ' + raidState.goalKills + '마리 처치)');
+        updateBanner('같은 칸 3개 이상을 이어요. 칼로 몬스터까지 이으면 몬스터가 맞아요. 몬스터만 이어도 돼요. 끝까지 버텨서 점수를 올려요.');
       }
 
       function startNewBossBattle(stageNum) {
@@ -3487,11 +3888,18 @@
               var cellData = raidState.board[r][c];
               if (cellData && cellData.type === 'monster') {
                 cell.classList.add('monster-cell');
+                var traitBadge = '';
+                if (cellData.trait === 'spiky') {
+                  traitBadge = '<span class="monster-trait-badge spiky" title="가시: 받은 피해 50% 반사">🌵</span>';
+                } else if (cellData.trait === 'regen') {
+                  traitBadge = '<span class="monster-trait-badge regen" title="재생: 매 턴 HP +1 회복">💚</span>';
+                }
                 cell.innerHTML =
+                  traitBadge +
                   '<span class="monster-emoji">👹</span>' +
                   '<div class="monster-stats-row">' +
                   '  <span class="monster-hp-stat">❤' + cellData.hp + '</span>' +
-                  '  <span class="monster-atk-stat">⚔' + (cellData.atk || 1) + '</span>' +
+                  '  <span class="monster-atk-stat">⚔' + (typeof cellData.atk === 'number' ? cellData.atk : 1) + '</span>' +
                   '  <span class="monster-dmg-preview" style="display:none;"></span>' +
                   '</div>';
               } else {
@@ -3530,22 +3938,13 @@
         var monsterInPathMap = {};
 
         if (isNormalRaid && currentPath.length > 0) {
-          var firstPos = currentPath[0];
-          var firstCell = raidState.board[firstPos.r][firstPos.c];
-          if (firstCell && firstCell.type === 'sword') {
-            var swordCount = 0;
-            for (var pIdx = 0; pIdx < currentPath.length; pIdx++) {
-              var pt = currentPath[pIdx];
-              var cObj = raidState.board[pt.r][pt.c];
-              if (cObj.type === 'sword') {
-                swordCount++;
-              } else if (cObj.type === 'monster') {
-                monsterInPathMap[pt.r + ',' + pt.c] = true;
-              }
+          expectedDamage = GoblinCore.getRaidChainDamage(raidState, currentPath);
+          for (var pIdx = 0; pIdx < currentPath.length; pIdx++) {
+            var pt = currentPath[pIdx];
+            var cObj = raidState.board[pt.r][pt.c];
+            if (cObj && cObj.type === 'monster') {
+              monsterInPathMap[pt.r + ',' + pt.c] = true;
             }
-            var roleBonus = raidState.profile ? GoblinCore.applyRoleBonus(raidState.profile, { type: 4, cleared: swordCount }) : null;
-            var bonusD = (roleBonus && roleBonus.bonusDamage) ? roleBonus.bonusDamage : 0;
-            expectedDamage = swordCount + bonusD;
           }
         }
 
@@ -3637,7 +4036,7 @@
         var len = currentPath.length;
         if (len === 0) {
           if (currentMode === 'normal' && raidState) {
-            msgBanner.textContent = '같은 종류 칸을 이어보세요! 칼로 몬스터까지 이으면 공격합니다. (10칸 이상 시 🎲주사위)';
+            msgBanner.textContent = '같은 칸 3개 이상을 이어요. 칼로 몬스터까지 이으면 몬스터가 맞아요. 몬스터만 이어도 돼요. 끝까지 버텨서 점수를 올려요.';
           } else if (currentMode === 'boss') {
             msgBanner.textContent = '손가락으로 칸을 이어 보스나 신하를 공격하세요! (10칸 이상 시 🎲주사위 버프)';
           } else {
@@ -3654,8 +4053,8 @@
           if (currentMode === 'normal' && raidState) {
             var first = currentPath[0];
             var fCell = raidState.board[first.r][first.c];
-            var typeNames = { sword: '공격', shield: '방어막 충전', potion: '체력 회복', coin: '전리품 골드' };
-            if (fCell.type === 'sword') {
+            var typeNames = { sword: '공격', shield: '방어막 충전', potion: '체력 회복', coin: '전리품 골드', monster: '몬스터 공격' };
+            if (fCell.type === 'sword' || fCell.type === 'monster') {
               var sCount = 0;
               var mCount = 0;
               for (var k = 0; k < currentPath.length; k++) {
@@ -3663,11 +4062,8 @@
                 if (raidState.board[pt.r][pt.c].type === 'sword') sCount++;
                 if (raidState.board[pt.r][pt.c].type === 'monster') mCount++;
               }
-              var rBonus = raidState.profile ? GoblinCore.applyRoleBonus(raidState.profile, { type: 4, cleared: sCount }) : null;
-              var bDmg = (rBonus && rBonus.bonusDamage) ? rBonus.bonusDamage : 0;
-              var expDmg = sCount + bDmg;
-              var tNotice = '칼 ' + sCount + '개 (예상 피해: ' + expDmg + ')';
-              if (mCount > 0) tNotice += ' -> 👹 몬스터 ' + mCount + '마리 피격';
+              var expDmg = GoblinCore.getRaidChainDamage(raidState, currentPath);
+              var tNotice = '칼 ' + sCount + '개 + 몬스터 ' + mCount + '마리 (예상 피해: ' + expDmg + ')';
               msgBanner.textContent = len + '칸 연결 중: ' + tNotice;
             } else {
               msgBanner.textContent = len + '칸 연결 중: ' + (typeNames[fCell.type] || '행동');
@@ -3717,6 +4113,7 @@
 
       // 포인터 입력 처리
       function onPointerDown(e) {
+        if (choiceModal && choiceModal.style.display !== 'none') return;
         var isPlaying = false;
         if (currentMode === 'normal' && raidState) {
           isPlaying = (raidState.status === 'playing');
@@ -3788,25 +4185,39 @@
                 savedData.bestChain = pathToResolve.length;
               }
 
-              // 화면 애니메이션 연출 (흔들림, 반격 붉은 깜빡임)
+              // 화면 애니메이션 연출 (흔들림, 반격 붉은 깜빡임, 실드 방어 깜빡임)
               if (raidState.lastEvents && raidState.lastEvents.length > 0) {
                 for (var evIdx = 0; evIdx < raidState.lastEvents.length; evIdx++) {
                   var ev = raidState.lastEvents[evIdx];
-                  if (ev.kind === 'enemyAttack' && ev.dmg > 0) {
-                    boardWrapper.classList.add('screen-flash-active');
-                    setTimeout(function() {
-                      boardWrapper.classList.remove('screen-flash-active');
-                    }, 380);
+                  if (ev.kind === 'enemyAttack' || ev.kind === 'spikyReflect') {
+                    if ((ev.dmg && ev.dmg > 0) || (ev.hpDmg && ev.hpDmg > 0)) {
+                      boardWrapper.classList.add('screen-flash-active');
+                      setTimeout(function() {
+                        boardWrapper.classList.remove('screen-flash-active');
+                      }, 380);
+                    }
+                    if (ev.absorbed && ev.absorbed > 0) {
+                      playerShieldBadge.style.display = 'inline-flex';
+                      playerShieldBadge.classList.add('shield-flash');
+                      setTimeout(function() {
+                        playerShieldBadge.classList.remove('shield-flash');
+                      }, 400);
+                    }
                   }
                 }
               }
 
               renderBoard();
-              // 맞은 몬스터가 있으면 판 위에 남은 몬스터 칸이 한 번 흔들린다(중력으로 자리가 바뀌어 위치 대신 전체 몬스터 칸에 적용)
-              var anyHit = (raidState.lastEvents || []).some(function(e) { return e.kind === 'hit' || e.kind === 'kill'; });
-              if (anyHit) {
-                var mCells = boardGrid.querySelectorAll('.monster-cell');
-                for (var mi = 0; mi < mCells.length; mi++) mCells[mi].classList.add('monster-hit');
+              // 맞은 몬스터가 남아 있으면 그 칸에만 흔들림 적용 (중력 후 위치 afterRow, afterCol)
+              var hitEvents = (raidState.lastEvents || []).filter(function(e) { return e.kind === 'hit'; });
+              for (var hi = 0; hi < hitEvents.length; hi++) {
+                var hEv = hitEvents[hi];
+                var rTarget = (typeof hEv.afterRow === 'number') ? hEv.afterRow : hEv.row;
+                var cTarget = (typeof hEv.afterCol === 'number') ? hEv.afterCol : hEv.col;
+                var targetEl = boardGrid.querySelector('[data-r="' + rTarget + '"][data-c="' + cTarget + '"]');
+                if (targetEl && targetEl.classList.contains('monster-cell')) {
+                  targetEl.classList.add('monster-hit');
+                }
               }
               updateBattleUI();
 
@@ -3817,44 +4228,18 @@
               var latestLog = raidState.logs.length > 0 ? raidState.logs[raidState.logs.length - 1] : '';
               updateBanner(latestLog, pathToResolve.length >= 10);
 
-              if (raidState.status === 'victory') {
-                savedData.totalWins = (savedData.totalWins || 0) + 1;
+              if (raidState.status === 'defeat') {
                 savedData.totalBattles = (savedData.totalBattles || 0) + 1;
                 savedData.gold = raidState.gold;
-
-                var leveledUp = false;
-                var promotedTitle = null;
-
-                if (raidState.profile) {
-                  leveledUp = raidState.profile.leveledUp;
-                  promotedTitle = raidState.profile.promotedTitle;
-                  savedData.profile = raidState.profile;
+                var curScore = raidState.score || (raidState.kills * 10 + raidState.turn);
+                if (curScore > (savedData.raidBest || 0)) {
+                  savedData.raidBest = curScore;
                 }
-
-                savedData = GoblinCore.checkProgression(savedData, currentStage);
-                GoblinCore.saveGameState(savedData);
-                updateBattleUI();
-
-                var clearTalks = GoblinCore.getStoryDialogue(currentStage, 'clear');
-                if (clearTalks && clearTalks.length > 0) {
-                  setTimeout(function() {
-                    startDialogue(clearTalks, function() {
-                      showModal('victory', raidState.gold, leveledUp, promotedTitle);
-                    });
-                  }, 350);
-                } else {
-                  setTimeout(function() {
-                    showModal('victory', raidState.gold, leveledUp, promotedTitle);
-                  }, 450);
-                }
-              } else if (raidState.status === 'defeat') {
-                savedData.totalBattles = (savedData.totalBattles || 0) + 1;
-                savedData.gold = raidState.gold;
                 GoblinCore.saveGameState(savedData);
                 updateBattleUI();
 
                 setTimeout(function() {
-                  showModal('defeat');
+                  showRaidGameOverModal(raidState);
                 }, 450);
               }
             } else {
@@ -4067,7 +4452,7 @@
         currentPath = [];
         rng = GoblinCore.createRng(Date.now());
         if (currentMode === 'normal' && raidState) {
-          raidState.board = GoblinCore.createRaidBoard(7, currentStage, rng);
+          raidState.board = GoblinCore.createRaidBoard(GoblinCore.DEFAULT_RAID_BOARD_SIZE, raidState.level, rng);
           board = raidState.board;
         } else {
           board = GoblinCore.createBoard(BOARD_SIZE, NUM_TYPES, rng);
@@ -4107,6 +4492,10 @@
 
       modalActionBtn.addEventListener('click', function() {
         hideModal();
+        if (currentMode === 'normal' && raidState && raidState.status === 'defeat') {
+          startNewBattle();
+          return;
+        }
         if (battleState && battleState.battleType === 'challenge') {
           openLeaderboardModal();
           return;
