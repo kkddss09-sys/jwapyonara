@@ -1,0 +1,726 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>하노이의 탑 무료 게임 | 좌표나라</title>
+<meta name="description" content="수학 퍼즐의 고전 하노이의 탑을 가입 없이 바로 즐겨보세요. 원반 3개·4개·5개 난이도와 모바일 터치·키보드를 지원합니다.">
+<style>
+:root {
+  --bg: #f5f5f7;
+  --card: #fff;
+  --ink: #1d1d1f;
+  --sub: #6e6e73;
+  --line: #e3e3e8;
+  --red: #1b64da;
+  --soft: #e8f0fe;
+  --danger: #d92d20;
+  --ok: #12805c;
+  --panel: #1d1d1f;
+  --fill: #f2f2f7;
+  --fill2: #e5e5ea;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e131c;
+  --card: #171d29;
+  --ink: #eef2f8;
+  --sub: #98a3b5;
+  --line: #2a3344;
+  --red: #3d8bff;
+  --soft: #1a2a47;
+  --danger: #ff7a70;
+  --ok: #4ade80;
+  --panel: #2b3547;
+  --fill: #1f2735;
+  --fill2: #2a3344;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+.wrap {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 0 14px 48px;
+}
+h1 {
+  font-size: 24px;
+  line-height: 1.3;
+  margin: 18px 0 6px;
+  letter-spacing: -0.02em;
+}
+.lead {
+  margin: 0 0 14px;
+  color: var(--sub);
+  font-size: 14px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+/* 난이도 탭 */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 46px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+/* 상태 정보 바 */
+.status-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  background: #232733;
+  color: #fff;
+  border-radius: 14px;
+  padding: 10px 8px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.status-item small {
+  display: block;
+  font-size: 11px;
+  color: #a1a8b8;
+  margin-bottom: 2px;
+}
+.status-item b {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffd60a;
+}
+.status-item.sub b {
+  color: #fff;
+}
+/* 하노이 스테이지 보드 */
+.hanoi-stage {
+  position: relative;
+  background: #11141c;
+  border-radius: 16px;
+  padding: 24px 8px 12px;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+  margin-bottom: 12px;
+  touch-action: manipulation;
+  user-select: none;
+}
+.pegs-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  height: 220px;
+  position: relative;
+}
+.peg-col {
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  cursor: pointer;
+  border-radius: 12px;
+  padding-bottom: 8px;
+  transition: background-color 0.15s ease;
+}
+.peg-col:hover, .peg-col:active {
+  background: rgba(255, 255, 255, 0.05);
+}
+.peg-col.selected {
+  background: rgba(27, 100, 218, 0.18);
+  outline: 2px solid #1b64da;
+}
+/* 기둥 막대 */
+.peg-pole {
+  position: absolute;
+  bottom: 8px;
+  width: 10px;
+  height: 160px;
+  background: #52525b;
+  border-radius: 5px;
+  z-index: 1;
+}
+.peg-label {
+  position: absolute;
+  top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #a1a1aa;
+}
+/* 받침대 바닥선 */
+.hanoi-base {
+  width: 100%;
+  height: 12px;
+  background: #3f3f46;
+  border-radius: 6px;
+  margin-top: -6px;
+  position: relative;
+  z-index: 2;
+}
+/* 원반 (Disks) */
+.disks-stack {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  width: 100%;
+  pointer-events: none;
+}
+.disk {
+  height: 24px;
+  border-radius: 6px;
+  margin-top: 3px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.35);
+  transition: transform 0.15s ease, margin 0.15s ease;
+}
+.disk.lifted {
+  transform: translateY(-24px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+  outline: 2px solid #ffffff;
+}
+/* 원반 크기 및 색상 팔레트 */
+.disk-1 { width: 44px; background: #ef4444; }
+.disk-2 { width: 60px; background: #f97316; }
+.disk-3 { width: 76px; background: #eab308; }
+.disk-4 { width: 92px; background: #10b981; }
+.disk-5 { width: 108px; background: #3b82f6; }
+
+/* 안내 메시지 */
+.hint-text {
+  text-align: center;
+  font-size: 13px;
+  color: #d1d5db;
+  margin-top: 10px;
+  min-height: 20px;
+}
+.hint-text.warn {
+  color: #ff6b6b;
+  font-weight: 700;
+}
+
+/* 오버레이 */
+.overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(17, 20, 28, 0.92);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  text-align: center;
+  color: #fff;
+  z-index: 10;
+  border-radius: 16px;
+  backdrop-filter: blur(4px);
+}
+.overlay.hidden {
+  display: none;
+}
+.overlay-title {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.overlay-msg {
+  font-size: 14px;
+  color: #d1d5db;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.overlay-score {
+  font-size: 32px;
+  font-weight: 900;
+  color: #ffd60a;
+  margin-bottom: 18px;
+}
+.btn-primary {
+  background: #1b64da;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 13px 28px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: 0 4px 12px rgba(27,100,218,0.3);
+}
+.btn-primary:active {
+  background: #1552b5;
+}
+/* 컨트롤 바 */
+.ctrl-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+.btn-sub {
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+/* 세부 규칙 */
+details {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 16px;
+}
+summary {
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--ink);
+  font-size: 15px;
+}
+details[open] summary {
+  margin-bottom: 10px;
+}
+.rules-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13.5px;
+  color: var(--sub);
+  line-height: 1.6;
+}
+.rules-list li {
+  margin-bottom: 4px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🗼 하노이의 탑</h1>
+  <p class="lead">모든 원반을 규칙에 맞게 맨 오른쪽 기둥으로 옮겨보세요.</p>
+
+  <!-- 난이도 선택 -->
+  <div class="diff-seg" role="tablist">
+    <button type="button" id="btnDiffEasy" class="on" data-diff="easy">쉬움 (원반 3개)</button>
+    <button type="button" id="btnDiffNormal" data-diff="normal">보통 (원반 4개)</button>
+    <button type="button" id="btnDiffHard" data-diff="hard">어려움 (원반 5개)</button>
+  </div>
+
+  <div class="card" style="padding: 12px; position: relative;">
+    <!-- 점수 및 상태 바 -->
+    <div class="status-bar">
+      <div class="status-item">
+        <small>이동 횟수</small>
+        <b id="txtMoves">0</b>
+      </div>
+      <div class="status-item sub">
+        <small>최소 횟수</small>
+        <b id="txtMinMoves">7회</b>
+      </div>
+      <div class="status-item sub">
+        <small>소요 시간</small>
+        <b id="txtTime">0.0초</b>
+      </div>
+      <div class="status-item sub">
+        <small>최고 점수</small>
+        <b id="txtBest">0</b>
+      </div>
+    </div>
+
+    <!-- 하노이 보드 영역 -->
+    <div class="hanoi-stage" id="hanoiStage">
+      <div class="pegs-row">
+        <!-- 기둥 1 (시작) -->
+        <div class="peg-col" id="peg0" data-peg="0">
+          <span class="peg-label">기둥 1 [시작]</span>
+          <div class="peg-pole"></div>
+          <div class="disks-stack" id="stack0"></div>
+        </div>
+        <!-- 기둥 2 (경유) -->
+        <div class="peg-col" id="peg1" data-peg="1">
+          <span class="peg-label">기둥 2</span>
+          <div class="peg-pole"></div>
+          <div class="disks-stack" id="stack1"></div>
+        </div>
+        <!-- 기둥 3 (도착) -->
+        <div class="peg-col" id="peg2" data-peg="2">
+          <span class="peg-label">기둥 3 [목표]</span>
+          <div class="peg-pole"></div>
+          <div class="disks-stack" id="stack2"></div>
+        </div>
+      </div>
+      <div class="hanoi-base"></div>
+      <div class="hint-text" id="txtHint">옮길 기둥을 터치하거나 키보드 1, 2, 3을 누르세요.</div>
+
+      <!-- 클리어 / 오버레이 -->
+      <div class="overlay hidden" id="gameOverlay">
+        <div class="overlay-title" id="overlayTitle">🎉 성공!</div>
+        <div class="overlay-msg" id="overlayMsg">모든 원반을 완벽하게 옮겼습니다!</div>
+        <div class="overlay-score" id="overlayScore">0점</div>
+        <button type="button" class="btn-primary" id="btnRestartModal">다시 하기</button>
+      </div>
+    </div>
+
+    <!-- 하단 컨트롤 바 -->
+    <div class="ctrl-bar">
+      <span style="font-size: 12px; color: var(--sub);" id="txtModeNotice">시험 모드 (점수는 화면에만 표시)</span>
+      <button type="button" class="btn-sub" id="btnRestart">새로 시작</button>
+    </div>
+  </div>
+
+  <!-- 게임 규칙 접기 -->
+  <details open>
+    <summary>어떻게 플레이하나요?</summary>
+    <ul class="rules-list">
+      <li><strong>조작 방법:</strong> 원반이 있는 기둥을 터치하면 맨 위 원반이 선택(들림)됩니다. 그 후 옮겨 놓을 기둥을 터치하면 이동합니다. 키보드 숫자 <code>1</code>, <code>2</code>, <code>3</code> 키로도 조작할 수 있습니다.</li>
+      <li><strong>핵심 규칙:</strong>
+        <br>1. 한 번에 기둥의 맨 위에 있는 원반 하나씩만 옮길 수 있습니다.
+        <br>2. <strong>작은 원반 위에 더 큰 원반을 올릴 수 없습니다.</strong>
+        <br>3. 기둥 1의 모든 원반을 기둥 3으로 전부 옮기면 퍼즐 완성입니다.
+      </li>
+      <li><strong>점수 계산:</strong> 최소 이동 횟수에 가까울수록, 소요 시간이 짧을수록 높은 점수를 얻습니다.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // 1. 난이도별 설정
+  var DIFF_CONFIG = {
+    easy: {
+      id: 'easy',
+      name: '쉬움',
+      disks: 3,
+      minMoves: 7,
+      baseScore: 1200,
+      targetTime: 30
+    },
+    normal: {
+      id: 'normal',
+      name: '보통',
+      disks: 4,
+      minMoves: 15,
+      baseScore: 2400,
+      targetTime: 60
+    },
+    hard: {
+      id: 'hard',
+      name: '어려움',
+      disks: 5,
+      minMoves: 31,
+      baseScore: 4000,
+      targetTime: 120
+    }
+  };
+
+  // 2. 상태 변수
+  var currentDiff = 'easy';
+  var pegs = [[], [], []]; // 각 기둥의 원반 배열 (원반 번호 1~5, 1이 가장 작음)
+  var selectedPeg = null; // 현재 들고 있는 원반이 있는 기둥 인덱스 (0, 1, 2)
+  var movesCount = 0;
+  var isPlaying = false;
+  var isCleared = false;
+  var startTime = 0;
+  var timerInterval = null;
+  var elapsedTime = 0.0;
+
+  var bestScores = {
+    easy: 0,
+    normal: 0,
+    hard: 0
+  };
+
+  try {
+    var saved = null;
+    if (saved) {
+      var parsed = JSON.parse(saved);
+      if (parsed) {
+        if (typeof parsed.easy === 'number') bestScores.easy = parsed.easy;
+        if (typeof parsed.normal === 'number') bestScores.normal = parsed.normal;
+        if (typeof parsed.hard === 'number') bestScores.hard = parsed.hard;
+      }
+    }
+  } catch (e) {}
+
+  // DOM 캐시
+  var txtMoves = document.getElementById('txtMoves');
+  var txtMinMoves = document.getElementById('txtMinMoves');
+  var txtTime = document.getElementById('txtTime');
+  var txtBest = document.getElementById('txtBest');
+  var txtHint = document.getElementById('txtHint');
+
+  var pegCols = [
+    document.getElementById('peg0'),
+    document.getElementById('peg1'),
+    document.getElementById('peg2')
+  ];
+  var stackEls = [
+    document.getElementById('stack0'),
+    document.getElementById('stack1'),
+    document.getElementById('stack2')
+  ];
+
+  var overlay = document.getElementById('gameOverlay');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayMsg = document.getElementById('overlayMsg');
+  var overlayScore = document.getElementById('overlayScore');
+  var btnRestartModal = document.getElementById('btnRestartModal');
+  var btnRestart = document.getElementById('btnRestart');
+
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+
+  // 3. 점수 클램핑
+  function clampScore(val) {
+    if (typeof val !== 'number' || isNaN(val) || !isFinite(val)) return 0;
+    if (val < 0) return 0;
+    if (val > 9999999) return 9999999;
+    return Math.floor(val);
+  }
+
+  function updateUI() {
+    var cfg = DIFF_CONFIG[currentDiff];
+    txtMoves.textContent = movesCount;
+    txtMinMoves.textContent = cfg.minMoves + '회';
+    txtTime.textContent = elapsedTime.toFixed(1) + '초';
+    txtBest.textContent = clampScore(bestScores[currentDiff]).toLocaleString('ko-KR');
+  }
+
+  // 4. 화면 원반 렌더링
+  function renderDisks() {
+    for (var p = 0; p < 3; p++) {
+      var stackEl = stackEls[p];
+      stackEl.innerHTML = '';
+      pegCols[p].classList.toggle('selected', selectedPeg === p);
+
+      var diskList = pegs[p];
+      for (var i = 0; i < diskList.length; i++) {
+        var diskSize = diskList[i];
+        var diskEl = document.createElement('div');
+        diskEl.className = 'disk disk-' + diskSize;
+        diskEl.textContent = diskSize;
+
+        // 선택된 기둥의 맨 위 원반이면 들어올림 표시
+        if (selectedPeg === p && i === diskList.length - 1) {
+          diskEl.classList.add('lifted');
+        }
+        stackEl.appendChild(diskEl);
+      }
+    }
+  }
+
+  // 5. 게임 초기화
+  function resetGame() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    var cfg = DIFF_CONFIG[currentDiff];
+    pegs = [[], [], []];
+    // 기둥 0에 큰 것(disks)부터 작은 것(1) 순서로 쌓기
+    for (var d = cfg.disks; d >= 1; d--) {
+      pegs[0].push(d);
+    }
+
+    selectedPeg = null;
+    movesCount = 0;
+    isPlaying = false;
+    isCleared = false;
+    elapsedTime = 0.0;
+
+    txtHint.textContent = '옮길 원반이 있는 기둥을 터치하세요.';
+    txtHint.className = 'hint-text';
+
+    overlay.classList.add('hidden');
+    updateUI();
+    renderDisks();
+  }
+
+  // 6. 타이머 시작
+  function ensureTimer() {
+    if (!isPlaying && !isCleared) {
+      isPlaying = true;
+      startTime = performance.now();
+      timerInterval = setInterval(function() {
+        if (!isPlaying) {
+          clearInterval(timerInterval);
+          return;
+        }
+        elapsedTime = (performance.now() - startTime) / 1000;
+        updateUI();
+      }, 100);
+    }
+  }
+
+  // 7. 기둥 조작 핸들러
+  function handlePegAction(pegIdx) {
+    if (isCleared) return;
+
+    if (selectedPeg === null) {
+      // 1단계: 원반 집기
+      if (pegs[pegIdx].length === 0) {
+        txtHint.textContent = '빈 기둥입니다. 원반이 있는 기둥을 선택하세요.';
+        txtHint.className = 'hint-text warn';
+        return;
+      }
+      selectedPeg = pegIdx;
+      txtHint.textContent = (pegIdx + 1) + '번 기둥의 원반을 놓을 기둥을 선택하세요.';
+      txtHint.className = 'hint-text';
+      renderDisks();
+    } else {
+      // 2단계: 원반 놓기
+      if (selectedPeg === pegIdx) {
+        // 같은 기둥 터치 시 선택 취소
+        selectedPeg = null;
+        txtHint.textContent = '선택을 취소했습니다.';
+        txtHint.className = 'hint-text';
+        renderDisks();
+        return;
+      }
+
+      var fromStack = pegs[selectedPeg];
+      var toStack = pegs[pegIdx];
+      var movingDisk = fromStack[fromStack.length - 1];
+
+      // 유효성 검사: 작은 원반 위에 더 큰 원반을 올릴 수 없음
+      if (toStack.length > 0 && toStack[toStack.length - 1] < movingDisk) {
+        txtHint.textContent = '규칙 위반! 작은 원반 위에 더 큰 원반을 놓을 수 없습니다.';
+        txtHint.className = 'hint-text warn';
+        return;
+      }
+
+      // 이동 실행
+      ensureTimer();
+      fromStack.pop();
+      toStack.push(movingDisk);
+      movesCount++;
+      selectedPeg = null;
+
+      txtHint.textContent = (movingDisk) + '번 원반을 ' + (pegIdx + 1) + '번 기둥으로 옮겼습니다.';
+      txtHint.className = 'hint-text';
+
+      updateUI();
+      renderDisks();
+
+      // 클리어 판정: 기둥 2 (목표)에 모든 원반이 모였는지 확인
+      var cfg = DIFF_CONFIG[currentDiff];
+      if (pegs[2].length === cfg.disks) {
+        gameClear();
+      }
+    }
+  }
+
+  // 8. 게임 클리어
+  function gameClear() {
+    isCleared = true;
+    isPlaying = false;
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    var cfg = DIFF_CONFIG[currentDiff];
+
+    // 점수 계산: (최소이동횟수 / 실제이동횟수) * 기본점수 + 시간단축보너스
+    var moveEfficiency = Math.min(1.0, cfg.minMoves / Math.max(cfg.minMoves, movesCount));
+    var timeBonus = Math.max(0, Math.floor((cfg.targetTime - elapsedTime) * 20));
+    var finalScore = clampScore(Math.round(cfg.baseScore * moveEfficiency) + timeBonus);
+
+    if (finalScore > bestScores[currentDiff]) {
+      bestScores[currentDiff] = finalScore;
+      try {
+        /* 시험 모드: 저장하지 않음 */
+      } catch (e) {}
+    }
+
+    updateUI();
+
+    overlayTitle.textContent = '🎉 하노이탑 클리어!';
+    overlayMsg.textContent = '기둥 3으로 모든 원반을 옮겼습니다!\n이동 횟수: ' + movesCount + '회 (최소 ' + cfg.minMoves + '회) · 소요 시간: ' + elapsedTime.toFixed(1) + '초';
+    overlayScore.textContent = finalScore.toLocaleString('ko-KR') + '점';
+    overlay.classList.remove('hidden');
+  }
+
+  // 9. 난이도 전환
+  function setDifficulty(diff) {
+    if (currentDiff === diff && movesCount === 0) return;
+    currentDiff = diff;
+
+    btnDiffEasy.classList.toggle('on', diff === 'easy');
+    btnDiffNormal.classList.toggle('on', diff === 'normal');
+    btnDiffHard.classList.toggle('on', diff === 'hard');
+
+    resetGame();
+  }
+
+  btnDiffEasy.addEventListener('click', function() { setDifficulty('easy'); });
+  btnDiffNormal.addEventListener('click', function() { setDifficulty('normal'); });
+  btnDiffHard.addEventListener('click', function() { setDifficulty('hard'); });
+
+  // 10. 이벤트 리스너 바인딩
+  pegCols.forEach(function(col, idx) {
+    col.addEventListener('click', function() {
+      handlePegAction(idx);
+    });
+  });
+
+  window.addEventListener('keydown', function(e) {
+    if (e.key === '1') { handlePegAction(0); e.preventDefault(); }
+    else if (e.key === '2') { handlePegAction(1); e.preventDefault(); }
+    else if (e.key === '3') { handlePegAction(2); e.preventDefault(); }
+    else if (e.key === 'Escape') {
+      if (selectedPeg !== null) {
+        selectedPeg = null;
+        renderDisks();
+      }
+    }
+  });
+
+  btnRestart.addEventListener('click', function() { resetGame(); });
+  btnRestartModal.addEventListener('click', function() { resetGame(); });
+
+  // 시작
+  resetGame();
+
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/dodge-fall/">낙하물 피하기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

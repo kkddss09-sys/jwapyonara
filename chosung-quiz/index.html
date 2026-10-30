@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>한글 초성 퀴즈 무료 게임 | 좌표나라</title>
+<meta name="description" content="초성을 보고 알맞은 낱말을 맞히는 두뇌 한글 퀴즈 게임. 쉬움(2글자)·보통(3글자)·어려움(4글자) 3단계를 가입 없이 모바일과 PC에서 즐겨보세요.">
+<style>
+:root {
+  --bg: #f5f5f7;
+  --card: #fff;
+  --ink: #1d1d1f;
+  --sub: #6e6e73;
+  --line: #e3e3e8;
+  --red: #1b64da;
+  --soft: #e8f0fe;
+  --danger: #d92d20;
+  --ok: #12805c;
+  --panel: #1d1d1f;
+  --fill: #f2f2f7;
+  --fill2: #e5e5ea;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e131c;
+  --card: #171d29;
+  --ink: #eef2f8;
+  --sub: #98a3b5;
+  --line: #2a3344;
+  --red: #3d8bff;
+  --soft: #1a2a47;
+  --danger: #ff7a70;
+  --ok: #4ade80;
+  --panel: #2b3547;
+  --fill: #1f2735;
+  --fill2: #2a3344;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+.wrap {
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 0 14px 48px;
+}
+h1 {
+  font-size: 24px;
+  line-height: 1.3;
+  margin: 18px 0 6px;
+  letter-spacing: -0.02em;
+}
+.lead {
+  margin: 0 0 14px;
+  color: var(--sub);
+  font-size: 14px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+/* 난이도 탭 */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 46px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+/* 점수 상태 바 */
+.status-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  background: #232733;
+  color: #fff;
+  border-radius: 14px;
+  padding: 10px 8px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.status-item small {
+  display: block;
+  font-size: 11px;
+  color: #a1a8b8;
+  margin-bottom: 2px;
+}
+.status-item b {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffd60a;
+}
+.status-item.sub b {
+  color: #fff;
+}
+.status-item.combo b {
+  color: #ff9800;
+}
+/* 문제당 타이머 바 */
+.timer-wrap {
+  width: 100%;
+  height: 8px;
+  background: var(--fill2);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.timer-bar {
+  width: 100%;
+  height: 100%;
+  background: #12805c;
+  transition: width 0.1s linear, background-color 0.3s ease;
+}
+.timer-bar.warning { background: #ff9800; }
+.timer-bar.danger { background: #d92d20; }
+
+/* 퀴즈 문제 카드 */
+.quiz-board {
+  position: relative;
+  background: #11141c;
+  border-radius: 16px;
+  padding: 24px 16px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 16px;
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+}
+.quiz-category {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.12);
+  color: #93c5fd;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+.quiz-chosung {
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  color: #ffd60a;
+  text-shadow: 0 2px 8px rgba(255, 214, 10, 0.3);
+  margin-bottom: 6px;
+}
+.quiz-meaning {
+  font-size: 14px;
+  color: #d1d5db;
+}
+.quiz-feedback {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* 4지선다 선택지 버튼 */
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.btn-choice {
+  position: relative;
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 700;
+  padding: 16px 8px;
+  min-height: 64px;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  transition: transform 0.08s ease, border-color 0.12s ease;
+}
+.btn-choice:active {
+  transform: scale(0.97);
+  background: var(--soft);
+  border-color: var(--red);
+}
+.btn-choice .key-badge {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sub);
+  background: var(--fill);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+.btn-choice.correct {
+  background: #e6f7ef !important;
+  border-color: #12805c !important;
+  color: #12805c !important;
+}
+.btn-choice.wrong {
+  background: #fde8e8 !important;
+  border-color: #d92d20 !important;
+  color: #d92d20 !important;
+}
+
+/* 오버레이 */
+.overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(17, 20, 28, 0.92);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  text-align: center;
+  color: #fff;
+  z-index: 10;
+  border-radius: 16px;
+  backdrop-filter: blur(4px);
+}
+.overlay.hidden {
+  display: none;
+}
+.overlay-title {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.overlay-msg {
+  font-size: 14px;
+  color: #d1d5db;
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+.overlay-stat {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 280px;
+}
+.overlay-stat-item small {
+  display: block;
+  font-size: 11px;
+  color: #9ca3af;
+}
+.overlay-stat-item b {
+  font-size: 20px;
+  color: #ffd60a;
+}
+.btn-primary {
+  background: #1b64da;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: 0 4px 12px rgba(27,100,218,0.3);
+}
+.btn-primary:active {
+  background: #1552b5;
+}
+/* 컨트롤 바 */
+.ctrl-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+.btn-sub {
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+/* 세부 설명 */
+details {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 16px;
+}
+summary {
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--ink);
+  font-size: 15px;
+}
+details[open] summary {
+  margin-bottom: 10px;
+}
+.rules-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13.5px;
+  color: var(--sub);
+  line-height: 1.6;
+}
+.rules-list li {
+  margin-bottom: 4px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>💡 한글 초성 퀴즈</h1>
+  <p class="lead">초성과 카테고리 힌트를 보고 알맞은 낱말을 빠르게 맞혀보세요.</p>
+
+  <!-- 난이도 선택 -->
+  <div class="diff-seg" role="tablist">
+    <button type="button" id="btnDiffEasy" class="on" data-diff="easy">쉬움 (2글자)</button>
+    <button type="button" id="btnDiffNormal" data-diff="normal">보통 (3글자)</button>
+    <button type="button" id="btnDiffHard" data-diff="hard">어려움 (4글자)</button>
+  </div>
+
+  <div class="card" style="padding: 12px; position: relative;">
+    <!-- 점수 및 상태 바 -->
+    <div class="status-bar">
+      <div class="status-item">
+        <small>점수</small>
+        <b id="txtScore">0</b>
+      </div>
+      <div class="status-item combo">
+        <small>연속 정답</small>
+        <b id="txtCombo">0</b>
+      </div>
+      <div class="status-item sub">
+        <small>진행 상황</small>
+        <b id="txtProgress">0 / 12</b>
+      </div>
+      <div class="status-item sub">
+        <small>최고 점수</small>
+        <b id="txtBest">0</b>
+      </div>
+    </div>
+
+    <!-- 문제당 타이머 -->
+    <div class="timer-wrap">
+      <div class="timer-bar" id="timerBar" style="width: 100%;"></div>
+    </div>
+
+    <!-- 초성 문제 보드 -->
+    <div class="quiz-board" id="quizBoard">
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="quiz-category" id="txtCategory">[힌트]</div>
+      <div class="quiz-chosung" id="txtChosung">준비</div>
+      <div class="quiz-meaning" id="txtMeaning">시작 단추를 누르면 퀴즈가 시작됩니다.</div>
+    </div>
+
+    <!-- 4지선다 버튼 -->
+    <div class="options-grid">
+      <button type="button" class="btn-choice" id="btnOpt0"><span class="key-badge">1</span><span class="val">-</span></button>
+      <button type="button" class="btn-choice" id="btnOpt1"><span class="key-badge">2</span><span class="val">-</span></button>
+      <button type="button" class="btn-choice" id="btnOpt2"><span class="key-badge">3</span><span class="val">-</span></button>
+      <button type="button" class="btn-choice" id="btnOpt3"><span class="key-badge">4</span><span class="val">-</span></button>
+    </div>
+
+    <!-- 하단 컨트롤 바 -->
+    <div class="ctrl-bar">
+      <span style="font-size: 12px; color: var(--sub);" id="txtModeNotice">시험 모드 (점수는 화면에만 표시)</span>
+      <button type="button" class="btn-sub" id="btnRestart">다시하기</button>
+    </div>
+
+    <!-- 오버레이 -->
+    <div class="overlay" id="gameOverlay">
+      <div class="overlay-title" id="overlayTitle">💡 한글 초성 퀴즈</div>
+      <div class="overlay-msg" id="overlayMsg">12문제를 연속으로 풀고 최고 점수를 기록해보세요!</div>
+      <div class="overlay-stat" id="overlayStat" style="display: none;">
+        <div class="overlay-stat-item">
+          <small>최종 점수</small>
+          <b id="statScore">0점</b>
+        </div>
+        <div class="overlay-stat-item">
+          <small>맞힌 문제</small>
+          <b id="statAccuracy">0 / 12</b>
+        </div>
+      </div>
+      <button type="button" class="btn-primary" id="btnStartGame">게임 시작</button>
+    </div>
+  </div>
+
+  <!-- 게임 규칙 -->
+  <details open>
+    <summary>어떻게 플레이하나요?</summary>
+    <ul class="rules-list">
+      <li><strong>조작 방법:</strong> 4개의 보기 중 초성에 알맞은 낱말을 터치하세요. PC에서는 숫자키 <code>1</code>, <code>2</code>, <code>3</code>, <code>4</code>를 눌러 빠르게 선택할 수 있습니다.</li>
+      <li><strong>점수와 콤보:</strong> 빠르게 정답을 맞힐수록 남은 시간 보너스를 받으며, 연속 정답 시 콤보 가산점이 더해집니다.</li>
+      <li><strong>난이도:</strong>
+        <br>• <strong>쉬움:</strong> 2글자 친숙한 일상 낱말 (문제당 8초)
+        <br>• <strong>보통:</strong> 3글자 생활 용어 및 전자기기 (문제당 5.5초)
+        <br>• <strong>어려움:</strong> 4글자 복합명사 및 사자성어 (문제당 4초)
+      </li>
+    </ul>
+  </details>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // 1. 단어 데이터 사전 (카테고리, 단어, 초성, 뜻/힌트, 유사 오답들)
+  var WORD_DATA = {
+    easy: [
+      { word: '사과', cho: 'ㅅㄱ', cat: '과일', hint: '빨갛고 아삭한 대표적인 가을 과일', dist: ['수박', '사고', '상어'] },
+      { word: '호랑이', cho: 'ㅎㄹㅇ', cat: '동물', hint: '용맹한 줄무늬를 가진 백수의 왕', dist: ['하마', '하이에나', '토끼'] },
+      { word: '포도', cho: 'ㅍㄷ', cat: '과일', hint: '보라색 알갱이가 송이송이 맺힌 과일', dist: ['파도', '푸들', '피자'] },
+      { word: '강아지', cho: 'ㄱㅇㅈ', cat: '동물', hint: '사람을 잘 따르는 귀여운 반려동물', dist: ['고양이', '송아지', '망아지'] },
+      { word: '피자', cho: 'ㅍㅈ', cat: '음식', hint: '치즈와 토핑을 얹어 구운 둥근 서양 음식', dist: ['파전', '포도', '표범'] },
+      { word: '컴퓨터', cho: 'ㅋㅍㅌ', cat: 'IT기기', hint: '인터넷과 업무에 쓰는 전자 계산 장치', dist: ['키보드', '프린터', '모니터'] },
+      { word: '바나나', cho: 'ㅂㄴㄴ', cat: '과일', hint: '원숭이가 좋아하는 달콤한 노란 과일', dist: ['비누', '보노보', '피아노'] },
+      { word: '딸기', cho: 'ㄸㄱ', cat: '과일', hint: '봄철에 인기 있는 새콤달콤한 붉은 과일', dist: ['땅콩', '떡볶이', '당근'] },
+      { word: '기린', cho: 'ㄱㄹ', cat: '동물', hint: '목이 아주 길어서 높은 나뭇잎을 먹는 동물', dist: ['구름', '가위', '고래'] },
+      { word: '비행기', cho: 'ㅂㅎㄱ', cat: '교통', hint: '하늘을 날아서 먼 거리를 빠르게 가는 교통수단', dist: ['자전거', '자동차', '잠수함'] },
+      { word: '우산', cho: 'ㅇㅅ', cat: '생활', hint: '비나 눈이 올 때 머리 위에 받쳐 드는 물건', dist: ['양산', '의사', '오산'] },
+      { word: '안경', cho: 'ㅇㄱ', cat: '생활', hint: '눈이 나쁠 때 얼굴에 써서 잘 보이게 하는 물건', dist: ['연필', '양말', '인형'] },
+      { word: '호박', cho: 'ㅎㅂ', cat: '채소', hint: '핼러윈이나 찌개에 쓰이는 커다란 채소', dist: ['수박', '하마', '화분'] },
+      { word: '치킨', cho: 'ㅊㅋ', cat: '음식', hint: '바삭하게 튀겨내어 야식으로 인기 있는 닭 요리', dist: ['초밥', '치즈', '커피'] },
+      { word: '라면', cho: 'ㄹㅁ', cat: '음식', hint: '꼬불꼬불한 면을 뜨거운 국물에 끓여 먹는 음식', dist: ['라면', '레몬', '로봇'] }
+    ],
+    normal: [
+      { word: '스마트폰', cho: 'ㅅㅁㅌㅍ', cat: 'IT기기', hint: '손안에서 인터넷과 전화를 모두 하는 기기', dist: ['태블릿', '노트북', '스마트워치'] },
+      { word: '냉장고', cho: 'ㄴㅈㄱ', cat: '가전', hint: '음식을 차갑고 신선하게 보관하는 가전제품', dist: ['세탁기', '청소기', '선풍기'] },
+      { word: '비빔밥', cho: 'ㅂㅂㅂ', cat: '음식', hint: '나물과 고추장을 밥에 쓱쓱 비벼 먹는 전통 음식', dist: ['볶음밥', '김밥', '초밥'] },
+      { word: '자전거', cho: 'ㅈㅈㄱ', cat: '교통', hint: '두 발로 페달을 밟아 바퀴를 굴리는 이동수단', dist: ['자동차', '비행기', '오토바이'] },
+      { word: '선풍기', cho: 'ㅅㅍㄱ', cat: '가전', hint: '날개를 돌려 시원한 바람을 일으키는 가전', dist: ['에어컨', '가습기', '환풍기'] },
+      { word: '선글라스', cho: 'ㅅㄱㄹㅅ', cat: '패션', hint: '햇빛의 눈부심을 막아주는 어두운 안경', dist: ['목걸이', '반지', '귀걸이'] },
+      { word: '텔레비전', cho: 'ㅌㄹㅂㅈ', cat: '가전', hint: '영상과 방송 프로그램을 시청하는 디스플레이', dist: ['라디오', '스피커', '모니터'] },
+      { word: '도서관', cho: 'ㄷㅅㄱ', cat: '장소', hint: '수많은 책을 읽거나 빌려 볼 수 있는 곳', dist: ['서점', '미술관', '박물관'] },
+      { word: '샌드위치', cho: 'ㅅㄷㅇㅊ', cat: '음식', hint: '식빵 사이에 햄과 채소를 넣어 만든 간식', dist: ['햄버거', '핫도그', '토스트'] },
+      { word: '키보드', cho: 'ㅋㅂㄷ', cat: 'IT기기', hint: '컴퓨터에 글자를 입력하는 자판 장치', dist: ['마우스', '모니터', '패드'] },
+      { word: '비밀번호', cho: 'ㅂㅁㅂㅎ', cat: '보안', hint: '로그인이나 문을 열 때 나만 아는 숫자나 암호', dist: ['아이디', '계좌번호', '전화번호'] },
+      { word: '정수기', cho: 'ㅈㅅㄱ', cat: '가전', hint: '물을 깨끗하게 걸러서 바로 마실 수 있게 해주는 기계', dist: ['공기청정기', '제습기', '보일러'] }
+    ],
+    hard: [
+      { word: '무선충전', cho: 'ㅁㅅㅊㅈ', cat: 'IT/기술', hint: '선 없이 패드 위에 올려두기만 해도 배터리가 차는 기술', dist: ['고속충전', '유선충전', '보조배터리'] },
+      { word: '일석이조', cho: 'ㅇㅅㅇㅈ', cat: '사자성어', hint: '돌 하나를 던져 두 마리의 새를 잡는다는 뜻', dist: ['일타쌍피', '다다익선', '동문서답'] },
+      { word: '와이파이', cho: 'ㅇㅇㅍㅇ', cat: 'IT/네트워크', hint: '무선으로 인터넷을 연결해 주는 통신 기술', dist: ['블루투스', '핫스팟', '데이터'] },
+      { word: '인공지능', cho: 'ㅇㄱㅈㄴ', cat: 'IT/첨단', hint: '컴퓨터가 사람처럼 학습하고 생각하는 첨단 기술 (AI)', dist: ['빅데이터', '클라우드', '알고리즘'] },
+      { word: '동문서답', cho: 'ㄷㅁㅅㄷ', cat: '사자성어', hint: '동쪽을 물었는데 서쪽을 대답한다는 엉뚱한 말', dist: ['우문현답', '자가당착', '마이동풍'] },
+      { word: '유튜브', cho: 'ㅇㅌㅂ', cat: '인터넷', hint: '전 세계 사람들이 영상을 올리고 시청하는 대표 플랫폼', dist: ['넷플릭스', '인스타그램', '틱톡'] },
+      { word: '가성비', cho: 'ㄱㅅㅂ', cat: '소비', hint: '가격 대비 성능이나 만족도가 뛰어남을 이르는 말', dist: ['가심비', '최저가', '할인율'] },
+      { word: '블루투스', cho: 'ㅂㄹㅌㅅ', cat: 'IT/통신', hint: '이어폰이나 스마트워치를 무선으로 연결하는 근거리 통신', dist: ['와이파이', '엔에프씨', '에어드롭'] },
+      { word: '사전예약', cho: 'ㅅㅈㅇㅇ', cat: '구매', hint: '신제품 휴대폰이 정식 출시되기 전에 미리 신청하는 것', dist: ['공동구매', '당일개통', '약정할인'] },
+      { word: '좌표나라', cho: 'ㅈㅍㄴㄹ', cat: '커뮤니티', hint: '휴대폰 시세와 성지 정보를 알차게 공유하는 대표 카페', dist: ['알뜰나라', '통신세상', '스마트폰천국'] },
+      { word: '배터리', cho: 'ㅂㅌㄹ', cat: '전자기기', hint: '기기를 충전하여 전원을 공급해 주는 부품', dist: ['충전기', '어댑터', '메모리'] },
+      { word: '작심삼일', cho: 'ㅈㅅㅅㅇ', cat: '사자성어', hint: '결심한 마음이 사흘을 넘기지 못한다는 말', dist: ['일취월장', '천고마비', '고진감래'] }
+    ]
+  };
+
+  // 2. 난이도별 설정
+  var DIFF_CONFIG = {
+    easy: {
+      id: 'easy',
+      name: '쉬움',
+      timePerQuestion: 8.0,
+      baseScore: 100,
+      comboBonus: 25,
+      totalQuestions: 12
+    },
+    normal: {
+      id: 'normal',
+      name: '보통',
+      timePerQuestion: 5.5,
+      baseScore: 160,
+      comboBonus: 40,
+      totalQuestions: 12
+    },
+    hard: {
+      id: 'hard',
+      name: '어려움',
+      timePerQuestion: 4.0,
+      baseScore: 240,
+      comboBonus: 60,
+      totalQuestions: 12
+    }
+  };
+
+  // 3. 상태 변수
+  var currentDiff = 'easy';
+  var gameState = 'ready'; // 'ready', 'playing', 'ended'
+  var score = 0;
+  var combo = 0;
+  var maxCombo = 0;
+  var questionIndex = 0;
+  var correctCount = 0;
+  var questionList = [];
+  var currentQuestion = null;
+  var timeLeft = 8.0;
+  var timerInterval = null;
+  var isAnsweringLocked = false;
+
+  var bestScores = {
+    easy: 0,
+    normal: 0,
+    hard: 0
+  };
+
+  try {
+    var saved = null;
+    if (saved) {
+      var parsed = JSON.parse(saved);
+      if (parsed) {
+        if (typeof parsed.easy === 'number') bestScores.easy = parsed.easy;
+        if (typeof parsed.normal === 'number') bestScores.normal = parsed.normal;
+        if (typeof parsed.hard === 'number') bestScores.hard = parsed.hard;
+      }
+    }
+  } catch (e) {}
+
+  // DOM 캐시
+  var txtScore = document.getElementById('txtScore');
+  var txtCombo = document.getElementById('txtCombo');
+  var txtProgress = document.getElementById('txtProgress');
+  var txtBest = document.getElementById('txtBest');
+  var timerBar = document.getElementById('timerBar');
+
+  var txtCategory = document.getElementById('txtCategory');
+  var txtChosung = document.getElementById('txtChosung');
+  var txtMeaning = document.getElementById('txtMeaning');
+  var quizFeedback = document.getElementById('quizFeedback');
+
+  var btnOpts = [
+    document.getElementById('btnOpt0'),
+    document.getElementById('btnOpt1'),
+    document.getElementById('btnOpt2'),
+    document.getElementById('btnOpt3')
+  ];
+
+  var overlay = document.getElementById('gameOverlay');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayMsg = document.getElementById('overlayMsg');
+  var overlayStat = document.getElementById('overlayStat');
+  var statScore = document.getElementById('statScore');
+  var statAccuracy = document.getElementById('statAccuracy');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnRestart = document.getElementById('btnRestart');
+
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+
+  // 4. 점수 클램핑
+  function clampScore(val) {
+    if (typeof val !== 'number' || isNaN(val) || !isFinite(val)) return 0;
+    if (val < 0) return 0;
+    if (val > 9999999) return 9999999;
+    return Math.floor(val);
+  }
+
+  function updateUI() {
+    var cfg = DIFF_CONFIG[currentDiff];
+    txtScore.textContent = clampScore(score).toLocaleString('ko-KR');
+    txtCombo.textContent = combo > 0 ? (combo + '연속') : '0';
+    txtProgress.textContent = Math.min(questionIndex + 1, cfg.totalQuestions) + ' / ' + cfg.totalQuestions;
+    txtBest.textContent = clampScore(bestScores[currentDiff]).toLocaleString('ko-KR');
+
+    // 타이머 바
+    var pct = Math.max(0, Math.min(100, (timeLeft / cfg.timePerQuestion) * 100));
+    timerBar.style.width = pct + '%';
+    if (pct < 25) {
+      timerBar.className = 'timer-bar danger';
+    } else if (pct < 50) {
+      timerBar.className = 'timer-bar warning';
+    } else {
+      timerBar.className = 'timer-bar';
+    }
+  }
+
+  // 5. 문제 목록 셔플 및 준비
+  function prepareQuestions(diff) {
+    var pool = (WORD_DATA[diff] || WORD_DATA.easy).slice();
+    // 무작위 셔플
+    pool.sort(function() { return Math.random() - 0.5; });
+    var cfg = DIFF_CONFIG[diff];
+    return pool.slice(0, cfg.totalQuestions);
+  }
+
+  // 6. 문제 출제
+  function loadQuestion() {
+    if (questionIndex >= questionList.length) {
+      endGame();
+      return;
+    }
+
+    var item = questionList[questionIndex];
+    currentQuestion = item;
+    isAnsweringLocked = false;
+    var cfg = DIFF_CONFIG[currentDiff];
+    timeLeft = cfg.timePerQuestion;
+
+    txtCategory.textContent = '[' + item.cat + ']';
+    txtChosung.textContent = item.cho;
+    txtMeaning.textContent = item.hint;
+    quizFeedback.textContent = '';
+
+    // 4지선다 옵션 만들기 (정답 1개 + 오답 3개)
+    var opts = [item.word];
+    var distCopy = item.dist.slice();
+    distCopy.sort(function() { return Math.random() - 0.5; });
+
+    for (var i = 0; i < distCopy.length; i++) {
+      if (opts.length >= 4) break;
+      if (distCopy[i] !== item.word) {
+        opts.push(distCopy[i]);
+      }
+    }
+    opts.sort(function() { return Math.random() - 0.5; });
+    currentQuestion.renderedOpts = opts;
+
+    for (var i = 0; i < 4; i++) {
+      var btn = btnOpts[i];
+      btn.className = 'btn-choice';
+      var valSpan = btn.querySelector('.val');
+      if (valSpan) valSpan.textContent = opts[i];
+    }
+
+    updateUI();
+    startTimer();
+  }
+
+  // 7. 문제 타이머
+  function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    var lastTick = performance.now();
+
+    timerInterval = setInterval(function() {
+      if (gameState !== 'playing' || isAnsweringLocked) return;
+      var now = performance.now();
+      var dt = (now - lastTick) / 1000;
+      lastTick = now;
+
+      timeLeft -= dt;
+      if (timeLeft <= 0) {
+        timeLeft = 0;
+        timeOut();
+      }
+      updateUI();
+    }, 80);
+  }
+
+  // 8. 시간 초과 처리
+  function timeOut() {
+    if (isAnsweringLocked) return;
+    isAnsweringLocked = true;
+    combo = 0;
+
+    quizFeedback.textContent = '시간 초과! ⏱️ 정답: ' + currentQuestion.word;
+    quizFeedback.style.color = '#d92d20';
+
+    // 정답 버튼 표시
+    for (var i = 0; i < 4; i++) {
+      if (currentQuestion.renderedOpts[i] === currentQuestion.word) {
+        btnOpts[i].classList.add('correct');
+      }
+    }
+
+    updateUI();
+    scheduleNext();
+  }
+
+  // 9. 답변 클릭 처리
+  function handleAnswer(idx) {
+    if (gameState !== 'playing' || isAnsweringLocked || !currentQuestion) return;
+    isAnsweringLocked = true;
+
+    var chosen = currentQuestion.renderedOpts[idx];
+    var isCorrect = (chosen === currentQuestion.word);
+    var cfg = DIFF_CONFIG[currentDiff];
+    var btn = btnOpts[idx];
+
+    if (isCorrect) {
+      correctCount++;
+      combo++;
+      if (combo > maxCombo) maxCombo = combo;
+      btn.classList.add('correct');
+
+      // 점수 계산: 기본 점수 + 콤보 가산점 + 남은 시간 비례 보너스
+      var timeBonus = Math.floor((timeLeft / cfg.timePerQuestion) * 50);
+      var pts = cfg.baseScore + ((combo - 1) * cfg.comboBonus) + timeBonus;
+      score = clampScore(score + pts);
+
+      quizFeedback.textContent = '정답! 👏 +' + pts + '점';
+      quizFeedback.style.color = '#12805c';
+    } else {
+      combo = 0;
+      btn.classList.add('wrong');
+      // 정답 위치 하이라이트
+      for (var i = 0; i < 4; i++) {
+        if (currentQuestion.renderedOpts[i] === currentQuestion.word) {
+          btnOpts[i].classList.add('correct');
+        }
+      }
+      quizFeedback.textContent = '오답! 😅 정답: ' + currentQuestion.word;
+      quizFeedback.style.color = '#d92d20';
+    }
+
+    updateUI();
+    scheduleNext();
+  }
+
+  function scheduleNext() {
+    setTimeout(function() {
+      if (gameState === 'playing') {
+        questionIndex++;
+        loadQuestion();
+      }
+    }, 700);
+  }
+
+  // 10. 게임 시작 및 종료
+  function startGame() {
+    var cfg = DIFF_CONFIG[currentDiff];
+    gameState = 'playing';
+    score = 0;
+    combo = 0;
+    maxCombo = 0;
+    correctCount = 0;
+    questionIndex = 0;
+    questionList = prepareQuestions(currentDiff);
+
+    overlay.classList.add('hidden');
+    loadQuestion();
+  }
+
+  function endGame() {
+    gameState = 'ended';
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    var cfg = DIFF_CONFIG[currentDiff];
+    // 만점자 보너스 (12문제 모두 맞힘)
+    if (correctCount === cfg.totalQuestions) {
+      score = clampScore(score + 1000);
+    }
+
+    if (score > bestScores[currentDiff]) {
+      bestScores[currentDiff] = clampScore(score);
+      try {
+        /* 시험 모드: 저장하지 않음 */
+      } catch (e) {}
+    }
+
+    updateUI();
+
+    overlayTitle.textContent = '🎉 퀴즈 완료!';
+    overlayMsg.textContent = '12문제를 모두 풀었습니다. 최종 점수를 확인하세요!';
+    statScore.textContent = clampScore(score).toLocaleString('ko-KR') + '점';
+    statAccuracy.textContent = correctCount + ' / ' + cfg.totalQuestions;
+    overlayStat.style.display = 'grid';
+    btnStartGame.textContent = '다시 도전하기';
+    overlay.classList.remove('hidden');
+  }
+
+  function resetGame() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    var cfg = DIFF_CONFIG[currentDiff];
+    gameState = 'ready';
+    score = 0;
+    combo = 0;
+    maxCombo = 0;
+    correctCount = 0;
+    questionIndex = 0;
+    timeLeft = cfg.timePerQuestion;
+
+    txtCategory.textContent = '[힌트]';
+    txtChosung.textContent = '준비';
+    txtMeaning.textContent = '시작 단추를 누르면 퀴즈가 시작됩니다.';
+    quizFeedback.textContent = '';
+
+    for (var i = 0; i < 4; i++) {
+      btnOpts[i].className = 'btn-choice';
+      var valSpan = btnOpts[i].querySelector('.val');
+      if (valSpan) valSpan.textContent = '-';
+    }
+
+    updateUI();
+
+    overlayTitle.textContent = '💡 한글 초성 퀴즈 (' + cfg.name + ')';
+    overlayMsg.textContent = '초성을 보고 알맞은 낱말을 빠르게 맞혀보세요!';
+    overlayStat.style.display = 'none';
+    btnStartGame.textContent = '게임 시작';
+    overlay.classList.remove('hidden');
+  }
+
+  // 11. 난이도 전환
+  function setDifficulty(diff) {
+    if (currentDiff === diff && gameState === 'ready') return;
+    currentDiff = diff;
+
+    btnDiffEasy.classList.toggle('on', diff === 'easy');
+    btnDiffNormal.classList.toggle('on', diff === 'normal');
+    btnDiffHard.classList.toggle('on', diff === 'hard');
+
+    resetGame();
+  }
+
+  btnDiffEasy.addEventListener('click', function() { setDifficulty('easy'); });
+  btnDiffNormal.addEventListener('click', function() { setDifficulty('normal'); });
+  btnDiffHard.addEventListener('click', function() { setDifficulty('hard'); });
+
+  // 12. 입력 이벤트
+  btnStartGame.addEventListener('click', function() { startGame(); });
+  btnRestart.addEventListener('click', function() { resetGame(); });
+
+  btnOpts.forEach(function(btn, idx) {
+    btn.addEventListener('click', function() {
+      handleAnswer(idx);
+    });
+  });
+
+  window.addEventListener('keydown', function(e) {
+    if (gameState === 'ready' || gameState === 'ended') {
+      if (e.key === 'Enter' || e.key === ' ') {
+        startGame();
+        e.preventDefault();
+      }
+      return;
+    }
+
+    if (gameState === 'playing') {
+      if (e.key === '1') { handleAnswer(0); e.preventDefault(); }
+      else if (e.key === '2') { handleAnswer(1); e.preventDefault(); }
+      else if (e.key === '3') { handleAnswer(2); e.preventDefault(); }
+      else if (e.key === '4') { handleAnswer(3); e.preventDefault(); }
+    }
+  });
+
+  // 초기화
+  resetGame();
+
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/dodge-fall/">낙하물 피하기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

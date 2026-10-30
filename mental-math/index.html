@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>암산 속도 게임 무료 게임 | 좌표나라</title>
+<meta name="description" content="제한시간 동안 빠르게 사칙연산 문제를 풀어 최고 점수에 도전하는 두뇌 회전 무료 암산 게임. 가입 없이 스마트폰과 PC에서 바로 즐기세요.">
+<style>
+:root {
+  --bg: #f5f5f7;
+  --card: #fff;
+  --ink: #1d1d1f;
+  --sub: #6e6e73;
+  --line: #e3e3e8;
+  --red: #1b64da;
+  --soft: #e8f0fe;
+  --danger: #d92d20;
+  --ok: #12805c;
+  --panel: #1d1d1f;
+  --fill: #f2f2f7;
+  --fill2: #e5e5ea;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e131c;
+  --card: #171d29;
+  --ink: #eef2f8;
+  --sub: #98a3b5;
+  --line: #2a3344;
+  --red: #3d8bff;
+  --soft: #1a2a47;
+  --danger: #ff7a70;
+  --ok: #4ade80;
+  --panel: #2b3547;
+  --fill: #1f2735;
+  --fill2: #2a3344;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+.wrap {
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 0 14px 48px;
+}
+h1 {
+  font-size: 24px;
+  line-height: 1.3;
+  margin: 18px 0 6px;
+  letter-spacing: -0.02em;
+}
+.lead {
+  margin: 0 0 14px;
+  color: var(--sub);
+  font-size: 14px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+/* 난이도 탭 */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 46px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+/* 상태 정보창 */
+.status-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  background: #232733;
+  color: #fff;
+  border-radius: 14px;
+  padding: 10px 8px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+.status-item small {
+  display: block;
+  font-size: 11px;
+  color: #a1a8b8;
+  margin-bottom: 2px;
+}
+.status-item b {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffd60a;
+}
+.status-item.sub b {
+  color: #fff;
+}
+.status-item.combo b {
+  color: #ff9800;
+}
+/* 타이머 게이지 바 */
+.timer-wrap {
+  width: 100%;
+  height: 10px;
+  background: var(--fill2);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  position: relative;
+}
+.timer-bar {
+  width: 100%;
+  height: 100%;
+  background: #12805c;
+  transition: width 0.1s linear, background-color 0.3s ease;
+}
+.timer-bar.warning {
+  background: #ff9800;
+}
+.timer-bar.danger {
+  background: #d92d20;
+}
+/* 문제 수식 영역 */
+.quiz-board {
+  position: relative;
+  background: #11141c;
+  border-radius: 16px;
+  padding: 28px 16px;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 16px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+}
+.quiz-exp {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+  color: #ffffff;
+}
+.quiz-feedback {
+  position: absolute;
+  top: 8px;
+  right: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffd60a;
+}
+/* 선택지 2x2 그리드 */
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.btn-choice {
+  position: relative;
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 800;
+  padding: 16px 8px;
+  min-height: 68px;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+  transition: transform 0.08s ease, border-color 0.12s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+}
+.btn-choice:active {
+  transform: scale(0.97);
+  background: var(--soft);
+  border-color: var(--red);
+}
+.btn-choice .key-badge {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sub);
+  background: var(--fill);
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-family: inherit;
+}
+/* 정답 / 오답 애니메이션 클래스 */
+.btn-choice.correct {
+  background: #e6f7ef !important;
+  border-color: #12805c !important;
+  color: #12805c !important;
+}
+.btn-choice.wrong {
+  background: #fde8e8 !important;
+  border-color: #d92d20 !important;
+  color: #d92d20 !important;
+}
+/* 게임 시작/종료 오버레이 */
+.overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(17, 20, 28, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  text-align: center;
+  color: #fff;
+  z-index: 10;
+  border-radius: 16px;
+  backdrop-filter: blur(4px);
+}
+.overlay.hidden {
+  display: none;
+}
+.overlay-title {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+.overlay-msg {
+  font-size: 14px;
+  color: #d1d5db;
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+.overlay-stat {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 280px;
+}
+.overlay-stat-item small {
+  display: block;
+  font-size: 11px;
+  color: #9ca3af;
+}
+.overlay-stat-item b {
+  font-size: 20px;
+  color: #ffd60a;
+}
+.btn-primary {
+  background: #1b64da;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: 0 4px 12px rgba(27,100,218,0.3);
+}
+.btn-primary:active {
+  background: #1552b5;
+}
+/* 하단 컨트롤 바 */
+.ctrl-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+.btn-sub {
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+/* 규칙 설명 접기 */
+details {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 16px;
+}
+summary {
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--ink);
+  font-size: 15px;
+}
+details[open] summary {
+  margin-bottom: 10px;
+}
+.rules-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13.5px;
+  color: var(--sub);
+  line-height: 1.6;
+}
+.rules-list li {
+  margin-bottom: 4px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>⚡ 암산 속도 게임</h1>
+  <p class="lead">제한시간 안에 번개처럼 암산 문제를 풀어 최고 점수에 도전하세요.</p>
+
+  <!-- 난이도 선택 -->
+  <div class="diff-seg" role="tablist">
+    <button type="button" id="btnDiffEasy" class="on" data-diff="easy">쉬움</button>
+    <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+    <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+  </div>
+
+  <div class="card" style="padding: 12px; position: relative;">
+    <!-- 점수 및 상태 바 -->
+    <div class="status-bar">
+      <div class="status-item">
+        <small>점수</small>
+        <b id="txtScore">0</b>
+      </div>
+      <div class="status-item combo">
+        <small>연속 정답</small>
+        <b id="txtCombo">0</b>
+      </div>
+      <div class="status-item sub">
+        <small>남은 시간</small>
+        <b id="txtTime">30.0초</b>
+      </div>
+      <div class="status-item sub">
+        <small>최고 점수</small>
+        <b id="txtBest">0</b>
+      </div>
+    </div>
+
+    <!-- 타이머 게이지 -->
+    <div class="timer-wrap">
+      <div class="timer-bar" id="timerBar" style="width: 100%;"></div>
+    </div>
+
+    <!-- 문제 표시판 -->
+    <div class="quiz-board" id="quizBoard">
+      <div class="quiz-feedback" id="quizFeedback"></div>
+      <div class="quiz-exp" id="txtQuizExp">준비 완료</div>
+    </div>
+
+    <!-- 4지선다 선택지 버튼 -->
+    <div class="options-grid">
+      <button type="button" class="btn-choice" id="btnOpt0"><span class="key-badge">1</span><span class="val">-</span></button>
+      <button type="button" class="btn-choice" id="btnOpt1"><span class="key-badge">2</span><span class="val">-</span></button>
+      <button type="button" class="btn-choice" id="btnOpt2"><span class="key-badge">3</span><span class="val">-</span></button>
+      <button type="button" class="btn-choice" id="btnOpt3"><span class="key-badge">4</span><span class="val">-</span></button>
+    </div>
+
+    <!-- 하단 컨트롤 바 -->
+    <div class="ctrl-bar">
+      <span style="font-size: 12px; color: var(--sub);" id="txtModeNotice">시험 모드 (점수는 화면에만 표시)</span>
+      <button type="button" class="btn-sub" id="btnRestart">다시하기</button>
+    </div>
+
+    <!-- 시작 / 종료 오버레이 -->
+    <div class="overlay" id="gameOverlay">
+      <div class="overlay-title" id="overlayTitle">⚡ 암산 스피드 게임</div>
+      <div class="overlay-msg" id="overlayMsg">30초 동안 최대한 많은 문제를 정확하게 풀어보세요!</div>
+      <div class="overlay-stat" id="overlayStat" style="display: none;">
+        <div class="overlay-stat-item">
+          <small>최종 점수</small>
+          <b id="statScore">0점</b>
+        </div>
+        <div class="overlay-stat-item">
+          <small>정답 / 푼 문제</small>
+          <b id="statAccuracy">0 / 0</b>
+        </div>
+      </div>
+      <button type="button" class="btn-primary" id="btnStartGame">게임 시작</button>
+    </div>
+  </div>
+
+  <!-- 게임 규칙 안내 -->
+  <details open>
+    <summary>어떻게 플레이하나요?</summary>
+    <ul class="rules-list">
+      <li><strong>조작 방법:</strong> 화면에 표시된 4개의 보기 중 정답을 터치하세요. PC에서는 키보드 숫자 <code>1</code>, <code>2</code>, <code>3</code>, <code>4</code> 키로 빠르게 누를 수 있습니다.</li>
+      <li><strong>시간과 콤보:</strong> 기본 30초가 주어집니다. 정답을 맞히면 점수와 함께 보너스 시간이 추가되고 콤보가 쌓입니다. 오답 시에는 난이도에 따라 시간이 2.5초·3초·3.5초 차감됩니다.</li>
+      <li><strong>난이도 차이:</strong>
+        <br>• <strong>쉬움:</strong> 1~2자리 덧셈과 뺄셈 중심, 정답 시 +1.5초
+        <br>• <strong>보통:</strong> 2자리 덧셈/뺄셈 및 구구단 곱셈, 정답 시 +1.2초
+        <br>• <strong>어려움:</strong> 2자리 곱셈 및 3항 연산/나눗셈 혼합, 정답 시 +1.0초
+      </li>
+    </ul>
+  </details>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // 1. 난이도별 상세 설정
+  var DIFF_CONFIG = {
+    easy: {
+      id: 'easy',
+      name: '쉬움',
+      initialTime: 30,
+      timeBonus: 1.5,
+      timePenalty: 2.5,
+      baseScore: 100,
+      comboBonus: 20
+    },
+    normal: {
+      id: 'normal',
+      name: '보통',
+      initialTime: 30,
+      timeBonus: 1.2,
+      timePenalty: 3.0,
+      baseScore: 150,
+      comboBonus: 35
+    },
+    hard: {
+      id: 'hard',
+      name: '어려움',
+      initialTime: 30,
+      timeBonus: 1.0,
+      timePenalty: 3.5,
+      baseScore: 220,
+      comboBonus: 50
+    }
+  };
+
+  // 2. 상태 변수
+  var currentDiff = 'easy';
+  var gameState = 'ready'; // 'ready', 'playing', 'ended'
+  var score = 0;
+  var combo = 0;
+  var maxCombo = 0;
+  var totalSolved = 0;
+  var correctCount = 0;
+  var timeLeft = 30.0;
+  var timerInterval = null;
+  var currentQuestion = null;
+  var isAnsweringLocked = false;
+
+  var bestScores = {
+    easy: 0,
+    normal: 0,
+    hard: 0
+  };
+
+  try {
+    var saved = null;
+    if (saved) {
+      var parsed = JSON.parse(saved);
+      if (parsed) {
+        if (typeof parsed.easy === 'number') bestScores.easy = parsed.easy;
+        if (typeof parsed.normal === 'number') bestScores.normal = parsed.normal;
+        if (typeof parsed.hard === 'number') bestScores.hard = parsed.hard;
+      }
+    }
+  } catch (e) {}
+
+  // DOM 캐시
+  var txtScore = document.getElementById('txtScore');
+  var txtCombo = document.getElementById('txtCombo');
+  var txtTime = document.getElementById('txtTime');
+  var txtBest = document.getElementById('txtBest');
+  var timerBar = document.getElementById('timerBar');
+  var txtQuizExp = document.getElementById('txtQuizExp');
+  var quizFeedback = document.getElementById('quizFeedback');
+
+  var btnOpts = [
+    document.getElementById('btnOpt0'),
+    document.getElementById('btnOpt1'),
+    document.getElementById('btnOpt2'),
+    document.getElementById('btnOpt3')
+  ];
+
+  var overlay = document.getElementById('gameOverlay');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayMsg = document.getElementById('overlayMsg');
+  var overlayStat = document.getElementById('overlayStat');
+  var statScore = document.getElementById('statScore');
+  var statAccuracy = document.getElementById('statAccuracy');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnRestart = document.getElementById('btnRestart');
+
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+
+  // 3. 점수 유효성 클램핑
+  function clampScore(val) {
+    if (typeof val !== 'number' || isNaN(val) || !isFinite(val)) return 0;
+    if (val < 0) return 0;
+    if (val > 9999999) return 9999999;
+    return Math.floor(val);
+  }
+
+  function updateUI() {
+    txtScore.textContent = clampScore(score).toLocaleString('ko-KR');
+    txtCombo.textContent = combo > 0 ? (combo + '연속') : '0';
+    txtTime.textContent = Math.max(0, timeLeft).toFixed(1) + '초';
+    txtBest.textContent = clampScore(bestScores[currentDiff]).toLocaleString('ko-KR');
+
+    // 타이머 바 비율 (최대 30초 기준)
+    var pct = Math.max(0, Math.min(100, (timeLeft / 30.0) * 100));
+    timerBar.style.width = pct + '%';
+    if (pct < 25) {
+      timerBar.className = 'timer-bar danger';
+    } else if (pct < 50) {
+      timerBar.className = 'timer-bar warning';
+    } else {
+      timerBar.className = 'timer-bar';
+    }
+  }
+
+  // 4. 문제 생성 엔진
+  function generateQuestion(diff) {
+    var exp = '';
+    var answer = 0;
+
+    if (diff === 'easy') {
+      // 1~2자리 덧셈/뺄셈
+      var op = Math.random() < 0.5 ? '+' : '-';
+      if (op === '+') {
+        var a = Math.floor(Math.random() * 40) + 5;
+        var b = Math.floor(Math.random() * 40) + 5;
+        exp = a + ' + ' + b;
+        answer = a + b;
+      } else {
+        var a = Math.floor(Math.random() * 50) + 10;
+        var b = Math.floor(Math.random() * a) + 1; // 양수 결과 보장
+        exp = a + ' − ' + b;
+        answer = a - b;
+      }
+    } else if (diff === 'normal') {
+      // 2자리 덧셈/뺄셈 또는 구구단 곱셈
+      var r = Math.random();
+      if (r < 0.4) {
+        // 곱셈 (2~9단 × 2~9단)
+        var a = Math.floor(Math.random() * 8) + 2;
+        var b = Math.floor(Math.random() * 8) + 2;
+        exp = a + ' × ' + b;
+        answer = a * b;
+      } else if (r < 0.7) {
+        // 2자리 덧셈 (올림 발생)
+        var a = Math.floor(Math.random() * 70) + 15;
+        var b = Math.floor(Math.random() * 70) + 15;
+        exp = a + ' + ' + b;
+        answer = a + b;
+      } else {
+        // 2자리 뺄셈
+        var a = Math.floor(Math.random() * 80) + 20;
+        var b = Math.floor(Math.random() * (a - 5)) + 5;
+        exp = a + ' − ' + b;
+        answer = a - b;
+      }
+    } else {
+      // hard: 두 자리 곱셈 또는 세 수 혼합 연산
+      var r = Math.random();
+      if (r < 0.35) {
+        // 곱셈 + 덧셈/뺄셈 (a × b + c)
+        var a = Math.floor(Math.random() * 8) + 3;
+        var b = Math.floor(Math.random() * 8) + 2;
+        var c = Math.floor(Math.random() * 30) + 5;
+        if (Math.random() < 0.5) {
+          exp = a + ' × ' + b + ' + ' + c;
+          answer = a * b + c;
+        } else {
+          exp = a + ' × ' + b + ' − ' + c;
+          answer = a * b - c;
+        }
+      } else if (r < 0.7) {
+        // 나눗셈 후 연산 (a ÷ b + c)
+        var b = Math.floor(Math.random() * 7) + 2; // 나누는 수 (2~8)
+        var q = Math.floor(Math.random() * 12) + 2; // 몫 (2~13)
+        var a = b * q; // 딱 나누어 떨어짐
+        var c = Math.floor(Math.random() * 20) + 5;
+        exp = a + ' ÷ ' + b + ' + ' + c;
+        answer = q + c;
+      } else {
+        // 세 수 덧셈/뺄셈
+        var a = Math.floor(Math.random() * 50) + 20;
+        var b = Math.floor(Math.random() * 30) + 10;
+        var c = Math.floor(Math.random() * 20) + 5;
+        exp = a + ' + ' + b + ' − ' + c;
+        answer = a + b - c;
+      }
+    }
+
+    // 4지선다 오답 후보 생성 (정답과 유사한 값들)
+    var options = [answer];
+    var deltas = [-10, 10, -1, 1, -2, 2, -5, 5, -15, 15];
+    // 무작위 섞기
+    deltas.sort(function() { return Math.random() - 0.5; });
+
+    for (var i = 0; i < deltas.length; i++) {
+      if (options.length >= 4) break;
+      var candidate = answer + deltas[i];
+      if (options.indexOf(candidate) === -1) {
+        options.push(candidate);
+      }
+    }
+    // 그래도 부족하면
+    while (options.length < 4) {
+      var randDiff = (Math.floor(Math.random() * 10) + 1) * (Math.random() < 0.5 ? 1 : -1);
+      var cand = answer + randDiff;
+      if (options.indexOf(cand) === -1) options.push(cand);
+    }
+
+    // 보기 섞기
+    options.sort(function() { return Math.random() - 0.5; });
+
+    return {
+      exp: exp,
+      answer: answer,
+      options: options
+    };
+  }
+
+  // 5. 다음 문제 출제
+  function nextQuestion() {
+    isAnsweringLocked = false;
+    currentQuestion = generateQuestion(currentDiff);
+    txtQuizExp.textContent = currentQuestion.exp + ' = ?';
+
+    for (var i = 0; i < 4; i++) {
+      var btn = btnOpts[i];
+      btn.className = 'btn-choice';
+      var valSpan = btn.querySelector('.val');
+      if (valSpan) {
+        valSpan.textContent = currentQuestion.options[i];
+      }
+    }
+  }
+
+  // 6. 답변 처리
+  function handleAnswer(idx) {
+    if (gameState !== 'playing' || isAnsweringLocked || !currentQuestion) return;
+    isAnsweringLocked = true;
+
+    totalSolved++;
+    var chosenVal = currentQuestion.options[idx];
+    var isCorrect = (chosenVal === currentQuestion.answer);
+    var cfg = DIFF_CONFIG[currentDiff];
+
+    var btn = btnOpts[idx];
+
+    if (isCorrect) {
+      correctCount++;
+      combo++;
+      if (combo > maxCombo) maxCombo = combo;
+
+      btn.classList.add('correct');
+      var pts = cfg.baseScore + ((combo - 1) * cfg.comboBonus);
+      score = clampScore(score + pts);
+      timeLeft = Math.min(45, timeLeft + cfg.timeBonus);
+
+      quizFeedback.textContent = '+' + pts + '점! (+ ' + cfg.timeBonus + '초)';
+      quizFeedback.style.color = '#12805c';
+    } else {
+      combo = 0;
+      btn.classList.add('wrong');
+      // 정답 버튼도 찾아 표시
+      for (var i = 0; i < 4; i++) {
+        if (currentQuestion.options[i] === currentQuestion.answer) {
+          btnOpts[i].classList.add('correct');
+        }
+      }
+      timeLeft = Math.max(0, timeLeft - cfg.timePenalty);
+      quizFeedback.textContent = '오답! (−' + cfg.timePenalty + '초)';
+      quizFeedback.style.color = '#d92d20';
+    }
+
+    updateUI();
+
+    // 0.22초 뒤 다음 문제 출제
+    setTimeout(function() {
+      if (gameState === 'playing') {
+        quizFeedback.textContent = '';
+        nextQuestion();
+      }
+    }, 220);
+  }
+
+  // 7. 타이머 루프
+  function startTimer() {
+    if (timerInterval) clearInterval(timerInterval);
+    var lastTick = performance.now();
+
+    timerInterval = setInterval(function() {
+      if (gameState !== 'playing') {
+        clearInterval(timerInterval);
+        return;
+      }
+      var now = performance.now();
+      var delta = (now - lastTick) / 1000;
+      lastTick = now;
+
+      timeLeft -= delta;
+      if (timeLeft <= 0) {
+        timeLeft = 0;
+        endGame();
+      }
+      updateUI();
+    }, 100);
+  }
+
+  // 8. 게임 시작 및 종료
+  function startGame() {
+    var cfg = DIFF_CONFIG[currentDiff];
+    gameState = 'playing';
+    score = 0;
+    combo = 0;
+    maxCombo = 0;
+    totalSolved = 0;
+    correctCount = 0;
+    timeLeft = cfg.initialTime;
+    quizFeedback.textContent = '';
+
+    overlay.classList.add('hidden');
+    updateUI();
+    nextQuestion();
+    startTimer();
+  }
+
+  function endGame() {
+    gameState = 'ended';
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    if (score > bestScores[currentDiff]) {
+      bestScores[currentDiff] = clampScore(score);
+      try {
+        /* 시험 모드: 저장하지 않음 */
+      } catch (e) {}
+    }
+
+    updateUI();
+
+    overlayTitle.textContent = '⏱️ 시간 종료!';
+    overlayMsg.textContent = '암산 훈련이 끝났습니다. 최종 기록을 확인하세요!';
+    statScore.textContent = clampScore(score).toLocaleString('ko-KR') + '점';
+    var rate = totalSolved > 0 ? Math.round((correctCount / totalSolved) * 100) : 0;
+    statAccuracy.textContent = correctCount + ' / ' + totalSolved + ' (' + rate + '%)';
+    overlayStat.style.display = 'grid';
+    btnStartGame.textContent = '다시 도전하기';
+    overlay.classList.remove('hidden');
+  }
+
+  function resetGame() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+    var cfg = DIFF_CONFIG[currentDiff];
+    gameState = 'ready';
+    score = 0;
+    combo = 0;
+    maxCombo = 0;
+    totalSolved = 0;
+    correctCount = 0;
+    timeLeft = cfg.initialTime;
+
+    txtQuizExp.textContent = '준비 완료';
+    quizFeedback.textContent = '';
+    for (var i = 0; i < 4; i++) {
+      btnOpts[i].className = 'btn-choice';
+      var v = btnOpts[i].querySelector('.val');
+      if (v) v.textContent = '-';
+    }
+
+    updateUI();
+
+    overlayTitle.textContent = '⚡ 암산 속도 게임 (' + cfg.name + ')';
+    overlayMsg.textContent = '30초 동안 번개처럼 문제를 풀어 최고 점수에 도전하세요!';
+    overlayStat.style.display = 'none';
+    btnStartGame.textContent = '게임 시작';
+    overlay.classList.remove('hidden');
+  }
+
+  // 9. 난이도 전환
+  function setDifficulty(diff) {
+    if (currentDiff === diff && gameState === 'ready') return;
+    currentDiff = diff;
+
+    btnDiffEasy.classList.toggle('on', diff === 'easy');
+    btnDiffNormal.classList.toggle('on', diff === 'normal');
+    btnDiffHard.classList.toggle('on', diff === 'hard');
+
+    resetGame();
+  }
+
+  btnDiffEasy.addEventListener('click', function() { setDifficulty('easy'); });
+  btnDiffNormal.addEventListener('click', function() { setDifficulty('normal'); });
+  btnDiffHard.addEventListener('click', function() { setDifficulty('hard'); });
+
+  // 10. 이벤트 리스너 등록
+  btnStartGame.addEventListener('click', function() {
+    startGame();
+  });
+
+  btnRestart.addEventListener('click', function() {
+    resetGame();
+  });
+
+  // 보기 버튼 터치/클릭
+  btnOpts.forEach(function(btn, idx) {
+    btn.addEventListener('click', function() {
+      handleAnswer(idx);
+    });
+  });
+
+  // 키보드 조작 (1, 2, 3, 4 키)
+  window.addEventListener('keydown', function(e) {
+    if (gameState === 'ready' || gameState === 'ended') {
+      if (e.key === 'Enter' || e.key === ' ') {
+        startGame();
+        e.preventDefault();
+      }
+      return;
+    }
+
+    if (gameState === 'playing') {
+      if (e.key === '1') { handleAnswer(0); e.preventDefault(); }
+      else if (e.key === '2') { handleAnswer(1); e.preventDefault(); }
+      else if (e.key === '3') { handleAnswer(2); e.preventDefault(); }
+      else if (e.key === '4') { handleAnswer(3); e.preventDefault(); }
+    }
+  });
+
+  // 초기 상태 세팅
+  resetGame();
+
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/dodge-fall/">낙하물 피하기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>
