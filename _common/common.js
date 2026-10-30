@@ -85,6 +85,7 @@ var TOOLS = [
   ['ladder', '사다리 타기', '순서와 당번 정하기', '재미', true, '테스트와 뽑기'],
   ['ranking', '게임 순위판', '게임마다 10등까지 한눈에', '게임', true, '순위판'],
   ['minesweeper', '지뢰찾기', '깃발 꽂고 지뢰 피하기', '게임', true, '퍼즐'],
+  ['omok', '오목', '컴퓨터와 오목 한 판', '게임', true, '퍼즐'],
   ['merge-numbers', '숫자 합치기', '같은 숫자를 밀어서 합치기', '게임', true, '퍼즐'],
   ['memory-match', '휴대폰 짝 맞추기', '같은 그림 두 장 찾기', '게임', true, '퍼즐'],
   ['sci-calc', '공학용 계산기', '삼각함수, 로그, 제곱, 괄호', '생활', true, '계산'],
@@ -161,6 +162,7 @@ var RANKS = {
   'pyeong-sense': { label: '평수 감각 · 맞힌 개수', better: 'high', unit: '개' },
   'sudoku': { label: '스도쿠 · 가장 빠른 시간(힌트 없이)', better: 'low', unit: '초', variants: [{ id: 'sudoku-easy', key: 'zw_sudoku_best_easy', name: '쉬움' }, { id: 'sudoku-normal', key: 'zw_sudoku_best_normal', name: '보통' }, { id: 'sudoku-hard', key: 'zw_sudoku_best_hard', name: '어려움' }] },
   'minesweeper': { label: '지뢰찾기 · 가장 빠른 시간', better: 'low', unit: '초', variants: [{ id: 'minesweeper-easy', key: 'zw_minesweeper_best_easy', name: '쉬움 9×9' }, { id: 'minesweeper-med', key: 'zw_minesweeper_best_med', name: '보통 9×13' }] },
+  'omok': { label: '오목 · 이긴 판의 가장 적은 수', better: 'low', unit: '수', variants: [{ id: 'omok-easy', key: 'zw_omok_best_easy', name: '쉬움' }, { id: 'omok-hard', key: 'zw_omok_best_hard', name: '어려움' }] },
   'merge-numbers': { label: '숫자 합치기 · 점수', better: 'high', unit: '점', key: 'zw_merge_numbers_best' },
   'memory-match': { label: '휴대폰 짝 맞추기 · 가장 적게 뒤집은 횟수', better: 'low', unit: '번', variants: [{ id: 'memory-match-6', key: 'zw_memory_match_best_6', name: '쉬움 6쌍' }, { id: 'memory-match-8', key: 'zw_memory_match_best_8', name: '보통 8쌍' }] }
 };
