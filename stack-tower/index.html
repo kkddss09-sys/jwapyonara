@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="../_common/icon-192.png">
+<title>블록 쌓기 무료 게임 | 좌표나라</title>
+<meta name="description" content="좌우로 움직이는 블록을 정확한 타이밍에 내려놓아 하늘 끝까지 탑을 쌓는 순발력 게임. 휴대폰 터치와 키보드 모두 지원합니다.">
+<style>
+:root {
+  --bg: #f5f5f7;
+  --card: #fff;
+  --ink: #1d1d1f;
+  --sub: #6e6e73;
+  --line: #e3e3e8;
+  --red: #1b64da;
+  --soft: #e8f0fe;
+  --danger: #d92d20;
+  --ok: #12805c;
+  --panel: #1d1d1f;
+  --fill: #f2f2f7;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e131c;
+  --card: #171d29;
+  --ink: #eef2f8;
+  --sub: #98a3b5;
+  --line: #2a3344;
+  --red: #3d8bff;
+  --soft: #1a2a47;
+  --danger: #ff7a70;
+  --ok: #4ade80;
+  --panel: #2b3547;
+  --fill: #1f2735;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: Pretendard, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
+  line-height: 1.55;
+  word-break: keep-all;
+}
+.wrap {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 0 14px 48px;
+}
+h1 {
+  font-size: 25px;
+  line-height: 1.3;
+  margin: 20px 0 6px;
+  letter-spacing: -0.02em;
+}
+.lead {
+  margin: 0 0 14px;
+  color: var(--sub);
+  font-size: 14px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 46px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+.status-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  background: #232733;
+  color: #fff;
+  border-radius: 14px;
+  padding: 10px 8px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.status-item small {
+  display: block;
+  font-size: 11px;
+  color: #a1a8b8;
+}
+.status-item b {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffd60a;
+}
+.status-item.sub b { color: #fff; }
+.canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 390px;
+  margin: 0 auto 12px;
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid var(--line);
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  touch-action: manipulation;
+  user-select: none;
+  cursor: pointer;
+}
+#stackCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 20, 30, 0.88);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  z-index: 10;
+}
+.overlay.show { display: flex; }
+.overlay h2 {
+  font-size: 24px;
+  margin: 0 0 8px;
+  color: #ffd60a;
+}
+.overlay p {
+  font-size: 15px;
+  margin: 0 0 16px;
+  color: #e2e8f0;
+}
+.btn-primary {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 28px;
+  min-height: 46px;
+  cursor: pointer;
+}
+.drop-btn {
+  display: block;
+  width: 100%;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  min-height: 54px;
+  border-radius: 14px;
+  border: none;
+  background: var(--red);
+  color: #fff;
+  cursor: pointer;
+  margin-bottom: 10px;
+  touch-action: manipulation;
+}
+.drop-btn:active { opacity: 0.88; transform: scale(0.99); }
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+.btn-act {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  min-height: 46px;
+  border-radius: 12px;
+  border: 1.5px solid var(--line);
+  background: #232733;
+  color: #fff;
+  cursor: pointer;
+}
+.rule-box {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--fill);
+  font-size: 13px;
+  color: var(--sub);
+  line-height: 1.5;
+}
+.zw-rank {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  margin-top: 14px;
+}
+.zw-rank h2 {
+  font-size: 18px;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.zw-rank h2 small { font-size: 12px; color: var(--sub); font-weight: 600; }
+.rk-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.rk-tabs button {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--sub);
+  border-radius: 999px;
+  padding: 5px 14px;
+  cursor: pointer;
+}
+.rk-tabs button.on { background: var(--panel); border-color: var(--panel); color: #fff; }
+.rk-list { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.rk-list li { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-top: 1px solid var(--line); font-size: 14px; }
+.rk-list li:first-child { border-top: none; }
+.rk-list .n { width: 22px; font-weight: 800; color: var(--red); text-align: center; }
+.rk-list .nm { flex: 1; }
+.rk-mine { margin: 10px 2px 6px; font-size: 14px; font-weight: 700; }
+.rk-form { display: flex; gap: 6px; }
+.rk-name { flex: 1; min-width: 0; font: inherit; font-size: 15px; border: 1.5px solid var(--line); border-radius: 10px; padding: 9px 10px; background: var(--card); color: var(--ink); }
+.rk-go { font: inherit; font-size: 14px; font-weight: 700; background: var(--red); color: #fff; border: none; border-radius: 10px; padding: 0 14px; min-height: 42px; cursor: pointer; }
+.rk-msg { margin: 6px 2px 0; font-size: 13px; color: var(--ok); min-height: 18px; }
+.rk-note { margin: 4px 2px 0; font-size: 12px; color: var(--sub); }
+</style>
+<script>var __zws=(function(){var m={};return{getItem:function(k){return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null},setItem:function(k,v){m[k]=String(v)},removeItem:function(k){delete m[k]}}})();</script>
+<script>try{document.documentElement.setAttribute("data-theme",__zws.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>블록 쌓기</h1>
+  <p class="lead">좌우로 움직이는 블록을 딱 맞게 내려놓아 가장 높은 탑을 쌓아 보세요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" id="btnDiffEasy" class="on" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-item">
+        <small>점수</small>
+        <b id="scoreVal">0</b>
+      </div>
+      <div class="status-item sub">
+        <small>현재 층수</small>
+        <b id="floorVal">0층</b>
+      </div>
+      <div class="status-item sub">
+        <small>연속 완벽</small>
+        <b id="streakVal">0</b>
+      </div>
+      <div class="status-item sub">
+        <small>최고 기록</small>
+        <b id="bestVal">0</b>
+      </div>
+    </div>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="stackCanvas" width="360" height="480"></canvas>
+      <div class="overlay" id="gameOverOverlay">
+        <h2 id="overTitle">탑 쌓기 종료!</h2>
+        <p id="overDesc">최종 점수: 0점</p>
+        <button type="button" class="btn-primary" id="btnOverlayRestart">다시 쌓기</button>
+      </div>
+    </div>
+
+    <button type="button" class="drop-btn" id="btnDrop">⬇ 블록 내려놓기 (화면 터치 / Space)</button>
+
+    <div class="control-bar">
+      <button type="button" class="btn-act" id="btnRestart">처음부터 다시 하기</button>
+    </div>
+
+    <div class="rule-box">
+      <b>하는 법 (터치·키보드 지원):</b><br>
+      1. 좌우로 움직이는 블록이 바로 아래 층 블록과 겹쳤을 때 화면이나 <b>블록 내려놓기</b> 단추(키보드 <code>Space</code>·<code>Enter</code>·<code>↓</code>)를 누릅니다.<br>
+      2. 아래 블록 밖으로 삐져나온 부분은 잘려 나가 다음 블록 폭이 좁아집니다.<br>
+      3. 오차 없이 거의 정확히 맞추면 <b>완벽(PERFECT)</b> 보너스 점수를 받고, 3연속 완벽 달성 시 블록 폭이 조금 넓어집니다!
+    </div>
+  </section>
+
+  <!-- 순위 연결: 서버 등록 전 시험 모드 동작 -->
+  <section class="zw-rank" id="rankSection">
+    <h2>🏆 순위표 <small>블록 쌓기 · 최고 점수 (시험 모드)</small></h2>
+    <div class="rk-tabs" id="rkTabs">
+      <button type="button" data-i="0" class="on">쉬움</button>
+      <button type="button" data-i="1">보통</button>
+      <button type="button" data-i="2">어려움</button>
+    </div>
+    <ol class="rk-list" id="rkList"></ol>
+    <div class="rk-mine" id="rkMine">내 최고 기록: 0점</div>
+    <div class="rk-form">
+      <input class="rk-name" id="rkName" type="text" maxlength="8" placeholder="닉네임 (2~8자)" autocomplete="off">
+      <button type="button" class="rk-go" id="rkGo">시험 기록 남기기</button>
+    </div>
+    <p class="rk-msg" id="rkMsg" role="status"></p>
+    <p class="rk-note">※ 서버에 등록되기 전이라 이 기기 화면에만 표시되는 시험 모드입니다.</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  // 난이도 3단계 설정 (초기 폭, 이동 속도, 층당 가속도, 완벽 판정 허용 오차, 기본 점수 차별화)
+  var DIFF_CONFIG = {
+    easy: {
+      name: '쉬움',
+      initWidth: 170,
+      baseSpeed: 2.3,
+      speedInc: 0.08,
+      perfectTol: 8,
+      growBonus: 12,
+      floorScore: 50
+    },
+    normal: {
+      name: '보통',
+      initWidth: 145,
+      baseSpeed: 3.3,
+      speedInc: 0.12,
+      perfectTol: 5,
+      growBonus: 8,
+      floorScore: 80
+    },
+    hard: {
+      name: '어려움',
+      initWidth: 120,
+      baseSpeed: 4.5,
+      speedInc: 0.17,
+      perfectTol: 3,
+      growBonus: 5,
+      floorScore: 120
+    }
+  };
+
+  var BLOCK_COLORS = [
+    '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f43f5e'
+  ];
+
+  var canvas = document.getElementById('stackCanvas');
+  var ctx = canvas.getContext('2d');
+  var canvasWrap = document.getElementById('canvasWrap');
+  var gameOverOverlay = document.getElementById('gameOverOverlay');
+  var overTitle = document.getElementById('overTitle');
+  var overDesc = document.getElementById('overDesc');
+  var btnOverlayRestart = document.getElementById('btnOverlayRestart');
+  var scoreVal = document.getElementById('scoreVal');
+  var floorVal = document.getElementById('floorVal');
+  var streakVal = document.getElementById('streakVal');
+  var bestVal = document.getElementById('bestVal');
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var btnDrop = document.getElementById('btnDrop');
+  var btnRestart = document.getElementById('btnRestart');
+
+  var currentLevel = 'easy';
+  var gameState = 'playing'; // 'playing' | 'over'
+  var W = 360;
+  var H = 480;
+  var BLOCK_H = 26;
+
+  var stack = []; // [{ x, w, color }]
+  var activeBlock = null; // { x, w, dir, speed, color }
+  var feedbackText = '';
+  var feedbackTimer = 0;
+  var score = 0;
+  var floorCount = 0;
+  var streak = 0;
+  var rafId = null;
+
+  function clampScore(val) {
+    var n = Number(val);
+    if (!Number.isFinite(n) || isNaN(n) || n < 0) return 0;
+    return Math.min(9999999, Math.floor(n));
+  }
+
+  function getBestKey(lvl) {
+    return 'zw_stack-tower_best_' + (lvl || currentLevel);
+  }
+
+  function getBestScore(lvl) {
+    try {
+      var raw = __zws.getItem(getBestKey(lvl));
+      return clampScore(parseInt(raw, 10) || 0);
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  function saveBestScore(lvl, val) {
+    var clean = clampScore(val);
+    if (clean > getBestScore(lvl)) {
+      try {
+        __zws.setItem(getBestKey(lvl), String(clean));
+      } catch (e) {}
+    }
+  }
+
+  function spawnNextBlock() {
+    var cfg = DIFF_CONFIG[currentLevel];
+    var top = stack[stack.length - 1];
+    var dir = (floorCount % 2 === 0) ? 1 : -1;
+    var startX = dir === 1 ? 0 : (W - top.w);
+    var spd = cfg.baseSpeed + Math.min(4.5, floorCount * cfg.speedInc);
+    activeBlock = {
+      x: startX,
+      w: top.w,
+      dir: dir,
+      speed: spd,
+      color: BLOCK_COLORS[floorCount % BLOCK_COLORS.length]
+    };
+  }
+
+  function dropBlock() {
+    if (gameState !== 'playing' || !activeBlock) return;
+    var cfg = DIFF_CONFIG[currentLevel];
+    var prev = stack[stack.length - 1];
+    var diff = activeBlock.x - prev.x;
+    var absDiff = Math.abs(diff);
+
+    // 완전히 빗나간 경우 -> 게임 종료
+    if (absDiff >= activeBlock.w) {
+      endGame();
+      return;
+    }
+
+    var newX = prev.x;
+    var newW = activeBlock.w;
+
+    if (absDiff <= cfg.perfectTol) {
+      // 완벽 정렬 (PERFECT)
+      streak++;
+      newX = prev.x;
+      if (streak >= 3) {
+        newW = Math.min(cfg.initWidth, activeBlock.w + cfg.growBonus);
+        newX = Math.max(0, Math.min(W - newW, newX - cfg.growBonus / 2));
+        feedbackText = '🔥 ' + streak + '연속 완벽! (폭 회복)';
+      } else {
+        feedbackText = '✨ 완벽! (+보너스)';
+      }
+      feedbackTimer = 40;
+      score = clampScore(score + cfg.floorScore + streak * 35);
+    } else {
+      // 일부 잘려 나감
+      streak = 0;
+      newW = activeBlock.w - absDiff;
+      newX = diff > 0 ? activeBlock.x : prev.x;
+      if (newW < 8) {
+        endGame();
+        return;
+      }
+      var ratio = newW / cfg.initWidth;
+      var gained = Math.max(10, Math.round(cfg.floorScore * ratio));
+      score = clampScore(score + gained);
+      feedbackText = '좋아요! (+' + gained + '점)';
+      feedbackTimer = 25;
+    }
+
+    stack.push({
+      x: newX,
+      w: newW,
+      color: activeBlock.color
+    });
+    floorCount++;
+    saveBestScore(currentLevel, score);
+    updateHUD();
+    spawnNextBlock();
+  }
+
+  function endGame() {
+    gameState = 'over';
+    activeBlock = null;
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    saveBestScore(currentLevel, score);
+    overTitle.textContent = floorCount + '층에서 멈췄어요!';
+    overDesc.textContent = DIFF_CONFIG[currentLevel].name + ' 최종 점수: ' + score.toLocaleString('ko-KR') + '점';
+    gameOverOverlay.classList.add('show');
+    updateHUD();
+    updateRankUI();
+  }
+
+  // 상태 완전 초기화 및 새 게임 시작
+  function startNewGame() {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    var cfg = DIFF_CONFIG[currentLevel];
+    score = 0;
+    floorCount = 0;
+    streak = 0;
+    feedbackText = '타이밍을 맞춰 내려놓으세요!';
+    feedbackTimer = 45;
+    gameState = 'playing';
+
+    stack = [{
+      x: (W - cfg.initWidth) / 2,
+      w: cfg.initWidth,
+      color: '#475569'
+    }];
+
+    spawnNextBlock();
+    gameOverOverlay.classList.remove('show');
+    updateHUD();
+    updateRankUI();
+    loop();
+  }
+
+  function updateHUD() {
+    scoreVal.textContent = clampScore(score).toLocaleString('ko-KR');
+    floorVal.textContent = floorCount + '층';
+    streakVal.textContent = String(streak);
+    bestVal.textContent = getBestScore(currentLevel).toLocaleString('ko-KR');
+  }
+
+  function loop() {
+    if (gameState !== 'playing') return;
+
+    if (activeBlock) {
+      activeBlock.x += activeBlock.dir * activeBlock.speed;
+      if (activeBlock.x <= 0) {
+        activeBlock.x = 0;
+        activeBlock.dir = 1;
+      } else if (activeBlock.x + activeBlock.w >= W) {
+        activeBlock.x = W - activeBlock.w;
+        activeBlock.dir = -1;
+      }
+    }
+    if (feedbackTimer > 0) feedbackTimer--;
+
+    drawCanvas();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function drawCanvas() {
+    ctx.clearRect(0, 0, W, H);
+
+    // 카메라 오프셋: 층이 높아질수록 아래로 스크롤
+    var visibleFloors = 10;
+    var offsetFloors = Math.max(0, stack.length - visibleFloors);
+    var baseBottomY = H - 40;
+
+    // 쌓인 블록 그리기
+    for (var i = offsetFloors; i < stack.length; i++) {
+      var b = stack[i];
+      var relIdx = i - offsetFloors;
+      var y = baseBottomY - relIdx * BLOCK_H;
+      ctx.fillStyle = b.color;
+      ctx.fillRect(b.x, y, b.w, BLOCK_H - 2);
+      ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+      ctx.strokeRect(b.x, y, b.w, BLOCK_H - 2);
+    }
+
+    // 현재 움직이는 블록 그리기
+    if (activeBlock) {
+      var activeRelIdx = stack.length - offsetFloors;
+      var ay = baseBottomY - activeRelIdx * BLOCK_H;
+      ctx.fillStyle = activeBlock.color;
+      ctx.fillRect(activeBlock.x, ay, activeBlock.w, BLOCK_H - 2);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(activeBlock.x, ay, activeBlock.w, BLOCK_H - 2);
+    }
+
+    // 피드백 문구 표시
+    if (feedbackTimer > 0 && feedbackText) {
+      ctx.fillStyle = '#ffd60a';
+      ctx.font = 'bold 16px Pretendard, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(feedbackText, W / 2, 42);
+    }
+  }
+
+  // 터치 및 클릭 조작
+  canvas.addEventListener('pointerdown', function (e) {
+    if (gameState !== 'playing') return;
+    e.preventDefault();
+    dropBlock();
+  });
+
+  btnDrop.addEventListener('click', function () {
+    dropBlock();
+  });
+
+  // 키보드 조작
+  window.addEventListener('keydown', function (e) {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    if (gameState !== 'playing') return;
+    if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      dropBlock();
+    }
+  });
+
+  function setDifficulty(lvl) {
+    if (!DIFF_CONFIG[lvl]) return;
+    currentLevel = lvl;
+    btnDiffEasy.classList.toggle('on', lvl === 'easy');
+    btnDiffNormal.classList.toggle('on', lvl === 'normal');
+    btnDiffHard.classList.toggle('on', lvl === 'hard');
+    syncRankTab();
+    startNewGame();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setDifficulty('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setDifficulty('normal'); });
+  btnDiffHard.addEventListener('click', function () { setDifficulty('hard'); });
+  btnRestart.addEventListener('click', function () { startNewGame(); });
+  btnOverlayRestart.addEventListener('click', function () { startNewGame(); });
+
+  // ── 순위표 시험 모드 ──
+  var rkTabs = document.getElementById('rkTabs');
+  var rkList = document.getElementById('rkList');
+  var rkMine = document.getElementById('rkMine');
+  var rkName = document.getElementById('rkName');
+  var rkGo = document.getElementById('rkGo');
+  var rkMsg = document.getElementById('rkMsg');
+  var rankTabLevel = 'easy';
+
+  function getTestRanks(lvl) {
+    try {
+      var raw = __zws.getItem('zw_test_rank_stack-tower_' + lvl);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return [];
+  }
+
+  function saveTestRank(lvl, name, sc) {
+    var list = getTestRanks(lvl);
+    var cleanSc = clampScore(sc);
+    if (cleanSc <= 0) return false;
+    var existing = list.find(function (item) { return item.name === name; });
+    if (existing) {
+      if (cleanSc > existing.score) existing.score = cleanSc;
+    } else {
+      list.push({ name: name, score: cleanSc });
+    }
+    list.sort(function (a, b) { return b.score - a.score; });
+    list = list.slice(0, 10);
+    try {
+      __zws.setItem('zw_test_rank_stack-tower_' + lvl, JSON.stringify(list));
+    } catch (e) {}
+    return true;
+  }
+
+  function syncRankTab() {
+    rankTabLevel = currentLevel;
+    var idx = currentLevel === 'easy' ? 0 : (currentLevel === 'normal' ? 1 : 2);
+    var btns = rkTabs.querySelectorAll('button');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].classList.toggle('on', i === idx);
+    }
+    updateRankUI();
+  }
+
+  function updateRankUI() {
+    var best = getBestScore(rankTabLevel);
+    rkMine.textContent = '내 최고 기록 (' + DIFF_CONFIG[rankTabLevel].name + '): ' + best.toLocaleString('ko-KR') + '점';
+    var list = getTestRanks(rankTabLevel);
+    if (list.length === 0) {
+      rkList.innerHTML = '<li style="justify-content:center;color:var(--sub)">아직 시험 기록이 없어요. 첫 1등에 도전해 보세요!</li>';
+    } else {
+      rkList.innerHTML = list.map(function (it, idx) {
+        return '<li><span class="n">' + (idx + 1) + '</span><span class="nm">' + it.name + '</span><b>' + it.score.toLocaleString('ko-KR') + '점</b></li>';
+      }).join('');
+    }
+  }
+
+  rkTabs.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-i]');
+    if (!btn) return;
+    var i = parseInt(btn.getAttribute('data-i'), 10);
+    rankTabLevel = i === 0 ? 'easy' : (i === 1 ? 'normal' : 'hard');
+    var btns = rkTabs.querySelectorAll('button');
+    for (var k = 0; k < btns.length; k++) {
+      btns[k].classList.toggle('on', k === i);
+    }
+    updateRankUI();
+  });
+
+  rkGo.addEventListener('click', function () {
+    var name = (rkName.value || '').trim();
+    if (name.length < 2) {
+      rkMsg.textContent = '닉네임을 2글자 이상 입력해 주세요.';
+      return;
+    }
+    var best = getBestScore(rankTabLevel);
+    if (best <= 0) {
+      rkMsg.textContent = '먼저 게임을 플레이해 점수를 내 주세요.';
+      return;
+    }
+    saveTestRank(rankTabLevel, name, best);
+    rkMsg.textContent = '시험 모드 순위표에 ' + best.toLocaleString('ko-KR') + '점을 표시했어요!';
+    updateRankUI();
+  });
+
+  startNewGame();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>
+
