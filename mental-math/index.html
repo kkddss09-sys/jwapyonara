@@ -928,7 +928,6 @@ details[open] summary {
     if (currentDiff === diff && gameState === 'ready') return;
     currentDiff = diff;
     if (window.ZW) ZW.rankPick = diff === 'easy' ? 0 : (diff === 'normal' ? 1 : 2);
-    syncRankTab();
 
     btnDiffEasy.classList.toggle('on', diff === 'easy');
     btnDiffNormal.classList.toggle('on', diff === 'normal');
