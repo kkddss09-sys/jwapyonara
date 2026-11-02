@@ -387,6 +387,17 @@ h1 {
   .piece-btn { min-height: 76px; padding: 4px; }
   .mini-cell { width: 11px; height: 11px; }
 }
+
+.overlay-rank-btn {
+  display: none;
+  margin-top: 10px;
+  background: transparent !important;
+  border: 1.5px solid rgba(255,255,255,.75) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.overlay-rank-btn:hover { background: rgba(255,255,255,.12) !important; }
+
 </style>
 
 <script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
@@ -424,6 +435,7 @@ h1 {
         <h2 id="overTitle">더 놓을 곳이 없어요!</h2>
         <p id="overDesc">이번 판 점수: 0점</p>
         <button type="button" class="btn-primary" id="btnOverlayRestart">다시 시작하기</button>
+        <button type="button" class="btn-primary overlay-rank-btn" id="btnOverlayRank">🏆 순위표 올리기</button>
       </div>
     </div>
 
@@ -507,6 +519,11 @@ h1 {
   var overTitle = document.getElementById('overTitle');
   var overDesc = document.getElementById('overDesc');
   var btnOverlayRestart = document.getElementById('btnOverlayRestart');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  btnOverlayRank.addEventListener('click', function() {
+    var j = document.querySelector('.zw-rk-jump');
+    if (j) { j.click(); } else { var s = document.querySelector('.zw-rank'); if (s) s.scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
   var pieceTray = document.getElementById('pieceTray');
   var scoreVal = document.getElementById('scoreVal');
   var comboVal = document.getElementById('comboVal');
@@ -751,6 +768,7 @@ h1 {
   // 게임 종료 처리
   function endGame() {
     gameState = 'over';
+    btnOverlayRank.style.display = 'inline-block';
     saveBestScore(currentLevel, score);
     overTitle.textContent = '더 놓을 곳이 없어요!';
     overDesc.textContent = DIFF_CONFIG[currentLevel].name + ' 난이도 최종 점수: ' + score.toLocaleString('ko-KR') + '점';
@@ -775,6 +793,7 @@ h1 {
     }
     refillTray();
     gameOverOverlay.classList.remove('show');
+    btnOverlayRank.style.display = 'none';
     statusHint.textContent = '조각을 고른 뒤 판의 원하는 칸을 누르세요 (한 번 더 누르면 놓기)';
     buildBoardDOM();
     renderAll();
@@ -962,6 +981,7 @@ h1 {
     if (!DIFF_CONFIG[lvl]) return;
     currentLevel = lvl;
     if (window.ZW) ZW.rankPick = lvl === 'easy' ? 0 : (lvl === 'normal' ? 1 : 2);
+    try { var rb = document.querySelector(".rk-tabs button[data-i=\"" + (lvl === 'easy' ? 0 : (lvl === 'normal' ? 1 : 2)) + "\"]"); if (rb) rb.click(); } catch (e) {}
     btnDiffEasy.classList.toggle('on', lvl === 'easy');
     btnDiffNormal.classList.toggle('on', lvl === 'normal');
     btnDiffHard.classList.toggle('on', lvl === 'hard');

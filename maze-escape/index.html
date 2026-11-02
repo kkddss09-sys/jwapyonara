@@ -272,6 +272,17 @@ h1 {
 .rk-go { font: inherit; font-size: 14px; font-weight: 700; background: var(--red); color: #fff; border: none; border-radius: 10px; padding: 0 14px; min-height: 42px; cursor: pointer; }
 .rk-msg { margin: 6px 2px 0; font-size: 13px; color: var(--ok); min-height: 18px; }
 .rk-note { margin: 4px 2px 0; font-size: 12px; color: var(--sub); }
+
+.overlay-rank-btn {
+  display: none;
+  margin-top: 10px;
+  background: transparent !important;
+  border: 1.5px solid rgba(255,255,255,.75) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.overlay-rank-btn:hover { background: rgba(255,255,255,.12) !important; }
+
 </style>
 
 <script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
@@ -314,6 +325,7 @@ h1 {
         <h2 id="overTitle">미로 탈출 성공!</h2>
         <p id="overDesc">최종 점수: 0점</p>
         <button type="button" class="btn-primary" id="btnOverlayRestart">새 미로 시작</button>
+        <button type="button" class="btn-primary overlay-rank-btn" id="btnOverlayRank">🏆 순위표 올리기</button>
       </div>
     </div>
 
@@ -385,6 +397,11 @@ h1 {
   var overTitle = document.getElementById('overTitle');
   var overDesc = document.getElementById('overDesc');
   var btnOverlayRestart = document.getElementById('btnOverlayRestart');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  btnOverlayRank.addEventListener('click', function() {
+    var j = document.querySelector('.zw-rk-jump');
+    if (j) { j.click(); } else { var s = document.querySelector('.zw-rank'); if (s) s.scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
   var scoreVal = document.getElementById('scoreVal');
   var timeVal = document.getElementById('timeVal');
   var keyVal = document.getElementById('keyVal');
@@ -586,6 +603,7 @@ h1 {
   function endGame(isWin, bonus) {
     stopTimers();
     gameState = 'over';
+    btnOverlayRank.style.display = 'inline-block';
     saveBestScore(currentLevel, score);
     if (isWin) {
       overTitle.textContent = '🎉 미로 탈출 성공!';
@@ -619,6 +637,7 @@ h1 {
     gameState = 'playing';
 
     gameOverOverlay.classList.remove('show');
+    btnOverlayRank.style.display = 'none';
     renderAll();
     
 
@@ -776,6 +795,7 @@ h1 {
     if (!DIFF_CONFIG[lvl]) return;
     currentLevel = lvl;
     if (window.ZW) ZW.rankPick = lvl === 'easy' ? 0 : (lvl === 'normal' ? 1 : 2);
+    try { var rb = document.querySelector(".rk-tabs button[data-i=\"" + (lvl === 'easy' ? 0 : (lvl === 'normal' ? 1 : 2)) + "\"]"); if (rb) rb.click(); } catch (e) {}
     btnDiffEasy.classList.toggle('on', lvl === 'easy');
     btnDiffNormal.classList.toggle('on', lvl === 'normal');
     btnDiffHard.classList.toggle('on', lvl === 'hard');

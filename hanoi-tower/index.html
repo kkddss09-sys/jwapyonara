@@ -425,6 +425,17 @@ details[open] summary {
   .mini-cell { width: 11px; height: 11px; }
 }
 
+
+.overlay-rank-btn {
+  display: none;
+  margin-top: 10px;
+  background: transparent !important;
+  border: 1.5px solid rgba(255,255,255,.75) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.overlay-rank-btn:hover { background: rgba(255,255,255,.12) !important; }
+
 </style>
 <link rel="stylesheet" href="../_common/common.css">
 </head>
@@ -492,6 +503,7 @@ details[open] summary {
         <div class="overlay-msg" id="overlayMsg">모든 원반을 완벽하게 옮겼습니다!</div>
         <div class="overlay-score" id="overlayScore">0점</div>
         <button type="button" class="btn-primary" id="btnRestartModal">다시 하기</button>
+        <button type="button" class="btn-primary overlay-rank-btn" id="btnOverlayRank">🏆 순위표 올리기</button>
       </div>
     </div>
 
@@ -602,6 +614,11 @@ details[open] summary {
   var overlayMsg = document.getElementById('overlayMsg');
   var overlayScore = document.getElementById('overlayScore');
   var btnRestartModal = document.getElementById('btnRestartModal');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  btnOverlayRank.addEventListener('click', function() {
+    var j = document.querySelector('.zw-rk-jump');
+    if (j) { j.click(); } else { var s = document.querySelector('.zw-rank'); if (s) s.scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
   var btnRestart = document.getElementById('btnRestart');
 
   var btnDiffEasy = document.getElementById('btnDiffEasy');
@@ -676,6 +693,7 @@ details[open] summary {
     txtHint.className = 'hint-text';
 
     overlay.classList.add('hidden');
+    btnOverlayRank.style.display = 'none';
     updateUI();
     renderDisks();
   }
@@ -780,6 +798,7 @@ details[open] summary {
 
     updateUI();
 
+    btnOverlayRank.style.display = 'inline-block';
     overlayTitle.textContent = '🎉 하노이탑 클리어!';
     overlayMsg.textContent = '기둥 3으로 모든 원반을 옮겼습니다!\n이동 횟수: ' + movesCount + '회 (최소 ' + cfg.minMoves + '회) · 소요 시간: ' + elapsedTime.toFixed(1) + '초';
     overlayScore.textContent = finalScore.toLocaleString('ko-KR') + '점';
@@ -791,6 +810,7 @@ details[open] summary {
     if (currentDiff === diff && movesCount === 0) return;
     currentDiff = diff;
     if (window.ZW) ZW.rankPick = diff === 'easy' ? 0 : (diff === 'normal' ? 1 : 2);
+    try { var rb = document.querySelector(".rk-tabs button[data-i=\"" + (diff === 'easy' ? 0 : (diff === 'normal' ? 1 : 2)) + "\"]"); if (rb) rb.click(); } catch (e) {}
 
     btnDiffEasy.classList.toggle('on', diff === 'easy');
     btnDiffNormal.classList.toggle('on', diff === 'normal');

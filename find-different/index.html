@@ -397,6 +397,17 @@ details[open] summary {
   .mini-cell { width: 11px; height: 11px; }
 }
 
+
+.overlay-rank-btn {
+  display: none;
+  margin-top: 10px;
+  background: transparent !important;
+  border: 1.5px solid rgba(255,255,255,.75) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.overlay-rank-btn:hover { background: rgba(255,255,255,.12) !important; }
+
 </style>
 <link rel="stylesheet" href="../_common/common.css">
 </head>
@@ -457,6 +468,7 @@ details[open] summary {
           </div>
         </div>
         <button type="button" class="btn-primary" id="btnStartGame">게임 시작</button>
+        <button type="button" class="btn-primary overlay-rank-btn" id="btnOverlayRank">🏆 순위표 올리기</button>
       </div>
     </div>
 
@@ -565,6 +577,11 @@ details[open] summary {
   var statScore = document.getElementById('statScore');
   var statFound = document.getElementById('statFound');
   var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  btnOverlayRank.addEventListener('click', function() {
+    var j = document.querySelector('.zw-rk-jump');
+    if (j) { j.click(); } else { var s = document.querySelector('.zw-rank'); if (s) s.scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
   var btnRestart = document.getElementById('btnRestart');
 
   var btnDiffEasy = document.getElementById('btnDiffEasy');
@@ -710,6 +727,7 @@ details[open] summary {
     timeLeft = 30.0;
 
     overlay.classList.add('hidden');
+    btnOverlayRank.style.display = 'none';
     updateUI();
     nextRound();
     startTimer();
@@ -732,6 +750,7 @@ details[open] summary {
 
     updateUI();
 
+    btnOverlayRank.style.display = 'inline-block';
     overlayTitle.textContent = '⏱️ 시간 종료!';
     overlayMsg.textContent = '관찰력 테스트가 끝났습니다. 최종 기록을 확인하세요!';
     statScore.textContent = clampScore(score).toLocaleString('ko-KR') + '점';
@@ -758,6 +777,7 @@ details[open] summary {
     gridContainer.innerHTML = '';
     updateUI();
 
+    btnOverlayRank.style.display = 'none';
     overlayTitle.textContent = '🔍 다른 도형 찾기 (' + cfg.name + ')';
     overlayMsg.textContent = '30초 동안 혼자만 다른 칸을 최대한 많이 찾아보세요!';
     overlayStat.style.display = 'none';
@@ -770,6 +790,7 @@ details[open] summary {
     if (currentDiff === diff && gameState === 'ready') return;
     currentDiff = diff;
     if (window.ZW) ZW.rankPick = diff === 'easy' ? 0 : (diff === 'normal' ? 1 : 2);
+    try { var rb = document.querySelector(".rk-tabs button[data-i=\"" + (diff === 'easy' ? 0 : (diff === 'normal' ? 1 : 2)) + "\"]"); if (rb) rb.click(); } catch (e) {}
 
     btnDiffEasy.classList.toggle('on', diff === 'easy');
     btnDiffNormal.classList.toggle('on', diff === 'normal');

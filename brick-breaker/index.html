@@ -355,6 +355,17 @@ details[open] summary {
   .mini-cell { width: 11px; height: 11px; }
 }
 
+
+.overlay-rank-btn {
+  display: none;
+  margin-top: 10px;
+  background: transparent !important;
+  border: 1.5px solid rgba(255,255,255,.75) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+.overlay-rank-btn:hover { background: rgba(255,255,255,.12) !important; }
+
 </style>
 <link rel="stylesheet" href="../_common/common.css">
 </head>
@@ -401,6 +412,7 @@ details[open] summary {
         <div class="overlay-msg" id="overlayMsg">화면을 터치하거나 발사 단추를 누르면 공이 출발합니다.</div>
         <div class="overlay-score" id="overlayScore" style="display:none;">0점</div>
         <button type="button" class="btn-primary" id="btnStartGame">게임 시작</button>
+        <button type="button" class="btn-primary overlay-rank-btn" id="btnOverlayRank">🏆 순위표 올리기</button>
       </div>
     </div>
 
@@ -550,6 +562,11 @@ details[open] summary {
   var overlayMsg = document.getElementById('overlayMsg');
   var overlayScore = document.getElementById('overlayScore');
   var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  btnOverlayRank.addEventListener('click', function() {
+    var j = document.querySelector('.zw-rk-jump');
+    if (j) { j.click(); } else { var s = document.querySelector('.zw-rank'); if (s) s.scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
   var btnRestart = document.getElementById('btnRestart');
 
   var txtScore = document.getElementById('txtScore');
@@ -650,6 +667,7 @@ details[open] summary {
     updateUI();
 
     gameState = 'ready';
+    btnOverlayRank.style.display = 'none';
     overlayTitle.textContent = '🧱 ' + cfg.name + ' 난이도';
     overlayMsg.textContent = '시작 단추를 누르거나 화면을 터치해 공을 발사하세요.';
     overlayScore.style.display = 'none';
@@ -673,6 +691,7 @@ details[open] summary {
     ball.vy = -Math.abs(ball.speed * Math.sin(angle));
 
     overlay.classList.add('hidden');
+    btnOverlayRank.style.display = 'none';
     if (!animationFrameId) {
       lastTimestamp = performance.now();
       animationFrameId = requestAnimationFrame(gameLoop);
@@ -732,6 +751,7 @@ details[open] summary {
         ball.vx = 0;
         ball.vy = 0;
         gameState = 'ready';
+        btnOverlayRank.style.display = 'none';
         overlayTitle.textContent = '공을 놓쳤습니다!';
         overlayMsg.textContent = '남은 생명: ' + lives + '개. 다시 발사하세요.';
         overlayScore.style.display = 'none';
@@ -827,6 +847,7 @@ details[open] summary {
     }
 
     checkBestScore();
+    btnOverlayRank.style.display = 'inline-block';
     overlayTitle.textContent = '💀 게임 오버';
     overlayMsg.textContent = '모든 생명을 잃었습니다. 다시 도전해보세요!';
     overlayScore.textContent = clampScore(score).toLocaleString('ko-KR') + '점';
@@ -850,6 +871,7 @@ details[open] summary {
     checkBestScore();
     updateUI();
 
+    btnOverlayRank.style.display = 'inline-block';
     overlayTitle.textContent = '🎉 스테이지 클리어!';
     overlayMsg.textContent = '모든 벽돌을 깨뜨렸습니다! (보너스 ' + bonus.toLocaleString('ko-KR') + '점)';
     overlayScore.textContent = clampScore(score).toLocaleString('ko-KR') + '점';
@@ -1067,6 +1089,7 @@ details[open] summary {
     if (currentDiff === diff && gameState === 'ready') return;
     currentDiff = diff;
     if (window.ZW) ZW.rankPick = diff === 'easy' ? 0 : (diff === 'normal' ? 1 : 2);
+    try { var rb = document.querySelector(".rk-tabs button[data-i=\"" + (diff === 'easy' ? 0 : (diff === 'normal' ? 1 : 2)) + "\"]"); if (rb) rb.click(); } catch (e) {}
 
     btnDiffEasy.classList.toggle('on', diff === 'easy');
     btnDiffNormal.classList.toggle('on', diff === 'normal');
