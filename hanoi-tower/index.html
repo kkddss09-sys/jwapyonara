@@ -326,6 +326,99 @@ details[open] summary {
 .rules-list li {
   margin-bottom: 4px;
 }
+.zw-rank {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  margin-top: 14px;
+}
+.zw-rank h2 {
+  font-size: 18px;
+  margin: 0 0 8px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.zw-rank h2 small {
+  font-size: 12px;
+  color: var(--sub);
+  font-weight: 600;
+}
+.rk-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.rk-tabs button {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--sub);
+  border-radius: 999px;
+  padding: 5px 14px;
+  cursor: pointer;
+}
+.rk-tabs button.on {
+  background: var(--panel);
+  border-color: var(--panel);
+  color: #fff;
+}
+.rk-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.rk-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+.rk-list li:first-child { border-top: none; }
+.rk-list .n { width: 22px; font-weight: 800; color: var(--red); text-align: center; }
+.rk-list .nm { flex: 1; }
+.rk-mine { margin: 10px 2px 6px; font-size: 14px; font-weight: 700; }
+.rk-form { display: flex; gap: 6px; }
+.rk-name {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 15px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 10px;
+  background: var(--card);
+  color: var(--ink);
+}
+.rk-go {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0 14px;
+  min-height: 42px;
+  cursor: pointer;
+}
+.rk-msg { margin: 6px 2px 0; font-size: 13px; color: var(--ok); min-height: 18px; }
+.rk-note { margin: 4px 2px 0; font-size: 12px; color: var(--sub); }
+@media (max-width: 380px) {
+  h1 { font-size: 22px; }
+  .piece-btn { min-height: 76px; padding: 4px; }
+  .mini-cell { width: 11px; height: 11px; }
+}
+
 </style>
 </head>
 <body>
@@ -397,7 +490,6 @@ details[open] summary {
 
     <!-- 하단 컨트롤 바 -->
     <div class="ctrl-bar">
-      <span style="font-size: 12px; color: var(--sub);" id="txtModeNotice">시험 모드 (점수는 화면에만 표시)</span>
       <button type="button" class="btn-sub" id="btnRestart">새로 시작</button>
     </div>
   </div>
@@ -466,8 +558,9 @@ details[open] summary {
     hard: 0
   };
 
+  var legacyBestKey = 'zw_hanoi-tower_best';
   try {
-    var saved = null;
+    var saved = localStorage.getItem(legacyBestKey);
     if (saved) {
       var parsed = JSON.parse(saved);
       if (parsed) {
@@ -476,6 +569,7 @@ details[open] summary {
         if (typeof parsed.hard === 'number') bestScores.hard = parsed.hard;
       }
     }
+    ['easy', 'normal', 'hard'].forEach(function (d) { var k = 'zw_hanoi-tower_best_' + d; var old = parseInt(localStorage.getItem(k), 10); if (isFinite(old)) bestScores[d] = Math.max(bestScores[d], clampScore(old)); localStorage.setItem(k, String(clampScore(bestScores[d]))); });
   } catch (e) {}
 
   // DOM 캐시
@@ -514,6 +608,11 @@ details[open] summary {
     if (val > 9999999) return 9999999;
     return Math.floor(val);
   }
+
+  function saveBestRecords() {
+    try { localStorage.setItem(legacyBestKey, JSON.stringify(bestScores)); localStorage.setItem('zw_hanoi-tower_best_' + currentDiff, String(clampScore(bestScores[currentDiff]))); } catch (e) {}
+ 
+    updateRankMine(); }
 
   function updateUI() {
     var cfg = DIFF_CONFIG[currentDiff];
@@ -666,8 +765,9 @@ details[open] summary {
 
     if (finalScore > bestScores[currentDiff]) {
       bestScores[currentDiff] = finalScore;
+      saveBestRecords();
       try {
-        /* 시험 모드: 저장하지 않음 */
+        /* 최고 기록 저장 */
       } catch (e) {}
     }
 
@@ -683,6 +783,8 @@ details[open] summary {
   function setDifficulty(diff) {
     if (currentDiff === diff && movesCount === 0) return;
     currentDiff = diff;
+    if (window.ZW) ZW.rankPick = diff === 'easy' ? 0 : (diff === 'normal' ? 1 : 2);
+    syncRankTab();
 
     btnDiffEasy.classList.toggle('on', diff === 'easy');
     btnDiffNormal.classList.toggle('on', diff === 'normal');
@@ -718,6 +820,94 @@ details[open] summary {
   btnRestartModal.addEventListener('click', function() { resetGame(); });
 
   // 시작
+  var RANK_API = 'https://jwapyonara-rank.kkddss09.workers.dev';
+  var rkTabs = document.getElementById('rkTabs');
+  var rkList = document.getElementById('rkList');
+  var rkMine = document.getElementById('rkMine');
+  var rkName = document.getElementById('rkName');
+  var rkGo = document.getElementById('rkGo');
+  var rkMsg = document.getElementById('rkMsg');
+  var rankTabLevel = currentDiff;
+  var rankHasBest = false;
+
+  function safeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function safeSet(key, value) { try { localStorage.setItem(key, value); } catch (e) {} }
+  function rankGameId() { return 'hanoi-tower-' + rankTabLevel; }
+  function rankBest() {
+    try {
+      var value = Number(bestScores[rankTabLevel]);
+      return Number.isFinite(value) && Number.isInteger(value) && value >= 0 ? value : null;
+    } catch (e) { return null; }
+  }
+  function updateRankMine() {
+    var best = rankBest();
+    rkMine.textContent = best === null ? '게임을 한 판 하면 내 최고 기록이 여기에 보여요.' : '내 최고 기록 (' + DIFF_CONFIG[rankTabLevel].name + '): ' + best.toLocaleString('ko-KR') + '점';
+    var sent = Number(safeGet('zw_rank_sent_' + rankGameId()));
+    var alreadySent = best !== null && Number.isFinite(sent) && sent >= best;
+    rkGo.disabled = best === null || best <= 0 || alreadySent;
+    rkGo.textContent = alreadySent ? '올렸어요' : '내 기록 올리기';
+  }
+  function renderRankRows(rows) {
+    rkList.textContent = '';
+    if (!rows.length) {
+      var empty = document.createElement('li'); empty.style.justifyContent = 'center'; empty.style.color = 'var(--sub)';
+      empty.textContent = '아직 기록이 없어요. 첫 번째가 되어 보세요!'; rkList.appendChild(empty); return;
+    }
+    rows.slice(0, 10).forEach(function (item, idx) {
+      var li = document.createElement('li');
+      var rank = document.createElement('span'); rank.className = 'n'; rank.textContent = String(idx + 1);
+      var name = document.createElement('span'); name.className = 'nm'; name.textContent = String(item.name == null ? '' : item.name);
+      var score = document.createElement('b'); var value = Number(item.score); score.textContent = (Number.isFinite(value) ? Math.trunc(value).toLocaleString('ko-KR') : '0') + '점';
+      li.appendChild(rank); li.appendChild(name); li.appendChild(score); rkList.appendChild(li);
+    });
+  }
+  async function loadRanks() {
+    updateRankMine();
+    try {
+      var response = await fetch(RANK_API + '/api/rank?game=' + encodeURIComponent(rankGameId()));
+      if (!response.ok) throw new Error('rank load failed');
+      var data = await response.json();
+      if (!data || !Array.isArray(data.top)) throw new Error('rank data invalid');
+      renderRankRows(data.top);
+    } catch (e) {
+      rkList.textContent = '';
+      var error = document.createElement('li'); error.style.justifyContent = 'center'; error.style.color = 'var(--sub)';
+      error.textContent = '순위표를 불러오지 못했어요. 잠시 뒤에 다시 열어 주세요.'; rkList.appendChild(error);
+    }
+  }
+  function syncRankTab() {
+    rankTabLevel = currentLevel;
+    var idx = currentLevel === 'easy' ? 0 : (currentLevel === 'normal' ? 1 : 2);
+    var buttons = rkTabs.querySelectorAll('button[data-i]');
+    for (var i = 0; i < buttons.length; i++) buttons[i].classList.toggle('on', i === idx);
+    loadRanks();
+  }
+  rkTabs.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-i]'); if (!btn) return;
+    var i = parseInt(btn.getAttribute('data-i'), 10);
+    rankTabLevel = i === 0 ? 'easy' : (i === 1 ? 'normal' : 'hard');
+    Array.prototype.forEach.call(rkTabs.querySelectorAll('button[data-i]'), function (b, idx) { b.classList.toggle('on', idx === i); });
+    rkMsg.textContent = ''; loadRanks();
+  });
+  rkGo.addEventListener('click', async function () {
+    var name = (rkName.value || '').trim();
+    if (!/^[가-힣A-Za-z0-9_]{2,8}$/.test(name)) { rkMsg.textContent = '닉네임은 한글·영문·숫자·밑줄로 2~8자만 쓸 수 있어요.'; return; }
+    var best = rankBest();
+    if (best === null || best <= 0) { updateRankMine(); return; }
+    rkGo.disabled = true;
+    try {
+      var response = await fetch(RANK_API + '/api/rank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: rankGameId(), name: name, score: best }) });
+      var data = await response.json();
+      if (!response.ok || !data || !data.ok) { rkMsg.textContent = data && data.error ? String(data.error) : '연결이 안 돼요. 잠시 뒤에 다시 해 주세요.'; return; }
+      safeSet('zw_nick', name); safeSet('zw_rank_sent_' + rankGameId(), String(best));
+      rkMsg.textContent = '올렸어요! 지금 ' + data.rank + '등입니다.';
+      await loadRanks();
+    } catch (e) { rkMsg.textContent = '연결이 안 돼요. 잠시 뒤에 다시 해 주세요.'; }
+    finally { updateRankMine(); }
+  });
+  var savedNick = safeGet('zw_nick'); if (savedNick) rkName.value = savedNick;
+
+  loadRanks();
   resetGame();
 
 })();

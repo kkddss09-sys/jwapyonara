@@ -306,9 +306,9 @@ h1 {
     </div>
   </section>
 
-  <!-- 순위 연결: 서버 등록 전 시험 모드 동작 -->
+  <!-- 순위표 -->
   <section class="zw-rank" id="rankSection">
-    <h2>🏆 순위표 <small>블록 쌓기 · 최고 점수 (시험 모드)</small></h2>
+    <h2>🏆 순위표 <small>블록 쌓기 · 최고 점수</small></h2>
     <div class="rk-tabs" id="rkTabs">
       <button type="button" data-i="0" class="on">쉬움</button>
       <button type="button" data-i="1">보통</button>
@@ -318,10 +318,10 @@ h1 {
     <div class="rk-mine" id="rkMine">내 최고 기록: 0점</div>
     <div class="rk-form">
       <input class="rk-name" id="rkName" type="text" maxlength="8" placeholder="닉네임 (2~8자)" autocomplete="off">
-      <button type="button" class="rk-go" id="rkGo">시험 기록 남기기</button>
+      <button type="button" class="rk-go" id="rkGo">내 기록 올리기</button>
     </div>
     <p class="rk-msg" id="rkMsg" role="status"></p>
-    <p class="rk-note">※ 서버에 등록되기 전이라 이 기기 화면에만 표시되는 시험 모드입니다.</p>
+    <p class="rk-note">닉네임과 점수만 올라갑니다. 이름·전화번호 같은 개인정보는 적지 마세요. 점수는 재미로 보는 참고용이라 조작될 수 있고, 이상한 닉네임은 지울 수 있습니다.</p>
   </section>
 </main>
 
@@ -406,7 +406,7 @@ h1 {
 
   function getBestScore(lvl) {
     try {
-      var raw = __zws.getItem(getBestKey(lvl));
+      var raw = localStorage.getItem(getBestKey(lvl));
       return clampScore(parseInt(raw, 10) || 0);
     } catch (e) {
       return 0;
@@ -418,9 +418,11 @@ h1 {
     if (clean > getBestScore(lvl)) {
       try {
         __zws.setItem(getBestKey(lvl), String(clean));
+        localStorage.setItem(getBestKey(lvl), String(clean));
       } catch (e) {}
     }
-  }
+ 
+    updateRankMine(); }
 
   function spawnNextBlock() {
     var cfg = DIFF_CONFIG[currentLevel];
@@ -505,7 +507,7 @@ h1 {
     overDesc.textContent = DIFF_CONFIG[currentLevel].name + ' 최종 점수: ' + score.toLocaleString('ko-KR') + '점';
     gameOverOverlay.classList.add('show');
     updateHUD();
-    updateRankUI();
+    updateRankMine();
   }
 
   // 상태 완전 초기화 및 새 게임 시작
@@ -531,7 +533,7 @@ h1 {
     spawnNextBlock();
     gameOverOverlay.classList.remove('show');
     updateHUD();
-    updateRankUI();
+    updateRankMine();
     loop();
   }
 
@@ -624,6 +626,7 @@ h1 {
   function setDifficulty(lvl) {
     if (!DIFF_CONFIG[lvl]) return;
     currentLevel = lvl;
+    if (window.ZW) ZW.rankPick = lvl === 'easy' ? 0 : (lvl === 'normal' ? 1 : 2);
     btnDiffEasy.classList.toggle('on', lvl === 'easy');
     btnDiffNormal.classList.toggle('on', lvl === 'normal');
     btnDiffHard.classList.toggle('on', lvl === 'hard');
@@ -637,92 +640,93 @@ h1 {
   btnRestart.addEventListener('click', function () { startNewGame(); });
   btnOverlayRestart.addEventListener('click', function () { startNewGame(); });
 
-  // ── 순위표 시험 모드 ──
+  // ── 순위표 ──
+  var RANK_API = 'https://jwapyonara-rank.kkddss09.workers.dev';
   var rkTabs = document.getElementById('rkTabs');
   var rkList = document.getElementById('rkList');
   var rkMine = document.getElementById('rkMine');
   var rkName = document.getElementById('rkName');
   var rkGo = document.getElementById('rkGo');
   var rkMsg = document.getElementById('rkMsg');
-  var rankTabLevel = 'easy';
+  var rankTabLevel = currentLevel;
+  var rankHasBest = false;
 
-  function getTestRanks(lvl) {
+  function safeGet(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function safeSet(key, value) { try { localStorage.setItem(key, value); } catch (e) {} }
+  function rankGameId() { return 'stack-tower-' + rankTabLevel; }
+  function rankBest() {
     try {
-      var raw = __zws.getItem('zw_test_rank_stack-tower_' + lvl);
-      if (raw) return JSON.parse(raw);
-    } catch (e) {}
-    return [];
+      var value = Number(getBestScore(rankTabLevel));
+      return Number.isFinite(value) && Number.isInteger(value) && value >= 0 ? value : null;
+    } catch (e) { return null; }
   }
-
-  function saveTestRank(lvl, name, sc) {
-    var list = getTestRanks(lvl);
-    var cleanSc = clampScore(sc);
-    if (cleanSc <= 0) return false;
-    var existing = list.find(function (item) { return item.name === name; });
-    if (existing) {
-      if (cleanSc > existing.score) existing.score = cleanSc;
-    } else {
-      list.push({ name: name, score: cleanSc });
+  function updateRankMine() {
+    var best = rankBest();
+    rkMine.textContent = best === null ? '게임을 한 판 하면 내 최고 기록이 여기에 보여요.' : '내 최고 기록 (' + DIFF_CONFIG[rankTabLevel].name + '): ' + best.toLocaleString('ko-KR') + '점';
+    var sent = Number(safeGet('zw_rank_sent_' + rankGameId()));
+    var alreadySent = best !== null && Number.isFinite(sent) && sent >= best;
+    rkGo.disabled = best === null || best <= 0 || alreadySent;
+    rkGo.textContent = alreadySent ? '올렸어요' : '내 기록 올리기';
+  }
+  function renderRankRows(rows) {
+    rkList.textContent = '';
+    if (!rows.length) {
+      var empty = document.createElement('li'); empty.style.justifyContent = 'center'; empty.style.color = 'var(--sub)';
+      empty.textContent = '아직 기록이 없어요. 첫 번째가 되어 보세요!'; rkList.appendChild(empty); return;
     }
-    list.sort(function (a, b) { return b.score - a.score; });
-    list = list.slice(0, 10);
-    try {
-      __zws.setItem('zw_test_rank_stack-tower_' + lvl, JSON.stringify(list));
-    } catch (e) {}
-    return true;
+    rows.slice(0, 10).forEach(function (item, idx) {
+      var li = document.createElement('li');
+      var rank = document.createElement('span'); rank.className = 'n'; rank.textContent = String(idx + 1);
+      var name = document.createElement('span'); name.className = 'nm'; name.textContent = String(item.name == null ? '' : item.name);
+      var score = document.createElement('b'); var value = Number(item.score); score.textContent = (Number.isFinite(value) ? Math.trunc(value).toLocaleString('ko-KR') : '0') + '점';
+      li.appendChild(rank); li.appendChild(name); li.appendChild(score); rkList.appendChild(li);
+    });
   }
-
+  async function loadRanks() {
+    updateRankMine();
+    try {
+      var response = await fetch(RANK_API + '/api/rank?game=' + encodeURIComponent(rankGameId()));
+      if (!response.ok) throw new Error('rank load failed');
+      var data = await response.json();
+      if (!data || !Array.isArray(data.top)) throw new Error('rank data invalid');
+      renderRankRows(data.top);
+    } catch (e) {
+      rkList.textContent = '';
+      var error = document.createElement('li'); error.style.justifyContent = 'center'; error.style.color = 'var(--sub)';
+      error.textContent = '순위표를 불러오지 못했어요. 잠시 뒤에 다시 열어 주세요.'; rkList.appendChild(error);
+    }
+  }
   function syncRankTab() {
     rankTabLevel = currentLevel;
     var idx = currentLevel === 'easy' ? 0 : (currentLevel === 'normal' ? 1 : 2);
-    var btns = rkTabs.querySelectorAll('button');
-    for (var i = 0; i < btns.length; i++) {
-      btns[i].classList.toggle('on', i === idx);
-    }
-    updateRankUI();
+    var buttons = rkTabs.querySelectorAll('button[data-i]');
+    for (var i = 0; i < buttons.length; i++) buttons[i].classList.toggle('on', i === idx);
+    loadRanks();
   }
-
-  function updateRankUI() {
-    var best = getBestScore(rankTabLevel);
-    rkMine.textContent = '내 최고 기록 (' + DIFF_CONFIG[rankTabLevel].name + '): ' + best.toLocaleString('ko-KR') + '점';
-    var list = getTestRanks(rankTabLevel);
-    if (list.length === 0) {
-      rkList.innerHTML = '<li style="justify-content:center;color:var(--sub)">아직 시험 기록이 없어요. 첫 1등에 도전해 보세요!</li>';
-    } else {
-      rkList.innerHTML = list.map(function (it, idx) {
-        return '<li><span class="n">' + (idx + 1) + '</span><span class="nm">' + it.name + '</span><b>' + it.score.toLocaleString('ko-KR') + '점</b></li>';
-      }).join('');
-    }
-  }
-
   rkTabs.addEventListener('click', function (e) {
-    var btn = e.target.closest('button[data-i]');
-    if (!btn) return;
+    var btn = e.target.closest('button[data-i]'); if (!btn) return;
     var i = parseInt(btn.getAttribute('data-i'), 10);
     rankTabLevel = i === 0 ? 'easy' : (i === 1 ? 'normal' : 'hard');
-    var btns = rkTabs.querySelectorAll('button');
-    for (var k = 0; k < btns.length; k++) {
-      btns[k].classList.toggle('on', k === i);
-    }
-    updateRankUI();
+    Array.prototype.forEach.call(rkTabs.querySelectorAll('button[data-i]'), function (b, idx) { b.classList.toggle('on', idx === i); });
+    rkMsg.textContent = ''; loadRanks();
   });
-
-  rkGo.addEventListener('click', function () {
+  rkGo.addEventListener('click', async function () {
     var name = (rkName.value || '').trim();
-    if (name.length < 2) {
-      rkMsg.textContent = '닉네임을 2글자 이상 입력해 주세요.';
-      return;
-    }
-    var best = getBestScore(rankTabLevel);
-    if (best <= 0) {
-      rkMsg.textContent = '먼저 게임을 플레이해 점수를 내 주세요.';
-      return;
-    }
-    saveTestRank(rankTabLevel, name, best);
-    rkMsg.textContent = '시험 모드 순위표에 ' + best.toLocaleString('ko-KR') + '점을 표시했어요!';
-    updateRankUI();
+    if (!/^[가-힣A-Za-z0-9_]{2,8}$/.test(name)) { rkMsg.textContent = '닉네임은 한글·영문·숫자·밑줄로 2~8자만 쓸 수 있어요.'; return; }
+    var best = rankBest();
+    if (best === null || best <= 0) { updateRankMine(); return; }
+    rkGo.disabled = true;
+    try {
+      var response = await fetch(RANK_API + '/api/rank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: rankGameId(), name: name, score: best }) });
+      var data = await response.json();
+      if (!response.ok || !data || !data.ok) { rkMsg.textContent = data && data.error ? String(data.error) : '연결이 안 돼요. 잠시 뒤에 다시 해 주세요.'; return; }
+      safeSet('zw_nick', name); safeSet('zw_rank_sent_' + rankGameId(), String(best));
+      rkMsg.textContent = '올렸어요! 지금 ' + data.rank + '등입니다.';
+      await loadRanks();
+    } catch (e) { rkMsg.textContent = '연결이 안 돼요. 잠시 뒤에 다시 해 주세요.'; }
+    finally { updateRankMine(); }
   });
-
+  var savedNick = safeGet('zw_nick'); if (savedNick) rkName.value = savedNick;
   startNewGame();
 })();
 </script>
