@@ -1,6 +1,6 @@
 function calcHogang(checked, total) {
-  var t = total === undefined ? 8 : Number(total);
-  if (isNaN(t) || t <= 0) t = 8;
+  var t = total === undefined ? 9 : Number(total);
+  if (isNaN(t) || t <= 0) t = 9;
 
   if (checked === null || checked === undefined || typeof checked === 'boolean' || checked === '') {
     return { ok: false, score: 0, total: t, level: '', title: '', desc: '' };
@@ -15,11 +15,11 @@ function calcHogang(checked, total) {
   var title = '';
   var desc = '';
 
-  if (score <= 2) {
+  if (score <= Math.floor(t / 3)) {
     level = 'low';
     title = '아직은 조심하세요';
     desc = '모르는 것이 많을수록 불리한 조건을 놓치기 쉽습니다. 아래에서 체크하지 못한 것부터 하나씩 알아보세요.';
-  } else if (score <= 5) {
+  } else if (score <= Math.floor(t * 2 / 3)) {
     level = 'mid';
     title = '절반은 알고 있어요';
     desc = '기본은 알고 있습니다. 체크하지 못한 것만 채우면 훨씬 든든합니다.';
