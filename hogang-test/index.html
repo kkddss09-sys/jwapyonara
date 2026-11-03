@@ -22,8 +22,10 @@
 .check-list { display:grid; gap:8px; }
 .check-item { display:flex; align-items:center; min-height:52px; padding:12px 14px; border:1.5px solid var(--line); border-radius:14px; background:var(--card); cursor:pointer; user-select:none; gap:12px; transition:border-color .15s, background .15s; }
 .check-item input[type="checkbox"] { width:22px; height:22px; margin:0; flex-shrink:0; cursor:pointer; accent-color:var(--red); }
-.check-item .cafe-link { flex-shrink:0; margin-left:8px; font-size:12px; font-weight:800; color:#fff; background:var(--red); padding:7px 11px; border-radius:999px; text-decoration:none; white-space:nowrap; }
-@media (max-width:520px) { .check-item.has-cafe { flex-wrap:wrap; } .check-item.has-cafe .cafe-link { flex-basis:100%; margin:8px 0 0 0; text-align:center; } }
+.check-item.has-cafe { flex-wrap:wrap; }
+.check-item .cafe-row { flex-basis:100%; margin:10px 0 0 34px; }
+.check-item .cafe-link { display:inline-block; font-size:15px; font-weight:800; color:#fff; background:var(--red); padding:11px 22px; border-radius:12px; text-decoration:none; text-align:center; }
+.check-item .cafe-note { display:block; margin-top:8px; font-size:13px; font-weight:600; line-height:1.45; color:#ff9f0a; word-break:keep-all; }
 .check-item.done { background:var(--fill); border-color:var(--red); }
 .check-item.done span { color:var(--ink); font-weight:700; }
 .check-item span { font-size:15px; font-weight:600; line-height:1.45; color:var(--ink); flex:1; word-break:keep-all; }
@@ -53,7 +55,7 @@
       <label class="check-item"><input type="checkbox" data-idx="5"><span>카드결합으로 구매하지 않기</span></label>
       <label class="check-item"><input type="checkbox" data-idx="6"><span>캡스나 워치 강매 등 기타 상품 구매하지 않기</span></label>
       <label class="check-item"><input type="checkbox" data-idx="7"><span>LG소호 상품 구매하지 않기</span></label>
-      <label class="check-item has-cafe"><input type="checkbox" data-idx="8"><span>개통 전에 좌표나라 카페 후기 먼저 쓰기</span><a class="cafe-link" href="https://cafe.naver.com/whdrpzja" target="_blank" rel="noopener">좌표.com 카페 바로가기</a></label>
+      <label class="check-item has-cafe"><input type="checkbox" data-idx="8"><span>개통 전에 좌표나라 카페 후기 먼저 쓰기</span><span class="cafe-row"><a class="cafe-link" href="http://xn--h25b29s.com/" target="_blank" rel="noopener">후기 작성하기</a><span class="cafe-note">후기를 작성하지 않으면 문제가 발생시 개인적으로 해결하셔야 합니다</span></span></label>
     </div>
   </section>
 
@@ -127,7 +129,7 @@
     { text: '카드결합으로 구매하지 않기' },
     { text: '캡스나 워치 강매 등 기타 상품 구매하지 않기' },
     { text: 'LG소호 상품 구매하지 않기' },
-    { text: '개통 전에 좌표나라 카페 후기 먼저 쓰기', linkText: '좌표나라 카페', linkHref: 'https://cafe.naver.com/whdrpzja' }
+    { text: '개통 전에 좌표나라 카페 후기 먼저 쓰기', linkText: '좌표.com 후기 작성', linkHref: 'http://xn--h25b29s.com/' }
   ];
 
   var boxes = document.querySelectorAll('input[type="checkbox"]');
