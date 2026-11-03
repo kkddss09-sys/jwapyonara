@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>나는 호갱일까? 9문항 테스트 | 좌표나라</title>
+<title>좌표나라 휴대폰구매 체크리스트</title>
 <meta name="description" content="아는 것에만 체크하세요. 휴대폰 살 때 얼마나 준비됐는지 바로 확인해 드립니다. 가입 없이 무료.">
 <link rel="stylesheet" href="../_common/common.css">
 <style>
@@ -22,6 +22,8 @@
 .check-list { display:grid; gap:8px; }
 .check-item { display:flex; align-items:center; min-height:52px; padding:12px 14px; border:1.5px solid var(--line); border-radius:14px; background:var(--card); cursor:pointer; user-select:none; gap:12px; transition:border-color .15s, background .15s; }
 .check-item input[type="checkbox"] { width:22px; height:22px; margin:0; flex-shrink:0; cursor:pointer; accent-color:var(--red); }
+.check-item .cafe-link { flex-shrink:0; margin-left:8px; font-size:12px; font-weight:800; color:#fff; background:var(--red); padding:7px 11px; border-radius:999px; text-decoration:none; white-space:nowrap; }
+@media (max-width:520px) { .check-item.has-cafe { flex-wrap:wrap; } .check-item.has-cafe .cafe-link { flex-basis:100%; margin:8px 0 0 0; text-align:center; } }
 .check-item.done { background:var(--fill); border-color:var(--red); }
 .check-item.done span { color:var(--ink); font-weight:700; }
 .check-item span { font-size:15px; font-weight:600; line-height:1.45; color:var(--ink); flex:1; word-break:keep-all; }
@@ -30,7 +32,7 @@
 </head>
 <body>
 <main class="wrap">
-  <h1>나는 호갱일까?<br>9문항 테스트</h1>
+  <h1>좌표나라 휴대폰구매 체크리스트</h1>
   <p class="lead">아는 것에만 체크하세요. 휴대폰 살 때 얼마나 준비됐는지 보여 드립니다.</p>
 
   <section class="result" aria-live="polite">
@@ -51,7 +53,7 @@
       <label class="check-item"><input type="checkbox" data-idx="5"><span>카드결합으로 구매하지 않기</span></label>
       <label class="check-item"><input type="checkbox" data-idx="6"><span>캡스나 워치 강매 등 기타 상품 구매하지 않기</span></label>
       <label class="check-item"><input type="checkbox" data-idx="7"><span>LG소호 상품 구매하지 않기</span></label>
-      <label class="check-item"><input type="checkbox" data-idx="8"><span>개통 전에 좌표나라 카페 후기 먼저 쓰기</span></label>
+      <label class="check-item has-cafe"><input type="checkbox" data-idx="8"><span>개통 전에 좌표나라 카페 후기 먼저 쓰기</span><a class="cafe-link" href="https://cafe.naver.com/whdrpzja" target="_blank" rel="noopener">좌표.com 카페 바로가기</a></label>
     </div>
   </section>
 
@@ -192,7 +194,7 @@
 
   btnCopy.addEventListener('click', function () {
     if (!currentResult) return;
-    var copyText = '나는 호갱일까? 테스트 — 9개 중 ' + currentScore + '개 · ' + currentResult.title + ' · jwapyonara.com/hogang-test/';
+    var copyText = '좌표나라 휴대폰구매 체크리스트 — 9개 중 ' + currentScore + '개 · ' + currentResult.title + ' · jwapyonara.com/hogang-test/';
     
     function showSuccess() {
       var orig = btnCopy.textContent;
