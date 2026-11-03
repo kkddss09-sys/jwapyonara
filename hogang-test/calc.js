@@ -1,6 +1,6 @@
 function calcHogang(checked, total) {
-  var t = total === undefined ? 9 : Number(total);
-  if (isNaN(t) || t <= 0) t = 9;
+  var t = total === undefined ? 8 : Number(total);
+  if (isNaN(t) || t <= 0) t = 8;
 
   if (checked === null || checked === undefined || typeof checked === 'boolean' || checked === '') {
     return { ok: false, score: 0, total: t, level: '', title: '', desc: '' };
