@@ -592,7 +592,7 @@ details[open] summary {
   function clampScore(val) {
     if (typeof val !== 'number' || isNaN(val) || !isFinite(val)) return 0;
     if (val < 0) return 0;
-    if (val > 9999999) return 9999999;
+    if (val > 99999999) return 99999999;
     return Math.floor(val);
   }
 

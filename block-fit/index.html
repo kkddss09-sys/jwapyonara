@@ -552,7 +552,7 @@ h1 {
   function clampScore(val) {
     var n = Number(val);
     if (!Number.isFinite(n) || isNaN(n) || n < 0) return 0;
-    return Math.min(9999999, Math.floor(n));
+    return Math.min(99999999, Math.floor(n));
   }
 
   // 난이도별 로컬 최고 기록 키
