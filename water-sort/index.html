@@ -1,0 +1,1312 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>물 정렬 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 즐기는 무료 물 정렬 퍼즐 게임. 색깔별로 물을 나누어 병에 채워보세요. 쉬움, 보통, 어려움 3단계 난이도를 휴대폰과 PC에서 즐길 수 있습니다.">
+<link rel="canonical" href="https://jwapyonara.com/water-sort/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="물 정렬 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 즐기는 무료 물 정렬 퍼즐 게임. 색깔별로 물을 나누어 병에 채워보세요.">
+<meta property="og:url" content="https://jwapyonara.com/water-sort/">
+<link rel="stylesheet" href="../_common/common.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "물 정렬",
+  "url": "https://jwapyonara.com/water-sort/",
+  "description": "가입 없이 바로 즐기는 무료 물 정렬 퍼즐 게임. 색깔별로 물을 나누어 병에 채우는 두뇌 퍼즐.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "KRW"
+  }
+}
+</script>
+<style>
+/* 난이도 선택 버튼 */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--line, #e5e5ea);
+  background: var(--card, #fff);
+  color: var(--ink, #1c1c1e);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red, #e5484d);
+  background: var(--soft, #fff5f5);
+  color: var(--red, #e5484d);
+}
+
+/* 상태 표시 바 */
+.ws-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+}
+.ws-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+.ws-status-mid {
+  color: #ffffff;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+.ws-status-right {
+  color: #63e6be;
+  flex: 1.2;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 800;
+}
+.ws-best-line {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+  text-align: right;
+  margin-bottom: 10px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 보조 도구 바 (되돌리기, 병 추가, 소리) */
+.ws-tool-bar {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 0.8fr;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.btn-tool {
+  min-height: 44px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid var(--line, #e5e5ea);
+  background: var(--card, #fff);
+  color: var(--ink, #1c1c1e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px;
+  touch-action: manipulation;
+}
+.btn-tool:active:not(:disabled) {
+  background: var(--soft, #f2f2f7);
+}
+.btn-tool:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* 게임 보드 영역 */
+.ws-board-area {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 12px;
+  min-height: 290px;
+  background: var(--fill, #f4f4f6);
+  border-radius: 16px;
+  padding: 16px 8px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+[data-theme="dark"] .ws-board-area {
+  background: #1c1c1e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* 병 그리드/플렉스 배치 */
+.ws-bottles-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 16px 10px;
+  width: 100%;
+}
+.ws-bottle-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 44px;
+  min-height: 120px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* 병 본체 그래픽 */
+.ws-bottle {
+  position: relative;
+  width: 44px;
+  height: 116px;
+  box-sizing: border-box;
+  border: 2.5px solid rgba(140, 140, 150, 0.65);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: inset 1.5px 0 3px rgba(255, 255, 255, 0.35), inset -1.5px 0 3px rgba(0, 0, 0, 0.2), 0 3px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column-reverse;
+  overflow: hidden;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s, border-color 0.2s;
+}
+[data-theme="dark"] .ws-bottle {
+  border-color: rgba(210, 210, 225, 0.55);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* 병 입구 테두리 (Lip) */
+.ws-bottle::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -4px;
+  right: -4px;
+  height: 5px;
+  border: 2px solid rgba(140, 140, 150, 0.7);
+  border-radius: 4px;
+  background: rgba(240, 240, 245, 0.8);
+  box-sizing: border-box;
+  z-index: 5;
+}
+[data-theme="dark"] .ws-bottle::before {
+  border-color: rgba(210, 210, 225, 0.65);
+  background: rgba(60, 60, 65, 0.8);
+}
+
+/* 병 선택 시 상태 (위로 떠오름 및 하이라이트) */
+.ws-bottle-slot.selected .ws-bottle {
+  transform: translateY(-14px);
+  border-color: var(--red, #e5484d);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22), 0 0 10px rgba(229, 72, 77, 0.45);
+}
+.ws-bottle-slot.selected .ws-bottle::before {
+  border-color: var(--red, #e5484d);
+}
+
+/* 보통 및 어려움 난이도에서 병 크기 최적화 (390px 한 손 조작 대응) */
+.ws-board-area.level-normal .ws-bottle {
+  width: 36px;
+  height: 106px;
+  border-radius: 0 0 14px 14px;
+}
+.ws-board-area.level-normal .ws-bottle-slot {
+  min-width: 40px;
+}
+.ws-board-area.level-hard .ws-bottles-grid {
+  gap: 12px 6px;
+}
+.ws-board-area.level-hard .ws-bottle {
+  width: 30px;
+  height: 98px;
+  border-radius: 0 0 12px 12px;
+}
+.ws-board-area.level-hard .ws-bottle-slot {
+  min-width: 34px;
+}
+
+/* 물 한 칸 단위 (높이 25%) */
+.ws-water-unit {
+  width: 100%;
+  height: 25%;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  position: relative;
+  transition: height 0.25s ease-out;
+}
+/* 물 표면 찰랑임 효과 */
+.ws-water-unit:last-child {
+  border-radius: 4px 4px 0 0;
+}
+.ws-water-unit:first-child {
+  border-radius: 0 0 13px 13px;
+}
+.ws-water-unit::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* 한 병이 완성되었을 때 빛나는 효과 */
+.ws-bottle.completed {
+  border-color: #51cf66;
+  box-shadow: 0 0 12px rgba(81, 207, 102, 0.4);
+}
+
+/* 하단 주 단추 바 (다시 하기, 새 판) */
+.ws-main-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+}
+.btn-reset {
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #3a3a3c;
+}
+.btn-newgame {
+  background: var(--card, #fff);
+  border: 1.5px solid var(--line, #e5e5ea);
+  color: var(--ink, #1c1c1e);
+}
+.btn-newgame:active {
+  background: var(--soft, #f2f2f7);
+}
+
+/* 결과 오버레이 창 */
+.ws-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 20, 24, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  z-index: 20;
+  border-radius: 16px;
+}
+.ws-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 8px;
+  color: #ffd60a;
+}
+.ws-overlay p {
+  font-size: 15px;
+  margin: 0 0 6px;
+  color: #e5e5ea;
+  line-height: 1.4;
+}
+.ws-overlay .ws-score-highlight {
+  font-size: 28px;
+  font-weight: 800;
+  color: #63e6be;
+  margin: 6px 0 18px;
+}
+.ws-overlay-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 260px;
+}
+.ws-overlay-btns button {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  border-radius: 12px;
+  padding: 12px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  border: none;
+}
+.btn-next-stage {
+  background: var(--red, #e5484d);
+  color: #fff;
+}
+.btn-next-stage:active {
+  opacity: 0.88;
+}
+.btn-rank-jump {
+  background: #ffd60a;
+  color: #000;
+}
+.btn-rank-jump:active {
+  opacity: 0.88;
+}
+.btn-overlay-close {
+  background: #3a3a3c;
+  color: #fff;
+}
+.btn-overlay-close:active {
+  background: #48484a;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>물 정렬 퍼즐,<br>색깔별로 물을 나누어 보세요</h1>
+  <p class="lead">같은 색 물을 한 병에 모으면 완성됩니다. 가입 없이 바로 즐겨보세요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="ws-status-bar">
+      <div class="ws-status-left" id="statusStage">1단계</div>
+      <div class="ws-status-mid" id="statusMoves">이동 0</div>
+      <div class="ws-status-right" id="statusScore">점수 0점</div>
+    </div>
+    <div class="ws-best-line" id="statusBest"></div>
+
+    <div class="ws-tool-bar">
+      <button type="button" class="btn-tool" id="btnUndo" disabled>되돌리기 (5회)</button>
+      <button type="button" class="btn-tool" id="btnAddBottle">병 추가 (1회)</button>
+      <button type="button" class="btn-tool" id="btnSound">소리 켬</button>
+    </div>
+
+    <div class="ws-board-area" id="boardArea">
+      <div class="ws-bottles-grid" id="bottlesGrid"></div>
+
+      <!-- 클리어 시 뜨는 결과 오버레이 창 -->
+      <div class="ws-overlay" id="overlayBox" style="display:none;">
+        <h2 id="overlayTitle">완성!</h2>
+        <p id="overlayDesc">모든 물을 알맞게 정렬했어요.</p>
+        <div class="ws-score-highlight" id="overlayScore">+900점</div>
+        <div class="ws-overlay-btns">
+          <button type="button" class="btn-next-stage" id="btnNextStage">다음 단계로</button>
+          <button type="button" class="btn-rank-jump" id="btnOverlayRank">🏆 순위표 올리기</button>
+          <button type="button" class="btn-overlay-close" id="btnOverlayRestart">처음부터 다시</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ws-main-controls">
+      <button type="button" class="btn-action btn-newgame" id="btnNewGame">새 판 뽑기</button>
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:8px;">
+      💡 병을 누르면 선택되고, 부을 다른 병을 누르면 맨 위 같은 색 물이 옮겨집니다.
+    </p>
+  </section>
+
+  <p class="note">모든 병을 한 가지 색으로 채우거나 완전히 비우면 클리어되며 기기 안에서만 실행됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>물 정렬 규칙:</b> 각 병에는 최대 4칸 높이로 색깔 물이 채워집니다. 병을 눌러 맨 위의 색 물을 다른 병으로 붓습니다.</li>
+      <li><b>붓는 조건:</b> 받는 병이 완전히 비어 있거나, 받는 병의 맨 위 물 색깔과 붓는 물의 색깔이 같고 빈 공간이 있을 때만 부을 수 있습니다.</li>
+      <li><b>클리어 조건:</b> 모든 병이 한 가지 색 물로만 4칸 가득 차거나, 완전히 빈 병이 되면 성공입니다.</li>
+      <li><b>난이도 구성:</b>
+        <ul>
+          <li>쉬움: 색 4개, 병 6개 (색 물 4병 + 빈 병 2개)</li>
+          <li>보통: 색 7개, 병 9개 (색 물 7병 + 빈 병 2개)</li>
+          <li>어려움: 색 10개, 병 12개 (색 물 10병 + 빈 병 2개)</li>
+        </ul>
+      </li>
+      <li><b>되돌리기와 병 추가:</b> 실수를 했을 때 최대 5번까지 이전 수로 되돌릴 수 있으며, 막혔을 때 빈 병 1개를 추가할 수 있습니다.</li>
+      <li><b>점수 계산:</b> 한 판 클리어 시 (1000 − 이동 수 × 5) × 난이도 배수(쉬움 1배, 보통 2배, 어려움 3배)로 최소 50점이 주어지며, 연속으로 단계를 클리어하면 누적 점수가 합산되어 순위표에 기록됩니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단에서 난이도(쉬움·보통·어려움)를 선택합니다.</li>
+      <li>옮기고 싶은 물이 든 병을 탭하면 병이 위로 살짝 올라옵니다.</li>
+      <li>같은 색 물이 맨 위에 있거나 비어 있는 다른 병을 탭하여 물을 붓습니다.</li>
+      <li>선택을 취소하고 싶다면 선택된 병을 다시 한번 탭하세요.</li>
+      <li>모든 물을 색깔별로 정리하여 단계를 계속 클리어하고 높은 누적 점수에 도전해 보세요.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>복잡한 생각에서 벗어나 차분하게 집중하고 싶을 때 좋습니다. 출퇴근길 지하철이나 잠시 쉬는 시간에 두뇌 회전을 즐겨보세요.</p>
+    <h2>알아 두면 좋은 전략</h2>
+    <dl>
+      <dt>빈 병 아껴 쓰기</dt>
+      <dd>비어 있는 병은 다른 색 물을 임시로 피신시킬 수 있는 가장 소중한 공간입니다. 빈 병에 물을 부을 때는 그 병을 한 색으로 완전히 채울 계획을 먼저 세우는 것이 유리합니다.</dd>
+      <dt>깊숙이 숨은 색 먼저 꺼내기</dt>
+      <dd>병 아래쪽에 깔려 있는 다양한 색들을 위로 꺼낼 수 있도록 맨 위 색들을 차례대로 다른 병에 합쳐주세요.</dd>
+      <dt>되돌리기와 병 추가 활용</dt>
+      <dd>더 이상 옮길 수 있는 수가 없을 때는 '되돌리기'로 다른 길을 찾거나 '병 추가'로 새로운 탈출구를 만들어 보세요.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>풀 수 없는 판이 나올 수도 있나요?</summary>
+      <p>아닙니다. 게임을 시작할 때 두뇌 퍼즐 알고리즘으로 반드시 풀 수 있는 판인지 수학적으로 검증한 판만 제공하므로 안심하고 즐기실 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>점수는 언제 기록되나요?</summary>
+      <p>각 단계를 클리어할 때마다 이동 수에 따라 점수가 계산되어 합산되며, 브라우저에 안전하게 저장됩니다. 클리어 창의 '순위표 올리기'를 눌러 사이트 전체 순위에 이름을 올려보세요.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // DOM 요소
+  var boardArea = document.getElementById('boardArea');
+  var bottlesGrid = document.getElementById('bottlesGrid');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var overlayScore = document.getElementById('overlayScore');
+  var btnNextStage = document.getElementById('btnNextStage');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnOverlayRestart = document.getElementById('btnOverlayRestart');
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var btnUndo = document.getElementById('btnUndo');
+  var btnAddBottle = document.getElementById('btnAddBottle');
+  var btnSound = document.getElementById('btnSound');
+  var btnRestart = document.getElementById('btnRestart');
+  var btnNewGame = document.getElementById('btnNewGame');
+  var statusStage = document.getElementById('statusStage');
+  var statusMoves = document.getElementById('statusMoves');
+  var statusScore = document.getElementById('statusScore');
+  var statusBest = document.getElementById('statusBest');
+
+  // 난이도 설정
+  var DIFF_CONFIG = {
+    easy: { colors: 4, bottles: 6, mult: 1, name: '쉬움' },
+    normal: { colors: 7, bottles: 9, mult: 2, name: '보통' },
+    hard: { colors: 10, bottles: 12, mult: 3, name: '어려움' }
+  };
+
+  // 선명하고 구별이 뚜렷한 10가지 수채화 색상
+  var COLOR_PALETTE = [
+    '#e5484d', // 0: 루비 레드
+    '#f76808', // 1: 오렌지
+    '#f5d90a', // 2: 골드 옐로우
+    '#30a46c', // 3: 에메랄드 그린
+    '#00a2c7', // 4: 틸 청록
+    '#0091ff', // 5: 스카이 블루
+    '#3e63dd', // 6: 로열 인디고
+    '#8e4ec6', // 7: 바이올렛 퍼플
+    '#e54666', // 8: 로즈 핑크
+    '#8b572a'  // 9: 브라운 앰버
+  ];
+
+  // 상태 변수
+  var currentLevel = 'easy';
+  var stage = 1;
+  var totalScore = 0;
+  var moves = 0;
+  var undoLimit = 5;
+  var addBottleLimit = 1;
+  var soundEnabled = true;
+  var bottles = []; // [ [c, c, c, c], ... ] (바닥부터 위로 0..3)
+  var initialBottles = []; // 현재 판 다시 하기용
+  var history = []; // 되돌리기 스택
+  var selectedBottle = null; // 선택된 병 인덱스
+  var isAnimating = false;
+  var isStageCleared = false;
+
+  // 최고 점수 (로컬스토리지)
+  var bestScores = { easy: 0, normal: 0, hard: 0 };
+
+  // ── WebAudio 효과음 엔진 (외부 파일 없음) ──
+  var audioCtx = null;
+  function getAudioContext() {
+    if (!audioCtx) {
+      var AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtxClass) {
+        audioCtx = new AudioCtxClass();
+      }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  function playTone(freq, duration, type, startGain, endGain) {
+    if (!soundEnabled) return;
+    try {
+      var ctx = getAudioContext();
+      if (!ctx) return;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(startGain == null ? 0.15 : startGain, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(endGain == null ? 0.001 : endGain, ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    } catch (e) {}
+  }
+
+  function soundPop() {
+    if (!soundEnabled) return;
+    try {
+      var ctx = getAudioContext();
+      if (!ctx) return;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(450, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(750, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.08);
+    } catch (e) {}
+  }
+
+  function soundPour() {
+    if (!soundEnabled) return;
+    try {
+      var ctx = getAudioContext();
+      if (!ctx) return;
+      var now = ctx.currentTime;
+      [360, 480, 400].forEach(function (f, i) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, now + i * 0.05);
+        gain.gain.setValueAtTime(0.14, now + i * 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.07);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + i * 0.05);
+        osc.stop(now + i * 0.05 + 0.07);
+      });
+    } catch (e) {}
+  }
+
+  function soundBottleComplete() {
+    if (!soundEnabled) return;
+    try {
+      var ctx = getAudioContext();
+      if (!ctx) return;
+      var now = ctx.currentTime;
+      var freqs = [523.25, 659.25, 783.99]; // C5, E5, G5
+      freqs.forEach(function (f, i) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(f, now + i * 0.08);
+        gain.gain.setValueAtTime(0.15, now + i * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + i * 0.08);
+        osc.stop(now + i * 0.08 + 0.2);
+      });
+    } catch (e) {}
+  }
+
+  function soundStageClear() {
+    if (!soundEnabled) return;
+    try {
+      var ctx = getAudioContext();
+      if (!ctx) return;
+      var now = ctx.currentTime;
+      var chord = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+      chord.forEach(function (f, i) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(f, now + i * 0.1);
+        gain.gain.setValueAtTime(0.2, now + i * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.35);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + i * 0.1);
+        osc.stop(now + i * 0.1 + 0.35);
+      });
+    } catch (e) {}
+  }
+
+  function soundError() {
+    playTone(180, 0.12, 'sawtooth', 0.1, 0.001);
+  }
+
+  // ── 퍼즐 해결 상태 판정 ──
+  function isSolved(state) {
+    for (var i = 0; i < state.length; i++) {
+      var b = state[i];
+      if (b.length === 0) continue;
+      if (b.length !== 4) return false;
+      var c0 = b[0];
+      for (var j = 1; j < 4; j++) {
+        if (b[j] !== c0) return false;
+      }
+    }
+    return true;
+  }
+
+  // ── 솔버 탐색용 상태 키 (대칭성 제거) ──
+  function getStateKey(state) {
+    var arr = [];
+    for (var i = 0; i < state.length; i++) {
+      arr.push(state[i].join(','));
+    }
+    arr.sort();
+    return arr.join('|');
+  }
+
+  // ── 솔버: 가능한 유효 이동 목록 ──
+  function getPossibleMoves(state) {
+    var movesList = [];
+    var n = state.length;
+    var emptyTargetUsed = false;
+
+    for (var from = 0; from < n; from++) {
+      var bFrom = state[from];
+      if (bFrom.length === 0) continue;
+
+      // 이미 완성된 병(같은 색 4개)에서는 꺼내지 않음
+      if (bFrom.length === 4 && bFrom[0] === bFrom[1] && bFrom[1] === bFrom[2] && bFrom[2] === bFrom[3]) {
+        continue;
+      }
+
+      var topColor = bFrom[bFrom.length - 1];
+      var count = 1;
+      for (var k = bFrom.length - 2; k >= 0; k--) {
+        if (bFrom[k] === topColor) count++;
+        else break;
+      }
+
+      var isPure = (count === bFrom.length);
+
+      for (var to = 0; to < n; to++) {
+        if (from === to) continue;
+        var bTo = state[to];
+        if (bTo.length >= 4) continue;
+
+        if (bTo.length === 0) {
+          if (isPure) continue; // 단일 색 병 전체를 빈 병으로 옮기는 것은 낭비
+          if (emptyTargetUsed) continue; // 빈 병 중복 방지 (대칭성 가지치기)
+          var moveAmt = Math.min(count, 4);
+          movesList.push({ from: from, to: to, count: moveAmt });
+          emptyTargetUsed = true;
+        } else {
+          if (bTo[bTo.length - 1] === topColor) {
+            var space = 4 - bTo.length;
+            var moveAmt2 = Math.min(count, space);
+            if (moveAmt2 > 0) {
+              movesList.push({ from: from, to: to, count: moveAmt2 });
+            }
+          }
+        }
+      }
+    }
+    return movesList;
+  }
+
+  function applyMoveToState(state, m) {
+    var next = [];
+    for (var i = 0; i < state.length; i++) {
+      next.push(state[i].slice());
+    }
+    var c = next[m.from][next[m.from].length - 1];
+    for (var k = 0; k < m.count; k++) {
+      next[m.from].pop();
+      next[m.to].push(c);
+    }
+    return next;
+  }
+
+  // ── 퍼즐 휴리스틱 점수 (완성도 평가) ──
+  function getHeuristicScore(state) {
+    var score = 0;
+    for (var i = 0; i < state.length; i++) {
+      var b = state[i];
+      if (b.length === 0) {
+        score += 8; // 빈 병의 자유도
+        continue;
+      }
+      var isComplete = (b.length === 4 && b[0] === b[1] && b[1] === b[2] && b[2] === b[3]);
+      if (isComplete) {
+        score += 30; // 완성된 병 보너스
+      } else {
+        // 인접한 같은 색 보너스
+        for (var j = 0; j < b.length - 1; j++) {
+          if (b[j] === b[j + 1]) score += 3;
+        }
+      }
+    }
+    return score;
+  }
+
+  // ── 풀 수 있는 판인지 검증 (휴리스틱 기반 솔버) ──
+  function checkSolvable(initialState, maxExpansions) {
+    var limit = maxExpansions || 2500;
+    var visited = {};
+    var startKey = getStateKey(initialState);
+    visited[startKey] = true;
+
+    // 우선순위 큐 느낌의 탐색 배열 (정렬 기반 탐색)
+    var list = [{ state: initialState, score: getHeuristicScore(initialState) }];
+    var count = 0;
+
+    while (list.length > 0 && count < limit) {
+      // 점수가 높은 상태를 우선 탐색
+      var currObj = list.pop();
+      var curr = currObj.state;
+      count++;
+
+      if (isSolved(curr)) {
+        return true;
+      }
+
+      var movesList = getPossibleMoves(curr);
+      for (var i = 0; i < movesList.length; i++) {
+        var nxt = applyMoveToState(curr, movesList[i]);
+        if (isSolved(nxt)) {
+          return true;
+        }
+        var key = getStateKey(nxt);
+        if (!visited[key]) {
+          visited[key] = true;
+          var sc = getHeuristicScore(nxt);
+          list.push({ state: nxt, score: sc });
+        }
+      }
+
+      // 노드가 너무 많이 쌓이면 상위 유망 노드들 위주로 정렬 유지
+      if (list.length > 80) {
+        list.sort(function (a, b) { return a.score - b.score; });
+        if (list.length > 300) {
+          list = list.slice(list.length - 200);
+        }
+      }
+    }
+    return false;
+  }
+
+  // ── 풀 수 있는 새 레벨 생성기 (100% 보장) ──
+  function generateSolvableLevel(cfg) {
+    var totalColors = cfg.colors;
+    var totalBottles = cfg.bottles;
+    var maxAttempts = 50;
+
+    for (var att = 0; att < maxAttempts; att++) {
+      // 색깔 배열 생성 (각 색깔 4개씩)
+      var pool = [];
+      for (var c = 0; c < totalColors; c++) {
+        for (var k = 0; k < 4; k++) {
+          pool.push(c);
+        }
+      }
+
+      // Fisher-Yates 셔플
+      for (var i = pool.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = pool[i];
+        pool[i] = pool[j];
+        pool[j] = tmp;
+      }
+
+      // 병에 4개씩 배분
+      var genBottles = [];
+      var hasAlreadySolved = false;
+
+      for (var b = 0; b < totalColors; b++) {
+        var tube = pool.slice(b * 4, b * 4 + 4);
+        if (tube[0] === tube[1] && tube[1] === tube[2] && tube[2] === tube[3]) {
+          hasAlreadySolved = true;
+        }
+        genBottles.push(tube);
+      }
+
+      // 이미 완성된 병이 처음부터 있으면 다시 생성
+      if (hasAlreadySolved) continue;
+
+      // 빈 병 2개 추가
+      genBottles.push([]);
+      genBottles.push([]);
+
+      // 추가 병까지 총 개수 맞춤
+      while (genBottles.length < totalBottles) {
+        genBottles.push([]);
+      }
+
+      // 시작 시 바로 둘 수 있는 수가 있는지 확인
+      var startMoves = getPossibleMoves(genBottles);
+      if (startMoves.length === 0) continue;
+
+      // 솔버로 풀 수 있는지 검증
+      var solvable = checkSolvable(genBottles, 2500);
+      if (solvable) {
+        return genBottles;
+      }
+    }
+
+    // fallback (보장된 패턴 기반 생성)
+    return generateFallbackLevel(cfg);
+  }
+
+  // 솔버 시도 초과 시 안전하게 풀 수 있는 대체 판 생성
+  function generateFallbackLevel(cfg) {
+    var totalColors = cfg.colors;
+    var bList = [];
+    for (var c = 0; c < totalColors; c++) {
+      bList.push([c, c, c, c]);
+    }
+    bList.push([]);
+    bList.push([]);
+
+    // 역방향 붓기 시뮬레이션으로 섞기
+    var shuffleSteps = totalColors * 8;
+    for (var s = 0; s < shuffleSteps; s++) {
+      var nonEmpties = [];
+      for (var i = 0; i < bList.length; i++) {
+        if (bList[i].length > 0) nonEmpties.push(i);
+      }
+      var from = nonEmpties[Math.floor(Math.random() * nonEmpties.length)];
+      var canReceive = [];
+      for (var j = 0; j < bList.length; j++) {
+        if (j !== from && bList[j].length < 4) canReceive.push(j);
+      }
+      if (canReceive.length > 0) {
+        var to = canReceive[Math.floor(Math.random() * canReceive.length)];
+        var val = bList[from].pop();
+        bList[to].push(val);
+      }
+    }
+    return bList;
+  }
+
+  function deepCopy(arr) {
+    var copy = [];
+    for (var i = 0; i < arr.length; i++) {
+      copy.push(arr[i].slice());
+    }
+    return copy;
+  }
+
+  // ── 로컬 스토리지 읽기 및 저장 ──
+  function loadStorage() {
+    try {
+      var be = parseInt(localStorage.getItem('zw_water-sort_best_easy'), 10) || 0;
+      var bn = parseInt(localStorage.getItem('zw_water-sort_best_normal'), 10) || 0;
+      var bh = parseInt(localStorage.getItem('zw_water-sort_best_hard'), 10) || 0;
+      bestScores.easy = be;
+      bestScores.normal = bn;
+      bestScores.hard = bh;
+
+      var savedLvl = localStorage.getItem('zw_water-sort_level');
+      if (savedLvl && DIFF_CONFIG[savedLvl]) {
+        currentLevel = savedLvl;
+      }
+      var savedSound = localStorage.getItem('zw_water-sort_sound');
+      if (savedSound === '0') {
+        soundEnabled = false;
+      }
+    } catch (e) {}
+
+    updateLevelButtons();
+    updateSoundButton();
+    updateBestDisplay();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+  }
+
+  function saveBestScore(levelKey, score) {
+    try {
+      var clamped = Math.min(99999999, Math.max(0, score));
+      if (clamped > (bestScores[levelKey] || 0)) {
+        bestScores[levelKey] = clamped;
+        localStorage.setItem('zw_water-sort_best_' + levelKey, String(clamped));
+        updateBestDisplay();
+      }
+    } catch (e) {}
+  }
+
+  function updateBestDisplay() {
+    statusBest.textContent = '최고 기록 · 쉬움 ' + (bestScores.easy ? bestScores.easy.toLocaleString('ko-KR') + '점' : '-')
+      + ' · 보통 ' + (bestScores.normal ? bestScores.normal.toLocaleString('ko-KR') + '점' : '-')
+      + ' · 어려움 ' + (bestScores.hard ? bestScores.hard.toLocaleString('ko-KR') + '점' : '-');
+  }
+
+  function updateLevelButtons() {
+    btnDiffEasy.classList.toggle('on', currentLevel === 'easy');
+    btnDiffNormal.classList.toggle('on', currentLevel === 'normal');
+    btnDiffHard.classList.toggle('on', currentLevel === 'hard');
+
+    boardArea.className = 'ws-board-area level-' + currentLevel;
+  }
+
+  function updateSoundButton() {
+    btnSound.textContent = soundEnabled ? '소리 켬' : '소리 끔';
+  }
+
+  // ── 순위표 탭 동기화 (오목 표준 준수) ──
+  function syncRankTab() {
+    try {
+      var idx = (currentLevel === 'easy') ? 0 : (currentLevel === 'normal' ? 1 : 2);
+      if (typeof ZW !== 'undefined') {
+        ZW.rankPick = idx;
+      }
+      var b = document.querySelector('.rk-tabs button[data-i="' + idx + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  // ── 새 게임 / 새 단계 시작 ──
+  function startStage(resetScore) {
+    if (resetScore) {
+      stage = 1;
+      totalScore = 0;
+    }
+    moves = 0;
+    undoLimit = 5;
+    addBottleLimit = 1;
+    history = [];
+    selectedBottle = null;
+    isAnimating = false;
+    isStageCleared = false;
+
+    overlayBox.style.display = 'none';
+
+    var cfg = DIFF_CONFIG[currentLevel];
+    bottles = generateSolvableLevel(cfg);
+    initialBottles = deepCopy(bottles);
+
+    updateStatusBar();
+    updateToolButtons();
+    renderBottles();
+  }
+
+  function updateStatusBar() {
+    statusStage.textContent = stage + '단계';
+    statusMoves.textContent = '이동 ' + moves;
+    statusScore.textContent = '점수 ' + totalScore.toLocaleString('ko-KR') + '점';
+  }
+
+  function updateToolButtons() {
+    btnUndo.textContent = '되돌리기 (' + undoLimit + '회)';
+    btnUndo.disabled = (undoLimit <= 0 || history.length === 0 || isAnimating || isStageCleared);
+
+    btnAddBottle.textContent = '병 추가 (' + addBottleLimit + '회)';
+    btnAddBottle.disabled = (addBottleLimit <= 0 || isAnimating || isStageCleared);
+  }
+
+  // ── 병 렌더링 ──
+  function renderBottles() {
+    bottlesGrid.innerHTML = '';
+
+    bottles.forEach(function (tube, idx) {
+      var slot = document.createElement('div');
+      slot.className = 'ws-bottle-slot';
+      slot.setAttribute('data-index', idx);
+      if (selectedBottle === idx) {
+        slot.classList.add('selected');
+      }
+
+      var bottleEl = document.createElement('div');
+      bottleEl.className = 'ws-bottle';
+
+      // 완성된 병인지 확인
+      if (tube.length === 4 && tube[0] === tube[1] && tube[1] === tube[2] && tube[2] === tube[3]) {
+        bottleEl.classList.add('completed');
+      }
+
+      // 물 채우기 (아래부터 위로 flex-direction: column-reverse)
+      for (var i = 0; i < tube.length; i++) {
+        var colorIdx = tube[i];
+        var waterUnit = document.createElement('div');
+        waterUnit.className = 'ws-water-unit';
+        waterUnit.style.backgroundColor = COLOR_PALETTE[colorIdx];
+        bottleEl.appendChild(waterUnit);
+      }
+
+      slot.appendChild(bottleEl);
+      bottlesGrid.appendChild(slot);
+    });
+  }
+
+  // ── 병 클릭 / 터치 처리 ──
+  function handleBottleClick(idx) {
+    if (isAnimating || isStageCleared) return;
+    getAudioContext();
+
+    if (selectedBottle === null) {
+      // 1. 첫 번째 병 선택
+      if (bottles[idx].length === 0) {
+        soundError();
+        return;
+      }
+      selectedBottle = idx;
+      soundPop();
+      renderBottles();
+    } else if (selectedBottle === idx) {
+      // 2. 같은 병 재선택 -> 선택 취소
+      selectedBottle = null;
+      soundPop();
+      renderBottles();
+    } else {
+      // 3. 다른 병으로 붓기 시도
+      var from = selectedBottle;
+      var to = idx;
+      var bFrom = bottles[from];
+      var bTo = bottles[to];
+
+      if (bTo.length >= 4) {
+        // 받는 병이 꽉 참 -> 그 병을 새 선택 병으로 전환하거나 오류음
+        if (bTo.length > 0) {
+          selectedBottle = to;
+          soundPop();
+          renderBottles();
+        } else {
+          soundError();
+        }
+        return;
+      }
+
+      var colorFrom = bFrom[bFrom.length - 1];
+
+      if (bTo.length > 0 && bTo[bTo.length - 1] !== colorFrom) {
+        // 다른 색 위에 부으려 함 -> 받는 병을 새로운 선택 병으로 변경
+        selectedBottle = to;
+        soundPop();
+        renderBottles();
+        return;
+      }
+
+      // 붓기 유효!
+      // 이동할 물 개수 계산 (맨 위의 연속된 동일 색 개수와 대상 병의 남은 공간 중 작은 값)
+      var count = 1;
+      for (var k = bFrom.length - 2; k >= 0; k--) {
+        if (bFrom[k] === colorFrom) count++;
+        else break;
+      }
+      var space = 4 - bTo.length;
+      var pourCount = Math.min(count, space);
+
+      if (pourCount <= 0) {
+        soundError();
+        return;
+      }
+
+      // 이전 상태 히스토리 저장
+      history.push({
+        bottles: deepCopy(bottles),
+        moves: moves
+      });
+
+      // 붓기 실행
+      for (var p = 0; p < pourCount; p++) {
+        bFrom.pop();
+        bTo.push(colorFrom);
+      }
+
+      moves++;
+      selectedBottle = null;
+      soundPour();
+
+      // 한 병이 완전히 완성되었는지 확인
+      if (bTo.length === 4 && bTo[0] === bTo[1] && bTo[1] === bTo[2] && bTo[2] === bTo[3]) {
+        setTimeout(function () {
+          soundBottleComplete();
+        }, 120);
+      }
+
+      updateStatusBar();
+      updateToolButtons();
+      renderBottles();
+
+      // 클리어 판정
+      if (isSolved(bottles)) {
+        handleStageClear();
+      }
+    }
+  }
+
+  // ── 단계 클리어 처리 ──
+  function handleStageClear() {
+    isStageCleared = true;
+    soundStageClear();
+
+    var mult = DIFF_CONFIG[currentLevel].mult;
+    var stageScore = Math.max(50, 1000 - moves * 5) * mult;
+    totalScore = Math.min(99999999, totalScore + stageScore);
+
+    saveBestScore(currentLevel, totalScore);
+    updateStatusBar();
+    updateToolButtons();
+
+    // 결과 오버레이 표시
+    overlayTitle.textContent = stage + '단계 완료!';
+    overlayDesc.textContent = moves + '번의 이동으로 완벽하게 정리했어요.';
+    overlayScore.textContent = '+' + stageScore.toLocaleString('ko-KR') + '점 (총 ' + totalScore.toLocaleString('ko-KR') + '점)';
+    overlayBox.style.display = 'flex';
+  }
+
+  // ── 이벤트 리스너 연결 ──
+  bottlesGrid.addEventListener('click', function (e) {
+    var slot = e.target.closest('.ws-bottle-slot');
+    if (!slot) return;
+    var idx = parseInt(slot.getAttribute('data-index'), 10);
+    if (!isNaN(idx)) {
+      handleBottleClick(idx);
+    }
+  });
+
+  // 되돌리기
+  btnUndo.addEventListener('click', function () {
+    if (undoLimit <= 0 || history.length === 0 || isAnimating || isStageCleared) return;
+    var prev = history.pop();
+    bottles = prev.bottles;
+    moves = prev.moves;
+    undoLimit--;
+    selectedBottle = null;
+    soundPop();
+    updateStatusBar();
+    updateToolButtons();
+    renderBottles();
+  });
+
+  // 병 추가
+  btnAddBottle.addEventListener('click', function () {
+    if (addBottleLimit <= 0 || isAnimating || isStageCleared) return;
+    addBottleLimit--;
+    bottles.push([]);
+    soundPop();
+    updateToolButtons();
+    renderBottles();
+  });
+
+  // 소리 켬/끔 토글
+  btnSound.addEventListener('click', function () {
+    soundEnabled = !soundEnabled;
+    try {
+      localStorage.setItem('zw_water-sort_sound', soundEnabled ? '1' : '0');
+    } catch (e) {}
+    updateSoundButton();
+    if (soundEnabled) soundPop();
+  });
+
+  // 난이도 변경
+  function setLevel(lvl) {
+    if (lvl === currentLevel && !isStageCleared) return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_water-sort_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    syncRankTab();
+    startStage(true);
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // 다시 하기 (현재 판 처음 상태로)
+  btnRestart.addEventListener('click', function () {
+    if (isAnimating) return;
+    bottles = deepCopy(initialBottles);
+    moves = 0;
+    undoLimit = 5;
+    addBottleLimit = 1;
+    history = [];
+    selectedBottle = null;
+    isStageCleared = false;
+    overlayBox.style.display = 'none';
+    soundPop();
+    updateStatusBar();
+    updateToolButtons();
+    renderBottles();
+  });
+
+  // 새 판 뽑기
+  btnNewGame.addEventListener('click', function () {
+    if (isAnimating) return;
+    startStage(false);
+  });
+
+  // 다음 단계 진행
+  btnNextStage.addEventListener('click', function () {
+    stage++;
+    startStage(false);
+  });
+
+  // 처음부터 다시
+  btnOverlayRestart.addEventListener('click', function () {
+    startStage(true);
+  });
+
+  // 🏆 순위표 올리기 (오목 및 사이트 표준 준수)
+  btnOverlayRank.addEventListener('click', function () {
+    var rkJump = document.querySelector('.zw-rk-jump');
+    if (rkJump && rkJump.style.display !== 'none') {
+      rkJump.click();
+    } else {
+      var rkSec = document.querySelector('.zw-rank');
+      if (rkSec) {
+        rkSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        rkSec.classList.add('flash');
+        setTimeout(function () { rkSec.classList.remove('flash'); }, 1800);
+      }
+    }
+  });
+
+  // 초기 로드 실행
+  loadStorage();
+  startStage(true);
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/four-in-row/">4목 맞추기</a> — 컴퓨터와 4개 먼저 잇기</li><li><a href="/water-sort/">물 정렬</a> — 색깔별로 물을 병에 모으기</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

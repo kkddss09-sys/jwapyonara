@@ -1,0 +1,1626 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>윷놀이 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 무료 윷놀이 게임. 컴퓨터와 흥미진진한 한 판, 쉬움·보통·어려움 난이도로 즐겨보세요.">
+<link rel="canonical" href="https://jwapyonara.com/yutnori/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="윷놀이 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 즐기는 무료 윷놀이 게임. 컴퓨터와 흥미진진한 승부!">
+<meta property="og:url" content="https://jwapyonara.com/yutnori/">
+<meta property="og:site_name" content="좌표나라">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "윷놀이",
+  "url": "https://jwapyonara.com/yutnori/",
+  "description": "가입 없이 바로 하는 무료 윷놀이 게임. 사람과 컴퓨터의 한 판, 쉬움·보통·어려움 난이도를 모바일과 PC에서 즐겨보세요.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "KRW"
+  }
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 (판 위) */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 줄 */
+.yut-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  gap: 6px;
+}
+.yut-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1.2;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.yut-status-mid {
+  color: #ffffff;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.yut-status-right {
+  color: #a1a1a6;
+  flex: 1.1;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.yut-best-line {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 말 현황판 (대기석 및 완주석) */
+.piece-tracker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.tracker-box {
+  background: var(--fill, #f2f2f7);
+  border: 1px solid var(--line, #e5e5ea);
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+.tracker-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.tracker-title .p-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.tracker-box.player .p-badge {
+  background: #1b64da;
+  color: #fff;
+}
+.tracker-box.ai .p-badge {
+  background: #d92d20;
+  color: #fff;
+}
+.tracker-pieces {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.tracker-chip {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  user-select: none;
+  cursor: default;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.tracker-chip.can-pick {
+  cursor: pointer;
+  animation: chipPulse 1s infinite alternate;
+  box-shadow: 0 0 0 3px #ffd60a;
+}
+@keyframes chipPulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.15); }
+}
+.tracker-box.player .tracker-chip {
+  background: #1b64da;
+  color: #fff;
+}
+.tracker-box.player .tracker-chip.finished {
+  background: #e8f0fe;
+  color: #1b64da;
+  border-color: #1b64da;
+}
+.tracker-box.ai .tracker-chip {
+  background: #d92d20;
+  color: #fff;
+}
+.tracker-box.ai .tracker-chip.finished {
+  background: #fdecea;
+  color: #d92d20;
+  border-color: #d92d20;
+}
+
+/* 윷판 감싸개 */
+.yut-board-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 12px;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f5e7c8;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  border: 2px solid #b8860b;
+}
+#yutSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 노드 및 말 스타일 */
+.board-line {
+  stroke: #7c4b18;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.board-node {
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.node-circle {
+  fill: #fffdf5;
+  stroke: #7c4b18;
+  stroke-width: 2.5;
+}
+.node-circle.corner {
+  fill: #ffecc4;
+  stroke: #8b3a0e;
+  stroke-width: 3.5;
+}
+.node-circle.center {
+  fill: #ffdf9e;
+  stroke: #8b3a0e;
+  stroke-width: 4;
+}
+.node-target-ring {
+  fill: none;
+  stroke: #ffd60a;
+  stroke-width: 3.5;
+  stroke-dasharray: 4 3;
+  animation: rotateRing 4s linear infinite;
+}
+@keyframes rotateRing {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.node-label {
+  font-size: 10px;
+  font-weight: 700;
+  fill: #7c4b18;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+/* 윷판 위 말 표시 */
+.piece-group {
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.piece-group.clickable {
+  animation: pieceBounce 0.8s infinite alternate;
+}
+@keyframes pieceBounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(-4px); }
+}
+.piece-circle-p {
+  fill: #1b64da;
+  stroke: #ffffff;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
+}
+.piece-circle-ai {
+  fill: #d92d20;
+  stroke: #ffffff;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
+}
+.piece-text {
+  font-size: 11px;
+  font-weight: 800;
+  fill: #ffffff;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+.stack-badge {
+  fill: #ffd60a;
+  stroke: #1c1c1e;
+  stroke-width: 1;
+}
+.stack-text {
+  font-size: 9px;
+  font-weight: 900;
+  fill: #1c1c1e;
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+/* 덮개 (시작 및 결과창) */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 20, 22, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  z-index: 10;
+}
+.canvas-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 8px;
+  color: #ffd60a;
+}
+.canvas-overlay p {
+  font-size: 15px;
+  margin: 0 0 16px;
+  color: #e5e5ea;
+  max-width: 300px;
+  line-height: 1.45;
+}
+.canvas-overlay .overlay-score-box {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 10px 18px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+.canvas-overlay .overlay-score-val {
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffd60a;
+  margin-top: 4px;
+}
+.canvas-overlay .overlay-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 240px;
+}
+.btn-start {
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  background: var(--red, #1b64da);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.btn-start:active {
+  opacity: 0.85;
+}
+.btn-overlay-rank {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  background: #ffd60a;
+  color: #1c1c1e;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 20px;
+  min-height: 46px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.btn-overlay-rank:active {
+  opacity: 0.85;
+}
+
+/* 윷가락 표시 및 던지기 조작 줄 */
+.yut-action-card {
+  background: var(--fill, #f2f2f7);
+  border: 1px solid var(--line, #e5e5ea);
+  border-radius: 14px;
+  padding: 12px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+.yut-sticks-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+  min-height: 72px;
+}
+.yut-stick {
+  width: 24px;
+  height: 68px;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.yut-stick.tumble {
+  animation: yutTumble 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes yutTumble {
+  0% { transform: translateY(0) rotate(0deg) scale(1); }
+  50% { transform: translateY(-16px) rotate(180deg) scale(1.15); }
+  100% { transform: translateY(0) rotate(360deg) scale(1); }
+}
+
+.yut-result-banner {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  min-height: 26px;
+  color: var(--ink);
+}
+.yut-result-banner em {
+  font-style: normal;
+  color: var(--red);
+}
+.yut-result-banner .extra-chance {
+  font-size: 13px;
+  font-weight: 700;
+  color: #d92d20;
+  margin-left: 6px;
+  display: inline-block;
+}
+
+.btn-yut-throw {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  background: var(--red, #1b64da);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 8px rgba(27, 100, 218, 0.25);
+}
+.btn-yut-throw:active:not(:disabled) {
+  opacity: 0.88;
+  transform: translateY(1px);
+}
+.btn-yut-throw:disabled {
+  background: #a1a1a6;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* 제어 단추 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+}
+.btn-reset {
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #3a3a3c;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>윷놀이 한 판,<br>컴퓨터를 이겨 보세요</h1>
+  <p class="lead">말 4개를 먼저 모두 완주시키면 이깁니다. 도·개·걸·윷·모와 지름길, 업기와 잡기를 즐겨보세요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="yut-status-bar">
+      <div class="yut-status-left" id="statusTurn">내 차례</div>
+      <div class="yut-status-mid" id="statusDetail">잡은 횟수 0</div>
+      <div class="yut-status-right" id="statusRecord">전적 0승 0패</div>
+    </div>
+    <div class="yut-best-line" id="statusBest"></div>
+
+    <div class="piece-tracker">
+      <div class="tracker-box player">
+        <div class="tracker-title">
+          <span>내 말 (청)</span>
+          <span class="p-badge" id="playerRemainBadge">남은 말 4개</span>
+        </div>
+        <div class="tracker-pieces" id="playerPiecesList"></div>
+      </div>
+      <div class="tracker-box ai">
+        <div class="tracker-title">
+          <span>컴퓨터 말 (홍)</span>
+          <span class="p-badge" id="aiRemainBadge">남은 말 4개</span>
+        </div>
+        <div class="tracker-pieces" id="aiPiecesList"></div>
+      </div>
+    </div>
+
+    <div class="yut-board-wrap" id="boardWrap">
+      <svg id="yutSvg" viewBox="0 0 360 360">
+        <!-- 배경 문양 -->
+        <rect x="20" y="20" width="320" height="320" rx="12" fill="#fdf7e7" stroke="#e0ca9a" stroke-width="1.5" />
+        
+        <!-- 대각선 연결선 -->
+        <line x1="320" y1="40" x2="40" y2="320" class="board-line" />
+        <line x1="40" y1="40" x2="320" y2="320" class="board-line" />
+
+        <!-- 외곽선 사각형 -->
+        <rect x="40" y="40" width="280" height="280" fill="none" class="board-line" />
+
+        <!-- 노드 점들과 말들이 동적으로 렌더링될 레이어 -->
+        <g id="layerTargets"></g>
+        <g id="layerNodes"></g>
+        <g id="layerPieces"></g>
+      </svg>
+
+      <!-- 시작 전 및 종료 덮개 -->
+      <div class="canvas-overlay" id="overlayBox">
+        <h2 id="overlayTitle">윷놀이</h2>
+        <p id="overlayDesc">쉬움 난이도로 시작해요</p>
+        <div class="overlay-score-box" id="overlayScoreBox" style="display:none;">
+          <div id="overlayScoreDesc">획득 점수</div>
+          <div class="overlay-score-val" id="overlayScoreVal">0점</div>
+        </div>
+        <div class="overlay-btns">
+          <button type="button" class="btn-start" id="btnStartGame">시작하기</button>
+          <button type="button" class="btn-overlay-rank" id="btnOverlayRank" style="display:none;">🏆 순위표 올리기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 윷가락 표시 및 던지기 버튼 영역 -->
+    <div class="yut-action-card">
+      <div class="yut-sticks-container" id="yutSticksBox">
+        <!-- SVG 윷가락 4개 -->
+      </div>
+      <div class="yut-result-banner" id="yutResultBanner">윷을 던져주세요</div>
+      <button type="button" class="btn-yut-throw" id="btnYutThrow">윷 던지기</button>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:8px;">
+      💡 윷을 던진 뒤 움직일 <b>말(청색 원반)</b>을 누르면 이동합니다. 상대 말을 잡거나 윷·모가 나오면 한 번 더 던져요!
+    </p>
+  </section>
+
+  <p class="note">규칙에 따라 윷을 던져 말을 완주시키며 기기 안에서만 실행됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>말과 목표:</b> 사람과 컴퓨터가 각각 말 4개씩 가지고 시작합니다. 윷판을 돌아 4개의 말을 먼저 모두 완주시키는 쪽이 승리합니다.</li>
+      <li><b>윷가락 규칙:</b> 윷을 던져 배(평평한 면)가 나온 개수에 따라 이동합니다.
+        <ul>
+          <li><b>도:</b> 1칸 전진 (배 1개)</li>
+          <li><b>개:</b> 2칸 전진 (배 2개)</li>
+          <li><b>걸:</b> 3칸 전진 (배 3개)</li>
+          <li><b>윷:</b> 4칸 전진 (배 4개) · <b>한 번 더 던지기</b></li>
+          <li><b>모:</b> 5칸 전진 (배 0개, 등 4개) · <b>한 번 더 던지기</b></li>
+        </ul>
+      </li>
+      <li><b>지름길 규칙:</b>
+        <ul>
+          <li>우측 상단 모서리(5번)에 딱 멈추면 가운데 방(25번)으로 향하는 대각선 지름길로 진입합니다.</li>
+          <li>좌측 상단 모서리(10번)에 딱 멈추면 가운데 방(25번)으로 향하는 대각선 지름길로 진입합니다.</li>
+          <li>가운데 방(25번)을 거쳐갈 때는 도착점(우측 하단)으로 바로 빠져나가는 가장 빠른 초단기 코스로 진행합니다.</li>
+          <li>모서리에 딱 멈추지 않고 지나치면 외곽 길을 따라 계속 전진합니다.</li>
+        </ul>
+      </li>
+      <li><b>말 잡기:</b> 내 말이 이동한 자리에 상대편 말이 있으면 그 말을 잡아서 출발 전 대기석으로 돌려보냅니다. 상대 말을 잡으면 <b>한 번 더 던질 기회</b>를 얻습니다!</li>
+      <li><b>말 업기:</b> 내 말이 이동한 자리에 이미 내 말이 있으면 함께 업혀서 다음부터 한 덩어리로 같이 움직입니다. (업힌 상태에서 잡히면 모두 함께 잡힙니다)</li>
+      <li><b>완주 판정:</b> 마지막 칸(참먹이, 20번)을 지나쳐 판 밖으로 완전히 벗어나면 완주(골인)가 됩니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>판 위에서 쉬움·보통·어려움 난이도를 고릅니다. 바꾸면 새 판이 시작돼요.</li>
+      <li>'윷 던지기' 버튼을 눌러 도·개·걸·윷·모를 확인합니다.</li>
+      <li>움직이고 싶은 내 말(청색 원반)을 터치하여 이동시킵니다. 대기 중인 말도 터치하여 새로 출발시킬 수 있습니다.</li>
+      <li>윷이나 모가 나오거나 상대 말을 잡으면 기분 좋은 보너스로 한 번 더 던질 수 있습니다!</li>
+    </ol>
+    <h2>점수와 순위</h2>
+    <p>컴퓨터를 이기면 <b>(100 + 남은 상대 말 수 × 150 + 잡은 횟수 × 30) × 난이도 배수</b> 공식으로 점수가 계산됩니다. 더 높은 난이도에서 상대 말을 많이 잡고 압도적으로 이길수록 순위표 높은 곳에 이름을 올릴 수 있습니다!</p>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>컴퓨터 난이도 '쉬움', '보통', '어려움'은 무엇이 다른가요?</summary>
+      <p>'쉬움'은 잡을 수 있는 말이 있어도 가끔 지나치며 편안하게 경기할 수 있습니다. '보통'은 완주와 잡기를 꼼꼼히 챙기며, '어려움'은 지름길 선점, 말 업기, 위험 회피까지 치밀하게 계산하여 실전 고수처럼 겨룹니다.</p>
+    </details>
+    <details>
+      <summary>말을 업으면 어떤 장단점이 있나요?</summary>
+      <p>말을 업으면 한 번 이동할 때 2개~4개의 말이 동시에 전진하므로 매우 빠른 속도로 완주할 수 있습니다. 하지만 상대에게 잡히면 업힌 말들이 한꺼번에 대기석으로 돌아가므로 짜릿한 긴장감을 선사합니다.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // --- 오디오 효과음 (WebAudio 합성) ---
+  var audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) {
+      try {
+        var AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      } catch (e) {}
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(function () {});
+    }
+    return audioCtx;
+  }
+
+  function playSound(type) {
+    try {
+      var ctx = getAudioCtx();
+      if (!ctx) return;
+      var t = ctx.currentTime;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      if (type === 'throw') {
+        // 탁! 나무 부딪히는 소리
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(160, t);
+        osc.frequency.exponentialRampToValueAtTime(40, t + 0.12);
+        gain.gain.setValueAtTime(0.3, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.12);
+        osc.start(t);
+        osc.stop(t + 0.13);
+      } else if (type === 'step') {
+        // 퐁! 말 이동 소리
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, t);
+        osc.frequency.exponentialRampToValueAtTime(540, t + 0.08);
+        gain.gain.setValueAtTime(0.2, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.08);
+        osc.start(t);
+        osc.stop(t + 0.09);
+      } else if (type === 'capture') {
+        // 상대 말 잡기 (경쾌한 상승음)
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(300, t);
+        osc.frequency.setValueAtTime(450, t + 0.07);
+        osc.frequency.setValueAtTime(600, t + 0.14);
+        gain.gain.setValueAtTime(0.3, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.28);
+        osc.start(t);
+        osc.stop(t + 0.29);
+      } else if (type === 'extra') {
+        // 윷/모 보너스
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, t); // C5
+        osc.frequency.setValueAtTime(659.25, t + 0.1); // E5
+        osc.frequency.setValueAtTime(783.99, t + 0.2); // G5
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.35);
+        osc.start(t);
+        osc.stop(t + 0.36);
+      } else if (type === 'win') {
+        // 승리 팡파레
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, t);
+        osc.frequency.setValueAtTime(554.37, t + 0.12);
+        osc.frequency.setValueAtTime(659.25, t + 0.24);
+        osc.frequency.setValueAtTime(880, t + 0.36);
+        gain.gain.setValueAtTime(0.35, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.65);
+        osc.start(t);
+        osc.stop(t + 0.66);
+      }
+    } catch (e) {}
+  }
+
+  // --- 윷판 노드 좌표 체계 (360×360) ---
+  // 1~20: 외곽 순환 (20: 참먹이/도착, 5: 모서리1, 10: 모서리2, 15: 모서리3)
+  // 21~25, 23~24: 대각선 1 (5 -> 21 -> 22 -> 25 -> 23 -> 24 -> 15)
+  // 26~27, 28~29: 대각선 2 (10 -> 26 -> 27 -> 25 -> 28 -> 29 -> 20)
+  var NODES = {
+    // 우변
+    1:  { x: 320, y: 264, label: '도' },
+    2:  { x: 320, y: 208, label: '개' },
+    3:  { x: 320, y: 152, label: '걸' },
+    4:  { x: 320, y: 96,  label: '윷' },
+    5:  { x: 320, y: 40,  label: '모', corner: true },
+    // 상변
+    6:  { x: 264, y: 40,  label: '' },
+    7:  { x: 208, y: 40,  label: '' },
+    8:  { x: 152, y: 40,  label: '' },
+    9:  { x: 96,  y: 40,  label: '' },
+    10: { x: 40,  y: 40,  label: '뒷모', corner: true },
+    // 좌변
+    11: { x: 40,  y: 96,  label: '' },
+    12: { x: 40,  y: 152, label: '' },
+    13: { x: 40,  y: 208, label: '' },
+    14: { x: 40,  y: 264, label: '' },
+    15: { x: 40,  y: 320, label: '', corner: true },
+    // 하변
+    16: { x: 96,  y: 320, label: '' },
+    17: { x: 152, y: 320, label: '' },
+    18: { x: 208, y: 320, label: '' },
+    19: { x: 264, y: 320, label: '' },
+    20: { x: 320, y: 320, label: '참먹이', corner: true },
+    // 대각선 (5 -> 25)
+    21: { x: 273, y: 87,  label: '' },
+    22: { x: 227, y: 133, label: '' },
+    // 중심 (방)
+    25: { x: 180, y: 180, label: '방', center: true },
+    // 대각선 (10 -> 25)
+    26: { x: 87,  y: 87,  label: '' },
+    27: { x: 133, y: 133, label: '' },
+    // 대각선 (25 -> 20 도착 방향)
+    28: { x: 227, y: 227, label: '' },
+    29: { x: 273, y: 273, label: '' }
+  };
+
+  // 한 걸음 이동 계산기
+  function getStepTarget(currentNode, currentRoute) {
+    if (currentNode === 100) return { node: 100, route: currentRoute };
+
+    if (currentRoute === 'diag_ur') {
+      if (currentNode === 5) return { node: 21, route: 'diag_ur' };
+      if (currentNode === 21) return { node: 22, route: 'diag_ur' };
+      if (currentNode === 22) return { node: 25, route: 'diag_ur' };
+      if (currentNode === 25) return { node: 28, route: 'diag_ur' };
+      if (currentNode === 28) return { node: 29, route: 'diag_ur' };
+      if (currentNode === 29) return { node: 20, route: 'diag_ur' };
+      if (currentNode === 20) return { node: 100, route: 'diag_ur' }; // 완주
+    } else if (currentRoute === 'diag_ul') {
+      if (currentNode === 10) return { node: 26, route: 'diag_ul' };
+      if (currentNode === 26) return { node: 27, route: 'diag_ul' };
+      if (currentNode === 27) return { node: 25, route: 'diag_ul' };
+      if (currentNode === 25) return { node: 28, route: 'diag_ul' };
+      if (currentNode === 28) return { node: 29, route: 'diag_ul' };
+      if (currentNode === 29) return { node: 20, route: 'diag_ul' };
+      if (currentNode === 20) return { node: 100, route: 'diag_ul' }; // 완주
+    } else if (currentRoute === 'diag_center') {
+      if (currentNode === 25) return { node: 28, route: 'diag_center' };
+      if (currentNode === 28) return { node: 29, route: 'diag_center' };
+      if (currentNode === 29) return { node: 20, route: 'diag_center' };
+      if (currentNode === 20) return { node: 100, route: 'diag_center' }; // 완주
+    } else {
+      // outer (기본 외곽)
+      if (currentNode === 0) return { node: 1, route: 'outer' };
+      if (currentNode >= 1 && currentNode < 20) return { node: currentNode + 1, route: 'outer' };
+      if (currentNode === 20) return { node: 100, route: 'outer' }; // 완주
+    }
+    return { node: 100, route: currentRoute };
+  }
+
+  // N걸음 이동 후 최종 위치 계산
+  function calculateDestination(startNode, startRoute, steps) {
+    var node = startNode;
+    var route = startRoute;
+
+    // 분기점에서 출발할 때의 지름길 분기 설정
+    if (node === 5) {
+      route = 'diag_ur';
+    } else if (node === 10) {
+      route = 'diag_ul';
+    } else if (node === 25) {
+      route = 'diag_center';
+    } else if (node === 0) {
+      route = 'outer';
+    }
+
+    var pathNodes = [];
+    for (var i = 0; i < steps; i++) {
+      var next = getStepTarget(node, route);
+      node = next.node;
+      route = next.route;
+      pathNodes.push(node);
+      if (node === 100) break;
+    }
+
+    return { targetNode: node, newRoute: route, path: pathNodes };
+  }
+
+  // --- DOM 요소 ---
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var statusTurn = document.getElementById('statusTurn');
+  var statusDetail = document.getElementById('statusDetail');
+  var statusRecord = document.getElementById('statusRecord');
+  var statusBest = document.getElementById('statusBest');
+  var playerRemainBadge = document.getElementById('playerRemainBadge');
+  var aiRemainBadge = document.getElementById('aiRemainBadge');
+  var playerPiecesList = document.getElementById('playerPiecesList');
+  var aiPiecesList = document.getElementById('aiPiecesList');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var overlayScoreBox = document.getElementById('overlayScoreBox');
+  var overlayScoreVal = document.getElementById('overlayScoreVal');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var yutSticksBox = document.getElementById('yutSticksBox');
+  var yutResultBanner = document.getElementById('yutResultBanner');
+  var btnYutThrow = document.getElementById('btnYutThrow');
+  var btnRestart = document.getElementById('btnRestart');
+  var layerTargets = document.getElementById('layerTargets');
+  var layerNodes = document.getElementById('layerNodes');
+  var layerPieces = document.getElementById('layerPieces');
+
+  // --- 게임 상태 변수 ---
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  var gameState = 'ready'; // 'ready', 'player_throw', 'player_move', 'ai_thinking', 'game_over'
+  var currentTurn = 'player'; // 'player' | 'ai'
+  var yutResult = null; // { name: '도', steps: 1, extra: false, flats: [0,1,0,0] }
+  var captureCount = 0; // 플레이어가 잡은 상대 말 횟수
+  var wins = 0;
+  var losses = 0;
+  var bestEasy = null;
+  var bestNormal = null;
+  var bestHard = null;
+  var isAnimating = false;
+
+  // 말 객체 배열 (각 팀 4개씩)
+  // node: 0 (대기석), 1~29 (윷판 위), 100 (완주)
+  var playerPieces = [];
+  var aiPieces = [];
+
+  function initPieces() {
+    playerPieces = [
+      { id: 0, owner: 'player', node: 0, route: 'outer' },
+      { id: 1, owner: 'player', node: 0, route: 'outer' },
+      { id: 2, owner: 'player', node: 0, route: 'outer' },
+      { id: 3, owner: 'player', node: 0, route: 'outer' }
+    ];
+    aiPieces = [
+      { id: 0, owner: 'ai', node: 0, route: 'outer' },
+      { id: 1, owner: 'ai', node: 0, route: 'outer' },
+      { id: 2, owner: 'ai', node: 0, route: 'outer' },
+      { id: 3, owner: 'ai', node: 0, route: 'outer' }
+    ];
+  }
+
+  // --- 로컬스토리지 저장 및 불러오기 ---
+  function loadStorage() {
+    try {
+      wins = parseInt(localStorage.getItem('zw_yutnori_wins'), 10) || 0;
+      losses = parseInt(localStorage.getItem('zw_yutnori_losses'), 10) || 0;
+      var rawE = localStorage.getItem('zw_yutnori_best_easy');
+      var rawN = localStorage.getItem('zw_yutnori_best_normal');
+      var rawH = localStorage.getItem('zw_yutnori_best_hard');
+      if (rawE && !isNaN(parseInt(rawE, 10))) bestEasy = parseInt(rawE, 10);
+      if (rawN && !isNaN(parseInt(rawN, 10))) bestNormal = parseInt(rawN, 10);
+      if (rawH && !isNaN(parseInt(rawH, 10))) bestHard = parseInt(rawH, 10);
+      var savedLvl = localStorage.getItem('zw_yutnori_level');
+      if (savedLvl === 'easy' || savedLvl === 'normal' || savedLvl === 'hard') {
+        currentLevel = savedLvl;
+      } else {
+        currentLevel = 'easy';
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+    updateStatusDisplay();
+  }
+
+  function updateStatusDisplay() {
+    statusRecord.textContent = '전적 ' + wins + '승 ' + losses + '패';
+    statusDetail.textContent = '잡은 횟수 ' + captureCount;
+    if (bestEasy !== null || bestNormal !== null || bestHard !== null) {
+      statusBest.textContent = '최고 점수 · 쉬움 ' + (bestEasy !== null ? bestEasy.toLocaleString('ko-KR') + '점' : '-')
+        + ' · 보통 ' + (bestNormal !== null ? bestNormal.toLocaleString('ko-KR') + '점' : '-')
+        + ' · 어려움 ' + (bestHard !== null ? bestHard.toLocaleString('ko-KR') + '점' : '-');
+    } else {
+      statusBest.textContent = '';
+    }
+  }
+
+  // --- 난이도 및 순위표 동기화 ---
+  function syncRankTab() {
+    try {
+      var i = (currentLevel === 'hard') ? 2 : ((currentLevel === 'normal') ? 1 : 0);
+      if (typeof ZW !== 'undefined') {
+        ZW.rankPick = i;
+      }
+      var b = document.querySelector('.rk-tabs button[data-i="' + i + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  function updateLevelButtons() {
+    btnDiffEasy.classList.toggle('on', currentLevel === 'easy');
+    btnDiffNormal.classList.toggle('on', currentLevel === 'normal');
+    btnDiffHard.classList.toggle('on', currentLevel === 'hard');
+  }
+
+  function updateOverlayDesc() {
+    var desc = '쉬움 난이도로 시작해요';
+    if (currentLevel === 'normal') desc = '보통 난이도로 시작해요';
+    else if (currentLevel === 'hard') desc = '어려움 난이도로 시작해요';
+    overlayDesc.textContent = desc;
+  }
+
+  function setLevel(lvl) {
+    if (lvl === currentLevel) return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_yutnori_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    resetToReadyState();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // --- 윷가락 그래픽 생성 ---
+  function createYutStickSvg(isFlat) {
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 68');
+    svg.setAttribute('class', 'yut-stick');
+
+    if (isFlat) {
+      // 배 (평평한 앞면 - 밝은 나무색, X 표식)
+      svg.innerHTML = '<rect x="1" y="2" width="22" height="64" rx="10" fill="#faebd7" stroke="#8b5a2b" stroke-width="2"/>'
+        + '<line x1="5" y1="18" x2="19" y2="28" stroke="#4a2e16" stroke-width="2.5" stroke-linecap="round"/>'
+        + '<line x1="19" y1="18" x2="5" y2="28" stroke="#4a2e16" stroke-width="2.5" stroke-linecap="round"/>'
+        + '<line x1="5" y1="40" x2="19" y2="50" stroke="#4a2e16" stroke-width="2.5" stroke-linecap="round"/>'
+        + '<line x1="19" y1="40" x2="5" y2="50" stroke="#4a2e16" stroke-width="2.5" stroke-linecap="round"/>';
+    } else {
+      // 등 (둥근 뒷면 - 짙은 갈색 나무껍질 질감)
+      svg.innerHTML = '<rect x="1" y="2" width="22" height="64" rx="10" fill="#6d3f18" stroke="#3b1f09" stroke-width="2"/>'
+        + '<path d="M4 10 Q12 14 20 10" fill="none" stroke="#4a2a10" stroke-width="1.8"/>'
+        + '<path d="M4 26 Q12 30 20 26" fill="none" stroke="#4a2a10" stroke-width="1.8"/>'
+        + '<path d="M4 42 Q12 46 20 42" fill="none" stroke="#4a2a10" stroke-width="1.8"/>'
+        + '<path d="M4 58 Q12 62 20 58" fill="none" stroke="#4a2a10" stroke-width="1.8"/>'
+        + '<line x1="12" y1="6" x2="12" y2="62" stroke="rgba(255,255,255,0.18)" stroke-width="2"/>';
+    }
+    return svg;
+  }
+
+  function renderYutSticks(flats, animate) {
+    yutSticksBox.innerHTML = '';
+    flats = flats || [1, 1, 0, 0];
+    for (var i = 0; i < 4; i++) {
+      var stick = createYutStickSvg(flats[i] === 1);
+      if (animate) {
+        stick.classList.add('tumble');
+      }
+      yutSticksBox.appendChild(stick);
+    }
+  }
+
+  // 윷 던지기 확률 시뮬레이션
+  function throwYut() {
+    var flats = [];
+    var flatCount = 0;
+    // 전통적으로 평평한 배가 나올 확률은 약 55%
+    for (var i = 0; i < 4; i++) {
+      var isFlat = (Math.random() < 0.55) ? 1 : 0;
+      flats.push(isFlat);
+      if (isFlat === 1) flatCount++;
+    }
+
+    var name = '도';
+    var steps = 1;
+    var extra = false;
+
+    if (flatCount === 1) {
+      name = '도';
+      steps = 1;
+    } else if (flatCount === 2) {
+      name = '개';
+      steps = 2;
+    } else if (flatCount === 3) {
+      name = '걸';
+      steps = 3;
+    } else if (flatCount === 4) {
+      name = '윷';
+      steps = 4;
+      extra = true; // 한 번 더!
+    } else if (flatCount === 0) {
+      name = '모';
+      steps = 5;
+      extra = true; // 한 번 더!
+    }
+
+    return { name: name, steps: steps, extra: extra, flats: flats };
+  }
+
+  // --- 윷판 렌더링 ---
+  function renderBoardBase() {
+    layerNodes.innerHTML = '';
+    for (var id in NODES) {
+      var n = NODES[id];
+      var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('class', 'board-node');
+      g.setAttribute('data-id', id);
+
+      var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', n.x);
+      circle.setAttribute('cy', n.y);
+      var r = 10;
+      if (n.center) {
+        r = 15;
+        circle.setAttribute('class', 'node-circle center');
+      } else if (n.corner) {
+        r = 13.5;
+        circle.setAttribute('class', 'node-circle corner');
+      } else {
+        circle.setAttribute('class', 'node-circle');
+      }
+      circle.setAttribute('r', r);
+      g.appendChild(circle);
+
+      if (n.label) {
+        var txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        txt.setAttribute('x', n.x);
+        txt.setAttribute('y', n.y + (n.corner || n.center ? 0 : 0));
+        txt.setAttribute('class', 'node-label');
+        if (n.center) txt.setAttribute('font-size', '11px');
+        txt.textContent = n.label;
+        g.appendChild(txt);
+      }
+
+      layerNodes.appendChild(g);
+    }
+  }
+
+  // 윷판 위의 말 및 말 현황판 렌더링
+  function renderPieces() {
+    layerPieces.innerHTML = '';
+
+    // 칸별로 그룹화
+    var nodeGroups = {};
+    playerPieces.forEach(function (p) {
+      if (p.node > 0 && p.node < 100) {
+        if (!nodeGroups[p.node]) nodeGroups[p.node] = [];
+        nodeGroups[p.node].push(p);
+      }
+    });
+    aiPieces.forEach(function (p) {
+      if (p.node > 0 && p.node < 100) {
+        if (!nodeGroups[p.node]) nodeGroups[p.node] = [];
+        nodeGroups[p.node].push(p);
+      }
+    });
+
+    // 판 위의 말 렌더링
+    for (var nodeId in nodeGroups) {
+      var list = nodeGroups[nodeId];
+      if (!list.length) continue;
+      var coord = NODES[nodeId];
+      if (!coord) continue;
+
+      var g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('class', 'piece-group');
+      g.setAttribute('data-node', nodeId);
+
+      var owner = list[0].owner;
+      var count = list.length;
+      var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', coord.x);
+      circle.setAttribute('cy', coord.y);
+      circle.setAttribute('r', 11.5);
+      circle.setAttribute('class', (owner === 'player') ? 'piece-circle-p' : 'piece-circle-ai');
+      g.appendChild(circle);
+
+      // 말 라벨 (청/홍)
+      var labelTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      labelTxt.setAttribute('x', coord.x);
+      labelTxt.setAttribute('y', coord.y);
+      labelTxt.setAttribute('class', 'piece-text');
+      labelTxt.textContent = (owner === 'player') ? '청' : '홍';
+      g.appendChild(labelTxt);
+
+      // 업은 말 개수 뱃지 (2개 이상일 때)
+      if (count > 1) {
+        var badge = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        badge.setAttribute('cx', coord.x + 8);
+        badge.setAttribute('cy', coord.y - 8);
+        badge.setAttribute('r', 6);
+        badge.setAttribute('class', 'stack-badge');
+        g.appendChild(badge);
+
+        var badgeTxt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        badgeTxt.setAttribute('x', coord.x + 8);
+        badgeTxt.setAttribute('y', coord.y - 8);
+        badgeTxt.setAttribute('class', 'stack-text');
+        badgeTxt.textContent = count;
+        g.appendChild(badgeTxt);
+      }
+
+      // 플레이어 턴에 이동 가능한 그룹이면 시각적 강조
+      if (gameState === 'player_move' && owner === 'player' && !isAnimating) {
+        g.classList.add('clickable');
+        g.addEventListener('click', (function (targetNode) {
+          return function () { onPlayerSelectNode(targetNode); };
+        })(parseInt(nodeId, 10)));
+      }
+
+      layerPieces.appendChild(g);
+    }
+
+    // 말 현황판 (대기석 및 완주석) 갱신
+    renderTrackers();
+  }
+
+  function renderTrackers() {
+    // 플레이어 말 현황
+    var pFinished = 0, pWait = 0, pBoard = 0;
+    playerPiecesList.innerHTML = '';
+    playerPieces.forEach(function (p, idx) {
+      var chip = document.createElement('div');
+      chip.className = 'tracker-chip';
+      if (p.node === 100) {
+        pFinished++;
+        chip.classList.add('finished');
+        chip.textContent = '완';
+        chip.title = (idx + 1) + '번 말 완주';
+      } else if (p.node === 0) {
+        pWait++;
+        chip.textContent = idx + 1;
+        chip.title = (idx + 1) + '번 말 대기 중';
+        if (gameState === 'player_move' && !isAnimating) {
+          chip.classList.add('can-pick');
+          chip.addEventListener('click', function () { onPlayerSelectPiece(p); });
+        }
+      } else {
+        pBoard++;
+        chip.textContent = idx + 1;
+        chip.title = (idx + 1) + '번 말 판 위';
+        if (gameState === 'player_move' && !isAnimating) {
+          chip.classList.add('can-pick');
+          chip.addEventListener('click', function () { onPlayerSelectPiece(p); });
+        }
+      }
+      playerPiecesList.appendChild(chip);
+    });
+    playerRemainBadge.textContent = '완주 ' + pFinished + '/4';
+
+    // 컴퓨터 말 현황
+    var aiFinished = 0;
+    aiPiecesList.innerHTML = '';
+    aiPieces.forEach(function (p, idx) {
+      var chip = document.createElement('div');
+      chip.className = 'tracker-chip';
+      if (p.node === 100) {
+        aiFinished++;
+        chip.classList.add('finished');
+        chip.textContent = '완';
+      } else {
+        chip.textContent = idx + 1;
+      }
+      aiPiecesList.appendChild(chip);
+    });
+    aiRemainBadge.textContent = '완주 ' + aiFinished + '/4';
+  }
+
+  // --- 플레이어 말 선택 및 이동 ---
+  function onPlayerSelectNode(nodeId) {
+    if (gameState !== 'player_move' || isAnimating) return;
+    var piece = playerPieces.find(function (p) { return p.node === nodeId; });
+    if (piece) onPlayerSelectPiece(piece);
+  }
+
+  function onPlayerSelectPiece(piece) {
+    if (gameState !== 'player_move' || isAnimating) return;
+    if (piece.owner !== 'player' || piece.node === 100) return;
+
+    // 대기 중인 말들의 경우 어떤 말이든 0번에서 출발하므로 선택 가능
+    // 판 위에 있는 말도 선택 가능
+    executeMove('player', piece, yutResult.steps, function () {
+      checkPostMove('player');
+    });
+  }
+
+  // 한 덩어리 말(업힌 말 포함) 이동 실행
+  function executeMove(owner, mainPiece, steps, onComplete) {
+    isAnimating = true;
+    var list = (owner === 'player') ? playerPieces : aiPieces;
+    var movingPieces = [];
+
+    if (mainPiece.node === 0) {
+      movingPieces = [mainPiece];
+    } else {
+      // 같은 칸에 있던 같은 팀 말 전체가 함께 이동 (업기)
+      movingPieces = list.filter(function (p) { return p.node === mainPiece.node; });
+    }
+
+    var startNode = mainPiece.node;
+    var startRoute = mainPiece.route;
+    var result = calculateDestination(startNode, startRoute, steps);
+    var path = result.path;
+
+    // 한 칸씩 통통 튀며 이동하는 애니메이션
+    var stepIndex = 0;
+    function stepNext() {
+      if (stepIndex < path.length) {
+        var currentNode = path[stepIndex];
+        movingPieces.forEach(function (p) { p.node = currentNode; });
+        playSound('step');
+        renderPieces();
+        stepIndex++;
+        setTimeout(stepNext, 160);
+      } else {
+        // 이동 완료 후 경로 갱신
+        movingPieces.forEach(function (p) {
+          p.node = result.targetNode;
+          p.route = result.newRoute;
+        });
+        renderPieces();
+        isAnimating = false;
+        if (onComplete) onComplete();
+      }
+    }
+
+    stepNext();
+  }
+
+  // 이동 후 판정 (상대 말 잡기, 완주, 턴 종료 또는 추가 던지기)
+  function checkPostMove(owner) {
+    var isPlayer = (owner === 'player');
+    var myPieces = isPlayer ? playerPieces : aiPieces;
+    var opponentPieces = isPlayer ? aiPieces : playerPieces;
+
+    // 승리 조건 체크 (4개 말 모두 완주)
+    var allFinished = myPieces.every(function (p) { return p.node === 100; });
+    if (allFinished) {
+      endGame(isPlayer ? 'player' : 'ai');
+      return;
+    }
+
+    // 잡기 체크 (node 100 제외)
+    var captured = false;
+    myPieces.forEach(function (p) {
+      if (p.node > 0 && p.node < 100) {
+        var targets = opponentPieces.filter(function (opp) { return opp.node === p.node; });
+        if (targets.length > 0) {
+          targets.forEach(function (opp) {
+            opp.node = 0;
+            opp.route = 'outer';
+          });
+          captured = true;
+          if (isPlayer) {
+            captureCount += targets.length;
+            updateStatusDisplay();
+          }
+        }
+      }
+    });
+
+    renderPieces();
+
+    var hasExtraChance = yutResult.extra || captured;
+
+    if (captured) {
+      playSound('capture');
+    } else if (yutResult.extra) {
+      playSound('extra');
+    }
+
+    if (isPlayer) {
+      if (hasExtraChance) {
+        var msg = captured ? '상대 말을 잡았어요! 한 번 더 던지세요!' : (yutResult.name + '이 나왔어요! 한 번 더 던지세요!');
+        yutResultBanner.innerHTML = msg + ' <span class="extra-chance">추가 던지기!</span>';
+        gameState = 'player_throw';
+        btnYutThrow.disabled = false;
+        btnYutThrow.textContent = '윷 다시 던지기';
+      } else {
+        // 컴퓨터 차례로 전환
+        startAiTurn();
+      }
+    } else {
+      // 컴퓨터 이동 후
+      if (hasExtraChance) {
+        var aiMsg = captured ? '컴퓨터가 말을 잡아서 한 번 더 던집니다!' : ('컴퓨터가 ' + yutResult.name + '이 나와서 한 번 더 던집니다!');
+        yutResultBanner.textContent = aiMsg;
+        setTimeout(function () {
+          processAiTurn();
+        }, 800);
+      } else {
+        // 플레이어 차례로 전환
+        startPlayerTurn();
+      }
+    }
+  }
+
+  // --- 플레이어 턴 시작 ---
+  function startPlayerTurn() {
+    currentTurn = 'player';
+    gameState = 'player_throw';
+    statusTurn.textContent = '내 차례';
+    yutResultBanner.textContent = '윷을 던져주세요';
+    btnYutThrow.disabled = false;
+    btnYutThrow.textContent = '윷 던지기';
+    renderPieces();
+  }
+
+  // 플레이어 윷 던지기 버튼 클릭
+  btnYutThrow.addEventListener('click', function () {
+    if (gameState !== 'player_throw' || isAnimating) return;
+    btnYutThrow.disabled = true;
+    playSound('throw');
+
+    yutResult = throwYut();
+    renderYutSticks(yutResult.flats, true);
+
+    setTimeout(function () {
+      var bannerText = '결과: <em>' + yutResult.name + '</em> (' + yutResult.steps + '칸)';
+      if (yutResult.extra) bannerText += ' <span class="extra-chance">한 번 더!</span>';
+      yutResultBanner.innerHTML = bannerText;
+
+      // 움직일 수 있는 플레이어 말 확인
+      var canMovePieces = playerPieces.filter(function (p) { return p.node !== 100; });
+      if (canMovePieces.length === 0) {
+        // 움직일 말이 없으면 턴 종료
+        startAiTurn();
+        return;
+      }
+
+      gameState = 'player_move';
+      btnYutThrow.textContent = '움직일 말을 선택하세요';
+      renderPieces();
+
+      // 만약 판에 나온 말이 없고 대기석 말뿐이라면, 첫 번째 대기 말을 자동 선택하여 편의 제공 가능
+      // 하지만 규칙상 대기석 칩이나 판 위 말을 직접 터치하도록 유도
+    }, 450);
+  });
+
+  // --- 컴퓨터 AI 턴 ---
+  function startAiTurn() {
+    currentTurn = 'ai';
+    gameState = 'ai_thinking';
+    statusTurn.textContent = '컴퓨터 차례';
+    btnYutThrow.disabled = true;
+    btnYutThrow.textContent = '컴퓨터가 생각 중입니다…';
+    yutResultBanner.textContent = '컴퓨터가 윷을 던집니다…';
+
+    setTimeout(function () {
+      processAiTurn();
+    }, 600);
+  }
+
+  function processAiTurn() {
+    if (gameState === 'game_over') return;
+    playSound('throw');
+    yutResult = throwYut();
+    renderYutSticks(yutResult.flats, true);
+
+    setTimeout(function () {
+      var bannerText = '컴퓨터 결과: <em>' + yutResult.name + '</em> (' + yutResult.steps + '칸)';
+      if (yutResult.extra) bannerText += ' <span class="extra-chance">한 번 더!</span>';
+      yutResultBanner.innerHTML = bannerText;
+
+      var availablePieces = aiPieces.filter(function (p) { return p.node !== 100; });
+      if (availablePieces.length === 0) {
+        startPlayerTurn();
+        return;
+      }
+
+      // 난이도별 최적의 말 선택
+      var chosenPiece = chooseAiPiece(availablePieces, yutResult.steps, currentLevel);
+
+      setTimeout(function () {
+        executeMove('ai', chosenPiece, yutResult.steps, function () {
+          checkPostMove('ai');
+        });
+      }, 500);
+    }, 450);
+  }
+
+  // AI 의사결정 알고리즘
+  function chooseAiPiece(pieces, steps, level) {
+    // 말 그룹별(동일 위치 말은 1개 취급) 후보 생성
+    var uniqueCandidates = [];
+    var seenNodes = {};
+    pieces.forEach(function (p) {
+      var key = (p.node === 0) ? 'wait' : String(p.node);
+      if (!seenNodes[key]) {
+        seenNodes[key] = true;
+        uniqueCandidates.push(p);
+      }
+    });
+
+    if (uniqueCandidates.length === 1) return uniqueCandidates[0];
+
+    // 각 후보 말의 가치 평가
+    var scored = uniqueCandidates.map(function (piece) {
+      var score = evaluateAiMove(piece, steps);
+      return { piece: piece, score: score };
+    });
+
+    // 점수 높은 순 정렬
+    scored.sort(function (a, b) { return b.score - a.score; });
+
+    if (level === 'hard') {
+      // 가장 점수 높은 최적의 수
+      return scored[0].piece;
+    } else if (level === 'normal') {
+      // 80% 확률로 최선의 수, 20% 차선의 수
+      if (scored.length > 1 && Math.random() < 0.2) {
+        return scored[1].piece;
+      }
+      return scored[0].piece;
+    } else {
+      // 쉬움: 무작위성 높음 (60% 랜덤)
+      if (Math.random() < 0.6) {
+        var randIdx = Math.floor(Math.random() * scored.length);
+        return scored[randIdx].piece;
+      }
+      return scored[0].piece;
+    }
+  }
+
+  function evaluateAiMove(piece, steps) {
+    var dest = calculateDestination(piece.node, piece.route, steps);
+    var targetNode = dest.targetNode;
+    var score = 10;
+
+    // 1. 완주하는 수
+    if (targetNode === 100) {
+      return 150;
+    }
+
+    // 2. 플레이어 말 잡기 (가장 큰 보너스)
+    var oppAtTarget = playerPieces.filter(function (p) { return p.node === targetNode && targetNode < 100; });
+    if (oppAtTarget.length > 0) {
+      score += 120 + (oppAtTarget.length * 30);
+    }
+
+    // 3. 지름길 분기점에 안착하기
+    if (targetNode === 25) score += 60; // 가운데 방
+    else if (targetNode === 5) score += 50; // 모서리1
+    else if (targetNode === 10) score += 45; // 모서리2
+
+    // 4. 같은 팀 말 업기
+    var myAtTarget = aiPieces.filter(function (p) { return p.node === targetNode && p.node !== 0 && targetNode < 100; });
+    if (myAtTarget.length > 0) {
+      score += 40;
+    }
+
+    // 5. 새 말 출격
+    if (piece.node === 0) {
+      score += 20;
+    } else {
+      // 이미 나온 말 전진
+      score += 15;
+    }
+
+    // 6. 플레이어 말에게 바로 뒤에서 잡힐 위험 페널티
+    playerPieces.forEach(function (pp) {
+      if (pp.node > 0 && pp.node < 100) {
+        for (var s = 1; s <= 5; s++) {
+          var pDest = calculateDestination(pp.node, pp.route, s);
+          if (pDest.targetNode === targetNode) {
+            score -= 25; // 잡힐 위험
+          }
+        }
+      }
+    });
+
+    return score;
+  }
+
+  // --- 게임 종료 처리 ---
+  function endGame(winner) {
+    gameState = 'game_over';
+    overlayBox.style.display = 'flex';
+
+    if (winner === 'player') {
+      playSound('win');
+      wins++;
+      try { localStorage.setItem('zw_yutnori_wins', String(wins)); } catch (e) {}
+
+      // 남은 상대 말 수 계산 (0~4)
+      var remainingAi = aiPieces.filter(function (p) { return p.node !== 100; }).length;
+      var mult = (currentLevel === 'hard') ? 3 : ((currentLevel === 'normal') ? 2 : 1);
+      // 점수 계산: (100 + 남은 상대 말 수 × 150 + 잡은 횟수 × 30) × 난이도 배수
+      var calcScore = (100 + (remainingAi * 150) + (captureCount * 30)) * mult;
+      // 점수 상한 99999999
+      calcScore = Math.min(99999999, Math.max(0, Math.round(calcScore)));
+
+      // 최고 점수 갱신
+      try {
+        if (currentLevel === 'hard') {
+          if (bestHard === null || calcScore > bestHard) {
+            bestHard = calcScore;
+            localStorage.setItem('zw_yutnori_best_hard', String(bestHard));
+          }
+        } else if (currentLevel === 'normal') {
+          if (bestNormal === null || calcScore > bestNormal) {
+            bestNormal = calcScore;
+            localStorage.setItem('zw_yutnori_best_normal', String(bestNormal));
+          }
+        } else {
+          if (bestEasy === null || calcScore > bestEasy) {
+            bestEasy = calcScore;
+            localStorage.setItem('zw_yutnori_best_easy', String(bestEasy));
+          }
+        }
+      } catch (e) {}
+
+      overlayTitle.textContent = '축하합니다! 승리!';
+      overlayDesc.textContent = '말 4개를 모두 완주시키고 컴퓨터를 이겼어요.';
+      overlayScoreBox.style.display = 'block';
+      overlayScoreVal.textContent = calcScore.toLocaleString('ko-KR') + '점';
+      btnOverlayRank.style.display = 'block';
+    } else {
+      // 패배
+      losses++;
+      try { localStorage.setItem('zw_yutnori_losses', String(losses)); } catch (e) {}
+      overlayTitle.textContent = '아쉬워요, 패배';
+      overlayDesc.textContent = '컴퓨터가 먼저 말을 모두 완주했어요.';
+      overlayScoreBox.style.display = 'none';
+      btnOverlayRank.style.display = 'none';
+    }
+
+    updateStatusDisplay();
+    btnStartGame.textContent = '새 게임 하기';
+  }
+
+  // --- 순위표 올리기 단추 연동 ---
+  btnOverlayRank.addEventListener('click', function () {
+    var jump = document.querySelector('.zw-rk-jump');
+    if (jump && jump.style.display !== 'none') {
+      jump.click();
+    } else {
+      var sec = document.querySelector('.zw-rank');
+      if (sec) {
+        sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  });
+
+  // --- 초기화 및 새 게임 시작 ---
+  function resetToReadyState() {
+    initPieces();
+    captureCount = 0;
+    gameState = 'ready';
+    overlayBox.style.display = 'flex';
+    overlayTitle.textContent = '윷놀이';
+    updateOverlayDesc();
+    overlayScoreBox.style.display = 'none';
+    btnOverlayRank.style.display = 'none';
+    btnStartGame.textContent = '시작하기';
+    statusTurn.textContent = '준비';
+    updateStatusDisplay();
+    renderBoardBase();
+    renderPieces();
+    renderYutSticks([1, 1, 0, 0], false);
+    yutResultBanner.textContent = '시작 버튼을 눌러주세요';
+    btnYutThrow.disabled = true;
+    btnYutThrow.textContent = '윷 던지기';
+  }
+
+  function startNewGame() {
+    initPieces();
+    captureCount = 0;
+    overlayBox.style.display = 'none';
+    updateStatusDisplay();
+    renderBoardBase();
+    renderPieces();
+    renderYutSticks([1, 1, 0, 0], false);
+    startPlayerTurn();
+  }
+
+  btnStartGame.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  btnRestart.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  // 초기 시작
+  loadStorage();
+  resetToReadyState();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/four-in-row/">4목 맞추기</a> — 컴퓨터와 4개 먼저 잇기</li><li><a href="/water-sort/">물 정렬</a> — 색깔별로 물을 병에 모으기</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

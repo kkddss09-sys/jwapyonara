@@ -96,6 +96,11 @@ var TOOLS = [
   ['maze-escape', '미로 찾기', '가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시', '게임', true, '퍼즐'],
   ['stack-tower', '블록 쌓기', '가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시', '게임', true, '액션'],
   ['omok', '오목', '컴퓨터와 오목 한 판', '게임', true, '퍼즐'],
+  ['four-in-row', '4목 맞추기', '컴퓨터와 4개 먼저 잇기', '게임', true, '퍼즐'],
+  ['water-sort', '물 정렬', '색깔별로 물을 병에 모으기', '게임', true, '퍼즐'],
+  ['yutnori', '윷놀이', '컴퓨터와 윷 한 판', '게임', true, '두뇌'],
+  ['mahjong-match', '마작 짝 맞추기', '같은 패 짝지어 없애기', '게임', true, '퍼즐'],
+  ['reversi-flip', '돌 뒤집기', '컴퓨터와 돌 뒤집기 대결', '게임', true, '두뇌'],
   ['merge-numbers', '숫자 합치기', '같은 숫자를 밀어서 합치기', '게임', true, '퍼즐'],
   ['memory-match', '휴대폰 짝 맞추기', '같은 그림 두 장 찾기', '게임', true, '퍼즐'],
   ['sci-calc', '공학용 계산기', '삼각함수, 로그, 제곱, 괄호', '생활', true, '계산'],
@@ -185,6 +190,11 @@ var RANKS = {
   ,'color-flood': { label: '색깔 물들이기 · 점수', better: 'high', unit: '점', variants: [{ id: 'color-flood-easy', key: 'zw_color-flood_best_easy', name: '쉬움' }, { id: 'color-flood-normal', key: 'zw_color-flood_best_normal', name: '보통' }, { id: 'color-flood-hard', key: 'zw_color-flood_best_hard', name: '어려움' }] }
   ,'maze-escape': { label: '미로 찾기 · 점수', better: 'high', unit: '점', variants: [{ id: 'maze-escape-easy', key: 'zw_maze-escape_best_easy', name: '쉬움' }, { id: 'maze-escape-normal', key: 'zw_maze-escape_best_normal', name: '보통' }, { id: 'maze-escape-hard', key: 'zw_maze-escape_best_hard', name: '어려움' }] }
   ,'stack-tower': { label: '블록 쌓기 · 점수', better: 'high', unit: '점', variants: [{ id: 'stack-tower-easy', key: 'zw_stack-tower_best_easy', name: '쉬움' }, { id: 'stack-tower-normal', key: 'zw_stack-tower_best_normal', name: '보통' }, { id: 'stack-tower-hard', key: 'zw_stack-tower_best_hard', name: '어려움' }] }
+  ,'four-in-row': { label: '4목 맞추기 · 점수', better: 'high', unit: '점', variants: [{ id: 'four-in-row-easy', key: 'zw_four-in-row_best_easy', name: '쉬움' }, { id: 'four-in-row-normal', key: 'zw_four-in-row_best_normal', name: '보통' }, { id: 'four-in-row-hard', key: 'zw_four-in-row_best_hard', name: '어려움' }] }
+  ,'water-sort': { label: '물 정렬 · 점수', better: 'high', unit: '점', variants: [{ id: 'water-sort-easy', key: 'zw_water-sort_best_easy', name: '쉬움' }, { id: 'water-sort-normal', key: 'zw_water-sort_best_normal', name: '보통' }, { id: 'water-sort-hard', key: 'zw_water-sort_best_hard', name: '어려움' }] }
+  ,'yutnori': { label: '윷놀이 · 점수', better: 'high', unit: '점', variants: [{ id: 'yutnori-easy', key: 'zw_yutnori_best_easy', name: '쉬움' }, { id: 'yutnori-normal', key: 'zw_yutnori_best_normal', name: '보통' }, { id: 'yutnori-hard', key: 'zw_yutnori_best_hard', name: '어려움' }] }
+  ,'mahjong-match': { label: '마작 짝 맞추기 · 점수', better: 'high', unit: '점', variants: [{ id: 'mahjong-match-easy', key: 'zw_mahjong-match_best_easy', name: '쉬움' }, { id: 'mahjong-match-normal', key: 'zw_mahjong-match_best_normal', name: '보통' }, { id: 'mahjong-match-hard', key: 'zw_mahjong-match_best_hard', name: '어려움' }] }
+  ,'reversi-flip': { label: '돌 뒤집기 · 점수', better: 'high', unit: '점', variants: [{ id: 'reversi-flip-easy', key: 'zw_reversi-flip_best_easy', name: '쉬움' }, { id: 'reversi-flip-normal', key: 'zw_reversi-flip_best_normal', name: '보통' }, { id: 'reversi-flip-hard', key: 'zw_reversi-flip_best_hard', name: '어려움' }] }
 };
 
 // ▼ 숫자 도우미 — 도구마다 다시 만들지 않게 여기 둔다

@@ -1,0 +1,1652 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4목 맞추기 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 즐기는 무료 4목 맞추기 게임. 컴퓨터와 대결하며 7×6 판에서 가로·세로·대각선으로 4개를 먼저 이어보세요.">
+<link rel="canonical" href="https://jwapyonara.com/four-in-row/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="4목 맞추기 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 즐기는 무료 4목 맞추기 게임. 컴퓨터와 지혜를 겨루고 순위표에 도전해 보세요.">
+<meta property="og:url" content="https://jwapyonara.com/four-in-row/">
+<meta property="og:site_name" content="좌표나라">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "4목 맞추기",
+  "url": "https://jwapyonara.com/four-in-row/",
+  "description": "가입 없이 바로 즐기는 무료 4목 맞추기 게임. 쉬움, 보통, 어려움 3단계 난이도로 컴퓨터와 대결해 보세요.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript. Requires HTML5.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "KRW"
+  }
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 3단계 */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상단 상태 바 */
+.fir-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #242933;
+  color: #fff;
+  border-radius: 14px;
+  padding: 11px 16px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+}
+.fir-status-left {
+  font-weight: 800;
+  flex: 1.4;
+  text-align: left;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.fir-status-left.turn-p1 {
+  color: #ff6b70;
+}
+.fir-status-left.turn-p2 {
+  color: #ffd60a;
+}
+.fir-status-badge {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: none;
+}
+.turn-p1 .fir-status-badge {
+  background: #e5484d;
+  box-shadow: 0 0 6px #e5484d;
+}
+.turn-p2 .fir-status-badge {
+  background: #ffd60a;
+  box-shadow: 0 0 6px #ffd60a;
+}
+.fir-status-mid {
+  color: #ffffff;
+  flex: 0.8;
+  text-align: center;
+  white-space: nowrap;
+}
+.fir-status-right {
+  color: #a1a1a6;
+  flex: 1.2;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.fir-best-line {
+  font-size: 13px;
+  color: var(--sub, #6e6e73);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 게임 판 영역 감싸개 */
+.fir-board-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 12px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 열 선택 화살표 버튼 줄 */
+.fir-col-selectors {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-bottom: 6px;
+}
+.fir-col-btn {
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  border-radius: 10px;
+  height: 44px;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+.fir-col-btn:hover:not(:disabled),
+.fir-col-btn.active:not(:disabled) {
+  border-color: #e5484d;
+  background: var(--soft);
+}
+.fir-col-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.fir-col-arrow {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.fir-col-num {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--sub);
+}
+
+/* 4목 파란 판 본체 */
+.fir-board {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  padding: 10px;
+  background: linear-gradient(160deg, #1f6fea, #134ebd 60%, #0d388e);
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(19, 78, 189, 0.35), inset 0 2px 3px rgba(255, 255, 255, 0.28);
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+}
+html[data-theme="dark"] .fir-board {
+  background: linear-gradient(160deg, #1b57c4, #123d91 60%, #0a255c);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.18);
+}
+
+/* 열 단위 기둥 */
+.fir-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  cursor: pointer;
+  border-radius: 12px;
+  position: relative;
+}
+.fir-col:hover,
+.fir-col.col-hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* 각 칸 (구멍) */
+.fir-cell {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  background: #091322;
+  border-radius: 50%;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.65), inset 0 1px 2px rgba(0, 0, 0, 0.8);
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 돌 모양 */
+.fir-stone {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.fir-stone::after {
+  content: "";
+  width: 50%;
+  height: 50%;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  box-sizing: border-box;
+}
+
+/* 사람 돌 (빨강) */
+.fir-stone.stone-p1 {
+  background: radial-gradient(circle at 35% 32%, #ff7378 0%, #e5484d 50%, #9e141a 100%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45), inset 0 2px 3px rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 컴퓨터 돌 (노랑) */
+.fir-stone.stone-p2 {
+  background: radial-gradient(circle at 35% 32%, #fff382 0%, #ffd60a 50%, #c48b00 100%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45), inset 0 2px 3px rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.fir-stone.stone-p2::after {
+  border-color: rgba(0, 0, 0, 0.16);
+}
+
+/* 착수 미리보기 반투명 돌 */
+.fir-stone.stone-preview {
+  background: radial-gradient(circle at 35% 32%, rgba(255, 115, 120, 0.45), rgba(229, 72, 77, 0.45));
+  border: 2px dashed rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 8px rgba(229, 72, 77, 0.6);
+  animation: previewPulse 1.1s ease-in-out infinite alternate;
+}
+.fir-stone.stone-preview::after {
+  border: none;
+}
+@keyframes previewPulse {
+  0% { transform: scale(0.92); opacity: 0.55; }
+  100% { transform: scale(1.02); opacity: 0.95; }
+}
+
+/* 떨어지는 애니메이션 */
+.fir-stone.dropping {
+  animation: dropAnim calc(0.18s + var(--drop-rows, 1) * 0.04s) cubic-bezier(0.25, 0.8, 0.35, 1.15) forwards;
+}
+@keyframes dropAnim {
+  0% {
+    transform: translateY(calc(-100% * (var(--drop-rows, 1) + 0.6)));
+    opacity: 0.95;
+  }
+  75% {
+    transform: translateY(0);
+  }
+  88% {
+    transform: translateY(-8%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* 이긴 4개 돌 하이라이트 깜빡임 */
+.fir-stone.win-pulse {
+  z-index: 5;
+  animation: winGlow 0.85s ease-in-out infinite alternate !important;
+}
+.fir-stone.win-pulse::before {
+  content: "";
+  position: absolute;
+  width: 28%;
+  height: 28%;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ffffff;
+}
+@keyframes winGlow {
+  0% {
+    transform: scale(0.96);
+    box-shadow: 0 0 0 3px #ffffff, 0 0 12px #ffffff;
+    filter: brightness(1);
+  }
+  100% {
+    transform: scale(1.08);
+    box-shadow: 0 0 0 4px #ffd60a, 0 0 22px #ffd60a;
+    filter: brightness(1.3);
+  }
+}
+
+/* 옵션 줄 */
+.fir-options-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 4px 10px;
+  font-size: 14px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.fir-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+.fir-check-label input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--red);
+  cursor: pointer;
+}
+.fir-sound-btn {
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 5px 12px;
+  min-height: 36px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  touch-action: manipulation;
+}
+.fir-sound-btn:active {
+  background: var(--soft);
+}
+
+/* 제어 단추 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+}
+.btn-undo {
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+}
+.btn-undo:active:not(:disabled) {
+  background: var(--soft);
+}
+.btn-undo:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-reset {
+  background: #242933;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #373e4d;
+}
+
+/* 결과 팝업 덮개 */
+.fir-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(14, 19, 28, 0.88);
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: #fff;
+  text-align: center;
+  z-index: 20;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: overlayFade 0.25s ease-out;
+}
+.fir-overlay[hidden] {
+  display: none !important;
+}
+@keyframes overlayFade {
+  0% { opacity: 0; transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.fir-modal-badge {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 3px 12px;
+  border-radius: 999px;
+  margin-bottom: 8px;
+}
+.badge-win {
+  background: #ffd60a;
+  color: #1a1a1a;
+}
+.badge-lose {
+  background: #ff453a;
+  color: #ffffff;
+}
+.badge-draw {
+  background: #8e8e93;
+  color: #ffffff;
+}
+.fir-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 6px;
+  font-weight: 800;
+}
+.fir-overlay p {
+  font-size: 14px;
+  color: #e5e5ea;
+  margin: 0 0 16px;
+  line-height: 1.45;
+}
+.fir-modal-scores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  max-width: 290px;
+  margin-bottom: 18px;
+}
+.fir-score-box {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.fir-score-label {
+  font-size: 12px;
+  color: #c7c7cc;
+}
+.fir-score-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffd60a;
+}
+.fir-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 290px;
+}
+.fir-btn-overlay-rank {
+  background: #ffd60a;
+  color: #1a1a1a;
+  font-size: 16px;
+  font-weight: 800;
+}
+.fir-btn-overlay-rank:active {
+  background: #e6c008;
+}
+.fir-btn-overlay-restart {
+  background: var(--red);
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+}
+.fir-btn-overlay-restart:active {
+  opacity: 0.9;
+}
+.fir-btn-overlay-close {
+  background: transparent;
+  border: none;
+  color: #a1a1a6;
+  font: inherit;
+  font-size: 13px;
+  padding: 6px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>4목 맞추기</h1>
+  <p class="lead">가로, 세로, 대각선으로 돌 4개를 먼저 이으면 이깁니다. 가입 없이 바로 시작해요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="fir-status-bar">
+      <div class="fir-status-left turn-p1" id="statusTurn">
+        <span class="fir-status-badge"></span>
+        <span id="statusTurnText">내 차례</span>
+      </div>
+      <div class="fir-status-mid" id="statusMoves">수 0</div>
+      <div class="fir-status-right" id="statusRecord">0승 0패 0무</div>
+    </div>
+    <div class="fir-best-line" id="statusBest"></div>
+
+    <div class="fir-board-wrap" id="boardWrap">
+      <!-- 7개 열 선택 화살표 버튼 -->
+      <div class="fir-col-selectors" id="colSelectors" role="toolbar" aria-label="돌 떨어뜨릴 열 선택"></div>
+
+      <!-- 4목 판 본체 -->
+      <div class="fir-board" id="firBoard" role="grid" aria-label="4목 맞추기 판"></div>
+
+      <!-- 결과 팝업 창 -->
+      <div class="fir-overlay" id="firOverlay" hidden>
+        <div class="fir-modal-badge" id="modalBadge">승리!</div>
+        <h2 id="modalTitle">이겼어요!</h2>
+        <p id="modalDesc">4목을 먼저 완성했습니다.</p>
+
+        <div class="fir-modal-scores">
+          <div class="fir-score-box">
+            <span class="fir-score-label">이번 점수</span>
+            <b class="fir-score-val" id="modalThisScore">0점</b>
+          </div>
+          <div class="fir-score-box">
+            <span class="fir-score-label">내 최고 점수</span>
+            <b class="fir-score-val" id="modalBestScore">0점</b>
+          </div>
+        </div>
+
+        <div class="fir-modal-actions">
+          <button type="button" class="btn-action fir-btn-overlay-rank" id="btnOverlayRank">🏆 순위표 올리기</button>
+          <button type="button" class="btn-action fir-btn-overlay-restart" id="btnOverlayRestart">다시 하기</button>
+          <button type="button" class="fir-btn-overlay-close" id="btnOverlayClose">판 자세히 보기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="fir-options-bar">
+      <label class="fir-check-label">
+        <input type="checkbox" id="chkInstant">
+        <span>한 번에 두기</span>
+      </label>
+      <button type="button" class="fir-sound-btn" id="btnSound">
+        <svg id="svgSoundIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+        </svg>
+        <span id="soundText">소리 켬</span>
+      </button>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-undo" id="btnUndo" disabled>한 수 물리기 (2회 남음)</button>
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:8px;">
+      열 위나 판을 누르면 <b>미리보기</b>가 뜨고, 같은 자리를 한 번 더 누르면 돌이 떨어져요.
+    </p>
+  </section>
+
+  <p class="note">자신의 돌 4개를 가로·세로·대각선으로 먼저 이으면 승리하며 기기 안에서만 실행됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>게임 규칙:</b> 가로 7칸, 세로 6칸 판에서 내가 빨간 돌(선공), 컴퓨터가 노란 돌(후공)을 쥡니다. 열을 선택하면 돌이 중력에 의해 그 열의 가장 아래 빈 칸으로 떨어져 쌓입니다.</li>
+      <li><b>승리 조건:</b> 가로, 세로, 대각선 중 어느 한 방향으로 내 돌 4개를 먼저 연결하면 승리합니다. 42칸이 가득 차도 4개가 연결되지 않으면 무승부입니다.</li>
+      <li><b>두는 법:</b> 원하는 열의 위쪽 버튼이나 판의 열을 누르면 떨어질 자리에 반투명 돌이 미리 표시되고, 한 번 더 누르면 착수됩니다. '한 번에 두기'를 켜면 첫 터치에 바로 떨어집니다.</li>
+      <li><b>난이도 선택:</b> 쉬움(1수 읽기), 보통(4수 읽기), 어려움(6수 읽기) 중 고를 수 있으며, 난이도를 바꾸면 새 판이 시작됩니다.</li>
+      <li><b>점수 계산:</b> 이겼을 때만 점수를 얻으며, 적은 수로 빠르게 이길수록, 높은 난이도일수록 큰 점수를 받습니다. (점수 공식: (42 − 내가 둔 돌 수 × 2 + 1) × 난이도 배수 × 10)</li>
+      <li><b>한 수 물리기:</b> 실수했을 때 한 판에 최대 2회까지 내 수와 컴퓨터의 수를 함께 되돌릴 수 있습니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 무료 웹 게임입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단에서 난이도(쉬움·보통·어려움)를 선택합니다.</li>
+      <li>가운데 열(4번째 열)은 대각선과 가로 연결 기회가 많으므로 초반에 선점하는 것이 유리합니다.</li>
+      <li>상대방이 3개를 이어 다음 수에 4개가 완성될 위협이 보이면 즉시 그 열을 찾아 막아야 합니다.</li>
+      <li>동시에 두 군데에서 4목을 만들 수 있는 '양수겸장(더블 어택)' 자리를 만들어 컴퓨터를 공략해 보세요.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>출퇴근 시간이나 쉬는 시간에 2~3분 동안 집중하여 가볍게 두뇌를 회전하고 싶을 때 좋습니다. 복잡한 설치나 회원가입 없이 휴대폰과 PC 어디서나 한 손으로 즐길 수 있습니다.</p>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>컴퓨터 난이도는 어떻게 동작하나요?</summary>
+      <p>'쉬움'은 당장 이길 수 있는 자리는 두지만 때때로 실수를 범하는 초보자 모드입니다. '보통'은 4수 앞, '어려움'은 6수 앞까지 미니맥스(Minimax)와 알파베타 가지치기 알고리즘으로 수를 계산하여 최선의 수비와 공격을 펼칩니다.</p>
+    </details>
+    <details>
+      <summary>최고 점수는 어떻게 저장되나요?</summary>
+      <p>난이도별 승리 최고 점수와 전적은 브라우저의 로컬 저장소에 안전하게 저장됩니다. 게임에서 승리한 뒤 결과 창의 '순위표 올리기' 버튼을 눌러 전체 순위표에 닉네임과 함께 기록을 등록할 수 있습니다.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var COLS = 7;
+  var ROWS = 6;
+  var TOTAL_CELLS = 42;
+
+  // DOM 요소
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var statusTurn = document.getElementById('statusTurn');
+  var statusTurnText = document.getElementById('statusTurnText');
+  var statusMoves = document.getElementById('statusMoves');
+  var statusRecord = document.getElementById('statusRecord');
+  var statusBest = document.getElementById('statusBest');
+  var colSelectors = document.getElementById('colSelectors');
+  var firBoard = document.getElementById('firBoard');
+  var firOverlay = document.getElementById('firOverlay');
+  var modalBadge = document.getElementById('modalBadge');
+  var modalTitle = document.getElementById('modalTitle');
+  var modalDesc = document.getElementById('modalDesc');
+  var modalThisScore = document.getElementById('modalThisScore');
+  var modalBestScore = document.getElementById('modalBestScore');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnOverlayRestart = document.getElementById('btnOverlayRestart');
+  var btnOverlayClose = document.getElementById('btnOverlayClose');
+  var chkInstant = document.getElementById('chkInstant');
+  var btnSound = document.getElementById('btnSound');
+  var soundText = document.getElementById('soundText');
+  var svgSoundIcon = document.getElementById('svgSoundIcon');
+  var btnUndo = document.getElementById('btnUndo');
+  var btnRestart = document.getElementById('btnRestart');
+
+  // 게임 상태 변수
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  var gameState = 'playing'; // 'playing', 'won', 'lost', 'draw'
+  var turn = 1; // 1: 사람(빨강), 2: 컴퓨터(노랑)
+  var board = createEmptyBoard(); // board[row][col], 0..5, 0..6
+  var moveHistory = []; // [{ r, c, player }]
+  var undoCount = 2;
+  var previewCol = -1;
+  var winningLine = [];
+  var isThinking = false;
+  var isAnimating = false;
+  var aiTimer = null;
+  var soundEnabled = true;
+
+  // 전적 및 최고 기록
+  var wins = 0;
+  var losses = 0;
+  var draws = 0;
+  var bestScores = {
+    easy: 0,
+    normal: 0,
+    hard: 0
+  };
+
+  // 빈 판 생성
+  function createEmptyBoard() {
+    var b = [];
+    for (var r = 0; r < ROWS; r++) {
+      b[r] = [];
+      for (var c = 0; c < COLS; c++) {
+        b[r][c] = 0;
+      }
+    }
+    return b;
+  }
+
+  // 로컬 스토리지 읽기
+  function loadStorage() {
+    try {
+      wins = parseInt(localStorage.getItem('zw_four-in-row_wins'), 10) || 0;
+      losses = parseInt(localStorage.getItem('zw_four-in-row_losses'), 10) || 0;
+      draws = parseInt(localStorage.getItem('zw_four-in-row_draws'), 10) || 0;
+
+      var bE = parseInt(localStorage.getItem('zw_four-in-row_best_easy'), 10);
+      var bN = parseInt(localStorage.getItem('zw_four-in-row_best_normal'), 10);
+      var bH = parseInt(localStorage.getItem('zw_four-in-row_best_hard'), 10);
+      bestScores.easy = (!isNaN(bE) && bE > 0) ? Math.min(bE, 99999999) : 0;
+      bestScores.normal = (!isNaN(bN) && bN > 0) ? Math.min(bN, 99999999) : 0;
+      bestScores.hard = (!isNaN(bH) && bH > 0) ? Math.min(bH, 99999999) : 0;
+
+      var savedLevel = localStorage.getItem('zw_four-in-row_level');
+      if (savedLevel === 'normal' || savedLevel === 'hard' || savedLevel === 'easy') {
+        currentLevel = savedLevel;
+      } else {
+        currentLevel = 'easy';
+      }
+
+      var savedInstant = localStorage.getItem('zw_four-in-row_instant');
+      if (savedInstant === '1') {
+        chkInstant.checked = true;
+      }
+
+      var savedSound = localStorage.getItem('zw_four-in-row_sound');
+      if (savedSound === '0') {
+        soundEnabled = false;
+      } else {
+        soundEnabled = true;
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+      soundEnabled = true;
+    }
+
+    updateLevelButtons();
+    updateSoundUI();
+    updateStatusDisplay();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+  }
+
+  // WebAudio 사운드 재생
+  var audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new Ctx();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  function playDropSound() {
+    if (!soundEnabled) return;
+    try {
+      var ctx = getAudioCtx();
+      if (!ctx) return;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'triangle';
+      var now = ctx.currentTime;
+      osc.frequency.setValueAtTime(340, now);
+      osc.frequency.exponentialRampToValueAtTime(70, now + 0.08);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.08);
+    } catch (e) {}
+  }
+
+  function playWinSound() {
+    if (!soundEnabled) return;
+    try {
+      var ctx = getAudioCtx();
+      if (!ctx) return;
+      var notes = [523.25, 659.25, 783.99, 1046.50];
+      var now = ctx.currentTime;
+      notes.forEach(function (freq, i) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + i * 0.09);
+        gain.gain.setValueAtTime(0.25, now + i * 0.09);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.22);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + i * 0.09);
+        osc.stop(now + i * 0.09 + 0.22);
+      });
+    } catch (e) {}
+  }
+
+  function playLoseSound() {
+    if (!soundEnabled) return;
+    try {
+      var ctx = getAudioCtx();
+      if (!ctx) return;
+      var notes = [392.00, 349.23, 311.13, 261.63];
+      var now = ctx.currentTime;
+      notes.forEach(function (freq, i) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + i * 0.12);
+        gain.gain.setValueAtTime(0.2, now + i * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + i * 0.12);
+        osc.stop(now + i * 0.12 + 0.2);
+      });
+    } catch (e) {}
+  }
+
+  function updateSoundUI() {
+    soundText.textContent = soundEnabled ? '소리 켬' : '소리 끔';
+    if (soundEnabled) {
+      svgSoundIcon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>';
+    } else {
+      svgSoundIcon.innerHTML = '<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>';
+    }
+  }
+
+  btnSound.addEventListener('click', function () {
+    soundEnabled = !soundEnabled;
+    try {
+      localStorage.setItem('zw_four-in-row_sound', soundEnabled ? '1' : '0');
+    } catch (e) {}
+    updateSoundUI();
+    if (soundEnabled) {
+      getAudioCtx();
+      playDropSound();
+    }
+  });
+
+  // 순위표 탭 연동
+  function syncRankTab() {
+    try {
+      var i = currentLevel === 'hard' ? 2 : (currentLevel === 'normal' ? 1 : 0);
+      var b = document.querySelector('.rk-tabs button[data-i="' + i + '"]');
+      if (b) b.click();
+      if (window.ZW) ZW.rankPick = i;
+    } catch (e) {}
+  }
+
+  // 난이도 단추 상태 갱신
+  function updateLevelButtons() {
+    btnDiffEasy.classList.remove('on');
+    btnDiffNormal.classList.remove('on');
+    btnDiffHard.classList.remove('on');
+    if (currentLevel === 'hard') {
+      btnDiffHard.classList.add('on');
+    } else if (currentLevel === 'normal') {
+      btnDiffNormal.classList.add('on');
+    } else {
+      btnDiffEasy.classList.add('on');
+    }
+  }
+
+  // 상태 줄 갱신
+  function updateStatusDisplay() {
+    statusRecord.textContent = wins + '승 ' + losses + '패 ' + draws + '무';
+    var eStr = bestScores.easy > 0 ? bestScores.easy.toLocaleString('ko-KR') + '점' : '-';
+    var nStr = bestScores.normal > 0 ? bestScores.normal.toLocaleString('ko-KR') + '점' : '-';
+    var hStr = bestScores.hard > 0 ? bestScores.hard.toLocaleString('ko-KR') + '점' : '-';
+    statusBest.textContent = '최고 점수 · 쉬움 ' + eStr + ' · 보통 ' + nStr + ' · 어려움 ' + hStr;
+  }
+
+  // 난이도 변경
+  function setLevel(lvl) {
+    if (lvl === currentLevel) return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_four-in-row_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    syncRankTab();
+    startNewGame();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  chkInstant.addEventListener('change', function () {
+    try {
+      localStorage.setItem('zw_four-in-row_instant', chkInstant.checked ? '1' : '0');
+    } catch (e) {}
+    previewCol = -1;
+    renderBoard();
+  });
+
+  // 물리기 버튼 갱신
+  function updateUndoButton() {
+    btnUndo.textContent = '한 수 물리기 (' + undoCount + '회 남음)';
+    if (undoCount <= 0 || moveHistory.length < 2 || gameState !== 'playing' || turn !== 1 || isThinking || isAnimating) {
+      btnUndo.disabled = true;
+    } else {
+      btnUndo.disabled = false;
+    }
+  }
+
+  // 상단 화살표 버튼 생성
+  function buildColSelectors() {
+    colSelectors.innerHTML = '';
+    for (var c = 0; c < COLS; c++) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'fir-col-btn';
+      btn.setAttribute('data-col', String(c));
+      btn.setAttribute('aria-label', (c + 1) + '열에 떨어뜨리기');
+      btn.innerHTML = '<svg class="fir-col-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg><span class="fir-col-num">' + (c + 1) + '</span>';
+
+      (function (colIndex, el) {
+        el.addEventListener('mouseenter', function () {
+          if (gameState === 'playing' && turn === 1 && !isThinking && !isAnimating) {
+            previewCol = colIndex;
+            renderBoard();
+          }
+        });
+        el.addEventListener('mouseleave', function () {
+          if (previewCol === colIndex) {
+            previewCol = -1;
+            renderBoard();
+          }
+        });
+        el.addEventListener('click', function () {
+          handleColumnAction(colIndex);
+        });
+      })(c, btn);
+
+      colSelectors.appendChild(btn);
+    }
+  }
+
+  // 보드 DOM 생성
+  function buildBoardDOM() {
+    firBoard.innerHTML = '';
+    for (var c = 0; c < COLS; c++) {
+      var colEl = document.createElement('div');
+      colEl.className = 'fir-col';
+      colEl.setAttribute('data-col', String(c));
+
+      for (var r = 0; r < ROWS; r++) {
+        var cellEl = document.createElement('div');
+        cellEl.className = 'fir-cell';
+        cellEl.setAttribute('data-row', String(r));
+        cellEl.setAttribute('data-col', String(c));
+        colEl.appendChild(cellEl);
+      }
+
+      (function (colIndex, el) {
+        el.addEventListener('mouseenter', function () {
+          if (gameState === 'playing' && turn === 1 && !isThinking && !isAnimating) {
+            previewCol = colIndex;
+            renderBoard();
+          }
+        });
+        el.addEventListener('mouseleave', function () {
+          if (previewCol === colIndex) {
+            previewCol = -1;
+            renderBoard();
+          }
+        });
+        el.addEventListener('click', function () {
+          handleColumnAction(colIndex);
+        });
+      })(c, colEl);
+
+      firBoard.appendChild(colEl);
+    }
+  }
+
+  // 특정 열의 가장 아래 빈 행 찾기 (0: 맨 위, 5: 맨 아래)
+  function getLowestEmptyRow(b, c) {
+    for (var r = ROWS - 1; r >= 0; r--) {
+      if (b[r][c] === 0) return r;
+    }
+    return -1;
+  }
+
+  // 열 클릭/터치 조작
+  function handleColumnAction(c) {
+    if (gameState !== 'playing' || turn !== 1 || isThinking || isAnimating) return;
+
+    var targetRow = getLowestEmptyRow(board, c);
+    if (targetRow === -1) return; // 열이 꽉 참
+
+    var isInstant = chkInstant.checked;
+
+    if (isInstant) {
+      previewCol = -1;
+      dropHumanStone(c, targetRow);
+    } else {
+      if (previewCol === c) {
+        previewCol = -1;
+        dropHumanStone(c, targetRow);
+      } else {
+        previewCol = c;
+        renderBoard();
+      }
+    }
+  }
+
+  // 보드 화면 렌더링
+  function renderBoard(animatedMove) {
+    // 1. 열 버튼 비활성화 상태 및 호버 스타일
+    var btns = colSelectors.querySelectorAll('.fir-col-btn');
+    for (var c = 0; c < COLS; c++) {
+      var isFull = (getLowestEmptyRow(board, c) === -1);
+      btns[c].disabled = isFull;
+      if (previewCol === c && !isFull) {
+        btns[c].classList.add('active');
+      } else {
+        btns[c].classList.remove('active');
+      }
+    }
+
+    // 2. 보드 열 호버 스타일
+    var cols = firBoard.querySelectorAll('.fir-col');
+    for (var c = 0; c < COLS; c++) {
+      if (previewCol === c) {
+        cols[c].classList.add('col-hover');
+      } else {
+        cols[c].classList.remove('col-hover');
+      }
+    }
+
+    // 3. 칸별 돌 및 미리보기 렌더링
+    var targetPreviewRow = (previewCol !== -1) ? getLowestEmptyRow(board, previewCol) : -1;
+
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c < COLS; c++) {
+        var cell = firBoard.querySelector('.fir-cell[data-row="' + r + '"][data-col="' + c + '"]');
+        if (!cell) continue;
+
+        var val = board[r][c];
+        cell.innerHTML = '';
+
+        if (val === 1 || val === 2) {
+          var stone = document.createElement('div');
+          stone.className = 'fir-stone ' + (val === 1 ? 'stone-p1' : 'stone-p2');
+
+          // 이긴 돌 하이라이트
+          if (isWinningCell(r, c)) {
+            stone.classList.add('win-pulse');
+          }
+
+          // 착수 낙하 애니메이션
+          if (animatedMove && animatedMove.r === r && animatedMove.c === c) {
+            stone.classList.add('dropping');
+            stone.style.setProperty('--drop-rows', String(r + 1));
+          }
+
+          cell.appendChild(stone);
+        } else if (previewCol === c && targetPreviewRow === r && gameState === 'playing' && turn === 1) {
+          // 미리보기 반투명 돌
+          var prevStone = document.createElement('div');
+          prevStone.className = 'fir-stone stone-preview';
+          cell.appendChild(prevStone);
+        }
+      }
+    }
+
+    // 4. 상태 표시줄 텍스트
+    statusMoves.textContent = '수 ' + moveHistory.length;
+    if (gameState === 'playing') {
+      if (turn === 1) {
+        statusTurn.className = 'fir-status-left turn-p1';
+        statusTurnText.textContent = '내 차례 (빨강)';
+      } else {
+        statusTurn.className = 'fir-status-left turn-p2';
+        statusTurnText.textContent = '컴퓨터 생각 중…';
+      }
+    } else if (gameState === 'won') {
+      statusTurn.className = 'fir-status-left turn-p1';
+      statusTurnText.textContent = '이겼어요!';
+    } else if (gameState === 'lost') {
+      statusTurn.className = 'fir-status-left turn-p2';
+      statusTurnText.textContent = '졌어요';
+    } else if (gameState === 'draw') {
+      statusTurn.className = 'fir-status-left';
+      statusTurnText.textContent = '비겼어요';
+    }
+
+    updateUndoButton();
+  }
+
+  // 이긴 4개 돌 좌표에 포함되는지 확인
+  function isWinningCell(r, c) {
+    if (!winningLine || winningLine.length === 0) return false;
+    for (var i = 0; i < winningLine.length; i++) {
+      if (winningLine[i][0] === r && winningLine[i][1] === c) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // 승리 판정 함수 (가로, 세로, 양 대각선)
+  function checkWin(b, r, c, player) {
+    var directions = [
+      [0, 1],  // 가로
+      [1, 0],  // 세로
+      [1, 1],  // 대각선 \
+      [-1, 1]  // 대각선 /
+    ];
+
+    for (var d = 0; d < directions.length; d++) {
+      var dr = directions[d][0];
+      var dc = directions[d][1];
+      var line = [[r, c]];
+
+      // 정방향
+      var step = 1;
+      while (true) {
+        var nr = r + dr * step;
+        var nc = c + dc * step;
+        if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && b[nr][nc] === player) {
+          line.push([nr, nc]);
+          step++;
+        } else {
+          break;
+        }
+      }
+
+      // 역방향
+      step = 1;
+      while (true) {
+        var nr = r - dr * step;
+        var nc = c - dc * step;
+        if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && b[nr][nc] === player) {
+          line.push([nr, nc]);
+          step++;
+        } else {
+          break;
+        }
+      }
+
+      if (line.length >= 4) {
+        return { win: true, line: line };
+      }
+    }
+
+    return { win: false, line: [] };
+  }
+
+  // 보드가 가득 찼는지 확인
+  function isBoardFull(b) {
+    for (var c = 0; c < COLS; c++) {
+      if (b[0][c] === 0) return false;
+    }
+    return true;
+  }
+
+  // 사람 돌 착수
+  function dropHumanStone(c, r) {
+    board[r][c] = 1;
+    moveHistory.push({ r: r, c: c, player: 1 });
+    isAnimating = true;
+
+    var dropDuration = Math.round(180 + (r + 1) * 40);
+    renderBoard({ r: r, c: c });
+
+    setTimeout(function () {
+      playDropSound();
+      isAnimating = false;
+
+      // 승리 확인
+      var winResult = checkWin(board, r, c, 1);
+      if (winResult.win) {
+        handleGameOver('won', winResult.line);
+        return;
+      }
+
+      // 무승부 확인
+      if (isBoardFull(board)) {
+        handleGameOver('draw', []);
+        return;
+      }
+
+      // 컴퓨터 턴으로 전환
+      turn = 2;
+      isThinking = true;
+      renderBoard();
+
+      // 컴퓨터 착수 딜레이 (자연스러운 380ms)
+      aiTimer = setTimeout(function () {
+        aiTimer = null;
+        if (gameState !== 'playing') return;
+
+        var aiCol = computeAiMove(currentLevel);
+        if (aiCol === -1) {
+          handleGameOver('draw', []);
+          return;
+        }
+
+        var aiRow = getLowestEmptyRow(board, aiCol);
+        board[aiRow][aiCol] = 2;
+        moveHistory.push({ r: aiRow, c: aiCol, player: 2 });
+        isThinking = false;
+        isAnimating = true;
+
+        var aiDropDuration = Math.round(180 + (aiRow + 1) * 40);
+        renderBoard({ r: aiRow, c: aiCol });
+
+        setTimeout(function () {
+          playDropSound();
+          isAnimating = false;
+
+          var aiWinResult = checkWin(board, aiRow, aiCol, 2);
+          if (aiWinResult.win) {
+            handleGameOver('lost', aiWinResult.line);
+            return;
+          }
+
+          if (isBoardFull(board)) {
+            handleGameOver('draw', []);
+            return;
+          }
+
+          turn = 1;
+          renderBoard();
+        }, aiDropDuration);
+
+      }, 380);
+
+    }, dropDuration);
+  }
+
+  // 게임 종료 처리 (승/패/무)
+  function handleGameOver(result, winLine) {
+    gameState = result;
+    winningLine = winLine;
+    isThinking = false;
+    isAnimating = false;
+    if (aiTimer) {
+      clearTimeout(aiTimer);
+      aiTimer = null;
+    }
+
+    var roundScore = 0;
+    var currentBest = bestScores[currentLevel] || 0;
+    var isNewRecord = false;
+
+    if (result === 'won') {
+      wins++;
+      try { localStorage.setItem('zw_four-in-row_wins', String(wins)); } catch (e) {}
+
+      // 사람이 둔 돌 수
+      var humanStoneCount = 0;
+      for (var i = 0; i < moveHistory.length; i++) {
+        if (moveHistory[i].player === 1) humanStoneCount++;
+      }
+
+      // 점수 계산: (42 - 사람 돌 수 * 2 + 1) * 난이도 배수 * 10
+      var mult = (currentLevel === 'hard') ? 3 : (currentLevel === 'normal' ? 2 : 1);
+      roundScore = Math.max(0, (TOTAL_CELLS - humanStoneCount * 2 + 1) * mult * 10);
+      roundScore = Math.min(roundScore, 99999999);
+
+      if (roundScore > currentBest) {
+        isNewRecord = true;
+        bestScores[currentLevel] = roundScore;
+        currentBest = roundScore;
+        try {
+          localStorage.setItem('zw_four-in-row_best_' + currentLevel, String(roundScore));
+        } catch (e) {}
+      }
+
+      playWinSound();
+    } else if (result === 'lost') {
+      losses++;
+      try { localStorage.setItem('zw_four-in-row_losses', String(losses)); } catch (e) {}
+      playLoseSound();
+    } else if (result === 'draw') {
+      draws++;
+      try { localStorage.setItem('zw_four-in-row_draws', String(draws)); } catch (e) {}
+    }
+
+    updateStatusDisplay();
+    renderBoard();
+
+    // 결과 팝업 표시
+    setTimeout(function () {
+      showResultModal(result, roundScore, currentBest, isNewRecord);
+    }, 450);
+  }
+
+  // 결과 모달 팝업 표시
+  function showResultModal(result, roundScore, bestScore, isNewRecord) {
+    if (result === 'won') {
+      modalBadge.className = 'fir-modal-badge badge-win';
+      modalBadge.textContent = isNewRecord ? '새 최고 기록!' : '승리!';
+      modalTitle.textContent = '이겼어요!';
+      modalDesc.textContent = '축하합니다! 4목을 먼저 완성했습니다.';
+      modalThisScore.textContent = roundScore.toLocaleString('ko-KR') + '점';
+      modalBestScore.textContent = (bestScore > 0 ? bestScore.toLocaleString('ko-KR') + '점' : '기록 없음');
+      btnOverlayRank.style.display = 'flex';
+    } else if (result === 'lost') {
+      modalBadge.className = 'fir-modal-badge badge-lose';
+      modalBadge.textContent = '패배';
+      modalTitle.textContent = '졌어요';
+      modalDesc.textContent = '컴퓨터가 4목을 먼저 완성했습니다.';
+      modalThisScore.textContent = '0점';
+      modalBestScore.textContent = (bestScore > 0 ? bestScore.toLocaleString('ko-KR') + '점' : '기록 없음');
+      btnOverlayRank.style.display = (bestScore > 0) ? 'flex' : 'none';
+    } else {
+      modalBadge.className = 'fir-modal-badge badge-draw';
+      modalBadge.textContent = '무승부';
+      modalTitle.textContent = '비겼어요';
+      modalDesc.textContent = '판이 가득 찼지만 4목이 나오지 않았습니다.';
+      modalThisScore.textContent = '0점';
+      modalBestScore.textContent = (bestScore > 0 ? bestScore.toLocaleString('ko-KR') + '점' : '기록 없음');
+      btnOverlayRank.style.display = (bestScore > 0) ? 'flex' : 'none';
+    }
+
+    firOverlay.hidden = false;
+  }
+
+  // 순위표 올리기 단추 클릭 이벤트
+  btnOverlayRank.addEventListener('click', function () {
+    firOverlay.hidden = true;
+    var jump = document.querySelector('.zw-rk-jump');
+    if (jump) {
+      jump.click();
+    } else {
+      var rkSec = document.querySelector('.zw-rank');
+      if (rkSec) {
+        rkSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  });
+
+  // 모달 닫기
+  btnOverlayClose.addEventListener('click', function () {
+    firOverlay.hidden = true;
+  });
+
+  // 모달 안의 다시 하기
+  btnOverlayRestart.addEventListener('click', function () {
+    firOverlay.hidden = true;
+    startNewGame();
+  });
+
+  // 하단 다시 하기 버튼
+  btnRestart.addEventListener('click', function () {
+    firOverlay.hidden = true;
+    startNewGame();
+  });
+
+  // 한 수 물리기
+  btnUndo.addEventListener('click', function () {
+    if (gameState !== 'playing' || turn !== 1 || isThinking || isAnimating) return;
+    if (undoCount <= 0 || moveHistory.length < 2) return;
+
+    var lastAi = moveHistory.pop();
+    board[lastAi.r][lastAi.c] = 0;
+
+    var lastHuman = moveHistory.pop();
+    board[lastHuman.r][lastHuman.c] = 0;
+
+    undoCount--;
+    previewCol = -1;
+    winningLine = [];
+
+    renderBoard();
+  });
+
+  // 새 판 시작
+  function startNewGame() {
+    if (aiTimer) {
+      clearTimeout(aiTimer);
+      aiTimer = null;
+    }
+    isThinking = false;
+    isAnimating = false;
+    board = createEmptyBoard();
+    moveHistory = [];
+    undoCount = 2;
+    previewCol = -1;
+    winningLine = [];
+    turn = 1;
+    gameState = 'playing';
+    firOverlay.hidden = true;
+
+    renderBoard();
+  }
+
+  // ==========================================
+  // 컴퓨터 인공지능 (AI) 알고리즘
+  // ==========================================
+
+  // 미리 계산된 69개의 4개 연속 창 (Windows)
+  var WINDOWS = [];
+  (function () {
+    // 1. 가로 (24개)
+    for (var r = 0; r < ROWS; r++) {
+      for (var c = 0; c <= COLS - 4; c++) {
+        WINDOWS.push([[r, c], [r, c + 1], [r, c + 2], [r, c + 3]]);
+      }
+    }
+    // 2. 세로 (21개)
+    for (var r = 0; r <= ROWS - 4; r++) {
+      for (var c = 0; c < COLS; c++) {
+        WINDOWS.push([[r, c], [r + 1, c], [r + 2, c], [r + 3, c]]);
+      }
+    }
+    // 3. 대각선 \ (12개)
+    for (var r = 0; r <= ROWS - 4; r++) {
+      for (var c = 0; c <= COLS - 4; c++) {
+        WINDOWS.push([[r, c], [r + 1, c + 1], [r + 2, c + 2], [r + 3, c + 3]]);
+      }
+    }
+    // 4. 대각선 / (12개)
+    for (var r = 3; r < ROWS; r++) {
+      for (var c = 0; c <= COLS - 4; c++) {
+        WINDOWS.push([[r, c], [r - 1, c + 1], [r - 2, c + 2], [r - 3, c + 3]]);
+      }
+    }
+  })();
+
+  // 휴리스틱 국면 평가 함수 (AI 점수: +, 사람 점수: -)
+  function evaluateBoard(b) {
+    var score = 0;
+
+    // 중앙 열 가중치
+    for (var r = 0; r < ROWS; r++) {
+      var v3 = b[r][3];
+      if (v3 === 2) score += 6;
+      else if (v3 === 1) score -= 6;
+
+      var v2 = b[r][2];
+      if (v2 === 2) score += 2;
+      else if (v2 === 1) score -= 2;
+
+      var v4 = b[r][4];
+      if (v4 === 2) score += 2;
+      else if (v4 === 1) score -= 2;
+    }
+
+    // 69개 4연속 창 검사
+    for (var i = 0; i < 69; i++) {
+      var w = WINDOWS[i];
+      var aiCount = 0;
+      var huCount = 0;
+
+      for (var k = 0; k < 4; k++) {
+        var cell = b[w[k][0]][w[k][1]];
+        if (cell === 2) aiCount++;
+        else if (cell === 1) huCount++;
+      }
+
+      if (aiCount > 0 && huCount > 0) continue; // 서로 막힌 창은 0점
+
+      if (aiCount === 3) score += 60;
+      else if (aiCount === 2) score += 12;
+      else if (aiCount === 1) score += 1;
+
+      if (huCount === 3) score -= 80; // 사람의 3개 위협 긴급 방어
+      else if (huCount === 2) score -= 12;
+      else if (huCount === 1) score -= 1;
+    }
+
+    return score;
+  }
+
+  // 알파-베타 가지치기를 포함한 미니맥스 탐색
+  function minimax(b, depth, alpha, beta, isMaximizing, lastR, lastC, lastP) {
+    // 직전 수로 인한 승패 확인
+    if (lastR !== -1) {
+      if (checkWin(b, lastR, lastC, lastP).win) {
+        return lastP === 2 ? (1000000 + depth * 100) : (-1000000 - depth * 100);
+      }
+    }
+
+    if (depth === 0 || isBoardFull(b)) {
+      return evaluateBoard(b);
+    }
+
+    // 중앙 우선 탐색 순서
+    var ORDER = [3, 2, 4, 1, 5, 0, 6];
+
+    if (isMaximizing) {
+      var maxEval = -Infinity;
+      for (var i = 0; i < COLS; i++) {
+        var c = ORDER[i];
+        var r = getLowestEmptyRow(b, c);
+        if (r === -1) continue;
+
+        b[r][c] = 2; // AI 가상 착수
+        var evalScore = minimax(b, depth - 1, alpha, beta, false, r, c, 2);
+        b[r][c] = 0; // 복원
+
+        if (evalScore > maxEval) maxEval = evalScore;
+        if (evalScore > alpha) alpha = evalScore;
+        if (beta <= alpha) break; // 가지치기
+      }
+      return (maxEval === -Infinity) ? 0 : maxEval;
+    } else {
+      var minEval = Infinity;
+      for (var i = 0; i < COLS; i++) {
+        var c = ORDER[i];
+        var r = getLowestEmptyRow(b, c);
+        if (r === -1) continue;
+
+        b[r][c] = 1; // 사람 가상 착수
+        var evalScore = minimax(b, depth - 1, alpha, beta, true, r, c, 1);
+        b[r][c] = 0; // 복원
+
+        if (evalScore < minEval) minEval = evalScore;
+        if (evalScore < beta) beta = evalScore;
+        if (beta <= alpha) break; // 가지치기
+      }
+      return (minEval === Infinity) ? 0 : minEval;
+    }
+  }
+
+  // 컴퓨터 AI 최적 수 결정
+  function computeAiMove(level) {
+    var ORDER = [3, 2, 4, 1, 5, 0, 6];
+    var legalCols = [];
+    for (var i = 0; i < COLS; i++) {
+      var c = ORDER[i];
+      if (getLowestEmptyRow(board, c) !== -1) {
+        legalCols.push(c);
+      }
+    }
+    if (legalCols.length === 0) return -1;
+
+    // 1. 당장 이길 수 있는 수가 있는지 확인
+    for (var i = 0; i < legalCols.length; i++) {
+      var c = legalCols[i];
+      var r = getLowestEmptyRow(board, c);
+      board[r][c] = 2;
+      var isWin = checkWin(board, r, c, 2).win;
+      board[r][c] = 0;
+      if (isWin) {
+        if (level === 'easy' && Math.random() < 0.15) {
+          // 쉬움 모드 15% 확률 실수
+        } else {
+          return c;
+        }
+      }
+    }
+
+    // 2. 상대방이 다음 수에 바로 이기는 자리(위협) 즉시 방어
+    var threats = [];
+    for (var i = 0; i < legalCols.length; i++) {
+      var c = legalCols[i];
+      var r = getLowestEmptyRow(board, c);
+      board[r][c] = 1;
+      var opponentCanWin = checkWin(board, r, c, 1).win;
+      board[r][c] = 0;
+      if (opponentCanWin) {
+        threats.push(c);
+      }
+    }
+    if (threats.length > 0) {
+      if (level === 'easy') {
+        // 쉬움 모드 70% 방어, 30% 방어 놓침
+        if (Math.random() < 0.7) {
+          return threats[0];
+        }
+      } else {
+        return threats[0];
+      }
+    }
+
+    // 3. 쉬움 모드: 1수 읽기 및 무작위/중앙 가중치
+    if (level === 'easy') {
+      if (Math.random() < 0.4) {
+        return legalCols[Math.floor(Math.random() * legalCols.length)];
+      }
+      var bestEasyCol = legalCols[0];
+      var bestEasyVal = -Infinity;
+      for (var i = 0; i < legalCols.length; i++) {
+        var c = legalCols[i];
+        var r = getLowestEmptyRow(board, c);
+        board[r][c] = 2;
+        var s = evaluateBoard(board) + (Math.random() * 12 - 6);
+        board[r][c] = 0;
+        if (s > bestEasyVal) {
+          bestEasyVal = s;
+          bestEasyCol = c;
+        }
+      }
+      return bestEasyCol;
+    }
+
+    // 4. 보통 (4수 읽기) 또는 어려움 (6수 읽기)
+    var searchDepth = (level === 'hard') ? 6 : 4;
+    var bestCol = legalCols[0];
+    var bestVal = -Infinity;
+    var alpha = -Infinity;
+    var beta = Infinity;
+
+    for (var i = 0; i < legalCols.length; i++) {
+      var c = legalCols[i];
+      var r = getLowestEmptyRow(board, c);
+      board[r][c] = 2;
+      var val = minimax(board, searchDepth - 1, alpha, beta, false, r, c, 2);
+      board[r][c] = 0;
+
+      if (val > bestVal) {
+        bestVal = val;
+        bestCol = c;
+      }
+      if (val > alpha) {
+        alpha = val;
+      }
+    }
+
+    return bestCol;
+  }
+
+  // 초기화 실행
+  buildColSelectors();
+  buildBoardDOM();
+  loadStorage();
+  startNewGame();
+
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/four-in-row/">4목 맞추기</a> — 컴퓨터와 4개 먼저 잇기</li><li><a href="/water-sort/">물 정렬</a> — 색깔별로 물을 병에 모으기</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>
