@@ -123,10 +123,10 @@
 /* 캔버스 감싸개 */
 .game-canvas-wrap {
   position: relative;
-  width: 100%;
+  width: min(100%, 420px, calc(48svh * 3 / 4));   /* 휴대폰 아래 메뉴에 깔리지 않게 높이 화면의 48%까지 (2026-11-08) */
   max-width: 420px;
   margin: 0 auto 12px;
-  aspect-ratio: 2 / 3;
+  aspect-ratio: 3 / 4;
   border-radius: 16px;
   overflow: hidden;
   background: #080c18;
