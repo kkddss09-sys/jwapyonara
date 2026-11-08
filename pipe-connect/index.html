@@ -1,0 +1,1306 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>파이프 잇기 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 즐기는 무료 파이프 잇기 퍼즐 게임. 물이 새지 않게 파이프를 돌려 샘에서 모든 집까지 길을 이어 보세요. 쉬움·보통·어려움 3단계를 지원합니다.">
+<link rel="canonical" href="https://jwapyonara.com/pipe-connect/">
+<meta property="og:title" content="파이프 잇기 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 즐기는 무료 파이프 잇기 퍼즐 게임. 물이 새지 않게 파이프를 돌려 샘에서 모든 집까지 연결해 보세요.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jwapyonara.com/pipe-connect/">
+<meta property="og:site_name" content="좌표나라">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "파이프 잇기",
+  "url": "https://jwapyonara.com/pipe-connect/",
+  "description": "가입 없이 바로 즐기는 무료 파이프 잇기 퍼즐 게임.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All"
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 (3분할) */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 줄 */
+.pipe-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+}
+.pipe-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1.1;
+  text-align: left;
+  white-space: nowrap;
+}
+.pipe-status-mid {
+  color: #38bdf8;
+  flex: 1.2;
+  text-align: center;
+  white-space: nowrap;
+}
+.pipe-status-right {
+  color: #ffffff;
+  flex: 1.1;
+  text-align: right;
+  white-space: nowrap;
+}
+.pipe-best-line {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 퍼즐 캔버스 래퍼 */
+.pipe-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 12px;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #0f172a;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#pipeCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+  touch-action: none;
+}
+
+/* 오버레이 (시작 전 / 클리어 후) */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 24px;
+  text-align: center;
+  z-index: 10;
+  backdrop-filter: blur(3px);
+}
+.canvas-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 10px;
+  color: #38bdf8;
+  font-weight: 800;
+}
+.canvas-overlay p {
+  font-size: 15px;
+  margin: 0 0 20px;
+  color: #e2e8f0;
+  max-width: 300px;
+  line-height: 1.5;
+}
+.canvas-overlay .score-box {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 12px 18px;
+  margin-bottom: 18px;
+  width: 100%;
+  max-width: 270px;
+}
+.canvas-overlay .score-box div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin: 4px 0;
+  color: #94a3b8;
+}
+.canvas-overlay .score-box div b {
+  color: #ffd60a;
+  font-size: 16px;
+}
+.canvas-overlay .btn-start {
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  background: var(--red, #1b64da);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 42px;
+  min-height: 50px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+  max-width: 270px;
+}
+.canvas-overlay .btn-start:active {
+  opacity: 0.88;
+}
+.canvas-overlay .btn-overlay-rank {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  background: #f59e0b;
+  color: #1c1917;
+  border: none;
+  border-radius: 12px;
+  padding: 11px 24px;
+  min-height: 48px;
+  margin-top: 10px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+  max-width: 270px;
+}
+.canvas-overlay .btn-overlay-rank:active {
+  opacity: 0.88;
+}
+
+/* 조작 안내 및 제어 단추 */
+.pipe-options-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 4px 10px;
+  font-size: 14px;
+}
+.pipe-sound-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+.pipe-sound-toggle input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--red, #1b64da);
+  cursor: pointer;
+}
+.pipe-hint-tip {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+}
+
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+}
+.btn-reset {
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #3a3a3c;
+}
+
+/* 범례 안내 박스 */
+.pipe-legend {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: var(--fill, #f2f2f7);
+  border-radius: 12px;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.pipe-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+.legend-source {
+  background: #0284c7;
+  border-radius: 50%;
+  border: 2px solid #38bdf8;
+}
+.legend-house {
+  background: #f59e0b;
+  border-radius: 3px;
+}
+.legend-water {
+  background: #38bdf8;
+}
+.legend-dry {
+  background: #64748b;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>파이프 잇기</h1>
+  <p class="lead">파이프를 눌러 돌려 물이 새지 않게 모든 집에 물을 연결하세요. 가입 없이 바로 즐겨요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움 5×5</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통 7×7</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움 9×9</button>
+    </div>
+
+    <div class="pipe-status-bar">
+      <div class="pipe-status-left" id="statusTime">⏱️ 00:00</div>
+      <div class="pipe-status-mid" id="statusTarget">집 연결 0/0</div>
+      <div class="pipe-status-right" id="statusScore">0점 (0판)</div>
+    </div>
+    <div class="pipe-best-line" id="statusBest"></div>
+
+    <div class="pipe-canvas-wrap" id="canvasWrap">
+      <canvas id="pipeCanvas" width="420" height="420"></canvas>
+      <div class="canvas-overlay" id="overlayBox">
+        <h2 id="overlayTitle">파이프 잇기</h2>
+        <p id="overlayDesc">쉬움(5×5)으로 시작해요.<br>파이프를 눌러 90°씩 돌릴 수 있어요.</p>
+        <div class="score-box" id="overlayScoreBox" style="display:none;">
+          <div><span>걸린 시간</span><b id="ovTime">0초</b></div>
+          <div><span>이번 판 점수</span><b id="ovRoundScore">+0점</b></div>
+          <div><span>누적 총점</span><b id="ovTotalScore">0점</b></div>
+        </div>
+        <button type="button" class="btn-start" id="btnStartGame">시작하기</button>
+        <button type="button" class="btn-overlay-rank" id="btnOverlayRank" style="display:none;">🏆 순위표 올리기</button>
+      </div>
+    </div>
+
+    <div class="pipe-options-bar">
+      <label class="pipe-sound-toggle">
+        <input type="checkbox" id="chkSound" checked>
+        <span>효과음 켜기</span>
+      </label>
+      <span class="pipe-hint-tip">조각을 누르면 시계방향 90° 회전</span>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+
+    <div class="pipe-legend">
+      <div class="pipe-legend-item"><span class="legend-dot legend-source"></span><span>샘 (시작)</span></div>
+      <div class="pipe-legend-item"><span class="legend-dot legend-house"></span><span>집 (도착)</span></div>
+      <div class="pipe-legend-item"><span class="legend-dot legend-water"></span><span>물 흐름</span></div>
+      <div class="pipe-legend-item"><span class="legend-dot legend-dry"></span><span>빈 파이프</span></div>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:10px;">
+      💡 물이 나오는 <b>샘</b>에서 시작해 <b>모든 집</b>까지 누수 없이 파이프를 이어보세요.
+    </p>
+  </section>
+
+  <p class="note">모든 연산은 기기 안에서만 실행되며 불필요한 인터넷 데이터를 소모하지 않습니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>게임 목표:</b> 물이 솟아나는 샘(원형 펌프)에서 출발하여 격자에 있는 모든 집까지 파이프를 끊김 없이 연결하세요.</li>
+      <li><b>파이프 회전:</b> 원하는 파이프 조각을 누르면 시계방향으로 90°씩 돌아갑니다.</li>
+      <li><b>물 흐름과 연결:</b> 샘과 올바르게 맞물린 파이프는 하늘색으로 물이 차오릅니다. 연결되지 않은 파이프는 어두운 회색입니다.</li>
+      <li><b>누수(물 샐 때) 주의:</b> 파이프의 열린 끝이 벽이나 닫힌 파이프를 향하면 빨간 점으로 물이 새는 표시가 납니다. 물이 새지 않게 서로 딱 맞물려야 완성이 인정됩니다.</li>
+      <li><b>점수 계산:</b> 한 판 클리어 시 (1500 − 걸린 초) × 난이도 배수(쉬움 1배, 보통 2배, 어려움 3배)로 계산되며(최소 100점), 연속해서 푼 판의 점수가 합산되어 순위표에 기록됩니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>쉬움(5×5), 보통(7×7), 어려움(9×9) 중 원하는 난이도를 고릅니다.</li>
+      <li>격자의 외곽이나 모서리에 위치한 파이프는 향할 수 있는 방향이 한정되어 있으므로 외곽부터 맞추면 쉽게 풀립니다.</li>
+      <li>샘에서부터 물길을 조금씩 이어 나가며 각 집으로 가는 길을 완성해 보세요.</li>
+      <li>판을 클리어한 뒤 다음 판을 계속 풀면 점수가 계속 누적되어 높은 순위에 오를 수 있습니다.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>가입이나 다운로드 없이 출퇴근 시간이나 쉬는 시간에 2~3분 동안 집중하여 공간 지각력과 논리적 문제 해결력을 키우고 싶을 때 제격입니다.</p>
+    <h2>알아 두면 좋은 것</h2>
+    <dl>
+      <dt>모서리와 가장자리 공략법</dt>
+      <dd>격자 모서리 칸은 벽 쪽으로 열릴 수 없으므로 꺾임 조각의 방향이 거의 정해져 있습니다. 외곽 모서리부터 차근차근 돌려보면 복잡한 중앙도 쉽게 실마리가 풀립니다.</dd>
+      <dt>누수 없는 완벽한 배관망</dt>
+      <dd>모든 집이 물을 받더라도 열려 있는 파이프로 물이 새면 통과되지 않습니다. 모든 배관의 끝이 빈틈없이 체결되어야 합니다.</dd>
+      <dt>최고 점수 안전 저장</dt>
+      <dd>난이도별 최고 기록은 브라우저 로컬 저장소에 안전하게 보관됩니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>물이 연결되었는데 왜 게임이 끝나지 않나요?</summary>
+      <p>파이프 어딘가의 열린 끝이 벽을 향하거나 맞닿은 파이프와 어긋나 물이 새고 있는 누수 지점이 있는지 확인해 보세요. 또한 모든 집에 물이 전부 도달해야 합니다.</p>
+    </details>
+    <details>
+      <summary>판 점수는 어떻게 누적되나요?</summary>
+      <p>한 판을 완료한 뒤 '다음 판 계속하기'를 누르면 현재까지 획득한 누적 점수에 새 판의 점수가 더해집니다. 난이도를 바꾸거나 새로고침하면 새 도전이 시작됩니다.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // DOM 요소
+  var canvas = document.getElementById('pipeCanvas');
+  var ctx = canvas.getContext('2d');
+  var canvasWrap = document.getElementById('canvasWrap');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var overlayScoreBox = document.getElementById('overlayScoreBox');
+  var ovTime = document.getElementById('ovTime');
+  var ovRoundScore = document.getElementById('ovRoundScore');
+  var ovTotalScore = document.getElementById('ovTotalScore');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var btnRestart = document.getElementById('btnRestart');
+  var chkSound = document.getElementById('chkSound');
+  var statusTime = document.getElementById('statusTime');
+  var statusTarget = document.getElementById('statusTarget');
+  var statusScore = document.getElementById('statusScore');
+  var statusBest = document.getElementById('statusBest');
+
+  // 방향 상수: 북(1), 동(2), 남(4), 서(8)
+  var NORTH = 1, EAST = 2, SOUTH = 4, WEST = 8;
+  var DIRS = [
+    { bit: NORTH, opp: SOUTH, dr: -1, dc: 0 },
+    { bit: EAST,  opp: WEST,  dr: 0,  dc: 1 },
+    { bit: SOUTH, opp: NORTH, dr: 1,  dc: 0 },
+    { bit: WEST,  opp: EAST,  dr: 0,  dc: -1 }
+  ];
+
+  // 90도 시계방향 비트마스크 회전
+  function rotateMask(mask) {
+    var next = 0;
+    if (mask & NORTH) next |= EAST;
+    if (mask & EAST)  next |= SOUTH;
+    if (mask & SOUTH) next |= WEST;
+    if (mask & WEST)  next |= NORTH;
+    return next;
+  }
+
+  // 게임 상태 변수
+  var gameState = 'ready'; // 'ready', 'playing', 'clear'
+  var currentLevel = 'easy'; // 'easy' (5×5), 'normal' (7×7), 'hard' (9×9)
+  var rows = 5, cols = 5;
+  var puzzle = null; // { grid, degree, source, houses }
+  var currentMask = []; // [r][c] 현재 방향 마스크
+  var targetRotation = []; // [r][c] 애니메이션용 각도 (도 단위)
+  var animRotation = []; // [r][c] 현재 렌더링 각도
+
+  // 점수 및 시간 변수
+  var totalScore = 0;
+  var clearedRounds = 0;
+  var startTime = 0;
+  var timerInterval = null;
+  var elapsedSeconds = 0;
+
+  // 최고 기록 (로컬스토리지)
+  var bestEasy = 0;
+  var bestNormal = 0;
+  var bestHard = 0;
+
+  // WebAudio 효과음 지원
+  var audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) {}
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(function () {});
+    }
+    return audioCtx;
+  }
+
+  function playSound(type) {
+    if (!chkSound.checked) return;
+    var actx = getAudioCtx();
+    if (!actx) return;
+    try {
+      var now = actx.currentTime;
+      if (type === 'rotate') {
+        // 짧고 산뜻한 찰칵 소리
+        var osc = actx.createOscillator();
+        var gain = actx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(140, now + 0.05);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.connect(gain);
+        gain.connect(actx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      } else if (type === 'connect') {
+        // 물방울 퐁 소리
+        var osc2 = actx.createOscillator();
+        var gain2 = actx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(450, now);
+        osc2.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+        gain2.gain.setValueAtTime(0.25, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+        osc2.connect(gain2);
+        gain2.connect(actx.destination);
+        osc2.start(now);
+        osc2.stop(now + 0.09);
+      } else if (type === 'clear') {
+        // 경쾌한 승리 아르페지오 (도-미-솔-도)
+        var notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach(function (freq, i) {
+          var o = actx.createOscillator();
+          var g = actx.createGain();
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(freq, now + i * 0.1);
+          g.gain.setValueAtTime(0.25, now + i * 0.1);
+          g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.25);
+          o.connect(g);
+          g.connect(actx.destination);
+          o.start(now + i * 0.1);
+          o.stop(now + i * 0.1 + 0.26);
+        });
+      }
+    } catch (e) {}
+  }
+
+  // 점수 콤마 포맷팅
+  function fmtScore(n) {
+    return Math.round(n).toLocaleString('ko-KR');
+  }
+
+  // 로컬 스토리지 로드
+  function loadStorage() {
+    try {
+      bestEasy = parseInt(localStorage.getItem('zw_pipe-connect_best_easy'), 10) || 0;
+      bestNormal = parseInt(localStorage.getItem('zw_pipe-connect_best_normal'), 10) || 0;
+      bestHard = parseInt(localStorage.getItem('zw_pipe-connect_best_hard'), 10) || 0;
+
+      var savedLevel = localStorage.getItem('zw_pipe-connect_level');
+      if (savedLevel === 'normal' || savedLevel === 'hard' || savedLevel === 'easy') {
+        currentLevel = savedLevel;
+      } else {
+        currentLevel = 'easy';
+      }
+
+      var savedSound = localStorage.getItem('zw_pipe-connect_sound');
+      if (savedSound === '0') {
+        chkSound.checked = false;
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+
+    updateLevelGridSize();
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    setTimeout(syncRankTab, 250);
+    updateStatusDisplay();
+  }
+
+  chkSound.addEventListener('change', function () {
+    try {
+      localStorage.setItem('zw_pipe-connect_sound', chkSound.checked ? '1' : '0');
+    } catch (e) {}
+  });
+
+  function updateLevelGridSize() {
+    if (currentLevel === 'easy') {
+      rows = 5; cols = 5;
+    } else if (currentLevel === 'normal') {
+      rows = 7; cols = 7;
+    } else {
+      rows = 9; cols = 9;
+    }
+  }
+
+  function updateLevelButtons() {
+    btnDiffEasy.classList.remove('on');
+    btnDiffNormal.classList.remove('on');
+    btnDiffHard.classList.remove('on');
+    if (currentLevel === 'normal') btnDiffNormal.classList.add('on');
+    else if (currentLevel === 'hard') btnDiffHard.classList.add('on');
+    else btnDiffEasy.classList.add('on');
+  }
+
+  function updateOverlayDesc() {
+    var sizeText = (currentLevel === 'easy') ? '쉬움(5×5)' : ((currentLevel === 'normal') ? '보통(7×7)' : '어려움(9×9)');
+    overlayDesc.innerHTML = sizeText + '으로 시작해요.<br>파이프를 눌러 90°씩 돌릴 수 있어요.';
+  }
+
+  // 순위표 카드(rank.js)의 탭을 현재 난이도에 맞춤
+  function syncRankTab() {
+    try {
+      var i = (currentLevel === 'easy') ? 0 : ((currentLevel === 'normal') ? 1 : 2);
+      if (window.ZW) ZW.rankPick = i;
+      var b = document.querySelector('.rk-tabs button[data-i="' + i + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  function updateStatusDisplay() {
+    var min = Math.floor(elapsedSeconds / 60);
+    var sec = elapsedSeconds % 60;
+    statusTime.textContent = '⏱️ ' + (min < 10 ? '0' : '') + min + ':' + (sec < 10 ? '0' : '') + sec;
+    statusScore.textContent = fmtScore(totalScore) + '점 (' + clearedRounds + '판)';
+
+    var parts = [];
+    parts.push('쉬움 ' + (bestEasy > 0 ? fmtScore(bestEasy) + '점' : '-'));
+    parts.push('보통 ' + (bestNormal > 0 ? fmtScore(bestNormal) + '점' : '-'));
+    parts.push('어려움 ' + (bestHard > 0 ? fmtScore(bestHard) + '점' : '-'));
+    statusBest.textContent = '최고 기록 · ' + parts.join(' · ');
+  }
+
+  // 신장 트리(Spanning Tree) 생성 알고리즘 (차수 최대 3 제한 -> 직선, 꺾임, T자, 끝만 생성)
+  function generatePuzzle(rCount, cCount) {
+    var maxAttempts = 60;
+    for (var att = 0; att < maxAttempts; att++) {
+      var grid = [];
+      var visited = [];
+      var degree = [];
+      for (var r = 0; r < rCount; r++) {
+        grid[r] = [];
+        visited[r] = [];
+        degree[r] = [];
+        for (var c = 0; c < cCount; c++) {
+          grid[r][c] = 0;
+          visited[r][c] = false;
+          degree[r][c] = 0;
+        }
+      }
+
+      // 무작위 시작점
+      var sr = Math.floor(Math.random() * rCount);
+      var sc = Math.floor(Math.random() * cCount);
+      visited[sr][sc] = true;
+
+      var frontier = [{ r: sr, c: sc }];
+      var visitedCount = 1;
+      var totalCells = rCount * cCount;
+
+      while (frontier.length > 0 && visitedCount < totalCells) {
+        var fIdx = Math.floor(Math.random() * frontier.length);
+        var cur = frontier[fIdx];
+
+        if (degree[cur.r][cur.c] >= 3) {
+          frontier.splice(fIdx, 1);
+          continue;
+        }
+
+        var validNeighbors = [];
+        for (var d = 0; d < 4; d++) {
+          var nr = cur.r + DIRS[d].dr;
+          var nc = cur.c + DIRS[d].dc;
+          if (nr >= 0 && nr < rCount && nc >= 0 && nc < cCount && !visited[nr][nc]) {
+            validNeighbors.push({ r: nr, c: nc, dir: DIRS[d] });
+          }
+        }
+
+        if (validNeighbors.length === 0) {
+          frontier.splice(fIdx, 1);
+          continue;
+        }
+
+        var chosen = validNeighbors[Math.floor(Math.random() * validNeighbors.length)];
+        var nCell = chosen;
+        var dirInfo = chosen.dir;
+
+        // 연결 체결
+        grid[cur.r][cur.c] |= dirInfo.bit;
+        grid[nCell.r][nCell.c] |= dirInfo.opp;
+        degree[cur.r][cur.c]++;
+        degree[nCell.r][nCell.c]++;
+        visited[nCell.r][nCell.c] = true;
+        visitedCount++;
+
+        frontier.push({ r: nCell.r, c: nCell.c });
+        if (degree[cur.r][cur.c] >= 3) {
+          frontier.splice(fIdx, 1);
+        }
+      }
+
+      if (visitedCount === totalCells) {
+        var leaves = [];
+        for (var r2 = 0; r2 < rCount; r2++) {
+          for (var c2 = 0; c2 < cCount; c2++) {
+            if (degree[r2][c2] === 1) {
+              leaves.push({ r: r2, c: c2 });
+            }
+          }
+        }
+
+        // 끝 노드가 최소 2개 이상이면 유효
+        if (leaves.length >= 2) {
+          // 외곽 쪽 리프를 샘으로 선호
+          var outerLeaves = leaves.filter(function (l) {
+            return l.r === 0 || l.r === rCount - 1 || l.c === 0 || l.c === cCount - 1;
+          });
+          var src = outerLeaves.length > 0
+            ? outerLeaves[Math.floor(Math.random() * outerLeaves.length)]
+            : leaves[0];
+
+          var houseList = leaves.filter(function (l) {
+            return l.r !== src.r || l.c !== src.c;
+          });
+
+          return {
+            grid: grid,
+            degree: degree,
+            source: src,
+            houses: houseList
+          };
+        }
+      }
+    }
+
+    // 백업: 기본 격자 트리
+    return createFallbackPuzzle(rCount, cCount);
+  }
+
+  function createFallbackPuzzle(rCount, cCount) {
+    var grid = [];
+    var degree = [];
+    for (var r = 0; r < rCount; r++) {
+      grid[r] = [];
+      degree[r] = [];
+      for (var c = 0; c < cCount; c++) {
+        grid[r][c] = 0;
+        degree[r][c] = 0;
+      }
+    }
+    // 지그재그 사펜틴 경로로 모든 셀을 안전하게 연결
+    for (var r = 0; r < rCount; r++) {
+      for (var c = 0; c < cCount; c++) {
+        if (r % 2 === 0) {
+          if (c < cCount - 1) {
+            grid[r][c] |= EAST;
+            grid[r][c + 1] |= WEST;
+          } else if (r < rCount - 1) {
+            grid[r][c] |= SOUTH;
+            grid[r + 1][c] |= NORTH;
+          }
+        } else {
+          if (c > 0) {
+            grid[r][c] |= WEST;
+            grid[r][c - 1] |= EAST;
+          } else if (r < rCount - 1) {
+            grid[r][c] |= SOUTH;
+            grid[r + 1][c] |= NORTH;
+          }
+        }
+      }
+    }
+    for (var r2 = 0; r2 < rCount; r2++) {
+      for (var c2 = 0; c2 < cCount; c2++) {
+        var cnt = 0;
+        if (grid[r2][c2] & NORTH) cnt++;
+        if (grid[r2][c2] & EAST)  cnt++;
+        if (grid[r2][c2] & SOUTH) cnt++;
+        if (grid[r2][c2] & WEST)  cnt++;
+        degree[r2][c2] = cnt;
+      }
+    }
+    var src = { r: 0, c: 0 };
+    var endR = rCount - 1;
+    var endC = (rCount % 2 === 1) ? (cCount - 1) : 0;
+    var houseList = [{ r: endR, c: endC }];
+    return {
+      grid: grid,
+      degree: degree,
+      source: src,
+      houses: houseList
+    };
+  }
+
+  // 판 초기화 및 무작위 회전
+  function setupNewBoard() {
+    puzzle = generatePuzzle(rows, cols);
+    currentMask = [];
+    targetRotation = [];
+    animRotation = [];
+
+    for (var r = 0; r < rows; r++) {
+      currentMask[r] = [];
+      targetRotation[r] = [];
+      animRotation[r] = [];
+      for (var c = 0; c < cols; c++) {
+        var orig = puzzle.grid[r][c];
+        // 1~3번 90도 회전
+        var rotCount = Math.floor(Math.random() * 3) + 1;
+        // 직선(대향 2포트)은 180도 회전 시 모양이 같으므로 1회 또는 3회 회전 보장
+        if ((orig === (NORTH | SOUTH) || orig === (EAST | WEST)) && rotCount === 2) {
+          rotCount = 1;
+        }
+        var m = orig;
+        for (var k = 0; k < rotCount; k++) {
+          m = rotateMask(m);
+        }
+        currentMask[r][c] = m;
+        targetRotation[r][c] = rotCount * 90;
+        animRotation[r][c] = rotCount * 90;
+      }
+    }
+
+    // 만에 하나 처음부터 풀려있는 경우 방지
+    var initialFlow = computeFlow();
+    if (initialFlow.isClear) {
+      // 0,0 셀을 90도 추가 회전
+      currentMask[0][0] = rotateMask(currentMask[0][0]);
+      targetRotation[0][0] += 90;
+      animRotation[0][0] += 90;
+    }
+  }
+
+  // 물 흐름 및 누수 계산
+  function computeFlow() {
+    var flow = [];
+    var leaks = [];
+    for (var r = 0; r < rows; r++) {
+      flow[r] = [];
+      leaks[r] = [];
+      for (var c = 0; c < cols; c++) {
+        flow[r][c] = false;
+        leaks[r][c] = 0;
+      }
+    }
+
+    if (!puzzle) {
+      return { flow: flow, leaks: leaks, connectedHouses: 0, totalHouses: 0, totalLeaks: 0, isClear: false };
+    }
+
+    var src = puzzle.source;
+    var queue = [{ r: src.r, c: src.c }];
+    flow[src.r][src.c] = true;
+
+    while (queue.length > 0) {
+      var cur = queue.shift();
+      var cr = cur.r, cc = cur.c;
+      var cMask = currentMask[cr][cc];
+
+      for (var d = 0; d < 4; d++) {
+        var bit = DIRS[d].bit;
+        if (cMask & bit) {
+          var nr = cr + DIRS[d].dr;
+          var nc = cc + DIRS[d].dc;
+          if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) {
+            // 외벽으로 열림 -> 누수
+            leaks[cr][cc] |= bit;
+          } else {
+            var opp = DIRS[d].opp;
+            var nMask = currentMask[nr][nc];
+            if (nMask & opp) {
+              // 완벽하게 맞물림 -> 물 전달
+              if (!flow[nr][nc]) {
+                flow[nr][nc] = true;
+                queue.push({ r: nr, c: nc });
+              }
+            } else {
+              // 상대 파이프가 닫혀 있음 -> 누수
+              leaks[cr][cc] |= bit;
+            }
+          }
+        }
+      }
+    }
+
+    var connectedHouses = 0;
+    for (var h = 0; h < puzzle.houses.length; h++) {
+      var hPos = puzzle.houses[h];
+      if (flow[hPos.r][hPos.c]) {
+        connectedHouses++;
+      }
+    }
+
+    var totalLeaks = 0;
+    var allCellsFilled = true;
+    for (var r2 = 0; r2 < rows; r2++) {
+      for (var c2 = 0; c2 < cols; c2++) {
+        if (flow[r2][c2]) {
+          if (leaks[r2][c2] > 0) {
+            for (var d2 = 0; d2 < 4; d2++) {
+              if (leaks[r2][c2] & DIRS[d2].bit) totalLeaks++;
+            }
+          }
+        } else {
+          allCellsFilled = false;
+        }
+      }
+    }
+
+    var isClear = (connectedHouses === puzzle.houses.length) && (totalLeaks === 0) && allCellsFilled;
+
+    return {
+      flow: flow,
+      leaks: leaks,
+      connectedHouses: connectedHouses,
+      totalHouses: puzzle.houses.length,
+      totalLeaks: totalLeaks,
+      allFilled: allCellsFilled,
+      isClear: isClear
+    };
+  }
+
+  // 게임 시작 (새 게임 또는 다음 판)
+  function startGame(keepStreak) {
+    if (!keepStreak) {
+      totalScore = 0;
+      clearedRounds = 0;
+    }
+    elapsedSeconds = 0;
+    if (timerInterval) clearInterval(timerInterval);
+
+    setupNewBoard();
+    gameState = 'playing';
+    overlayBox.style.display = 'none';
+    overlayScoreBox.style.display = 'none';
+    btnOverlayRank.style.display = 'none';
+
+    startTime = Date.now();
+    timerInterval = setInterval(function () {
+      if (gameState === 'playing') {
+        elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+        updateStatusDisplay();
+      }
+    }, 1000);
+
+    var res = computeFlow();
+    statusTarget.textContent = '집 연결 ' + res.connectedHouses + '/' + res.totalHouses;
+    updateStatusDisplay();
+    render();
+  }
+
+  // 레벨 변경
+  function setLevel(lvl) {
+    if (lvl === currentLevel) return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_pipe-connect_level', currentLevel);
+    } catch (e) {}
+    updateLevelGridSize();
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    resetToReady();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  function resetToReady() {
+    if (timerInterval) clearInterval(timerInterval);
+    gameState = 'ready';
+    elapsedSeconds = 0;
+    totalScore = 0;
+    clearedRounds = 0;
+    setupNewBoard();
+
+    overlayBox.style.display = 'flex';
+    overlayTitle.textContent = '파이프 잇기';
+    updateOverlayDesc();
+    overlayScoreBox.style.display = 'none';
+    btnOverlayRank.style.display = 'none';
+    btnStartGame.textContent = '시작하기';
+
+    updateStatusDisplay();
+    var res = computeFlow();
+    statusTarget.textContent = '집 연결 ' + res.connectedHouses + '/' + res.totalHouses;
+    render();
+  }
+
+  // 클리어 처리
+  function handleClear() {
+    gameState = 'clear';
+    if (timerInterval) clearInterval(timerInterval);
+    playSound('clear');
+
+    var multiplier = (currentLevel === 'easy') ? 1 : ((currentLevel === 'normal') ? 2 : 3);
+    var roundScore = Math.max(100, (1500 - elapsedSeconds) * multiplier);
+    totalScore = Math.min(99999999, totalScore + roundScore);
+    clearedRounds++;
+
+    // 최고 기록 저장 (상한 99999999)
+    try {
+      var key = 'zw_pipe-connect_best_' + currentLevel;
+      var curBest = parseInt(localStorage.getItem(key), 10) || 0;
+      if (totalScore > curBest) {
+        var clamped = Math.min(99999999, totalScore);
+        localStorage.setItem(key, String(clamped));
+        if (currentLevel === 'easy') bestEasy = clamped;
+        else if (currentLevel === 'normal') bestNormal = clamped;
+        else bestHard = clamped;
+      }
+    } catch (e) {}
+
+    updateStatusDisplay();
+    render();
+
+    // 결과 덮개 표시
+    setTimeout(function () {
+      overlayTitle.textContent = '🎉 연결 성공!';
+      overlayDesc.innerHTML = '모든 집에 시원한 물이 닿았어요!<br>다음 판을 이어서 풀면 점수가 누적됩니다.';
+      ovTime.textContent = elapsedSeconds + '초';
+      ovRoundScore.textContent = '+' + fmtScore(roundScore) + '점';
+      ovTotalScore.textContent = fmtScore(totalScore) + '점';
+
+      overlayScoreBox.style.display = 'block';
+      btnStartGame.textContent = '다음 판 계속하기';
+      btnOverlayRank.style.display = 'block';
+      overlayBox.style.display = 'flex';
+    }, 450);
+  }
+
+  // 셀 클릭/터치 시 90도 회전
+  function handleCellClick(r, c) {
+    if (gameState !== 'playing') return;
+    if (r < 0 || r >= rows || c < 0 || c >= cols) return;
+
+    currentMask[r][c] = rotateMask(currentMask[r][c]);
+    targetRotation[r][c] += 90;
+    playSound('rotate');
+
+    var flowResult = computeFlow();
+    statusTarget.textContent = '집 연결 ' + flowResult.connectedHouses + '/' + flowResult.totalHouses;
+
+    if (flowResult.isClear) {
+      handleClear();
+    } else {
+      render();
+    }
+  }
+
+  // 캔버스 좌표 계산
+  function handleInput(e) {
+    if (gameState !== 'playing') return;
+    var rect = canvas.getBoundingClientRect();
+    var clientX = e.clientX;
+    var clientY = e.clientY;
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    }
+
+    var px = clientX - rect.left;
+    var py = clientY - rect.top;
+    var cellW = rect.width / cols;
+    var cellH = rect.height / rows;
+
+    var c = Math.floor(px / cellW);
+    var r = Math.floor(py / cellH);
+
+    handleCellClick(r, c);
+  }
+
+  canvas.addEventListener('click', handleInput);
+  canvas.addEventListener('touchend', function (e) {
+    e.preventDefault();
+    handleInput(e);
+  }, { passive: false });
+
+  // 캔버스 렌더링
+  function render() {
+    var rect = canvas.getBoundingClientRect();
+    var size = rect.width || 420;
+    var dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.round(size * dpr);
+    canvas.height = Math.round(size * dpr);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+
+    ctx.clearRect(0, 0, size, size);
+
+    // 바탕 배경
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, size, size);
+
+    var cellW = size / cols;
+    var cellH = size / rows;
+    var flowData = computeFlow();
+    var flowGrid = flowData.flow;
+    var leakGrid = flowData.leaks;
+
+    var pipeThick = cellW * 0.28;
+    var waterThick = cellW * 0.16;
+
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols; c++) {
+        var cx = c * cellW + cellW / 2;
+        var cy = r * cellH + cellH / 2;
+        var isFlow = flowGrid[r][c];
+        var mask = currentMask[r][c];
+        var leak = leakGrid[r][c];
+
+        var isSrc = (puzzle && puzzle.source.r === r && puzzle.source.c === c);
+        var isHse = false;
+        if (puzzle) {
+          for (var h = 0; h < puzzle.houses.length; h++) {
+            if (puzzle.houses[h].r === r && puzzle.houses[h].c === c) {
+              isHse = true;
+              break;
+            }
+          }
+        }
+
+        // 1. 셀 타일 배경
+        ctx.save();
+        ctx.fillStyle = isFlow ? '#132338' : '#1e293b';
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 1;
+        var pad = Math.max(1.5, cellW * 0.04);
+        roundRect(ctx, c * cellW + pad, r * cellH + pad, cellW - pad * 2, cellH - pad * 2, 8);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        // 2. 파이프 그리기
+        ctx.save();
+        var outerColor = isFlow ? '#0284c7' : '#475569';
+        var innerColor = isFlow ? '#38bdf8' : '#334155';
+
+        // 외벽 먼저 그리기
+        ctx.fillStyle = outerColor;
+        drawPipeSegments(ctx, cx, cy, cellW, cellH, mask, pipeThick);
+        // 중심 허브 외벽
+        ctx.beginPath();
+        ctx.arc(cx, cy, pipeThick / 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 내부 수로 그리기
+        ctx.fillStyle = innerColor;
+        drawPipeSegments(ctx, cx, cy, cellW, cellH, mask, waterThick);
+        // 중심 수로 허브
+        ctx.beginPath();
+        ctx.arc(cx, cy, waterThick / 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 물 찬 파이프 하이라이트 중심선
+        if (isFlow) {
+          ctx.fillStyle = '#e0f2fe';
+          drawPipeSegments(ctx, cx, cy, cellW, cellH, mask, Math.max(1.5, waterThick * 0.3));
+          ctx.beginPath();
+          ctx.arc(cx, cy, Math.max(2, waterThick * 0.3), 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 3. 누수 경고 (물이 흐르는데 상대방이 닫혔거나 벽일 때)
+        if (isFlow && leak > 0) {
+          ctx.fillStyle = '#ef4444';
+          ctx.strokeStyle = '#fca5a5';
+          ctx.lineWidth = 1;
+          for (var d = 0; d < 4; d++) {
+            if (leak & DIRS[d].bit) {
+              var lx = cx + DIRS[d].dc * (cellW / 2 - 4);
+              var ly = cy + DIRS[d].dr * (cellH / 2 - 4);
+              ctx.beginPath();
+              ctx.arc(lx, ly, Math.max(3, cellW * 0.08), 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+            }
+          }
+        }
+
+        // 4. 특별 셀 마커 (샘 / 집)
+        if (isSrc) {
+          // 샘 (물 나오는 곳): 동심 펌프 & 물방울 아이콘
+          ctx.fillStyle = '#0284c7';
+          ctx.beginPath();
+          ctx.arc(cx, cy, cellW * 0.28, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#38bdf8';
+          ctx.beginPath();
+          ctx.arc(cx, cy, cellW * 0.19, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 흰색 중앙 물방울 심볼
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(cx, cy, cellW * 0.09, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 텍스트 라벨 (공간 충분할 때)
+          if (cellW >= 50) {
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold ' + Math.round(cellW * 0.22) + 'px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('샘', cx, cy + 1);
+          }
+        } else if (isHse) {
+          // 집 (도착점): 집 형태 그래픽
+          var hw = cellW * 0.44;
+          var hh = cellH * 0.44;
+          var hx = cx - hw / 2;
+          var hy = cy - hh / 2;
+
+          // 지붕 (삼각형)
+          ctx.fillStyle = isFlow ? '#f59e0b' : '#64748b';
+          ctx.beginPath();
+          ctx.moveTo(cx, hy - hh * 0.2);
+          ctx.lineTo(cx - hw * 0.55, hy + hh * 0.35);
+          ctx.lineTo(cx + hw * 0.55, hy + hh * 0.35);
+          ctx.closePath();
+          ctx.fill();
+
+          // 집 본체 (사각형)
+          ctx.fillStyle = isFlow ? '#fbbf24' : '#475569';
+          ctx.fillRect(cx - hw * 0.42, hy + hh * 0.35, hw * 0.84, hh * 0.65);
+
+          // 문/창문
+          ctx.fillStyle = isFlow ? '#ffffff' : '#334155';
+          ctx.fillRect(cx - hw * 0.18, hy + hh * 0.55, hw * 0.36, hh * 0.45);
+        }
+
+        ctx.restore();
+      }
+    }
+  }
+
+  // 사각형 파이프 가지 그리기
+  function drawPipeSegments(ctx, cx, cy, cellW, cellH, mask, thick) {
+    var half = thick / 2;
+    if (mask & NORTH) {
+      ctx.fillRect(cx - half, cy - cellH / 2, thick, cellH / 2);
+    }
+    if (mask & SOUTH) {
+      ctx.fillRect(cx - half, cy, thick, cellH / 2);
+    }
+    if (mask & WEST) {
+      ctx.fillRect(cx - cellW / 2, cy - half, cellW / 2, thick);
+    }
+    if (mask & EAST) {
+      ctx.fillRect(cx, cy - half, cellW / 2, thick);
+    }
+  }
+
+  // 둥근 사각형 헬퍼
+  function roundRect(ctx, x, y, w, h, r) {
+    if (w < 2 * r) r = w / 2;
+    if (h < 2 * r) r = h / 2;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  // 버튼 이벤트 연결
+  btnStartGame.addEventListener('click', function () {
+    if (gameState === 'clear') {
+      startGame(true); // 판 점수 누적 유지
+    } else {
+      startGame(false);
+    }
+  });
+
+  btnRestart.addEventListener('click', function () {
+    resetToReady();
+  });
+
+  // 순위표 올리기 단추 (#btnOverlayRank)
+  btnOverlayRank.addEventListener('click', function () {
+    var rk = document.querySelector('.zw-rank');
+    if (rk) {
+      rk.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      rk.classList.add('flash');
+      setTimeout(function () { rk.classList.remove('flash'); }, 1800);
+      var nameInp = document.querySelector('.rk-name');
+      if (nameInp) {
+        setTimeout(function () {
+          try { nameInp.focus({ preventScroll: true }); } catch (e) {}
+        }, 450);
+      }
+    } else {
+      var jump = document.querySelector('.zw-rk-jump');
+      if (jump) jump.click();
+    }
+  });
+
+  window.addEventListener('resize', function () {
+    render();
+  });
+
+  // 초기화 실행
+  loadStorage();
+  resetToReady();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/four-in-row/">4목 맞추기</a> — 컴퓨터와 4개 먼저 잇기</li><li><a href="/water-sort/">물 정렬</a> — 색깔별로 물을 병에 모으기</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/klondike-solitaire/">솔리테어</a> — 카드를 순서대로 쌓아 완성하기</li><li><a href="/box-push/">상자 밀기</a> — 상자를 목표 칸으로 밀기</li><li><a href="/pipe-connect/">파이프 잇기</a> — 돌려서 물길 연결하기</li><li><a href="/checkers-8/">체커</a> — 컴퓨터와 체커 한 판</li><li><a href="/fleet-hunt/">함대 맞히기</a> — 좌표를 찍어 상대 함대 찾기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

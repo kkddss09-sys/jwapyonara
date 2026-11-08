@@ -1,0 +1,1579 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>함대 맞히기 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 무료 함대 맞히기 게임. 10×10 바다에 숨은 컴퓨터 함대를 먼저 찾아 격침해 보세요. 쉬움, 보통, 어려움 3단계 난이도를 지원합니다.">
+<link rel="canonical" href="https://jwapyonara.com/fleet-hunt/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="함대 맞히기 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 하는 무료 함대 맞히기 게임. 컴퓨터와 두뇌 싸움, 10×10 바다에서 상대 함대를 모두 찾아 격침해 보세요.">
+<meta property="og:url" content="https://jwapyonara.com/fleet-hunt/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "함대 맞히기",
+  "url": "https://jwapyonara.com/fleet-hunt/",
+  "description": "가입 없이 바로 즐기는 무료 함대 맞히기 게임",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All"
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 표시 바 */
+.fh-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1c2538;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  gap: 6px;
+}
+.fh-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1.3;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fh-status-mid {
+  color: #ffffff;
+  flex: 0.9;
+  text-align: center;
+  white-space: nowrap;
+}
+.fh-status-right {
+  color: #9cb3d3;
+  flex: 1.2;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.fh-best-line {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+  text-align: right;
+  margin-bottom: 10px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 함대 생존 상태 게이지 */
+.fh-gauge-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  background: var(--fill, #f2f2f7);
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 12px;
+}
+[data-theme="dark"] .fh-gauge-box {
+  background: #252a38;
+}
+.fh-gauge-side {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.fh-gauge-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--sub);
+  display: flex;
+  justify-content: space-between;
+}
+.fh-ships-list {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.fh-ship-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  padding: 2px 5px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  transition: opacity .2s, border-color .2s;
+}
+.fh-ship-pill.sunk {
+  opacity: 0.35;
+  text-decoration: line-through;
+  border-color: #d92d20;
+  color: #d92d20;
+}
+.fh-ship-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--red);
+}
+.fh-ship-pill.sunk .fh-ship-dot {
+  background: #d92d20;
+}
+
+/* 게임 판 영역 */
+.fh-boards-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+/* 메인 사격 해역 (적 바다) */
+.fh-board-section {
+  position: relative;
+  background: #0f172a;
+  border-radius: 16px;
+  padding: 10px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.fh-board-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #e2e8f0;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+.fh-board-head h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fh-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(229, 72, 77, 0.2);
+  color: #ff6b6b;
+  border: 1px solid rgba(229, 72, 77, 0.35);
+}
+.fh-badge.my-badge {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+/* 10x10 격자 */
+.fh-grid-container {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  gap: 2px;
+  background: #1e293b;
+  padding: 2px;
+  border-radius: 10px;
+  border: 1.5px solid #334155;
+  box-sizing: border-box;
+}
+.fh-cell {
+  position: relative;
+  background: #0f172a;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .12s, transform .08s;
+  touch-action: manipulation;
+  overflow: hidden;
+}
+.fh-cell:active {
+  transform: scale(0.92);
+}
+/* 조준 상태 */
+.fh-cell.target-locked {
+  background: rgba(255, 214, 10, 0.28);
+  outline: 2px solid #ffd60a;
+  outline-offset: -2px;
+  z-index: 2;
+}
+/* 빗맞음 (Miss) */
+.fh-cell.miss {
+  background: #172554;
+  cursor: default;
+}
+.fh-cell.miss::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #93c5fd;
+  opacity: 0.85;
+}
+/* 명중 (Hit) */
+.fh-cell.hit {
+  background: #7f1d1d;
+  cursor: default;
+}
+/* 격침 (Sunk) */
+.fh-cell.sunk-ship {
+  background: #450a0a;
+}
+
+/* 아군 바다 (하단 미니 그리드) */
+.fh-my-board-box {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px;
+}
+.fh-my-board-box .fh-grid-container {
+  max-width: 260px;
+  background: #1e293b;
+  border-color: #334155;
+  margin-top: 6px;
+}
+.fh-my-board-box .fh-cell {
+  cursor: default;
+}
+.fh-my-board-box .fh-cell.my-ship {
+  background: #0284c7;
+  border: 1px solid #38bdf8;
+}
+.fh-my-board-box .fh-cell.my-ship.hit {
+  background: #dc2626;
+  border-color: #f87171;
+}
+
+/* 십자선 SVG, 불꽃 SVG, 물보라 SVG 등 */
+.fh-svg-icon {
+  width: 75%;
+  height: 75%;
+  display: block;
+  pointer-events: none;
+}
+
+/* 옵션 바 */
+.fh-options-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px 12px;
+  font-size: 14px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.fh-check-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+.fh-check-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--red);
+  cursor: pointer;
+}
+
+/* 제어 단추 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+  transition: opacity .15s, background .15s;
+}
+.btn-sub {
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+}
+.btn-sub:active {
+  background: var(--soft);
+}
+.btn-reset {
+  background: #1c2538;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #2b3954;
+}
+
+/* 게임 결과 오버레이 팝업 */
+.canvas-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.86);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+.overlay-card {
+  background: var(--card);
+  color: var(--ink);
+  width: 100%;
+  max-width: 360px;
+  border-radius: 20px;
+  padding: 24px 20px;
+  text-align: center;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line);
+}
+.overlay-card h2 {
+  font-size: 24px;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+.overlay-card h2.win-title {
+  color: var(--red);
+}
+.overlay-card h2.lose-title {
+  color: var(--sub);
+}
+.overlay-card p {
+  font-size: 14px;
+  color: var(--sub);
+  margin: 0 0 18px;
+  line-height: 1.45;
+}
+.overlay-stats {
+  background: var(--fill, #f2f2f7);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  display: grid;
+  gap: 8px;
+}
+[data-theme="dark"] .overlay-stats {
+  background: #252a38;
+}
+.overlay-stats div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+.overlay-stats span {
+  color: var(--sub);
+}
+.overlay-stats b {
+  font-weight: 800;
+  color: var(--ink);
+}
+.overlay-stats b.hl {
+  color: var(--red);
+  font-size: 16px;
+}
+.overlay-btns {
+  display: grid;
+  gap: 8px;
+}
+.btn-overlay-rank {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  background: var(--red);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 13px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.btn-overlay-rank:active {
+  opacity: 0.88;
+}
+.btn-overlay-restart {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  background: var(--fill, #f2f2f7);
+  border: 1.5px solid var(--line);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 12px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.btn-overlay-restart:active {
+  background: var(--soft);
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>함대 맞히기</h1>
+  <p class="lead">10×10 바다에 숨은 컴퓨터 함대를 먼저 찾아 격침하세요. 가입 없이 바로 즐겨요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="fh-status-bar">
+      <div class="fh-status-left" id="statusTurn">내 차례 (적 해역 조준)</div>
+      <div class="fh-status-mid" id="statusShots">포격 0회</div>
+      <div class="fh-status-right" id="statusRecord">0승 0패</div>
+    </div>
+    <div class="fh-best-line" id="statusBest"></div>
+
+    <!-- 함대 현황 바 -->
+    <div class="fh-gauge-box">
+      <div class="fh-gauge-side">
+        <div class="fh-gauge-title"><span>적 함대 현황</span><b id="txtEnemyRemaining">5척 생존</b></div>
+        <div class="fh-ships-list" id="enemyShipsList">
+          <span class="fh-ship-pill" id="pill-enemy-5"><i class="fh-ship-dot"></i>5칸</span>
+          <span class="fh-ship-pill" id="pill-enemy-4"><i class="fh-ship-dot"></i>4칸</span>
+          <span class="fh-ship-pill" id="pill-enemy-3a"><i class="fh-ship-dot"></i>3칸</span>
+          <span class="fh-ship-pill" id="pill-enemy-3b"><i class="fh-ship-dot"></i>3칸</span>
+          <span class="fh-ship-pill" id="pill-enemy-2"><i class="fh-ship-dot"></i>2칸</span>
+        </div>
+      </div>
+      <div class="fh-gauge-side">
+        <div class="fh-gauge-title"><span>아군 함대 현황</span><b id="txtMyRemaining">5척 생존</b></div>
+        <div class="fh-ships-list" id="myShipsList">
+          <span class="fh-ship-pill" id="pill-my-5"><i class="fh-ship-dot"></i>항공모함(5)</span>
+          <span class="fh-ship-pill" id="pill-my-4"><i class="fh-ship-dot"></i>전함(4)</span>
+          <span class="fh-ship-pill" id="pill-my-3a"><i class="fh-ship-dot"></i>순양함(3)</span>
+          <span class="fh-ship-pill" id="pill-my-3b"><i class="fh-ship-dot"></i>잠수함(3)</span>
+          <span class="fh-ship-pill" id="pill-my-2"><i class="fh-ship-dot"></i>구축함(2)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 메인 사격 해역 (적 바다) -->
+    <div class="fh-boards-wrap">
+      <div class="fh-board-section">
+        <div class="fh-board-head">
+          <h3>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3v4M12 17v4M3 12h4M17 12h4"></path></svg>
+            적 해역 (사격 목표)
+          </h3>
+          <span class="fh-badge" id="radarTip">칸을 터치해 조준</span>
+        </div>
+        <div class="fh-grid-container" id="radarGrid" role="grid" aria-label="적 해역 10x10 격자"></div>
+      </div>
+
+      <!-- 아군 바다 (내 함대 배치 및 피격 상황) -->
+      <div class="fh-my-board-box">
+        <div class="fh-board-head" style="color:var(--ink);">
+          <h3 style="font-size:14px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            아군 함대 배치 및 피격 현황
+          </h3>
+          <span class="fh-badge my-badge">내 바다</span>
+        </div>
+        <div class="fh-grid-container" id="fleetGrid" role="grid" aria-label="아군 해역 10x10 격자"></div>
+      </div>
+    </div>
+
+    <!-- 조작 옵션 -->
+    <div class="fh-options-bar">
+      <label class="fh-check-label">
+        <input type="checkbox" id="chkInstant">
+        <span>한 번에 쏘기 (즉시 발사)</span>
+      </label>
+      <label class="fh-check-label">
+        <input type="checkbox" id="chkSound" checked>
+        <span>효과음 켜기</span>
+      </label>
+    </div>
+
+    <!-- 버튼 바 -->
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-sub" id="btnRedeploy">함대 재배치</button>
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:8px;">
+      💡 적 해역 칸을 한 번 누르면 조준되고, 다시 누르면 포격합니다. 빠른 진행은 '한 번에 쏘기'를 켜세요.
+    </p>
+  </section>
+
+  <p class="note">내 함대와 컴퓨터 함대는 모두 무작위로 배치되며 기기 안에서만 실행됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>게임 규칙:</b> 10×10 바다에 숨어 있는 상대 함선 5척(길이 5·4·3·3·2)을 번갈아 포격하여 먼저 모두 격침하면 승리합니다.</li>
+      <li><b>포격 방법:</b> 적 해역의 미사격 칸을 터치하면 노란색 조준선이 뜨고, 한 번 더 터치하면 포격합니다. '한 번에 쏘기'를 켜면 터치 즉시 발사됩니다.</li>
+      <li><b>명중과 격침:</b> 배가 있는 칸은 붉은 폭발(Hit), 빈 바다는 푸른 물보라(Miss)로 표시됩니다. 함선의 모든 칸을 맞히면 해당 함선이 침몰합니다.</li>
+      <li><b>점수 계산:</b> 이기면 (100 − 포격 횟수) × 난이도 배수 × 10점이 주어지며(최소 10점), 적은 횟수로 빠르게 격침할수록 높은 점수를 얻습니다. 지면 0점입니다.</li>
+      <li><b>난이도 배수:</b> 쉬움 1배, 보통 2배, 어려움 3배가 적용됩니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>쉬움·보통·어려움 중 원하는 단계를 고릅니다. 마음에 들지 않으면 '함대 재배치'로 아군 진형을 바꿀 수 있습니다.</li>
+      <li>적 해역 칸을 눌러 포격합니다. 내가 한 발 쏘면 컴퓨터도 아군 해역에 한 발을 쏩니다.</li>
+      <li>명중이 발생하면 그 칸의 상하좌우를 집중적으로 탐색하여 배의 전체 길이를 찾아내세요.</li>
+      <li>최소 포격 횟수로 상대 함대를 먼저 전멸시켜 순위표 최고 기록에 도전하세요!</li>
+    </ol>
+    <h2>난이도 안내</h2>
+    <dl>
+      <dt>쉬움 (Easy)</dt>
+      <dd>컴퓨터가 완전 무작위로 포격하므로 초보자도 쉽게 전략을 익히며 승리할 수 있습니다.</dd>
+      <dt>보통 (Normal)</dt>
+      <dd>평소에는 격자 탐색을 하다가 명중이 나오면 주변 상하좌우를 집요하게 추적하여 침몰시킵니다.</dd>
+      <dt>어려움 (Hard)</dt>
+      <dd>남은 아군 함선들의 길이와 격자 공간의 확률 밀도를 실시간으로 계산하여 가장 치명적인 자리를 찾아 포격합니다.</dd>
+    </dl>
+    <h2>승리 꿀팁</h2>
+    <p>가장 작은 구축함도 2칸을 차지하므로, 체스판처럼 건너뛰며(패리티 탐색) 쏘면 최소 횟수로 모든 배의 흔적을 찾아낼 수 있습니다.</p>
+  </section>
+</main>
+
+<!-- 게임 종료 결과 모달 팝업 -->
+<div class="canvas-overlay" id="overlayBox" style="display:none;">
+  <div class="overlay-card">
+    <h2 id="overlayTitle" class="win-title">승리했습니다!</h2>
+    <p id="overlayDesc">적 함대 5척을 모두 격침했습니다.</p>
+    <div class="overlay-stats">
+      <div><span>총 포격 횟수</span><b id="statShots">0회</b></div>
+      <div><span>사격 명중률</span><b id="statAccuracy">0%</b></div>
+      <div><span>난이도 배수</span><b id="statMultiplier">1배</b></div>
+      <div><span>최종 점수</span><b class="hl" id="statScore">0점</b></div>
+    </div>
+    <div class="overlay-btns">
+      <button type="button" class="btn-overlay-rank" id="btnOverlayRank">🏆 순위표 올리기</button>
+      <button type="button" class="btn-overlay-restart" id="btnOverlayRestart">한 판 더 하기</button>
+    </div>
+  </div>
+</div>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // DOM 요소
+  var radarGrid = document.getElementById('radarGrid');
+  var fleetGrid = document.getElementById('fleetGrid');
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var btnRestart = document.getElementById('btnRestart');
+  var btnRedeploy = document.getElementById('btnRedeploy');
+  var chkInstant = document.getElementById('chkInstant');
+  var chkSound = document.getElementById('chkSound');
+
+  var statusTurn = document.getElementById('statusTurn');
+  var statusShots = document.getElementById('statusShots');
+  var statusRecord = document.getElementById('statusRecord');
+  var statusBest = document.getElementById('statusBest');
+  var radarTip = document.getElementById('radarTip');
+
+  var txtEnemyRemaining = document.getElementById('txtEnemyRemaining');
+  var txtMyRemaining = document.getElementById('txtMyRemaining');
+
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var statShots = document.getElementById('statShots');
+  var statAccuracy = document.getElementById('statAccuracy');
+  var statMultiplier = document.getElementById('statMultiplier');
+  var statScore = document.getElementById('statScore');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnOverlayRestart = document.getElementById('btnOverlayRestart');
+
+  // SVG 도형 마크들 (외부 이미지·이모지 배제)
+  var SVG_HIT = '<svg class="fh-svg-icon" viewBox="0 0 24 24" fill="none"><path d="M12 2L14.5 8.5L21.5 9.5L16.5 14.5L18 21.5L12 17.5L6 21.5L7.5 14.5L2.5 9.5L9.5 8.5L12 2Z" fill="#ff4d4f" stroke="#fff" stroke-width="1.2"/></svg>';
+  var SVG_TARGET = '<svg class="fh-svg-icon" viewBox="0 0 24 24" fill="none" stroke="#ffd60a" stroke-width="2.5"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>';
+  var SVG_SUNK = '<svg class="fh-svg-icon" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+
+  // 함선 규격 정의 (5척, 총 17칸)
+  var SHIP_DEFS = [
+    { key: '5', name: '항공모함', size: 5 },
+    { key: '4', name: '전함', size: 4 },
+    { key: '3a', name: '순양함', size: 3 },
+    { key: '3b', name: '잠수함', size: 3 },
+    { key: '2', name: '구축함', size: 2 }
+  ];
+  var TOTAL_HIT_TARGET = 17;
+
+  // 게임 상태 변수
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  var gameState = 'playing'; // 'playing', 'won', 'lost'
+  var isAiThinking = false;
+  var selectedTarget = null; // { r, c }
+  var humanShots = 0;
+  var humanHits = 0;
+  var aiShots = 0;
+  var aiHits = 0;
+
+  // 보드 데이터: 10×10 2차원 배열
+  // 0: 빈칸, 1: 배, 2: 빗맞음(Miss), 3: 명중(Hit)
+  var playerBoard = [];
+  var enemyBoard = [];
+  var playerShips = [];
+  var enemyShips = [];
+
+  // 컴퓨터 AI 추적용 상태
+  var aiTargetQueue = []; // 보통 난이도 명중 주변 큐
+  var aiHitStreak = [];   // 현재 격침되지 않은 명중 칸들 [{r, c}]
+
+  // 전적 및 최고 기록
+  var wins = 0;
+  var losses = 0;
+  var bestEasy = null;
+  var bestNormal = null;
+  var bestHard = null;
+
+  // -------------------------------------------------------------
+  // Web Audio 사운드 합성 (외부 오디오 파일 없음)
+  // -------------------------------------------------------------
+  var audioCtx = null;
+  function getAudioContext() {
+    if (!audioCtx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) audioCtx = new AC();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  function playSound(type) {
+    if (!chkSound.checked) return;
+    try {
+      var ctx = getAudioContext();
+      if (!ctx) return;
+      var now = ctx.currentTime;
+
+      if (type === 'fire') {
+        // 포격 발사음: 저음 쿵
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.18);
+        gain.gain.setValueAtTime(0.4, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } else if (type === 'miss') {
+        // 빗맞음: 물방울 퐁당
+        var oscM = ctx.createOscillator();
+        var gainM = ctx.createGain();
+        oscM.type = 'sine';
+        oscM.frequency.setValueAtTime(380, now);
+        oscM.frequency.exponentialRampToValueAtTime(160, now + 0.15);
+        gainM.gain.setValueAtTime(0.3, now);
+        gainM.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        oscM.connect(gainM);
+        gainM.connect(ctx.destination);
+        oscM.start(now);
+        oscM.stop(now + 0.15);
+      } else if (type === 'hit') {
+        // 명중: 파열 폭발음
+        var oscH = ctx.createOscillator();
+        var gainH = ctx.createGain();
+        oscH.type = 'sawtooth';
+        oscH.frequency.setValueAtTime(260, now);
+        oscH.frequency.exponentialRampToValueAtTime(45, now + 0.28);
+        gainH.gain.setValueAtTime(0.5, now);
+        gainH.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
+        oscH.connect(gainH);
+        gainH.connect(ctx.destination);
+        oscH.start(now);
+        oscH.stop(now + 0.28);
+      } else if (type === 'sink') {
+        // 격침: 강렬한 이중 폭발
+        var oscS1 = ctx.createOscillator();
+        var oscS2 = ctx.createOscillator();
+        var gainS = ctx.createGain();
+        oscS1.type = 'sawtooth';
+        oscS2.type = 'square';
+        oscS1.frequency.setValueAtTime(180, now);
+        oscS1.frequency.exponentialRampToValueAtTime(30, now + 0.55);
+        oscS2.frequency.setValueAtTime(120, now);
+        oscS2.frequency.exponentialRampToValueAtTime(25, now + 0.55);
+        gainS.gain.setValueAtTime(0.6, now);
+        gainS.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
+        oscS1.connect(gainS);
+        oscS2.connect(gainS);
+        gainS.connect(ctx.destination);
+        oscS1.start(now);
+        oscS2.start(now);
+        oscS1.stop(now + 0.55);
+        oscS2.stop(now + 0.55);
+      } else if (type === 'win') {
+        // 승리 팡파르 (도-미-솔-도)
+        var notes = [261.63, 329.63, 392.00, 523.25];
+        notes.forEach(function (f, idx) {
+          var o = ctx.createOscillator();
+          var g = ctx.createGain();
+          var t = now + idx * 0.12;
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(f, t);
+          g.gain.setValueAtTime(0.35, t);
+          g.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start(t);
+          o.stop(t + 0.25);
+        });
+      } else if (type === 'lose') {
+        // 패배 징 (하강 톤)
+        var lNotes = [329.63, 293.66, 261.63, 196.00];
+        lNotes.forEach(function (f, idx) {
+          var o = ctx.createOscillator();
+          var g = ctx.createGain();
+          var t = now + idx * 0.15;
+          o.type = 'sine';
+          o.frequency.setValueAtTime(f, t);
+          g.gain.setValueAtTime(0.3, t);
+          g.gain.exponentialRampToValueAtTime(0.01, t + 0.3);
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start(t);
+          o.stop(t + 0.3);
+        });
+      }
+    } catch (e) {}
+  }
+
+  // -------------------------------------------------------------
+  // 보드 생성 및 함선 무작위 배치
+  // -------------------------------------------------------------
+  function createEmptyBoard() {
+    var b = [];
+    for (var r = 0; r < 10; r++) {
+      var row = [];
+      for (var c = 0; c < 10; c++) row.push(0);
+      b.push(row);
+    }
+    return b;
+  }
+
+  function placeShipsRandomly() {
+    var b = createEmptyBoard();
+    var ships = [];
+
+    for (var i = 0; i < SHIP_DEFS.length; i++) {
+      var def = SHIP_DEFS[i];
+      var placed = false;
+      var attempts = 0;
+
+      while (!placed && attempts < 200) {
+        attempts++;
+        var isVertical = Math.random() < 0.5;
+        var r = Math.floor(Math.random() * (isVertical ? (11 - def.size) : 10));
+        var c = Math.floor(Math.random() * (isVertical ? 10 : (11 - def.size)));
+
+        // 충돌 검사
+        var canPlace = true;
+        for (var l = 0; l < def.size; l++) {
+          var cr = isVertical ? r + l : r;
+          var cc = isVertical ? c : c + l;
+          if (b[cr][cc] !== 0) {
+            canPlace = false;
+            break;
+          }
+        }
+
+        if (canPlace) {
+          var coords = [];
+          for (var l2 = 0; l2 < def.size; l2++) {
+            var pr = isVertical ? r + l2 : r;
+            var pc = isVertical ? c : c + l2;
+            b[pr][pc] = 1;
+            coords.push({ r: pr, c: pc });
+          }
+          ships.push({
+            key: def.key,
+            name: def.name,
+            size: def.size,
+            coords: coords,
+            hits: 0,
+            sunk: false
+          });
+          placed = true;
+        }
+      }
+    }
+    return { board: b, ships: ships };
+  }
+
+  // -------------------------------------------------------------
+  // DOM 격자 생성 (초기 1회)
+  // -------------------------------------------------------------
+  function buildDOMGrids() {
+    radarGrid.innerHTML = '';
+    fleetGrid.innerHTML = '';
+
+    for (var r = 0; r < 10; r++) {
+      for (var c = 0; c < 10; c++) {
+        // 적 해역 사격 셀
+        var rCell = document.createElement('div');
+        rCell.className = 'fh-cell';
+        rCell.setAttribute('data-r', r);
+        rCell.setAttribute('data-c', c);
+        rCell.setAttribute('role', 'gridcell');
+        rCell.setAttribute('aria-label', (r + 1) + '행 ' + (c + 1) + '열');
+        radarGrid.appendChild(rCell);
+
+        // 아군 해역 셀
+        var fCell = document.createElement('div');
+        fCell.className = 'fh-cell';
+        fCell.setAttribute('data-r', r);
+        fCell.setAttribute('data-c', c);
+        fleetGrid.appendChild(fCell);
+      }
+    }
+  }
+
+  // -------------------------------------------------------------
+  // 화면 렌더링 갱신
+  // -------------------------------------------------------------
+  function renderBoards() {
+    // 1. 적 해역 렌더
+    var rCells = radarGrid.children;
+    for (var i = 0; i < rCells.length; i++) {
+      var cell = rCells[i];
+      var r = parseInt(cell.getAttribute('data-r'), 10);
+      var c = parseInt(cell.getAttribute('data-c'), 10);
+      var val = enemyBoard[r][c];
+
+      cell.className = 'fh-cell';
+      cell.innerHTML = '';
+
+      if (val === 2) {
+        cell.classList.add('miss');
+      } else if (val === 3) {
+        cell.classList.add('hit');
+        // 침몰한 배에 속해있는지 확인
+        var isShipSunk = false;
+        for (var s = 0; s < enemyShips.length; s++) {
+          var ship = enemyShips[s];
+          if (ship.sunk) {
+            for (var sc = 0; sc < ship.coords.length; sc++) {
+              if (ship.coords[sc].r === r && ship.coords[sc].c === c) {
+                isShipSunk = true;
+                break;
+              }
+            }
+          }
+          if (isShipSunk) break;
+        }
+        if (isShipSunk) {
+          cell.classList.add('sunk-ship');
+          cell.innerHTML = SVG_SUNK;
+        } else {
+          cell.innerHTML = SVG_HIT;
+        }
+      } else if (selectedTarget && selectedTarget.r === r && selectedTarget.c === c) {
+        cell.classList.add('target-locked');
+        cell.innerHTML = SVG_TARGET;
+      }
+    }
+
+    // 2. 아군 해역 렌더
+    var fCells = fleetGrid.children;
+    for (var j = 0; j < fCells.length; j++) {
+      var fCell = fCells[j];
+      var fr = parseInt(fCell.getAttribute('data-r'), 10);
+      var fc = parseInt(fCell.getAttribute('data-c'), 10);
+      var fVal = playerBoard[fr][fc];
+
+      fCell.className = 'fh-cell';
+      fCell.innerHTML = '';
+
+      // 아군 배 위치
+      var hasShip = false;
+      for (var ps = 0; ps < playerShips.length; ps++) {
+        var pShip = playerShips[ps];
+        for (var pc = 0; pc < pShip.coords.length; pc++) {
+          if (pShip.coords[pc].r === fr && pShip.coords[pc].c === fc) {
+            hasShip = true;
+            break;
+          }
+        }
+        if (hasShip) break;
+      }
+
+      if (hasShip) fCell.classList.add('my-ship');
+      if (fVal === 2) fCell.classList.add('miss');
+      if (fVal === 3) {
+        fCell.classList.add('hit');
+        fCell.innerHTML = SVG_HIT;
+      }
+    }
+
+    // 3. 함선 게이지 갱신
+    var enemyRemainingCount = 0;
+    for (var es = 0; es < enemyShips.length; es++) {
+      var eShip = enemyShips[es];
+      var ePill = document.getElementById('pill-enemy-' + eShip.key);
+      if (ePill) {
+        if (eShip.sunk) ePill.classList.add('sunk');
+        else {
+          ePill.classList.remove('sunk');
+          enemyRemainingCount++;
+        }
+      }
+    }
+    txtEnemyRemaining.textContent = enemyRemainingCount + '척 생존';
+
+    var myRemainingCount = 0;
+    for (var ms = 0; ms < playerShips.length; ms++) {
+      var mShip = playerShips[ms];
+      var mPill = document.getElementById('pill-my-' + mShip.key);
+      if (mPill) {
+        if (mShip.sunk) mPill.classList.add('sunk');
+        else {
+          mPill.classList.remove('sunk');
+          myRemainingCount++;
+        }
+      }
+    }
+    txtMyRemaining.textContent = myRemainingCount + '척 생존';
+
+    statusShots.textContent = '포격 ' + humanShots + '회';
+  }
+
+  // -------------------------------------------------------------
+  // 플레이어 포격 실행
+  // -------------------------------------------------------------
+  function handleRadarClick(e) {
+    if (gameState !== 'playing' || isAiThinking) return;
+
+    var targetEl = e.target.closest('.fh-cell');
+    if (!targetEl) return;
+
+    var r = parseInt(targetEl.getAttribute('data-r'), 10);
+    var c = parseInt(targetEl.getAttribute('data-c'), 10);
+    if (isNaN(r) || isNaN(c)) return;
+
+    // 이미 쏜 칸이면 무시
+    if (enemyBoard[r][c] === 2 || enemyBoard[r][c] === 3) return;
+
+    var isInstant = chkInstant.checked;
+
+    if (isInstant) {
+      selectedTarget = null;
+      executeHumanShot(r, c);
+    } else {
+      if (selectedTarget && selectedTarget.r === r && selectedTarget.c === c) {
+        selectedTarget = null;
+        executeHumanShot(r, c);
+      } else {
+        selectedTarget = { r: r, c: c };
+        radarTip.textContent = '한 번 더 누르면 발사!';
+        renderBoards();
+      }
+    }
+  }
+
+  function executeHumanShot(r, c) {
+    humanShots++;
+    radarTip.textContent = '칸을 터치해 조준';
+
+    var isHit = (enemyBoard[r][c] === 1);
+
+    if (isHit) {
+      enemyBoard[r][c] = 3;
+      humanHits++;
+      playSound('hit');
+
+      // 격침 여부 확인
+      var justSunkShip = null;
+      for (var i = 0; i < enemyShips.length; i++) {
+        var ship = enemyShips[i];
+        if (!ship.sunk) {
+          for (var k = 0; k < ship.coords.length; k++) {
+            if (ship.coords[k].r === r && ship.coords[k].c === c) {
+              ship.hits++;
+              if (ship.hits === ship.size) {
+                ship.sunk = true;
+                justSunkShip = ship;
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      if (justSunkShip) {
+        playSound('sink');
+        statusTurn.textContent = '적 ' + justSunkShip.name + '(' + justSunkShip.size + '칸) 격침!';
+      } else {
+        statusTurn.textContent = '적 함선 명중! 💥';
+      }
+
+      // 승리 확인 (총 17칸 모두 명중)
+      if (humanHits >= TOTAL_HIT_TARGET) {
+        handleGameOver('won');
+        return;
+      }
+    } else {
+      enemyBoard[r][c] = 2;
+      playSound('miss');
+      statusTurn.textContent = '빗맞았습니다 🌊';
+    }
+
+    renderBoards();
+
+    // 컴퓨터 턴으로 전환
+    isAiThinking = true;
+    setTimeout(function () {
+      if (gameState !== 'playing') return;
+      statusTurn.textContent = '컴퓨터 조준 중…';
+    }, 200);
+
+    setTimeout(function () {
+      if (gameState !== 'playing') return;
+      executeAiTurn();
+    }, 450);
+  }
+
+  // -------------------------------------------------------------
+  // 컴퓨터 AI 알고리즘
+  // -------------------------------------------------------------
+  function executeAiTurn() {
+    aiShots++;
+    var shot = chooseAiTarget();
+
+    var ar = shot.r;
+    var ac = shot.c;
+    var isHit = (playerBoard[ar][ac] === 1);
+
+    if (isHit) {
+      playerBoard[ar][ac] = 3;
+      aiHits++;
+      aiHitStreak.push({ r: ar, c: ac });
+
+      // 아군 배 격침 검사
+      var sunkShip = null;
+      for (var i = 0; i < playerShips.length; i++) {
+        var pShip = playerShips[i];
+        if (!pShip.sunk) {
+          for (var k = 0; k < pShip.coords.length; k++) {
+            if (pShip.coords[k].r === ar && pShip.coords[k].c === ac) {
+              pShip.hits++;
+              if (pShip.hits === pShip.size) {
+                pShip.sunk = true;
+                sunkShip = pShip;
+              }
+              break;
+            }
+          }
+        }
+      }
+
+      if (sunkShip) {
+        playSound('sink');
+        statusTurn.textContent = '아군 ' + sunkShip.name + ' 격침 피격! ⚠️';
+        // 침몰한 배의 칸들은 미해결 streak에서 제거
+        aiHitStreak = aiHitStreak.filter(function (pt) {
+          for (var sk = 0; sk < sunkShip.coords.length; sk++) {
+            if (sunkShip.coords[sk].r === pt.r && sunkShip.coords[sk].c === pt.c) return false;
+          }
+          return true;
+        });
+      } else {
+        playSound('hit');
+        statusTurn.textContent = '아군 함대 피격 발생!';
+      }
+
+      // 패배 확인
+      if (aiHits >= TOTAL_HIT_TARGET) {
+        handleGameOver('lost');
+        return;
+      }
+    } else {
+      playerBoard[ar][ac] = 2;
+      statusTurn.textContent = '내 차례 (적 해역 조준)';
+    }
+
+    isAiThinking = false;
+    renderBoards();
+  }
+
+  // 난이도별 좌표 선택
+  function chooseAiTarget() {
+    var validShots = [];
+    for (var r = 0; r < 10; r++) {
+      for (var c = 0; c < 10; c++) {
+        if (playerBoard[r][c] === 0 || playerBoard[r][c] === 1) {
+          validShots.push({ r: r, c: c });
+        }
+      }
+    }
+    if (validShots.length === 0) return { r: 0, c: 0 };
+
+    // 1. 쉬움 난이도: 완전 무작위 사격
+    if (currentLevel === 'easy') {
+      var randIdx = Math.floor(Math.random() * validShots.length);
+      return validShots[randIdx];
+    }
+
+    // 2. 보통 난이도: 명중 시 주변 상하좌우 추적 (Hunt & Target)
+    if (currentLevel === 'normal') {
+      if (aiHitStreak.length > 0) {
+        var targetCandidates = getTargetNeighbors(aiHitStreak);
+        if (targetCandidates.length > 0) {
+          return targetCandidates[Math.floor(Math.random() * targetCandidates.length)];
+        }
+      }
+      // 무작위 탐색 (체스판 짝수 칸 우선)
+      var parityShots = validShots.filter(function (p) { return (p.r + p.c) % 2 === 0; });
+      var pool = (parityShots.length > 0) ? parityShots : validShots;
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    // 3. 어려움 난이도: 확률 밀도 계산 (Probability Density Heatmap + Line Priority)
+    if (currentLevel === 'hard') {
+      if (aiHitStreak.length > 0) {
+        var lineTargets = getTargetNeighbors(aiHitStreak);
+        if (lineTargets.length > 0) {
+          // 명중이 2개 이상이면 선상 끝점 최우선
+          if (aiHitStreak.length >= 2) {
+            var aligned = getAlignedLineEndpoints(aiHitStreak);
+            if (aligned.length > 0) {
+              return aligned[Math.floor(Math.random() * aligned.length)];
+            }
+          }
+          return lineTargets[Math.floor(Math.random() * lineTargets.length)];
+        }
+      }
+
+      // 남은 아군 배들의 크기로 10x10 확률 밀도 계산
+      var density = [];
+      for (var dr = 0; dr < 10; dr++) {
+        var dRow = [];
+        for (var dc = 0; dc < 10; dc++) dRow.push(0);
+        density.push(dRow);
+      }
+
+      // 아직 침몰하지 않은 플레이어 배 크기 모음
+      var aliveSizes = [];
+      for (var ps = 0; ps < playerShips.length; ps++) {
+        if (!playerShips[ps].sunk) aliveSizes.push(playerShips[ps].size);
+      }
+
+      for (var sIdx = 0; sIdx < aliveSizes.length; sIdx++) {
+        var len = aliveSizes[sIdx];
+        // 가로 방향 가능성
+        for (var row = 0; row < 10; row++) {
+          for (var col = 0; col <= 10 - len; col++) {
+            var okH = true;
+            for (var l = 0; l < len; l++) {
+              if (playerBoard[row][col + l] === 2) { okH = false; break; }
+            }
+            if (okH) {
+              for (var l2 = 0; l2 < len; l2++) {
+                if (playerBoard[row][col + l2] === 0 || playerBoard[row][col + l2] === 1) {
+                  density[row][col + l2] += ((row + col + l2) % 2 === 0 ? 3 : 1);
+                }
+              }
+            }
+          }
+        }
+        // 세로 방향 가능성
+        for (var vCol = 0; vCol < 10; vCol++) {
+          for (var vRow = 0; vRow <= 10 - len; vRow++) {
+            var okV = true;
+            for (var vl = 0; vl < len; vl++) {
+              if (playerBoard[vRow + vl][vCol] === 2) { okV = false; break; }
+            }
+            if (okV) {
+              for (var vl2 = 0; vl2 < len; vl2++) {
+                if (playerBoard[vRow + vl2][vCol] === 0 || playerBoard[vRow + vl2][vCol] === 1) {
+                  density[vRow + vl2][vCol] += ((vRow + vl2 + vCol) % 2 === 0 ? 3 : 1);
+                }
+              }
+            }
+          }
+        }
+      }
+
+      var maxScore = -1;
+      var bestTargets = [];
+      for (var vi = 0; vi < validShots.length; vi++) {
+        var pt = validShots[vi];
+        var sc = density[pt.r][pt.c];
+        if (sc > maxScore) {
+          maxScore = sc;
+          bestTargets = [pt];
+        } else if (sc === maxScore) {
+          bestTargets.push(pt);
+        }
+      }
+      return bestTargets[Math.floor(Math.random() * bestTargets.length)];
+    }
+
+    return validShots[0];
+  }
+
+  // 명중된 좌표들의 인접 4방향 유효 칸 수집
+  function getTargetNeighbors(streak) {
+    var neighbors = [];
+    var dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    for (var i = 0; i < streak.length; i++) {
+      var pt = streak[i];
+      for (var d = 0; d < dirs.length; d++) {
+        var nr = pt.r + dirs[d][0];
+        var nc = pt.c + dirs[d][1];
+        if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10) {
+          if (playerBoard[nr][nc] === 0 || playerBoard[nr][nc] === 1) {
+            var exists = false;
+            for (var n = 0; n < neighbors.length; n++) {
+              if (neighbors[n].r === nr && neighbors[n].c === nc) { exists = true; break; }
+            }
+            if (!exists) neighbors.push({ r: nr, c: nc });
+          }
+        }
+      }
+    }
+    return neighbors;
+  }
+
+  // 2개 이상 명중 시 같은 직선상의 양 끝점 검출
+  function getAlignedLineEndpoints(streak) {
+    var endpoints = [];
+    var isSameRow = true;
+    var isSameCol = true;
+    for (var i = 1; i < streak.length; i++) {
+      if (streak[i].r !== streak[0].r) isSameRow = false;
+      if (streak[i].c !== streak[0].c) isSameCol = false;
+    }
+
+    if (isSameRow) {
+      var r = streak[0].r;
+      var minC = 10, maxC = -1;
+      streak.forEach(function (p) {
+        if (p.c < minC) minC = p.c;
+        if (p.c > maxC) maxC = p.c;
+      });
+      if (minC - 1 >= 0 && (playerBoard[r][minC - 1] === 0 || playerBoard[r][minC - 1] === 1)) {
+        endpoints.push({ r: r, c: minC - 1 });
+      }
+      if (maxC + 1 < 10 && (playerBoard[r][maxC + 1] === 0 || playerBoard[r][maxC + 1] === 1)) {
+        endpoints.push({ r: r, c: maxC + 1 });
+      }
+    } else if (isSameCol) {
+      var c = streak[0].c;
+      var minR = 10, maxR = -1;
+      streak.forEach(function (p) {
+        if (p.r < minR) minR = p.r;
+        if (p.r > maxR) maxR = p.r;
+      });
+      if (minR - 1 >= 0 && (playerBoard[minR - 1][c] === 0 || playerBoard[minR - 1][c] === 1)) {
+        endpoints.push({ r: minR - 1, c: c });
+      }
+      if (maxR + 1 < 10 && (playerBoard[maxR + 1][c] === 0 || playerBoard[maxR + 1][c] === 1)) {
+        endpoints.push({ r: maxR + 1, c: c });
+      }
+    }
+    return endpoints;
+  }
+
+  // -------------------------------------------------------------
+  // 게임 종료 처리 및 점수 계산
+  // -------------------------------------------------------------
+  function handleGameOver(result) {
+    gameState = result;
+    isAiThinking = false;
+    renderBoards();
+
+    var mult = (currentLevel === 'hard') ? 3 : (currentLevel === 'normal' ? 2 : 1);
+    var finalScore = 0;
+
+    if (result === 'won') {
+      playSound('win');
+      wins++;
+      statusTurn.textContent = '승리했습니다! 🏆';
+
+      // 점수 계산: (100 - humanShots) * mult * 10, 최소 10, 최대 99999999
+      var rawScore = (100 - humanShots) * mult * 10;
+      finalScore = Math.max(10, rawScore);
+      finalScore = Math.min(99999999, Math.round(finalScore));
+
+      try {
+        localStorage.setItem('zw_fleet-hunt_wins', String(wins));
+        var key = 'zw_fleet-hunt_best_' + currentLevel;
+        var currentBest = null;
+        if (currentLevel === 'hard') currentBest = bestHard;
+        else if (currentLevel === 'normal') currentBest = bestNormal;
+        else currentBest = bestEasy;
+
+        if (currentBest === null || finalScore > currentBest) {
+          if (currentLevel === 'hard') bestHard = finalScore;
+          else if (currentLevel === 'normal') bestNormal = finalScore;
+          else bestEasy = finalScore;
+          localStorage.setItem(key, String(finalScore));
+        }
+      } catch (e) {}
+
+      overlayTitle.className = 'win-title';
+      overlayTitle.textContent = '승리했습니다!';
+      overlayDesc.textContent = '적 함대를 모두 가라앉혀 제해권을 장악했습니다.';
+    } else {
+      playSound('lose');
+      losses++;
+      finalScore = 0;
+      statusTurn.textContent = '패배했습니다... 🌊';
+      try {
+        localStorage.setItem('zw_fleet-hunt_losses', String(losses));
+      } catch (e) {}
+
+      overlayTitle.className = 'lose-title';
+      overlayTitle.textContent = '패배했습니다';
+      overlayDesc.textContent = '아군 함대가 모두 격침되었습니다. 다시 도전해 보세요.';
+    }
+
+    updateStatusDisplay();
+
+    // 모달 통계 채우기
+    var acc = humanShots > 0 ? Math.round((humanHits / humanShots) * 100) : 0;
+    statShots.textContent = humanShots + '회';
+    statAccuracy.textContent = acc + '%';
+    statMultiplier.textContent = mult + '배';
+    statScore.textContent = finalScore.toLocaleString('ko-KR') + '점';
+
+    // 결과 오버레이 팝업 표시
+    overlayBox.style.display = 'flex';
+  }
+
+  // -------------------------------------------------------------
+  // 게임 리셋 및 새 게임 시작
+  // -------------------------------------------------------------
+  function startNewGame() {
+    overlayBox.style.display = 'none';
+    gameState = 'playing';
+    isAiThinking = false;
+    selectedTarget = null;
+    humanShots = 0;
+    humanHits = 0;
+    aiShots = 0;
+    aiHits = 0;
+    aiHitStreak = [];
+
+    var pData = placeShipsRandomly();
+    playerBoard = pData.board;
+    playerShips = pData.ships;
+
+    var eData = placeShipsRandomly();
+    enemyBoard = eData.board;
+    enemyShips = eData.ships;
+
+    statusTurn.textContent = '내 차례 (적 해역 조준)';
+    radarTip.textContent = '칸을 터치해 조준';
+
+    renderBoards();
+  }
+
+  // 아군 함대만 재배치
+  function redeployMyFleet() {
+    if (gameState !== 'playing' || humanShots > 0) {
+      startNewGame();
+      return;
+    }
+    var pData = placeShipsRandomly();
+    playerBoard = pData.board;
+    playerShips = pData.ships;
+    renderBoards();
+  }
+
+  // -------------------------------------------------------------
+  // 난이도 및 스토리지 연동
+  // -------------------------------------------------------------
+  function updateLevelButtons() {
+    btnDiffEasy.classList.toggle('on', currentLevel === 'easy');
+    btnDiffNormal.classList.toggle('on', currentLevel === 'normal');
+    btnDiffHard.classList.toggle('on', currentLevel === 'hard');
+  }
+
+  function syncRankTab() {
+    try {
+      var i = (currentLevel === 'hard') ? 2 : (currentLevel === 'normal' ? 1 : 0);
+      if (window.ZW) ZW.rankPick = i;
+      var b = document.querySelector('.rk-tabs button[data-i="' + i + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  function setLevel(lvl) {
+    if (lvl === currentLevel) return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_fleet-hunt_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    syncRankTab();
+    startNewGame();
+  }
+
+  function updateStatusDisplay() {
+    statusRecord.textContent = wins + '승 ' + losses + '패';
+    var bestArr = [];
+    if (bestEasy !== null) bestArr.push('쉬움 ' + bestEasy.toLocaleString('ko-KR') + '점');
+    if (bestNormal !== null) bestArr.push('보통 ' + bestNormal.toLocaleString('ko-KR') + '점');
+    if (bestHard !== null) bestArr.push('어려움 ' + bestHard.toLocaleString('ko-KR') + '점');
+
+    if (bestArr.length > 0) {
+      statusBest.textContent = '최고 기록 · ' + bestArr.join(' · ');
+    } else {
+      statusBest.textContent = '';
+    }
+  }
+
+  function loadStorage() {
+    try {
+      wins = parseInt(localStorage.getItem('zw_fleet-hunt_wins'), 10) || 0;
+      losses = parseInt(localStorage.getItem('zw_fleet-hunt_losses'), 10) || 0;
+      var rawE = localStorage.getItem('zw_fleet-hunt_best_easy');
+      var rawN = localStorage.getItem('zw_fleet-hunt_best_normal');
+      var rawH = localStorage.getItem('zw_fleet-hunt_best_hard');
+      if (rawE && !isNaN(parseInt(rawE, 10))) bestEasy = parseInt(rawE, 10);
+      if (rawN && !isNaN(parseInt(rawN, 10))) bestNormal = parseInt(rawN, 10);
+      if (rawH && !isNaN(parseInt(rawH, 10))) bestHard = parseInt(rawH, 10);
+
+      var savedLvl = localStorage.getItem('zw_fleet-hunt_level');
+      if (savedLvl === 'normal' || savedLvl === 'hard' || savedLvl === 'easy') {
+        currentLevel = savedLvl;
+      }
+      var savedInstant = localStorage.getItem('zw_fleet-hunt_instant');
+      if (savedInstant === '1') chkInstant.checked = true;
+      var savedSound = localStorage.getItem('zw_fleet-hunt_sound');
+      if (savedSound === '0') chkSound.checked = false;
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+    updateLevelButtons();
+    syncRankTab();
+    setTimeout(syncRankTab, 250);
+    updateStatusDisplay();
+  }
+
+  // -------------------------------------------------------------
+  // 이벤트 바인딩
+  // -------------------------------------------------------------
+  radarGrid.addEventListener('click', handleRadarClick);
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  btnRestart.addEventListener('click', startNewGame);
+  btnRedeploy.addEventListener('click', redeployMyFleet);
+  btnOverlayRestart.addEventListener('click', startNewGame);
+
+  // 결과 창의 순위표 올리기 단추: rank.js의 바로가기 점프나 순위판으로 스크롤
+  btnOverlayRank.addEventListener('click', function () {
+    overlayBox.style.display = 'none';
+    var jump = document.querySelector('.zw-rk-jump');
+    if (jump && jump.style.display !== 'none') {
+      jump.click();
+    } else {
+      var rk = document.querySelector('.zw-rank');
+      if (rk) {
+        rk.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        rk.classList.add('flash');
+        setTimeout(function () { rk.classList.remove('flash'); }, 1800);
+      }
+    }
+  });
+
+  chkInstant.addEventListener('change', function () {
+    try {
+      localStorage.setItem('zw_fleet-hunt_instant', chkInstant.checked ? '1' : '0');
+    } catch (e) {}
+    selectedTarget = null;
+    renderBoards();
+  });
+
+  chkSound.addEventListener('change', function () {
+    try {
+      localStorage.setItem('zw_fleet-hunt_sound', chkSound.checked ? '1' : '0');
+    } catch (e) {}
+  });
+
+  // 초기화 실행
+  buildDOMGrids();
+  loadStorage();
+  startNewGame();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/four-in-row/">4목 맞추기</a> — 컴퓨터와 4개 먼저 잇기</li><li><a href="/water-sort/">물 정렬</a> — 색깔별로 물을 병에 모으기</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/klondike-solitaire/">솔리테어</a> — 카드를 순서대로 쌓아 완성하기</li><li><a href="/box-push/">상자 밀기</a> — 상자를 목표 칸으로 밀기</li><li><a href="/pipe-connect/">파이프 잇기</a> — 돌려서 물길 연결하기</li><li><a href="/checkers-8/">체커</a> — 컴퓨터와 체커 한 판</li><li><a href="/fleet-hunt/">함대 맞히기</a> — 좌표를 찍어 상대 함대 찾기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

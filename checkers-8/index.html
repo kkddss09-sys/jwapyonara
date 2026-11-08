@@ -1,0 +1,1747 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>체커 8×8 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 무료 체커(Checkers 8×8) 게임. 쉬움·보통·어려움 3단계 컴퓨터와 지혜를 겨루고 실시간 순위표에 도전해보세요.">
+<link rel="canonical" href="https://jwapyonara.com/checkers-8/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="체커 8×8 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 하는 무료 체커 게임. 쉬움·보통·어려움 컴퓨터와 한 판 승부!">
+<meta property="og:url" content="https://jwapyonara.com/checkers-8/">
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 (판 위 3칸) */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1.5px solid var(--line, #e5e5ea);
+  background: var(--card, #fff);
+  color: var(--ink, #1c1c1e);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.15s ease;
+}
+.diff-seg button.on {
+  border-color: var(--red, #e5484d);
+  background: var(--soft, #fef2f2);
+  color: var(--red, #e5484d);
+}
+
+/* 상태 표시 바 */
+.checkers-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+}
+.checkers-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1.2;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.checkers-status-mid {
+  color: #ffffff;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.checkers-status-right {
+  color: #a1a1a6;
+  flex: 1.2;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.checkers-best-line {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 체커보드 캔버스 감싸개 */
+.checkers-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 12px;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #5c3415;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#checkersCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+  touch-action: none;
+}
+
+/* 판 위 덮개 (시작 및 결과창) */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 18, 20, 0.90);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 24px 20px;
+  text-align: center;
+  z-index: 10;
+  backdrop-filter: blur(2px);
+}
+.canvas-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 8px;
+  color: #ffd60a;
+}
+.canvas-overlay p {
+  font-size: 15px;
+  margin: 0 0 16px;
+  color: #e5e5ea;
+  max-width: 300px;
+  line-height: 1.45;
+}
+.overlay-score-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 280px;
+  font-size: 14px;
+  color: #f2f2f7;
+}
+.overlay-score-box b {
+  color: #ffd60a;
+  font-size: 18px;
+}
+.overlay-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 260px;
+}
+.btn-start {
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  background: var(--red, #e5484d);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  min-height: 50px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+}
+.btn-start:active {
+  opacity: 0.88;
+}
+.btn-overlay-rank {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  background: var(--soft, #fef2f2);
+  color: var(--red, #e5484d);
+  border: 1.5px solid var(--red, #e5484d);
+  border-radius: 12px;
+  padding: 11px 20px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+}
+.btn-overlay-rank:active {
+  background: rgba(229, 72, 77, 0.2);
+}
+
+/* 하단 제어 단추 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px 6px;
+}
+.btn-undo {
+  background: var(--card, #fff);
+  border: 1.5px solid var(--line, #e5e5ea);
+  color: var(--ink, #1c1c1e);
+}
+.btn-undo:active:not(:disabled) {
+  background: var(--soft, #f2f2f7);
+}
+.btn-undo:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-reset {
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #3a3a3c;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "체커 8×8 무료",
+  "url": "https://jwapyonara.com/checkers-8/",
+  "description": "가입 없이 바로 즐기는 무료 체커(Checkers 8×8) 게임. 쉬움, 보통, 어려움 3단계 컴퓨터 인공지능과 대결하고 순위표에 등록해보세요.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All"
+}
+</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>체커 8×8 한 판,<br>컴퓨터를 이겨 보세요</h1>
+  <p class="lead">대각선으로 전진하고 뛰어넘어 잡으세요. 끝 줄에 닿으면 왕이 되어 앞뒤로 질주합니다.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="checkers-status-bar">
+      <div class="checkers-status-left" id="statusTurn">내 차례</div>
+      <div class="checkers-status-mid" id="statusCount">나 12 : 12 컴</div>
+      <div class="checkers-status-right" id="statusRecord">전적 0승 0패 0무</div>
+    </div>
+    <div class="checkers-best-line" id="statusBest"></div>
+
+    <div class="checkers-canvas-wrap" id="canvasWrap">
+      <canvas id="checkersCanvas" width="420" height="420"></canvas>
+      <div class="canvas-overlay" id="overlayBox">
+        <h2 id="overlayTitle">체커 8×8</h2>
+        <p id="overlayDesc">쉬움으로 시작해요</p>
+        <div class="overlay-score-box" id="overlayScoreBox" style="display:none;"></div>
+        <div class="overlay-btn-group">
+          <button type="button" class="btn-start" id="btnStartGame">게임 시작</button>
+          <button type="button" class="btn-overlay-rank" id="btnOverlayRank" style="display:none;">🏆 순위표 올리기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-undo" id="btnUndo" disabled>한 수 물리기 (2회 남음)</button>
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:8px;">
+      💡 말을 누르면 이동할 자리가 떠요. 잡을 수 있는 말은 <b>반드시 잡아야</b> 합니다.
+    </p>
+  </section>
+
+  <p class="note">상대 말을 모두 잡거나 상대가 더 이상 움직일 수 없으면 이깁니다. 기기 안에서만 실행돼요.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>체커 규칙과 하는 법</summary>
+    <ul>
+      <li><b>말의 배치와 판:</b> 8×8 판의 어두운 칸 32개만 사용합니다. 나와 컴퓨터 각자 12개의 말을 가지고 시작합니다. 내 말은 흰색, 컴퓨터는 검은색입니다.</li>
+      <li><b>이동(한 칸 전진):</b> 일반 말은 대각선 앞쪽으로 비어 있는 어두운 칸 1칸만 이동할 수 있습니다. (뒤로는 갈 수 없습니다)</li>
+      <li><b>뛰어넘어 잡기(점프):</b> 대각선 앞쪽에 상대 말이 있고 그 바로 뒤 칸이 비어 있다면, 상대 말을 뛰어넘어 잡을 수 있습니다. 잡힌 상대 말은 판에서 제거됩니다.</li>
+      <li><b>강제 잡기 규칙(가장 중요):</b> 판에 잡을 수 있는 상대 말이 하나라도 있다면, <b>반드시 잡는 수</b>를 두어야 합니다. 단순 전진은 둘 수 없습니다.</li>
+      <li><b>연속 잡기:</b> 상대를 한 번 뛰어넘은 자리에서 또 다른 상대를 뛰어넘을 수 있다면, 턴을 넘기지 않고 연속으로 뛰어넘어 모두 잡아야 합니다.</li>
+      <li><b>왕(King) 승급:</b> 내 말이 상대 진영 맨 끝 줄(맨 윗줄)에 닿으면 황금 왕관을 쓰고 '왕'이 됩니다. 왕은 앞뒤 모든 대각선 4방향으로 자유롭게 이동하고 잡을 수 있습니다.</li>
+      <li><b>승리와 패배:</b> 상대 말을 모두 잡아내거나, 상대가 갇혀서 둘 수 있는 수가 하나도 없으면 이깁니다.</li>
+      <li><b>점수 계산:</b> 이겼을 때 (남은 내 말 수 × 100 + 왕 수 × 50) × 난이도 배수(쉬움 1배, 보통 2배, 어려움 3배)로 점수가 계산되어 순위표에 기록됩니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단에서 난이도(쉬움·보통·어려움)를 고릅니다. 컴퓨터는 각각 앞 2수, 4수, 6수를 미리 내다보고 둡니다.</li>
+      <li>움직이고 싶은 내 말을 누르면 이동할 수 있는 위치에 초록색 또는 빨간색 점이 표시됩니다.</li>
+      <li>표시된 목적지 점을 누르면 말이 이동합니다. 잡을 수 있는 말이 여러 개라면 유리한 쪽을 직접 골라보세요.</li>
+      <li>실수가 있었다면 '한 수 물리기' 단추로 한 판당 최대 2번까지 되돌릴 수 있습니다.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>체스보다 규칙이 직관적이면서도 깊은 수 싸움이 필요한 클래식 두뇌 게임입니다. 출퇴근길이나 여유 시간에 3~5분 동안 컴퓨터와 집중력 대결을 즐겨보세요.</p>
+    <h2>알아 두면 좋은 체커 전술</h2>
+    <dl>
+      <dt>홈 로우(맨 뒷줄) 사수</dt>
+      <dd>내 진영 맨 뒷줄(행 7)에 있는 말들은 상대가 침투하여 왕이 되는 것을 막아주는 중요한 수비수입니다. 초반에는 가능한 맨 뒷줄 말을 지키는 것이 유리합니다.</dd>
+      <dt>중앙 4칸 장악</dt>
+      <dd>판의 가장자리에 있는 말은 이동 경로가 1방향으로 제한되지만, 중앙에 자리 잡은 말은 양쪽 대각선으로 침투하며 판 전체를 장악할 수 있습니다.</dd>
+      <dt>상대 말을 유인하여 더블 캡처</dt>
+      <dd>강제 잡기 규칙을 역이용해, 내 말 1개를 일부러 미끼로 주고 상대가 잡게 한 뒤 2~3개의 말을 연속으로 뛰어넘어 잡는 전술을 구사해 보세요.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>컴퓨터 난이도는 어떻게 다른가요?</summary>
+      <p>'쉬움'은 앞 2수만 읽으며 초보자도 쉽게 이길 수 있도록 실수를 허용합니다. '보통'은 앞 4수를 읽어 공격과 수비를 탄탄히 합니다. '어려움'은 앞 6수를 정밀하게 탐색하여 실수를 놓치지 않고 파고듭니다.</p>
+    </details>
+    <details>
+      <summary>말이 왜 안 움직이나요?</summary>
+      <p>체커 공식 규칙상 상대 말을 잡을 수 있는 기회가 있다면 일반 전진 이동이 금지되고 반드시 잡는 수만 두어야 합니다. 빨간색으로 표시된 잡기 가능한 말을 확인해 보세요.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // DOM 요소
+  var canvas = document.getElementById('checkersCanvas');
+  var ctx = canvas.getContext('2d');
+  var canvasWrap = document.getElementById('canvasWrap');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var overlayScoreBox = document.getElementById('overlayScoreBox');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var btnUndo = document.getElementById('btnUndo');
+  var btnRestart = document.getElementById('btnRestart');
+  var statusTurn = document.getElementById('statusTurn');
+  var statusCount = document.getElementById('statusCount');
+  var statusRecord = document.getElementById('statusRecord');
+  var statusBest = document.getElementById('statusBest');
+
+  // 상수 정의
+  var SIZE = 8;
+  // 말 정의: 0=빈칸, 1=사람일반, 2=사람왕, -1=컴퓨터일반, -2=컴퓨터왕
+
+  // 게임 상태 변수
+  var gameState = 'ready'; // 'ready', 'playing', 'multi_jump', 'won', 'lost', 'draw'
+  var turn = 1; // 1: 사람(흰색), -1: 컴퓨터(검은색)
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  var board = createInitialBoard();
+  var selectedPiece = null; // { r, c }
+  var validMovesForSelected = []; // [{ to: {r, c}, path, captured, isJump }]
+  var mandatoryJumpsExist = false;
+  var piecesWithJumps = []; // [{r, c}]
+  var historyStack = []; // 한 수 물리기용 이전 스냅샷 [{ board, turn, undoCount, moveCount }]
+  var undoCount = 2;
+  var isThinking = false;
+  var aiTimer = null;
+  var lastMoveHighlight = null; // { from: {r,c}, to: {r,c} }
+  var moveCount = 0;
+
+  // 전적 및 최고 점수
+  var wins = 0;
+  var losses = 0;
+  var draws = 0;
+  var bestScores = {
+    easy: 0,
+    normal: 0,
+    hard: 0
+  };
+
+  // WebAudio 사운드 생성기
+  var audioCtx = null;
+  function getAudioContext() {
+    if (!audioCtx) {
+      try {
+        var AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      } catch (e) {}
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(function () {});
+    }
+    return audioCtx;
+  }
+
+  function playSound(type) {
+    try {
+      var ac = getAudioContext();
+      if (!ac) return;
+      var now = ac.currentTime;
+
+      if (type === 'select') {
+        var osc = ac.createOscillator();
+        var gain = ac.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(540, now);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        osc.connect(gain);
+        gain.connect(ac.destination);
+        osc.start(now);
+        osc.stop(now + 0.04);
+      } else if (type === 'move') {
+        var osc2 = ac.createOscillator();
+        var gain2 = ac.createGain();
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(180, now);
+        osc2.frequency.exponentialRampToValueAtTime(60, now + 0.06);
+        gain2.gain.setValueAtTime(0.2, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        osc2.connect(gain2);
+        gain2.connect(ac.destination);
+        osc2.start(now);
+        osc2.stop(now + 0.06);
+      } else if (type === 'capture') {
+        var osc3 = ac.createOscillator();
+        var gain3 = ac.createGain();
+        osc3.type = 'sawtooth';
+        osc3.frequency.setValueAtTime(280, now);
+        osc3.frequency.exponentialRampToValueAtTime(90, now + 0.12);
+        gain3.gain.setValueAtTime(0.25, now);
+        gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc3.connect(gain3);
+        gain3.connect(ac.destination);
+        osc3.start(now);
+        osc3.stop(now + 0.12);
+      } else if (type === 'king') {
+        var notes = [523.25, 659.25, 783.99]; // C5, E5, G5
+        notes.forEach(function (freq, i) {
+          var o = ac.createOscillator();
+          var g = ac.createGain();
+          var t = now + i * 0.08;
+          o.type = 'sine';
+          o.frequency.setValueAtTime(freq, t);
+          g.gain.setValueAtTime(0.18, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+          o.connect(g);
+          g.connect(ac.destination);
+          o.start(t);
+          o.stop(t + 0.16);
+        });
+      } else if (type === 'win') {
+        var winNotes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+        winNotes.forEach(function (freq, i) {
+          var o = ac.createOscillator();
+          var g = ac.createGain();
+          var t = now + i * 0.1;
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(freq, t);
+          g.gain.setValueAtTime(0.22, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+          o.connect(g);
+          g.connect(ac.destination);
+          o.start(t);
+          o.stop(t + 0.25);
+        });
+      } else if (type === 'lose') {
+        var loseNotes = [392.00, 329.63, 261.63]; // G4, E4, C4
+        loseNotes.forEach(function (freq, i) {
+          var o = ac.createOscillator();
+          var g = ac.createGain();
+          var t = now + i * 0.14;
+          o.type = 'sine';
+          o.frequency.setValueAtTime(freq, t);
+          g.gain.setValueAtTime(0.18, t);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+          o.connect(g);
+          g.connect(ac.destination);
+          o.start(t);
+          o.stop(t + 0.22);
+        });
+      }
+    } catch (e) {}
+  }
+
+  // 초기 보드 생성 (어두운 칸 (r+c)%2===1에만 말 배치)
+  function createInitialBoard() {
+    var b = [];
+    for (var r = 0; r < SIZE; r++) {
+      b[r] = [];
+      for (var c = 0; c < SIZE; c++) {
+        if ((r + c) % 2 === 1) {
+          if (r < 3) {
+            b[r][c] = -1; // 컴퓨터 일반 말
+          } else if (r > 4) {
+            b[r][c] = 1; // 사람 일반 말
+          } else {
+            b[r][c] = 0;
+          }
+        } else {
+          b[r][c] = 0;
+        }
+      }
+    }
+    return b;
+  }
+
+  function cloneBoard(b) {
+    var nb = [];
+    for (var r = 0; r < SIZE; r++) {
+      nb[r] = b[r].slice();
+    }
+    return nb;
+  }
+
+  // 말 개수 세기 { human: { total, kings }, ai: { total, kings } }
+  function countPieces(b) {
+    var humanTotal = 0, humanKings = 0;
+    var aiTotal = 0, aiKings = 0;
+    for (var r = 0; r < SIZE; r++) {
+      for (var c = 0; c < SIZE; c++) {
+        var p = b[r][c];
+        if (p > 0) {
+          humanTotal++;
+          if (p === 2) humanKings++;
+        } else if (p < 0) {
+          aiTotal++;
+          if (p === -2) aiKings++;
+        }
+      }
+    }
+    return {
+      human: { total: humanTotal, kings: humanKings },
+      ai: { total: aiTotal, kings: aiKings }
+    };
+  }
+
+  // 단일 말의 1단 점프 가능한 목록 찾기
+  function getSingleJumpsForPiece(b, r, c, player) {
+    var piece = b[r][c];
+    if (piece === 0) return [];
+    if (player === 1 && piece <= 0) return [];
+    if (player === -1 && piece >= 0) return [];
+
+    var isKing = Math.abs(piece) === 2;
+    var dirs;
+    if (isKing) {
+      dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+    } else if (player === 1) {
+      dirs = [[-1, -1], [-1, 1]]; // 위로 전진
+    } else {
+      dirs = [[1, -1], [1, 1]]; // 아래로 전진
+    }
+
+    var jumps = [];
+    for (var i = 0; i < dirs.length; i++) {
+      var dr = dirs[i][0], dc = dirs[i][1];
+      var mr = r + dr, mc = c + dc;
+      var er = r + 2 * dr, ec = c + 2 * dc;
+      if (er >= 0 && er < SIZE && ec >= 0 && ec < SIZE) {
+        if (b[er][ec] === 0) {
+          var mid = b[mr][mc];
+          if ((player === 1 && mid < 0) || (player === -1 && mid > 0)) {
+            jumps.push({
+              from: { r: r, c: c },
+              to: { r: er, c: ec },
+              captured: { r: mr, c: mc },
+              isJump: true
+            });
+          }
+        }
+      }
+    }
+    return jumps;
+  }
+
+  // 해당 플레이어의 모든 1단 점프 찾기
+  function getAllJumps(b, player) {
+    var all = [];
+    for (var r = 0; r < SIZE; r++) {
+      for (var c = 0; c < SIZE; c++) {
+        var p = b[r][c];
+        if ((player === 1 && p > 0) || (player === -1 && p < 0)) {
+          var j = getSingleJumpsForPiece(b, r, c, player);
+          if (j.length > 0) {
+            all = all.concat(j);
+          }
+        }
+      }
+    }
+    return all;
+  }
+
+  // 단일 말의 단순 1칸 대각선 이동 목록
+  function getSimpleMovesForPiece(b, r, c, player) {
+    var piece = b[r][c];
+    if (piece === 0) return [];
+    if (player === 1 && piece <= 0) return [];
+    if (player === -1 && piece >= 0) return [];
+
+    var isKing = Math.abs(piece) === 2;
+    var dirs;
+    if (isKing) {
+      dirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+    } else if (player === 1) {
+      dirs = [[-1, -1], [-1, 1]];
+    } else {
+      dirs = [[1, -1], [1, 1]];
+    }
+
+    var moves = [];
+    for (var i = 0; i < dirs.length; i++) {
+      var nr = r + dirs[i][0], nc = c + dirs[i][1];
+      if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) {
+        if (b[nr][nc] === 0) {
+          moves.push({
+            from: { r: r, c: c },
+            to: { r: nr, c: nc },
+            isJump: false
+          });
+        }
+      }
+    }
+    return moves;
+  }
+
+  // 해당 플레이어의 모든 단순 이동
+  function getAllSimpleMoves(b, player) {
+    var all = [];
+    for (var r = 0; r < SIZE; r++) {
+      for (var c = 0; c < SIZE; c++) {
+        var p = b[r][c];
+        if ((player === 1 && p > 0) || (player === -1 && p < 0)) {
+          var m = getSimpleMovesForPiece(b, r, c, player);
+          if (m.length > 0) {
+            all = all.concat(m);
+          }
+        }
+      }
+    }
+    return all;
+  }
+
+  // 플레이어의 합법적인 다음 1단계 이동 목록 (강제 잡기 규칙 적용)
+  function getLegalSingleMoves(b, player) {
+    var jumps = getAllJumps(b, player);
+    if (jumps.length > 0) {
+      return { moves: jumps, isJump: true };
+    }
+    return { moves: getAllSimpleMoves(b, player), isJump: false };
+  }
+
+  // AI 및 탐색용: 1개 턴의 완전한 수(모든 연속 점프 시퀀스 포함) 생성
+  function getTurnSequences(b, player) {
+    var jumps = [];
+
+    function findSequences(curB, r, c, path, capturedSoFar) {
+      var piece = curB[r][c];
+      var isKing = Math.abs(piece) === 2;
+      var dirs = isKing ? [[-1, -1], [-1, 1], [1, -1], [1, 1]] : (player === 1 ? [[-1, -1], [-1, 1]] : [[1, -1], [1, 1]]);
+      var foundNextJump = false;
+
+      for (var i = 0; i < dirs.length; i++) {
+        var dr = dirs[i][0], dc = dirs[i][1];
+        var mr = r + dr, mc = c + dc;
+        var er = r + 2 * dr, ec = c + 2 * dc;
+        if (er >= 0 && er < SIZE && ec >= 0 && ec < SIZE && curB[er][ec] === 0) {
+          var mid = curB[mr][mc];
+          if ((player === 1 && mid < 0) || (player === -1 && mid > 0)) {
+            foundNextJump = true;
+            var nextB = cloneBoard(curB);
+            var nextPiece = piece;
+            var promoted = false;
+
+            if (player === 1 && er === 0 && nextPiece === 1) {
+              nextPiece = 2;
+              promoted = true;
+            } else if (player === -1 && er === SIZE - 1 && nextPiece === -1) {
+              nextPiece = -2;
+              promoted = true;
+            }
+
+            nextB[r][c] = 0;
+            nextB[mr][mc] = 0;
+            nextB[er][ec] = nextPiece;
+
+            var newPath = path.concat([{ r: er, c: ec }]);
+            var newCap = capturedSoFar.concat([{ r: mr, c: mc }]);
+
+            // 승급 시 공식 룰에 따라 즉시 턴 종료
+            if (promoted) {
+              jumps.push({
+                from: path[0],
+                to: { r: er, c: ec },
+                path: newPath,
+                captured: newCap,
+                finalBoard: nextB,
+                isJump: true,
+                promoted: true
+              });
+            } else {
+              var branchCountBefore = jumps.length;
+              findSequences(nextB, er, ec, newPath, newCap);
+              if (jumps.length === branchCountBefore) {
+                // 추가 점프가 없었던 경우 현재 점프 완료를 등록
+                jumps.push({
+                  from: path[0],
+                  to: { r: er, c: ec },
+                  path: newPath,
+                  captured: newCap,
+                  finalBoard: nextB,
+                  isJump: true,
+                  promoted: false
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // 모든 말에서 시작하는 점프 탐색
+    for (var r = 0; r < SIZE; r++) {
+      for (var c = 0; c < SIZE; c++) {
+        var p = b[r][c];
+        if ((player === 1 && p > 0) || (player === -1 && p < 0)) {
+          findSequences(b, r, c, [{ r: r, c: c }], []);
+        }
+      }
+    }
+
+    if (jumps.length > 0) {
+      return jumps;
+    }
+
+    // 점프가 없다면 단순 이동 목록을 반환
+    var simpleMoves = [];
+    var allSimple = getAllSimpleMoves(b, player);
+    for (var m = 0; m < allSimple.length; m++) {
+      var sm = allSimple[m];
+      var nb = cloneBoard(b);
+      var pieceVal = nb[sm.from.r][sm.from.c];
+      var isPromoted = false;
+      if (player === 1 && sm.to.r === 0 && pieceVal === 1) {
+        pieceVal = 2;
+        isPromoted = true;
+      } else if (player === -1 && sm.to.r === SIZE - 1 && pieceVal === -1) {
+        pieceVal = -2;
+        isPromoted = true;
+      }
+      nb[sm.from.r][sm.from.c] = 0;
+      nb[sm.to.r][sm.to.c] = pieceVal;
+      simpleMoves.push({
+        from: sm.from,
+        to: sm.to,
+        path: [sm.from, sm.to],
+        captured: [],
+        finalBoard: nb,
+        isJump: false,
+        promoted: isPromoted
+      });
+    }
+    return simpleMoves;
+  }
+
+  // 보드 평가 함수 (컴퓨터 관점 양수=컴퓨터 유리, 음수=사람 유리)
+  function evaluateBoard(b) {
+    var score = 0;
+    var counts = countPieces(b);
+
+    if (counts.human.total === 0) return 999999;
+    if (counts.ai.total === 0) return -999999;
+
+    // 말 개수 및 왕 가치
+    score += counts.ai.total * 100;
+    score += counts.ai.kings * 160;
+    score -= counts.human.total * 100;
+    score -= counts.human.kings * 160;
+
+    // 위치 기반 가중치
+    for (var r = 0; r < SIZE; r++) {
+      for (var c = 0; c < SIZE; c++) {
+        var p = b[r][c];
+        if (p === 0) continue;
+
+        if (p === -1) {
+          // 컴퓨터 일반 말 전진 보너스
+          score += r * 5;
+          // 컴퓨터 뒷줄 수비 보너스
+          if (r === 0) score += 12;
+        } else if (p === 1) {
+          // 사람 일반 말 전진 감점
+          score -= (7 - r) * 5;
+          // 사람 뒷줄 수비 감점
+          if (r === 7) score -= 12;
+        }
+
+        // 중앙 4칸 장악
+        if ((r === 3 || r === 4) && (c >= 2 && c <= 5)) {
+          score += (p < 0 ? 8 : -8);
+        }
+
+        // 외곽 안전성 (벽 쪽은 잡히지 않음)
+        if (c === 0 || c === 7) {
+          score += (p < 0 ? 4 : -4);
+        }
+      }
+    }
+    return score;
+  }
+
+  // Minimax with Alpha-Beta Pruning
+  function minimax(b, depth, alpha, beta, isMaximizing) {
+    var player = isMaximizing ? -1 : 1;
+    var moves = getTurnSequences(b, player);
+
+    if (moves.length === 0) {
+      // 움직일 수 없음 -> 패배
+      return isMaximizing ? -888888 : 888888;
+    }
+
+    if (depth <= 0) {
+      return evaluateBoard(b);
+    }
+
+    // Move Ordering: 점프(잡기) 우선 및 다중 잡기 우선
+    moves.sort(function (a, bMove) {
+      return (bMove.captured.length * 10 + (bMove.promoted ? 5 : 0)) - (a.captured.length * 10 + (a.promoted ? 5 : 0));
+    });
+
+    if (isMaximizing) {
+      var maxEval = -Infinity;
+      for (var i = 0; i < moves.length; i++) {
+        var ev = minimax(moves[i].finalBoard, depth - 1, alpha, beta, false);
+        if (ev > maxEval) maxEval = ev;
+        if (ev > alpha) alpha = ev;
+        if (beta <= alpha) break; // 가지치기
+      }
+      return maxEval;
+    } else {
+      var minEval = Infinity;
+      for (var j = 0; j < moves.length; j++) {
+        var ev2 = minimax(moves[j].finalBoard, depth - 1, alpha, beta, true);
+        if (ev2 < minEval) minEval = ev2;
+        if (ev2 < beta) beta = ev2;
+        if (beta <= alpha) break; // 가지치기
+      }
+      return minEval;
+    }
+  }
+
+  // 컴퓨터 AI 최선의 수 선택 (depth: 쉬움=2, 보통=4, 어려움=6)
+  function selectAiMove(b, level) {
+    var moves = getTurnSequences(b, -1);
+    if (!moves || moves.length === 0) return null;
+
+    var depth = 2;
+    if (level === 'normal') depth = 4;
+    else if (level === 'hard') depth = 6;
+
+    // 쉬움: 가끔 무작위성 부여
+    if (level === 'easy' && Math.random() < 0.28) {
+      return moves[Math.floor(Math.random() * moves.length)];
+    }
+
+    // 후보 수 정렬
+    moves.sort(function (a, bMove) {
+      return (bMove.captured.length * 10 + (bMove.promoted ? 5 : 0)) - (a.captured.length * 10 + (a.promoted ? 5 : 0));
+    });
+
+    var bestMove = moves[0];
+    var bestValue = -Infinity;
+    var alpha = -Infinity;
+    var beta = Infinity;
+
+    for (var i = 0; i < moves.length; i++) {
+      var m = moves[i];
+      var val = minimax(m.finalBoard, depth - 1, alpha, beta, false);
+      // 쉬움일 경우 약간의 노이즈
+      if (level === 'easy') {
+        val += (Math.random() * 30 - 15);
+      }
+      if (val > bestValue) {
+        bestValue = val;
+        bestMove = m;
+      }
+      if (val > alpha) alpha = val;
+    }
+    return bestMove;
+  }
+
+  // 로컬 스토리지 읽기
+  function loadStorage() {
+    try {
+      wins = parseInt(localStorage.getItem('zw_checkers-8_wins'), 10) || 0;
+      losses = parseInt(localStorage.getItem('zw_checkers-8_losses'), 10) || 0;
+      draws = parseInt(localStorage.getItem('zw_checkers-8_draws'), 10) || 0;
+
+      var re = localStorage.getItem('zw_checkers-8_best_easy');
+      var rn = localStorage.getItem('zw_checkers-8_best_normal');
+      var rh = localStorage.getItem('zw_checkers-8_best_hard');
+      if (re && !isNaN(parseInt(re, 10))) bestScores.easy = parseInt(re, 10);
+      if (rn && !isNaN(parseInt(rn, 10))) bestScores.normal = parseInt(rn, 10);
+      if (rh && !isNaN(parseInt(rh, 10))) bestScores.hard = parseInt(rh, 10);
+
+      var savedLvl = localStorage.getItem('zw_checkers-8_level');
+      if (savedLvl === 'hard' || savedLvl === 'normal' || savedLvl === 'easy') {
+        currentLevel = savedLvl;
+      } else {
+        currentLevel = 'easy';
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+    updateStatusDisplay();
+  }
+
+  // 화면 상태 텍스트 갱신
+  function updateStatusDisplay() {
+    var counts = countPieces(board);
+    statusCount.textContent = '나 ' + counts.human.total + ' : ' + counts.ai.total + ' 컴';
+    statusRecord.textContent = '전적 ' + wins + '승 ' + losses + '패 ' + draws + '무';
+
+    var bE = bestScores.easy ? bestScores.easy.toLocaleString() + '점' : '-';
+    var bN = bestScores.normal ? bestScores.normal.toLocaleString() + '점' : '-';
+    var bH = bestScores.hard ? bestScores.hard.toLocaleString() + '점' : '-';
+    statusBest.textContent = '최고 점수 · 쉬움 ' + bE + ' · 보통 ' + bN + ' · 어려움 ' + bH;
+  }
+
+  // 난이도 단추 상태 갱신
+  function updateLevelButtons() {
+    btnDiffEasy.classList.toggle('on', currentLevel === 'easy');
+    btnDiffNormal.classList.toggle('on', currentLevel === 'normal');
+    btnDiffHard.classList.toggle('on', currentLevel === 'hard');
+  }
+
+  // 덮개 설명 문구 갱신
+  function updateOverlayDesc() {
+    var lvlKorean = currentLevel === 'hard' ? '어려움' : (currentLevel === 'normal' ? '보통' : '쉬움');
+    var descText = lvlKorean + '으로 시작해요 (앞 ' + (currentLevel === 'hard' ? '6' : (currentLevel === 'normal' ? '4' : '2')) + '수 읽기)';
+    if (overlayDesc) overlayDesc.textContent = descText;
+  }
+
+  // 순위표 탭 동기화 (오목의 syncRankTab 방식)
+  function syncRankTab() {
+    try {
+      var idx = currentLevel === 'hard' ? 2 : (currentLevel === 'normal' ? 1 : 0);
+      if (window.ZW) window.ZW.rankPick = idx;
+      var b = document.querySelector('.rk-tabs button[data-i="' + idx + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  // 난이도 변경 함수
+  function setLevel(lvl) {
+    if (lvl === currentLevel) return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_checkers-8_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    resetToReadyState();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // 새 판 준비 상태로 리셋
+  function resetToReadyState() {
+    if (aiTimer) {
+      clearTimeout(aiTimer);
+      aiTimer = null;
+    }
+    isThinking = false;
+    gameState = 'ready';
+    turn = 1;
+    board = createInitialBoard();
+    selectedPiece = null;
+    validMovesForSelected = [];
+    mandatoryJumpsExist = false;
+    piecesWithJumps = [];
+    historyStack = [];
+    undoCount = 2;
+    lastMoveHighlight = null;
+    moveCount = 0;
+
+    overlayBox.style.display = 'flex';
+    overlayTitle.textContent = '체커 8×8';
+    overlayScoreBox.style.display = 'none';
+    btnOverlayRank.style.display = 'none';
+    btnStartGame.textContent = '게임 시작';
+    updateOverlayDesc();
+
+    statusTurn.textContent = '내 차례';
+    updateUndoButton();
+    updateStatusDisplay();
+    render();
+  }
+
+  // 새 게임 시작
+  function startNewGame() {
+    if (aiTimer) {
+      clearTimeout(aiTimer);
+      aiTimer = null;
+    }
+    isThinking = false;
+    board = createInitialBoard();
+    selectedPiece = null;
+    validMovesForSelected = [];
+    historyStack = [];
+    undoCount = 2;
+    lastMoveHighlight = null;
+    moveCount = 0;
+    turn = 1;
+    gameState = 'playing';
+
+    overlayBox.style.display = 'none';
+    statusTurn.textContent = '내 차례';
+    updateUndoButton();
+    updateStatusDisplay();
+    checkHumanTurnState();
+    render();
+  }
+
+  // 사람 턴 상태 점검 (강제 잡기 유무 파악)
+  function checkHumanTurnState() {
+    var jumps = getAllJumps(board, 1);
+    if (jumps.length > 0) {
+      mandatoryJumpsExist = true;
+      var uniquePieces = {};
+      piecesWithJumps = [];
+      for (var i = 0; i < jumps.length; i++) {
+        var key = jumps[i].from.r + ',' + jumps[i].from.c;
+        if (!uniquePieces[key]) {
+          uniquePieces[key] = true;
+          piecesWithJumps.push(jumps[i].from);
+        }
+      }
+      statusTurn.textContent = '내 차례 · 상대를 잡으세요!';
+    } else {
+      mandatoryJumpsExist = false;
+      piecesWithJumps = [];
+      // 둘 수 있는 단순 이동이 있는지 확인
+      var simples = getAllSimpleMoves(board, 1);
+      if (simples.length === 0) {
+        // 움직일 수 없음 -> 패배
+        handleGameOver('lost');
+        return;
+      }
+      statusTurn.textContent = '내 차례';
+    }
+  }
+
+  // 한 수 물리기 버튼 갱신
+  function updateUndoButton() {
+    btnUndo.textContent = '한 수 물리기 (' + undoCount + '회 남음)';
+    if (undoCount <= 0 || historyStack.length === 0 || (gameState !== 'playing' && gameState !== 'multi_jump') || turn !== 1 || isThinking) {
+      btnUndo.disabled = true;
+    } else {
+      btnUndo.disabled = false;
+    }
+  }
+
+  // 캔버스 크기 및 디스플레이 비율 맞추기
+  var metrics = {
+    size: 420,
+    step: 52.5,
+    radius: 21
+  };
+
+  function updateMetrics() {
+    var rect = canvas.getBoundingClientRect();
+    var width = rect.width || 420;
+    var dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(width * dpr);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+
+    metrics.size = width;
+    metrics.step = width / SIZE;
+    metrics.radius = metrics.step * 0.40;
+  }
+
+  // 왕관 문양 그리기 (Canvas 2D 직접 작성, 이모지 없음)
+  function drawCrown(cx, cy, r, color) {
+    ctx.save();
+    var w = r * 1.05;
+    var h = r * 0.72;
+    var topY = cy - h * 0.55;
+    var botY = cy + h * 0.45;
+    var leftX = cx - w * 0.5;
+    var rightX = cx + w * 0.5;
+
+    ctx.beginPath();
+    // 왕관 밑단
+    ctx.moveTo(leftX, botY);
+    ctx.lineTo(rightX, botY);
+    // 우측 기둥
+    ctx.lineTo(rightX + w * 0.08, topY);
+    // 우측 꺾임
+    ctx.lineTo(cx + w * 0.22, cy - h * 0.05);
+    // 중앙 뾰족 꼭지
+    ctx.lineTo(cx, topY - h * 0.20);
+    // 좌측 꺾임
+    ctx.lineTo(cx - w * 0.22, cy - h * 0.05);
+    // 좌측 기둥
+    ctx.lineTo(leftX - w * 0.08, topY);
+    ctx.closePath();
+
+    ctx.fillStyle = color;
+    ctx.fill();
+
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.stroke();
+
+    // 왕관 밑단 밴드 디테일
+    ctx.beginPath();
+    ctx.arc(cx, botY - h * 0.12, w * 0.08, 0, Math.PI * 2);
+    ctx.arc(cx - w * 0.26, botY - h * 0.12, w * 0.07, 0, Math.PI * 2);
+    ctx.arc(cx + w * 0.26, botY - h * 0.12, w * 0.07, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // 체커 말 그리기
+  function drawCheckerPiece(cx, cy, piece, radius) {
+    var isHuman = piece > 0;
+    var isKing = Math.abs(piece) === 2;
+
+    ctx.save();
+    // 바닥 그림자
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.38)';
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetX = 1.5;
+    ctx.shadowOffsetY = 2.5;
+
+    // 외부 본체 그라데이션
+    var grad = ctx.createRadialGradient(cx - radius * 0.3, cy - radius * 0.3, radius * 0.1, cx, cy, radius);
+    if (isHuman) {
+      // 사람: 세련된 펄 아이보리 / 화이트
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.65, '#f0ede6');
+      grad.addColorStop(1, '#c9c2b5');
+    } else {
+      // 컴퓨터: 흑요석 다크 차콜
+      grad.addColorStop(0, '#4a4a4e');
+      grad.addColorStop(0.6, '#222224');
+      grad.addColorStop(1, '#0c0c0e');
+    }
+
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 그림자 끄고 내부 링 음각 디테일
+    ctx.shadowColor = 'transparent';
+    ctx.lineWidth = 1.4;
+    ctx.strokeStyle = isHuman ? 'rgba(160, 150, 135, 0.65)' : 'rgba(80, 80, 85, 0.75)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 0.75, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius * 0.48, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 외곽 테두리 림
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = isHuman ? '#b5aca0' : '#111113';
+    ctx.beginPath();
+    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // 왕(King)이면 황금 왕관 그리기
+    if (isKing) {
+      drawCrown(cx, cy, radius * 0.85, '#ffd60a');
+    }
+
+    ctx.restore();
+  }
+
+  // 전체 화면 렌더링
+  function render() {
+    updateMetrics();
+
+    var size = metrics.size;
+    var step = metrics.step;
+    var radius = metrics.radius;
+
+    ctx.clearRect(0, 0, size, size);
+
+    // 1. 8×8 체커보드 타일 그리기
+    for (var r = 0; r < SIZE; r++) {
+      for (var c = 0; c < SIZE; c++) {
+        var x = c * step;
+        var y = r * step;
+        var isDark = (r + c) % 2 === 1;
+
+        if (isDark) {
+          // 어두운 타일 (월넛 우드)
+          ctx.fillStyle = '#6d411a';
+          ctx.fillRect(x, y, step, step);
+          // 미세 내부 음영
+          ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(x + 0.5, y + 0.5, step - 1, step - 1);
+        } else {
+          // 밝은 타일 (메이플 우드)
+          ctx.fillStyle = '#eed9b3';
+          ctx.fillRect(x, y, step, step);
+        }
+      }
+    }
+
+    // 2. 이전 수 하이라이트 (from -> to)
+    if (lastMoveHighlight) {
+      ctx.fillStyle = 'rgba(255, 214, 10, 0.24)';
+      ctx.fillRect(lastMoveHighlight.from.c * step, lastMoveHighlight.from.r * step, step, step);
+      ctx.fillRect(lastMoveHighlight.to.c * step, lastMoveHighlight.to.r * step, step, step);
+    }
+
+    // 3. 내 턴이고 강제 잡기 가능한 말 하이라이트 (부드러운 빨간 펄스 링)
+    if (turn === 1 && (gameState === 'playing' || gameState === 'multi_jump') && mandatoryJumpsExist) {
+      ctx.save();
+      for (var pj = 0; pj < piecesWithJumps.length; pj++) {
+        var ppos = piecesWithJumps[pj];
+        var px = ppos.c * step + step * 0.5;
+        var py = ppos.r * step + step * 0.5;
+
+        ctx.strokeStyle = '#e5484d';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(px, py, radius + 4, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 4. 선택된 말 하이라이트
+    if (selectedPiece) {
+      var sx = selectedPiece.c * step + step * 0.5;
+      var sy = selectedPiece.r * step + step * 0.5;
+
+      ctx.save();
+      // 바닥 칸 오렌지 하이라이트
+      ctx.fillStyle = 'rgba(255, 149, 0, 0.28)';
+      ctx.fillRect(selectedPiece.c * step, selectedPiece.r * step, step, step);
+
+      // 말 주변 빛나는 링
+      ctx.strokeStyle = '#ff9500';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(sx, sy, radius + 4, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 5. 체커 말 그리기
+    for (var row = 0; row < SIZE; row++) {
+      for (var col = 0; col < SIZE; col++) {
+        var pieceVal = board[row][col];
+        if (pieceVal !== 0) {
+          var cx = col * step + step * 0.5;
+          var cy = row * step + step * 0.5;
+          drawCheckerPiece(cx, cy, pieceVal, radius);
+        }
+      }
+    }
+
+    // 6. 선택된 말이 이동/점프 가능한 칸 표시
+    if (selectedPiece && validMovesForSelected.length > 0) {
+      ctx.save();
+      for (var vi = 0; vi < validMovesForSelected.length; vi++) {
+        var vm = validMovesForSelected[vi];
+        var destX = vm.to.c * step + step * 0.5;
+        var destY = vm.to.r * step + step * 0.5;
+
+        if (vm.isJump) {
+          // 점프(상대 말을 잡는 칸): 빨간색 타겟 링
+          ctx.strokeStyle = '#e5484d';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(destX, destY, radius * 0.55, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.fillStyle = 'rgba(229, 72, 77, 0.65)';
+          ctx.beginPath();
+          ctx.arc(destX, destY, radius * 0.25, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // 단순 이동 칸: 녹색/골드 반투명 점
+          ctx.fillStyle = 'rgba(52, 199, 89, 0.85)';
+          ctx.beginPath();
+          ctx.arc(destX, destY, radius * 0.35, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+  }
+
+  // 판 좌표 찾기
+  function getSquareFromPoint(px, py) {
+    var step = metrics.step;
+    var c = Math.floor(px / step);
+    var r = Math.floor(py / step);
+    if (r >= 0 && r < SIZE && c >= 0 && c < SIZE) {
+      return { r: r, c: c };
+    }
+    return null;
+  }
+
+  // 사용자 터치 / 클릭 처리
+  function handleBoardInput(e) {
+    if (gameState !== 'playing' && gameState !== 'multi_jump') return;
+    if (turn !== 1 || isThinking) return;
+
+    var rect = canvas.getBoundingClientRect();
+    var clientX = e.clientX;
+    var clientY = e.clientY;
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    }
+
+    var px = clientX - rect.left;
+    var py = clientY - rect.top;
+    var sq = getSquareFromPoint(px, py);
+    if (!sq) return;
+
+    // 만약 연속 잡기 중이면 다른 말을 선택할 수 없음
+    if (gameState === 'multi_jump') {
+      // 오직 선택된 말의 점프 목적지만 클릭 가능
+      var chosenJump = null;
+      for (var j = 0; j < validMovesForSelected.length; j++) {
+        if (validMovesForSelected[j].to.r === sq.r && validMovesForSelected[j].to.c === sq.c) {
+          chosenJump = validMovesForSelected[j];
+          break;
+        }
+      }
+      if (chosenJump) {
+        executeHumanMove(chosenJump);
+      }
+      return;
+    }
+
+    var clickedPiece = board[sq.r][sq.c];
+
+    // 1. 내 말을 클릭한 경우 -> 선택
+    if (clickedPiece > 0) {
+      // 강제 잡기가 존재할 경우, 잡기가 가능한 말만 선택 가능
+      if (mandatoryJumpsExist) {
+        var isPieceWithJump = false;
+        for (var p = 0; p < piecesWithJumps.length; p++) {
+          if (piecesWithJumps[p].r === sq.r && piecesWithJumps[p].c === sq.c) {
+            isPieceWithJump = true;
+            break;
+          }
+        }
+        if (!isPieceWithJump) {
+          // 잡기가 가능한 다른 말이 있음 -> 알림
+          statusTurn.textContent = '잡을 수 있는 말을 먼저 골라주세요!';
+          return;
+        }
+        // 이 말의 점프 목록 로드
+        var jumps = getSingleJumpsForPiece(board, sq.r, sq.c, 1);
+        selectedPiece = { r: sq.r, c: sq.c };
+        validMovesForSelected = jumps;
+        playSound('select');
+        render();
+      } else {
+        // 일반 이동 가능 목록 로드
+        var moves = getSimpleMovesForPiece(board, sq.r, sq.c, 1);
+        if (moves.length === 0) return;
+        selectedPiece = { r: sq.r, c: sq.c };
+        validMovesForSelected = moves;
+        playSound('select');
+        render();
+      }
+      return;
+    }
+
+    // 2. 이미 선택된 상태에서 목적지 칸을 클릭한 경우
+    if (selectedPiece && validMovesForSelected.length > 0) {
+      var matchedMove = null;
+      for (var m = 0; m < validMovesForSelected.length; m++) {
+        if (validMovesForSelected[m].to.r === sq.r && validMovesForSelected[m].to.c === sq.c) {
+          matchedMove = validMovesForSelected[m];
+          break;
+        }
+      }
+
+      if (matchedMove) {
+        executeHumanMove(matchedMove);
+      } else {
+        // 빈 곳 클릭 시 선택 해제 (단, 강제 잡기일 때는 유지)
+        if (!mandatoryJumpsExist) {
+          selectedPiece = null;
+          validMovesForSelected = [];
+          render();
+        }
+      }
+    }
+  }
+
+  // 사람 수 실행
+  function executeHumanMove(moveObj) {
+    // 한 수 물리기용 히스토리 저장
+    historyStack.push({
+      board: cloneBoard(board),
+      turn: turn,
+      undoCount: undoCount,
+      moveCount: moveCount,
+      mandatoryJumpsExist: mandatoryJumpsExist,
+      lastMoveHighlight: lastMoveHighlight ? {
+        from: { r: lastMoveHighlight.from.r, c: lastMoveHighlight.from.c },
+        to: { r: lastMoveHighlight.to.r, c: lastMoveHighlight.to.c }
+      } : null
+    });
+
+    var fromR = moveObj.from.r, fromC = moveObj.from.c;
+    var toR = moveObj.to.r, toC = moveObj.to.c;
+    var pieceVal = board[fromR][fromC];
+
+    board[fromR][fromC] = 0;
+    if (moveObj.isJump && moveObj.captured) {
+      board[moveObj.captured.r][moveObj.captured.c] = 0;
+      playSound('capture');
+    } else {
+      playSound('move');
+    }
+
+    // 왕 승급 체크 (행 0 도달)
+    var promoted = false;
+    if (pieceVal === 1 && toR === 0) {
+      pieceVal = 2;
+      promoted = true;
+      playSound('king');
+    }
+    board[toR][toC] = pieceVal;
+    lastMoveHighlight = { from: { r: fromR, c: fromC }, to: { r: toR, c: toC } };
+    moveCount++;
+
+    updateStatusDisplay();
+
+    // 점프였고 승급하지 않았다면 연속 잡기(Multi-Jump) 확인
+    if (moveObj.isJump && !promoted) {
+      var nextJumps = getSingleJumpsForPiece(board, toR, toC, 1);
+      if (nextJumps.length > 0) {
+        // 연속 잡기 계속 진행
+        gameState = 'multi_jump';
+        selectedPiece = { r: toR, c: toC };
+        validMovesForSelected = nextJumps;
+        mandatoryJumpsExist = true;
+        piecesWithJumps = [{ r: toR, c: toC }];
+        statusTurn.textContent = '연속으로 잡으세요!';
+        updateUndoButton();
+        render();
+        return;
+      }
+    }
+
+    // 턴 완료 -> 승패 확인 또는 컴퓨터 차례 전환
+    selectedPiece = null;
+    validMovesForSelected = [];
+    mandatoryJumpsExist = false;
+    piecesWithJumps = [];
+
+    var counts = countPieces(board);
+    if (counts.ai.total === 0) {
+      handleGameOver('won');
+      return;
+    }
+
+    // 컴퓨터 차례로 전환
+    turn = -1;
+    gameState = 'playing';
+    isThinking = true;
+    statusTurn.textContent = '컴퓨터 생각 중…';
+    updateUndoButton();
+    render();
+
+    aiTimer = setTimeout(function () {
+      aiTimer = null;
+      if (gameState !== 'playing') return;
+      executeAiTurn();
+    }, 420);
+  }
+
+  // 컴퓨터 수 실행 (연속 잡기 시 순차 애니메이션)
+  function executeAiTurn() {
+    var aiTurnMove = selectAiMove(board, currentLevel);
+    isThinking = false;
+
+    if (!aiTurnMove) {
+      // 둘 수가 없음 -> 사람 승리!
+      handleGameOver('won');
+      return;
+    }
+
+    // 시퀀스가 다중 점프인 경우 단계별로 실행
+    var path = aiTurnMove.path;
+    var captured = aiTurnMove.captured;
+
+    if (aiTurnMove.isJump && path.length > 2) {
+      // 2단 이상의 연속 점프: 220ms 간격으로 하나씩 착-착 뛰기
+      var stepIdx = 0;
+      function stepAiJump() {
+        if (gameState !== 'playing') return;
+        var pFrom = path[stepIdx];
+        var pTo = path[stepIdx + 1];
+        var pCap = captured[stepIdx];
+
+        var curPiece = board[pFrom.r][pFrom.c];
+        board[pFrom.r][pFrom.c] = 0;
+        board[pCap.r][pCap.c] = 0;
+
+        var isPromoted = false;
+        if (curPiece === -1 && pTo.r === SIZE - 1) {
+          curPiece = -2;
+          isPromoted = true;
+          playSound('king');
+        } else {
+          playSound('capture');
+        }
+
+        board[pTo.r][pTo.c] = curPiece;
+        lastMoveHighlight = { from: pFrom, to: pTo };
+        updateStatusDisplay();
+        render();
+
+        stepIdx++;
+        if (stepIdx < path.length - 1 && !isPromoted) {
+          aiTimer = setTimeout(stepAiJump, 220);
+        } else {
+          finishAiTurn();
+        }
+      }
+      stepAiJump();
+    } else {
+      // 단일 이동 또는 1단 점프 즉시 실행
+      board = aiTurnMove.finalBoard;
+      lastMoveHighlight = { from: aiTurnMove.from, to: aiTurnMove.to };
+      if (aiTurnMove.isJump) {
+        playSound('capture');
+      } else {
+        playSound('move');
+      }
+      if (aiTurnMove.promoted) {
+        playSound('king');
+      }
+      finishAiTurn();
+    }
+  }
+
+  // 컴퓨터 턴 종료 후 판정 및 사람 턴 전환
+  function finishAiTurn() {
+    updateStatusDisplay();
+
+    var counts = countPieces(board);
+    if (counts.human.total === 0) {
+      handleGameOver('lost');
+      return;
+    }
+
+    // 사람 턴 복귀
+    turn = 1;
+    checkHumanTurnState();
+    updateUndoButton();
+    render();
+  }
+
+  // 게임 종료 처리 (점수 계산 및 최고 기록 저장)
+  function handleGameOver(result) {
+    if (aiTimer) {
+      clearTimeout(aiTimer);
+      aiTimer = null;
+    }
+    isThinking = false;
+    gameState = result;
+    selectedPiece = null;
+    validMovesForSelected = [];
+
+    var counts = countPieces(board);
+    var finalScore = 0;
+    var isNewBest = false;
+
+    if (result === 'won') {
+      playSound('win');
+      wins++;
+      try {
+        localStorage.setItem('zw_checkers-8_wins', String(wins));
+      } catch (e) {}
+
+      // 점수 계산: (남은 내 말 수 × 100 + 왕 수 × 50) × 난이도 배수
+      var mult = currentLevel === 'hard' ? 3 : (currentLevel === 'normal' ? 2 : 1);
+      finalScore = (counts.human.total * 100 + counts.human.kings * 50) * mult;
+      finalScore = Math.min(99999999, Math.max(0, Math.floor(finalScore)));
+
+      var prevBest = bestScores[currentLevel] || 0;
+      if (finalScore > prevBest) {
+        bestScores[currentLevel] = finalScore;
+        isNewBest = true;
+        try {
+          var key = 'zw_checkers-8_best_' + currentLevel;
+          localStorage.setItem(key, String(finalScore));
+        } catch (e) {}
+      }
+
+      statusTurn.textContent = '이겼어요! (' + finalScore.toLocaleString() + '점)';
+      overlayTitle.textContent = '🎉 승리했습니다!';
+      var scoreHtml = '획득 점수: <b>' + finalScore.toLocaleString() + '점</b>';
+      scoreHtml += '<br><small style="color:#a1a1a6;">(말 ' + counts.human.total + '개 × 100 + 왕 ' + counts.human.kings + '개 × 50) × 난이도 ' + mult + '배</small>';
+      if (isNewBest) {
+        scoreHtml += '<br><span style="color:#34c759; font-weight:800;">✨ 최고 점수 갱신!</span>';
+      }
+      overlayScoreBox.innerHTML = scoreHtml;
+      overlayScoreBox.style.display = 'block';
+      btnOverlayRank.style.display = 'block';
+    } else if (result === 'lost') {
+      playSound('lose');
+      losses++;
+      try {
+        localStorage.setItem('zw_checkers-8_losses', String(losses));
+      } catch (e) {}
+      statusTurn.textContent = '졌어요';
+      overlayTitle.textContent = '아쉽게 졌어요';
+      overlayScoreBox.innerHTML = '컴퓨터의 지혜가 한 수 위였습니다.<br><small style="color:#a1a1a6;">다시 도전하여 컴퓨터를 꺾어보세요!</small>';
+      overlayScoreBox.style.display = 'block';
+      btnOverlayRank.style.display = 'none';
+    } else {
+      draws++;
+      try {
+        localStorage.setItem('zw_checkers-8_draws', String(draws));
+      } catch (e) {}
+      statusTurn.textContent = '비겼어요';
+      overlayTitle.textContent = '비겼어요';
+      overlayScoreBox.innerHTML = '양쪽 모두 팽팽한 접전이었습니다.';
+      overlayScoreBox.style.display = 'block';
+      btnOverlayRank.style.display = 'none';
+    }
+
+    btnStartGame.textContent = '다시 하기';
+    overlayBox.style.display = 'flex';
+    updateUndoButton();
+    updateStatusDisplay();
+    render();
+  }
+
+  // 한 수 물리기
+  btnUndo.addEventListener('click', function () {
+    if (historyStack.length === 0 || undoCount <= 0) return;
+    if (gameState !== 'playing' && gameState !== 'multi_jump') return;
+    if (turn !== 1 || isThinking) return;
+
+    var prev = historyStack.pop();
+    board = prev.board;
+    turn = prev.turn;
+    moveCount = prev.moveCount;
+    lastMoveHighlight = prev.lastMoveHighlight;
+    mandatoryJumpsExist = prev.mandatoryJumpsExist;
+
+    undoCount--;
+    selectedPiece = null;
+    validMovesForSelected = [];
+    gameState = 'playing';
+
+    checkHumanTurnState();
+    updateUndoButton();
+    updateStatusDisplay();
+    render();
+  });
+
+  // 다시 하기
+  btnRestart.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  // 덮개 시작 단추
+  btnStartGame.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  // 결과 창의 🏆 순위표 올리기 단추 (#btnOverlayRank)
+  btnOverlayRank.addEventListener('click', function () {
+    // 공용 순위표 jump 버튼이 있으면 클릭, 없으면 .zw-rank로 스크롤
+    var rkJump = document.querySelector('.zw-rk-jump');
+    if (rkJump && rkJump.style.display !== 'none') {
+      rkJump.click();
+    } else {
+      var rkSec = document.querySelector('.zw-rank');
+      if (rkSec) {
+        rkSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        rkSec.classList.add('flash');
+        setTimeout(function () { rkSec.classList.remove('flash'); }, 1800);
+      }
+    }
+  });
+
+  // 캔버스 입력 이벤트 바인딩
+  canvas.addEventListener('click', handleBoardInput);
+  canvas.addEventListener('touchend', function (e) {
+    e.preventDefault();
+    handleBoardInput(e);
+  }, { passive: false });
+
+  // 화면 크기 조정 시 리사이즈 렌더
+  window.addEventListener('resize', function () {
+    render();
+  });
+
+  // 초기 로드 실행
+  loadStorage();
+  render();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/four-in-row/">4목 맞추기</a> — 컴퓨터와 4개 먼저 잇기</li><li><a href="/water-sort/">물 정렬</a> — 색깔별로 물을 병에 모으기</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/klondike-solitaire/">솔리테어</a> — 카드를 순서대로 쌓아 완성하기</li><li><a href="/box-push/">상자 밀기</a> — 상자를 목표 칸으로 밀기</li><li><a href="/pipe-connect/">파이프 잇기</a> — 돌려서 물길 연결하기</li><li><a href="/checkers-8/">체커</a> — 컴퓨터와 체커 한 판</li><li><a href="/fleet-hunt/">함대 맞히기</a> — 좌표를 찍어 상대 함대 찾기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

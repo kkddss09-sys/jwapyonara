@@ -101,6 +101,11 @@ var TOOLS = [
   ['yutnori', '윷놀이', '컴퓨터와 윷 한 판', '게임', true, '두뇌'],
   ['mahjong-match', '마작 짝 맞추기', '같은 패 짝지어 없애기', '게임', true, '퍼즐'],
   ['reversi-flip', '돌 뒤집기', '컴퓨터와 돌 뒤집기 대결', '게임', true, '두뇌'],
+  ['klondike-solitaire', '솔리테어', '카드를 순서대로 쌓아 완성하기', '게임', true, '퍼즐'],
+  ['box-push', '상자 밀기', '상자를 목표 칸으로 밀기', '게임', true, '퍼즐'],
+  ['pipe-connect', '파이프 잇기', '돌려서 물길 연결하기', '게임', true, '퍼즐'],
+  ['checkers-8', '체커', '컴퓨터와 체커 한 판', '게임', true, '두뇌'],
+  ['fleet-hunt', '함대 맞히기', '좌표를 찍어 상대 함대 찾기', '게임', true, '두뇌'],
   ['merge-numbers', '숫자 합치기', '같은 숫자를 밀어서 합치기', '게임', true, '퍼즐'],
   ['memory-match', '휴대폰 짝 맞추기', '같은 그림 두 장 찾기', '게임', true, '퍼즐'],
   ['sci-calc', '공학용 계산기', '삼각함수, 로그, 제곱, 괄호', '생활', true, '계산'],
@@ -195,6 +200,11 @@ var RANKS = {
   ,'yutnori': { label: '윷놀이 · 점수', better: 'high', unit: '점', variants: [{ id: 'yutnori-easy', key: 'zw_yutnori_best_easy', name: '쉬움' }, { id: 'yutnori-normal', key: 'zw_yutnori_best_normal', name: '보통' }, { id: 'yutnori-hard', key: 'zw_yutnori_best_hard', name: '어려움' }] }
   ,'mahjong-match': { label: '마작 짝 맞추기 · 점수', better: 'high', unit: '점', variants: [{ id: 'mahjong-match-easy', key: 'zw_mahjong-match_best_easy', name: '쉬움' }, { id: 'mahjong-match-normal', key: 'zw_mahjong-match_best_normal', name: '보통' }, { id: 'mahjong-match-hard', key: 'zw_mahjong-match_best_hard', name: '어려움' }] }
   ,'reversi-flip': { label: '돌 뒤집기 · 점수', better: 'high', unit: '점', variants: [{ id: 'reversi-flip-easy', key: 'zw_reversi-flip_best_easy', name: '쉬움' }, { id: 'reversi-flip-normal', key: 'zw_reversi-flip_best_normal', name: '보통' }, { id: 'reversi-flip-hard', key: 'zw_reversi-flip_best_hard', name: '어려움' }] }
+  ,'klondike-solitaire': { label: '솔리테어 · 점수', better: 'high', unit: '점', variants: [{ id: 'klondike-solitaire-easy', key: 'zw_klondike-solitaire_best_easy', name: '쉬움' }, { id: 'klondike-solitaire-normal', key: 'zw_klondike-solitaire_best_normal', name: '보통' }, { id: 'klondike-solitaire-hard', key: 'zw_klondike-solitaire_best_hard', name: '어려움' }] }
+  ,'box-push': { label: '상자 밀기 · 점수', better: 'high', unit: '점', variants: [{ id: 'box-push-easy', key: 'zw_box-push_best_easy', name: '쉬움' }, { id: 'box-push-normal', key: 'zw_box-push_best_normal', name: '보통' }, { id: 'box-push-hard', key: 'zw_box-push_best_hard', name: '어려움' }] }
+  ,'pipe-connect': { label: '파이프 잇기 · 점수', better: 'high', unit: '점', variants: [{ id: 'pipe-connect-easy', key: 'zw_pipe-connect_best_easy', name: '쉬움' }, { id: 'pipe-connect-normal', key: 'zw_pipe-connect_best_normal', name: '보통' }, { id: 'pipe-connect-hard', key: 'zw_pipe-connect_best_hard', name: '어려움' }] }
+  ,'checkers-8': { label: '체커 · 점수', better: 'high', unit: '점', variants: [{ id: 'checkers-8-easy', key: 'zw_checkers-8_best_easy', name: '쉬움' }, { id: 'checkers-8-normal', key: 'zw_checkers-8_best_normal', name: '보통' }, { id: 'checkers-8-hard', key: 'zw_checkers-8_best_hard', name: '어려움' }] }
+  ,'fleet-hunt': { label: '함대 맞히기 · 점수', better: 'high', unit: '점', variants: [{ id: 'fleet-hunt-easy', key: 'zw_fleet-hunt_best_easy', name: '쉬움' }, { id: 'fleet-hunt-normal', key: 'zw_fleet-hunt_best_normal', name: '보통' }, { id: 'fleet-hunt-hard', key: 'zw_fleet-hunt_best_hard', name: '어려움' }] }
 };
 
 // ▼ 숫자 도우미 — 도구마다 다시 만들지 않게 여기 둔다

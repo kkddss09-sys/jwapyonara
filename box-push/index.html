@@ -1,0 +1,1530 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>상자 밀기 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 즐기는 무료 상자 밀기 두뇌 퍼즐 게임. 창고 안의 상자들을 목표 칸으로 모두 밀어 넣으세요. 쉬움, 보통, 어려움 20개 단계를 휴대폰과 PC에서 즐겨보세요.">
+<link rel="canonical" href="https://jwapyonara.com/box-push/">
+<meta property="og:title" content="상자 밀기 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 즐기는 무료 상자 밀기 두뇌 퍼즐 게임. 20개 단계에 도전해보세요.">
+<meta property="og:url" content="https://jwapyonara.com/box-push/">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "상자 밀기",
+  "url": "https://jwapyonara.com/box-push/",
+  "description": "창고 안에서 상자를 밀어 목표 칸에 모두 채워 넣는 무료 두뇌 퍼즐 게임",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All"
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.15s ease;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 정보 표시 바 */
+.bp-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+}
+.bp-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+.bp-status-mid {
+  color: #ffffff;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+.bp-status-right {
+  color: #30d158;
+  flex: 1.2;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 800;
+}
+.bp-best-line {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 게임 캔버스 감싸개 */
+.bp-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 12px;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #1c1c1e;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: default;
+}
+
+/* 판 위 오버레이 (시작 전 / 단계 완료 / 전체 클리어) */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 18, 20, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  z-index: 10;
+  backdrop-filter: blur(2px);
+}
+.canvas-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 8px;
+  color: #ffd60a;
+}
+.canvas-overlay p {
+  font-size: 15px;
+  margin: 0 0 18px;
+  color: #e5e5ea;
+  max-width: 300px;
+  line-height: 1.45;
+}
+.canvas-overlay .overlay-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 240px;
+}
+.canvas-overlay .btn-main-action {
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  background: var(--red, #e5484d);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+}
+.canvas-overlay .btn-main-action:active {
+  opacity: 0.85;
+}
+.canvas-overlay .btn-sub-action {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  background: #3a3a3c;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  min-height: 44px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+}
+.canvas-overlay .btn-rank-action {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  background: #ffd60a;
+  color: #1c1c1e;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+}
+
+/* 제어 단추 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+  transition: background 0.15s ease;
+}
+.btn-undo {
+  background: var(--card, #fff);
+  border: 1.5px solid var(--line, #e5e5ea);
+  color: var(--ink, #1c1c1e);
+}
+.btn-undo:active:not(:disabled) {
+  background: var(--soft, #f2f2f7);
+}
+.btn-undo:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-stage-reset {
+  background: #3a3a3c;
+  color: #fff;
+}
+.btn-stage-reset:active {
+  background: #48484a;
+}
+
+/* 방향 조작 D-Pad */
+.dpad-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 12px auto 8px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.dpad-row {
+  display: flex;
+  gap: 8px;
+}
+.dpad-btn {
+  width: 60px;
+  height: 52px;
+  border-radius: 14px;
+  background: var(--card, #ffffff);
+  border: 1.5px solid var(--line, #e5e5ea);
+  color: var(--ink, #1c1c1e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.dpad-btn:active {
+  background: var(--soft, #f2f2f7);
+  transform: scale(0.96);
+}
+.dpad-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  pointer-events: none;
+}
+
+/* 추가 옵션 줄 (소리 토글) */
+.options-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 4px 10px;
+  font-size: 14px;
+}
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+.check-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--red, #e5484d);
+  cursor: pointer;
+}
+.options-tip {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+}
+
+.bottom-restart-wrap {
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+.btn-all-restart {
+  width: 100%;
+  min-height: 46px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid var(--line, #e5e5ea);
+  background: var(--card, #fff);
+  color: var(--ink, #1c1c1e);
+  touch-action: manipulation;
+}
+.btn-all-restart:active {
+  background: var(--soft, #f2f2f7);
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>상자 밀기<br>창고의 상자를 모두 옮겨보세요</h1>
+  <p class="lead">사람을 움직여 상자를 밀고, 모든 목표 칸에 채워 넣으면 단계가 끝납니다. 가입 없이 바로 즐겨보세요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="bp-status-bar">
+      <div class="bp-status-left" id="statusStage">1 / 8 단계</div>
+      <div class="bp-status-mid" id="statusMoves">이동 0</div>
+      <div class="bp-status-right" id="statusScore">0점</div>
+    </div>
+    <div class="bp-best-line" id="statusBest"></div>
+
+    <div class="bp-canvas-wrap" id="canvasWrap">
+      <canvas id="gameCanvas" width="420" height="420"></canvas>
+      <div class="canvas-overlay" id="overlayBox">
+        <h2 id="overlayTitle">상자 밀기</h2>
+        <p id="overlayDesc">쉬움 8단계에 도전하세요.<br>상자를 밀어 목표 칸에 모두 채워 넣으면 승리합니다.</p>
+        <div class="overlay-btn-group">
+          <button type="button" class="btn-main-action" id="btnOverlayAction">게임 시작</button>
+          <button type="button" class="btn-rank-action" id="btnOverlayRank" style="display:none;">🏆 순위표 올리기</button>
+          <button type="button" class="btn-sub-action" id="btnOverlaySub" style="display:none;">처음부터 다시</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-undo" id="btnUndo" disabled>되돌리기</button>
+      <button type="button" class="btn-action btn-stage-reset" id="btnResetStage">단계 다시 시작</button>
+    </div>
+
+    <!-- 터치 방향 조작 D-Pad -->
+    <div class="dpad-container" aria-label="방향 조작 버튼">
+      <div class="dpad-row">
+        <button type="button" class="dpad-btn" id="btnUp" aria-label="위로">
+          <svg viewBox="0 0 24 24"><path d="M12 4l-7 7h4v9h6v-9h4z"/></svg>
+        </button>
+      </div>
+      <div class="dpad-row">
+        <button type="button" class="dpad-btn" id="btnLeft" aria-label="왼쪽으로">
+          <svg viewBox="0 0 24 24"><path d="M4 12l7-7v4h9v6h-9v4z"/></svg>
+        </button>
+        <button type="button" class="dpad-btn" id="btnDown" aria-label="아래로">
+          <svg viewBox="0 0 24 24"><path d="M12 20l7-7h-4V4h-6v9H5z"/></svg>
+        </button>
+        <button type="button" class="dpad-btn" id="btnRight" aria-label="오른쪽으로">
+          <svg viewBox="0 0 24 24"><path d="M20 12l-7 7v-4H4v-6h9V5z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="options-bar">
+      <label class="check-label">
+        <input type="checkbox" id="chkSound" checked>
+        <span>효과음 켜기</span>
+      </label>
+      <span class="options-tip">스와이프 및 키보드(방향키/WASD) 지원</span>
+    </div>
+
+    <div class="bottom-restart-wrap">
+      <button type="button" class="btn-all-restart" id="btnRestart">1단계부터 다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:4px;">
+      💡 상자는 <b>밀기만 가능</b>하며 당길 수 없습니다. 상자를 벽 구석에 밀어 넣지 않도록 주의하세요!
+    </p>
+  </section>
+
+  <p class="note">모든 게임 연산과 최고 기록은 브라우저 안에서 안전하게 저장되며 외부로 전송되지 않습니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>게임 목표:</b> 작업자(캐릭터)를 움직여 창고 안의 모든 상자를 목표 칸(붉은 표식) 위로 밀어 넣으면 해당 단계가 완료됩니다.</li>
+      <li><b>상자 밀기 규칙:</b> 상자는 앞으로 밀기만 할 수 있으며 뒤로 당길 수 없습니다. 한 번에 상자 하나만 밀 수 있으며 두 개가 연속으로 붙어 있으면 밀 수 없습니다.</li>
+      <li><b>이동 조작:</b> 화면 중앙의 방향 단추(상/하/좌/우), 화면 스와이프, 또는 키보드 방향키 및 WASD 키를 이용해 이동합니다.</li>
+      <li><b>실수 만회:</b> '되돌리기' 단추(또는 키보드 Z키)로 이전 수를 언제든 무제한 되돌릴 수 있으며, 완전히 꼬였을 때는 '단계 다시 시작'(R키)을 누르세요.</li>
+      <li><b>점수 계산:</b> 단계를 깰 때마다 <code>1,000점 - (이동 수 × 2점)</code>(최소 50점 보장)이 계산되어 총점에 누적됩니다. 적은 수로 단계를 통과할수록 높은 점수를 얻습니다.</li>
+      <li><b>난이도 구성:</b> 쉬움(1~8단계), 보통(1~14단계), 어려움(1~20단계)을 제공합니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단에서 난이도를 선택합니다(쉬움 8단계, 보통 14단계, 어려움 20단계).</li>
+      <li>창고 전체 구조를 먼저 살피고, 상자를 어떤 순서로 어느 목표 지점에 넣을지 머릿속으로 경로를 그려봅니다.</li>
+      <li>방향 단추나 스와이프로 캐릭터를 조작하여 상자를 목표 지점으로 차례대로 이동시킵니다.</li>
+      <li>잘못 밀어 벽이나 구석에 끼였다면 '되돌리기' 단추로 안전하게 수를 물러보세요.</li>
+      <li>모든 단계를 클리어하고 최고 점수를 순위표에 등록해 보세요!</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>가입이나 복잡한 설치 없이 스마트폰과 PC에서 3~5분 동안 가볍게 두뇌를 스트레칭하고 싶을 때 적합합니다. 공간 감각과 논리적 문제 해결력을 키워보세요.</p>
+    <h2>알아 두면 좋은 것</h2>
+    <dl>
+      <dt>구석 데드락(Deadlock) 피하기</dt>
+      <dd>상자가 목표 칸이 아닌 벽의 모서리(구석)에 들어가면 다시는 꺼낼 수 없습니다. 벽을 따라 밀 때도 목표 지점이 있는 벽 쪽으로만 밀어야 안전합니다.</dd>
+      <dt>가장 먼 목표부터 채우기</dt>
+      <dd>입구나 통로 쪽에 상자를 먼저 넣으면 다른 상자가 지나갈 길이 막힐 수 있습니다. 안쪽이나 가장 먼 목표 칸부터 채우는 것이 정석입니다.</dd>
+      <dt>최고 기록 자동 저장</dt>
+      <dd>각 난이도별 최고 점수는 기기의 로컬 저장소에 안전하게 기록되어 언제든 이어서 기록을 갱신할 수 있습니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>상자를 당길 수는 없나요?</summary>
+      <p>전통적인 상자 밀기 규칙에 따라 상자는 밀기만 가능하며 당길 수 없습니다. 따라서 상자 뒤편에 들어갈 공간이 있는지 항상 먼저 확인해야 합니다.</p>
+    </details>
+    <details>
+      <summary>되돌리기 횟수에 제한이 있나요?</summary>
+      <p>되돌리기 횟수에는 제한이 없습니다. 실수를 두려워하지 말고 다양한 경로를 마음껏 시도해 보세요.</p>
+    </details>
+    <details>
+      <summary>중간에 난이도를 바꾸면 어떻게 되나요?</summary>
+      <p>난이도를 변경하면 해당 난이도의 1단계부터 새로운 게임이 시작됩니다. 기존에 달성한 난이도별 최고 점수는 그대로 보존됩니다.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ── DOM 요소 ──
+  var canvas = document.getElementById('gameCanvas');
+  var ctx = canvas.getContext('2d');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var btnOverlayAction = document.getElementById('btnOverlayAction');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnOverlaySub = document.getElementById('btnOverlaySub');
+
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+
+  var statusStage = document.getElementById('statusStage');
+  var statusMoves = document.getElementById('statusMoves');
+  var statusScore = document.getElementById('statusScore');
+  var statusBest = document.getElementById('statusBest');
+
+  var btnUndo = document.getElementById('btnUndo');
+  var btnResetStage = document.getElementById('btnResetStage');
+  var btnRestart = document.getElementById('btnRestart');
+  var chkSound = document.getElementById('chkSound');
+
+  var btnUp = document.getElementById('btnUp');
+  var btnDown = document.getElementById('btnDown');
+  var btnLeft = document.getElementById('btnLeft');
+  var btnRight = document.getElementById('btnRight');
+
+  // ── WebAudio 사운드 효과음 ──
+  var audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  function playSound(type) {
+    if (!chkSound.checked) return;
+    try {
+      var actx = getAudioCtx();
+      if (!actx) return;
+      var now = actx.currentTime;
+
+      if (type === 'move') {
+        var osc = actx.createOscillator();
+        var gain = actx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(160, now + 0.05);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.05);
+        osc.connect(gain);
+        gain.connect(actx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      } else if (type === 'push') {
+        var pOsc = actx.createOscillator();
+        var pGain = actx.createGain();
+        pOsc.type = 'triangle';
+        pOsc.frequency.setValueAtTime(180, now);
+        pOsc.frequency.exponentialRampToValueAtTime(90, now + 0.08);
+        pGain.gain.setValueAtTime(0.2, now);
+        pGain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+        pOsc.connect(pGain);
+        pGain.connect(actx.destination);
+        pOsc.start(now);
+        pOsc.stop(now + 0.08);
+      } else if (type === 'goal') {
+        var gOsc = actx.createOscillator();
+        var gGain = actx.createGain();
+        gOsc.type = 'sine';
+        gOsc.frequency.setValueAtTime(587, now);
+        gOsc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+        gGain.gain.setValueAtTime(0.25, now);
+        gGain.gain.linearRampToValueAtTime(0.01, now + 0.12);
+        gOsc.connect(gGain);
+        gGain.connect(actx.destination);
+        gOsc.start(now);
+        gOsc.stop(now + 0.12);
+      } else if (type === 'stage') {
+        var notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach(function (f, idx) {
+          var sOsc = actx.createOscillator();
+          var sGain = actx.createGain();
+          var st = now + idx * 0.08;
+          sOsc.type = 'triangle';
+          sOsc.frequency.setValueAtTime(f, st);
+          sGain.gain.setValueAtTime(0.2, st);
+          sGain.gain.linearRampToValueAtTime(0.01, st + 0.12);
+          sOsc.connect(sGain);
+          sGain.connect(actx.destination);
+          sOsc.start(st);
+          sOsc.stop(st + 0.12);
+        });
+      } else if (type === 'win') {
+        var winNotes = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+        winNotes.forEach(function (f, idx) {
+          var wOsc = actx.createOscillator();
+          var wGain = actx.createGain();
+          var wt = now + idx * 0.1;
+          wOsc.type = 'sine';
+          wOsc.frequency.setValueAtTime(f, wt);
+          wGain.gain.setValueAtTime(0.25, wt);
+          wGain.gain.linearRampToValueAtTime(0.01, wt + 0.2);
+          wOsc.connect(wGain);
+          wGain.connect(actx.destination);
+          wOsc.start(wt);
+          wOsc.stop(wt + 0.2);
+        });
+      } else if (type === 'undo') {
+        var uOsc = actx.createOscillator();
+        var uGain = actx.createGain();
+        uOsc.type = 'sine';
+        uOsc.frequency.setValueAtTime(220, now);
+        uOsc.frequency.exponentialRampToValueAtTime(330, now + 0.06);
+        uGain.gain.setValueAtTime(0.12, now);
+        uGain.gain.linearRampToValueAtTime(0.01, now + 0.06);
+        uOsc.connect(uGain);
+        uGain.connect(actx.destination);
+        uOsc.start(now);
+        uOsc.stop(now + 0.06);
+      }
+    } catch (e) {}
+  }
+
+  // ── 20개 단계 직접 설계 ──
+  // 문자 규칙:
+  // '#' : 벽
+  // ' ' : 빈 바닥
+  // '.' : 목표 칸
+  // '$' : 상자
+  // '*' : 목표 칸 위 상자
+  // '@' : 사람
+  // '+' : 목표 칸 위 사람
+  var STAGES = [
+    // [1단계] 쉬움 1: 튜토리얼 (상자 1개)
+    [
+      "#####",
+      "#   #",
+      "#@$.#",
+      "#   #",
+      "#####"
+    ],
+    // [2단계] 쉬움 2: 회전 길 (상자 1개)
+    [
+      "#######",
+      "#     #",
+      "# @$  #",
+      "#  #  #",
+      "#  .  #",
+      "#######"
+    ],
+    // [3단계] 쉬움 3: 나란한 목표 (상자 2개)
+    [
+      "########",
+      "#  .   #",
+      "#  $   #",
+      "#  @ $ #",
+      "#    . #",
+      "########"
+    ],
+    // [4단계] 쉬움 4: 상하 대칭 (상자 2개)
+    [
+      "#######",
+      "#  .  #",
+      "#  #  #",
+      "# $ $ #",
+      "#  @  #",
+      "#  .  #",
+      "#######"
+    ],
+    // [5단계] 쉬움 5: 3상자 우회로 (상자 3개)
+    [
+      "#########",
+      "#   .   #",
+      "#  $$$  #",
+      "#   @   #",
+      "#  . .  #",
+      "#########"
+    ],
+    // [6단계] 쉬움 6: 코너 회랑 (상자 2개)
+    [
+      "########",
+      "#  .   #",
+      "#  #$# #",
+      "#  $@# #",
+      "#  #.# #",
+      "########"
+    ],
+    // [7단계] 쉬움 7: 좌우 격벽 (상자 2개)
+    [
+      "#########",
+      "#   #   #",
+      "# $ . $ #",
+      "#   #   #",
+      "#   @   #",
+      "#   .   #",
+      "#########"
+    ],
+    // [8단계] 쉬움 8: 쉬움 마지막 (상자 2개)
+    [
+      "#########",
+      "# .     #",
+      "# #$#$# #",
+      "#   @ . #",
+      "#########"
+    ],
+    // [9단계] 보통 1: 기둥 우회 (상자 2개)
+    [
+      "########",
+      "#  . . #",
+      "#  $$  #",
+      "#  #   #",
+      "#  @   #",
+      "########"
+    ],
+    // [10단계] 보통 2: 더블 기둥 (상자 3개)
+    [
+      "#########",
+      "#   .   #",
+      "#  $$$  #",
+      "#  # #  #",
+      "#   @   #",
+      "#  . .  #",
+      "#########"
+    ],
+    // [11단계] 보통 3: 4방향 대칭 (상자 4개)
+    [
+      "#########",
+      "# . # . #",
+      "#  $ $  #",
+      "#  #@#  #",
+      "#  $ $  #",
+      "# . # . #",
+      "#########"
+    ],
+    // [12단계] 보통 4: 지그재그 회랑 (상자 2개)
+    [
+      "#########",
+      "#   .   #",
+      "#  # #  #",
+      "#  $ $  #",
+      "#  #@#  #",
+      "#   .   #",
+      "#########"
+    ],
+    // [13단계] 보통 5: 3방향 분산 (상자 3개)
+    [
+      "#########",
+      "# .   . #",
+      "#  $ $  #",
+      "#   $   #",
+      "#   @   #",
+      "#   .   #",
+      "#########"
+    ],
+    // [14단계] 보통 6: 보통 마지막 (상자 4개)
+    [
+      "##########",
+      "#  .  .  #",
+      "#  $  $  #",
+      "#  #$$#  #",
+      "#   @    #",
+      "#  .  .  #",
+      "##########"
+    ],
+    // [15단계] 어려움 1: 다이아몬드 (상자 4개)
+    [
+      "#########",
+      "#   .   #",
+      "#  #$#  #",
+      "# .$ $. #",
+      "#  #$#  #",
+      "#   @   #",
+      "#########"
+    ],
+    // [16단계] 어려움 2: 두 개의 방 (상자 3개)
+    [
+      "###########",
+      "# . #   . #",
+      "# $ #   $ #",
+      "#         #",
+      "#   #   $ #",
+      "# @ #   . #",
+      "###########"
+    ],
+    // [17단계] 어려움 3: 코너 분산 (상자 4개)
+    [
+      "##########",
+      "#  .  .  #",
+      "#  #$$#  #",
+      "#  $  $  #",
+      "#  #  #  #",
+      "#   @    #",
+      "#  .  .  #",
+      "##########"
+    ],
+    // [18단계] 어려움 4: 포위망 (상자 4개)
+    [
+      "###########",
+      "#  .   .  #",
+      "#  # $ #  #",
+      "#  $ @ $  #",
+      "#  # $ #  #",
+      "#  .   .  #",
+      "###########"
+    ],
+    // [19단계] 어려움 5: 이중 회랑 (상자 4개)
+    [
+      "############",
+      "#   .    . #",
+      "#  ##$$##  #",
+      "#  #    #  #",
+      "#  # $$ #  #",
+      "#    @     #",
+      "#   .    . #",
+      "############"
+    ],
+    // [20단계] 어려움 6: 최종 마스터 (상자 4개)
+    [
+      "###########",
+      "# .     . #",
+      "#  #$$$#  #",
+      "#  # $ #  #",
+      "#    @    #",
+      "# .     . #",
+      "###########"
+    ]
+  ];
+
+  // ── 게임 상태 변수 ──
+  var currentLevel = 'easy'; // 'easy' (8단계), 'normal' (14단계), 'hard' (20단계)
+  var currentStageIndex = 0;
+  var stageMoves = 0;
+  var totalMoves = 0;
+  var totalScore = 0;
+  var gameState = 'ready'; // 'ready', 'playing', 'stage_clear', 'game_clear'
+
+  // 현재 스테이지 내부 모델
+  var mapRows = 0;
+  var mapCols = 0;
+  var walls = [];
+  var goals = [];
+  var boxes = [];
+  var player = { x: 0, y: 0, dir: 'down' };
+  var history = [];
+
+  // 최고 점수 기억
+  var bestEasy = 0;
+  var bestNormal = 0;
+  var bestHard = 0;
+
+  // 난이도별 최대 단계 수
+  function getMaxStages(lvl) {
+    if (lvl === 'easy') return 8;
+    if (lvl === 'normal') return 14;
+    return 20;
+  }
+
+  // ── 로컬 스토리지 읽기 & 쓰기 ──
+  function loadStorage() {
+    try {
+      bestEasy = parseInt(localStorage.getItem('zw_box-push_best_easy'), 10) || 0;
+      bestNormal = parseInt(localStorage.getItem('zw_box-push_best_normal'), 10) || 0;
+      bestHard = parseInt(localStorage.getItem('zw_box-push_best_hard'), 10) || 0;
+
+      var savedLvl = localStorage.getItem('zw_box-push_level');
+      if (savedLvl === 'normal' || savedLvl === 'hard' || savedLvl === 'easy') {
+        currentLevel = savedLvl;
+      } else {
+        currentLevel = 'easy';
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+    updateLevelButtons();
+    updateBestDisplay();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+  }
+
+  function saveBestScore() {
+    try {
+      var key = 'zw_box-push_best_' + currentLevel;
+      var prev = parseInt(localStorage.getItem(key), 10) || 0;
+      var clamped = Math.min(99999999, Math.max(0, totalScore));
+      if (clamped > prev) {
+        localStorage.setItem(key, String(clamped));
+        if (currentLevel === 'easy') bestEasy = clamped;
+        else if (currentLevel === 'normal') bestNormal = clamped;
+        else if (currentLevel === 'hard') bestHard = clamped;
+      }
+      localStorage.setItem('zw_box-push_level', currentLevel);
+    } catch (e) {}
+    updateBestDisplay();
+  }
+
+  function updateBestDisplay() {
+    var txt = '최고 기록 · 쉬움 ' + (bestEasy > 0 ? bestEasy.toLocaleString('ko-KR') + '점' : '-')
+      + ' · 보통 ' + (bestNormal > 0 ? bestNormal.toLocaleString('ko-KR') + '점' : '-')
+      + ' · 어려움 ' + (bestHard > 0 ? bestHard.toLocaleString('ko-KR') + '점' : '-');
+    statusBest.textContent = txt;
+  }
+
+  function updateLevelButtons() {
+    btnDiffEasy.classList.toggle('on', currentLevel === 'easy');
+    btnDiffNormal.classList.toggle('on', currentLevel === 'normal');
+    btnDiffHard.classList.toggle('on', currentLevel === 'hard');
+  }
+
+  // ── 순위표 탭 연동 ──
+  function syncRankTab() {
+    try {
+      var idx = currentLevel === 'easy' ? 0 : (currentLevel === 'normal' ? 1 : 2);
+      if (window.ZW) ZW.rankPick = idx;
+      var b = document.querySelector('.rk-tabs button[data-i="' + idx + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  // ── 맵 데이터 초기화 ──
+  function loadStage(index) {
+    var rawMap = STAGES[index];
+    mapRows = rawMap.length;
+    mapCols = 0;
+    for (var r = 0; r < mapRows; r++) {
+      if (rawMap[r].length > mapCols) mapCols = rawMap[r].length;
+    }
+
+    walls = [];
+    goals = [];
+    boxes = [];
+    history = [];
+    stageMoves = 0;
+
+    for (var y = 0; y < mapRows; y++) {
+      var rowStr = rawMap[y];
+      for (var x = 0; x < mapCols; x++) {
+        var ch = x < rowStr.length ? rowStr[x] : ' ';
+        if (ch === '#') {
+          walls.push({ x: x, y: y });
+        } else if (ch === '.') {
+          goals.push({ x: x, y: y });
+        } else if (ch === '$') {
+          boxes.push({ x: x, y: y });
+        } else if (ch === '*') {
+          goals.push({ x: x, y: y });
+          boxes.push({ x: x, y: y });
+        } else if (ch === '@') {
+          player.x = x;
+          player.y = y;
+          player.dir = 'down';
+        } else if (ch === '+') {
+          goals.push({ x: x, y: y });
+          player.x = x;
+          player.y = y;
+          player.dir = 'down';
+        }
+      }
+    }
+
+    updateStatusUI();
+    btnUndo.disabled = true;
+    render();
+  }
+
+  function isWall(x, y) {
+    for (var i = 0; i < walls.length; i++) {
+      if (walls[i].x === x && walls[i].y === y) return true;
+    }
+    return false;
+  }
+
+  function getBoxAt(x, y) {
+    for (var i = 0; i < boxes.length; i++) {
+      if (boxes[i].x === x && boxes[i].y === y) return boxes[i];
+    }
+    return null;
+  }
+
+  function isGoal(x, y) {
+    for (var i = 0; i < goals.length; i++) {
+      if (goals[i].x === x && goals[i].y === y) return true;
+    }
+    return false;
+  }
+
+  // ── 플레이어 이동 로직 ──
+  function tryMove(dx, dy, dirName) {
+    if (gameState !== 'playing') return;
+
+    var nx = player.x + dx;
+    var ny = player.y + dy;
+    player.dir = dirName;
+
+    // 벽 충돌
+    if (isWall(nx, ny)) {
+      render();
+      return;
+    }
+
+    var box = getBoxAt(nx, ny);
+    if (!box) {
+      // 빈 바닥 이동
+      history.push({
+        type: 'move',
+        px: player.x,
+        py: player.y,
+        dir: player.dir
+      });
+      player.x = nx;
+      player.y = ny;
+      stageMoves++;
+      totalMoves++;
+      playSound('move');
+    } else {
+      // 상자 밀기 시도
+      var bnx = nx + dx;
+      var bny = ny + dy;
+
+      if (isWall(bnx, bny) || getBoxAt(bnx, bny)) {
+        // 상자 뒤가 막힘
+        render();
+        return;
+      }
+
+      // 상자 밀기 성공
+      history.push({
+        type: 'push',
+        px: player.x,
+        py: player.y,
+        dir: player.dir,
+        box: box,
+        boxFromX: box.x,
+        boxFromY: box.y,
+        boxToX: bnx,
+        boxToY: bny
+      });
+
+      box.x = bnx;
+      box.y = bny;
+      player.x = nx;
+      player.y = ny;
+      stageMoves++;
+      totalMoves++;
+
+      if (isGoal(bnx, bny)) {
+        playSound('goal');
+      } else {
+        playSound('push');
+      }
+    }
+
+    btnUndo.disabled = (history.length === 0);
+    updateStatusUI();
+    render();
+
+    checkStageClear();
+  }
+
+  // ── 클리어 판정 ──
+  function checkStageClear() {
+    var allInGoals = boxes.length > 0 && boxes.every(function (b) {
+      return isGoal(b.x, b.y);
+    });
+
+    if (!allInGoals) return;
+
+    // 단계 클리어 계산
+    var stageScore = Math.max(50, 1000 - stageMoves * 2);
+    totalScore += stageScore;
+    saveBestScore();
+    updateStatusUI();
+
+    var maxS = getMaxStages(currentLevel);
+    var isLastStage = (currentStageIndex + 1 >= maxS);
+
+    if (isLastStage) {
+      gameState = 'game_clear';
+      playSound('win');
+      overlayTitle.textContent = '🎉 모든 단계 정복!';
+      overlayDesc.innerHTML = '축하합니다! <b>' + maxS + '개</b> 단계를 모두 통과했습니다.<br>'
+        + '최종 점수: <b>' + totalScore.toLocaleString('ko-KR') + '점</b> (총 이동 ' + totalMoves + '회)<br>'
+        + '순위표에 나의 기록을 올려보세요!';
+      btnOverlayAction.textContent = '다시 도전하기';
+      btnOverlayRank.style.display = 'block';
+      btnOverlaySub.style.display = 'none';
+      overlayBox.style.display = 'flex';
+    } else {
+      gameState = 'stage_clear';
+      playSound('stage');
+      overlayTitle.textContent = '✨ 단계 클리어!';
+      overlayDesc.innerHTML = (currentStageIndex + 1) + '단계를 통과했습니다!<br>'
+        + '이동 횟수: <b>' + stageMoves + '회</b> · 획득: <b>+' + stageScore.toLocaleString('ko-KR') + '점</b><br>'
+        + '현재 총점: <b>' + totalScore.toLocaleString('ko-KR') + '점</b>';
+      btnOverlayAction.textContent = '다음 단계로';
+      btnOverlayRank.style.display = 'none';
+      btnOverlaySub.style.display = 'block';
+      btnOverlaySub.textContent = '이 단계 다시 하기';
+      overlayBox.style.display = 'flex';
+    }
+  }
+
+  // ── 되돌리기 (Undo) ──
+  function undo() {
+    if (gameState !== 'playing' || history.length === 0) return;
+
+    var lastAction = history.pop();
+    if (lastAction.type === 'move') {
+      player.x = lastAction.px;
+      player.y = lastAction.py;
+      player.dir = lastAction.dir;
+    } else if (lastAction.type === 'push') {
+      player.x = lastAction.px;
+      player.y = lastAction.py;
+      player.dir = lastAction.dir;
+      lastAction.box.x = lastAction.boxFromX;
+      lastAction.box.y = lastAction.boxFromY;
+    }
+
+    stageMoves = Math.max(0, stageMoves - 1);
+    totalMoves = Math.max(0, totalMoves - 1);
+    btnUndo.disabled = (history.length === 0);
+    playSound('undo');
+    updateStatusUI();
+    render();
+  }
+
+  // ── UI 및 상태 표시 ──
+  function updateStatusUI() {
+    var maxS = getMaxStages(currentLevel);
+    statusStage.textContent = (currentStageIndex + 1) + ' / ' + maxS + ' 단계';
+    statusMoves.textContent = '이동 ' + stageMoves;
+    statusScore.textContent = totalScore.toLocaleString('ko-KR') + '점';
+  }
+
+  // ── 새 게임 시작 ──
+  function startNewGame() {
+    currentStageIndex = 0;
+    totalMoves = 0;
+    totalScore = 0;
+    gameState = 'playing';
+    overlayBox.style.display = 'none';
+    loadStage(currentStageIndex);
+  }
+
+  function setLevel(lvl) {
+    if (lvl === currentLevel && gameState === 'playing') return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_box-push_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    syncRankTab();
+    resetToReadyState();
+  }
+
+  function resetToReadyState() {
+    gameState = 'ready';
+    currentStageIndex = 0;
+    stageMoves = 0;
+    totalMoves = 0;
+    totalScore = 0;
+
+    var maxS = getMaxStages(currentLevel);
+    var lvlName = (currentLevel === 'easy') ? '쉬움(8단계)' : (currentLevel === 'normal' ? '보통(14단계)' : '어려움(20단계)');
+    overlayTitle.textContent = '상자 밀기';
+    overlayDesc.innerHTML = lvlName + ' 도전을 시작합니다.<br>모든 상자를 목표 칸으로 밀어 넣어 보세요!';
+    btnOverlayAction.textContent = '게임 시작';
+    btnOverlayRank.style.display = 'none';
+    btnOverlaySub.style.display = 'none';
+    overlayBox.style.display = 'flex';
+
+    loadStage(0);
+  }
+
+  // ── 캔버스 렌더링 (SVG/Canvas 직접 드로잉) ──
+  function render() {
+    var rect = canvas.getBoundingClientRect();
+    var width = rect.width || 420;
+    var dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(width * dpr);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+
+    // 바탕 창고 바닥
+    ctx.fillStyle = '#1e1e24';
+    ctx.fillRect(0, 0, width, width);
+
+    if (mapCols === 0 || mapRows === 0) return;
+
+    // 타일 크기 및 패딩 계산
+    var pad = 12;
+    var availW = width - pad * 2;
+    var availH = width - pad * 2;
+    var tileSize = Math.min(availW / mapCols, availH / mapRows);
+
+    var offsetX = pad + (availW - tileSize * mapCols) / 2;
+    var offsetY = pad + (availH - tileSize * mapRows) / 2;
+
+    // 1. 바닥 격자 타일
+    for (var r = 0; r < mapRows; r++) {
+      for (var c = 0; c < mapCols; c++) {
+        var tx = offsetX + c * tileSize;
+        var ty = offsetY + r * tileSize;
+
+        ctx.fillStyle = ((r + c) % 2 === 0) ? '#282830' : '#23232a';
+        ctx.fillRect(tx, ty, tileSize, tileSize);
+
+        ctx.strokeStyle = '#1a1a20';
+        ctx.lineWidth = 0.5;
+        ctx.strokeRect(tx, ty, tileSize, tileSize);
+      }
+    }
+
+    // 2. 목표 칸 (Goals)
+    for (var g = 0; g < goals.length; g++) {
+      var gx = offsetX + goals[g].x * tileSize;
+      var gy = offsetY + goals[g].y * tileSize;
+      var cx = gx + tileSize / 2;
+      var cy = gy + tileSize / 2;
+
+      // 목표 바닥 마킹
+      ctx.fillStyle = 'rgba(229, 72, 77, 0.18)';
+      ctx.beginPath();
+      ctx.arc(cx, cy, tileSize * 0.42, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 외부 링
+      ctx.strokeStyle = '#e5484d';
+      ctx.lineWidth = Math.max(1.5, tileSize * 0.08);
+      ctx.beginPath();
+      ctx.arc(cx, cy, tileSize * 0.32, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 내부 점
+      ctx.fillStyle = '#ff6b6b';
+      ctx.beginPath();
+      ctx.arc(cx, cy, tileSize * 0.12, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 3. 벽 (Walls)
+    for (var w = 0; w < walls.length; w++) {
+      var wx = offsetX + walls[w].x * tileSize;
+      var wy = offsetY + walls[w].y * tileSize;
+      drawWallBlock(wx, wy, tileSize);
+    }
+
+    // 4. 상자 (Boxes)
+    for (var b = 0; b < boxes.length; b++) {
+      var bx = offsetX + boxes[b].x * tileSize;
+      var by = offsetY + boxes[b].y * tileSize;
+      var onGoal = isGoal(boxes[b].x, boxes[b].y);
+      drawBox(bx, by, tileSize, onGoal);
+    }
+
+    // 5. 사람 캐릭터 (Player)
+    var px = offsetX + player.x * tileSize;
+    var py = offsetY + player.y * tileSize;
+    drawPlayer(px, py, tileSize, player.dir);
+  }
+
+  // 벽돌 블록 드로잉
+  function drawWallBlock(x, y, s) {
+    var pad = s * 0.04;
+    var bw = s - pad * 2;
+    var bh = s - pad * 2;
+    var bx = x + pad;
+    var by = y + pad;
+
+    // 그림자
+    ctx.fillStyle = '#0f0f12';
+    ctx.fillRect(bx + 1, by + 1, bw, bh);
+
+    // 블록 베이스
+    ctx.fillStyle = '#4a4a58';
+    ctx.fillRect(bx, by, bw, bh);
+
+    // 윗면 하이라이트
+    ctx.fillStyle = '#626274';
+    ctx.fillRect(bx, by, bw, bh * 0.35);
+
+    // 내부 벽돌 텍스처 라인
+    ctx.strokeStyle = '#34343e';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(bx, by + bh * 0.5);
+    ctx.lineTo(bx + bw, by + bh * 0.5);
+    ctx.moveTo(bx + bw * 0.5, by);
+    ctx.lineTo(bx + bw * 0.5, by + bh * 0.5);
+    ctx.stroke();
+
+    // 테두리
+    ctx.strokeStyle = '#2b2b34';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bx, by, bw, bh);
+  }
+
+  // 상자 드로잉
+  function drawBox(x, y, s, onGoal) {
+    var m = s * 0.08;
+    var w = s - m * 2;
+    var bx = x + m;
+    var by = y + m;
+
+    ctx.save();
+    // 바닥 그림자
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+    ctx.fillRect(bx + 2, by + 3, w, w);
+
+    if (onGoal) {
+      // 목표에 안착한 상자 (화사한 골드/그린 톤)
+      var gGrad = ctx.createLinearGradient(bx, by, bx, by + w);
+      gGrad.addColorStop(0, '#30d158');
+      gGrad.addColorStop(1, '#248a3d');
+      ctx.fillStyle = gGrad;
+      ctx.fillRect(bx, by, w, w);
+
+      ctx.strokeStyle = '#ffd60a';
+      ctx.lineWidth = Math.max(2, s * 0.07);
+      ctx.strokeRect(bx, by, w, w);
+
+      // 체크 표식 마크
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = Math.max(2, s * 0.08);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(bx + w * 0.28, by + w * 0.52);
+      ctx.lineTo(bx + w * 0.44, by + w * 0.68);
+      ctx.lineTo(bx + w * 0.72, by + w * 0.34);
+      ctx.stroke();
+    } else {
+      // 일반 나무 상자
+      var wGrad = ctx.createLinearGradient(bx, by, bx, by + w);
+      wGrad.addColorStop(0, '#c68a4c');
+      wGrad.addColorStop(1, '#9e622b');
+      ctx.fillStyle = wGrad;
+      ctx.fillRect(bx, by, w, w);
+
+      // 내부 X자 보강 프레임
+      ctx.strokeStyle = '#6e3f16';
+      ctx.lineWidth = Math.max(1.5, s * 0.06);
+      ctx.beginPath();
+      ctx.moveTo(bx + 2, by + 2);
+      ctx.lineTo(bx + w - 2, by + w - 2);
+      ctx.moveTo(bx + w - 2, by + 2);
+      ctx.lineTo(bx + 2, by + w - 2);
+      ctx.stroke();
+
+      // 테두리
+      ctx.strokeStyle = '#5a310e';
+      ctx.lineWidth = Math.max(1.5, s * 0.06);
+      ctx.strokeRect(bx, by, w, w);
+
+      // 모서리 리벳 징
+      ctx.fillStyle = '#ffd60a';
+      var rsize = Math.max(1.5, s * 0.04);
+      ctx.fillRect(bx + 2, by + 2, rsize, rsize);
+      ctx.fillRect(bx + w - 2 - rsize, by + 2, rsize, rsize);
+      ctx.fillRect(bx + 2, by + w - 2 - rsize, rsize, rsize);
+      ctx.fillRect(bx + w - 2 - rsize, by + w - 2 - rsize, rsize, rsize);
+    }
+    ctx.restore();
+  }
+
+  // 플레이어 캐릭터 드로잉 (이모지 없음, 순수 기하학 Canvas 드로잉)
+  function drawPlayer(x, y, s, dir) {
+    var cx = x + s / 2;
+    var cy = y + s / 2;
+    var r = s * 0.38;
+
+    ctx.save();
+    // 바닥 그림자
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + r * 0.75, r * 0.85, r * 0.35, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 1. 몸체 (파란색 작업복)
+    ctx.fillStyle = '#0a84ff';
+    ctx.beginPath();
+    ctx.arc(cx, cy + r * 0.2, r * 0.65, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 2. 머리 (살구색 피부)
+    ctx.fillStyle = '#ffd1a4';
+    ctx.beginPath();
+    ctx.arc(cx, cy - r * 0.22, r * 0.46, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 3. 안전모 (노란색 캡)
+    ctx.fillStyle = '#ffd60a';
+    ctx.beginPath();
+    ctx.arc(cx, cy - r * 0.36, r * 0.46, Math.PI, 0, false);
+    ctx.fill();
+    ctx.fillRect(cx - r * 0.5, cy - r * 0.38, r, r * 0.16);
+
+    // 4. 얼굴 눈동자 (바라보는 방향 반영)
+    ctx.fillStyle = '#1c1c1e';
+    var eyeR = Math.max(1.5, s * 0.045);
+    var eyeOffX = 0;
+    var eyeOffY = 0;
+
+    if (dir === 'left') {
+      eyeOffX = -r * 0.2;
+      ctx.beginPath();
+      ctx.arc(cx + eyeOffX, cy - r * 0.2, eyeR, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (dir === 'right') {
+      eyeOffX = r * 0.2;
+      ctx.beginPath();
+      ctx.arc(cx + eyeOffX, cy - r * 0.2, eyeR, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (dir === 'up') {
+      // 뒤통수이므로 눈을 그리지 않음
+    } else {
+      // 앞(아래)을 볼 때 두 눈
+      ctx.beginPath();
+      ctx.arc(cx - r * 0.15, cy - r * 0.18, eyeR, 0, Math.PI * 2);
+      ctx.arc(cx + r * 0.15, cy - r * 0.18, eyeR, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  }
+
+  // ── 이벤트 리스너 ──
+  // 오버레이 단추
+  btnOverlayAction.addEventListener('click', function () {
+    if (gameState === 'ready' || gameState === 'game_clear') {
+      startNewGame();
+    } else if (gameState === 'stage_clear') {
+      currentStageIndex++;
+      gameState = 'playing';
+      overlayBox.style.display = 'none';
+      loadStage(currentStageIndex);
+    }
+  });
+
+  btnOverlaySub.addEventListener('click', function () {
+    gameState = 'playing';
+    overlayBox.style.display = 'none';
+    loadStage(currentStageIndex);
+  });
+
+  // 결과 창의 순위표 올리기 단추
+  if (btnOverlayRank) {
+    btnOverlayRank.addEventListener('click', function () {
+      var jump = document.querySelector('.zw-rk-jump');
+      if (jump && jump.style.display !== 'none') {
+        jump.click();
+      } else {
+        var rk = document.querySelector('.zw-rank');
+        if (rk) {
+          rk.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          rk.classList.add('flash');
+          setTimeout(function () { rk.classList.remove('flash'); }, 1800);
+        }
+      }
+    });
+  }
+
+  // 난이도 단추
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // 조작 단추
+  btnUndo.addEventListener('click', undo);
+  btnResetStage.addEventListener('click', function () {
+    if (gameState === 'playing') {
+      loadStage(currentStageIndex);
+      playSound('undo');
+    }
+  });
+  btnRestart.addEventListener('click', function () {
+    resetToReadyState();
+  });
+
+  // D-Pad 터치/클릭
+  function bindDpad(btn, dx, dy, dirName) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      tryMove(dx, dy, dirName);
+    });
+  }
+  bindDpad(btnUp, 0, -1, 'up');
+  bindDpad(btnDown, 0, 1, 'down');
+  bindDpad(btnLeft, -1, 0, 'left');
+  bindDpad(btnRight, 1, 0, 'right');
+
+  // 키보드 조작
+  window.addEventListener('keydown', function (e) {
+    if (gameState !== 'playing') return;
+
+    if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+      e.preventDefault();
+      tryMove(0, -1, 'up');
+    } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+      e.preventDefault();
+      tryMove(0, 1, 'down');
+    } else if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+      e.preventDefault();
+      tryMove(-1, 0, 'left');
+    } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+      e.preventDefault();
+      tryMove(1, 0, 'right');
+    } else if (e.key === 'z' || e.key === 'Z') {
+      e.preventDefault();
+      undo();
+    } else if (e.key === 'r' || e.key === 'R') {
+      e.preventDefault();
+      loadStage(currentStageIndex);
+    }
+  });
+
+  // 스와이프 제스처
+  var touchStartX = 0;
+  var touchStartY = 0;
+  canvas.addEventListener('touchstart', function (e) {
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      touchStartX = e.changedTouches[0].clientX;
+      touchStartY = e.changedTouches[0].clientY;
+    }
+  }, { passive: true });
+
+  canvas.addEventListener('touchend', function (e) {
+    if (!e.changedTouches || e.changedTouches.length === 0) return;
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    var dy = e.changedTouches[0].clientY - touchStartY;
+    var absX = Math.abs(dx);
+    var absY = Math.abs(dy);
+
+    if (Math.max(absX, absY) < 22) return; // 미세한 떨림 무시
+
+    if (absX > absY) {
+      if (dx > 0) tryMove(1, 0, 'right');
+      else tryMove(-1, 0, 'left');
+    } else {
+      if (dy > 0) tryMove(0, 1, 'down');
+      else tryMove(0, -1, 'up');
+    }
+  }, { passive: true });
+
+  window.addEventListener('resize', function () {
+    render();
+  });
+
+  // 초기화 실행
+  loadStorage();
+  resetToReadyState();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/four-in-row/">4목 맞추기</a> — 컴퓨터와 4개 먼저 잇기</li><li><a href="/water-sort/">물 정렬</a> — 색깔별로 물을 병에 모으기</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/klondike-solitaire/">솔리테어</a> — 카드를 순서대로 쌓아 완성하기</li><li><a href="/box-push/">상자 밀기</a> — 상자를 목표 칸으로 밀기</li><li><a href="/pipe-connect/">파이프 잇기</a> — 돌려서 물길 연결하기</li><li><a href="/checkers-8/">체커</a> — 컴퓨터와 체커 한 판</li><li><a href="/fleet-hunt/">함대 맞히기</a> — 좌표를 찍어 상대 함대 찾기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>
