@@ -2171,7 +2171,14 @@
       color: #94a3b8;
       line-height: 1.3;
     }
-  </style>
+      /* 2026-11-08: 휴대폰에서 맨 위 단추 글자가 세로로 쪼개지던 것 — 단추 줄을 제목 아래 한 줄 4칸으로 */
+    .btn-action, .btn-reset, .btn-action span, .btn-reset span { white-space: nowrap; }
+    @media (max-width: 560px) {
+      .header { flex-wrap: wrap; gap: 8px; }
+      .header-buttons { width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+      .header-buttons .btn-action, .header-buttons .btn-reset { padding: 8px 2px; font-size: 12px; justify-content: center; min-width: 0; }
+    }
+</style>
 </head>
 <body>
   <div class="app-container">
@@ -2181,7 +2188,7 @@
         <span class="title-icon">🧌</span>
         <div class="title-text">
           <h1>고블린 성장기</h1>
-          <p>퍼즐 레이드 · 조각 7 (순위표 & 도전장 & 닉네임)</p>
+          <p>퍼즐 레이드</p>
         </div>
       </div>
       <div class="header-buttons">
@@ -3149,7 +3156,7 @@
           if (raidUpgradeGaugeText) raidUpgradeGaugeText.textContent = upGauge + '/100';
           if (raidUpgradeGaugeFill) {
             raidUpgradeGaugeFill.style.width = upGauge + '%';
-            if (raidState.upgradeGauge >= 100) {
+            if (raidState.upgradeGauge >= 100 || (typeof window._gbPrevUp === 'number' && (raidState.upgradeGauge || 0) < window._gbPrevUp)) {
               raidUpgradeGaugeFill.classList.add('gauge-flash');
               setTimeout(function() { if (raidUpgradeGaugeFill) raidUpgradeGaugeFill.classList.remove('gauge-flash'); }, 400);
             }
@@ -3160,7 +3167,7 @@
           if (raidGoldGaugeText) raidGoldGaugeText.textContent = gGauge + '/100';
           if (raidGoldGaugeFill) {
             raidGoldGaugeFill.style.width = gGauge + '%';
-            if (raidState.goldGauge >= 100) {
+            if (raidState.goldGauge >= 100 || (typeof window._gbPrevGold === 'number' && (raidState.goldGauge || 0) < window._gbPrevGold)) {
               raidGoldGaugeFill.classList.add('gauge-flash');
               setTimeout(function() { if (raidGoldGaugeFill) raidGoldGaugeFill.classList.remove('gauge-flash'); }, 400);
             }
@@ -3173,11 +3180,16 @@
           if (raidExpGaugeText) raidExpGaugeText.textContent = curExp + '/' + expToNext;
           if (raidExpGaugeFill) {
             raidExpGaugeFill.style.width = expPct + '%';
-            if (curExp >= expToNext) {
+            if (curExp >= expToNext || (typeof window._gbPrevLv === 'number' && (p.playerLevel || 1) > window._gbPrevLv)) {
               raidExpGaugeFill.classList.add('gauge-flash');
               setTimeout(function() { if (raidExpGaugeFill) raidExpGaugeFill.classList.remove('gauge-flash'); }, 400);
             }
           }
+
+          // 다음 갱신 때 '문턱을 넘어 줄었는지' 비교하려고 지금 값을 기억 (게이지 반짝임 수정 11/8)
+          window._gbPrevUp = raidState.upgradeGauge || 0;
+          window._gbPrevGold = raidState.goldGauge || 0;
+          window._gbPrevLv = p.playerLevel || 1;
 
           playerBuffsList.innerHTML = '';
           if (raidState.activeBuffs && raidState.activeBuffs.length > 0) {
@@ -4218,6 +4230,19 @@
                 if (targetEl && targetEl.classList.contains('monster-cell')) {
                   targetEl.classList.add('monster-hit');
                 }
+              }
+              // 처치한 몬스터 자리에 해골이 커졌다 사라지는 연출 (11/8)
+              var killEvents = (raidState.lastEvents || []).filter(function(e) { return e.kind === 'kill'; });
+              for (var ki = 0; ki < killEvents.length; ki++) {
+                var kEl = boardGrid.querySelector('[data-r="' + killEvents[ki].row + '"][data-c="' + killEvents[ki].col + '"]');
+                if (!kEl) continue;
+                if (getComputedStyle(kEl).position === 'static') kEl.style.position = 'relative';
+                var skull = document.createElement('span');
+                skull.textContent = '💀';
+                skull.className = 'monster-die';
+                skull.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6em;pointer-events:none;z-index:5;';
+                kEl.appendChild(skull);
+                (function(el) { setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 400); })(skull);
               }
               updateBattleUI();
 

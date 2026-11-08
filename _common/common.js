@@ -622,6 +622,12 @@ var GA_ID = 'G-444W8XPZ1Z';   // 예: 'G-XXXXXXXXXX' — 사용자가 구글 애
     window.gtag = function () { window.dataLayer.push(arguments); };
     window.gtag('js', new Date());
     window.gtag('config', GA_ID);
+    // 카톡방·카페로 넘어가는 클릭 세기(2026-11-08): 사이트의 진짜 목적 숫자. 애널리틱스 이벤트 kakao_click / cafe_click
+    document.addEventListener('click', function (e) {
+      var a = e.target && e.target.closest ? e.target.closest('a[href]') : null; if (!a) return;
+      var u = a.href || '', ev = /open\.kakao\.com/.test(u) ? 'kakao_click' : /cafe\.naver\.com/.test(u) ? 'cafe_click' : '';
+      if (ev) window.gtag('event', ev, { link_url: u, page_path: location.pathname, transport_type: 'beacon' });
+    }, true);
     var foot = document.querySelector('.zw-foot');
     if (foot) { var p = document.createElement('p'); p.textContent = '방문 수를 세려고 구글 애널리틱스를 씁니다.'; foot.appendChild(p); }
   } catch (e) {}
