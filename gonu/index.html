@@ -1,0 +1,1435 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>고누 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 무료 3줄 고누 게임. 3×3 판에서 컴퓨터와 한 판, 쉬움·보통·어려움 세 단계를 휴대폰과 PC에서 즐겨보세요.">
+<link rel="canonical" href="https://jwapyonara.com/gonu/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="고누 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 하는 무료 3줄 고누 게임. 3×3 판에서 컴퓨터와 한 판, 쉬움·보통·어려움 세 단계를 휴대폰과 PC에서 즐겨보세요.">
+<meta property="og:url" content="https://jwapyonara.com/gonu/">
+<meta property="og:site_name" content="좌표나라">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "고누 무료",
+  "url": "https://jwapyonara.com/gonu/",
+  "description": "가입 없이 바로 즐기는 무료 3줄 고누 게임. 컴퓨터와 한 판 겨뤄보세요.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All"
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 (판 위) */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 줄 */
+.gonu-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+}
+.gonu-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+.gonu-status-mid {
+  color: #ffffff;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+.gonu-status-right {
+  color: #a1a1a6;
+  flex: 1.2;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.gonu-best-line {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 고누판 캔버스 감싸개 */
+.gonu-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 12px;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #deb887;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#gonuCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+  touch-action: none;
+}
+
+/* 판 위 덮개 (시작 및 결과 창) */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 20, 22, 0.88);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  z-index: 10;
+}
+.canvas-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 8px;
+  color: #ffd60a;
+}
+.canvas-overlay p {
+  font-size: 15px;
+  margin: 0 0 18px;
+  color: #e5e5ea;
+  max-width: 290px;
+  line-height: 1.45;
+}
+.overlay-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 240px;
+}
+.canvas-overlay .btn-start {
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  background: var(--red, #1b64da);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  min-height: 50px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.canvas-overlay .btn-start:active {
+  opacity: 0.85;
+}
+.canvas-overlay .btn-overlay-rank {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  background: var(--soft, #e8f0fe);
+  color: var(--red, #1b64da);
+  border: 1.5px solid var(--red, #1b64da);
+  border-radius: 12px;
+  padding: 10px 18px;
+  min-height: 46px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.canvas-overlay .btn-overlay-rank:active {
+  opacity: 0.85;
+}
+
+/* 제어 단추 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+}
+.btn-undo {
+  background: var(--card, #fff);
+  border: 1.5px solid var(--line, #e5e5ea);
+  color: var(--ink, #1c1c1e);
+}
+.btn-undo:active:not(:disabled) {
+  background: var(--soft, #f2f2f7);
+}
+.btn-undo:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-reset {
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #3a3a3c;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>고누 한 판,<br>컴퓨터를 이겨 보세요</h1>
+  <p class="lead">3×3 판에서 말 3개를 먼저 한 줄로 모으면 이깁니다. 가입 없이 바로 시작해요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="gonu-status-bar">
+      <div class="gonu-status-left" id="statusTurn">내 차례</div>
+      <div class="gonu-status-mid" id="statusMoves">수 0</div>
+      <div class="gonu-status-right" id="statusRecord">전적 0승 0패 0무</div>
+    </div>
+    <div class="gonu-best-line" id="statusBest"></div>
+
+    <div class="gonu-canvas-wrap" id="canvasWrap">
+      <canvas id="gonuCanvas" width="420" height="420"></canvas>
+      <div class="canvas-overlay" id="overlayBox">
+        <h2 id="overlayTitle">3줄 고누</h2>
+        <p id="overlayDesc">쉬움으로 시작해요</p>
+        <div class="overlay-btns">
+          <button type="button" class="btn-start" id="btnStartGame">시작</button>
+          <button type="button" class="btn-overlay-rank" id="btnOverlayRank" style="display:none;">🏆 순위표 올리기</button>
+        </div>
+      </div>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:10px; margin-top:4px;">
+      💡 내 말을 누른 뒤 <b>연결된 빈 점</b>을 누르면 이동해요.
+    </p>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-undo" id="btnUndo" disabled>한 수 물리기 (2회 남음)</button>
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+  </section>
+
+  <p class="note">말 3개를 가로, 세로, 대각선 중 한 줄로 먼저 모으면 승리하며 기기 안에서만 실행됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>3줄 고누 규칙과 하는 법</summary>
+    <ul>
+      <li><b>게임 목표:</b> 3×3 점으로 이루어진 고누판에서 자신의 말 3개를 가로, 세로, 대각선 중 어느 한 방향으로 먼저 일렬로 늘어놓으면 승리합니다.</li>
+      <li><b>말의 이동:</b> 사람은 흑돌(선공), 컴퓨터는 백돌(후공)입니다. 번갈아 가며 자신의 말 1개를 골라 선으로 직접 연결된 인접한 빈 점으로 1칸 이동합니다.</li>
+      <li><b>조작 방법:</b> 움직이고 싶은 내 말을 누르면 초록색 유도 점이 뜹니다. 가고 싶은 빈 점을 누르면 말이 이동합니다. 다른 내 말을 누르면 선택이 바뀝니다.</li>
+      <li><b>외통수(포위):</b> 자신의 차례에 움직일 수 있는 말이 하나도 없으면 패배합니다.</li>
+      <li><b>동형 반복 무승부:</b> 서로 승부를 내지 못하고 같은 배치가 3회 반복되면 무승부로 끝납니다.</li>
+      <li><b>한 수 물리기:</b> 한 판에 최대 2번까지 내 수와 컴퓨터의 수를 함께 되돌릴 수 있습니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>판 위에서 난이도(쉬움·보통·어려움)를 고릅니다. 바꾸면 새 판이 시작돼요.</li>
+      <li>내가 흑돌(아랫줄 3개)을 쥐고 판의 말을 눌러 선택한 뒤, 선으로 이어진 빈 점으로 이동합니다.</li>
+      <li>컴퓨터(윗줄 3개)의 수를 예측하고 길목을 막으며 먼저 3줄을 완성해 보세요.</li>
+      <li>아차 하는 실수가 있다면 '한 수 물리기' 단추로 최대 2번까지 수를 무를 수 있습니다.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>우리나라 전통 민속놀이인 3줄 고누는 배우기는 1분도 안 걸리지만 치밀한 수싸움과 자리싸움이 필요한 지능 게임입니다. 스마트폰과 PC 어디서나 1~2분 만에 가볍게 두뇌를 깨우고 싶을 때 즐겨보세요.</p>
+    <h2>알아 두면 좋은 것</h2>
+    <dl>
+      <dt>중앙점(1,1)의 중요성</dt>
+      <dd>고누판의 정중앙 점은 8방향(상하좌우 및 대각선 4곳) 모두와 선으로 연결되어 있어 이동 기동성이 가장 뛰어나며, 모든 대각선과 십자선 승리의 핵심 요충지입니다.</dd>
+      <dt>컴퓨터 난이도 읽기 수준</dt>
+      <dd><b>쉬움</b>은 앞 1수를 읽으며 즉시 이기는 수를 두거나 당장 위험한 수를 차단합니다. <b>보통</b>은 앞 3수를 치밀하게 수읽기합니다. <b>어려움</b>은 전체 상태를 깊이 탐색하여 완벽한 전략으로 맞섭니다.</dd>
+      <dt>점수 계산 방식</dt>
+      <dd>승리 시 <code>(100 - 움직인 횟수 × 5) × 난이도 배수 × 10</code>(최소 10점)이 부여되며, 난이도 배수는 쉬움 1배, 보통 2배, 어려움 3배입니다. 적은 수로 빠르게 이길수록 높은 점수를 기록합니다.</dd>
+      <dt>전적과 최고 기록 저장</dt>
+      <dd>승패 전적과 난이도별 최고 점수는 기기의 로컬 저장소에 안전하게 보관됩니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>말을 뛰어넘거나 상대 말을 잡을 수 있나요?</summary>
+      <p>3줄 고누는 다른 말을 뛰어넘거나 잡는 규칙이 없습니다. 오직 선으로 연결된 비어 있는 이웃 점으로만 1칸씩 이동할 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>시작할 때 이미 한 줄인데 왜 승리가 아닌가요?</summary>
+      <p>처음 배치된 상태(컴퓨터 맨 윗줄, 사람 맨 아랫줄)는 게임 시작을 위한 기본 배치입니다. 게임이 시작된 후 말을 움직여 새롭게 한 줄을 완성해야 승리로 인정됩니다.</p>
+    </details>
+    <details>
+      <summary>컴퓨터가 움직이지 않거나 무승부가 되는 경우는 어떤 경우인가요?</summary>
+      <p>양쪽 플레이어가 같은 수순을 반복하여 동일한 판의 배치가 3회 나타나면 삼복수(동형반복) 규칙에 따라 자동으로 무승부 처리됩니다.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // DOM 요소
+  var canvas = document.getElementById('gonuCanvas');
+  var ctx = canvas.getContext('2d');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var btnUndo = document.getElementById('btnUndo');
+  var btnRestart = document.getElementById('btnRestart');
+  var statusTurn = document.getElementById('statusTurn');
+  var statusMoves = document.getElementById('statusMoves');
+  var statusRecord = document.getElementById('statusRecord');
+  var statusBest = document.getElementById('statusBest');
+
+  // 효과음 (WebAudio 합성)
+  var audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) {
+      var AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) audioCtx = new AudioContext();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+  function playSound(type) {
+    try {
+      var actx = getAudioCtx();
+      if (!actx) return;
+      var now = actx.currentTime;
+      var osc = actx.createOscillator();
+      var gain = actx.createGain();
+      osc.connect(gain);
+      gain.connect(actx.destination);
+
+      if (type === 'select') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(480, now);
+        osc.frequency.exponentialRampToValueAtTime(640, now + 0.05);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      } else if (type === 'move') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+        osc.start(now);
+        osc.stop(now + 0.09);
+      } else if (type === 'win') {
+        var freqs = [523.25, 659.25, 783.99, 1046.50];
+        for (var i = 0; i < freqs.length; i++) {
+          var o = actx.createOscillator();
+          var g = actx.createGain();
+          o.type = 'sine';
+          o.frequency.setValueAtTime(freqs[i], now + i * 0.09);
+          g.gain.setValueAtTime(0.15, now + i * 0.09);
+          g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.22);
+          o.connect(g);
+          g.connect(actx.destination);
+          o.start(now + i * 0.09);
+          o.stop(now + i * 0.09 + 0.24);
+        }
+      } else if (type === 'lose') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.25);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      }
+    } catch (e) {}
+  }
+
+  // 3×3 고누 보드 연결 그래프 (인접 점)
+  // 인덱스: 0:(0,0), 1:(0,1), 2:(0,2), 3:(1,0), 4:(1,1), 5:(1,2), 6:(2,0), 7:(2,1), 8:(2,2)
+  var ADJACENCY = [
+    [1, 3, 4],                // 0
+    [0, 2, 4],                // 1
+    [1, 5, 4],                // 2
+    [0, 6, 4],                // 3
+    [0, 1, 2, 3, 5, 6, 7, 8], // 4 (중앙)
+    [2, 8, 4],                // 5
+    [3, 7, 4],                // 6
+    [6, 8, 4],                // 7
+    [5, 7, 4]                 // 8
+  ];
+
+  // 승리 라인 8개 (가로 3, 세로 3, 대각선 2)
+  var LINES = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], // 가로
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], // 세로
+    [0, 4, 8], [2, 4, 6]             // 대각선
+  ];
+
+  // 게임 상태 변수
+  var gameState = 'ready'; // 'ready', 'playing', 'won', 'lost', 'draw'
+  var turn = 1; // 1: 사람(흑돌), 2: 컴퓨터(백돌)
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  var board = [2, 2, 2, 0, 0, 0, 1, 1, 1]; // 0: 빈칸, 1: 사람, 2: 컴퓨터
+  var moveHistory = []; // [{ from, to, player, prevBoard }]
+  var positionHistory = {}; // 상태 반복 카운트
+  var undoCount = 2; // 한 판당 2회
+  var selectedPiece = null; // 선택된 사람 말 인덱스 (0~8)
+  var lastMove = null; // { from, to, player }
+  var winningLine = null; // [p1, p2, p3]
+  var humanMoveCount = 0; // 사람이 움직인 횟수
+  var totalMoveCount = 0; // 전체 수
+  var isThinking = false; // 컴퓨터 생각 중 플래그
+  var aiThinkingTimer = null;
+
+  // 전적 및 최고 기록 변수
+  var wins = 0;
+  var losses = 0;
+  var draws = 0;
+  var bestEasy = null;
+  var bestNormal = null;
+  var bestHard = null;
+
+  // 컴퓨터 생각 타이머 취소
+  function cancelAiThinking() {
+    if (aiThinkingTimer) {
+      clearTimeout(aiThinkingTimer);
+      aiThinkingTimer = null;
+    }
+    isThinking = false;
+  }
+
+  // 로컬 스토리지 읽기
+  function loadStorage() {
+    try {
+      wins = parseInt(localStorage.getItem('zw_gonu_wins'), 10) || 0;
+      losses = parseInt(localStorage.getItem('zw_gonu_losses'), 10) || 0;
+      draws = parseInt(localStorage.getItem('zw_gonu_draws'), 10) || 0;
+
+      var rawE = localStorage.getItem('zw_gonu_best_easy');
+      var rawN = localStorage.getItem('zw_gonu_best_normal');
+      var rawH = localStorage.getItem('zw_gonu_best_hard');
+      if (rawE && !isNaN(parseInt(rawE, 10))) { bestEasy = parseInt(rawE, 10); }
+      if (rawN && !isNaN(parseInt(rawN, 10))) { bestNormal = parseInt(rawN, 10); }
+      if (rawH && !isNaN(parseInt(rawH, 10))) { bestHard = parseInt(rawH, 10); }
+
+      var savedLevel = localStorage.getItem('zw_gonu_level');
+      if (savedLevel === 'hard' || savedLevel === 'normal' || savedLevel === 'easy') {
+        currentLevel = savedLevel;
+      } else {
+        currentLevel = 'easy';
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+    updateStatusDisplay();
+  }
+
+  // 전적 및 최고 점수 화면 표시
+  function updateStatusDisplay() {
+    statusRecord.textContent = '전적 ' + wins + '승 ' + losses + '패 ' + draws + '무';
+    if (bestEasy !== null || bestNormal !== null || bestHard !== null) {
+      statusBest.textContent = '최고 기록 · 쉬움 ' + (bestEasy !== null ? bestEasy.toLocaleString() + '점' : '-') +
+        ' · 보통 ' + (bestNormal !== null ? bestNormal.toLocaleString() + '점' : '-') +
+        ' · 어려움 ' + (bestHard !== null ? bestHard.toLocaleString() + '점' : '-');
+    } else {
+      statusBest.textContent = '';
+    }
+  }
+
+  // 난이도 단추 상태 갱신
+  function updateLevelButtons() {
+    btnDiffEasy.classList.toggle('on', currentLevel === 'easy');
+    btnDiffNormal.classList.toggle('on', currentLevel === 'normal');
+    btnDiffHard.classList.toggle('on', currentLevel === 'hard');
+  }
+
+  // 덮개 설명 문구 갱신
+  function updateOverlayDesc() {
+    var txt = (currentLevel === 'hard') ? '어려움으로 시작해요' : ((currentLevel === 'normal') ? '보통으로 시작해요' : '쉬움으로 시작해요');
+    if (overlayDesc) overlayDesc.textContent = txt;
+  }
+
+  // 순위표 카드(rank.js) 탭 동기화
+  function syncRankTab() {
+    try {
+      var i = (currentLevel === 'hard') ? 2 : ((currentLevel === 'normal') ? 1 : 0);
+      if (window.ZW) ZW.rankPick = i;
+      var b = document.querySelector('.rk-tabs button[data-i="' + i + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  // 새 판 준비 상태로 리셋
+  function resetToReadyState() {
+    cancelAiThinking();
+    gameState = 'ready';
+    turn = 1;
+    board = [2, 2, 2, 0, 0, 0, 1, 1, 1];
+    moveHistory = [];
+    positionHistory = {};
+    undoCount = 2;
+    selectedPiece = null;
+    lastMove = null;
+    winningLine = null;
+    humanMoveCount = 0;
+    totalMoveCount = 0;
+
+    overlayBox.style.display = 'flex';
+    overlayTitle.textContent = '3줄 고누';
+    updateOverlayDesc();
+    btnStartGame.textContent = '시작';
+    btnOverlayRank.style.display = 'none';
+
+    statusTurn.textContent = '내 차례';
+    statusMoves.textContent = '수 0';
+    updateUndoButton();
+    render();
+  }
+
+  // 난이도 변경 함수
+  function setLevel(lvl) {
+    if (lvl === currentLevel) return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_gonu_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    resetToReadyState();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // 게임 시작
+  function startNewGame() {
+    cancelAiThinking();
+    board = [2, 2, 2, 0, 0, 0, 1, 1, 1];
+    moveHistory = [];
+    positionHistory = {};
+    var startKey = board.join('') + '_1';
+    positionHistory[startKey] = 1;
+
+    undoCount = 2;
+    selectedPiece = null;
+    lastMove = null;
+    winningLine = null;
+    humanMoveCount = 0;
+    totalMoveCount = 0;
+    turn = 1;
+    gameState = 'playing';
+
+    overlayBox.style.display = 'none';
+    statusTurn.textContent = '내 차례';
+    statusMoves.textContent = '수 0';
+    updateUndoButton();
+    render();
+  }
+
+  // 물리기 단추 상태 갱신
+  function updateUndoButton() {
+    btnUndo.textContent = '한 수 물리기 (' + undoCount + '회 남음)';
+    if (undoCount <= 0 || moveHistory.length < 2 || gameState !== 'playing' || turn !== 1 || isThinking) {
+      btnUndo.disabled = true;
+    } else {
+      btnUndo.disabled = false;
+    }
+  }
+
+  // 합법적 이동 목록 반환
+  function getLegalMoves(b, player) {
+    var moves = [];
+    for (var from = 0; from < 9; from++) {
+      if (b[from] === player) {
+        var adj = ADJACENCY[from];
+        for (var j = 0; j < adj.length; j++) {
+          var to = adj[j];
+          if (b[to] === 0) {
+            moves.push({ from: from, to: to });
+          }
+        }
+      }
+    }
+    return moves;
+  }
+
+  // 승리 여부 판정
+  function checkWin(b, player) {
+    for (var i = 0; i < LINES.length; i++) {
+      var line = LINES[i];
+      if (b[line[0]] === player && b[line[1]] === player && b[line[2]] === player) {
+        return { win: true, line: line };
+      }
+    }
+    return { win: false, line: null };
+  }
+
+  // 점수 계산 공식: 이기면 (100 - 사람이 움직인 횟수 * 5) * 난이도 배수 * 10, 최소 10, 최대 99999999
+  function calculateScore(moves, level) {
+    var base = Math.max(1, 100 - moves * 5);
+    var mult = (level === 'hard') ? 3 : ((level === 'normal') ? 2 : 1);
+    var score = Math.max(10, base * mult * 10);
+    return Math.min(99999999, Math.round(score));
+  }
+
+  // 캔버스 크기 계산 및 DPR 설정
+  var boardMetrics = {
+    size: 420,
+    pad: 68,
+    step: 142,
+    radius: 36
+  };
+
+  function updateMetrics() {
+    var rect = canvas.getBoundingClientRect();
+    var width = rect.width || 420;
+    var dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(width * dpr);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+
+    boardMetrics.size = width;
+    boardMetrics.pad = width * 0.16;
+    boardMetrics.step = (width - 2 * boardMetrics.pad) / 2;
+    boardMetrics.radius = boardMetrics.step * 0.28;
+  }
+
+  // 인덱스 0~8의 캔버스 (x, y) 중심 좌표
+  function getPointCoord(idx) {
+    var r = Math.floor(idx / 3);
+    var c = idx % 3;
+    var x = boardMetrics.pad + c * boardMetrics.step;
+    var y = boardMetrics.pad + r * boardMetrics.step;
+    return { x: x, y: y };
+  }
+
+  // 캔버스 렌더링
+  function render() {
+    updateMetrics();
+
+    var size = boardMetrics.size;
+    var pad = boardMetrics.pad;
+    var step = boardMetrics.step;
+    var radius = boardMetrics.radius;
+
+    ctx.clearRect(0, 0, size, size);
+
+    // 1. 고누판 원목 배경 그라데이션
+    var bgGrad = ctx.createLinearGradient(0, 0, size, size);
+    bgGrad.addColorStop(0, '#e8be82');
+    bgGrad.addColorStop(1, '#d5aa6e');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, size, size);
+
+    // 2. 외곽 테두리
+    ctx.strokeStyle = '#4a2c11';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(pad, pad, step * 2, step * 2);
+
+    // 3. 고누판 선 그리기 (가로선, 세로선, 대각선)
+    ctx.strokeStyle = '#5a3617';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+
+    // 가로선 3개
+    ctx.moveTo(pad, pad); ctx.lineTo(pad + 2 * step, pad);
+    ctx.moveTo(pad, pad + step); ctx.lineTo(pad + 2 * step, pad + step);
+    ctx.moveTo(pad, pad + 2 * step); ctx.lineTo(pad + 2 * step, pad + 2 * step);
+
+    // 세로선 3개
+    ctx.moveTo(pad, pad); ctx.lineTo(pad, pad + 2 * step);
+    ctx.moveTo(pad + step, pad); ctx.lineTo(pad + step, pad + 2 * step);
+    ctx.moveTo(pad + 2 * step, pad); ctx.lineTo(pad + 2 * step, pad + 2 * step);
+
+    // 대각선 2개
+    ctx.moveTo(pad, pad); ctx.lineTo(pad + 2 * step, pad + 2 * step);
+    ctx.moveTo(pad + 2 * step, pad); ctx.lineTo(pad, pad + 2 * step);
+    ctx.stroke();
+
+    // 4. 9개 교차점 화점
+    ctx.fillStyle = '#5a3617';
+    for (var i = 0; i < 9; i++) {
+      var pt = getPointCoord(i);
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 5. 선택된 말에서 이동 가능한 점 유도 가이드 원 표시
+    if (selectedPiece !== null && gameState === 'playing' && turn === 1) {
+      var adj = ADJACENCY[selectedPiece];
+      for (var a = 0; a < adj.length; a++) {
+        var targetIdx = adj[a];
+        if (board[targetIdx] === 0) {
+          var tpt = getPointCoord(targetIdx);
+
+          ctx.save();
+          // 이동 가능 반투명 원
+          ctx.beginPath();
+          ctx.arc(tpt.x, tpt.y, radius * 0.7, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(18, 128, 92, 0.28)';
+          ctx.fill();
+          ctx.strokeStyle = '#12805c';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([4, 3]);
+          ctx.stroke();
+
+          // 가운데 유도 작은 점
+          ctx.beginPath();
+          ctx.arc(tpt.x, tpt.y, 5, 0, Math.PI * 2);
+          ctx.fillStyle = '#12805c';
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+    }
+
+    // 6. 직전 착수 출발지 표시
+    if (lastMove) {
+      var fromPt = getPointCoord(lastMove.from);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(229, 72, 77, 0.65)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.arc(fromPt.x, fromPt.y, radius * 0.55, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // 7. 판 위의 말(돌) 그리기
+    for (var p = 0; p < 9; p++) {
+      var stone = board[p];
+      if (stone !== 0) {
+        var coord = getPointCoord(p);
+        var isSelected = (selectedPiece === p);
+        drawStone(coord.x, coord.y, stone, radius, isSelected);
+
+        // 직전 착수 도착지 표시 (작은 중앙 점)
+        if (lastMove && lastMove.to === p) {
+          ctx.beginPath();
+          ctx.arc(coord.x, coord.y, radius * 0.2, 0, Math.PI * 2);
+          ctx.fillStyle = (stone === 1) ? '#ffffff' : '#e5484d';
+          ctx.fill();
+        }
+      }
+    }
+
+    // 8. 승리 시 승리 라인 강조 선 그리기
+    if (winningLine && winningLine.length === 3) {
+      ctx.save();
+      ctx.strokeStyle = '#e5484d';
+      ctx.lineWidth = Math.max(5, step * 0.08);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      var p1 = getPointCoord(winningLine[0]);
+      var p2 = getPointCoord(winningLine[2]);
+
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.stroke();
+
+      for (var w = 0; w < 3; w++) {
+        var wpt = getPointCoord(winningLine[w]);
+        ctx.strokeStyle = '#ffd60a';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.arc(wpt.x, wpt.y, radius + 4, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+
+  // 돌 그리기 (입체 음영)
+  function drawStone(cx, cy, color, r, isSelected) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.38)';
+    ctx.shadowBlur = 5;
+    ctx.shadowOffsetX = 2;
+    ctx.shadowOffsetY = 2.5;
+
+    var grad = ctx.createRadialGradient(cx - r * 0.28, cy - r * 0.28, r * 0.08, cx, cy, r);
+
+    if (color === 1) {
+      // 사람 (흑돌)
+      grad.addColorStop(0, '#58585e');
+      grad.addColorStop(0.6, '#202024');
+      grad.addColorStop(1, '#08080a');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      // 컴퓨터 (백돌)
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.7, '#f2f2f7');
+      grad.addColorStop(1, '#d1d1d6');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.shadowColor = 'transparent';
+      ctx.strokeStyle = '#b0b0b8';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // 선택된 말 강조 링
+    if (isSelected) {
+      ctx.shadowColor = 'transparent';
+      ctx.strokeStyle = '#ffd60a';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r + 4, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  // 터치/클릭 좌표에서 가장 가까운 교차점(0~8) 찾기
+  function getIntersectionFromPoint(px, py) {
+    var step = boardMetrics.step;
+    var pad = boardMetrics.pad;
+    var threshold = step * 0.55;
+
+    var closestIdx = -1;
+    var minDist = 999999;
+
+    for (var i = 0; i < 9; i++) {
+      var pt = getPointCoord(i);
+      var dist = Math.hypot(px - pt.x, py - pt.y);
+      if (dist < minDist) {
+        minDist = dist;
+        closestIdx = i;
+      }
+    }
+    return (minDist <= threshold) ? closestIdx : -1;
+  }
+
+  // 보드 입력 처리
+  function handleBoardInput(e) {
+    if (gameState !== 'playing' || turn !== 1 || isThinking) return;
+
+    var rect = canvas.getBoundingClientRect();
+    var clientX = e.clientX;
+    var clientY = e.clientY;
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    }
+
+    var px = clientX - rect.left;
+    var py = clientY - rect.top;
+
+    var idx = getIntersectionFromPoint(px, py);
+    if (idx === -1) return;
+
+    // 1. 자신의 말 누른 경우: 선택 또는 선택 교체
+    if (board[idx] === 1) {
+      if (selectedPiece === idx) {
+        // 이미 선택된 말을 다시 누르면 선택 해제
+        selectedPiece = null;
+      } else {
+        selectedPiece = idx;
+        playSound('select');
+      }
+      render();
+      return;
+    }
+
+    // 2. 말을 선택한 상태에서 빈 칸을 누른 경우: 이동 시도
+    if (selectedPiece !== null && board[idx] === 0) {
+      var adj = ADJACENCY[selectedPiece];
+      if (adj.indexOf(idx) !== -1) {
+        // 이동 가능!
+        executeHumanMove(selectedPiece, idx);
+      }
+    }
+  }
+
+  // 사람 이동 실행
+  function executeHumanMove(from, to) {
+    var prevBoard = board.slice();
+    board[to] = 1;
+    board[from] = 0;
+
+    selectedPiece = null;
+    humanMoveCount++;
+    totalMoveCount++;
+    lastMove = { from: from, to: to, player: 1 };
+    moveHistory.push({ from: from, to: to, player: 1, prevBoard: prevBoard });
+
+    playSound('move');
+    statusMoves.textContent = '수 ' + totalMoveCount;
+
+    // 동형 반복 기록
+    var stateKey = board.join('') + '_2';
+    positionHistory[stateKey] = (positionHistory[stateKey] || 0) + 1;
+
+    // 승리 판정
+    var winCheck = checkWin(board, 1);
+    if (winCheck.win) {
+      handleGameOver('won', winCheck.line);
+      return;
+    }
+
+    // 동형 3회 반복 무승부 판정
+    if (positionHistory[stateKey] >= 3) {
+      handleGameOver('draw', null, '같은 배치가 3회 반복되어 무승부로 끝났어요.');
+      return;
+    }
+
+    // 컴퓨터 차례로 전환
+    turn = 2;
+    isThinking = true;
+    statusTurn.textContent = '컴퓨터 생각 중…';
+    updateUndoButton();
+    render();
+
+    // 컴퓨터 380ms 딜레이 후 착수
+    aiThinkingTimer = setTimeout(function () {
+      aiThinkingTimer = null;
+      if (gameState !== 'playing') return;
+
+      executeAiMove();
+    }, 380);
+  }
+
+  // 컴퓨터 AI 로직 및 실행
+  function executeAiMove() {
+    var aiMove = null;
+    if (currentLevel === 'hard') {
+      aiMove = getAiMoveHard(board);
+    } else if (currentLevel === 'normal') {
+      aiMove = getAiMoveNormal(board);
+    } else {
+      aiMove = getAiMoveEasy(board);
+    }
+
+    isThinking = false;
+
+    // 둘 수 있는 수가 없음 -> 사람 승리 (컴퓨터 포위 외통수)
+    if (!aiMove) {
+      handleGameOver('won', null, '컴퓨터가 둘 수 있는 수가 없어 승리했어요!');
+      return;
+    }
+
+    var prevBoard = board.slice();
+    board[aiMove.to] = 2;
+    board[aiMove.from] = 0;
+    totalMoveCount++;
+    lastMove = { from: aiMove.from, to: aiMove.to, player: 2 };
+    moveHistory.push({ from: aiMove.from, to: aiMove.to, player: 2, prevBoard: prevBoard });
+
+    playSound('move');
+    statusMoves.textContent = '수 ' + totalMoveCount;
+
+    // 동형 반복 기록
+    var stateKey = board.join('') + '_1';
+    positionHistory[stateKey] = (positionHistory[stateKey] || 0) + 1;
+
+    // 컴퓨터 승리 판정
+    var aiWinCheck = checkWin(board, 2);
+    if (aiWinCheck.win) {
+      handleGameOver('lost', aiWinCheck.line);
+      return;
+    }
+
+    // 동형 3회 반복 무승부 판정
+    if (positionHistory[stateKey] >= 3) {
+      handleGameOver('draw', null, '같은 배치가 3회 반복되어 무승부로 끝났어요.');
+      return;
+    }
+
+    // 사람 이동 가능 여부 확인
+    var humanMoves = getLegalMoves(board, 1);
+    if (humanMoves.length === 0) {
+      // 사람 둘 곳 없음 -> 컴퓨터 승리
+      handleGameOver('lost', null, '둘 수 있는 수가 없어 졌어요.');
+      return;
+    }
+
+    // 다시 사람 차례
+    turn = 1;
+    statusTurn.textContent = '내 차례';
+    updateUndoButton();
+    render();
+  }
+
+  // 게임 종료 처리
+  function handleGameOver(result, line, customMsg) {
+    gameState = result;
+    winningLine = line || null;
+    cancelAiThinking();
+
+    if (result === 'won') {
+      playSound('win');
+      statusTurn.textContent = '이겼어요!';
+      wins++;
+      var earnedScore = calculateScore(humanMoveCount, currentLevel);
+      var isNewBest = false;
+
+      try {
+        localStorage.setItem('zw_gonu_wins', String(wins));
+        if (currentLevel === 'hard') {
+          if (bestHard === null || earnedScore > bestHard) {
+            bestHard = earnedScore; isNewBest = true;
+            localStorage.setItem('zw_gonu_best_hard', String(bestHard));
+          }
+        } else if (currentLevel === 'normal') {
+          if (bestNormal === null || earnedScore > bestNormal) {
+            bestNormal = earnedScore; isNewBest = true;
+            localStorage.setItem('zw_gonu_best_normal', String(bestNormal));
+          }
+        } else {
+          if (bestEasy === null || earnedScore > bestEasy) {
+            bestEasy = earnedScore; isNewBest = true;
+            localStorage.setItem('zw_gonu_best_easy', String(bestEasy));
+          }
+        }
+      } catch (e) {}
+
+      updateStatusDisplay();
+      overlayTitle.textContent = '승리!';
+      overlayDesc.innerHTML = (customMsg ? customMsg + '<br>' : '말 3개를 먼저 모았어요!<br>') +
+        '획득 점수: <b>' + earnedScore.toLocaleString() + '점</b>' +
+        (isNewBest ? '<br><span style="color:#ffd60a; font-weight:700;">최고 기록 갱신!</span>' : '');
+    } else if (result === 'lost') {
+      playSound('lose');
+      statusTurn.textContent = '졌어요';
+      losses++;
+      try {
+        localStorage.setItem('zw_gonu_losses', String(losses));
+      } catch (e) {}
+      updateStatusDisplay();
+      overlayTitle.textContent = '패배';
+      overlayDesc.textContent = customMsg || '컴퓨터가 먼저 3줄을 완성했어요.';
+    } else {
+      statusTurn.textContent = '비겼어요';
+      draws++;
+      try {
+        localStorage.setItem('zw_gonu_draws', String(draws));
+      } catch (e) {}
+      updateStatusDisplay();
+      overlayTitle.textContent = '무승부';
+      overlayDesc.textContent = customMsg || '승부를 내지 못하고 비겼어요.';
+    }
+
+    btnStartGame.textContent = '한 판 더';
+    btnOverlayRank.style.display = 'inline-block';
+    overlayBox.style.display = 'flex';
+    updateUndoButton();
+    render();
+  }
+
+  // ── AI 알고리즘 ──
+  // 1. 쉬움: 앞 1수 읽기 (1-ply)
+  function getAiMoveEasy(b) {
+    var moves = getLegalMoves(b, 2);
+    if (moves.length === 0) return null;
+
+    // 즉시 승리하는 수 확인
+    for (var i = 0; i < moves.length; i++) {
+      var m = moves[i];
+      b[m.to] = 2; b[m.from] = 0;
+      var w = checkWin(b, 2);
+      b[m.from] = 2; b[m.to] = 0;
+      if (w.win) return m;
+    }
+
+    // 사람이 다음 수에 이길 수 있는 칸 방어
+    var hMoves = getLegalMoves(b, 1);
+    var urgentTo = [];
+    for (var h = 0; h < hMoves.length; h++) {
+      var hm = hMoves[h];
+      b[hm.to] = 1; b[hm.from] = 0;
+      var hw = checkWin(b, 1);
+      b[hm.from] = 1; b[hm.to] = 0;
+      if (hw.win) {
+        urgentTo.push(hm.to);
+      }
+    }
+
+    if (urgentTo.length > 0) {
+      var blockMoves = [];
+      for (var j = 0; j < moves.length; j++) {
+        if (urgentTo.indexOf(moves[j].to) !== -1) {
+          blockMoves.push(moves[j]);
+        }
+      }
+      if (blockMoves.length > 0) {
+        return blockMoves[Math.floor(Math.random() * blockMoves.length)];
+      }
+    }
+
+    // 그 외 중앙(4) 선호 및 랜덤
+    moves.sort(function (a, bMove) {
+      var sa = (a.to === 4 ? 3 : 0) + Math.random();
+      var sb = (bMove.to === 4 ? 3 : 0) + Math.random();
+      return sb - sa;
+    });
+    return moves[0];
+  }
+
+  // 국면 평가 함수 (보통/어려움에서 활용)
+  function evaluateBoard(b) {
+    var score = 0;
+    for (var i = 0; i < LINES.length; i++) {
+      var line = LINES[i];
+      var cCount = 0, hCount = 0, emptyCount = 0;
+      for (var j = 0; j < 3; j++) {
+        if (b[line[j]] === 2) cCount++;
+        else if (b[line[j]] === 1) hCount++;
+        else emptyCount++;
+      }
+      if (cCount === 2 && emptyCount === 1) score += 220;
+      if (hCount === 2 && emptyCount === 1) score -= 260;
+    }
+    if (b[4] === 2) score += 70;
+    else if (b[4] === 1) score -= 70;
+
+    var cMoves = getLegalMoves(b, 2).length;
+    var hMoves = getLegalMoves(b, 1).length;
+    score += (cMoves - hMoves) * 15;
+
+    return score;
+  }
+
+  // 2. 보통: 앞 3수 읽기 (3-ply Minimax + Alpha-Beta)
+  function minimax3(b, depth, maxDepth, isMax, alpha, beta) {
+    var lastPlayer = isMax ? 1 : 2;
+    var win = checkWin(b, lastPlayer);
+    if (win.win) {
+      return isMax ? (-10000 + depth) : (10000 - depth);
+    }
+
+    var player = isMax ? 2 : 1;
+    var moves = getLegalMoves(b, player);
+    if (moves.length === 0) {
+      return isMax ? (-10000 + depth) : (10000 - depth);
+    }
+
+    if (depth >= maxDepth) {
+      return evaluateBoard(b);
+    }
+
+    if (isMax) {
+      var maxEval = -999999;
+      for (var i = 0; i < moves.length; i++) {
+        var m = moves[i];
+        b[m.to] = 2; b[m.from] = 0;
+        var ev = minimax3(b, depth + 1, maxDepth, false, alpha, beta);
+        b[m.from] = 2; b[m.to] = 0;
+        if (ev > maxEval) maxEval = ev;
+        if (ev > alpha) alpha = ev;
+        if (beta <= alpha) break;
+      }
+      return maxEval;
+    } else {
+      var minEval = 999999;
+      for (var j = 0; j < moves.length; j++) {
+        var hm = moves[j];
+        b[hm.to] = 1; b[hm.from] = 0;
+        var hev = minimax3(b, depth + 1, maxDepth, true, alpha, beta);
+        b[hm.from] = 1; b[hm.to] = 0;
+        if (hev < minEval) minEval = hev;
+        if (hev < beta) beta = hev;
+        if (beta <= alpha) break;
+      }
+      return minEval;
+    }
+  }
+
+  function getAiMoveNormal(b) {
+    var moves = getLegalMoves(b, 2);
+    if (moves.length === 0) return null;
+
+    // 즉시 이기는 수 우선
+    for (var i = 0; i < moves.length; i++) {
+      var m = moves[i];
+      b[m.to] = 2; b[m.from] = 0;
+      var w = checkWin(b, 2);
+      b[m.from] = 2; b[m.to] = 0;
+      if (w.win) return m;
+    }
+
+    moves.sort(function () { return Math.random() - 0.5; });
+    var bestMove = null;
+    var bestScore = -999999;
+
+    for (var k = 0; k < moves.length; k++) {
+      var cand = moves[k];
+      b[cand.to] = 2; b[cand.from] = 0;
+      var score = minimax3(b, 1, 3, false, -999999, 999999);
+      b[cand.from] = 2; b[cand.to] = 0;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestMove = cand;
+      }
+    }
+    return bestMove || moves[0];
+  }
+
+  // 3. 어려움: 전체 읽기 (Full Minimax with Cycle Detection & Transposition Table)
+  function getAiMoveHard(b) {
+    var moves = getLegalMoves(b, 2);
+    if (moves.length === 0) return null;
+
+    // 즉시 승리 확인
+    for (var i = 0; i < moves.length; i++) {
+      var m = moves[i];
+      b[m.to] = 2; b[m.from] = 0;
+      var w = checkWin(b, 2);
+      b[m.from] = 2; b[m.to] = 0;
+      if (w.win) return m;
+    }
+
+    var memo = {};
+    var path = {};
+    var rootKey = b.join('') + '_2';
+    path[rootKey] = true;
+
+    function fullSearch(boardState, depth, maxDepth, isMax, alpha, beta) {
+      var lastPlayer = isMax ? 1 : 2;
+      var win = checkWin(boardState, lastPlayer);
+      if (win.win) {
+        return isMax ? (-10000 + depth) : (10000 - depth);
+      }
+
+      var player = isMax ? 2 : 1;
+      var stateKey = boardState.join('') + '_' + player;
+
+      // 사이클 감지 (반복 상태는 무승부 0점 처리)
+      if (path[stateKey]) {
+        return 0;
+      }
+
+      if (depth >= maxDepth) {
+        return evaluateBoard(boardState);
+      }
+
+      var memoKey = stateKey + '_' + depth;
+      if (memo[memoKey] !== undefined) {
+        return memo[memoKey];
+      }
+
+      var legal = getLegalMoves(boardState, player);
+      if (legal.length === 0) {
+        return isMax ? (-10000 + depth) : (10000 - depth);
+      }
+
+      path[stateKey] = true;
+      var result;
+
+      if (isMax) {
+        var maxEval = -999999;
+        for (var idx = 0; idx < legal.length; idx++) {
+          var lm = legal[idx];
+          boardState[lm.to] = 2; boardState[lm.from] = 0;
+          var ev = fullSearch(boardState, depth + 1, maxDepth, false, alpha, beta);
+          boardState[lm.from] = 2; boardState[lm.to] = 0;
+          if (ev > maxEval) maxEval = ev;
+          if (ev > alpha) alpha = ev;
+          if (beta <= alpha) break;
+        }
+        result = maxEval;
+      } else {
+        var minEval = 999999;
+        for (var jdx = 0; jdx < legal.length; jdx++) {
+          var hlm = legal[jdx];
+          boardState[hlm.to] = 1; boardState[hlm.from] = 0;
+          var hev = fullSearch(boardState, depth + 1, maxDepth, true, alpha, beta);
+          boardState[hlm.from] = 1; boardState[hlm.to] = 0;
+          if (hev < minEval) minEval = hev;
+          if (hev < beta) beta = hev;
+          if (beta <= alpha) break;
+        }
+        result = minEval;
+      }
+
+      delete path[stateKey];
+      memo[memoKey] = result;
+      return result;
+    }
+
+    var bestScore = -999999;
+    var bestCandidates = [];
+
+    // 중앙(4) 이동 먼저 정렬
+    moves.sort(function (a, bMove) {
+      var sa = (a.to === 4 ? 5 : 0);
+      var sb = (bMove.to === 4 ? 5 : 0);
+      return sb - sa;
+    });
+
+    for (var k = 0; k < moves.length; k++) {
+      var cand = moves[k];
+      b[cand.to] = 2; b[cand.from] = 0;
+      var score = fullSearch(b, 1, 12, false, -999999, 999999);
+      b[cand.from] = 2; b[cand.to] = 0;
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestCandidates = [cand];
+      } else if (score === bestScore) {
+        bestCandidates.push(cand);
+      }
+    }
+
+    delete path[rootKey];
+    return bestCandidates[Math.floor(Math.random() * bestCandidates.length)] || moves[0];
+  }
+
+  // 한 수 물리기
+  btnUndo.addEventListener('click', function () {
+    if (gameState !== 'playing' || turn !== 1 || isThinking) return;
+    if (undoCount <= 0 || moveHistory.length < 2) return;
+
+    // 컴퓨터 수 되돌리기
+    var lastAi = moveHistory.pop();
+    board[lastAi.from] = 2;
+    board[lastAi.to] = 0;
+
+    // 사람 수 되돌리기
+    var lastHuman = moveHistory.pop();
+    board[lastHuman.from] = 1;
+    board[lastHuman.to] = 0;
+
+    undoCount--;
+    humanMoveCount--;
+    totalMoveCount -= 2;
+    selectedPiece = null;
+    lastMove = moveHistory.length > 0 ? moveHistory[moveHistory.length - 1] : null;
+
+    statusMoves.textContent = '수 ' + totalMoveCount;
+    statusTurn.textContent = '내 차례';
+
+    updateUndoButton();
+    render();
+  });
+
+  // 다시 하기
+  btnRestart.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  // 덮개 시작 단추
+  btnStartGame.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  // 결과 창 순위표 올리기 단추
+  btnOverlayRank.addEventListener('click', function () {
+    var jump = document.querySelector('.zw-rk-jump');
+    if (jump && jump.style.display !== 'none') {
+      jump.click();
+    } else {
+      var rkSec = document.querySelector('.zw-rank');
+      if (rkSec) {
+        rkSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        rkSec.classList.add('flash');
+        setTimeout(function () { rkSec.classList.remove('flash'); }, 1800);
+      }
+    }
+  });
+
+  // 캔버스 클릭 및 터치 이벤트
+  canvas.addEventListener('click', handleBoardInput);
+  canvas.addEventListener('touchend', function (e) {
+    e.preventDefault();
+    handleBoardInput(e);
+  }, { passive: false });
+
+  // 창 크기 변경 시 다시 그리기
+  window.addEventListener('resize', function () {
+    render();
+  });
+
+  // 초기화 실행
+  loadStorage();
+  render();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/four-in-row/">4목 맞추기</a> — 컴퓨터와 4개 먼저 잇기</li><li><a href="/water-sort/">물 정렬</a> — 색깔별로 물을 병에 모으기</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/klondike-solitaire/">솔리테어</a> — 카드를 순서대로 쌓아 완성하기</li><li><a href="/box-push/">상자 밀기</a> — 상자를 목표 칸으로 밀기</li><li><a href="/pipe-connect/">파이프 잇기</a> — 돌려서 물길 연결하기</li><li><a href="/checkers-8/">체커</a> — 컴퓨터와 체커 한 판</li><li><a href="/fleet-hunt/">함대 맞히기</a> — 좌표를 찍어 상대 함대 찾기</li><li><a href="/baduk-9/">바둑 9줄</a> — 9줄 판에서 컴퓨터와 바둑 한 판</li><li><a href="/janggi-mini/">장기</a> — 컴퓨터와 장기 한 판</li><li><a href="/gonu/">고누</a> — 말 3개를 한 줄로 모으기</li><li><a href="/mancala/">만칼라</a> — 구슬을 나눠 담아 곳간 채우기</li><li><a href="/mini-chess/">미니 체스</a> — 6×6 판의 작은 체스</li><li><a href="/freecell-solitaire/">프리셀</a> — 임시 칸을 써서 카드 쌓기</li><li><a href="/domino-chain/">도미노</a> — 숫자를 맞춰 도미노 잇기</li><li><a href="/peg-jump/">페그 솔리테어</a> — 구슬을 뛰어넘어 하나만 남기기</li><li><a href="/tangram-seven/">칠교</a> — 일곱 조각으로 모양 맞추기</li><li><a href="/dot-box-land/">점 잇기 땅따먹기</a> — 선을 그어 네모 땅 차지하기</li><li><a href="/nonogram/">네모 로직</a> — 숫자 힌트로 숨은 그림 찾기</li><li><a href="/binary-fill/">0과 1 채우기</a> — 규칙대로 0과 1 채우기</li><li><a href="/sum-fill/">숫자 합 맞추기</a> — 가로세로 합에 맞게 숫자 채우기</li><li><a href="/word-hangman/">글자 맞히기</a> — 글자를 하나씩 찍어 단어 맞히기</li><li><a href="/word-chain/">끝말잇기</a> — 컴퓨터와 끝말잇기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

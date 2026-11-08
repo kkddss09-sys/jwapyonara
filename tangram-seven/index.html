@@ -1,0 +1,1385 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>칠교 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 무료 칠교(탕그램) 퍼즐. 정사각형 7조각으로 12가지 그림자를 완성해 보세요. 쉬움·보통·어려움 난이도를 휴대폰과 PC에서 즐길 수 있습니다.">
+<link rel="canonical" href="https://jwapyonara.com/tangram-seven/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="칠교 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 하는 무료 칠교(탕그램) 퍼즐. 정사각형 7조각으로 12가지 그림자를 완성해 보세요.">
+<meta property="og:url" content="https://jwapyonara.com/tangram-seven/">
+<meta property="og:site_name" content="좌표나라">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "칠교",
+  "description": "가입 없이 바로 즐기는 무료 칠교(탕그램) 퍼즐 게임. 정사각형 7조각으로 12가지 그림자 모양을 완성하세요.",
+  "url": "https://jwapyonara.com/tangram-seven/",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All"
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 3단계 선택 단추 (.diff-seg) */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 표시 바 */
+.tangram-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  gap: 6px;
+}
+.tangram-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1.3;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tangram-status-mid {
+  color: #ffffff;
+  flex: 0.9;
+  text-align: center;
+  white-space: nowrap;
+}
+.tangram-status-right {
+  color: #a1a1a6;
+  flex: 1.1;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* 최고 점수 안내 줄 */
+.tangram-best-line {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 칠교 캔버스 감싸개 */
+.tangram-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 12px;
+  aspect-ratio: 420 / 490;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #1c1c1e;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#tangramCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+  touch-action: none;
+}
+
+/* 덮개 창 (시작/완료 안내) */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 18, 20, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  z-index: 10;
+}
+.canvas-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 8px;
+  color: #ffd60a;
+}
+.canvas-overlay p {
+  font-size: 15px;
+  margin: 0 0 16px;
+  color: #e5e5ea;
+  max-width: 300px;
+  line-height: 1.45;
+}
+.canvas-overlay .btn-start {
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  background: var(--red, #1b64da);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 38px;
+  min-height: 50px;
+  cursor: pointer;
+  touch-action: manipulation;
+  margin-bottom: 8px;
+}
+.canvas-overlay .btn-start:active {
+  opacity: 0.85;
+}
+.canvas-overlay .btn-rank-jump {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  background: #ffd60a;
+  color: #1c1c1e;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 24px;
+  min-height: 46px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* 조각 컨트롤 도구 줄 */
+.piece-tool-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.btn-tool {
+  min-height: 46px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid var(--line, #e5e5ea);
+  background: var(--card, #fff);
+  color: var(--ink, #1c1c1e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 8px 4px;
+}
+.btn-tool:active:not(:disabled) {
+  background: var(--soft, #e8f0fe);
+}
+.btn-tool:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-tool.active {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 문제 이동 및 초기화 제어 줄 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px 6px;
+}
+.btn-stage {
+  background: var(--card, #fff);
+  border: 1.5px solid var(--line, #e5e5ea);
+  color: var(--ink, #1c1c1e);
+}
+.btn-stage:active:not(:disabled) {
+  background: var(--soft, #e8f0fe);
+}
+.btn-stage:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn-reset {
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #3a3a3c;
+}
+
+/* 조작 팁 안내 문구 */
+.tangram-tip-box {
+  background: var(--fill, #f2f2f7);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--sub, #6e6e73);
+  line-height: 1.5;
+  margin-top: 6px;
+  text-align: center;
+}
+.tangram-tip-box b {
+  color: var(--ink, #1d1d1f);
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>칠교 한 판,<br>그림자를 채워 보세요</h1>
+  <p class="lead">정사각형 7조각을 돌리고 뒤집어 그림자 모양을 완성해 보세요. 가입 없이 바로 즐겨요.</p>
+
+  <section class="card">
+    <!-- 난이도 3단계 선택 단추 -->
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <!-- 상태 표시 바 -->
+    <div class="tangram-status-bar">
+      <div class="tangram-status-left" id="statusStage">문제 1/12 · 정사각형</div>
+      <div class="tangram-status-mid" id="statusTimer">0초</div>
+      <div class="tangram-status-right" id="statusScore">점수 0점</div>
+    </div>
+    <div class="tangram-best-line" id="statusBest"></div>
+
+    <!-- 칠교 캔버스 및 시작/완료 오버레이 -->
+    <div class="tangram-canvas-wrap" id="canvasWrap">
+      <canvas id="tangramCanvas" width="420" height="490"></canvas>
+      <div class="canvas-overlay" id="overlayBox">
+        <h2 id="overlayTitle">칠교</h2>
+        <p id="overlayDesc">쉬움으로 시작해요<br>조각을 끌어 놓고 탭하여 회전해 보세요.</p>
+        <button type="button" class="btn-start" id="btnStartGame">시작하기</button>
+        <button type="button" class="btn-rank-jump" id="btnOverlayRank" style="display:none;">🏆 순위표 올리기</button>
+      </div>
+    </div>
+
+    <!-- 선택 조각 조작 단추 -->
+    <div class="piece-tool-bar">
+      <button type="button" class="btn-tool" id="btnRotate" title="선택한 조각을 45도 회전합니다">회전 (45°)</button>
+      <button type="button" class="btn-tool" id="btnFlip" title="선택한 조각을 좌우로 뒤집습니다">뒤집기</button>
+      <button type="button" class="btn-tool" id="btnReturnTray" title="선택한 조각을 아래 보관함으로 되돌립니다">보관함으로</button>
+    </div>
+
+    <!-- 문제 이동 및 다시 하기 제어 단추 -->
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-stage" id="btnPrevStage">이전 문제</button>
+      <button type="button" class="btn-action btn-stage" id="btnNextStage">다음 문제</button>
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+
+    <div class="tangram-tip-box">
+      [안내] 조각을 <b>끌어다 놓고</b>, 가볍게 <b>탭하면 45°씩 회전</b>합니다. 자리에 맞으면 <b>자석처럼 착!</b> 붙어요.
+    </div>
+  </section>
+
+  <p class="note">7조각 칠교 퍼즐은 기기 브라우저 안에서만 안전하게 실행되며 점수가 안전하게 보관됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>칠교 하는 법</summary>
+    <ul>
+      <li><b>칠교 규칙:</b> 큰 삼각형 2개, 중간 삼각형 1개, 작은 삼각형 2개, 정사각형 1개, 평행사변형 1개로 이루어진 7개의 조각을 겹침 없이 모두 사용하여 위쪽 그림자 모양을 채웁니다.</li>
+      <li><b>조각 조작법:</b> 아래 보관함이나 판 위의 조각을 손가락이나 마우스로 잡고 끌어(드래그) 원하는 위치에 놓을 수 있습니다.</li>
+      <li><b>회전과 뒤집기:</b> 조각을 가볍게 탭(클릭)하거나 아래 '회전(45°)' 단추를 누르면 45도씩 회전합니다. 평행사변형은 '뒤집기' 단추로 뒤집을 수 있습니다.</li>
+      <li><b>자석 스냅:</b> 조각을 정답 위치 근처에 올바른 각도로 가져가면 자석처럼 자동으로 착 붙습니다.</li>
+      <li><b>난이도 안내:</b>
+        <ul>
+          <li><b>쉬움:</b> 그림자 테두리와 함께 각 조각이 들어갈 안쪽 안내선이 모두 보입니다.</li>
+          <li><b>보통:</b> 합쳐진 전체 외곽 테두리만 보입니다.</li>
+          <li><b>어려움:</b> 내부 선과 테두리 없이 오직 검은 그림자(실루엣)만 보입니다.</li>
+        </ul>
+      </li>
+      <li><b>점수 계산:</b> 문제를 풀 때마다 <b>(1,000 − 걸린 시간(초)) × 난이도 배수</b>(최소 50점)로 점수를 얻으며, 푼 문제 점수를 모두 합산합니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>칠교놀이란?</h2>
+    <p>칠교(七巧)는 정사각형을 7개의 기하학적 조각으로 나눈 전통 두뇌 퍼즐(탕그램, Tangram)입니다. 7개의 단순한 조각만으로 동물, 사물, 사람, 건축물 등 수천 가지의 무한한 형상을 만들 수 있어 '지혜판'이라고도 불렸습니다.</p>
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단에서 난이도를 고릅니다(쉬움·보통·어려움).</li>
+      <li>주어진 12가지 문제(정사각형, 삼각형, 집, 요트, 물고기, 여우, 새 등)를 차례대로 풀어보세요.</li>
+      <li>한 문제를 빠르게 풀수록 더 높은 점수를 획득할 수 있습니다. 12문제를 모두 완성하여 최고 점수에 도전해 보세요!</li>
+    </ol>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // ── WebAudio 효과음 생성기 (외부 소리 파일 일절 없음) ──
+  var audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) audioCtx = new AC();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  // 자석 스냅 효과음 ("착!")
+  function playSnapSound() {
+    try {
+      var ctx = getAudioCtx();
+      if (!ctx) return;
+      var now = ctx.currentTime;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(520, now);
+      osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.09);
+    } catch (e) {}
+  }
+
+  // 조각 회전 효과음 (가벼운 "틱")
+  function playRotateSound() {
+    try {
+      var ctx = getAudioCtx();
+      if (!ctx) return;
+      var now = ctx.currentTime;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(420, now);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.04);
+    } catch (e) {}
+  }
+
+  // 스테이지 클리어 팡파레 (도-미-솔-도)
+  function playStageClearSound() {
+    try {
+      var ctx = getAudioCtx();
+      if (!ctx) return;
+      var notes = [523.25, 659.25, 783.99, 1046.50];
+      var now = ctx.currentTime;
+      for (var i = 0; i < notes.length; i++) {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        var t = now + i * 0.09;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(notes[i], t);
+        gain.gain.setValueAtTime(0.2, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.24);
+      }
+    } catch (e) {}
+  }
+
+  // ── DOM 요소 ──
+  var canvas = document.getElementById('tangramCanvas');
+  var ctx = canvas.getContext('2d');
+  var canvasWrap = document.getElementById('canvasWrap');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var btnRotate = document.getElementById('btnRotate');
+  var btnFlip = document.getElementById('btnFlip');
+  var btnReturnTray = document.getElementById('btnReturnTray');
+  var btnPrevStage = document.getElementById('btnPrevStage');
+  var btnNextStage = document.getElementById('btnNextStage');
+  var btnRestart = document.getElementById('btnRestart');
+  var statusStage = document.getElementById('statusStage');
+  var statusTimer = document.getElementById('statusTimer');
+  var statusScore = document.getElementById('statusScore');
+  var statusBest = document.getElementById('statusBest');
+
+  // ── 칠교 기하학 기본 수치 ──
+  // 단위 치수 (모바일 420x490 캔버스 기준 최적 스케일)
+  var S = 28;                 // 작은 직각삼각형 직각변, 정사각형 한 변
+  var H = S * Math.SQRT2;     // 작은 삼 빗변, 중간 삼 직각변 (~39.6)
+  var D = 2 * S;              // 중간 삼 빗변, 큰 삼 직각변 (56)
+  var W = 2 * H;              // 큰 삼 빗변 (~79.2)
+
+  // 각 조각의 로컬 중심 기준 다각형 꼭짓점 좌표 (정밀 계산)
+  var LOCAL_SHAPES = {
+    // 큰 직각이등변삼각형 (직각변 D=56)
+    TL1: [
+      [-D / 3, -D / 3],
+      [2 * D / 3, -D / 3],
+      [-D / 3, 2 * D / 3]
+    ],
+    TL2: [
+      [-D / 3, -D / 3],
+      [2 * D / 3, -D / 3],
+      [-D / 3, 2 * D / 3]
+    ],
+    // 중간 직각이등변삼각형 (직각변 H)
+    TM: [
+      [-H / 3, -H / 3],
+      [2 * H / 3, -H / 3],
+      [-H / 3, 2 * H / 3]
+    ],
+    // 작은 직각이등변삼각형 (직각변 S=28)
+    TS1: [
+      [-S / 3, -S / 3],
+      [2 * S / 3, -S / 3],
+      [-S / 3, 2 * S / 3]
+    ],
+    TS2: [
+      [-S / 3, -S / 3],
+      [2 * S / 3, -S / 3],
+      [-S / 3, 2 * S / 3]
+    ],
+    // 정사각형 (한 변 S=28)
+    SQ: [
+      [-S / 2, -S / 2],
+      [S / 2, -S / 2],
+      [S / 2, S / 2],
+      [-S / 2, S / 2]
+    ],
+    // 평행사변형 (밑변 H, 높이 H/2)
+    PARA: [
+      [-0.75 * H, -0.25 * H],
+      [0.25 * H, -0.25 * H],
+      [0.75 * H, 0.25 * H],
+      [-0.25 * H, 0.25 * H]
+    ]
+  };
+
+  // 조각별 고유 테마 색상 (모던 플랫 & 파스텔)
+  var PIECE_COLORS = {
+    TL1: { fill: '#3b82f6', border: '#1d4ed8', name: '큰 삼각형 A' },
+    TL2: { fill: '#06b6d4', border: '#0e7490', name: '큰 삼각형 B' },
+    TM:  { fill: '#f97316', border: '#c2410c', name: '중간 삼각형' },
+    SQ:  { fill: '#22c55e', border: '#15803d', name: '정사각형' },
+    PARA:{ fill: '#8b5cf6', border: '#6d28d9', name: '평행사변형' },
+    TS1: { fill: '#eab308', border: '#a16207', name: '작은 삼각형 A' },
+    TS2: { fill: '#ec4899', border: '#be185d', name: '작은 삼각형 B' }
+  };
+
+  // ── 12가지 칠교 퍼즐 문제 데이터 ──
+  // 각 문제마다 목표 조각 7개의 상대 위치(px), 회전각(도), 뒤집기 여부
+  var STAGES = [
+    {
+      name: '정사각형',
+      desc: '칠교의 기본! 7조각을 모아 원래의 정사각형을 만들어 보세요.',
+      boardCenterY: 145,
+      pieces: [
+        { type: 'TL1', x: 0, y: -26.4, rot: 135, flip: false },
+        { type: 'TL2', x: -26.4, y: 0, rot: 45, flip: false },
+        { type: 'TM',  x: 26.4, y: 26.4, rot: 180, flip: false },
+        { type: 'SQ',  x: 0, y: 19.8, rot: 45, flip: false },
+        { type: 'TS1', x: -19.8, y: 33.0, rot: 225, flip: false },
+        { type: 'TS2', x: 13.2, y: 0, rot: 315, flip: false },
+        { type: 'PARA', x: 29.7, y: -9.9, rot: 0, flip: false }
+      ]
+    },
+    {
+      name: '큰 삼각형',
+      desc: '7조각을 합쳐 거대한 직각이등변삼각형을 만듭니다.',
+      boardCenterY: 145,
+      pieces: [
+        { type: 'TL1', x: -39.6, y: 0, rot: 45, flip: false },
+        { type: 'TL2', x: 39.6, y: 0, rot: 315, flip: false },
+        { type: 'TM',  x: 0, y: 26.4, rot: 0, flip: false },
+        { type: 'SQ',  x: 0, y: -13.2, rot: 0, flip: false },
+        { type: 'TS1', x: -18.7, y: -18.7, rot: 135, flip: false },
+        { type: 'TS2', x: 18.7, y: -18.7, rot: 225, flip: false },
+        { type: 'PARA', x: 0, y: -33.0, rot: 90, flip: false }
+      ]
+    },
+    {
+      name: '직사각형',
+      desc: '가로로 길게 뻗은 직사각형 모양을 가득 채워보세요.',
+      boardCenterY: 145,
+      pieces: [
+        { type: 'TL1', x: -59.4, y: -6.6, rot: 180, flip: false },
+        { type: 'TL2', x: -59.4, y: 6.6, rot: 0, flip: false },
+        { type: 'TM',  x: 59.4, y: 0, rot: 270, flip: false },
+        { type: 'SQ',  x: 19.8, y: 0, rot: 45, flip: false },
+        { type: 'TS1', x: 0, y: -9.9, rot: 90, flip: false },
+        { type: 'TS2', x: 0, y: 9.9, rot: 270, flip: false },
+        { type: 'PARA', x: -19.8, y: 0, rot: 0, flip: false }
+      ]
+    },
+    {
+      name: '집',
+      desc: '삼각형 지붕과 반듯한 벽체가 어우러진 따뜻한 집입니다.',
+      boardCenterY: 148,
+      pieces: [
+        { type: 'TL1', x: -28, y: -36, rot: 135, flip: false },
+        { type: 'TL2', x: 28, y: -36, rot: 225, flip: false },
+        { type: 'TM',  x: -28, y: 22, rot: 0, flip: false },
+        { type: 'SQ',  x: 0, y: 22, rot: 0, flip: false },
+        { type: 'PARA', x: 28, y: 22, rot: 90, flip: false },
+        { type: 'TS1', x: -14, y: -7, rot: 45, flip: false },
+        { type: 'TS2', x: 14, y: -7, rot: 315, flip: false }
+      ]
+    },
+    {
+      name: '요트',
+      desc: '바람을 가르는 높은 돛과 날렵한 선체의 돛단배입니다.',
+      boardCenterY: 142,
+      pieces: [
+        { type: 'TL1', x: -15, y: -45, rot: 90, flip: false },
+        { type: 'TL2', x: 25, y: -25, rot: 180, flip: false },
+        { type: 'TM',  x: 40, y: 35, rot: 180, flip: false },
+        { type: 'SQ',  x: 0, y: 35, rot: 0, flip: false },
+        { type: 'PARA', x: -40, y: 35, rot: 0, flip: false },
+        { type: 'TS1', x: -15, y: 15, rot: 90, flip: false },
+        { type: 'TS2', x: 15, y: 15, rot: 270, flip: false }
+      ]
+    },
+    {
+      name: '물고기',
+      desc: '지느러미와 꼬리를 흔들며 헤엄치는 물고기 모양입니다.',
+      boardCenterY: 145,
+      pieces: [
+        { type: 'TL1', x: -45, y: -20, rot: 135, flip: false },
+        { type: 'TL2', x: -45, y: 20, rot: 45, flip: false },
+        { type: 'SQ',  x: -10, y: 0, rot: 45, flip: false },
+        { type: 'TM',  x: 20, y: 0, rot: 270, flip: false },
+        { type: 'TS1', x: -10, y: -35, rot: 90, flip: false },
+        { type: 'TS2', x: -10, y: 35, rot: 0, flip: false },
+        { type: 'PARA', x: 55, y: 0, rot: 45, flip: false }
+      ]
+    },
+    {
+      name: '여우',
+      desc: '쫑긋 솟은 두 귀와 영리한 눈매의 여우 형상입니다.',
+      boardCenterY: 140,
+      pieces: [
+        { type: 'TS1', x: -20, y: -65, rot: 45, flip: false },
+        { type: 'TS2', x: 20, y: -65, rot: 315, flip: false },
+        { type: 'SQ',  x: 0, y: -45, rot: 45, flip: false },
+        { type: 'TL1', x: -25, y: 0, rot: 90, flip: false },
+        { type: 'TL2', x: 25, y: 15, rot: 225, flip: false },
+        { type: 'TM',  x: -45, y: 35, rot: 180, flip: false },
+        { type: 'PARA', x: 45, y: 45, rot: 45, flip: false }
+      ]
+    },
+    {
+      name: '날아가는 새',
+      desc: '날개를 힘차게 펼치고 하늘을 비행하는 새입니다.',
+      boardCenterY: 145,
+      pieces: [
+        { type: 'TS1', x: -60, y: -35, rot: 135, flip: false },
+        { type: 'PARA', x: -35, y: -20, rot: 45, flip: false },
+        { type: 'TL1', x: 0, y: 0, rot: 90, flip: false },
+        { type: 'TL2', x: 20, y: -45, rot: 0, flip: false },
+        { type: 'TM',  x: -10, y: 30, rot: 270, flip: false },
+        { type: 'SQ',  x: 40, y: 20, rot: 45, flip: false },
+        { type: 'TS2', x: 65, y: 35, rot: 315, flip: false }
+      ]
+    },
+    {
+      name: '촛대',
+      desc: '타오르는 촛불과 우아하게 받쳐진 촛대입니다.',
+      boardCenterY: 142,
+      pieces: [
+        { type: 'TS1', x: 0, y: -65, rot: 45, flip: false },
+        { type: 'SQ',  x: 0, y: -38, rot: 0, flip: false },
+        { type: 'PARA', x: 0, y: -10, rot: 90, flip: false },
+        { type: 'TL1', x: -35, y: 35, rot: 45, flip: false },
+        { type: 'TL2', x: 35, y: 35, rot: 315, flip: false },
+        { type: 'TM',  x: 0, y: 25, rot: 0, flip: false },
+        { type: 'TS2', x: 0, y: 45, rot: 180, flip: false }
+      ]
+    },
+    {
+      name: '로켓',
+      desc: '우주를 향해 힘차게 발사되는 날렵한 로켓 모양입니다.',
+      boardCenterY: 140,
+      pieces: [
+        { type: 'TL1', x: 0, y: -60, rot: 0, flip: false },
+        { type: 'TM',  x: 0, y: -20, rot: 180, flip: false },
+        { type: 'SQ',  x: 0, y: 8, rot: 0, flip: false },
+        { type: 'TL2', x: 0, y: 45, rot: 180, flip: false },
+        { type: 'TS1', x: -32, y: 20, rot: 90, flip: false },
+        { type: 'TS2', x: 32, y: 20, rot: 270, flip: false },
+        { type: 'PARA', x: 0, y: 75, rot: 90, flip: false }
+      ]
+    },
+    {
+      name: '달리는 사람',
+      desc: '앞을 향해 활기차게 질주하는 사람의 역동적인 모습입니다.',
+      boardCenterY: 142,
+      pieces: [
+        { type: 'SQ',  x: -25, y: -65, rot: 45, flip: false },
+        { type: 'TL1', x: -10, y: -25, rot: 135, flip: false },
+        { type: 'TS1', x: 25, y: -40, rot: 315, flip: false },
+        { type: 'TS2', x: -45, y: -25, rot: 225, flip: false },
+        { type: 'TM',  x: 0, y: 10, rot: 270, flip: false },
+        { type: 'PARA', x: 35, y: 25, rot: 45, flip: false },
+        { type: 'TL2', x: -30, y: 45, rot: 45, flip: false }
+      ]
+    },
+    {
+      name: '화살표',
+      desc: '목표를 향해 단호하게 가리키는 화살표 형상입니다.',
+      boardCenterY: 145,
+      pieces: [
+        { type: 'TL1', x: 0, y: -50, rot: 0, flip: false },
+        { type: 'TS1', x: -32, y: -25, rot: 90, flip: false },
+        { type: 'TS2', x: 32, y: -25, rot: 270, flip: false },
+        { type: 'SQ',  x: 0, y: -10, rot: 0, flip: false },
+        { type: 'TM',  x: 0, y: 25, rot: 180, flip: false },
+        { type: 'TL2', x: 0, y: 55, rot: 0, flip: false },
+        { type: 'PARA', x: 0, y: 80, rot: 90, flip: false }
+      ]
+    }
+  ];
+
+  // ── 게임 진행 상태 변수 ──
+  var gameState = 'ready'; // 'ready', 'playing', 'stage_clear', 'all_clear'
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  var currentStageIndex = 0; // 0 ~ 11
+  var totalScore = 0;
+  var stageStartTime = 0;
+  var timerInterval = null;
+  var elapsedSeconds = 0;
+
+  // 플레이어 조각 인스턴스 배열 (7개)
+  // { id, type, x, y, rot, flip, isSnapped, trayX, trayY }
+  var pieces = [];
+  var selectedPieceId = null;
+
+  // 드래그 상태
+  var dragPiece = null;
+  var dragOffsetX = 0;
+  var dragOffsetY = 0;
+  var pointerDownTime = 0;
+  var pointerDownX = 0;
+  var pointerDownY = 0;
+
+  // 로컬 최고 점수 기록
+  var bestEasy = 0;
+  var bestNormal = 0;
+  var bestHard = 0;
+
+  // ── 점수 및 로컬스토리지 동기화 ──
+  function clampScore(score) {
+    var n = parseInt(score, 10);
+    if (isNaN(n) || n < 0) return 0;
+    return Math.min(n, 99999999);
+  }
+
+  function loadStorage() {
+    try {
+      bestEasy = clampScore(localStorage.getItem('zw_tangram-seven_best_easy'));
+      bestNormal = clampScore(localStorage.getItem('zw_tangram-seven_best_normal'));
+      bestHard = clampScore(localStorage.getItem('zw_tangram-seven_best_hard'));
+      var savedLvl = localStorage.getItem('zw_tangram-seven_level');
+      if (savedLvl === 'hard' || savedLvl === 'normal' || savedLvl === 'easy') {
+        currentLevel = savedLvl;
+      } else {
+        currentLevel = 'easy';
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+    updateLevelButtons();
+    updateBestDisplay();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+  }
+
+  function saveBestScore() {
+    try {
+      var key = 'zw_tangram-seven_best_' + currentLevel;
+      var currentBest = 0;
+      if (currentLevel === 'easy') currentBest = bestEasy;
+      else if (currentLevel === 'normal') currentBest = bestNormal;
+      else if (currentLevel === 'hard') currentBest = bestHard;
+
+      if (totalScore > currentBest) {
+        var clamped = clampScore(totalScore);
+        if (currentLevel === 'easy') bestEasy = clamped;
+        else if (currentLevel === 'normal') bestNormal = clamped;
+        else if (currentLevel === 'hard') bestHard = clamped;
+        localStorage.setItem(key, String(clamped));
+        updateBestDisplay();
+      }
+    } catch (e) {}
+  }
+
+  function updateBestDisplay() {
+    statusBest.textContent = '최고 점수 · 쉬움 ' + bestEasy.toLocaleString() + '점 · 보통 ' +
+      bestNormal.toLocaleString() + '점 · 어려움 ' + bestHard.toLocaleString() + '점';
+  }
+
+  // ── 난이도 단추 및 순위표 동기화 ──
+  function updateLevelButtons() {
+    btnDiffEasy.classList.toggle('on', currentLevel === 'easy');
+    btnDiffNormal.classList.toggle('on', currentLevel === 'normal');
+    btnDiffHard.classList.toggle('on', currentLevel === 'hard');
+  }
+
+  function syncRankTab() {
+    try {
+      var i = (currentLevel === 'hard') ? 2 : (currentLevel === 'normal' ? 1 : 0);
+      if (window.ZW) ZW.rankPick = i;
+      var b = document.querySelector('.rk-tabs button[data-i="' + i + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  function setLevel(lvl) {
+    if (lvl === currentLevel) return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_tangram-seven_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    syncRankTab();
+    initStage(currentStageIndex);
+    render();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // ── 기하학 보조 함수 ──
+  // 다각형 꼭짓점 회전 및 이동 변환
+  function getTransformedPolygon(type, cx, cy, rotDeg, flipped) {
+    var rad = rotDeg * Math.PI / 180;
+    var cos = Math.cos(rad);
+    var sin = Math.sin(rad);
+    var base = LOCAL_SHAPES[type];
+    if (!base) return [];
+
+    return base.map(function (pt) {
+      var lx = flipped ? -pt[0] : pt[0];
+      var ly = pt[1];
+      var rx = lx * cos - ly * sin;
+      var ry = lx * sin + ly * cos;
+      return [cx + rx, cy + ry];
+    });
+  }
+
+  // 각도 0~359도 정규화
+  function normAngle(deg) {
+    var d = deg % 360;
+    if (d < 0) d += 360;
+    return d;
+  }
+
+  // 점(px, py)이 다각형 내부에 있는지 판정 (Ray casting)
+  function pointInPolygon(px, py, poly) {
+    var inside = false;
+    for (var i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      var xi = poly[i][0], yi = poly[i][1];
+      var xj = poly[j][0], yj = poly[j][1];
+      var intersect = ((yi > py) !== (yj > py)) &&
+        (px < (xj - xi) * (py - yi) / ((yj - yi) || 0.0001) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  // ── 조각 초기화 및 스테이지 설정 ──
+  function initPieces() {
+    var pieceTypes = ['TL1', 'TL2', 'TM', 'SQ', 'PARA', 'TS1', 'TS2'];
+    // 하단 보관함(트레이) 초기 배치 좌표 (폭 420, Y 320~460 영역)
+    var traySlots = [
+      { x: 50,  y: 345 }, // TL1
+      { x: 130, y: 345 }, // TL2
+      { x: 215, y: 345 }, // TM
+      { x: 295, y: 345 }, // SQ
+      { x: 375, y: 345 }, // PARA
+      { x: 110, y: 430 }, // TS1
+      { x: 230, y: 430 }  // TS2
+    ];
+
+    pieces = [];
+    for (var i = 0; i < pieceTypes.length; i++) {
+      var t = pieceTypes[i];
+      var slot = traySlots[i];
+      pieces.push({
+        id: i,
+        type: t,
+        x: slot.x,
+        y: slot.y,
+        trayX: slot.x,
+        trayY: slot.y,
+        rot: 0,
+        flip: false,
+        isSnapped: false,
+        snapSlotIndex: -1
+      });
+    }
+    selectedPieceId = null;
+    dragPiece = null;
+  }
+
+  function initStage(index) {
+    currentStageIndex = Math.max(0, Math.min(index, STAGES.length - 1));
+    initPieces();
+    elapsedSeconds = 0;
+    statusTimer.textContent = '0초';
+    statusStage.textContent = '문제 ' + (currentStageIndex + 1) + '/' + STAGES.length + ' · ' + STAGES[currentStageIndex].name;
+    statusScore.textContent = '점수 ' + totalScore.toLocaleString() + '점';
+
+    btnPrevStage.disabled = (currentStageIndex === 0);
+    btnNextStage.disabled = (currentStageIndex === STAGES.length - 1);
+
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    if (gameState === 'playing') {
+      stageStartTime = Date.now();
+      timerInterval = setInterval(function () {
+        elapsedSeconds = Math.floor((Date.now() - stageStartTime) / 1000);
+        statusTimer.textContent = elapsedSeconds + '초';
+      }, 1000);
+    }
+  }
+
+  // ── 스냅(Snap) 판정 로직 ──
+  // 조각이 목표 슬롯과 일치하는지 정밀 판정
+  function checkPieceSnap(p) {
+    var stage = STAGES[currentStageIndex];
+    var boardCenter = { x: 210, y: stage.boardCenterY };
+    var targetList = stage.pieces;
+
+    for (var idx = 0; idx < targetList.length; idx++) {
+      var target = targetList[idx];
+
+      // 이미 다른 조각이 스냅된 슬롯인지 확인
+      var isOccupied = pieces.some(function (other) {
+        return other.id !== p.id && other.isSnapped && other.snapSlotIndex === idx;
+      });
+      if (isOccupied) continue;
+
+      // 1. 조각 타입 호환성 (동일 크기 삼각형끼리 호환 허용)
+      var typeMatch = (p.type === target.type);
+      if (!typeMatch) {
+        if ((p.type === 'TL1' || p.type === 'TL2') && (target.type === 'TL1' || target.type === 'TL2')) {
+          typeMatch = true;
+        } else if ((p.type === 'TS1' || p.type === 'TS2') && (target.type === 'TS1' || target.type === 'TS2')) {
+          typeMatch = true;
+        }
+      }
+      if (!typeMatch) continue;
+
+      // 2. 위치 거리 판정 (30px 이내)
+      var targetWorldX = boardCenter.x + target.x;
+      var targetWorldY = boardCenter.y + target.y;
+      var dist = Math.hypot(p.x - targetWorldX, p.y - targetWorldY);
+      if (dist > 30) continue;
+
+      // 3. 각도 및 뒤집기 일치 판정
+      var angleDiff = normAngle(p.rot - target.rot);
+      var angleMatch = false;
+
+      if (p.type === 'SQ') {
+        // 정사각형은 90도 회전 대칭
+        angleMatch = (angleDiff % 90 === 0);
+      } else if (p.type === 'PARA') {
+        // 평행사변형은 180도 회전 대칭 & 뒤집기 일치 필요
+        angleMatch = (angleDiff % 180 === 0) && (p.flip === target.flip);
+      } else {
+        // 삼각형들은 정확히 360도 일치
+        angleMatch = (angleDiff === 0);
+      }
+
+      if (angleMatch) {
+        // 스냅 성공! 정확한 위치와 각도로 흡착
+        p.x = targetWorldX;
+        p.y = targetWorldY;
+        p.rot = target.rot;
+        p.flip = target.flip;
+        p.isSnapped = true;
+        p.snapSlotIndex = idx;
+        playSnapSound();
+        checkStageCompletion();
+        return true;
+      }
+    }
+
+    // 일치하지 않으면 미스냅 상태
+    p.isSnapped = false;
+    p.snapSlotIndex = -1;
+    return false;
+  }
+
+  // 스테이지 클리어 확인
+  function checkStageCompletion() {
+    var allSnapped = pieces.every(function (p) { return p.isSnapped; });
+    if (!allSnapped) return;
+
+    // 클리어 처리!
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    playStageClearSound();
+
+    // 점수 계산: (1000 - 걸린초) * 난이도배수, 최소 50
+    var multiplier = (currentLevel === 'hard') ? 3 : (currentLevel === 'normal' ? 2 : 1);
+    var earnedScore = Math.max(50, (1000 - elapsedSeconds) * multiplier);
+    totalScore += earnedScore;
+    statusScore.textContent = '점수 ' + totalScore.toLocaleString() + '점';
+    saveBestScore();
+
+    if (currentStageIndex >= STAGES.length - 1) {
+      // 12문제 전체 클리어!
+      gameState = 'all_clear';
+      overlayTitle.textContent = '축하합니다! 칠교 완성';
+      overlayDesc.innerHTML = '12개 모든 그림자를 완성했습니다!<br>' +
+        '최종 점수: <b>' + totalScore.toLocaleString() + '점</b><br>순위표에 나의 기록을 올려보세요.';
+      btnStartGame.textContent = '처음부터 다시 하기';
+      btnOverlayRank.style.display = 'inline-block';
+      overlayBox.style.display = 'flex';
+    } else {
+      // 다음 문제로 이동 안내
+      gameState = 'stage_clear';
+      overlayTitle.textContent = '문제를 맞췄어요!';
+      overlayDesc.innerHTML = STAGES[currentStageIndex].name + ' 완성!<br>' +
+        '걸린 시간: ' + elapsedSeconds + '초 · 획득: +' + earnedScore.toLocaleString() + '점<br>' +
+        '다음 문제에 도전해 보세요.';
+      btnStartGame.textContent = '다음 문제로';
+      btnOverlayRank.style.display = 'none';
+      overlayBox.style.display = 'flex';
+    }
+  }
+
+  // ── 렌더링 엔진 (Canvas 2D) ──
+  function updateMetrics() {
+    var dpr = window.devicePixelRatio || 1;
+    var width = 420;
+    var height = 490;
+    if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+  }
+
+  function render() {
+    updateMetrics();
+    var width = 420;
+    var height = 490;
+
+    ctx.clearRect(0, 0, width, height);
+
+    // 1. 전체 보드 배경
+    ctx.fillStyle = '#1c1c1e';
+    ctx.fillRect(0, 0, width, height);
+
+    // 2. 상단 퍼즐 영역 배경 (Y: 0 ~ 290)
+    var boardCenterY = STAGES[currentStageIndex].boardCenterY;
+    var boardGrad = ctx.createLinearGradient(0, 0, 0, 290);
+    boardGrad.addColorStop(0, '#242426');
+    boardGrad.addColorStop(1, '#1e1e20');
+    ctx.fillStyle = boardGrad;
+    ctx.fillRect(0, 0, width, 290);
+
+    // 상단/하단 구분선
+    ctx.strokeStyle = '#3a3a3c';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, 290);
+    ctx.lineTo(width, 290);
+    ctx.stroke();
+
+    // 3. 하단 보관함(트레이) 배경 (Y: 290 ~ 490)
+    ctx.fillStyle = '#161618';
+    ctx.fillRect(0, 290, width, 200);
+
+    // 보관함 안내 글자
+    ctx.fillStyle = '#636366';
+    ctx.font = '600 12px Pretendard, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('조각 보관함 (끌어서 위로 가져가세요)', width / 2, 308);
+
+    // 4. 문제 목표 실루엣 렌더링 (난이도별 차등)
+    renderTargetSilhouette(width / 2, boardCenterY);
+
+    // 5. 판 위 조각들 렌더링 (스냅된 조각 -> 대기 조각 -> 드래그 중인 조각 순)
+    for (var s = 0; s < pieces.length; s++) {
+      if (pieces[s].isSnapped) renderPiece(pieces[s]);
+    }
+    for (var u = 0; u < pieces.length; u++) {
+      if (!pieces[u].isSnapped && pieces[u] !== dragPiece) renderPiece(pieces[u]);
+    }
+    if (dragPiece) {
+      renderPiece(dragPiece, true);
+    }
+  }
+
+  // 목표 그림자 렌더링
+  function renderTargetSilhouette(cx, cy) {
+    var stage = STAGES[currentStageIndex];
+    var targetList = stage.pieces;
+
+    ctx.save();
+
+    if (currentLevel === 'hard') {
+      // 어려움: 짙은 검은색 실루엣(그림자)만 채움
+      ctx.fillStyle = '#0a0a0c';
+      for (var h = 0; h < targetList.length; h++) {
+        var th = targetList[h];
+        var polyH = getTransformedPolygon(th.type, cx + th.x, cy + th.y, th.rot, th.flip);
+        drawPolygonPath(polyH);
+        ctx.fill();
+      }
+      // 은은한 외곽 글로우
+      ctx.strokeStyle = '#2c2c2e';
+      ctx.lineWidth = 1;
+      for (var h2 = 0; h2 < targetList.length; h2++) {
+        var th2 = targetList[h2];
+        var polyH2 = getTransformedPolygon(th2.type, cx + th2.x, cy + th2.y, th2.rot, th2.flip);
+        drawPolygonPath(polyH2);
+        ctx.stroke();
+      }
+    } else if (currentLevel === 'normal') {
+      // 보통: 외곽선만 뚜렷하게 보임
+      ctx.fillStyle = '#141416';
+      for (var n = 0; n < targetList.length; n++) {
+        var tn = targetList[n];
+        var polyN = getTransformedPolygon(tn.type, cx + tn.x, cy + tn.y, tn.rot, tn.flip);
+        drawPolygonPath(polyN);
+        ctx.fill();
+      }
+      ctx.strokeStyle = '#5a5a60';
+      ctx.lineWidth = 2.5;
+      for (var n2 = 0; n2 < targetList.length; n2++) {
+        var tn2 = targetList[n2];
+        var polyN2 = getTransformedPolygon(tn2.type, cx + tn2.x, cy + tn2.y, tn2.rot, tn2.flip);
+        drawPolygonPath(polyN2);
+        ctx.stroke();
+      }
+    } else {
+      // 쉬움: 외곽 테두리와 각 조각의 안쪽 가이드 점선이 모두 보임
+      for (var e = 0; e < targetList.length; e++) {
+        var te = targetList[e];
+        var polyE = getTransformedPolygon(te.type, cx + te.x, cy + te.y, te.rot, te.flip);
+        drawPolygonPath(polyE);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.fill();
+
+        ctx.strokeStyle = '#6e6e73';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
+
+    ctx.restore();
+  }
+
+  // 다각형 경로 그리기 도우미
+  function drawPolygonPath(poly) {
+    if (!poly || poly.length === 0) return;
+    ctx.beginPath();
+    ctx.moveTo(poly[0][0], poly[0][1]);
+    for (var i = 1; i < poly.length; i++) {
+      ctx.lineTo(poly[i][0], poly[i][1]);
+    }
+    ctx.closePath();
+  }
+
+  // 조각 렌더링
+  function renderPiece(p, isDragging) {
+    var poly = getTransformedPolygon(p.type, p.x, p.y, p.rot, p.flip);
+    var col = PIECE_COLORS[p.type] || { fill: '#3b82f6', border: '#1d4ed8' };
+
+    ctx.save();
+
+    // 드래그 중이거나 선택된 조각 그림자 효과
+    if (isDragging) {
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetX = 3;
+      ctx.shadowOffsetY = 6;
+      ctx.globalAlpha = 0.95;
+    } else if (p.id === selectedPieceId) {
+      ctx.shadowColor = '#ffd60a';
+      ctx.shadowBlur = 8;
+    }
+
+    drawPolygonPath(poly);
+
+    // 바탕 채우기
+    ctx.fillStyle = col.fill;
+    ctx.fill();
+
+    // 테두리
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = isDragging ? '#ffffff' : col.border;
+    ctx.lineWidth = (p.id === selectedPieceId) ? 2.5 : 1.5;
+    ctx.stroke();
+
+    // 선택 조각 하이라이트 링
+    if (p.id === selectedPieceId && !p.isSnapped) {
+      ctx.strokeStyle = '#ffd60a';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+
+  // ── 터치 & 마우스 입력 처리 (Pointer Events) ──
+  function getCanvasPoint(e) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: (e.clientX - rect.left) * (420 / rect.width),
+      y: (e.clientY - rect.top) * (490 / rect.height)
+    };
+  }
+
+  function findPieceAt(px, py) {
+    // 위쪽에 그려진 조각부터 거꾸로 검사
+    for (var i = pieces.length - 1; i >= 0; i--) {
+      var p = pieces[i];
+      var poly = getTransformedPolygon(p.type, p.x, p.y, p.rot, p.flip);
+      if (pointInPolygon(px, py, poly)) {
+        return p;
+      }
+    }
+    return null;
+  }
+
+  canvas.addEventListener('pointerdown', function (e) {
+    if (gameState !== 'playing') return;
+    var pt = getCanvasPoint(e);
+    pointerDownX = pt.x;
+    pointerDownY = pt.y;
+    pointerDownTime = Date.now();
+
+    var targetPiece = findPieceAt(pt.x, pt.y);
+    if (targetPiece) {
+      dragPiece = targetPiece;
+      dragOffsetX = pt.x - targetPiece.x;
+      dragOffsetY = pt.y - targetPiece.y;
+      selectedPieceId = targetPiece.id;
+
+      // 이미 스냅된 조각을 드래그하면 스냅 해제
+      if (targetPiece.isSnapped) {
+        targetPiece.isSnapped = false;
+        targetPiece.snapSlotIndex = -1;
+      }
+
+      try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+      render();
+    } else {
+      selectedPieceId = null;
+      render();
+    }
+  });
+
+  canvas.addEventListener('pointermove', function (e) {
+    if (!dragPiece) return;
+    var pt = getCanvasPoint(e);
+    dragPiece.x = Math.max(10, Math.min(canvas.width - 10, pt.x - dragOffsetX));
+    dragPiece.y = Math.max(10, Math.min(canvas.height - 10, pt.y - dragOffsetY));
+    render();
+  });
+
+  function handlePointerEnd(e) {
+    if (!dragPiece) return;
+    var pt = getCanvasPoint(e);
+    var dist = Math.hypot(pt.x - pointerDownX, pt.y - pointerDownY);
+    var duration = Date.now() - pointerDownTime;
+
+    // 가볍게 탭(클릭)한 경우 -> 45도 회전
+    if (dist < 6 && duration < 320) {
+      dragPiece.rot = normAngle(dragPiece.rot + 45);
+      playRotateSound();
+      checkPieceSnap(dragPiece);
+    } else {
+      // 드래그 후 놓았을 때 -> 자석 스냅 확인
+      checkPieceSnap(dragPiece);
+    }
+
+    try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+    dragPiece = null;
+    render();
+  }
+
+  canvas.addEventListener('pointerup', handlePointerEnd);
+  canvas.addEventListener('pointercancel', handlePointerEnd);
+
+  // ── 조작 버튼 액션 ──
+  // 회전 버튼 (45°)
+  btnRotate.addEventListener('click', function () {
+    if (selectedPieceId === null) return;
+    var p = pieces[selectedPieceId];
+    if (!p) return;
+    p.rot = normAngle(p.rot + 45);
+    p.isSnapped = false;
+    p.snapSlotIndex = -1;
+    playRotateSound();
+    checkPieceSnap(p);
+    render();
+  });
+
+  // 뒤집기 버튼
+  btnFlip.addEventListener('click', function () {
+    if (selectedPieceId === null) return;
+    var p = pieces[selectedPieceId];
+    if (!p) return;
+    p.flip = !p.flip;
+    p.isSnapped = false;
+    p.snapSlotIndex = -1;
+    playRotateSound();
+    checkPieceSnap(p);
+    render();
+  });
+
+  // 보관함으로 되돌리기 버튼
+  btnReturnTray.addEventListener('click', function () {
+    if (selectedPieceId === null) return;
+    var p = pieces[selectedPieceId];
+    if (!p) return;
+    p.x = p.trayX;
+    p.y = p.trayY;
+    p.rot = 0;
+    p.flip = false;
+    p.isSnapped = false;
+    p.snapSlotIndex = -1;
+    selectedPieceId = null;
+    playRotateSound();
+    render();
+  });
+
+  // 이전 문제 버튼
+  btnPrevStage.addEventListener('click', function () {
+    if (currentStageIndex > 0) {
+      initStage(currentStageIndex - 1);
+      render();
+    }
+  });
+
+  // 다음 문제 버튼
+  btnNextStage.addEventListener('click', function () {
+    if (currentStageIndex < STAGES.length - 1) {
+      initStage(currentStageIndex + 1);
+      render();
+    }
+  });
+
+  // 다시 하기 버튼
+  btnRestart.addEventListener('click', function () {
+    initStage(currentStageIndex);
+    render();
+  });
+
+  // 덮개 시작/진행 단추
+  btnStartGame.addEventListener('click', function () {
+    overlayBox.style.display = 'none';
+    if (gameState === 'all_clear') {
+      totalScore = 0;
+      currentStageIndex = 0;
+    } else if (gameState === 'stage_clear') {
+      currentStageIndex = Math.min(currentStageIndex + 1, STAGES.length - 1);
+    }
+    gameState = 'playing';
+    initStage(currentStageIndex);
+    render();
+  });
+
+  // 🏆 순위표 올리기 단추 클릭 시 부드럽게 스크롤 및 포커스
+  btnOverlayRank.addEventListener('click', function () {
+    overlayBox.style.display = 'none';
+    var rankSec = document.querySelector('.zw-rank');
+    if (rankSec) {
+      rankSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      rankSec.classList.add('flash');
+      setTimeout(function () { rankSec.classList.remove('flash'); }, 1800);
+      var nameEl = rankSec.querySelector('.rk-name');
+      if (nameEl) {
+        setTimeout(function () {
+          try { nameEl.focus({ preventScroll: true }); } catch (e) {}
+        }, 450);
+      }
+    }
+  });
+
+  // 창 크기 변경 시 재렌더링
+  window.addEventListener('resize', function () {
+    render();
+  });
+
+  // ── 초기화 실행 ──
+  loadStorage();
+  initStage(0);
+  render();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/four-in-row/">4목 맞추기</a> — 컴퓨터와 4개 먼저 잇기</li><li><a href="/water-sort/">물 정렬</a> — 색깔별로 물을 병에 모으기</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/klondike-solitaire/">솔리테어</a> — 카드를 순서대로 쌓아 완성하기</li><li><a href="/box-push/">상자 밀기</a> — 상자를 목표 칸으로 밀기</li><li><a href="/pipe-connect/">파이프 잇기</a> — 돌려서 물길 연결하기</li><li><a href="/checkers-8/">체커</a> — 컴퓨터와 체커 한 판</li><li><a href="/fleet-hunt/">함대 맞히기</a> — 좌표를 찍어 상대 함대 찾기</li><li><a href="/baduk-9/">바둑 9줄</a> — 9줄 판에서 컴퓨터와 바둑 한 판</li><li><a href="/janggi-mini/">장기</a> — 컴퓨터와 장기 한 판</li><li><a href="/gonu/">고누</a> — 말 3개를 한 줄로 모으기</li><li><a href="/mancala/">만칼라</a> — 구슬을 나눠 담아 곳간 채우기</li><li><a href="/mini-chess/">미니 체스</a> — 6×6 판의 작은 체스</li><li><a href="/freecell-solitaire/">프리셀</a> — 임시 칸을 써서 카드 쌓기</li><li><a href="/domino-chain/">도미노</a> — 숫자를 맞춰 도미노 잇기</li><li><a href="/peg-jump/">페그 솔리테어</a> — 구슬을 뛰어넘어 하나만 남기기</li><li><a href="/tangram-seven/">칠교</a> — 일곱 조각으로 모양 맞추기</li><li><a href="/dot-box-land/">점 잇기 땅따먹기</a> — 선을 그어 네모 땅 차지하기</li><li><a href="/nonogram/">네모 로직</a> — 숫자 힌트로 숨은 그림 찾기</li><li><a href="/binary-fill/">0과 1 채우기</a> — 규칙대로 0과 1 채우기</li><li><a href="/sum-fill/">숫자 합 맞추기</a> — 가로세로 합에 맞게 숫자 채우기</li><li><a href="/word-hangman/">글자 맞히기</a> — 글자를 하나씩 찍어 단어 맞히기</li><li><a href="/word-chain/">끝말잇기</a> — 컴퓨터와 끝말잇기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

@@ -1,0 +1,1266 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>만칼라 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 즐기는 무료 만칼라 게임. 컴퓨터와 지혜를 겨루는 2인 전통 두뇌 보드게임. 쉬움·보통·어려움 3단계를 휴대폰과 PC에서 즐겨보세요.">
+<link rel="canonical" href="https://jwapyonara.com/mancala/">
+<meta property="og:title" content="만칼라 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 즐기는 무료 만칼라 게임. 컴퓨터와 지혜를 겨루는 2인 전통 두뇌 보드게임.">
+<meta property="og:url" content="https://jwapyonara.com/mancala/">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "만칼라",
+  "url": "https://jwapyonara.com/mancala/",
+  "description": "가입 없이 바로 하는 무료 만칼라 보드게임",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All"
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* ── 난이도 선택 버튼 ── */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--line, #e5e5ea);
+  background: var(--card, #fff);
+  color: var(--ink, #1c1c1e);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 46px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color 0.15s, background-color 0.15s, color 0.15s;
+}
+.diff-seg button.on {
+  border-color: var(--red, #e5484d);
+  background: var(--soft, #fdf2f2);
+  color: var(--red, #e5484d);
+}
+
+/* ── 상태 줄 ── */
+.mancala-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #231810;
+  color: #fff;
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  gap: 6px;
+}
+.status-left {
+  color: #ffd54f;
+  font-weight: 800;
+  flex: 1.2;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.status-mid {
+  color: #ffffff;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+.status-right {
+  color: #d7ccc8;
+  flex: 1.2;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.mancala-best-line {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+  text-align: right;
+  margin-bottom: 10px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* ── 상황 알림 배너 ── */
+.mancala-msg-banner {
+  background: var(--soft, #f8f1e9);
+  border: 1px solid var(--line, #e6dcd0);
+  color: var(--ink, #2d180c);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 10px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── 만칼라 원목 보드 영역 ── */
+.mancala-board-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto 12px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.mancala-board {
+  display: grid;
+  grid-template-columns: 56px 1fr 56px;
+  gap: 8px;
+  background: linear-gradient(145deg, #442714, #261408);
+  border: 3.5px solid #633c20;
+  border-radius: 22px;
+  padding: 12px 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 2px 5px rgba(255, 255, 255, 0.12);
+  position: relative;
+}
+
+/* 곳간 (Store / Kalah) */
+.store {
+  border-radius: 28px;
+  background: linear-gradient(180deg, #180c05, #2c160b);
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.85), 0 1px 2px rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 2px 10px;
+  min-height: 184px;
+  border: 1.5px solid #4a2d18;
+  box-sizing: border-box;
+}
+.store.highlight {
+  border-color: #ffd54f;
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.85), 0 0 10px rgba(255, 213, 79, 0.5);
+}
+.store-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #d7ccc8;
+  text-align: center;
+  line-height: 1.2;
+}
+.store-count {
+  font-size: 22px;
+  font-weight: 900;
+  color: #ffd54f;
+  margin: 4px 0;
+  line-height: 1;
+}
+.store-seeds-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 2.5px;
+  width: 100%;
+  flex: 1;
+  padding: 4px 2px;
+  overflow: hidden;
+}
+
+/* 중앙 구멍 2행 영역 */
+.pits-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+}
+.pits-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 5px;
+}
+.pit {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #170b04, #2a150a);
+  border: 1.5px solid #4d2b17;
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  touch-action: manipulation;
+  transition: transform 0.12s, border-color 0.15s, box-shadow 0.15s;
+  padding: 0;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+.pit-ai {
+  cursor: default;
+}
+.pit-human {
+  cursor: pointer;
+  background: linear-gradient(145deg, #1b0e06, #32190d);
+}
+.pit-human.can-play {
+  border-color: #ffd54f;
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.85), 0 0 8px rgba(255, 213, 79, 0.4);
+}
+.pit-human.can-play:active {
+  transform: scale(0.92);
+}
+.pit.highlight {
+  border-color: #ff5252;
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.85), 0 0 10px rgba(255, 82, 82, 0.6);
+}
+.pit-count {
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+  z-index: 2;
+  line-height: 1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+.pit-seeds-box {
+  position: absolute;
+  inset: 3px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* 구슬 그래픽 */
+.seed-dot {
+  width: 6.5px;
+  height: 6.5px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+.seed-c0 { background: radial-gradient(circle at 35% 35%, #80deea, #00838f); }
+.seed-c1 { background: radial-gradient(circle at 35% 35%, #ffe082, #ff8f00); }
+.seed-c2 { background: radial-gradient(circle at 35% 35%, #ef9a9a, #c62828); }
+.seed-c3 { background: radial-gradient(circle at 35% 35%, #c5e1a5, #558b2f); }
+
+/* 중앙 회전 방향 안내 */
+.direction-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #bcaaa4;
+}
+.dir-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.dir-tag svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+/* 덮개 오버레이 (시작 전 / 게임 종료 후) */
+.mancala-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 11, 7, 0.9);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 16px;
+  text-align: center;
+  z-index: 10;
+  backdrop-filter: blur(2px);
+}
+.mancala-overlay h2 {
+  font-size: 24px;
+  margin: 0 0 6px;
+  color: #ffd54f;
+}
+.mancala-overlay p {
+  font-size: 14px;
+  margin: 0 0 16px;
+  color: #f5f5f7;
+  max-width: 290px;
+  line-height: 1.45;
+}
+.overlay-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 220px;
+}
+.btn-overlay {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  border-radius: 12px;
+  padding: 11px 16px;
+  min-height: 46px;
+  cursor: pointer;
+  border: none;
+  touch-action: manipulation;
+  width: 100%;
+  box-sizing: border-box;
+}
+.btn-overlay-start {
+  background: var(--red, #e5484d);
+  color: #fff;
+}
+.btn-overlay-start:active {
+  opacity: 0.88;
+}
+.btn-overlay-rank {
+  background: #ffd54f;
+  color: #211206;
+}
+.btn-overlay-rank:active {
+  opacity: 0.88;
+}
+
+/* ── 옵션 및 제어 단추 ── */
+.mancala-options-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 4px 10px;
+  font-size: 14px;
+}
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+.check-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--red, #e5484d);
+  cursor: pointer;
+}
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-action:active {
+  background: #3a3a3c;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>만칼라</h1>
+  <p class="lead">씨앗을 옮겨 내 곳간을 채우는 전통 2인 두뇌 보드게임. 가입 없이 컴퓨터와 한 판 겨뤄보세요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="mancala-status-bar">
+      <div class="status-left" id="statusTurn">내 차례</div>
+      <div class="status-mid" id="statusScore">나 0 : 0 컴퓨터</div>
+      <div class="status-right" id="statusRecord">0승 0패 0무</div>
+    </div>
+    <div class="mancala-best-line" id="statusBest"></div>
+
+    <div class="mancala-msg-banner" id="statusMessage">
+      내 쪽 구멍(아래쪽 6개) 중 하나를 골라 씨앗을 옮기세요.
+    </div>
+
+    <div class="mancala-board-wrap">
+      <div class="mancala-board" id="mancalaBoard">
+        <!-- 왼쪽: 컴퓨터 곳간 (Store 13) -->
+        <div class="store" id="storeAi">
+          <div class="store-label">컴퓨터<br>곳간</div>
+          <div class="store-seeds-box" id="storeAiSeeds"></div>
+          <div class="store-count" id="storeAiCount">0</div>
+        </div>
+
+        <!-- 중앙: 위 컴퓨터 구멍 6개, 방향 표시, 아래 내 구멍 6개 -->
+        <div class="pits-center">
+          <!-- 위쪽 행: 컴퓨터 구멍 (인덱스 12, 11, 10, 9, 8, 7) -->
+          <div class="pits-row" id="rowAi">
+            <div class="pit pit-ai" id="pit12"><span class="pit-count">4</span><div class="pit-seeds-box"></div></div>
+            <div class="pit pit-ai" id="pit11"><span class="pit-count">4</span><div class="pit-seeds-box"></div></div>
+            <div class="pit pit-ai" id="pit10"><span class="pit-count">4</span><div class="pit-seeds-box"></div></div>
+            <div class="pit pit-ai" id="pit9"><span class="pit-count">4</span><div class="pit-seeds-box"></div></div>
+            <div class="pit pit-ai" id="pit8"><span class="pit-count">4</span><div class="pit-seeds-box"></div></div>
+            <div class="pit pit-ai" id="pit7"><span class="pit-count">4</span><div class="pit-seeds-box"></div></div>
+          </div>
+
+          <!-- 중앙 방향 표시 -->
+          <div class="direction-bar">
+            <span class="dir-tag">
+              <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+              컴퓨터 진행
+            </span>
+            <span class="dir-tag">
+              내 진행
+              <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
+            </span>
+          </div>
+
+          <!-- 아래쪽 행: 내 구멍 (인덱스 0, 1, 2, 3, 4, 5) -->
+          <div class="pits-row" id="rowHuman">
+            <button type="button" class="pit pit-human" id="pit0" data-idx="0"><span class="pit-count">4</span><div class="pit-seeds-box"></div></button>
+            <button type="button" class="pit pit-human" id="pit1" data-idx="1"><span class="pit-count">4</span><div class="pit-seeds-box"></div></button>
+            <button type="button" class="pit pit-human" id="pit2" data-idx="2"><span class="pit-count">4</span><div class="pit-seeds-box"></div></button>
+            <button type="button" class="pit pit-human" id="pit3" data-idx="3"><span class="pit-count">4</span><div class="pit-seeds-box"></div></button>
+            <button type="button" class="pit pit-human" id="pit4" data-idx="4"><span class="pit-count">4</span><div class="pit-seeds-box"></div></button>
+            <button type="button" class="pit pit-human" id="pit5" data-idx="5"><span class="pit-count">4</span><div class="pit-seeds-box"></div></button>
+          </div>
+        </div>
+
+        <!-- 오른쪽: 내 곳간 (Store 6) -->
+        <div class="store" id="storeHuman">
+          <div class="store-label">내<br>곳간</div>
+          <div class="store-seeds-box" id="storeHumanSeeds"></div>
+          <div class="store-count" id="storeHumanCount">0</div>
+        </div>
+      </div>
+
+      <!-- 보드 위 덮개 (시작 전 / 게임 종료 후) -->
+      <div class="mancala-overlay" id="overlayBox">
+        <h2 id="overlayTitle">만칼라</h2>
+        <p id="overlayDesc">쉬움 난이도로 시작해요</p>
+        <div class="overlay-btns">
+          <button type="button" class="btn-overlay btn-overlay-start" id="btnOverlayStart">게임 시작</button>
+          <button type="button" class="btn-overlay btn-overlay-rank" id="btnOverlayRank" style="display:none;">🏆 순위표 올리기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mancala-options-bar">
+      <label class="check-label">
+        <input type="checkbox" id="chkInstant">
+        <span>빠른 진행</span>
+      </label>
+      <label class="check-label">
+        <input type="checkbox" id="chkSound" checked>
+        <span>효과음</span>
+      </label>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action" id="btnRestart">다시 하기</button>
+    </div>
+  </section>
+
+  <p class="note">이 게임은 설치나 가입 없이 기기 브라우저에서 바로 실행됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>만칼라 규칙</summary>
+    <ul>
+      <li><b>기본 구성:</b> 양쪽에 각 6개의 구멍과 1개의 곳간이 있습니다. 처음에는 12개 구멍마다 씨앗(구슬)이 4개씩(총 48개) 들어 있습니다.</li>
+      <li><b>씨앗 옮기기:</b> 내 차례에 내 쪽 구멍 중 하나를 골라 그 구멍의 씨앗을 모두 집은 뒤, 반시계 방향으로 다음 구멍마다 1개씩 떨어뜨립니다. (내 곳간에는 넣지만, 상대방 곳간은 건너뜁니다)</li>
+      <li><b>한 번 더:</b> 마지막 씨앗이 <b>내 곳간</b>에 떨어지면 차례가 넘어가지 않고 한 번 더 둘 수 있습니다.</li>
+      <li><b>맞은편 씨앗 가져오기:</b> 마지막 씨앗이 <b>내 쪽의 비어 있는 구멍</b>에 떨어지고 그 맞은편 상대 구멍에 씨앗이 있으면, 내 마지막 씨앗 1개와 맞은편 상대 씨앗을 모두 가져와 내 곳간에 넣습니다.</li>
+      <li><b>게임 종료:</b> 한쪽 구멍이 모두 비면 게임이 끝나고, 자기 구멍에 남은 씨앗은 모두 자기 곳간으로 가져갑니다.</li>
+      <li><b>승패와 점수:</b> 최종적으로 곳간의 씨앗이 많은 쪽이 이깁니다. 승리 시 점수는 (내 곳간 − 상대 곳간) × 난이도 배수 × 20점입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단의 쉬움·보통·어려움 중 원하는 단계를 고릅니다.</li>
+      <li>아래쪽 내 구멍 중 씨앗이 있는 구멍을 터치하면 반시계 방향으로 씨앗이 분배됩니다.</li>
+      <li>마지막 씨앗이 내 곳간에 떨어지도록 계산하면 한 번 더 둘 수 있어 매우 유리합니다.</li>
+      <li>게임이 끝나면 획득한 점수를 확인하고 순위표에 내 기록을 올려보세요.</li>
+    </ol>
+
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>바둑이나 체스처럼 운의 요소 없이 순수한 수읽기와 수싸움으로 승부하는 전통 보드게임입니다. 이동 중이나 휴식 시간에 3분 동안 집중하여 두뇌를 풀고 싶을 때 좋습니다.</p>
+
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>컴퓨터 난이도는 어떻게 다른가요?</summary>
+      <p>쉬움은 앞 2수, 보통은 앞 4수, 어려움은 앞 6수까지의 모든 경우의 수를 깊이 읽고 최선의 수를 찾아냅니다.</p>
+    </details>
+    <details>
+      <summary>점수는 어떻게 계산되나요?</summary>
+      <p>승리했을 때 (내 곳간 − 상대 곳간)에 난이도 배수(쉬움 1배, 보통 2배, 어려움 3배)와 20을 곱해 산출됩니다. 비기거나 지면 0점입니다.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // ── WebAudio 사운드 효과음 ──
+  var audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx) {
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      } catch (e) {}
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(function () {});
+    }
+    return audioCtx;
+  }
+
+  function playTone(freq, type, duration, gainVal) {
+    if (!chkSound.checked) return;
+    try {
+      var ctx = getAudioCtx();
+      if (!ctx) return;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(gainVal || 0.12, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    } catch (e) {}
+  }
+
+  function sndDrop() { playTone(580 + Math.random() * 80, 'sine', 0.06, 0.1); }
+  function sndCapture() {
+    playTone(440, 'triangle', 0.1, 0.15);
+    setTimeout(function () { playTone(660, 'triangle', 0.16, 0.15); }, 80);
+  }
+  function sndExtra() {
+    playTone(523, 'sine', 0.08, 0.15);
+    setTimeout(function () { playTone(784, 'sine', 0.14, 0.15); }, 70);
+  }
+  function sndWin() {
+    [523, 659, 784, 1046].forEach(function (f, i) {
+      setTimeout(function () { playTone(f, 'triangle', 0.18, 0.18); }, i * 90);
+    });
+  }
+  function sndLose() {
+    [440, 392, 330].forEach(function (f, i) {
+      setTimeout(function () { playTone(f, 'sine', 0.16, 0.15); }, i * 110);
+    });
+  }
+
+  // ── DOM 요소 ──
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var statusTurn = document.getElementById('statusTurn');
+  var statusScore = document.getElementById('statusScore');
+  var statusRecord = document.getElementById('statusRecord');
+  var statusBest = document.getElementById('statusBest');
+  var statusMessage = document.getElementById('statusMessage');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var btnOverlayStart = document.getElementById('btnOverlayStart');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnRestart = document.getElementById('btnRestart');
+  var chkInstant = document.getElementById('chkInstant');
+  var chkSound = document.getElementById('chkSound');
+
+  var storeAiEl = document.getElementById('storeAi');
+  var storeAiCount = document.getElementById('storeAiCount');
+  var storeAiSeeds = document.getElementById('storeAiSeeds');
+  var storeHumanEl = document.getElementById('storeHuman');
+  var storeHumanCount = document.getElementById('storeHumanCount');
+  var storeHumanSeeds = document.getElementById('storeHumanSeeds');
+
+  var pitEls = [];
+  for (var i = 0; i < 14; i++) {
+    if (i === 6) {
+      pitEls.push(storeHumanEl);
+    } else if (i === 13) {
+      pitEls.push(storeAiEl);
+    } else {
+      pitEls.push(document.getElementById('pit' + i));
+    }
+  }
+
+  // ── 게임 상태 변수 ──
+  // board[0..5]: 사람 구멍, board[6]: 사람 곳간
+  // board[7..12]: 컴퓨터 구멍, board[13]: 컴퓨터 곳간
+  var board = [];
+  var turn = 0; // 0: 사람, 1: 컴퓨터
+  var gameState = 'ready'; // 'ready', 'playing', 'ended'
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  var isAnimating = false;
+  var aiTimer = null;
+
+  var wins = 0;
+  var losses = 0;
+  var draws = 0;
+  var bestEasy = 0;
+  var bestNormal = 0;
+  var bestHard = 0;
+
+  // ── 로컬 스토리지 읽기 및 저장 ──
+  function loadStorage() {
+    try {
+      wins = parseInt(localStorage.getItem('zw_mancala_wins'), 10) || 0;
+      losses = parseInt(localStorage.getItem('zw_mancala_losses'), 10) || 0;
+      draws = parseInt(localStorage.getItem('zw_mancala_draws'), 10) || 0;
+
+      bestEasy = clampScore(parseInt(localStorage.getItem('zw_mancala_best_easy'), 10) || 0);
+      bestNormal = clampScore(parseInt(localStorage.getItem('zw_mancala_best_normal'), 10) || 0);
+      bestHard = clampScore(parseInt(localStorage.getItem('zw_mancala_best_hard'), 10) || 0);
+
+      var savedLvl = localStorage.getItem('zw_mancala_level');
+      if (savedLvl === 'normal' || savedLvl === 'hard' || savedLvl === 'easy') {
+        currentLevel = savedLvl;
+      }
+      var savedInstant = localStorage.getItem('zw_mancala_instant');
+      if (savedInstant === '1') chkInstant.checked = true;
+      var savedSound = localStorage.getItem('zw_mancala_sound');
+      if (savedSound === '0') chkSound.checked = false;
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+    updateLevelButtons();
+    updateOverlayDesc();
+    updateStatusDisplay();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+  }
+
+  function clampScore(s) {
+    if (!isFinite(s) || isNaN(s) || s < 0) return 0;
+    return Math.min(99999999, Math.floor(s));
+  }
+
+  function saveScore(score) {
+    score = clampScore(score);
+    try {
+      if (currentLevel === 'easy') {
+        if (score > bestEasy) {
+          bestEasy = score;
+          localStorage.setItem('zw_mancala_best_easy', String(bestEasy));
+        }
+      } else if (currentLevel === 'normal') {
+        if (score > bestNormal) {
+          bestNormal = score;
+          localStorage.setItem('zw_mancala_best_normal', String(bestNormal));
+        }
+      } else if (currentLevel === 'hard') {
+        if (score > bestHard) {
+          bestHard = score;
+          localStorage.setItem('zw_mancala_best_hard', String(bestHard));
+        }
+      }
+      localStorage.setItem('zw_mancala_wins', String(wins));
+      localStorage.setItem('zw_mancala_losses', String(losses));
+      localStorage.setItem('zw_mancala_draws', String(draws));
+    } catch (e) {}
+    updateStatusDisplay();
+    syncRankTab();
+  }
+
+  function updateStatusDisplay() {
+    statusRecord.textContent = wins + '승 ' + losses + '패 ' + draws + '무';
+    statusBest.textContent = '최고 점수 · 쉬움 ' + bestEasy.toLocaleString('ko-KR') + '점 · 보통 ' +
+      bestNormal.toLocaleString('ko-KR') + '점 · 어려움 ' + bestHard.toLocaleString('ko-KR') + '점';
+  }
+
+  function updateLevelButtons() {
+    btnDiffEasy.classList.remove('on');
+    btnDiffNormal.classList.remove('on');
+    btnDiffHard.classList.remove('on');
+    if (currentLevel === 'normal') btnDiffNormal.classList.add('on');
+    else if (currentLevel === 'hard') btnDiffHard.classList.add('on');
+    else btnDiffEasy.classList.add('on');
+  }
+
+  function updateOverlayDesc() {
+    var lvlKr = currentLevel === 'hard' ? '어려움' : (currentLevel === 'normal' ? '보통' : '쉬움');
+    var descKr = currentLevel === 'hard' ? '앞 6수를 내다보는 컴퓨터와 대결해요' : (currentLevel === 'normal' ? '앞 4수를 계산하는 컴퓨터와 대결해요' : '앞 2수를 읽는 컴퓨터와 시작해요');
+    if (overlayBox && overlayBox.style.display !== 'none' && gameState === 'ready') {
+      overlayTitle.textContent = '만칼라';
+      overlayDesc.textContent = lvlKr + ' 난이도로 시작해요. ' + descKr + '.';
+      btnOverlayStart.textContent = '게임 시작';
+      btnOverlayRank.style.display = 'none';
+    }
+  }
+
+  // 순위표 카드(rank.js) 탭 동기화
+  function syncRankTab() {
+    try {
+      var idx = currentLevel === 'hard' ? 2 : (currentLevel === 'normal' ? 1 : 0);
+      if (window.ZW) ZW.rankPick = idx;
+      var b = document.querySelector('.rk-tabs button[data-i="' + idx + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  function setLevel(lvl) {
+    if (lvl === currentLevel && gameState === 'playing') return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_mancala_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    syncRankTab();
+    resetBoard();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  chkInstant.addEventListener('change', function () {
+    try { localStorage.setItem('zw_mancala_instant', chkInstant.checked ? '1' : '0'); } catch (e) {}
+  });
+  chkSound.addEventListener('change', function () {
+    try { localStorage.setItem('zw_mancala_sound', chkSound.checked ? '1' : '0'); } catch (e) {}
+  });
+
+  // ── 보드 초기화 ──
+  function resetBoard() {
+    if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+    isAnimating = false;
+    board = [4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0];
+    turn = 0;
+    gameState = 'ready';
+
+    statusTurn.textContent = '내 차례';
+    statusScore.textContent = '나 0 : 0 컴퓨터';
+    statusMessage.textContent = '내 쪽 구멍(아래쪽 6개) 중 하나를 골라 씨앗을 옮기세요.';
+
+    overlayBox.style.display = 'flex';
+    updateOverlayDesc();
+    renderBoard();
+  }
+
+  function startGame() {
+    if (aiTimer) { clearTimeout(aiTimer); aiTimer = null; }
+    isAnimating = false;
+    board = [4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 0];
+    turn = 0;
+    gameState = 'playing';
+
+    overlayBox.style.display = 'none';
+    statusTurn.textContent = '내 차례';
+    statusScore.textContent = '나 0 : 0 컴퓨터';
+    statusMessage.textContent = '원하는 내 구멍을 터치하세요.';
+    renderBoard();
+  }
+
+  // ── 보드 화면 그리기 ──
+  function renderBoard(highlightIdx) {
+    // 곳간 업데이트
+    storeHumanCount.textContent = board[6];
+    storeAiCount.textContent = board[13];
+
+    renderSeeds(storeHumanSeeds, board[6], 28);
+    renderSeeds(storeAiSeeds, board[13], 28);
+
+    // 구멍 업데이트
+    for (var i = 0; i < 14; i++) {
+      if (i === 6 || i === 13) continue;
+      var pitEl = pitEls[i];
+      if (!pitEl) continue;
+      var countEl = pitEl.querySelector('.pit-count');
+      var seedsBox = pitEl.querySelector('.pit-seeds-box');
+      if (countEl) countEl.textContent = board[i];
+      if (seedsBox) renderSeeds(seedsBox, board[i], 12);
+
+      // 클래스 초기화
+      pitEl.classList.remove('highlight');
+      if (i >= 0 && i <= 5) {
+        if (gameState === 'playing' && turn === 0 && !isAnimating && board[i] > 0) {
+          pitEl.classList.add('can-play');
+        } else {
+          pitEl.classList.remove('can-play');
+        }
+      }
+    }
+
+    storeHumanEl.classList.remove('highlight');
+    storeAiEl.classList.remove('highlight');
+
+    if (highlightIdx !== undefined && highlightIdx !== null) {
+      if (pitEls[highlightIdx]) pitEls[highlightIdx].classList.add('highlight');
+    }
+
+    statusScore.textContent = '나 ' + board[6] + ' : ' + board[13] + ' 컴퓨터';
+  }
+
+  function renderSeeds(container, count, maxVisual) {
+    if (!container) return;
+    container.innerHTML = '';
+    var show = Math.min(count, maxVisual || 12);
+    for (var s = 0; s < show; s++) {
+      var d = document.createElement('span');
+      d.className = 'seed-dot seed-c' + (s % 4);
+      container.appendChild(d);
+    }
+  }
+
+  // ── 사람 착수 처리 ──
+  function handleHumanPitClick(idx) {
+    if (gameState !== 'playing' || turn !== 0 || isAnimating) return;
+    if (idx < 0 || idx > 5) return;
+    if (board[idx] <= 0) {
+      statusMessage.textContent = '씨앗이 있는 구멍을 선택해 주세요.';
+      return;
+    }
+    executeMove(idx, 0);
+  }
+
+  for (var h = 0; h <= 5; h++) {
+    (function (pitIdx) {
+      var el = document.getElementById('pit' + pitIdx);
+      if (el) {
+        el.addEventListener('click', function () { handleHumanPitClick(pitIdx); });
+      }
+    })(h);
+  }
+
+  // ── 씨앗 뿌리기 (Sowing) 실행 ──
+  function executeMove(startPit, player) {
+    isAnimating = true;
+    var seeds = board[startPit];
+    board[startPit] = 0;
+    renderBoard(startPit);
+    sndDrop();
+
+    var isInstant = chkInstant.checked;
+    var curr = startPit;
+
+    if (isInstant) {
+      // 즉시 완료 모드
+      while (seeds > 0) {
+        curr = (curr + 1) % 14;
+        if (player === 0 && curr === 13) continue; // 사람 곳간 건너뛰기
+        if (player === 1 && curr === 6) continue;  // 컴퓨터 곳간 건너뛰기
+        board[curr]++;
+        seeds--;
+      }
+      finishMove(curr, player);
+    } else {
+      // 애니메이션 단계 모드
+      function stepSow() {
+        if (seeds <= 0) {
+          finishMove(curr, player);
+          return;
+        }
+        curr = (curr + 1) % 14;
+        if (player === 0 && curr === 13) { curr = (curr + 1) % 14; }
+        if (player === 1 && curr === 6) { curr = (curr + 1) % 14; }
+
+        board[curr]++;
+        seeds--;
+        sndDrop();
+        renderBoard(curr);
+        setTimeout(stepSow, 130);
+      }
+      setTimeout(stepSow, 130);
+    }
+  }
+
+  // 착수 마무리 (한 번 더, 캡처, 게임 종료 판정)
+  function finishMove(lastPit, player) {
+    var myStore = (player === 0 ? 6 : 13);
+    var isMyPit = (player === 0 ? (lastPit >= 0 && lastPit <= 5) : (lastPit >= 7 && lastPit <= 12));
+    var captured = 0;
+
+    // 1. 맞은편 씨앗 가져오기 (Capture)
+    // 마지막 씨앗이 내 빈 구멍에 떨어진 경우 (놓은 후 정확히 1개)
+    if (isMyPit && board[lastPit] === 1) {
+      var oppositePit = 12 - lastPit;
+      if (board[oppositePit] > 0) {
+        captured = board[oppositePit] + 1;
+        board[myStore] += captured;
+        board[lastPit] = 0;
+        board[oppositePit] = 0;
+        sndCapture();
+      }
+    }
+
+    renderBoard(lastPit);
+
+    // 2. 게임 종료 검사
+    if (checkGameOver()) {
+      isAnimating = false;
+      endGame();
+      return;
+    }
+
+    // 3. 한 번 더 (Free Turn) 검사
+    var isFreeTurn = (lastPit === myStore);
+
+    if (player === 0) {
+      // 사람 차례 마무리
+      if (captured > 0) {
+        statusMessage.textContent = '맞은편 씨앗을 포함해 ' + captured + '개를 가져왔습니다!';
+      }
+      if (isFreeTurn) {
+        sndExtra();
+        statusTurn.textContent = '내 차례 (한 번 더!)';
+        statusMessage.textContent = '마지막 씨앗이 내 곳간에 쏙! 한 번 더 두세요.';
+        isAnimating = false;
+        renderBoard();
+      } else {
+        turn = 1;
+        statusTurn.textContent = '컴퓨터 생각 중…';
+        statusMessage.textContent = '컴퓨터가 생각하고 있습니다.';
+        isAnimating = false;
+        renderBoard();
+        triggerAiTurn();
+      }
+    } else {
+      // 컴퓨터 차례 마무리
+      if (captured > 0) {
+        statusMessage.textContent = '컴퓨터가 맞은편 씨앗 ' + captured + '개를 가져갔습니다.';
+      }
+      if (isFreeTurn) {
+        sndExtra();
+        statusTurn.textContent = '컴퓨터 (한 번 더!)';
+        statusMessage.textContent = '컴퓨터 마지막 씨앗이 곳간에 떨어져 한 번 더 둡니다.';
+        isAnimating = false;
+        renderBoard();
+        triggerAiTurn();
+      } else {
+        turn = 0;
+        statusTurn.textContent = '내 차례';
+        statusMessage.textContent = '내 차례입니다. 원하는 구멍을 터치하세요.';
+        isAnimating = false;
+        renderBoard();
+      }
+    }
+  }
+
+  // ── 컴퓨터 차례 실행 ──
+  function triggerAiTurn() {
+    if (aiTimer) clearTimeout(aiTimer);
+    var delay = chkInstant.checked ? 160 : 460;
+    aiTimer = setTimeout(function () {
+      aiTimer = null;
+      if (gameState !== 'playing' || turn !== 1) return;
+      var move = getBestAiMove(board, currentLevel);
+      if (move === null) {
+        checkGameOver();
+        endGame();
+        return;
+      }
+      executeMove(move, 1);
+    }, delay);
+  }
+
+  // ── 게임 종료 검사 ──
+  function checkGameOver() {
+    var side0Empty = true;
+    for (var i = 0; i < 6; i++) {
+      if (board[i] > 0) { side0Empty = false; break; }
+    }
+    var side1Empty = true;
+    for (var j = 7; j < 13; j++) {
+      if (board[j] > 0) { side1Empty = false; break; }
+    }
+    return (side0Empty || side1Empty);
+  }
+
+  // ── 게임 종료 처리 ──
+  function endGame() {
+    gameState = 'ended';
+
+    // 한쪽이 모두 비면 남은 씨앗은 반대쪽이 모두 가져간다
+    var rem0 = 0;
+    for (var i = 0; i < 6; i++) { rem0 += board[i]; board[i] = 0; }
+    board[6] += rem0;
+
+    var rem1 = 0;
+    for (var j = 7; j < 13; j++) { rem1 += board[j]; board[j] = 0; }
+    board[13] += rem1;
+
+    renderBoard();
+
+    var humanScore = board[6];
+    var aiScore = board[13];
+    var diff = humanScore - aiScore;
+    var mult = (currentLevel === 'hard' ? 3 : (currentLevel === 'normal' ? 2 : 1));
+    var calcScore = 0;
+
+    overlayBox.style.display = 'flex';
+    btnOverlayRank.style.display = 'block';
+
+    if (diff > 0) {
+      calcScore = diff * mult * 20;
+      calcScore = clampScore(calcScore);
+      wins++;
+      saveScore(calcScore);
+      sndWin();
+      statusTurn.textContent = '이겼어요!';
+      overlayTitle.textContent = '승리했습니다!';
+      overlayDesc.textContent = '내 곳간 ' + humanScore + '개 vs 컴퓨터 ' + aiScore + '개로 승리! 획득 점수: ' + calcScore.toLocaleString('ko-KR') + '점';
+      statusMessage.textContent = '승리! 순위표에 기록을 올려보세요.';
+    } else if (diff < 0) {
+      losses++;
+      saveScore(0);
+      sndLose();
+      statusTurn.textContent = '졌어요';
+      overlayTitle.textContent = '아쉽게 졌습니다';
+      overlayDesc.textContent = '내 곳간 ' + humanScore + '개 vs 컴퓨터 ' + aiScore + '개로 패배했습니다. (점수: 0점)';
+      statusMessage.textContent = '다시 도전해 보세요!';
+    } else {
+      draws++;
+      saveScore(0);
+      statusTurn.textContent = '비겼어요';
+      overlayTitle.textContent = '비겼습니다!';
+      overlayDesc.textContent = '내 곳간 ' + humanScore + '개 vs 컴퓨터 ' + aiScore + '개로 무승부입니다. (점수: 0점)';
+      statusMessage.textContent = '동점으로 끝났습니다. 다시 시작해 보세요.';
+    }
+    btnOverlayStart.textContent = '새 게임 하기';
+  }
+
+  // ── 순위표 올리기 단추 연동 ──
+  btnOverlayRank.addEventListener('click', function () {
+    var jump = document.querySelector('.zw-rk-jump');
+    if (jump && jump.style.display !== 'none') {
+      jump.click();
+    } else {
+      var rkSec = document.querySelector('.zw-rank');
+      if (rkSec) {
+        rkSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        rkSec.classList.add('flash');
+        setTimeout(function () { rkSec.classList.remove('flash'); }, 1800);
+      }
+    }
+  });
+
+  btnOverlayStart.addEventListener('click', function () { startGame(); });
+  btnRestart.addEventListener('click', function () { startGame(); });
+
+  // ── 미니맥스 수읽기 AI (깊이 2 / 4 / 6) ──
+  function simulateMove(b, pit, p) {
+    var nb = b.slice();
+    var s = nb[pit];
+    nb[pit] = 0;
+    var curr = pit;
+    while (s > 0) {
+      curr = (curr + 1) % 14;
+      if (p === 0 && curr === 13) continue;
+      if (p === 1 && curr === 6) continue;
+      nb[curr]++;
+      s--;
+    }
+    var myStore = (p === 0 ? 6 : 13);
+    var isMyPit = (p === 0 ? (curr >= 0 && curr <= 5) : (curr >= 7 && curr <= 12));
+    if (isMyPit && nb[curr] === 1) {
+      var opp = 12 - curr;
+      if (nb[opp] > 0) {
+        nb[myStore] += nb[opp] + 1;
+        nb[curr] = 0;
+        nb[opp] = 0;
+      }
+    }
+
+    var side0Empty = true;
+    for (var i = 0; i < 6; i++) { if (nb[i] > 0) { side0Empty = false; break; } }
+    var side1Empty = true;
+    for (var j = 7; j < 13; j++) { if (nb[j] > 0) { side1Empty = false; break; } }
+    var isOver = (side0Empty || side1Empty);
+    if (isOver) {
+      for (var k = 0; k < 6; k++) { nb[6] += nb[k]; nb[k] = 0; }
+      for (var m = 7; m < 13; m++) { nb[13] += nb[m]; nb[m] = 0; }
+    }
+    return { board: nb, freeTurn: (curr === myStore), gameOver: isOver };
+  }
+
+  function evaluateBoard(b) {
+    var diff = b[13] - b[6];
+    var compPits = 0, humanPits = 0;
+    for (var i = 7; i <= 12; i++) compPits += b[i];
+    for (var j = 0; j <= 5; j++) humanPits += b[j];
+
+    var val = diff * 100 + (compPits - humanPits) * 3;
+
+    // 한 번 더 둘 수 있는 수 가산점
+    for (var p = 7; p <= 12; p++) {
+      if (b[p] === (13 - p)) val += 16;
+    }
+    return val;
+  }
+
+  function minimax(b, depth, alpha, beta, isMaximizing) {
+    var side0Empty = true;
+    for (var i = 0; i < 6; i++) { if (b[i] > 0) { side0Empty = false; break; } }
+    var side1Empty = true;
+    for (var j = 7; j < 13; j++) { if (b[j] > 0) { side1Empty = false; break; } }
+
+    if (depth <= 0 || side0Empty || side1Empty) {
+      var eb = b.slice();
+      if (side0Empty || side1Empty) {
+        for (var k = 0; k < 6; k++) { eb[6] += eb[k]; eb[k] = 0; }
+        for (var m = 7; m < 13; m++) { eb[13] += eb[m]; eb[m] = 0; }
+        return (eb[13] - eb[6]) * 1000;
+      }
+      return evaluateBoard(b);
+    }
+
+    if (isMaximizing) {
+      var maxEval = -Infinity;
+      var moves = [];
+      for (var p = 7; p <= 12; p++) {
+        if (b[p] > 0) moves.push(p);
+      }
+      if (moves.length === 0) return evaluateBoard(b);
+
+      // 한 번 더 둘 수 있는 수를 우선 탐색해 가지치기 효율 극대화
+      moves.sort(function (a, c) {
+        var fa = (b[a] === 13 - a) ? 1 : 0;
+        var fc = (b[c] === 13 - c) ? 1 : 0;
+        return fc - fa;
+      });
+
+      for (var mi = 0; mi < moves.length; mi++) {
+        var mv = moves[mi];
+        var sim = simulateMove(b, mv, 1);
+        var ev;
+        if (sim.gameOver) {
+          ev = (sim.board[13] - sim.board[6]) * 1000;
+        } else if (sim.freeTurn) {
+          ev = minimax(sim.board, depth - 1, alpha, beta, true);
+        } else {
+          ev = minimax(sim.board, depth - 1, alpha, beta, false);
+        }
+        if (ev > maxEval) maxEval = ev;
+        if (ev > alpha) alpha = ev;
+        if (beta <= alpha) break;
+      }
+      return maxEval;
+    } else {
+      var minEval = Infinity;
+      var hmoves = [];
+      for (var hp = 0; hp <= 5; hp++) {
+        if (b[hp] > 0) hmoves.push(hp);
+      }
+      if (hmoves.length === 0) return evaluateBoard(b);
+
+      hmoves.sort(function (a, c) {
+        var fa = (b[a] === 6 - a) ? 1 : 0;
+        var fc = (b[c] === 6 - c) ? 1 : 0;
+        return fc - fa;
+      });
+
+      for (var hmi = 0; hmi < hmoves.length; hmi++) {
+        var hmv = hmoves[hmi];
+        var hsim = simulateMove(b, hmv, 0);
+        var hev;
+        if (hsim.gameOver) {
+          hev = (hsim.board[13] - hsim.board[6]) * 1000;
+        } else if (hsim.freeTurn) {
+          hev = minimax(hsim.board, depth - 1, alpha, beta, false);
+        } else {
+          hev = minimax(hsim.board, depth - 1, alpha, beta, true);
+        }
+        if (hev < minEval) minEval = hev;
+        if (hev < beta) beta = hev;
+        if (beta <= alpha) break;
+      }
+      return minEval;
+    }
+  }
+
+  function getBestAiMove(b, level) {
+    var depth = 2; // 쉬움: 2수
+    if (level === 'normal') depth = 4; // 보통: 4수
+    else if (level === 'hard') depth = 6; // 어려움: 6수
+
+    var legalMoves = [];
+    for (var p = 7; p <= 12; p++) {
+      if (b[p] > 0) legalMoves.push(p);
+    }
+    if (legalMoves.length === 0) return null;
+    if (legalMoves.length === 1) return legalMoves[0];
+
+    // 쉬움 난이도에서 25% 확률로 임의 착수 (초보자 배려)
+    if (level === 'easy' && Math.random() < 0.25) {
+      return legalMoves[Math.floor(Math.random() * legalMoves.length)];
+    }
+
+    var bestVal = -Infinity;
+    var candidates = [];
+
+    for (var i = 0; i < legalMoves.length; i++) {
+      var move = legalMoves[i];
+      var sim = simulateMove(b, move, 1);
+      var val;
+      if (sim.gameOver) {
+        val = (sim.board[13] - sim.board[6]) * 1000;
+      } else if (sim.freeTurn) {
+        val = minimax(sim.board, depth - 1, -Infinity, Infinity, true);
+      } else {
+        val = minimax(sim.board, depth - 1, -Infinity, Infinity, false);
+      }
+
+      if (val > bestVal) {
+        bestVal = val;
+        candidates = [move];
+      } else if (val === bestVal) {
+        candidates.push(move);
+      }
+    }
+
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  }
+
+  // 초기화 실행
+  loadStorage();
+  resetBoard();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/four-in-row/">4목 맞추기</a> — 컴퓨터와 4개 먼저 잇기</li><li><a href="/water-sort/">물 정렬</a> — 색깔별로 물을 병에 모으기</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/klondike-solitaire/">솔리테어</a> — 카드를 순서대로 쌓아 완성하기</li><li><a href="/box-push/">상자 밀기</a> — 상자를 목표 칸으로 밀기</li><li><a href="/pipe-connect/">파이프 잇기</a> — 돌려서 물길 연결하기</li><li><a href="/checkers-8/">체커</a> — 컴퓨터와 체커 한 판</li><li><a href="/fleet-hunt/">함대 맞히기</a> — 좌표를 찍어 상대 함대 찾기</li><li><a href="/baduk-9/">바둑 9줄</a> — 9줄 판에서 컴퓨터와 바둑 한 판</li><li><a href="/janggi-mini/">장기</a> — 컴퓨터와 장기 한 판</li><li><a href="/gonu/">고누</a> — 말 3개를 한 줄로 모으기</li><li><a href="/mancala/">만칼라</a> — 구슬을 나눠 담아 곳간 채우기</li><li><a href="/mini-chess/">미니 체스</a> — 6×6 판의 작은 체스</li><li><a href="/freecell-solitaire/">프리셀</a> — 임시 칸을 써서 카드 쌓기</li><li><a href="/domino-chain/">도미노</a> — 숫자를 맞춰 도미노 잇기</li><li><a href="/peg-jump/">페그 솔리테어</a> — 구슬을 뛰어넘어 하나만 남기기</li><li><a href="/tangram-seven/">칠교</a> — 일곱 조각으로 모양 맞추기</li><li><a href="/dot-box-land/">점 잇기 땅따먹기</a> — 선을 그어 네모 땅 차지하기</li><li><a href="/nonogram/">네모 로직</a> — 숫자 힌트로 숨은 그림 찾기</li><li><a href="/binary-fill/">0과 1 채우기</a> — 규칙대로 0과 1 채우기</li><li><a href="/sum-fill/">숫자 합 맞추기</a> — 가로세로 합에 맞게 숫자 채우기</li><li><a href="/word-hangman/">글자 맞히기</a> — 글자를 하나씩 찍어 단어 맞히기</li><li><a href="/word-chain/">끝말잇기</a> — 컴퓨터와 끝말잇기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

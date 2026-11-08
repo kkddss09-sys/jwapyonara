@@ -106,6 +106,21 @@ var TOOLS = [
   ['pipe-connect', '파이프 잇기', '돌려서 물길 연결하기', '게임', true, '퍼즐'],
   ['checkers-8', '체커', '컴퓨터와 체커 한 판', '게임', true, '두뇌'],
   ['fleet-hunt', '함대 맞히기', '좌표를 찍어 상대 함대 찾기', '게임', true, '두뇌'],
+  ['baduk-9', '바둑 9줄', '9줄 판에서 컴퓨터와 바둑 한 판', '게임', true, '두뇌'],
+  ['janggi-mini', '장기', '컴퓨터와 장기 한 판', '게임', true, '두뇌'],
+  ['gonu', '고누', '말 3개를 한 줄로 모으기', '게임', true, '두뇌'],
+  ['mancala', '만칼라', '구슬을 나눠 담아 곳간 채우기', '게임', true, '두뇌'],
+  ['mini-chess', '미니 체스', '6×6 판의 작은 체스', '게임', true, '두뇌'],
+  ['freecell-solitaire', '프리셀', '임시 칸을 써서 카드 쌓기', '게임', true, '퍼즐'],
+  ['domino-chain', '도미노', '숫자를 맞춰 도미노 잇기', '게임', true, '두뇌'],
+  ['peg-jump', '페그 솔리테어', '구슬을 뛰어넘어 하나만 남기기', '게임', true, '퍼즐'],
+  ['tangram-seven', '칠교', '일곱 조각으로 모양 맞추기', '게임', true, '퍼즐'],
+  ['dot-box-land', '점 잇기 땅따먹기', '선을 그어 네모 땅 차지하기', '게임', true, '두뇌'],
+  ['nonogram', '네모 로직', '숫자 힌트로 숨은 그림 찾기', '게임', true, '퍼즐'],
+  ['binary-fill', '0과 1 채우기', '규칙대로 0과 1 채우기', '게임', true, '퍼즐'],
+  ['sum-fill', '숫자 합 맞추기', '가로세로 합에 맞게 숫자 채우기', '게임', true, '퍼즐'],
+  ['word-hangman', '글자 맞히기', '글자를 하나씩 찍어 단어 맞히기', '게임', true, '두뇌'],
+  ['word-chain', '끝말잇기', '컴퓨터와 끝말잇기', '게임', true, '두뇌'],
   ['merge-numbers', '숫자 합치기', '같은 숫자를 밀어서 합치기', '게임', true, '퍼즐'],
   ['memory-match', '휴대폰 짝 맞추기', '같은 그림 두 장 찾기', '게임', true, '퍼즐'],
   ['sci-calc', '공학용 계산기', '삼각함수, 로그, 제곱, 괄호', '생활', true, '계산'],
@@ -205,6 +220,21 @@ var RANKS = {
   ,'pipe-connect': { label: '파이프 잇기 · 점수', better: 'high', unit: '점', variants: [{ id: 'pipe-connect-easy', key: 'zw_pipe-connect_best_easy', name: '쉬움' }, { id: 'pipe-connect-normal', key: 'zw_pipe-connect_best_normal', name: '보통' }, { id: 'pipe-connect-hard', key: 'zw_pipe-connect_best_hard', name: '어려움' }] }
   ,'checkers-8': { label: '체커 · 점수', better: 'high', unit: '점', variants: [{ id: 'checkers-8-easy', key: 'zw_checkers-8_best_easy', name: '쉬움' }, { id: 'checkers-8-normal', key: 'zw_checkers-8_best_normal', name: '보통' }, { id: 'checkers-8-hard', key: 'zw_checkers-8_best_hard', name: '어려움' }] }
   ,'fleet-hunt': { label: '함대 맞히기 · 점수', better: 'high', unit: '점', variants: [{ id: 'fleet-hunt-easy', key: 'zw_fleet-hunt_best_easy', name: '쉬움' }, { id: 'fleet-hunt-normal', key: 'zw_fleet-hunt_best_normal', name: '보통' }, { id: 'fleet-hunt-hard', key: 'zw_fleet-hunt_best_hard', name: '어려움' }] }
+  ,'baduk-9': { label: '바둑 9줄 · 점수', better: 'high', unit: '점', variants: [{ id: 'baduk-9-easy', key: 'zw_baduk-9_best_easy', name: '쉬움' }, { id: 'baduk-9-normal', key: 'zw_baduk-9_best_normal', name: '보통' }, { id: 'baduk-9-hard', key: 'zw_baduk-9_best_hard', name: '어려움' }] }
+  ,'janggi-mini': { label: '장기 · 점수', better: 'high', unit: '점', variants: [{ id: 'janggi-mini-easy', key: 'zw_janggi-mini_best_easy', name: '쉬움' }, { id: 'janggi-mini-normal', key: 'zw_janggi-mini_best_normal', name: '보통' }, { id: 'janggi-mini-hard', key: 'zw_janggi-mini_best_hard', name: '어려움' }] }
+  ,'gonu': { label: '고누 · 점수', better: 'high', unit: '점', variants: [{ id: 'gonu-easy', key: 'zw_gonu_best_easy', name: '쉬움' }, { id: 'gonu-normal', key: 'zw_gonu_best_normal', name: '보통' }, { id: 'gonu-hard', key: 'zw_gonu_best_hard', name: '어려움' }] }
+  ,'mancala': { label: '만칼라 · 점수', better: 'high', unit: '점', variants: [{ id: 'mancala-easy', key: 'zw_mancala_best_easy', name: '쉬움' }, { id: 'mancala-normal', key: 'zw_mancala_best_normal', name: '보통' }, { id: 'mancala-hard', key: 'zw_mancala_best_hard', name: '어려움' }] }
+  ,'mini-chess': { label: '미니 체스 · 점수', better: 'high', unit: '점', variants: [{ id: 'mini-chess-easy', key: 'zw_mini-chess_best_easy', name: '쉬움' }, { id: 'mini-chess-normal', key: 'zw_mini-chess_best_normal', name: '보통' }, { id: 'mini-chess-hard', key: 'zw_mini-chess_best_hard', name: '어려움' }] }
+  ,'freecell-solitaire': { label: '프리셀 · 점수', better: 'high', unit: '점', variants: [{ id: 'freecell-solitaire-easy', key: 'zw_freecell-solitaire_best_easy', name: '쉬움' }, { id: 'freecell-solitaire-normal', key: 'zw_freecell-solitaire_best_normal', name: '보통' }, { id: 'freecell-solitaire-hard', key: 'zw_freecell-solitaire_best_hard', name: '어려움' }] }
+  ,'domino-chain': { label: '도미노 · 점수', better: 'high', unit: '점', variants: [{ id: 'domino-chain-easy', key: 'zw_domino-chain_best_easy', name: '쉬움' }, { id: 'domino-chain-normal', key: 'zw_domino-chain_best_normal', name: '보통' }, { id: 'domino-chain-hard', key: 'zw_domino-chain_best_hard', name: '어려움' }] }
+  ,'peg-jump': { label: '페그 솔리테어 · 점수', better: 'high', unit: '점', variants: [{ id: 'peg-jump-easy', key: 'zw_peg-jump_best_easy', name: '쉬움' }, { id: 'peg-jump-normal', key: 'zw_peg-jump_best_normal', name: '보통' }, { id: 'peg-jump-hard', key: 'zw_peg-jump_best_hard', name: '어려움' }] }
+  ,'tangram-seven': { label: '칠교 · 점수', better: 'high', unit: '점', variants: [{ id: 'tangram-seven-easy', key: 'zw_tangram-seven_best_easy', name: '쉬움' }, { id: 'tangram-seven-normal', key: 'zw_tangram-seven_best_normal', name: '보통' }, { id: 'tangram-seven-hard', key: 'zw_tangram-seven_best_hard', name: '어려움' }] }
+  ,'dot-box-land': { label: '점 잇기 땅따먹기 · 점수', better: 'high', unit: '점', variants: [{ id: 'dot-box-land-easy', key: 'zw_dot-box-land_best_easy', name: '쉬움' }, { id: 'dot-box-land-normal', key: 'zw_dot-box-land_best_normal', name: '보통' }, { id: 'dot-box-land-hard', key: 'zw_dot-box-land_best_hard', name: '어려움' }] }
+  ,'nonogram': { label: '네모 로직 · 점수', better: 'high', unit: '점', variants: [{ id: 'nonogram-easy', key: 'zw_nonogram_best_easy', name: '쉬움' }, { id: 'nonogram-normal', key: 'zw_nonogram_best_normal', name: '보통' }, { id: 'nonogram-hard', key: 'zw_nonogram_best_hard', name: '어려움' }] }
+  ,'binary-fill': { label: '0과 1 채우기 · 점수', better: 'high', unit: '점', variants: [{ id: 'binary-fill-easy', key: 'zw_binary-fill_best_easy', name: '쉬움' }, { id: 'binary-fill-normal', key: 'zw_binary-fill_best_normal', name: '보통' }, { id: 'binary-fill-hard', key: 'zw_binary-fill_best_hard', name: '어려움' }] }
+  ,'sum-fill': { label: '숫자 합 맞추기 · 점수', better: 'high', unit: '점', variants: [{ id: 'sum-fill-easy', key: 'zw_sum-fill_best_easy', name: '쉬움' }, { id: 'sum-fill-normal', key: 'zw_sum-fill_best_normal', name: '보통' }, { id: 'sum-fill-hard', key: 'zw_sum-fill_best_hard', name: '어려움' }] }
+  ,'word-hangman': { label: '글자 맞히기 · 점수', better: 'high', unit: '점', variants: [{ id: 'word-hangman-easy', key: 'zw_word-hangman_best_easy', name: '쉬움' }, { id: 'word-hangman-normal', key: 'zw_word-hangman_best_normal', name: '보통' }, { id: 'word-hangman-hard', key: 'zw_word-hangman_best_hard', name: '어려움' }] }
+  ,'word-chain': { label: '끝말잇기 · 점수', better: 'high', unit: '점', variants: [{ id: 'word-chain-easy', key: 'zw_word-chain_best_easy', name: '쉬움' }, { id: 'word-chain-normal', key: 'zw_word-chain_best_normal', name: '보통' }, { id: 'word-chain-hard', key: 'zw_word-chain_best_hard', name: '어려움' }] }
 };
 
 // ▼ 숫자 도우미 — 도구마다 다시 만들지 않게 여기 둔다

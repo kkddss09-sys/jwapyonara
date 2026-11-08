@@ -1,0 +1,1990 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>도미노 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 즐기는 무료 클래식 도미노 체인 게임. 컴퓨터와 맞붙는 1대1 대결, 쉬움·보통·어려움 3단계 난이도를 스마트폰과 PC에서 즐겨보세요.">
+<link rel="canonical" href="https://jwapyonara.com/domino-chain/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="도미노 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 즐기는 무료 클래식 도미노 체인 게임. 컴퓨터와 한 판 승부!">
+<meta property="og:url" content="https://jwapyonara.com/domino-chain/">
+<meta property="og:site_name" content="좌표나라">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "도미노 무료",
+  "url": "https://jwapyonara.com/domino-chain/",
+  "description": "가입 없이 바로 즐기는 무료 클래식 도미노 체인 게임",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript"
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--line, #e3e3e8);
+  background: var(--card, #fff);
+  color: var(--ink, #1d1d1f);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red, #1b64da);
+  background: var(--soft, #e8f0fe);
+  color: var(--red, #1b64da);
+}
+
+/* 상태 표시줄 */
+.domino-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #23272f;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  gap: 6px;
+}
+.domino-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+.domino-status-mid {
+  color: #ffffff;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.domino-status-right {
+  color: #a1a1a6;
+  flex: 1.2;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.domino-best-line {
+  font-size: 13px;
+  color: var(--sub, #6e6e73);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 컴퓨터 정보 줄 */
+.opponent-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--fill, #f2f2f7);
+  border: 1px solid var(--line, #e3e3e8);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.opponent-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+.domino-back-icons {
+  display: inline-flex;
+  gap: 3px;
+  vertical-align: middle;
+}
+.domino-back-mini {
+  width: 14px;
+  height: 22px;
+  border-radius: 3px;
+  background: #2b3648;
+  border: 1px solid #1c2430;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  display: inline-block;
+}
+.boneyard-badge {
+  font-size: 12px;
+  color: var(--sub, #6e6e73);
+}
+.boneyard-badge b {
+  color: var(--ink, #1d1d1f);
+}
+
+/* 체인 양 끝 상태 바 */
+.chain-ends-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+  background: #192231;
+  color: #fff;
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+.end-chip {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+}
+.end-chip.left {
+  text-align: left;
+}
+.end-chip.right {
+  text-align: right;
+}
+.end-chip .lbl {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+}
+.end-chip .val {
+  font-size: 18px;
+  font-weight: 900;
+  color: #ffd60a;
+  line-height: 1.2;
+}
+.chain-info-center {
+  text-align: center;
+  font-size: 12px;
+  color: #cbd5e1;
+  font-weight: 700;
+}
+
+/* 보드 캔버스 영역 */
+.domino-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: 260px;
+  margin: 0 auto 10px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #193822;
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.4), 0 4px 14px rgba(0,0,0,0.12);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#dominoCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+  touch-action: none;
+}
+#dominoCanvas:active {
+  cursor: grabbing;
+}
+
+/* 보드 위 덮개 (시작 및 결과 창) */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 22, 28, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 16px;
+  text-align: center;
+  z-index: 10;
+}
+.canvas-overlay h2 {
+  font-size: 24px;
+  margin: 0 0 6px;
+  color: #ffd60a;
+}
+.canvas-overlay p {
+  font-size: 14px;
+  margin: 0 0 16px;
+  color: #e2e8f0;
+  max-width: 300px;
+  line-height: 1.45;
+}
+.canvas-overlay .score-detail {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+  background: rgba(255,255,255,0.06);
+  padding: 8px 14px;
+  border-radius: 8px;
+}
+.canvas-overlay .btn-start {
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  background: var(--red, #1b64da);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 36px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.canvas-overlay .btn-start:active {
+  opacity: 0.85;
+}
+
+/* 플레이어 패 선택 모달 (좌/우 양쪽 착수 가능한 경우) */
+.choose-direction-box {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1.5px solid #38bdf8;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  border-radius: 14px;
+  padding: 12px;
+  color: #fff;
+  z-index: 15;
+  text-align: center;
+  display: none;
+}
+.choose-direction-box p {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #38bdf8;
+}
+.choose-btn-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.btn-choose-dir {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  background: #0284c7;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 4px;
+  min-height: 44px;
+  cursor: pointer;
+}
+.btn-choose-dir:active {
+  background: #0369a1;
+}
+.btn-choose-cancel {
+  width: 100%;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  color: #94a3b8;
+  border: 1px solid #475569;
+  border-radius: 8px;
+  padding: 6px;
+  min-height: 36px;
+  cursor: pointer;
+}
+
+/* 플레이어 손패 영역 */
+.player-hand-section {
+  background: var(--card, #fff);
+  border: 1.5px solid var(--line, #e3e3e8);
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.hand-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.hand-header .tip {
+  font-size: 12px;
+  font-weight: normal;
+  color: var(--sub, #6e6e73);
+}
+.hand-tiles-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 6px 2px 10px;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+.hand-tiles-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.hand-tiles-scroll::-webkit-scrollbar-thumb {
+  background: var(--line, #e3e3e8);
+  border-radius: 3px;
+}
+
+/* 손패 도미노 타일 버튼 */
+.domino-tile-btn {
+  flex: none;
+  width: 52px;
+  height: 94px;
+  background: #fbfaf5;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  touch-action: manipulation;
+}
+.domino-tile-btn.playable {
+  border-color: #2563eb;
+  background: #ffffff;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.25), 0 5px 12px rgba(37,99,235,0.2);
+  transform: translateY(-4px);
+}
+.domino-tile-btn.selected {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.4), 0 6px 14px rgba(0,0,0,0.25);
+  transform: translateY(-8px);
+}
+.domino-tile-btn:disabled:not(.playable) {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.tile-half {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.tile-divider {
+  height: 1.5px;
+  background: #94a3b8;
+  margin: 1px 4px;
+  position: relative;
+}
+.tile-divider::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 4px;
+  background: #64748b;
+  border-radius: 50%;
+}
+.pip-svg {
+  width: 32px;
+  height: 32px;
+}
+.tile-num-lbl {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  font-size: 9px;
+  font-weight: 800;
+  color: #64748b;
+  line-height: 1;
+}
+
+/* 액션 단추 (뽑기 / 패스) */
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.btn-action-primary {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px 14px;
+  background: #2563eb;
+  color: #fff;
+  transition: opacity 0.15s ease;
+}
+.btn-action-primary:active:not(:disabled) {
+  opacity: 0.85;
+}
+.btn-action-primary:disabled {
+  background: var(--fill, #f2f2f7);
+  color: var(--sub, #6e6e73);
+  border: 1px solid var(--line, #e3e3e8);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.btn-action-primary.pulse-action {
+  background: #ea580c;
+  animation: pulseBtn 1.4s infinite;
+}
+@keyframes pulseBtn {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234,88,12,0.5); }
+  70% { transform: scale(1.02); box-shadow: 0 0 0 8px rgba(234,88,12,0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(234,88,12,0); }
+}
+
+/* 하단 제어 단추 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+}
+.btn-undo {
+  background: var(--card, #fff);
+  border: 1.5px solid var(--line, #e3e3e8);
+  color: var(--ink, #1d1d1f);
+}
+.btn-undo:active:not(:disabled) {
+  background: var(--soft, #f2f2f7);
+}
+.btn-undo:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-reset {
+  background: #23272f;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #374151;
+}
+
+/* 옵션 줄 */
+.domino-options-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px 8px;
+  font-size: 14px;
+}
+.domino-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+.domino-check-label input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--red, #1b64da);
+  cursor: pointer;
+}
+.domino-options-tip {
+  font-size: 13px;
+  color: var(--sub, #6e6e73);
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>도미노 한 판,<br>컴퓨터를 이겨 보세요</h1>
+  <p class="lead">숫자가 맞는 도미노를 체인에 이어 붙여 손패를 먼저 털어내세요. 가입 없이 바로 시작해요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="domino-status-bar">
+      <div class="domino-status-left" id="statusTurn">내 차례</div>
+      <div class="domino-status-mid" id="statusMoves">연결 0개</div>
+      <div class="domino-status-right" id="statusRecord">전적 0승 0패 0무</div>
+    </div>
+    <div class="domino-best-line" id="statusBest"></div>
+
+    <div class="opponent-bar">
+      <div class="opponent-info">
+        <span>상대(컴퓨터)</span>
+        <span class="domino-back-icons" id="computerHandIcons"></span>
+        <span id="computerCountText">7장</span>
+      </div>
+      <div class="boneyard-badge">
+        더미: <b id="boneyardCountText">14장</b>
+      </div>
+    </div>
+
+    <div class="chain-ends-bar">
+      <div class="end-chip left">
+        <span class="lbl">◀ 왼쪽 끝</span>
+        <span class="val" id="valLeft">-</span>
+      </div>
+      <div class="chain-info-center" id="chainCenterInfo">첫 패를 내보세요</div>
+      <div class="end-chip right">
+        <span class="lbl">오른쪽 끝 ▶</span>
+        <span class="val" id="valRight">-</span>
+      </div>
+    </div>
+
+    <div class="domino-canvas-wrap" id="canvasWrap">
+      <canvas id="dominoCanvas" width="420" height="260"></canvas>
+      
+      <div class="choose-direction-box" id="chooseDirBox">
+        <p>어느 쪽 끝에 연결할까요?</p>
+        <div class="choose-btn-grid">
+          <button type="button" class="btn-choose-dir" id="btnChooseLeft">◀ 왼쪽 끝에 놓기</button>
+          <button type="button" class="btn-choose-dir" id="btnChooseRight">오른쪽 끝에 놓기 ▶</button>
+        </div>
+        <button type="button" class="btn-choose-cancel" id="btnChooseCancel">선택 취소</button>
+      </div>
+
+      <div class="canvas-overlay" id="overlayBox">
+        <h2 id="overlayTitle">도미노 체인</h2>
+        <p id="overlayDesc">쉬움 난이도로 시작해요</p>
+        <div class="score-detail" id="overlayScoreDetail" style="display:none;"></div>
+        <button type="button" class="btn-start" id="btnStartGame">게임 시작</button>
+        <button type="button" class="btn-action" id="btnOverlayRank" style="display:none; width:auto; padding:10px 24px; min-height:44px; margin-top:10px; background:#ffd60a; color:#1c1c1e; font-weight:800; border:none; border-radius:10px; cursor:pointer;">🏆 순위표 올리기</button>
+      </div>
+    </div>
+
+    <div class="player-hand-section">
+      <div class="hand-header">
+        <span>내 손패 (<span id="playerTileCount">7</span>장)</span>
+        <span class="tip" id="handTip">파란 테두리 패를 누르면 놓여요</span>
+      </div>
+      <div class="hand-tiles-scroll" id="playerHandBox">
+        <!-- 손패 타일 동적 렌더링 -->
+      </div>
+    </div>
+
+    <div class="action-grid">
+      <button type="button" class="btn-action-primary" id="btnDrawOrPass" disabled>패 뽑기 (더미 14장)</button>
+    </div>
+
+    <div class="domino-options-bar">
+      <label class="domino-check-label">
+        <input type="checkbox" id="chkSound" checked>
+        <span>효과음 켜기</span>
+      </label>
+      <span class="domino-options-tip">판을 드래그하여 체인을 이동해 보세요</span>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-undo" id="btnUndo" disabled>한 수 물리기 (2회 남음)</button>
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:6px;">
+      💡 손패에서 불이 들어온 패를 터치하면 체인 끝에 연결됩니다.
+    </p>
+  </section>
+
+  <p class="note">0부터 6까지 28개의 도미노 패를 사용하며 브라우저 기기 안에서만 실행됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>도미노 패 구성:</b> 0부터 6까지의 눈을 조합한 28개의 클래식 더블 식스 도미노를 사용합니다.</li>
+      <li><b>게임 시작:</b> 플레이어와 컴퓨터가 각각 7장씩 손패를 나누어 갖고, 나머지 14장은 더미에 둡니다. 플레이어가 원하는 패 1장을 보드에 내려놓으며 판이 시작됩니다.</li>
+      <li><b>패 연결 규칙:</b> 내 차례에는 보드에 놓인 체인의 왼쪽 끝 숫자나 오른쪽 끝 숫자와 일치하는 눈을 가진 패만 이어 붙일 수 있습니다. 양쪽 끝 모두에 맞출 수 있다면 원하는 방향을 선택할 수 있습니다.</li>
+      <li><b>패 뽑기와 넘기기:</b> 손에 낼 수 있는 패가 없다면 더미에서 1장씩 뽑아야 합니다. 더미가 모두 소진되었는데도 낼 패가 없으면 차례를 상대에게 넘깁니다.</li>
+      <li><b>승리와 점수 계산:</b> 손패를 먼저 전부 털어내면 승리합니다! 양쪽 모두 더 이상 둘 패가 없고 더미도 바닥나면(블록), 손에 남은 눈의 합이 적은 쪽이 이깁니다. 승리 시 점수는 <code>(상대 남은 눈 합 × 10) × 난이도 배수</code>(최소 10점)로 계산됩니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 무료 도구입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>쉬움·보통·어려움 중 원하는 난이도를 고릅니다.</li>
+      <li>시작할 때 손패 중 가장 유리한 패(예: 눈이 큰 패나 더블 패)를 보드에 내려놓습니다.</li>
+      <li>컴퓨터와 번갈아 체인 양 끝에 맞는 패를 연결하며 먼저 손패를 0장으로 만드세요.</li>
+      <li>낼 패가 없을 때는 '패 뽑기' 버튼으로 더미에서 패를 가져옵니다.</li>
+    </ol>
+    <h2>난이도 안내</h2>
+    <dl>
+      <dt>쉬움 (배수 1배)</dt>
+      <dd>컴퓨터가 낼 수 있는 패 중 무작위로 선택하여 냅니다. 규칙을 익히며 가볍게 이기기 좋습니다.</dd>
+      <dt>보통 (배수 2배)</dt>
+      <dd>컴퓨터가 눈의 합이 큰 패를 우선적으로 털어내어 블록 시 실점을 최소화하고 적극적으로 공격합니다.</dd>
+      <dt>어려움 (배수 3배)</dt>
+      <dd>지금까지 나온 패와 남은 패의 개수를 치밀하게 계산하여, 상대가 낼 수 없는 숫자로 체인 끝을 막아 강제 뽑기를 유도합니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>체인이 길어져서 화면 밖으로 넘어가면 어떻게 보나요?</summary>
+      <p>보드 판을 손가락이나 마우스로 좌우로 드래그하면 원하는 방향으로 자유롭게 이동해 볼 수 있습니다. 또한 상단의 안내 바에 현재 왼쪽 끝과 오른쪽 끝 숫자가 항상 크게 표시됩니다.</p>
+    </details>
+    <details>
+      <summary>게임이 끝난 후 순위표에 기록을 올릴 수 있나요?</summary>
+      <p>승리하여 점수를 획득하면 결과 창의 '🏆 순위표 올리기' 단추를 눌러 하단 순위표에서 닉네임과 함께 내 최고 점수를 등록할 수 있습니다.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // DOM 요소 참조
+  var canvas = document.getElementById('dominoCanvas');
+  var ctx = canvas.getContext('2d');
+  var canvasWrap = document.getElementById('canvasWrap');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var overlayScoreDetail = document.getElementById('overlayScoreDetail');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  
+  var statusTurn = document.getElementById('statusTurn');
+  var statusMoves = document.getElementById('statusMoves');
+  var statusRecord = document.getElementById('statusRecord');
+  var statusBest = document.getElementById('statusBest');
+  
+  var valLeft = document.getElementById('valLeft');
+  var valRight = document.getElementById('valRight');
+  var chainCenterInfo = document.getElementById('chainCenterInfo');
+  
+  var computerHandIcons = document.getElementById('computerHandIcons');
+  var computerCountText = document.getElementById('computerCountText');
+  var boneyardCountText = document.getElementById('boneyardCountText');
+  
+  var playerHandBox = document.getElementById('playerHandBox');
+  var playerTileCount = document.getElementById('playerTileCount');
+  var handTip = document.getElementById('handTip');
+  var btnDrawOrPass = document.getElementById('btnDrawOrPass');
+  
+  var chooseDirBox = document.getElementById('chooseDirBox');
+  var btnChooseLeft = document.getElementById('btnChooseLeft');
+  var btnChooseRight = document.getElementById('btnChooseRight');
+  var btnChooseCancel = document.getElementById('btnChooseCancel');
+  
+  var chkSound = document.getElementById('chkSound');
+  var btnUndo = document.getElementById('btnUndo');
+  var btnRestart = document.getElementById('btnRestart');
+
+  // 도미노 숫자별 전용 색상 (가독성 및 시각 보조)
+  var PIP_COLORS = [
+    '#94a3b8', // 0: 회색
+    '#2563eb', // 1: 파랑
+    '#059669', // 2: 청록
+    '#dc2626', // 3: 빨강
+    '#b45309', // 4: 갈색
+    '#d97706', // 5: 주황
+    '#7c3aed'  // 6: 보라
+  ];
+
+  // 게임 상태 변수
+  var gameState = 'ready'; // 'ready', 'playing', 'won', 'lost', 'draw'
+  var turn = 'player'; // 'player', 'computer'
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  
+  var boneyard = []; // 남은 더미 타일 [{ id, a, b }]
+  var playerHand = []; // 플레이어 손패
+  var computerHand = []; // 컴퓨터 손패
+  var chain = []; // 놓인 도미노 체인 [{ a, b, isDouble, x, y, angle }]
+  var openLeft = null; // 체인 왼쪽 끝 숫자
+  var openRight = null; // 체인 오른쪽 끝 숫자
+  
+  var undoHistory = []; // 되돌리기 스택
+  var undoCount = 2; // 한 판당 2회
+  var isAiThinking = false;
+  var aiTimer = null;
+  var pendingPlayerTile = null; // 좌/우 선택 대기 중인 타일
+
+  // 보드 카메라/팬 오프셋
+  var panOffset = { x: 0, y: 0 };
+  var isDragging = false;
+  var dragStart = { x: 0, y: 0 };
+  var panStart = { x: 0, y: 0 };
+
+  // 기록 및 통계
+  var wins = 0;
+  var losses = 0;
+  var draws = 0;
+  var bestEasy = null;
+  var bestNormal = null;
+  var bestHard = null;
+
+  // WebAudio 사운드 생성기
+  var audioCtx = null;
+  function getAudioCtx() {
+    if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+      var AudioCtor = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioCtor();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  function playTone(freq, type, duration, gainVal) {
+    if (!chkSound.checked) return;
+    try {
+      var actx = getAudioCtx();
+      if (!actx) return;
+      var osc = actx.createOscillator();
+      var gain = actx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, actx.currentTime);
+      gain.gain.setValueAtTime(gainVal || 0.15, actx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(actx.destination);
+      osc.start();
+      osc.stop(actx.currentTime + duration);
+    } catch (e) {}
+  }
+
+  function soundTile() {
+    playTone(680, 'triangle', 0.08, 0.2);
+    setTimeout(function () { playTone(340, 'sine', 0.09, 0.15); }, 35);
+  }
+  function soundDraw() {
+    playTone(420, 'sine', 0.07, 0.12);
+  }
+  function soundWin() {
+    playTone(523.25, 'triangle', 0.12, 0.2);
+    setTimeout(function () { playTone(659.25, 'triangle', 0.12, 0.2); }, 110);
+    setTimeout(function () { playTone(783.99, 'triangle', 0.14, 0.2); }, 220);
+    setTimeout(function () { playTone(1046.50, 'triangle', 0.3, 0.25); }, 340);
+  }
+  function soundLose() {
+    playTone(493.88, 'sine', 0.15, 0.2);
+    setTimeout(function () { playTone(440.00, 'sine', 0.15, 0.2); }, 140);
+    setTimeout(function () { playTone(392.00, 'sine', 0.18, 0.2); }, 280);
+    setTimeout(function () { playTone(329.63, 'sine', 0.35, 0.2); }, 420);
+  }
+
+  // 28개 도미노 생성
+  function makeAllDominoes() {
+    var list = [];
+    var uid = 0;
+    for (var i = 0; i <= 6; i++) {
+      for (var j = i; j <= 6; j++) {
+        list.push({
+          id: uid++,
+          a: i,
+          b: j,
+          sum: i + j,
+          isDouble: (i === j)
+        });
+      }
+    }
+    return list;
+  }
+
+  // 배열 셔플
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i];
+      arr[i] = arr[j];
+      arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  // 순위표 표준 연동 함수 (필수 정의)
+  function syncRankTab() {
+    try {
+      var idx = (currentLevel === 'hard') ? 2 : ((currentLevel === 'normal') ? 1 : 0);
+      if (typeof ZW !== 'undefined') {
+        ZW.rankPick = idx;
+      }
+      var b = document.querySelector('.rk-tabs button[data-i="' + idx + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  // 로컬 스토리지 데이터 로드
+  function loadStorage() {
+    try {
+      wins = parseInt(localStorage.getItem('zw_domino-chain_wins'), 10) || 0;
+      losses = parseInt(localStorage.getItem('zw_domino-chain_losses'), 10) || 0;
+      draws = parseInt(localStorage.getItem('zw_domino-chain_draws'), 10) || 0;
+      
+      var re = localStorage.getItem('zw_domino-chain_best_easy');
+      var rn = localStorage.getItem('zw_domino-chain_best_normal');
+      var rh = localStorage.getItem('zw_domino-chain_best_hard');
+      if (re && !isNaN(parseInt(re, 10))) bestEasy = parseInt(re, 10);
+      if (rn && !isNaN(parseInt(rn, 10))) bestNormal = parseInt(rn, 10);
+      if (rh && !isNaN(parseInt(rh, 10))) bestHard = parseInt(rh, 10);
+
+      var savedLevel = localStorage.getItem('zw_domino-chain_level');
+      if (savedLevel === 'normal' || savedLevel === 'hard' || savedLevel === 'easy') {
+        currentLevel = savedLevel;
+      } else {
+        currentLevel = 'easy';
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    setTimeout(syncRankTab, 250);
+    updateStatusDisplay();
+  }
+
+  // 상단 상태 및 최고 기록 화면 표시
+  function updateStatusDisplay() {
+    statusRecord.textContent = '전적 ' + wins + '승 ' + losses + '패 ' + draws + '무';
+    if (bestEasy !== null || bestNormal !== null || bestHard !== null) {
+      statusBest.textContent = '최고 기록 · 쉬움 ' + (bestEasy !== null ? bestEasy + '점' : '-')
+        + ' · 보통 ' + (bestNormal !== null ? bestNormal + '점' : '-')
+        + ' · 어려움 ' + (bestHard !== null ? bestHard + '점' : '-');
+    } else {
+      statusBest.textContent = '';
+    }
+  }
+
+  // 난이도 단추 상태 갱신
+  function updateLevelButtons() {
+    btnDiffEasy.classList.toggle('on', currentLevel === 'easy');
+    btnDiffNormal.classList.toggle('on', currentLevel === 'normal');
+    btnDiffHard.classList.toggle('on', currentLevel === 'hard');
+  }
+
+  function updateOverlayDesc() {
+    var names = { easy: '쉬움', normal: '보통', hard: '어려움' };
+    if (overlayDesc) {
+      overlayDesc.textContent = (names[currentLevel] || '쉬움') + ' 난이도로 시작해요';
+    }
+  }
+
+  function setLevel(lvl) {
+    if (lvl === currentLevel) return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_domino-chain_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    resetToReadyState();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // 새 판 시작 전 준비 상태로 리셋
+  function resetToReadyState() {
+    if (aiTimer) {
+      clearTimeout(aiTimer);
+      aiTimer = null;
+    }
+    isAiThinking = false;
+    gameState = 'ready';
+    turn = 'player';
+    chain = [];
+    openLeft = null;
+    openRight = null;
+    boneyard = [];
+    playerHand = [];
+    computerHand = [];
+    undoHistory = [];
+    undoCount = 2;
+    pendingPlayerTile = null;
+    chooseDirBox.style.display = 'none';
+
+    overlayTitle.textContent = '도미노 체인';
+    updateOverlayDesc();
+    overlayScoreDetail.style.display = 'none';
+    btnOverlayRank.style.display = 'none';
+    btnStartGame.textContent = '게임 시작';
+    overlayBox.style.display = 'flex';
+
+    statusTurn.textContent = '내 차례';
+    statusMoves.textContent = '연결 0개';
+    valLeft.textContent = '-';
+    valRight.textContent = '-';
+    chainCenterInfo.textContent = '첫 패를 내보세요';
+    
+    updateHeaderCounts();
+    renderPlayerHand();
+    updateActionButtons();
+    updateUndoButton();
+    panOffset = { x: 0, y: 0 };
+    renderBoard();
+  }
+
+  // 상단 카운트 갱신
+  function updateHeaderCounts() {
+    computerCountText.textContent = computerHand.length + '장';
+    boneyardCountText.textContent = boneyard.length + '장';
+    playerTileCount.textContent = playerHand.length;
+
+    // 컴퓨터 손패 미니 카드 아이콘 생성
+    var iconsHtml = '';
+    for (var i = 0; i < computerHand.length; i++) {
+      iconsHtml += '<span class="domino-back-mini"></span>';
+    }
+    computerHandIcons.innerHTML = iconsHtml;
+
+    valLeft.textContent = (openLeft !== null) ? openLeft : '-';
+    valRight.textContent = (openRight !== null) ? openRight : '-';
+    statusMoves.textContent = '연결 ' + chain.length + '개';
+
+    if (chain.length === 0) {
+      chainCenterInfo.textContent = '첫 패를 내보세요';
+    } else {
+      chainCenterInfo.textContent = '체인 ' + chain.length + '개 연결';
+    }
+  }
+
+  // 새 게임 시작
+  function startNewGame() {
+    if (aiTimer) {
+      clearTimeout(aiTimer);
+      aiTimer = null;
+    }
+    isAiThinking = false;
+    undoHistory = [];
+    undoCount = 2;
+    chain = [];
+    openLeft = null;
+    openRight = null;
+    pendingPlayerTile = null;
+    chooseDirBox.style.display = 'none';
+
+    var deck = shuffle(makeAllDominoes());
+    playerHand = deck.slice(0, 7);
+    computerHand = deck.slice(7, 14);
+    boneyard = deck.slice(14);
+
+    gameState = 'playing';
+    turn = 'player';
+    panOffset = { x: 0, y: 0 };
+
+    overlayBox.style.display = 'none';
+    btnOverlayRank.style.display = 'none';
+    statusTurn.textContent = '내 차례';
+    handTip.textContent = '손패 중 원하는 패를 골라 첫 패를 놓으세요';
+
+    updateHeaderCounts();
+    renderPlayerHand();
+    updateActionButtons();
+    updateUndoButton();
+    renderBoard();
+  }
+
+  // 타일 착수 가능 여부 검사
+  function canPlayTile(tile) {
+    if (chain.length === 0) return { canLeft: true, canRight: true, playable: true };
+    var canL = (tile.a === openLeft || tile.b === openLeft);
+    var canR = (tile.a === openRight || tile.b === openRight);
+    return {
+      canLeft: canL,
+      canRight: canR,
+      playable: (canL || canR)
+    };
+  }
+
+  // 손패에 착수 가능한 패가 1개라도 있는지 확인
+  function hasPlayableTile(hand) {
+    if (chain.length === 0) return hand.length > 0;
+    for (var i = 0; i < hand.length; i++) {
+      var t = hand[i];
+      if (t.a === openLeft || t.b === openLeft || t.a === openRight || t.b === openRight) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // 손패 눈(점)의 총합
+  function getHandPipSum(hand) {
+    var sum = 0;
+    for (var i = 0; i < hand.length; i++) {
+      sum += (hand[i].a + hand[i].b);
+    }
+    return sum;
+  }
+
+  // SVG 주사위 점 문자열 생성 (0~6)
+  function createPipSvg(num, size) {
+    var s = size || 32;
+    var col = PIP_COLORS[num] || '#2563eb';
+    var r = s * 0.12;
+    var c1 = s * 0.25;
+    var c2 = s * 0.50;
+    var c3 = s * 0.75;
+    
+    var dots = [];
+    if (num === 1) {
+      dots.push([c2, c2]);
+    } else if (num === 2) {
+      dots.push([c1, c1], [c3, c3]);
+    } else if (num === 3) {
+      dots.push([c1, c1], [c2, c2], [c3, c3]);
+    } else if (num === 4) {
+      dots.push([c1, c1], [c3, c1], [c1, c3], [c3, c3]);
+    } else if (num === 5) {
+      dots.push([c1, c1], [c3, c1], [c2, c2], [c1, c3], [c3, c3]);
+    } else if (num === 6) {
+      dots.push([c1, c1], [c3, c1], [c1, c2], [c3, c2], [c1, c3], [c3, c3]);
+    }
+
+    var circles = dots.map(function (pt) {
+      return '<circle cx="' + pt[0] + '" cy="' + pt[1] + '" r="' + r + '" fill="' + col + '" />';
+    }).join('');
+
+    return '<svg class="pip-svg" viewBox="0 0 ' + s + ' ' + s + '" width="' + s + '" height="' + s + '">' + circles + '</svg>';
+  }
+
+  // 플레이어 손패 UI 렌더링
+  function renderPlayerHand() {
+    playerHandBox.innerHTML = '';
+    var isMyTurn = (gameState === 'playing' && turn === 'player' && !isAiThinking);
+
+    for (var i = 0; i < playerHand.length; i++) {
+      (function (idx) {
+        var tile = playerHand[idx];
+        var check = canPlayTile(tile);
+        var isPlayable = isMyTurn && check.playable;
+
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'domino-tile-btn' + (isPlayable ? ' playable' : '');
+        if (pendingPlayerTile && pendingPlayerTile.id === tile.id) {
+          btn.classList.add('selected');
+        }
+        btn.disabled = !isPlayable;
+        btn.setAttribute('aria-label', '도미노 ' + tile.a + ' ' + tile.b);
+
+        btn.innerHTML =
+          '<div class="tile-half">' + createPipSvg(tile.a, 28) + '<span class="tile-num-lbl">' + tile.a + '</span></div>'
+          + '<div class="tile-divider"></div>'
+          + '<div class="tile-half">' + createPipSvg(tile.b, 28) + '<span class="tile-num-lbl">' + tile.b + '</span></div>';
+
+        btn.addEventListener('click', function () {
+          if (!isMyTurn || !check.playable) return;
+          handlePlayerTileClick(tile, check);
+        });
+
+        playerHandBox.appendChild(btn);
+      })(i);
+    }
+  }
+
+  // 플레이어가 손패를 눌렀을 때 처리
+  function handlePlayerTileClick(tile, check) {
+    if (chain.length === 0) {
+      // 첫 패: 바로 중앙에 놓기
+      saveStateForUndo();
+      placeFirstTile(tile, 'player');
+      return;
+    }
+
+    // 양쪽 끝 숫자가 같은 경우 (예: 왼쪽 끝도 3, 오른쪽 끝도 3)
+    if (check.canLeft && check.canRight && openLeft === openRight) {
+      saveStateForUndo();
+      placeTileOnEnd(tile, 'right', 'player');
+      return;
+    }
+
+    // 양쪽 끝 숫자가 다르고 둘 다 놓을 수 있는 경우 -> 사용자에게 좌/우 선택창 표시
+    if (check.canLeft && check.canRight) {
+      pendingPlayerTile = tile;
+      chooseDirBox.style.display = 'block';
+      btnChooseLeft.textContent = '◀ 왼쪽 [' + openLeft + ']에 놓기';
+      btnChooseRight.textContent = '오른쪽 [' + openRight + ']에 놓기 ▶';
+      renderPlayerHand();
+      return;
+    }
+
+    // 한쪽 끝에만 놓을 수 있는 경우 -> 즉시 해당 쪽에 착수
+    saveStateForUndo();
+    if (check.canLeft) {
+      placeTileOnEnd(tile, 'left', 'player');
+    } else {
+      placeTileOnEnd(tile, 'right', 'player');
+    }
+  }
+
+  // 방향 선택 팝업 버튼 이벤트
+  btnChooseLeft.addEventListener('click', function () {
+    if (!pendingPlayerTile) return;
+    saveStateForUndo();
+    var t = pendingPlayerTile;
+    pendingPlayerTile = null;
+    chooseDirBox.style.display = 'none';
+    placeTileOnEnd(t, 'left', 'player');
+  });
+
+  btnChooseRight.addEventListener('click', function () {
+    if (!pendingPlayerTile) return;
+    saveStateForUndo();
+    var t = pendingPlayerTile;
+    pendingPlayerTile = null;
+    chooseDirBox.style.display = 'none';
+    placeTileOnEnd(t, 'right', 'player');
+  });
+
+  btnChooseCancel.addEventListener('click', function () {
+    pendingPlayerTile = null;
+    chooseDirBox.style.display = 'none';
+    renderPlayerHand();
+  });
+
+  // 액션 버튼 (뽑기 / 넘기기) 상태 갱신
+  function updateActionButtons() {
+    var isMyTurn = (gameState === 'playing' && turn === 'player' && !isAiThinking);
+    var playable = hasPlayableTile(playerHand);
+
+    if (!isMyTurn) {
+      btnDrawOrPass.disabled = true;
+      btnDrawOrPass.textContent = '패 뽑기 (더미 ' + boneyard.length + '장)';
+      btnDrawOrPass.classList.remove('pulse-action');
+      return;
+    }
+
+    if (playable) {
+      // 낼 수 있는 패가 손에 있으면 뽑기/패스 비활성화
+      btnDrawOrPass.disabled = true;
+      btnDrawOrPass.textContent = '손패에서 패를 내세요';
+      btnDrawOrPass.classList.remove('pulse-action');
+      handTip.textContent = '파란 테두리 패를 눌러 연결하세요';
+    } else {
+      // 낼 수 있는 패가 없음
+      if (boneyard.length > 0) {
+        btnDrawOrPass.disabled = false;
+        btnDrawOrPass.textContent = '더미에서 패 뽑기 (남은 패: ' + boneyard.length + '장)';
+        btnDrawOrPass.classList.add('pulse-action');
+        handTip.textContent = '낼 수 있는 패가 없어요. 패를 뽑으세요!';
+      } else {
+        btnDrawOrPass.disabled = false;
+        btnDrawOrPass.textContent = '차례 넘기기 (패스)';
+        btnDrawOrPass.classList.add('pulse-action');
+        handTip.textContent = '더미가 바닥났습니다. 차례를 넘기세요.';
+      }
+    }
+  }
+
+  // 패 뽑기 / 넘기기 버튼 클릭 이벤트
+  btnDrawOrPass.addEventListener('click', function () {
+    if (gameState !== 'playing' || turn !== 'player' || isAiThinking) return;
+    if (hasPlayableTile(playerHand)) return;
+
+    if (boneyard.length > 0) {
+      // 1장 뽑기
+      saveStateForUndo();
+      var drawn = boneyard.pop();
+      playerHand.push(drawn);
+      soundDraw();
+      updateHeaderCounts();
+      renderPlayerHand();
+      updateActionButtons();
+      updateUndoButton();
+    } else {
+      // 넘기기 (패스)
+      saveStateForUndo();
+      soundTile();
+      switchTurnToComputer();
+    }
+  });
+
+  // 물리기(Undo) 저장
+  function saveStateForUndo() {
+    var snapshot = {
+      boneyard: JSON.parse(JSON.stringify(boneyard)),
+      playerHand: JSON.parse(JSON.stringify(playerHand)),
+      computerHand: JSON.parse(JSON.stringify(computerHand)),
+      chain: JSON.parse(JSON.stringify(chain)),
+      openLeft: openLeft,
+      openRight: openRight,
+      turn: turn,
+      panOffset: { x: panOffset.x, y: panOffset.y }
+    };
+    undoHistory.push(snapshot);
+    if (undoHistory.length > 10) {
+      undoHistory.shift();
+    }
+    updateUndoButton();
+  }
+
+  // 물리기 버튼 상태 갱신
+  function updateUndoButton() {
+    btnUndo.textContent = '한 수 물리기 (' + undoCount + '회 남음)';
+    if (undoCount <= 0 || undoHistory.length === 0 || gameState !== 'playing' || isAiThinking) {
+      btnUndo.disabled = true;
+    } else {
+      btnUndo.disabled = false;
+    }
+  }
+
+  // 물리기 실행
+  btnUndo.addEventListener('click', function () {
+    if (gameState !== 'playing' || isAiThinking || undoCount <= 0 || undoHistory.length === 0) return;
+    
+    var state = undoHistory.pop();
+    boneyard = state.boneyard;
+    playerHand = state.playerHand;
+    computerHand = state.computerHand;
+    chain = state.chain;
+    openLeft = state.openLeft;
+    openRight = state.openRight;
+    turn = state.turn;
+    panOffset = state.panOffset;
+    undoCount--;
+    pendingPlayerTile = null;
+    chooseDirBox.style.display = 'none';
+
+    statusTurn.textContent = (turn === 'player') ? '내 차례' : '컴퓨터 차례';
+    updateHeaderCounts();
+    renderPlayerHand();
+    updateActionButtons();
+    updateUndoButton();
+    renderBoard();
+  });
+
+  // 첫 패 놓기
+  function placeFirstTile(tile, who) {
+    // 손패에서 제거
+    removeTileFromHand(tile, who);
+    
+    // 체인에 등록 (가운데 0, 0 위치)
+    chain.push({
+      id: tile.id,
+      a: tile.a,
+      b: tile.b,
+      isDouble: tile.isDouble,
+      x: 0,
+      y: 0,
+      angle: tile.isDouble ? Math.PI / 2 : 0
+    });
+
+    openLeft = tile.a;
+    openRight = tile.b;
+
+    soundTile();
+    recalcChainPositions();
+    updateHeaderCounts();
+    renderPlayerHand();
+    updateActionButtons();
+    updateUndoButton();
+    renderBoard();
+
+    checkGameEndAfterMove(who);
+  }
+
+  // 체인의 한쪽 끝에 패 연결
+  function placeTileOnEnd(tile, end, who) {
+    removeTileFromHand(tile, who);
+
+    var itemA, itemB;
+    if (end === 'left') {
+      // 왼쪽 끝에 연결
+      if (tile.b === openLeft) {
+        itemA = tile.a;
+        itemB = tile.b;
+      } else {
+        itemA = tile.b;
+        itemB = tile.a;
+      }
+      openLeft = itemA;
+      chain.unshift({
+        id: tile.id,
+        a: itemA,
+        b: itemB,
+        isDouble: tile.isDouble,
+        x: 0,
+        y: 0,
+        angle: 0
+      });
+    } else {
+      // 오른쪽 끝에 연결
+      if (tile.a === openRight) {
+        itemA = tile.a;
+        itemB = tile.b;
+      } else {
+        itemA = tile.b;
+        itemB = tile.a;
+      }
+      openRight = itemB;
+      chain.push({
+        id: tile.id,
+        a: itemA,
+        b: itemB,
+        isDouble: tile.isDouble,
+        x: 0,
+        y: 0,
+        angle: 0
+      });
+    }
+
+    soundTile();
+    recalcChainPositions();
+    updateHeaderCounts();
+    renderPlayerHand();
+    updateActionButtons();
+    updateUndoButton();
+    renderBoard();
+
+    checkGameEndAfterMove(who);
+  }
+
+  // 손패에서 타일 제거
+  function removeTileFromHand(tile, who) {
+    var hand = (who === 'player') ? playerHand : computerHand;
+    for (var i = 0; i < hand.length; i++) {
+      if (hand[i].id === tile.id) {
+        hand.splice(i, 1);
+        break;
+      }
+    }
+  }
+
+  // 착수 후 승패 확인
+  function checkGameEndAfterMove(lastWho) {
+    // 1. 손패를 모두 턴 경우 즉시 승리/패배
+    if (playerHand.length === 0) {
+      finishGame('won', '손패를 모두 내려놓아 완벽하게 이겼습니다!');
+      return;
+    }
+    if (computerHand.length === 0) {
+      finishGame('lost', '컴퓨터가 손패를 먼저 모두 내려놓았습니다.');
+      return;
+    }
+
+    // 2. 턴 교체
+    if (lastWho === 'player') {
+      switchTurnToComputer();
+    } else {
+      switchTurnToPlayer();
+    }
+  }
+
+  // 턴 전환: 컴퓨터 차례
+  function switchTurnToComputer() {
+    turn = 'computer';
+    isAiThinking = true;
+    statusTurn.textContent = '컴퓨터 생각 중…';
+    updateActionButtons();
+    updateUndoButton();
+    renderPlayerHand();
+
+    // 약간의 딜레이 후 컴퓨터 착수 (450ms)
+    aiTimer = setTimeout(function () {
+      aiTimer = null;
+      if (gameState !== 'playing') return;
+      processAiTurn();
+    }, 450);
+  }
+
+  // 턴 전환: 플레이어 차례
+  function switchTurnToPlayer() {
+    turn = 'player';
+    isAiThinking = false;
+    statusTurn.textContent = '내 차례';
+    updateActionButtons();
+    updateUndoButton();
+    renderPlayerHand();
+
+    // 플레이어가 둘 수 있는지 확인
+    if (!hasPlayableTile(playerHand) && boneyard.length === 0 && !hasPlayableTile(computerHand)) {
+      // 둘 다 둘 수 없고 더미도 0개인 교착(Block) 상태
+      handleBlockedGame();
+    }
+  }
+
+  // 교착 상태(Block) 판정 및 처리
+  function handleBlockedGame() {
+    var pSum = getHandPipSum(playerHand);
+    var cSum = getHandPipSum(computerHand);
+
+    var msg = '양쪽 모두 낼 패가 없습니다 (교착). 내 남은 눈: ' + pSum + '점, 컴퓨터 남은 눈: ' + cSum + '점.';
+
+    if (pSum < cSum) {
+      finishGame('won', msg + ' 남은 눈이 더 적어 승리했습니다!');
+    } else if (pSum > cSum) {
+      finishGame('lost', msg + ' 남은 눈이 더 많아 패배했습니다.');
+    } else {
+      finishGame('draw', msg + ' 남은 눈의 합이 같아 비겼습니다.');
+    }
+  }
+
+  // 컴퓨터 AI 로직 처리
+  function processAiTurn() {
+    if (gameState !== 'playing' || turn !== 'computer') return;
+
+    // 첫 패일 때 (컴퓨터가 첫 수를 두는 특수한 경우)
+    if (chain.length === 0) {
+      var pick = pickAiMove();
+      isAiThinking = false;
+      placeFirstTile(pick.tile, 'computer');
+      return;
+    }
+
+    // 낼 수 있는 패가 있는지 확인
+    var move = pickAiMove();
+    if (move) {
+      // 패 내기
+      isAiThinking = false;
+      placeTileOnEnd(move.tile, move.end, 'computer');
+      return;
+    }
+
+    // 낼 수 있는 패가 없으면 더미에서 뽑기
+    if (boneyard.length > 0) {
+      var drawn = boneyard.pop();
+      computerHand.push(drawn);
+      soundDraw();
+      updateHeaderCounts();
+      renderBoard();
+
+      // 뽑은 뒤 다시 생각 후 착수 또는 넘기기 (350ms 후)
+      aiTimer = setTimeout(function () {
+        aiTimer = null;
+        if (gameState !== 'playing') return;
+        processAiTurn();
+      }, 350);
+      return;
+    }
+
+    // 더미도 없으면 패스(넘기기)
+    isAiThinking = false;
+    statusTurn.textContent = '컴퓨터 패스';
+    soundTile();
+
+    // 만약 플레이어도 낼 패가 없으면 즉시 블록 종료
+    if (!hasPlayableTile(playerHand)) {
+      handleBlockedGame();
+      return;
+    }
+
+    // 플레이어 턴으로 전환
+    switchTurnToPlayer();
+  }
+
+  // 컴퓨터 난이도별 최적 수 선택
+  function pickAiMove() {
+    var candidates = [];
+
+    if (chain.length === 0) {
+      for (var i = 0; i < computerHand.length; i++) {
+        candidates.push({ tile: computerHand[i], end: 'right', score: computerHand[i].sum });
+      }
+      if (candidates.length === 0) return null;
+      candidates.sort(function (a, b) { return b.score - a.score; });
+      return candidates[0];
+    }
+
+    for (var j = 0; j < computerHand.length; j++) {
+      var t = computerHand[j];
+      var check = canPlayTile(t);
+      if (check.canLeft) {
+        candidates.push({ tile: t, end: 'left', resultingOpen: (t.b === openLeft ? t.a : t.b) });
+      }
+      if (check.canRight) {
+        candidates.push({ tile: t, end: 'right', resultingOpen: (t.a === openRight ? t.b : t.a) });
+      }
+    }
+
+    if (candidates.length === 0) return null;
+
+    if (currentLevel === 'easy') {
+      // 쉬움: 무작위 선택
+      var randIdx = Math.floor(Math.random() * candidates.length);
+      return candidates[randIdx];
+    }
+
+    if (currentLevel === 'normal') {
+      // 보통: 큰 패(합이 큰 패) 먼저
+      candidates.sort(function (a, b) {
+        return b.tile.sum - a.tile.sum;
+      });
+      return candidates[0];
+    }
+
+    // 어려움: 상대방이 못 낼 숫자 막기
+    // 1) 전체 28개 도미노 중, 각 숫자의 미공개 개수 계산
+    var pipCounts = [0, 0, 0, 0, 0, 0, 0];
+    // 체인에 놓인 패
+    for (var c = 0; c < chain.length; c++) {
+      pipCounts[chain[c].a]++;
+      pipCounts[chain[c].b]++;
+    }
+    // 컴퓨터 손패
+    for (var h = 0; h < computerHand.length; h++) {
+      pipCounts[computerHand[h].a]++;
+      pipCounts[computerHand[h].b]++;
+    }
+
+    // 각 후보를 평가: resultingOpen 숫자가 이미 많이 노출되었을수록 상대방 손에 없을 확률이 높음!
+    candidates.forEach(function (cand) {
+      var res = cand.resultingOpen;
+      var exposedCount = pipCounts[res] || 0; // 이미 8개 중 몇 개가 나왔는가
+      // exposedCount가 클수록 상대가 낼 수 있는 확률이 적어짐 (방어 및 틀어막기 점수 가산)
+      cand.score = (exposedCount * 25) + cand.tile.sum;
+      if (cand.tile.isDouble) cand.score += 15; // 더블 패 우선 털기
+    });
+
+    candidates.sort(function (a, b) {
+      return b.score - a.score;
+    });
+
+    return candidates[0];
+  }
+
+  // 게임 종료 처리
+  function finishGame(result, message) {
+    gameState = result;
+    isAiThinking = false;
+    chooseDirBox.style.display = 'none';
+
+    var mult = (currentLevel === 'hard') ? 3 : ((currentLevel === 'normal') ? 2 : 1);
+    var opponentPips = getHandPipSum(computerHand);
+    var earnedScore = 0;
+
+    if (result === 'won') {
+      wins++;
+      earnedScore = Math.max(10, opponentPips * 10 * mult);
+      earnedScore = Math.min(earnedScore, 99999999);
+      statusTurn.textContent = '이겼어요!';
+      soundWin();
+
+      // 최고 점수 갱신
+      try {
+        localStorage.setItem('zw_domino-chain_wins', String(wins));
+        if (currentLevel === 'hard') {
+          if (bestHard === null || earnedScore > bestHard) {
+            bestHard = earnedScore;
+            localStorage.setItem('zw_domino-chain_best_hard', String(bestHard));
+          }
+        } else if (currentLevel === 'normal') {
+          if (bestNormal === null || earnedScore > bestNormal) {
+            bestNormal = earnedScore;
+            localStorage.setItem('zw_domino-chain_best_normal', String(bestNormal));
+          }
+        } else {
+          if (bestEasy === null || earnedScore > bestEasy) {
+            bestEasy = earnedScore;
+            localStorage.setItem('zw_domino-chain_best_easy', String(bestEasy));
+          }
+        }
+      } catch (e) {}
+
+      overlayTitle.textContent = '🎉 승리했습니다!';
+      overlayDesc.textContent = message;
+      overlayScoreDetail.style.display = 'block';
+      overlayScoreDetail.innerHTML =
+        '상대 남은 눈: <b>' + opponentPips + '점</b> × 난이도 ' + mult + '배<br>'
+        + '획득 점수: <b style="color:#ffd60a; font-size:16px;">' + earnedScore.toLocaleString('ko-KR') + '점</b>';
+      btnOverlayRank.style.display = 'inline-block';
+    } else if (result === 'lost') {
+      losses++;
+      try {
+        localStorage.setItem('zw_domino-chain_losses', String(losses));
+      } catch (e) {}
+      statusTurn.textContent = '졌어요';
+      soundLose();
+
+      overlayTitle.textContent = '아쉽게 패배했습니다';
+      overlayDesc.textContent = message;
+      overlayScoreDetail.style.display = 'block';
+      overlayScoreDetail.innerHTML = '획득 점수: <b>0점</b>';
+      btnOverlayRank.style.display = 'none';
+    } else {
+      draws++;
+      try {
+        localStorage.setItem('zw_domino-chain_draws', String(draws));
+      } catch (e) {}
+      statusTurn.textContent = '비겼어요';
+      soundLose();
+
+      overlayTitle.textContent = '무승부입니다';
+      overlayDesc.textContent = message;
+      overlayScoreDetail.style.display = 'block';
+      overlayScoreDetail.innerHTML = '획득 점수: <b>0점</b>';
+      btnOverlayRank.style.display = 'none';
+    }
+
+    btnStartGame.textContent = '다시 한 판 하기';
+    overlayBox.style.display = 'flex';
+
+    updateStatusDisplay();
+    updateUndoButton();
+    renderBoard();
+  }
+
+  // 🏆 순위표 올리기 단추 클릭 이벤트
+  btnOverlayRank.addEventListener('click', function () {
+    var sec = document.querySelector('.zw-rank');
+    if (sec) {
+      sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      sec.classList.add('flash');
+      setTimeout(function () { sec.classList.remove('flash'); }, 1800);
+      var nameEl = sec.querySelector('.rk-name');
+      if (nameEl) {
+        setTimeout(function () { try { nameEl.focus(); } catch (e) {} }, 450);
+      }
+    }
+  });
+
+  // 보드 체인 좌표 재계산 (스네이크/트랙 곡선 레이아웃)
+  function recalcChainPositions() {
+    if (chain.length === 0) return;
+
+    var tileW = 54;
+    var tileH = 27;
+    var gap = 4;
+    var step = tileW + gap;
+
+    // 가로 일렬로 자연스럽게 늘어놓고 중앙 정렬
+    var totalW = (chain.length - 1) * step;
+    var startX = -totalW / 2;
+
+    for (var i = 0; i < chain.length; i++) {
+      var item = chain[i];
+      item.x = startX + i * step;
+      item.y = 0;
+      item.w = item.isDouble ? tileH : tileW;
+      item.h = item.isDouble ? tileW : tileH;
+      item.isVert = item.isDouble;
+    }
+  }
+
+  // 캔버스 크기 리사이징
+  function resizeCanvas() {
+    var rect = canvasWrap.getBoundingClientRect();
+    var width = rect.width || 420;
+    var height = 260;
+    var dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+  }
+
+  // 보드 렌더링
+  function renderBoard() {
+    resizeCanvas();
+    var rect = canvasWrap.getBoundingClientRect();
+    var w = rect.width || 420;
+    var h = 260;
+
+    ctx.clearRect(0, 0, w, h);
+
+    // 1. 녹색 펠트 테이블 배경
+    var grad = ctx.createRadialGradient(w / 2, h / 2, 40, w / 2, h / 2, w * 0.7);
+    grad.addColorStop(0, '#1d4829');
+    grad.addColorStop(1, '#112918');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+
+    // 2. 미세한 그리드 텍스처
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = 1;
+    for (var x = 0; x < w; x += 24) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+    for (var y = 0; y < h; y += 24) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+
+    // 3. 체인 타일 그리기
+    ctx.save();
+    var centerX = w / 2 + panOffset.x;
+    var centerY = h / 2 + panOffset.y;
+    ctx.translate(centerX, centerY);
+
+    if (chain.length === 0) {
+      // 체인이 비어있을 때 중앙 안내
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.font = '700 15px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('손패에서 첫 패를 골라 놓아보세요', 0, 0);
+      ctx.restore();
+      return;
+    }
+
+    for (var i = 0; i < chain.length; i++) {
+      var t = chain[i];
+      drawBoardTile(t.x, t.y, t.w, t.h, t.a, t.b, t.isVert, (i === 0), (i === chain.length - 1));
+    }
+
+    // 양쪽 끝 연결 가능 표시 링
+    if (chain.length > 0) {
+      var leftT = chain[0];
+      var rightT = chain[chain.length - 1];
+
+      // 왼쪽 끝 하이라이트
+      ctx.save();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(leftT.x - leftT.w / 2 - 10, leftT.y, 8, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+
+      // 오른쪽 끝 하이라이트
+      ctx.save();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(rightT.x + rightT.w / 2 + 10, rightT.y, 8, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
+  // 보드 위의 개별 도미노 타일 그리기
+  function drawBoardTile(cx, cy, w, h, valA, valB, isVert, isLeftEnd, isRightEnd) {
+    ctx.save();
+    ctx.translate(cx, cy);
+
+    // 그림자
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetX = 1.5;
+    ctx.shadowOffsetY = 3;
+
+    // 타일 본체 (상아색)
+    var bgGrad = ctx.createLinearGradient(-w / 2, -h / 2, w / 2, h / 2);
+    bgGrad.addColorStop(0, '#ffffff');
+    bgGrad.addColorStop(1, '#f1f0eb');
+    ctx.fillStyle = bgGrad;
+
+    var r = 5;
+    drawRoundedRect(ctx, -w / 2, -h / 2, w, h, r);
+    ctx.fill();
+
+    // 테두리
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1;
+    drawRoundedRect(ctx, -w / 2, -h / 2, w, h, r);
+    ctx.stroke();
+
+    // 끝단 타일 강조 테두리
+    if (isLeftEnd || isRightEnd) {
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 1.8;
+      drawRoundedRect(ctx, -w / 2 - 1, -h / 2 - 1, w + 2, h + 2, r + 1);
+      ctx.stroke();
+    }
+
+    // 중간 분할선 및 중심 핀
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 1.2;
+    if (isVert) {
+      // 세로 타일: 가로선 분할
+      ctx.beginPath();
+      ctx.moveTo(-w / 2 + 3, 0);
+      ctx.lineTo(w / 2 - 3, 0);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748b';
+      ctx.beginPath();
+      ctx.arc(0, 0, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 위쪽 칸 valA, 아래쪽 칸 valB
+      drawPipsOnCanvas(0, -h / 4, Math.min(w, h / 2) * 0.75, valA);
+      drawPipsOnCanvas(0, h / 4, Math.min(w, h / 2) * 0.75, valB);
+    } else {
+      // 가로 타일: 세로선 분할
+      ctx.beginPath();
+      ctx.moveTo(0, -h / 2 + 3);
+      ctx.lineTo(0, h / 2 - 3);
+      ctx.stroke();
+
+      ctx.fillStyle = '#64748b';
+      ctx.beginPath();
+      ctx.arc(0, 0, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 왼쪽 칸 valA, 오른쪽 칸 valB
+      drawPipsOnCanvas(-w / 4, 0, Math.min(w / 2, h) * 0.75, valA);
+      drawPipsOnCanvas(w / 4, 0, Math.min(w / 2, h) * 0.75, valB);
+    }
+
+    ctx.restore();
+  }
+
+  // 캔버스에 주사위 점 직접 그리기
+  function drawPipsOnCanvas(cx, cy, boxSize, num) {
+    if (num <= 0) return;
+    var col = PIP_COLORS[num] || '#2563eb';
+    var r = Math.max(1.5, boxSize * 0.12);
+    var d = boxSize * 0.28;
+
+    var pts = [];
+    if (num === 1) {
+      pts.push([0, 0]);
+    } else if (num === 2) {
+      pts.push([-d, -d], [d, d]);
+    } else if (num === 3) {
+      pts.push([-d, -d], [0, 0], [d, d]);
+    } else if (num === 4) {
+      pts.push([-d, -d], [d, -d], [-d, d], [d, d]);
+    } else if (num === 5) {
+      pts.push([-d, -d], [d, -d], [0, 0], [-d, d], [d, d]);
+    } else if (num === 6) {
+      pts.push([-d, -d], [d, -d], [-d, 0], [d, 0], [-d, d], [d, d]);
+    }
+
+    ctx.fillStyle = col;
+    for (var i = 0; i < pts.length; i++) {
+      ctx.beginPath();
+      ctx.arc(cx + pts[i][0], cy + pts[i][1], r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function drawRoundedRect(c, x, y, width, height, radius) {
+    c.beginPath();
+    c.moveTo(x + radius, y);
+    c.lineTo(x + width - radius, y);
+    c.quadraticCurveTo(x + width, y, x + width, y + radius);
+    c.lineTo(x + width, y + height - radius);
+    c.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    c.lineTo(x + radius, y + height);
+    c.quadraticCurveTo(x, y + height, x, y + height - radius);
+    c.lineTo(x, y + radius);
+    c.quadraticCurveTo(x, y, x + radius, y);
+    c.closePath();
+  }
+
+  // 캔버스 터치/마우스 드래그로 팬(Pan) 이동
+  function onPointerDown(e) {
+    isDragging = true;
+    var pt = getPointerPos(e);
+    dragStart = pt;
+    panStart = { x: panOffset.x, y: panOffset.y };
+  }
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    var pt = getPointerPos(e);
+    var dx = pt.x - dragStart.x;
+    var dy = pt.y - dragStart.y;
+    panOffset.x = panStart.x + dx;
+    panOffset.y = panStart.y + dy;
+    renderBoard();
+  }
+
+  function onPointerUp() {
+    isDragging = false;
+  }
+
+  function getPointerPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var clientX = e.clientX;
+    var clientY = e.clientY;
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    }
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  }
+
+  canvas.addEventListener('mousedown', onPointerDown);
+  window.addEventListener('mousemove', onPointerMove);
+  window.addEventListener('mouseup', onPointerUp);
+
+  canvas.addEventListener('touchstart', function (e) {
+    onPointerDown(e);
+  }, { passive: true });
+  window.addEventListener('touchmove', function (e) {
+    if (isDragging) onPointerMove(e);
+  }, { passive: true });
+  window.addEventListener('touchend', onPointerUp);
+
+  // 다시 하기 / 시작 버튼
+  btnRestart.addEventListener('click', function () {
+    startNewGame();
+  });
+  btnStartGame.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  window.addEventListener('resize', function () {
+    renderBoard();
+  });
+
+  // 초기화 실행
+  loadStorage();
+  resetToReadyState();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/four-in-row/">4목 맞추기</a> — 컴퓨터와 4개 먼저 잇기</li><li><a href="/water-sort/">물 정렬</a> — 색깔별로 물을 병에 모으기</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/klondike-solitaire/">솔리테어</a> — 카드를 순서대로 쌓아 완성하기</li><li><a href="/box-push/">상자 밀기</a> — 상자를 목표 칸으로 밀기</li><li><a href="/pipe-connect/">파이프 잇기</a> — 돌려서 물길 연결하기</li><li><a href="/checkers-8/">체커</a> — 컴퓨터와 체커 한 판</li><li><a href="/fleet-hunt/">함대 맞히기</a> — 좌표를 찍어 상대 함대 찾기</li><li><a href="/baduk-9/">바둑 9줄</a> — 9줄 판에서 컴퓨터와 바둑 한 판</li><li><a href="/janggi-mini/">장기</a> — 컴퓨터와 장기 한 판</li><li><a href="/gonu/">고누</a> — 말 3개를 한 줄로 모으기</li><li><a href="/mancala/">만칼라</a> — 구슬을 나눠 담아 곳간 채우기</li><li><a href="/mini-chess/">미니 체스</a> — 6×6 판의 작은 체스</li><li><a href="/freecell-solitaire/">프리셀</a> — 임시 칸을 써서 카드 쌓기</li><li><a href="/domino-chain/">도미노</a> — 숫자를 맞춰 도미노 잇기</li><li><a href="/peg-jump/">페그 솔리테어</a> — 구슬을 뛰어넘어 하나만 남기기</li><li><a href="/tangram-seven/">칠교</a> — 일곱 조각으로 모양 맞추기</li><li><a href="/dot-box-land/">점 잇기 땅따먹기</a> — 선을 그어 네모 땅 차지하기</li><li><a href="/nonogram/">네모 로직</a> — 숫자 힌트로 숨은 그림 찾기</li><li><a href="/binary-fill/">0과 1 채우기</a> — 규칙대로 0과 1 채우기</li><li><a href="/sum-fill/">숫자 합 맞추기</a> — 가로세로 합에 맞게 숫자 채우기</li><li><a href="/word-hangman/">글자 맞히기</a> — 글자를 하나씩 찍어 단어 맞히기</li><li><a href="/word-chain/">끝말잇기</a> — 컴퓨터와 끝말잇기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

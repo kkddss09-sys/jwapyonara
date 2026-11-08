@@ -1,0 +1,1414 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>숫자 합 맞추기 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 무료 숫자 합 맞추기 퍼즐. 십자말풀이처럼 힌트 숫자에 맞춰 1~9 숫자를 중복 없이 채워보세요. 쉬움, 보통, 어려움 3단계를 휴대폰과 PC에서 즐겨보세요.">
+<link rel="canonical" href="https://jwapyonara.com/sum-fill/">
+<meta property="og:title" content="숫자 합 맞추기 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 즐기는 두뇌 퍼즐! 힌트 합에 맞춰 빈칸에 숫자를 채워보세요.">
+<meta property="og:url" content="https://jwapyonara.com/sum-fill/">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "숫자 합 맞추기",
+  "url": "https://jwapyonara.com/sum-fill/",
+  "description": "가입 없이 바로 즐기는 무료 숫자 합 맞추기 퍼즐 게임",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All"
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 (판 위) */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 바 */
+.sum-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+}
+.sum-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+.sum-status-mid {
+  color: #ffffff;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.sum-status-right {
+  color: #a1a1a6;
+  flex: 1;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.sum-best-line {
+  font-size: 13px;
+  color: var(--sub, #6e6e73);
+  text-align: right;
+  margin-bottom: 10px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 퍼즐 판 컨테이너 */
+.puzzle-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 12px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.puzzle-grid {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 1;
+  background: #1c1c1e;
+  border: 2px solid #3a3a3c;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  touch-action: manipulation;
+}
+
+/* 셀 공통 스타일 */
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border-right: 1px solid #3a3a3c;
+  border-bottom: 1px solid #3a3a3c;
+  font-family: inherit;
+}
+.cell:nth-child(n) {
+  border-right: 1px solid #3a3a3c;
+  border-bottom: 1px solid #3a3a3c;
+}
+
+/* 벽(차단) 칸 */
+.cell.wall {
+  background: #232326;
+}
+
+/* 힌트 칸 */
+.cell.clue {
+  background: #2c2c30;
+  color: #e5e5ea;
+  overflow: hidden;
+}
+.cell.clue::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top right, transparent calc(50% - 0.75px), #48484a calc(50% - 0.75px), #48484a calc(50% + 0.75px), transparent calc(50% + 0.75px));
+  pointer-events: none;
+}
+.clue-val {
+  position: absolute;
+  font-weight: 800;
+  line-height: 1;
+  color: #f2f2f7;
+  font-variant-numeric: tabular-nums;
+}
+.clue-v {
+  bottom: 3px;
+  left: 4px;
+  text-align: left;
+}
+.clue-h {
+  top: 3px;
+  right: 4px;
+  text-align: right;
+}
+
+/* 입력 빈칸 */
+.cell.input-cell {
+  background: var(--card, #ffffff);
+  color: var(--ink, #1c1c1e);
+  cursor: pointer;
+  transition: background-color 0.15s, box-shadow 0.15s;
+}
+.cell.input-cell.highlight-run {
+  background: var(--soft, #e8f0fe);
+}
+.cell.input-cell.active {
+  background: #d0e2ff !important;
+  outline: 2.5px solid var(--red, #1b64da);
+  outline-offset: -2.5px;
+  z-index: 2;
+}
+.cell.input-cell.conflict {
+  background: #ffdcd8 !important;
+  color: var(--danger, #d92d20) !important;
+}
+
+/* 셀 내부 입력 숫자 */
+.cell-value {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--ink, #1c1c1e);
+}
+.puzzle-grid[data-size="7"] .cell-value {
+  font-size: 18px;
+}
+.puzzle-grid[data-size="9"] .cell-value {
+  font-size: 15px;
+}
+
+/* 힌트 숫자 크기 반응형 */
+.puzzle-grid[data-size="5"] .clue-val {
+  font-size: 13px;
+}
+.puzzle-grid[data-size="7"] .clue-val {
+  font-size: 11px;
+}
+.puzzle-grid[data-size="9"] .clue-val {
+  font-size: 9.5px;
+}
+
+/* 후보 숫자 메모 (3x3 미니 그리드) */
+.cell-notes {
+  position: absolute;
+  inset: 2px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  pointer-events: none;
+}
+.note-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--sub, #6e6e73);
+  line-height: 1;
+}
+.puzzle-grid[data-size="7"] .note-num {
+  font-size: 8px;
+}
+.puzzle-grid[data-size="9"] .note-num {
+  font-size: 6.5px;
+}
+
+/* 조작 키패드 영역 */
+.keypad-wrap {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 12px;
+}
+.num-pad {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.btn-num {
+  font: inherit;
+  font-size: 21px;
+  font-weight: 800;
+  background: var(--card, #ffffff);
+  border: 1.5px solid var(--line, #e3e3e8);
+  color: var(--ink, #1c1c1e);
+  border-radius: 12px;
+  min-height: 48px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  transition: background-color 0.1s, transform 0.05s;
+}
+.btn-num:active {
+  background: var(--fill, #f2f2f7);
+  transform: scale(0.97);
+}
+.action-pad {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.3fr;
+  gap: 6px;
+}
+.btn-act {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 12px;
+  min-height: 48px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  touch-action: manipulation;
+  border: 1.5px solid var(--line, #e3e3e8);
+  background: var(--card, #ffffff);
+  color: var(--ink, #1c1c1e);
+}
+.btn-act.btn-note.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+.btn-act.btn-check {
+  background: var(--red, #1b64da);
+  color: #fff;
+  border-color: var(--red, #1b64da);
+  font-weight: 800;
+}
+.btn-act.btn-check:active {
+  opacity: 0.88;
+}
+
+/* 하단 제어 단추 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.btn-bar {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid var(--line, #e3e3e8);
+  background: var(--card, #ffffff);
+  color: var(--ink, #1c1c1e);
+  touch-action: manipulation;
+}
+.btn-bar-dark {
+  background: #2c2c2e;
+  border-color: #2c2c2e;
+  color: #ffffff;
+}
+
+/* 피드백 안내 문구 */
+.msg-tip {
+  min-height: 22px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  margin: 6px 0 10px;
+  color: var(--sub, #6e6e73);
+}
+.msg-tip.err {
+  color: var(--danger, #d92d20);
+}
+.msg-tip.ok {
+  color: var(--ok, #12805c);
+}
+
+/* 완성 축하 오버레이 모달 */
+.overlay-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 16px;
+}
+.overlay-content {
+  background: var(--card, #ffffff);
+  color: var(--ink, #1c1c1e);
+  border-radius: 20px;
+  padding: 24px 20px;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+.overlay-content h2 {
+  font-size: 24px;
+  margin: 0 0 8px;
+  color: var(--red, #1b64da);
+}
+.overlay-content p {
+  font-size: 15px;
+  color: var(--sub, #6e6e73);
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+.overlay-score-box {
+  background: var(--fill, #f2f2f7);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 18px;
+}
+.overlay-score-box .score-val {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--ink, #1c1c1e);
+  margin: 4px 0;
+  font-variant-numeric: tabular-nums;
+}
+.overlay-score-box .score-time {
+  font-size: 13px;
+  color: var(--sub, #6e6e73);
+}
+.overlay-actions {
+  display: grid;
+  gap: 8px;
+}
+.overlay-actions button {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  touch-action: manipulation;
+}
+.btn-overlay-rank {
+  background: var(--red, #1b64da);
+  color: #fff;
+}
+.btn-overlay-close {
+  background: var(--fill, #f2f2f7);
+  color: var(--ink, #1c1c1e);
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>숫자 합 맞추기</h1>
+  <p class="lead">십자말풀이처럼 힌트 숫자에 맞춰 1부터 9까지 채워보세요. 같은 줄에 숫자는 겹치지 않아요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움 5×5</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통 7×7</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움 9×9</button>
+    </div>
+
+    <div class="sum-status-bar">
+      <div class="sum-status-left" id="statusRemaining">남은 칸 0</div>
+      <div class="sum-status-mid" id="statusTime">00:00</div>
+      <div class="sum-status-right" id="statusLevelText">쉬움</div>
+    </div>
+    <div class="sum-best-line" id="statusBestLine"></div>
+
+    <div class="puzzle-wrap">
+      <div class="puzzle-grid" id="puzzleGrid" data-size="5" role="grid" aria-label="숫자 퍼즐 판"></div>
+    </div>
+
+    <div class="msg-tip" id="msgTip">빈칸을 누르고 아래 숫자를 채우세요</div>
+
+    <div class="keypad-wrap">
+      <div class="num-pad">
+        <button type="button" class="btn-num" data-num="1">1</button>
+        <button type="button" class="btn-num" data-num="2">2</button>
+        <button type="button" class="btn-num" data-num="3">3</button>
+        <button type="button" class="btn-num" data-num="4">4</button>
+        <button type="button" class="btn-num" data-num="5">5</button>
+        <button type="button" class="btn-num" data-num="6">6</button>
+        <button type="button" class="btn-num" data-num="7">7</button>
+        <button type="button" class="btn-num" data-num="8">8</button>
+        <button type="button" class="btn-num" data-num="9">9</button>
+        <button type="button" class="btn-num" id="btnErase" aria-label="지우기">⌫</button>
+      </div>
+      <div class="action-pad">
+        <button type="button" class="btn-act btn-note" id="btnToggleNote">✏️ 메모</button>
+        <button type="button" class="btn-act" id="btnClearNotes">메모 지우기</button>
+        <button type="button" class="btn-act btn-check" id="btnCheck">✓ 확인</button>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-bar" id="btnRestart">다시 하기</button>
+      <button type="button" class="btn-bar btn-bar-dark" id="btnNewPuzzle">새 문제</button>
+    </div>
+  </section>
+
+  <!-- 게임 클리어 팝업 모달 -->
+  <div class="overlay-modal" id="overlayModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="overlay-content">
+      <h2 id="modalTitle">🎉 축하합니다!</h2>
+      <p id="modalDesc">모든 숫자의 합을 완벽하게 맞췄어요!</p>
+      <div class="overlay-score-box">
+        <div class="score-time" id="modalTimeLine">걸린 시간: 00:00</div>
+        <div class="score-val" id="modalScoreLine">0점</div>
+        <div class="score-time" id="modalBestNote">최고 점수로 저장되었어요!</div>
+      </div>
+      <div class="overlay-actions">
+        <button type="button" class="btn-overlay-rank" id="btnOverlayRank">🏆 순위표 올리기</button>
+        <button type="button" class="btn-overlay-close" id="btnModalRestart">다시 하기</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">십자말풀이처럼 가로와 세로 합을 맞추며 모든 계산은 기기 안에서만 실행됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법 (규칙)</summary>
+    <ul>
+      <li><b>목표:</b> 흰색 빈칸에 1부터 9까지 숫자를 채워 각 힌트 칸의 가로 및 세로 합을 완성합니다.</li>
+      <li><b>대각선 힌트 칸:</b> 대각선 오른쪽 위 숫자는 그 칸의 <b>오른쪽 가로 줄</b> 합이며, 왼쪽 아래 숫자는 <b>아래쪽 세로 줄</b> 합입니다.</li>
+      <li><b>중복 금지 규칙:</b> 하나의 연속된 가로 줄이나 세로 줄 안에서는 <b>같은 숫자가 두 번 이상 쓰일 수 없습니다</b>.</li>
+      <li><b>후보 숫자 메모:</b> '✏️ 메모' 단추를 켜면 빈칸에 후보 숫자를 작게 적어두고 비교할 수 있습니다.</li>
+      <li><b>확인 단추:</b> '✓ 확인' 단추를 누르면 현재 맞춘 상태와 잘못된 합 또는 중복이 있는지 바로 점검해 줍니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단에서 <b>쉬움 5×5</b>, <b>보통 7×7</b>, <b>어려움 9×9</b> 중 원하는 난이도를 고릅니다.</li>
+      <li>힌트 칸의 숫자를 보고 가능한 조합을 생각합니다. 예: 2칸 합이 3이면 [1, 2], 2칸 합이 17이면 [8, 9]뿐입니다.</li>
+      <li>가로 힌트와 세로 힌트가 교차하는 자리는 두 조건에 모두 만족하는 숫자를 넣습니다.</li>
+      <li>헷갈리는 자리는 '✏️ 메모' 기능을 켜두고 유력한 후보를 기록해 두면 한결 풀기 쉬워집니다.</li>
+    </ol>
+
+    <h2>풀이 꿀팁 (유일 조합 외우기)</h2>
+    <dl>
+      <dt>2칸으로 만드는 유일 조합</dt>
+      <dd>합이 3이면 {1, 2}, 합이 4이면 {1, 3}, 합이 16이면 {7, 9}, 합이 17이면 {8, 9}만 가능합니다.</dd>
+      <dt>3칸으로 만드는 유일 조합</dt>
+      <dd>합이 6이면 {1, 2, 3}, 합이 7이면 {1, 2, 4}, 합이 23이면 {6, 8, 9}, 합이 24이면 {7, 8, 9}만 가능합니다.</dd>
+      <dt>교차 지점의 해법</dt>
+      <dd>예를 들어 가로 2칸 합 3({1, 2})과 세로 2칸 합 4({1, 3})가 만나는 교차점은 공통 숫자인 <b>1</b>로 유일하게 확정됩니다.</dd>
+    </dl>
+
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>0이나 10 이상의 숫자도 쓸 수 있나요?</summary>
+      <p>아닙니다. 오직 1부터 9까지의 자연수만 사용할 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>점수는 어떻게 계산되나요?</summary>
+      <p>퍼즐을 클리어할 때 걸린 시간을 바탕으로 <code>(2000 - 걸린 초) × 난이도 배수</code>(쉬움 1배, 보통 2배, 어려움 3배)로 계산되며, 최소 100점이 보장됩니다. 빠른 시간 안에 풀수록 더 높은 순위를 기록할 수 있습니다.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // ── 오디오 합성 (외부 파일 없이 순수 WebAudio로 생성) ──
+  var audioCtx = null;
+  function getAudioContext() {
+    if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+      var AudioCtx = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioCtx();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  function playTone(freq, duration, type, startDelay) {
+    try {
+      var ctx = getAudioContext();
+      if (!ctx) return;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + (startDelay || 0));
+      gain.gain.setValueAtTime(0.08, ctx.currentTime + (startDelay || 0));
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (startDelay || 0) + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(ctx.currentTime + (startDelay || 0));
+      osc.stop(ctx.currentTime + (startDelay || 0) + duration);
+    } catch (e) {}
+  }
+
+  function playSuccessSound() {
+    playTone(523.25, 0.12, 'triangle', 0);     // C5
+    playTone(659.25, 0.12, 'triangle', 0.1);   // E5
+    playTone(783.99, 0.12, 'triangle', 0.2);   // G5
+    playTone(1046.50, 0.28, 'triangle', 0.3);  // C6
+  }
+
+  function playClickSound() {
+    playTone(440, 0.04, 'sine', 0);
+  }
+
+  // ── 퍼즐 데이터 (100% 유일해 검증 완료) ──
+  // 0: WALL, [h, v]: CLUE, { sol: N }: CELL
+  var PUZZLES = {
+    easy: [
+      {
+        size: 5,
+        grid: [
+          [ 0,             [0, 4],          [0, 12],         0,               0 ],
+          [ [3, 0],        { sol: 1 },      { sol: 2 },      [0, 14],         0 ],
+          [ [12, 0],       { sol: 3 },      { sol: 4 },      { sol: 5 },      [0, 16] ],
+          [ 0,             [14, 0],         { sol: 6 },      { sol: 1 },      { sol: 7 } ],
+          [ 0,             0,               [17, 0],         { sol: 8 },      { sol: 9 } ]
+        ]
+      },
+      {
+        size: 5,
+        grid: [
+          [ 0,             [0, 5],          [0, 11],         0,               0 ],
+          [ [4, 0],        { sol: 3 },      { sol: 1 },      [0, 16],         0 ],
+          [ [13, 0],       { sol: 2 },      { sol: 6 },      { sol: 5 },      [0, 15] ],
+          [ 0,             [14, 0],         { sol: 4 },      { sol: 2 },      { sol: 8 } ],
+          [ 0,             0,               [16, 0],         { sol: 9 },      { sol: 7 } ]
+        ]
+      }
+    ],
+    normal: [
+      {
+        size: 7,
+        grid: [
+          [ 0,       [0, 4],   [0, 24],  [0, 7],   0,        [0, 17],  [0, 3]  ],
+          [ [10, 0], {sol:1},  {sol:7},  {sol:2},  [11, 0],  {sol:9},  {sol:2} ],
+          [ [15, 0], {sol:3},  {sol:8},  {sol:4},  [9, 15],  {sol:8},  {sol:1} ],
+          [ 0,       [16, 0],  {sol:9},  {sol:1},  {sol:6},  [0, 12],  [0, 8]  ],
+          [ 0,       [0, 16],  [0, 11],  [24, 5],  {sol:9},  {sol:8},  {sol:7} ],
+          [ [15, 0], {sol:7},  {sol:5},  {sol:3},  [5, 0],   {sol:4},  {sol:1} ],
+          [ [17, 0], {sol:9},  {sol:6},  {sol:2},  0,        0,        0       ]
+        ]
+      },
+      {
+        size: 7,
+        grid: [
+          [ 0,       [0, 16],  [0, 17],  0,        0,        [0, 4],   [0, 17] ],
+          [ [17, 0], {sol:9},  {sol:8},  0,        [10, 0],  {sol:1},  {sol:9} ],
+          [ [16, 0], {sol:7},  {sol:9},  [0, 12],  [11, 0],  {sol:3},  {sol:8} ],
+          [ 0,       [15, 0],  {sol:6},  {sol:4},  {sol:5},  [0, 7],   0       ],
+          [ 0,       [0, 11],  [0, 16],  {sol:8},  [14, 0],  {sol:5},  {sol:9} ],
+          [ [11, 0], {sol:3},  {sol:8},  0,        [15, 0],  {sol:7},  {sol:8} ],
+          [ [16, 0], {sol:8},  {sol:7},  0,        0,        0,        0       ]
+        ]
+      }
+    ],
+    hard: [
+      {
+        size: 9,
+        grid: [
+          [ 0,       [0, 6],   [0, 24],  [0, 15],  0,        [0, 10],  [0, 20],  [0, 16],  [0, 14] ],
+          [ [14, 0], {sol:1},  {sol:7},  {sol:6},  [20, 0],  {sol:1},  {sol:8},  {sol:9},  {sol:2} ],
+          [ [14, 0], {sol:2},  {sol:8},  {sol:4},  [15, 0],  {sol:2},  {sol:3},  {sol:6},  {sol:4} ],
+          [ [17, 0], {sol:3},  {sol:9},  {sol:5},  [25, 0],  {sol:7},  {sol:9},  {sol:1},  {sol:8} ],
+          [ 0,       [0, 24],  [0, 16],  [0, 14],  0,        [0, 14],  [0, 26],  [0, 22],  [0, 10] ],
+          [ [18, 0], {sol:9},  {sol:7},  {sol:2},  [16, 0],  {sol:1},  {sol:8},  {sol:4},  {sol:3} ],
+          [ [16, 0], {sol:8},  {sol:5},  {sol:3},  [19, 0],  {sol:4},  {sol:7},  {sol:6},  {sol:2} ],
+          [ [11, 0], {sol:6},  {sol:1},  {sol:4},  [14, 0],  {sol:6},  {sol:2},  {sol:5},  {sol:1} ],
+          [ [9, 0],  {sol:1},  {sol:3},  {sol:5},  [23, 0],  {sol:3},  {sol:9},  {sol:7},  {sol:4} ]
+        ]
+      }
+    ]
+  };
+
+  // ── DOM 요소 ──
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var puzzleGridEl = document.getElementById('puzzleGrid');
+  var statusRemaining = document.getElementById('statusRemaining');
+  var statusTime = document.getElementById('statusTime');
+  var statusLevelText = document.getElementById('statusLevelText');
+  var statusBestLine = document.getElementById('statusBestLine');
+  var msgTip = document.getElementById('msgTip');
+  var btnToggleNote = document.getElementById('btnToggleNote');
+  var btnClearNotes = document.getElementById('btnClearNotes');
+  var btnCheck = document.getElementById('btnCheck');
+  var btnRestart = document.getElementById('btnRestart');
+  var btnNewPuzzle = document.getElementById('btnNewPuzzle');
+  var btnErase = document.getElementById('btnErase');
+
+  var overlayModal = document.getElementById('overlayModal');
+  var modalTimeLine = document.getElementById('modalTimeLine');
+  var modalScoreLine = document.getElementById('modalScoreLine');
+  var modalBestNote = document.getElementById('modalBestNote');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnModalRestart = document.getElementById('btnModalRestart');
+
+  // ── 게임 상태 변수 ──
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  var puzzleIndex = 0;
+  var currentPuzzle = null;
+  var userGrid = []; // [r][c] -> { val: 0, notes: Set, sol: number, isCell: bool }
+  var selectedCell = null; // { r, c } or null
+  var isNoteMode = false;
+  var isGameWon = false;
+
+  var timerSeconds = 0;
+  var timerInterval = null;
+
+  // 런(연속 구간) 정보 캐시
+  var hRuns = []; // [ { id, hVal, cells: [{r,c}, ...] }, ... ]
+  var vRuns = []; // [ { id, vVal, cells: [{r,c}, ...] }, ... ]
+  var cellRunMap = {}; // "r,c" -> { hRun, vRun }
+
+  // ── 타이머 ──
+  function startTimer() {
+    stopTimer();
+    timerSeconds = 0;
+    updateTimerDisplay();
+    timerInterval = setInterval(function () {
+      if (!isGameWon) {
+        timerSeconds++;
+        updateTimerDisplay();
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+  }
+
+  function formatTime(sec) {
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s);
+  }
+
+  function updateTimerDisplay() {
+    statusTime.textContent = formatTime(timerSeconds);
+  }
+
+  // ── 순위표 탭 동기화 ──
+  function syncRankTab() {
+    try {
+      var i = (currentLevel === 'hard') ? 2 : (currentLevel === 'normal' ? 1 : 0);
+      if (typeof ZW !== 'undefined') {
+        ZW.rankPick = i;
+      }
+      var b = document.querySelector('.rk-tabs button[data-i="' + i + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  // ── 로컬 스토리지 최고 기록 읽기/쓰기 ──
+  function getBestScore(level) {
+    try {
+      var val = localStorage.getItem('zw_sum-fill_best_' + level);
+      if (val !== null) {
+        var num = parseInt(val, 10);
+        return isNaN(num) ? null : Math.min(99999999, Math.max(0, num));
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function setBestScore(level, score) {
+    try {
+      var clamped = Math.min(99999999, Math.max(0, Math.round(score)));
+      localStorage.setItem('zw_sum-fill_best_' + level, String(clamped));
+    } catch (e) {}
+  }
+
+  function updateBestLine() {
+    var bEasy = getBestScore('easy');
+    var bNormal = getBestScore('normal');
+    var bHard = getBestScore('hard');
+
+    if (bEasy !== null || bNormal !== null || bHard !== null) {
+      statusBestLine.textContent = '최고 기록 · 쉬움 ' + (bEasy !== null ? bEasy.toLocaleString('ko-KR') + '점' : '-')
+        + ' · 보통 ' + (bNormal !== null ? bNormal.toLocaleString('ko-KR') + '점' : '-')
+        + ' · 어려움 ' + (bHard !== null ? bHard.toLocaleString('ko-KR') + '점' : '-');
+    } else {
+      statusBestLine.textContent = '';
+    }
+  }
+
+  // ── 퍼즐 런(Run) 분석 ──
+  function parseRuns(grid, size) {
+    hRuns = [];
+    vRuns = [];
+    cellRunMap = {};
+
+    var hCount = 0;
+    var vCount = 0;
+
+    // 1. 가로 런 찾기
+    for (var r = 0; r < size; r++) {
+      for (var c = 0; c < size; c++) {
+        var item = grid[r][c];
+        if (Array.isArray(item) && item[0] > 0) {
+          var hVal = item[0];
+          var runCells = [];
+          for (var cc = c + 1; cc < size; cc++) {
+            var nextItem = grid[r][cc];
+            if (nextItem && typeof nextItem === 'object' && !Array.isArray(nextItem) && nextItem.sol) {
+              runCells.push({ r: r, c: cc });
+            } else {
+              break;
+            }
+          }
+          if (runCells.length > 0) {
+            hRuns.push({ id: 'h_' + (++hCount), val: hVal, cells: runCells });
+          }
+        }
+      }
+    }
+
+    // 2. 세로 런 찾기
+    for (var c = 0; c < size; c++) {
+      for (var r = 0; r < size; r++) {
+        var item = grid[r][c];
+        if (Array.isArray(item) && item[1] > 0) {
+          var vVal = item[1];
+          var runCells = [];
+          for (var rr = r + 1; rr < size; rr++) {
+            var nextItem = grid[rr][c];
+            if (nextItem && typeof nextItem === 'object' && !Array.isArray(nextItem) && nextItem.sol) {
+              runCells.push({ r: rr, c: c });
+            } else {
+              break;
+            }
+          }
+          if (runCells.length > 0) {
+            vRuns.push({ id: 'v_' + (++vCount), val: vVal, cells: runCells });
+          }
+        }
+      }
+    }
+
+    // 3. 셀별 매핑
+    hRuns.forEach(function (hr) {
+      hr.cells.forEach(function (pos) {
+        var k = pos.r + ',' + pos.c;
+        if (!cellRunMap[k]) cellRunMap[k] = {};
+        cellRunMap[k].hRun = hr;
+      });
+    });
+
+    vRuns.forEach(function (vr) {
+      vr.cells.forEach(function (pos) {
+        var k = pos.r + ',' + pos.c;
+        if (!cellRunMap[k]) cellRunMap[k] = {};
+        cellRunMap[k].vRun = vr;
+      });
+    });
+  }
+
+  // ── 퍼즐 초기화 및 렌더링 ──
+  function initGame(level, changePuzzle) {
+    currentLevel = level || currentLevel;
+    var list = PUZZLES[currentLevel] || PUZZLES.easy;
+
+    if (changePuzzle) {
+      puzzleIndex = (puzzleIndex + 1) % list.length;
+    } else {
+      puzzleIndex = puzzleIndex % list.length;
+    }
+
+    currentPuzzle = list[puzzleIndex];
+    var size = currentPuzzle.size;
+
+    parseRuns(currentPuzzle.grid, size);
+
+    // 사용자 그리드 데이터 초기화
+    userGrid = [];
+    for (var r = 0; r < size; r++) {
+      userGrid[r] = [];
+      for (var c = 0; c < size; c++) {
+        var item = currentPuzzle.grid[r][c];
+        if (item && typeof item === 'object' && !Array.isArray(item) && item.sol) {
+          userGrid[r][c] = {
+            isCell: true,
+            sol: item.sol,
+            val: 0,
+            notes: new Set()
+          };
+        } else {
+          userGrid[r][c] = {
+            isCell: false,
+            val: 0,
+            notes: null
+          };
+        }
+      }
+    }
+
+    selectedCell = null;
+    isGameWon = false;
+    isNoteMode = false;
+    btnToggleNote.classList.remove('on');
+    overlayModal.style.display = 'none';
+
+    // 레벨 버튼 UI 갱신
+    btnDiffEasy.classList.toggle('on', currentLevel === 'easy');
+    btnDiffNormal.classList.toggle('on', currentLevel === 'normal');
+    btnDiffHard.classList.toggle('on', currentLevel === 'hard');
+
+    statusLevelText.textContent = (currentLevel === 'hard') ? '어려움' : (currentLevel === 'normal' ? '보통' : '쉬움');
+    updateBestLine();
+    syncRankTab();
+
+    renderGrid();
+    updateRemainingCount();
+    showTip('빈칸을 누르고 아래 숫자를 채우세요', 'normal');
+    startTimer();
+  }
+
+  // ── 그리드 DOM 렌더링 ──
+  function renderGrid() {
+    var size = currentPuzzle.size;
+    puzzleGridEl.innerHTML = '';
+    puzzleGridEl.setAttribute('data-size', String(size));
+    puzzleGridEl.style.gridTemplateColumns = 'repeat(' + size + ', 1fr)';
+    puzzleGridEl.style.gridTemplateRows = 'repeat(' + size + ', 1fr)';
+
+    for (var r = 0; r < size; r++) {
+      for (var c = 0; c < size; c++) {
+        var cellEl = document.createElement('div');
+        cellEl.className = 'cell';
+        cellEl.setAttribute('data-r', String(r));
+        cellEl.setAttribute('data-c', String(c));
+
+        var item = currentPuzzle.grid[r][c];
+
+        if (item === 0) {
+          // 벽
+          cellEl.classList.add('wall');
+        } else if (Array.isArray(item)) {
+          // 힌트 칸 [h, v]
+          cellEl.classList.add('clue');
+          var h = item[0];
+          var v = item[1];
+          if (v > 0) {
+            var vSpan = document.createElement('span');
+            vSpan.className = 'clue-val clue-v';
+            vSpan.textContent = String(v);
+            cellEl.appendChild(vSpan);
+          }
+          if (h > 0) {
+            var hSpan = document.createElement('span');
+            hSpan.className = 'clue-val clue-h';
+            hSpan.textContent = String(h);
+            cellEl.appendChild(hSpan);
+          }
+        } else if (item && item.sol) {
+          // 입력 빈칸
+          cellEl.classList.add('input-cell');
+          cellEl.setAttribute('role', 'gridcell');
+          cellEl.setAttribute('tabindex', '0');
+
+          var valSpan = document.createElement('span');
+          valSpan.className = 'cell-value';
+          cellEl.appendChild(valSpan);
+
+          var notesDiv = document.createElement('div');
+          notesDiv.className = 'cell-notes';
+          cellEl.appendChild(notesDiv);
+        }
+
+        puzzleGridEl.appendChild(cellEl);
+      }
+    }
+
+    updateGridDisplay();
+  }
+
+  // ── 화면 셀 값 및 상태 갱신 ──
+  function updateGridDisplay() {
+    var size = currentPuzzle.size;
+    var activeRunCells = new Set();
+
+    if (selectedCell) {
+      var k = selectedCell.r + ',' + selectedCell.c;
+      var runs = cellRunMap[k];
+      if (runs) {
+        if (runs.hRun) {
+          runs.hRun.cells.forEach(function (pos) { activeRunCells.add(pos.r + ',' + pos.c); });
+        }
+        if (runs.vRun) {
+          runs.vRun.cells.forEach(function (pos) { activeRunCells.add(pos.r + ',' + pos.c); });
+        }
+      }
+    }
+
+    for (var r = 0; r < size; r++) {
+      for (var c = 0; c < size; c++) {
+        var u = userGrid[r][c];
+        if (!u.isCell) continue;
+
+        var el = puzzleGridEl.querySelector('.cell[data-r="' + r + '"][data-c="' + c + '"]');
+        if (!el) continue;
+
+        var isSelected = (selectedCell && selectedCell.r === r && selectedCell.c === c);
+        var inRun = activeRunCells.has(r + ',' + c);
+
+        el.classList.toggle('active', !!isSelected);
+        el.classList.toggle('highlight-run', inRun && !isSelected);
+
+        var valSpan = el.querySelector('.cell-value');
+        var notesDiv = el.querySelector('.cell-notes');
+
+        if (u.val > 0) {
+          valSpan.textContent = String(u.val);
+          notesDiv.innerHTML = '';
+        } else {
+          valSpan.textContent = '';
+          notesDiv.innerHTML = '';
+          if (u.notes && u.notes.size > 0) {
+            for (var n = 1; n <= 9; n++) {
+              var nSpan = document.createElement('span');
+              nSpan.className = 'note-num';
+              nSpan.textContent = u.notes.has(n) ? String(n) : '';
+              notesDiv.appendChild(nSpan);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // ── 남은 빈칸 수 갱신 ──
+  function updateRemainingCount() {
+    var size = currentPuzzle.size;
+    var remaining = 0;
+    for (var r = 0; r < size; r++) {
+      for (var c = 0; c < size; c++) {
+        if (userGrid[r][c].isCell && userGrid[r][c].val === 0) {
+          remaining++;
+        }
+      }
+    }
+    statusRemaining.textContent = '남은 칸 ' + remaining;
+    return remaining;
+  }
+
+  // ── 팁 메시지 출력 ──
+  function showTip(text, type) {
+    msgTip.textContent = text;
+    msgTip.className = 'msg-tip' + (type === 'err' ? ' err' : (type === 'ok' ? ' ok' : ''));
+  }
+
+  // ── 셀 선택 ──
+  function selectCell(r, c) {
+    if (isGameWon) return;
+    if (r < 0 || r >= currentPuzzle.size || c < 0 || c >= currentPuzzle.size) return;
+    if (!userGrid[r][c].isCell) return;
+
+    selectedCell = { r: r, c: c };
+    updateGridDisplay();
+    playClickSound();
+  }
+
+  // ── 숫자 입력 ──
+  function inputNumber(num) {
+    if (isGameWon || !selectedCell) return;
+    var r = selectedCell.r;
+    var c = selectedCell.c;
+    var cellData = userGrid[r][c];
+
+    if (isNoteMode) {
+      // 메모 모드: 토글
+      cellData.val = 0;
+      if (cellData.notes.has(num)) {
+        cellData.notes.delete(num);
+      } else {
+        cellData.notes.add(num);
+      }
+      playClickSound();
+    } else {
+      // 일반 숫자 입력
+      if (cellData.val === num) {
+        cellData.val = 0; // 같은 숫자 누르면 지우기
+      } else {
+        cellData.val = num;
+        cellData.notes.clear();
+
+        // 스마트 기능: 같은 런의 다른 셀 메모에서 이 숫자 자동 제거
+        var runs = cellRunMap[r + ',' + c];
+        if (runs) {
+          if (runs.hRun) {
+            runs.hRun.cells.forEach(function (pos) {
+              if (userGrid[pos.r][pos.c].notes) userGrid[pos.r][pos.c].notes.delete(num);
+            });
+          }
+          if (runs.vRun) {
+            runs.vRun.cells.forEach(function (pos) {
+              if (userGrid[pos.r][pos.c].notes) userGrid[pos.r][pos.c].notes.delete(num);
+            });
+          }
+        }
+      }
+      playClickSound();
+    }
+
+    updateGridDisplay();
+    var rem = updateRemainingCount();
+
+    // 모든 칸이 채워졌으면 자동 검사
+    if (rem === 0) {
+      checkSolution(true);
+    }
+  }
+
+  // ── 셀 내용 지우기 ──
+  function eraseSelectedCell() {
+    if (isGameWon || !selectedCell) return;
+    var cellData = userGrid[selectedCell.r][selectedCell.c];
+    cellData.val = 0;
+    cellData.notes.clear();
+    updateGridDisplay();
+    updateRemainingCount();
+    playClickSound();
+  }
+
+  // ── 전체 메모 지우기 ──
+  function clearAllNotes() {
+    if (isGameWon) return;
+    var size = currentPuzzle.size;
+    for (var r = 0; r < size; r++) {
+      for (var c = 0; c < size; c++) {
+        if (userGrid[r][c].isCell && userGrid[r][c].notes) {
+          userGrid[r][c].notes.clear();
+        }
+      }
+    }
+    updateGridDisplay();
+    showTip('모든 메모를 지웠어요', 'normal');
+  }
+
+  // ── 정답/오류 확인 ──
+  function checkSolution(isAuto) {
+    if (isGameWon) return;
+
+    var size = currentPuzzle.size;
+    var hasConflict = false;
+    var emptyCount = 0;
+
+    // 모든 셀의 conflict 표시 초기화
+    puzzleGridEl.querySelectorAll('.cell.conflict').forEach(function (el) {
+      el.classList.remove('conflict');
+    });
+
+    // 1. 빈칸 수 확인
+    for (var r = 0; r < size; r++) {
+      for (var c = 0; c < size; c++) {
+        if (userGrid[r][c].isCell && userGrid[r][c].val === 0) {
+          emptyCount++;
+        }
+      }
+    }
+
+    // 2. 가로 런 검사
+    hRuns.forEach(function (hr) {
+      var sum = 0;
+      var seen = {};
+      var allFilled = true;
+      var dupCells = [];
+
+      hr.cells.forEach(function (pos) {
+        var v = userGrid[pos.r][pos.c].val;
+        if (v === 0) {
+          allFilled = false;
+        } else {
+          sum += v;
+          if (seen[v]) {
+            dupCells.push(pos);
+            dupCells.push(seen[v]);
+          } else {
+            seen[v] = pos;
+          }
+        }
+      });
+
+      // 중복 발생
+      if (dupCells.length > 0) {
+        hasConflict = true;
+        dupCells.forEach(function (p) {
+          var el = puzzleGridEl.querySelector('.cell[data-r="' + p.r + '"][data-c="' + p.c + '"]');
+          if (el) el.classList.add('conflict');
+        });
+      }
+
+      // 다 채웠는데 합이 맞지 않음
+      if (allFilled && sum !== hr.val) {
+        hasConflict = true;
+        hr.cells.forEach(function (p) {
+          var el = puzzleGridEl.querySelector('.cell[data-r="' + p.r + '"][data-c="' + p.c + '"]');
+          if (el) el.classList.add('conflict');
+        });
+      }
+    });
+
+    // 3. 세로 런 검사
+    vRuns.forEach(function (vr) {
+      var sum = 0;
+      var seen = {};
+      var allFilled = true;
+      var dupCells = [];
+
+      vr.cells.forEach(function (pos) {
+        var v = userGrid[pos.r][pos.c].val;
+        if (v === 0) {
+          allFilled = false;
+        } else {
+          sum += v;
+          if (seen[v]) {
+            dupCells.push(pos);
+            dupCells.push(seen[v]);
+          } else {
+            seen[v] = pos;
+          }
+        }
+      });
+
+      // 중복 발생
+      if (dupCells.length > 0) {
+        hasConflict = true;
+        dupCells.forEach(function (p) {
+          var el = puzzleGridEl.querySelector('.cell[data-r="' + p.r + '"][data-c="' + p.c + '"]');
+          if (el) el.classList.add('conflict');
+        });
+      }
+
+      // 다 채웠는데 합이 맞지 않음
+      if (allFilled && sum !== vr.val) {
+        hasConflict = true;
+        vr.cells.forEach(function (p) {
+          var el = puzzleGridEl.querySelector('.cell[data-r="' + p.r + '"][data-c="' + p.c + '"]');
+          if (el) el.classList.add('conflict');
+        });
+      }
+    });
+
+    if (hasConflict) {
+      showTip('빨간색으로 표시된 칸의 합이나 중복을 다시 확인해 보세요!', 'err');
+    } else if (emptyCount > 0) {
+      if (!isAuto) {
+        showTip('지금까지 채운 칸은 모두 규칙에 맞아요! (남은 ' + emptyCount + '칸)', 'ok');
+      }
+    } else {
+      // 모든 칸이 정확하게 채워짐 -> 승리!
+      handleGameWin();
+    }
+  }
+
+  // ── 게임 클리어 처리 ──
+  function handleGameWin() {
+    isGameWon = true;
+    stopTimer();
+    playSuccessSound();
+
+    // 점수 계산 공식: (2000 - 걸린초) * 난이도배수, 최소 100, 최대 99999999
+    var multiplier = (currentLevel === 'hard') ? 3 : (currentLevel === 'normal' ? 2 : 1);
+    var base = 2000 - timerSeconds;
+    var score = Math.max(100, Math.min(99999999, Math.round(base * multiplier)));
+
+    var prevBest = getBestScore(currentLevel);
+    var isNewBest = (prevBest === null || score > prevBest);
+
+    if (isNewBest) {
+      setBestScore(currentLevel, score);
+    }
+    updateBestLine();
+
+    // 순위표 카드에 즉시 반영되도록 탭 갱신
+    syncRankTab();
+
+    // 축하 모달 내용 작성
+    modalTimeLine.textContent = '걸린 시간: ' + formatTime(timerSeconds) + ' (' + timerSeconds + '초)';
+    modalScoreLine.textContent = score.toLocaleString('ko-KR') + '점';
+    modalBestNote.textContent = isNewBest ? '🎉 최고 기록을 달성했어요!' : ('내 최고 기록: ' + (prevBest ? prevBest.toLocaleString('ko-KR') + '점' : '-'));
+
+    overlayModal.style.display = 'flex';
+    showTip('🎉 완벽해요! 모든 숫자 합을 맞췄어요!', 'ok');
+  }
+
+  // ── 이벤트 리스너 ──
+
+  // 난이도 단추
+  btnDiffEasy.addEventListener('click', function () {
+    if (currentLevel !== 'easy') initGame('easy', false);
+  });
+  btnDiffNormal.addEventListener('click', function () {
+    if (currentLevel !== 'normal') initGame('normal', false);
+  });
+  btnDiffHard.addEventListener('click', function () {
+    if (currentLevel !== 'hard') initGame('hard', false);
+  });
+
+  // 그리드 터치 및 클릭
+  puzzleGridEl.addEventListener('click', function (e) {
+    var cellEl = e.target.closest('.input-cell');
+    if (!cellEl) return;
+    var r = parseInt(cellEl.getAttribute('data-r'), 10);
+    var c = parseInt(cellEl.getAttribute('data-c'), 10);
+    selectCell(r, c);
+  });
+
+  // 숫자 버튼 (1~9)
+  document.querySelectorAll('.btn-num[data-num]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var n = parseInt(this.getAttribute('data-num'), 10);
+      inputNumber(n);
+    });
+  });
+
+  // 지우기 버튼
+  btnErase.addEventListener('click', function () {
+    eraseSelectedCell();
+  });
+
+  // 메모 모드 토글
+  btnToggleNote.addEventListener('click', function () {
+    isNoteMode = !isNoteMode;
+    btnToggleNote.classList.toggle('on', isNoteMode);
+    showTip(isNoteMode ? '✏️ 메모 모드가 켜졌어요 (후보 숫자를 적으세요)' : '일반 입력 모드입니다', 'normal');
+    playClickSound();
+  });
+
+  // 전체 메모 지우기
+  btnClearNotes.addEventListener('click', function () {
+    clearAllNotes();
+  });
+
+  // 확인 버튼
+  btnCheck.addEventListener('click', function () {
+    checkSolution(false);
+  });
+
+  // 다시 하기
+  btnRestart.addEventListener('click', function () {
+    initGame(currentLevel, false);
+  });
+
+  // 새 문제
+  btnNewPuzzle.addEventListener('click', function () {
+    initGame(currentLevel, true);
+  });
+
+  // 모달 안 다시 하기
+  btnModalRestart.addEventListener('click', function () {
+    overlayModal.style.display = 'none';
+    initGame(currentLevel, false);
+  });
+
+  // 모달 안 순위표 올리기 바로가기 (#btnOverlayRank)
+  btnOverlayRank.addEventListener('click', function () {
+    overlayModal.style.display = 'none';
+    syncRankTab();
+
+    // 순위표 카드로 부드럽게 스크롤
+    var rankSec = document.querySelector('.zw-rank');
+    if (rankSec) {
+      rankSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      rankSec.classList.add('flash');
+      setTimeout(function () { rankSec.classList.remove('flash'); }, 1800);
+      setTimeout(function () {
+        var nameInput = rankSec.querySelector('.rk-name');
+        if (nameInput) {
+          try { nameInput.focus({ preventScroll: true }); } catch (e) {}
+        }
+      }, 450);
+    } else {
+      var jumpBtn = document.querySelector('.zw-rk-jump');
+      if (jumpBtn) jumpBtn.click();
+    }
+  });
+
+  // 키보드 조작
+  window.addEventListener('keydown', function (e) {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) {
+      return;
+    }
+
+    if (e.key >= '1' && e.key <= '9') {
+      inputNumber(parseInt(e.key, 10));
+    } else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') {
+      eraseSelectedCell();
+    } else if (e.key === 'n' || e.key === 'N') {
+      btnToggleNote.click();
+    } else if (e.key === 'c' || e.key === 'C' || e.key === ' ') {
+      e.preventDefault();
+      checkSolution(false);
+    } else if (selectedCell) {
+      var r = selectedCell.r;
+      var c = selectedCell.c;
+      var size = currentPuzzle.size;
+
+      if (e.key === 'ArrowUp') {
+        for (var rr = r - 1; rr >= 0; rr--) {
+          if (userGrid[rr][c].isCell) { selectCell(rr, c); break; }
+        }
+      } else if (e.key === 'ArrowDown') {
+        for (var rr = r + 1; rr < size; rr++) {
+          if (userGrid[rr][c].isCell) { selectCell(rr, c); break; }
+        }
+      } else if (e.key === 'ArrowLeft') {
+        for (var cc = c - 1; cc >= 0; cc--) {
+          if (userGrid[r][cc].isCell) { selectCell(r, cc); break; }
+        }
+      } else if (e.key === 'ArrowRight') {
+        for (var cc = c + 1; cc < size; cc++) {
+          if (userGrid[r][cc].isCell) { selectCell(r, cc); break; }
+        }
+      }
+    }
+  });
+
+  // ── 시작 실행 ──
+  initGame('easy', false);
+
+  // 순위표가 비동기로 로드될 때 탭 맞춰주기
+  setTimeout(syncRankTab, 300);
+  setTimeout(syncRankTab, 1000);
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="다른 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/brick-breaker/">벽돌 깨기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/hanoi-tower/">하노이의 탑</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/four-in-row/">4목 맞추기</a> — 컴퓨터와 4개 먼저 잇기</li><li><a href="/water-sort/">물 정렬</a> — 색깔별로 물을 병에 모으기</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/klondike-solitaire/">솔리테어</a> — 카드를 순서대로 쌓아 완성하기</li><li><a href="/box-push/">상자 밀기</a> — 상자를 목표 칸으로 밀기</li><li><a href="/pipe-connect/">파이프 잇기</a> — 돌려서 물길 연결하기</li><li><a href="/checkers-8/">체커</a> — 컴퓨터와 체커 한 판</li><li><a href="/fleet-hunt/">함대 맞히기</a> — 좌표를 찍어 상대 함대 찾기</li><li><a href="/baduk-9/">바둑 9줄</a> — 9줄 판에서 컴퓨터와 바둑 한 판</li><li><a href="/janggi-mini/">장기</a> — 컴퓨터와 장기 한 판</li><li><a href="/gonu/">고누</a> — 말 3개를 한 줄로 모으기</li><li><a href="/mancala/">만칼라</a> — 구슬을 나눠 담아 곳간 채우기</li><li><a href="/mini-chess/">미니 체스</a> — 6×6 판의 작은 체스</li><li><a href="/freecell-solitaire/">프리셀</a> — 임시 칸을 써서 카드 쌓기</li><li><a href="/domino-chain/">도미노</a> — 숫자를 맞춰 도미노 잇기</li><li><a href="/peg-jump/">페그 솔리테어</a> — 구슬을 뛰어넘어 하나만 남기기</li><li><a href="/tangram-seven/">칠교</a> — 일곱 조각으로 모양 맞추기</li><li><a href="/dot-box-land/">점 잇기 땅따먹기</a> — 선을 그어 네모 땅 차지하기</li><li><a href="/nonogram/">네모 로직</a> — 숫자 힌트로 숨은 그림 찾기</li><li><a href="/binary-fill/">0과 1 채우기</a> — 규칙대로 0과 1 채우기</li><li><a href="/sum-fill/">숫자 합 맞추기</a> — 가로세로 합에 맞게 숫자 채우기</li><li><a href="/word-hangman/">글자 맞히기</a> — 글자를 하나씩 찍어 단어 맞히기</li><li><a href="/word-chain/">끝말잇기</a> — 컴퓨터와 끝말잇기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li><li><a href="/goblin/">고블린 성장기</a> — 선을 이어 고블린 군대 키우기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>
