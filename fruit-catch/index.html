@@ -1,0 +1,1484 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>과일 받기 무료 게임 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 즐기는 무료 과일 받기 게임. 떨어지는 과일을 바구니로 받고 폭탄을 피해 최고 점수 순위표에 도전해 보세요.">
+<link rel="canonical" href="https://jwapyonara.com/fruit-catch/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="과일 받기 무료 게임 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 즐기는 무료 과일 받기 게임. 떨어지는 과일을 바구니로 받고 폭탄을 피해 최고 점수 순위표에 도전해 보세요.">
+<meta property="og:url" content="https://jwapyonara.com/fruit-catch/">
+<meta property="og:site_name" content="좌표나라">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "과일 받기",
+  "url": "https://jwapyonara.com/fruit-catch/",
+  "description": "바구니를 좌우로 움직여 떨어지는 과일을 받는 무료 웹 게임. 폭탄을 피하고 과일을 연속으로 받아 최고 점수를 기록해 보세요.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript. Requires HTML5."
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 (판 위) */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 바 */
+.game-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+}
+.game-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1.2;
+  text-align: left;
+  white-space: nowrap;
+}
+.game-status-mid {
+  color: #ffffff;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+.game-status-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  flex: 1;
+}
+.life-heart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #e53935;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.life-heart.off {
+  color: #636366;
+  opacity: 0.4;
+  transform: scale(0.85);
+}
+.game-best-line {
+  font-size: 13px;
+  color: var(--sub, #8e8e93);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 캔버스 감싸개 */
+.game-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 12px;
+  aspect-ratio: 3 / 4;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #181e2b;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+  touch-action: none;
+}
+
+/* 덮개 (시작 및 결과 창) */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 22, 32, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 24px;
+  text-align: center;
+  z-index: 10;
+}
+.canvas-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 8px;
+  color: #ffd60a;
+}
+.canvas-overlay p {
+  font-size: 15px;
+  margin: 0 0 16px;
+  color: #e5e5ea;
+  max-width: 290px;
+  line-height: 1.45;
+}
+.overlay-stats {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 12px 18px;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 260px;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: left;
+}
+.overlay-stats div {
+  display: flex;
+  justify-content: space-between;
+}
+.overlay-stats b {
+  color: #ffd60a;
+}
+.overlay-stats .new-best {
+  color: #4ade80;
+  font-weight: 800;
+  text-align: center;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.2);
+}
+.overlay-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 260px;
+}
+.canvas-overlay .btn-start {
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  background: var(--red, #1b64da);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  min-height: 50px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.canvas-overlay .btn-start:active {
+  opacity: 0.85;
+}
+.btn-overlay-rank {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  background: var(--card, #2c2c2e);
+  color: #ffd60a;
+  border: 1.5px solid #ffd60a;
+  border-radius: 12px;
+  padding: 12px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.btn-overlay-rank:active {
+  background: rgba(255, 214, 10, 0.15);
+}
+
+/* 제어 단추 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+}
+.btn-sound {
+  background: var(--card, #fff);
+  border: 1.5px solid var(--line, #e5e5ea);
+  color: var(--ink, #1c1c1e);
+}
+.btn-sound:active {
+  background: var(--soft, #f2f2f7);
+}
+.btn-reset {
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #3a3a3c;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>과일 받기 한 판,<br>신선한 과일을 바구니로 받아 보세요</h1>
+  <p class="lead">바구니를 좌우로 움직여 과일을 받고 폭탄을 피하세요. 가입 없이 바로 시작해요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="game-status-bar">
+      <div class="game-status-left" id="statusScore">점수 0</div>
+      <div class="game-status-mid" id="statusCombo">연속 0</div>
+      <div class="game-status-right" id="statusLives" aria-label="남은 생명">
+        <span class="life-heart" id="heart1"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></span>
+        <span class="life-heart" id="heart2"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></span>
+        <span class="life-heart" id="heart3"><svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></span>
+      </div>
+    </div>
+    <div class="game-best-line" id="statusBest"></div>
+
+    <div class="game-canvas-wrap" id="canvasWrap">
+      <canvas id="gameCanvas" width="390" height="520"></canvas>
+      <div class="canvas-overlay" id="overlayBox">
+        <h2 id="overlayTitle">과일 받기</h2>
+        <p id="overlayDesc">쉬움으로 시작해요</p>
+        <div id="overlayStats" style="display:none;" class="overlay-stats"></div>
+        <div class="overlay-btns">
+          <button type="button" class="btn-start" id="btnStartGame">시작</button>
+          <button type="button" class="btn-overlay-rank" id="btnOverlayRank" style="display:none;">🏆 순위표 올리기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-sound" id="btnSound">소리 켬</button>
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:8px;">
+      💡 화면을 손가락으로 누른 채 좌우로 문지르거나, PC에서는 마우스와 키보드(←, →)로 바구니를 움직입니다.
+    </p>
+  </section>
+
+  <p class="note">과일을 놓치거나 폭탄을 받으면 생명이 줄어들며, 브라우저 안에서만 실행됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>과일 받기 규칙:</b> 하늘에서 떨어지는 과일을 바구니에 담아 점수를 모으는 게임입니다. 시간이 지날수록 과일이 더 빠르고 촘촘하게 떨어집니다.</li>
+      <li><b>조작 방법:</b> 스마트폰에서는 화면을 터치하여 좌우로 드래그하면 바구니가 손가락을 따라 이동합니다. PC에서는 마우스 이동 또는 키보드 좌우 방향키(←, →), A·D 키로 움직입니다.</li>
+      <li><b>생명(기회 3개):</b> 폭탄(검은 구체)을 받거나, 과일을 놓쳐서 바닥으로 떨어지면 생명이 1개씩 깎입니다. 생명이 0이 되면 게임이 끝납니다.</li>
+      <li><b>연속 받기(콤보):</b> 과일을 놓치지 않고 연속으로 받으면 콤보가 쌓여 추가 보너스 점수를 크게 획득합니다. 실수를 하면 콤보가 0으로 초기화됩니다.</li>
+      <li><b>난이도 배수:</b> 쉬움(점수 1배), 보통(점수 2배), 어려움(점수 3배) 단계가 있으며, 난이도가 높을수록 떨어지는 속도가 빠르고 폭탄이 자주 나타납니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>게임판 위에서 쉬움·보통·어려움 중 원하는 난이도를 고릅니다.</li>
+      <li>'시작' 버튼을 누르면 위에서 다양한 과일과 폭탄이 떨어집니다.</li>
+      <li>바구니를 민첩하게 움직여 과일만 골라 담고, 검은 폭탄은 피해 주세요.</li>
+      <li>과일을 연속으로 받을수록 콤보 점수가 눈덩이처럼 불어나 고득점을 노릴 수 있습니다.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>출퇴근길이나 나른한 오후, 가입이나 앱 설치 없이 스마트폰과 PC에서 1~2분 동안 가볍게 손가락과 반사신경을 깨우고 싶을 때 즐기기 좋습니다.</p>
+    <h2>알아 두면 좋은 고득점 비법</h2>
+    <dl>
+      <dt>콤보 유지가 핵심</dt>
+      <dd>과일 하나를 받는 기본 점수보다 콤보가 쌓였을 때 주어지는 연속 보너스 점수가 훨씬 큽니다. 무리해서 멀리 있는 과일을 쫓아가다 놓치기보다는 안전하게 하나씩 확실히 담는 것이 유리합니다.</dd>
+      <dt>폭탄은 바닥에 그냥 떨어뜨리기</dt>
+      <dd>과일은 놓치면 생명이 줄어들지만, 폭탄은 바닥에 떨어져도 생명이 깎이지 않습니다. 폭탄이 떨어질 때는 바구니를 멀리 치워두세요.</dd>
+      <dt>수박 보너스</dt>
+      <dd>큼직한 수박 조각은 일반 과일보다 2배 높은 기본 점수를 줍니다. 수박이 보이면 놓치지 말고 꼭 받아보세요.</dd>
+      <dt>최고 점수 안전 저장</dt>
+      <dd>난이도별 최고 점수는 브라우저에 안전하게 저장되며, 게임이 끝난 뒤 순위표에 내 닉네임과 함께 기록을 등록할 수 있습니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>난이도마다 어떤 점이 다른가요?</summary>
+      <p>쉬움은 과일이 비교적 여유 있게 떨어지고 폭탄 비율이 낮아 누구나 편하게 즐길 수 있습니다. 보통과 어려움은 과일의 낙하 속도가 훨씬 빠르고 폭탄이 섞여 나오는 빈도가 높아 고도의 집중력이 필요하지만, 점수 배수가 2배·3배로 높아 순위표 상위권을 노리기에 좋습니다.</p>
+    </details>
+    <details>
+      <summary>게임 소리를 끌 수 있나요?</summary>
+      <p>게임판 아래의 '소리 켬/끔' 버튼을 누르면 언제든지 효과음을 끄거나 켤 수 있으며, 설정 상태는 다음 접속 때도 유지됩니다.</p>
+    </details>
+    <details>
+      <summary>점수를 순위표에 올리려면 어떻게 하나요?</summary>
+      <p>게임이 끝나면 결과 창에 나타나는 '🏆 순위표 올리기' 버튼을 누르시면 화면 아래 순위표로 바로 이동하여 닉네임을 입력하고 내 점수를 자랑할 수 있습니다.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // DOM 요소
+  var canvas = document.getElementById('gameCanvas');
+  var ctx = canvas.getContext('2d');
+  var canvasWrap = document.getElementById('canvasWrap');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var overlayStats = document.getElementById('overlayStats');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var btnSound = document.getElementById('btnSound');
+  var btnRestart = document.getElementById('btnRestart');
+  var statusScore = document.getElementById('statusScore');
+  var statusCombo = document.getElementById('statusCombo');
+  var heart1 = document.getElementById('heart1');
+  var heart2 = document.getElementById('heart2');
+  var heart3 = document.getElementById('heart3');
+  var statusBest = document.getElementById('statusBest');
+
+  // 논리 해상도 (세로형 390 x 520)
+  var LOGICAL_W = 390;
+  var LOGICAL_H = 520;
+
+  // 게임 상태 변수
+  var gameState = 'ready'; // 'ready', 'playing', 'gameover'
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  var score = 0;
+  var combo = 0;
+  var maxCombo = 0;
+  var totalCaught = 0;
+  var lives = 3;
+  var gameTime = 0;
+  var lastFrameTime = 0;
+  var animationFrameId = null;
+  var spawnTimer = 0;
+  var screenShake = 0;
+
+  // 최고 점수 (로컬스토리지)
+  var bestEasy = 0;
+  var bestNormal = 0;
+  var bestHard = 0;
+
+  // 효과음 설정
+  var soundEnabled = true;
+  var audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      var AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        audioCtx = new AudioContext();
+      }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  function playSound(type) {
+    if (!soundEnabled) return;
+    initAudio();
+    if (!audioCtx) return;
+
+    try {
+      var now = audioCtx.currentTime;
+      if (type === 'catch') {
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === 'combo') {
+        var osc2 = audioCtx.createOscillator();
+        var gain2 = audioCtx.createGain();
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(660, now);
+        osc2.frequency.setValueAtTime(880, now + 0.04);
+        osc2.frequency.setValueAtTime(1100, now + 0.08);
+        gain2.gain.setValueAtTime(0.22, now);
+        gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now);
+        osc2.stop(now + 0.14);
+      } else if (type === 'miss') {
+        var oscM = audioCtx.createOscillator();
+        var gainM = audioCtx.createGain();
+        oscM.type = 'sawtooth';
+        oscM.frequency.setValueAtTime(240, now);
+        oscM.frequency.exponentialRampToValueAtTime(110, now + 0.15);
+        gainM.gain.setValueAtTime(0.2, now);
+        gainM.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        oscM.connect(gainM);
+        gainM.connect(audioCtx.destination);
+        oscM.start(now);
+        oscM.stop(now + 0.15);
+      } else if (type === 'bomb') {
+        var oscB = audioCtx.createOscillator();
+        var gainB = audioCtx.createGain();
+        oscB.type = 'square';
+        oscB.frequency.setValueAtTime(160, now);
+        oscB.frequency.exponentialRampToValueAtTime(35, now + 0.28);
+        gainB.gain.setValueAtTime(0.3, now);
+        gainB.gain.exponentialRampToValueAtTime(0.01, now + 0.28);
+        oscB.connect(gainB);
+        gainB.connect(audioCtx.destination);
+        oscB.start(now);
+        oscB.stop(now + 0.28);
+      } else if (type === 'over') {
+        var oscO = audioCtx.createOscillator();
+        var gainO = audioCtx.createGain();
+        oscO.type = 'sine';
+        oscO.frequency.setValueAtTime(420, now);
+        oscO.frequency.setValueAtTime(350, now + 0.12);
+        oscO.frequency.setValueAtTime(280, now + 0.24);
+        oscO.frequency.setValueAtTime(180, now + 0.38);
+        gainO.gain.setValueAtTime(0.25, now);
+        gainO.gain.exponentialRampToValueAtTime(0.01, now + 0.55);
+        oscO.connect(gainO);
+        gainO.connect(audioCtx.destination);
+        oscO.start(now);
+        oscO.stop(now + 0.55);
+      }
+    } catch (e) {}
+  }
+
+  // 바구니 객체
+  var basket = {
+    x: LOGICAL_W / 2,
+    y: LOGICAL_H - 42,
+    width: 86,
+    height: 28,
+    speed: 420
+  };
+
+  // 키보드 상태
+  var keys = {
+    left: false,
+    right: false
+  };
+
+  // 떨어지는 아이템 목록 및 효과 목록
+  var items = [];
+  var particles = [];
+  var floatingTexts = [];
+
+  // 난이도 설정 반환
+  function getLevelConfig() {
+    if (currentLevel === 'hard') {
+      return {
+        multiplier: 3,
+        baseSpeed: 175,
+        maxSpeed: 420,
+        speedGrowth: 2.2,
+        spawnIntervalBase: 0.65,
+        spawnIntervalMin: 0.32,
+        bombChance: 0.26
+      };
+    } else if (currentLevel === 'normal') {
+      return {
+        multiplier: 2,
+        baseSpeed: 140,
+        maxSpeed: 340,
+        speedGrowth: 1.6,
+        spawnIntervalBase: 0.82,
+        spawnIntervalMin: 0.42,
+        bombChance: 0.18
+      };
+    } else {
+      return {
+        multiplier: 1,
+        baseSpeed: 110,
+        maxSpeed: 270,
+        speedGrowth: 1.1,
+        spawnIntervalBase: 1.05,
+        spawnIntervalMin: 0.52,
+        bombChance: 0.12
+      };
+    }
+  }
+
+  // 로컬 스토리지 읽기
+  function loadStorage() {
+    try {
+      var rawE = localStorage.getItem('zw_fruit-catch_best_easy');
+      var rawN = localStorage.getItem('zw_fruit-catch_best_normal');
+      var rawH = localStorage.getItem('zw_fruit-catch_best_hard');
+      if (rawE && !isNaN(parseInt(rawE, 10))) bestEasy = Math.min(parseInt(rawE, 10), 99999999);
+      if (rawN && !isNaN(parseInt(rawN, 10))) bestNormal = Math.min(parseInt(rawN, 10), 99999999);
+      if (rawH && !isNaN(parseInt(rawH, 10))) bestHard = Math.min(parseInt(rawH, 10), 99999999);
+
+      var savedLevel = localStorage.getItem('zw_fruit-catch_level');
+      if (savedLevel === 'hard' || savedLevel === 'normal' || savedLevel === 'easy') {
+        currentLevel = savedLevel;
+      } else {
+        currentLevel = 'easy';
+      }
+
+      var savedSound = localStorage.getItem('zw_fruit-catch_sound');
+      if (savedSound === '0') {
+        soundEnabled = false;
+      } else {
+        soundEnabled = true;
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+    updateStatusDisplay();
+    updateSoundButton();
+  }
+
+  // 상태 줄 및 최고 기록 표시 갱신
+  function updateStatusDisplay() {
+    statusScore.textContent = '점수 ' + score.toLocaleString('ko-KR');
+    statusCombo.textContent = '연속 ' + combo;
+
+    if (heart1 && heart2 && heart3) {
+      heart1.className = lives >= 1 ? 'life-heart' : 'life-heart off';
+      heart2.className = lives >= 2 ? 'life-heart' : 'life-heart off';
+      heart3.className = lives >= 3 ? 'life-heart' : 'life-heart off';
+    }
+
+    var bestTxt = '최고 기록 · 쉬움 ' + (bestEasy > 0 ? bestEasy.toLocaleString('ko-KR') + '점' : '-')
+      + ' · 보통 ' + (bestNormal > 0 ? bestNormal.toLocaleString('ko-KR') + '점' : '-')
+      + ' · 어려움 ' + (bestHard > 0 ? bestHard.toLocaleString('ko-KR') + '점' : '-');
+    statusBest.textContent = bestTxt;
+  }
+
+  // 소리 버튼 텍스트 갱신
+  function updateSoundButton() {
+    btnSound.textContent = soundEnabled ? '소리 켬' : '소리 끔';
+  }
+
+  // 난이도 단추 상태 갱신
+  function updateLevelButtons() {
+    btnDiffEasy.classList.remove('on');
+    btnDiffNormal.classList.remove('on');
+    btnDiffHard.classList.remove('on');
+
+    if (currentLevel === 'hard') {
+      btnDiffHard.classList.add('on');
+    } else if (currentLevel === 'normal') {
+      btnDiffNormal.classList.add('on');
+    } else {
+      btnDiffEasy.classList.add('on');
+    }
+  }
+
+  // 덮개 설명 문구 갱신
+  function updateOverlayDesc() {
+    var txt = '쉬움으로 시작해요';
+    if (currentLevel === 'normal') txt = '보통으로 시작해요';
+    else if (currentLevel === 'hard') txt = '어려움으로 시작해요';
+    overlayDesc.textContent = txt;
+  }
+
+  // 순위표 카드(rank.js)의 난이도 탭 동기화
+  function syncRankTab() {
+    try {
+      var i = currentLevel === 'hard' ? 2 : (currentLevel === 'normal' ? 1 : 0);
+      if (typeof ZW !== 'undefined') {
+        ZW.rankPick = i;
+      }
+      var b = document.querySelector('.rk-tabs button[data-i="' + i + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  // 최고 점수 저장 (최대 99999999로 clamp)
+  function saveBestScore(val) {
+    var clamped = Math.min(Math.max(0, parseInt(val, 10) || 0), 99999999);
+    var key = 'zw_fruit-catch_best_' + currentLevel;
+    var isNew = false;
+    try {
+      var prev = 0;
+      if (currentLevel === 'easy') prev = bestEasy;
+      else if (currentLevel === 'normal') prev = bestNormal;
+      else if (currentLevel === 'hard') prev = bestHard;
+
+      if (clamped > prev) {
+        localStorage.setItem(key, String(clamped));
+        isNew = true;
+        if (currentLevel === 'easy') bestEasy = clamped;
+        else if (currentLevel === 'normal') bestNormal = clamped;
+        else if (currentLevel === 'hard') bestHard = clamped;
+      }
+    } catch (e) {}
+    updateStatusDisplay();
+    return isNew;
+  }
+
+  // 준비 상태로 되돌리기
+  function resetToReadyState() {
+    gameState = 'ready';
+    score = 0;
+    combo = 0;
+    maxCombo = 0;
+    totalCaught = 0;
+    lives = 3;
+    gameTime = 0;
+    items = [];
+    particles = [];
+    floatingTexts = [];
+    screenShake = 0;
+    basket.x = LOGICAL_W / 2;
+
+    overlayBox.style.display = 'flex';
+    overlayTitle.textContent = '과일 받기';
+    updateOverlayDesc();
+    overlayStats.style.display = 'none';
+    btnStartGame.textContent = '시작';
+    btnOverlayRank.style.display = 'none';
+
+    updateStatusDisplay();
+    renderStaticReady();
+  }
+
+  // 난이도 변경 처리
+  function setLevel(lvl) {
+    if (lvl === currentLevel) return;
+    currentLevel = (lvl === 'hard') ? 'hard' : ((lvl === 'normal') ? 'normal' : 'easy');
+    try {
+      localStorage.setItem('zw_fruit-catch_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    resetToReadyState();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // 소리 버튼 클릭
+  btnSound.addEventListener('click', function () {
+    soundEnabled = !soundEnabled;
+    try {
+      localStorage.setItem('zw_fruit-catch_sound', soundEnabled ? '1' : '0');
+    } catch (e) {}
+    updateSoundButton();
+    if (soundEnabled) {
+      playSound('catch');
+    }
+  });
+
+  // 새 게임 시작
+  function startNewGame() {
+    initAudio();
+    gameState = 'playing';
+    score = 0;
+    combo = 0;
+    maxCombo = 0;
+    totalCaught = 0;
+    lives = 3;
+    gameTime = 0;
+    spawnTimer = 0;
+    items = [];
+    particles = [];
+    floatingTexts = [];
+    screenShake = 0;
+    basket.x = LOGICAL_W / 2;
+
+    overlayBox.style.display = 'none';
+    updateStatusDisplay();
+
+    lastFrameTime = performance.now();
+    if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  // 게임 오버 처리
+  function gameOver() {
+    gameState = 'gameover';
+    playSound('over');
+
+    var isNewBest = saveBestScore(score);
+
+    overlayBox.style.display = 'flex';
+    overlayTitle.textContent = '게임 종료';
+    overlayDesc.textContent = (currentLevel === 'hard' ? '어려움' : (currentLevel === 'normal' ? '보통' : '쉬움')) + ' 난이도 완료!';
+
+    var statsHtml = '<div><span>최종 점수</span><b>' + score.toLocaleString('ko-KR') + '점</b></div>'
+      + '<div><span>받은 과일 수</span><b>' + totalCaught + '개</b></div>'
+      + '<div><span>최대 연속 받기</span><b>' + maxCombo + '연속</b></div>';
+    if (isNewBest) {
+      statsHtml += '<div class="new-best">🎉 최고 기록을 경신했어요!</div>';
+    }
+    overlayStats.innerHTML = statsHtml;
+    overlayStats.style.display = 'block';
+
+    btnStartGame.textContent = '다시 하기';
+    btnOverlayRank.style.display = 'block';
+
+    updateStatusDisplay();
+  }
+
+  // 순위표 올리기 단추 클릭 (오목 및 순위표 표준)
+  btnOverlayRank.addEventListener('click', function () {
+    var jump = document.querySelector('.zw-rk-jump');
+    if (jump && jump.style.display !== 'none') {
+      jump.click();
+    } else {
+      var rankSec = document.querySelector('.zw-rank');
+      if (rankSec) {
+        rankSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        rankSec.classList.add('flash');
+        setTimeout(function () { rankSec.classList.remove('flash'); }, 1800);
+        var nameInput = rankSec.querySelector('.rk-name');
+        if (nameInput) {
+          setTimeout(function () {
+            try { nameInput.focus({ preventScroll: true }); } catch (err) {}
+          }, 450);
+        }
+      }
+    }
+  });
+
+  // 다시 하기 단추 클릭
+  btnRestart.addEventListener('click', function () {
+    startNewGame();
+  });
+  btnStartGame.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  // 새로운 아이템 스폰
+  function spawnItem() {
+    var cfg = getLevelConfig();
+    var isBomb = Math.random() < cfg.bombChance;
+    var x = 32 + Math.random() * (LOGICAL_W - 64);
+    var y = -26;
+
+    var speed = Math.min(cfg.maxSpeed, cfg.baseSpeed + gameTime * cfg.speedGrowth);
+
+    if (isBomb) {
+      items.push({
+        type: 'bomb',
+        x: x,
+        y: y,
+        radius: 18,
+        speed: speed * 1.05,
+        tick: 0
+      });
+    } else {
+      // 과일 5종 중 선택
+      var rand = Math.random();
+      var fruitType = 'apple';
+      var r = 18;
+      var speedMod = 1.0;
+
+      if (rand < 0.30) {
+        fruitType = 'apple';
+        r = 17;
+      } else if (rand < 0.55) {
+        fruitType = 'orange';
+        r = 18;
+      } else if (rand < 0.75) {
+        fruitType = 'banana';
+        r = 19;
+        speedMod = 1.08;
+      } else if (rand < 0.90) {
+        fruitType = 'grape';
+        r = 17;
+        speedMod = 1.15;
+      } else {
+        fruitType = 'watermelon';
+        r = 23;
+        speedMod = 0.92;
+      }
+
+      items.push({
+        type: fruitType,
+        x: x,
+        y: y,
+        radius: r,
+        speed: speed * speedMod,
+        wobble: Math.random() * Math.PI * 2,
+        isWobble: (fruitType === 'banana')
+      });
+    }
+  }
+
+  // 파티클 생성
+  function createParticles(x, y, color, count) {
+    for (var i = 0; i < count; i++) {
+      var angle = Math.random() * Math.PI * 2;
+      var spd = 60 + Math.random() * 160;
+      particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * spd,
+        vy: Math.sin(angle) * spd,
+        color: color,
+        radius: 2 + Math.random() * 3,
+        alpha: 1.0,
+        life: 0.35 + Math.random() * 0.25
+      });
+    }
+  }
+
+  // 플로팅 텍스트 생성
+  function addFloatingText(x, y, text, color) {
+    floatingTexts.push({
+      x: x,
+      y: y,
+      text: text,
+      color: color,
+      alpha: 1.0,
+      vy: -55
+    });
+  }
+
+  // 물리 및 게임 루프 업데이트
+  function update(dt) {
+    if (gameState !== 'playing') return;
+
+    gameTime += dt;
+    var cfg = getLevelConfig();
+
+    // 화면 흔들림 감쇠
+    if (screenShake > 0) {
+      screenShake = Math.max(0, screenShake - dt * 25);
+    }
+
+    // 키보드 조작 이동
+    if (keys.left) {
+      basket.x -= basket.speed * dt;
+    }
+    if (keys.right) {
+      basket.x += basket.speed * dt;
+    }
+    basket.x = Math.max(basket.width / 2, Math.min(LOGICAL_W - basket.width / 2, basket.x));
+
+    // 아이템 스폰 관리
+    var currentInterval = Math.max(cfg.spawnIntervalMin, cfg.spawnIntervalBase - gameTime * 0.012);
+    spawnTimer += dt;
+    if (spawnTimer >= currentInterval) {
+      spawnTimer = 0;
+      spawnItem();
+    }
+
+    // 아이템 이동 및 충돌 판정
+    for (var i = items.length - 1; i >= 0; i--) {
+      var it = items[i];
+      it.y += it.speed * dt;
+
+      if (it.isWobble) {
+        it.wobble += dt * 6;
+        it.x += Math.sin(it.wobble) * 45 * dt;
+        it.x = Math.max(it.radius, Math.min(LOGICAL_W - it.radius, it.x));
+      }
+
+      if (it.type === 'bomb') {
+        it.tick = (it.tick + 1) % 60;
+      }
+
+      // 바구니 충돌 판정 (바구니 윗단 부근)
+      var basketTop = basket.y - basket.height / 2;
+      var basketBottom = basket.y + basket.height / 2;
+      var hitX = Math.abs(it.x - basket.x) <= (basket.width / 2 + it.radius * 0.45);
+      var hitY = (it.y + it.radius >= basketTop) && (it.y - it.radius <= basketBottom);
+
+      if (hitX && hitY) {
+        if (it.type === 'bomb') {
+          // 폭탄 획득: 생명 감소, 콤보 리셋
+          lives--;
+          combo = 0;
+          screenShake = 14;
+          createParticles(it.x, it.y, '#ff5722', 18);
+          createParticles(it.x, it.y, '#212121', 12);
+          addFloatingText(it.x, it.y - 10, '폭탄! (-1)', '#ff5722');
+          playSound('bomb');
+
+          items.splice(i, 1);
+          updateStatusDisplay();
+
+          if (lives <= 0) {
+            gameOver();
+            return;
+          }
+        } else {
+          // 과일 획득: 점수 획득, 콤보 증가
+          combo++;
+          if (combo > maxCombo) maxCombo = combo;
+          totalCaught++;
+
+          var basePts = (it.type === 'watermelon' ? 20 : 10) * cfg.multiplier;
+          var comboBonus = (combo - 1) * cfg.multiplier * 2;
+          var pts = basePts + comboBonus;
+          score = Math.min(99999999, score + pts);
+
+          var pColor = '#e53935';
+          if (it.type === 'orange') pColor = '#f57c00';
+          else if (it.type === 'banana') pColor = '#fbc02d';
+          else if (it.type === 'grape') pColor = '#8e24aa';
+          else if (it.type === 'watermelon') pColor = '#43a047';
+
+          createParticles(it.x, it.y, pColor, 10);
+
+          var txt = '+' + pts;
+          if (combo >= 3) {
+            txt += ' (' + combo + '연속)';
+          }
+          addFloatingText(it.x, it.y - 12, txt, (combo >= 5 ? '#ffd60a' : '#4ade80'));
+
+          if (combo % 5 === 0) {
+            playSound('combo');
+          } else {
+            playSound('catch');
+          }
+
+          items.splice(i, 1);
+          updateStatusDisplay();
+        }
+        continue;
+      }
+
+      // 바닥을 벗어난 경우 (놓침)
+      if (it.y - it.radius > LOGICAL_H) {
+        if (it.type === 'bomb') {
+          // 폭탄은 피했으므로 감점 없음
+          items.splice(i, 1);
+        } else {
+          // 과일을 놓침: 생명 감소, 콤보 리셋
+          lives--;
+          combo = 0;
+          createParticles(it.x, LOGICAL_H - 10, '#90caf9', 8);
+          addFloatingText(it.x, LOGICAL_H - 32, '놓침!', '#ff7a70');
+          playSound('miss');
+
+          items.splice(i, 1);
+          updateStatusDisplay();
+
+          if (lives <= 0) {
+            gameOver();
+            return;
+          }
+        }
+      }
+    }
+
+    // 파티클 업데이트
+    for (var p = particles.length - 1; p >= 0; p--) {
+      var part = particles[p];
+      part.x += part.vx * dt;
+      part.y += part.vy * dt;
+      part.life -= dt;
+      part.alpha = Math.max(0, part.life / 0.5);
+      if (part.life <= 0) {
+        particles.splice(p, 1);
+      }
+    }
+
+    // 플로팅 텍스트 업데이트
+    for (var f = floatingTexts.length - 1; f >= 0; f--) {
+      var ft = floatingTexts[f];
+      ft.y += ft.vy * dt;
+      ft.alpha -= dt * 1.5;
+      if (ft.alpha <= 0) {
+        floatingTexts.splice(f, 1);
+      }
+    }
+  }
+
+  // 캔버스 크기 및 디스플레이 비율 맞추기
+  function resizeCanvas() {
+    var rect = canvas.getBoundingClientRect();
+    var width = rect.width || LOGICAL_W;
+    var height = rect.height || LOGICAL_H;
+    var dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr * (width / LOGICAL_W), dpr * (height / LOGICAL_H));
+  }
+
+  // 그래픽 렌더링 함수들 (이모지 쓰지 않고 직접 도형·Path 작성)
+  function drawApple(c, x, y, r) {
+    c.save();
+    c.translate(x, y);
+
+    c.fillStyle = '#e53935';
+    c.beginPath();
+    c.arc(-r * 0.45, 0, r * 0.75, 0, Math.PI * 2);
+    c.arc(r * 0.45, 0, r * 0.75, 0, Math.PI * 2);
+    c.fill();
+
+    // 하이라이트
+    c.fillStyle = 'rgba(255, 255, 255, 0.38)';
+    c.beginPath();
+    c.ellipse(-r * 0.35, -r * 0.28, r * 0.25, r * 0.45, -Math.PI / 6, 0, Math.PI * 2);
+    c.fill();
+
+    // 꼭지
+    c.strokeStyle = '#5d4037';
+    c.lineWidth = Math.max(2, r * 0.16);
+    c.beginPath();
+    c.moveTo(0, -r * 0.5);
+    c.quadraticCurveTo(r * 0.2, -r * 1.05, r * 0.35, -r * 1.15);
+    c.stroke();
+
+    // 잎사귀
+    c.fillStyle = '#43a047';
+    c.beginPath();
+    c.ellipse(r * 0.32, -r * 0.85, r * 0.32, r * 0.16, Math.PI / 4, 0, Math.PI * 2);
+    c.fill();
+
+    c.restore();
+  }
+
+  function drawOrange(c, x, y, r) {
+    c.save();
+    c.translate(x, y);
+
+    var grad = c.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.1, 0, 0, r);
+    grad.addColorStop(0, '#ffb74d');
+    grad.addColorStop(1, '#f57c00');
+    c.fillStyle = grad;
+    c.beginPath();
+    c.arc(0, 0, r, 0, Math.PI * 2);
+    c.fill();
+
+    // 꼭지
+    c.fillStyle = '#2e7d32';
+    c.beginPath();
+    c.arc(0, -r * 0.82, r * 0.16, 0, Math.PI * 2);
+    c.fill();
+
+    // 잎
+    c.beginPath();
+    c.ellipse(r * 0.24, -r * 0.82, r * 0.25, r * 0.12, 0, 0, Math.PI * 2);
+    c.fill();
+
+    c.restore();
+  }
+
+  function drawBanana(c, x, y, r) {
+    c.save();
+    c.translate(x, y);
+
+    c.fillStyle = '#fbc02d';
+    c.beginPath();
+    c.arc(0, 0, r * 1.18, 0.45, 2.7, false);
+    c.arc(r * 0.2, -r * 0.2, r * 0.95, 2.5, 0.65, true);
+    c.closePath();
+    c.fill();
+
+    c.fillStyle = '#795548';
+    c.beginPath();
+    c.arc(r * 0.88, r * 0.55, r * 0.14, 0, Math.PI * 2);
+    c.fill();
+    c.beginPath();
+    c.arc(-r * 0.82, r * 0.6, r * 0.12, 0, Math.PI * 2);
+    c.fill();
+
+    c.restore();
+  }
+
+  function drawGrape(c, x, y, r) {
+    c.save();
+    c.translate(x, y);
+    var gr = r * 0.38;
+    var pts = [
+      [-r * 0.45, -r * 0.35], [0, -r * 0.45], [r * 0.45, -r * 0.35],
+      [-r * 0.25, r * 0.05], [r * 0.25, r * 0.05],
+      [0, r * 0.48]
+    ];
+    for (var i = 0; i < pts.length; i++) {
+      var p = pts[i];
+      var gGrad = c.createRadialGradient(p[0] - gr * 0.3, p[1] - gr * 0.3, gr * 0.1, p[0], p[1], gr);
+      gGrad.addColorStop(0, '#ba68c8');
+      gGrad.addColorStop(1, '#6a1b9a');
+      c.fillStyle = gGrad;
+      c.beginPath();
+      c.arc(p[0], p[1], gr, 0, Math.PI * 2);
+      c.fill();
+    }
+    c.strokeStyle = '#558b2f';
+    c.lineWidth = Math.max(2, r * 0.14);
+    c.beginPath();
+    c.moveTo(0, -r * 0.45);
+    c.lineTo(0, -r * 0.9);
+    c.stroke();
+    c.restore();
+  }
+
+  function drawWatermelon(c, x, y, r) {
+    c.save();
+    c.translate(x, y);
+
+    c.fillStyle = '#2e7d32';
+    c.beginPath();
+    c.arc(0, 0, r, 0.22, Math.PI - 0.22);
+    c.closePath();
+    c.fill();
+
+    c.fillStyle = '#e53935';
+    c.beginPath();
+    c.arc(0, 0, r * 0.84, 0.24, Math.PI - 0.24);
+    c.closePath();
+    c.fill();
+
+    c.fillStyle = '#212121';
+    var seeds = [[-r * 0.4, r * 0.32], [0, r * 0.46], [r * 0.4, r * 0.32]];
+    for (var s = 0; s < seeds.length; s++) {
+      c.beginPath();
+      c.ellipse(seeds[s][0], seeds[s][1], r * 0.07, r * 0.12, 0, 0, Math.PI * 2);
+      c.fill();
+    }
+    c.restore();
+  }
+
+  function drawBomb(c, x, y, r, tick) {
+    c.save();
+    c.translate(x, y);
+
+    var bGrad = c.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.1, 0, 0, r);
+    bGrad.addColorStop(0, '#555555');
+    bGrad.addColorStop(0.7, '#212121');
+    bGrad.addColorStop(1, '#0a0a0a');
+    c.fillStyle = bGrad;
+    c.beginPath();
+    c.arc(0, 0, r, 0, Math.PI * 2);
+    c.fill();
+
+    c.fillStyle = '#757575';
+    c.fillRect(-r * 0.25, -r * 1.15, r * 0.5, r * 0.3);
+
+    c.strokeStyle = '#d7ccc8';
+    c.lineWidth = Math.max(2, r * 0.13);
+    c.beginPath();
+    c.moveTo(0, -r * 1.15);
+    c.quadraticCurveTo(r * 0.28, -r * 1.45, r * 0.42, -r * 1.55);
+    c.stroke();
+
+    var sparkR = (tick % 6 < 3) ? r * 0.35 : r * 0.2;
+    c.fillStyle = (tick % 4 < 2) ? '#ffeb3b' : '#ff5722';
+    c.beginPath();
+    c.arc(r * 0.42, -r * 1.55, sparkR, 0, Math.PI * 2);
+    c.fill();
+
+    c.restore();
+  }
+
+  function drawBasket(c, x, y, width, height) {
+    c.save();
+    c.translate(x, y);
+
+    var wTop = width;
+    var wBottom = width * 0.72;
+    var h = height;
+
+    c.shadowColor = 'rgba(0, 0, 0, 0.35)';
+    c.shadowBlur = 6;
+    c.shadowOffsetY = 3;
+
+    var grad = c.createLinearGradient(0, -h / 2, 0, h / 2);
+    grad.addColorStop(0, '#b07238');
+    grad.addColorStop(1, '#6d3c14');
+    c.fillStyle = grad;
+
+    c.beginPath();
+    c.moveTo(-wTop / 2, -h / 2);
+    c.lineTo(wTop / 2, -h / 2);
+    c.lineTo(wBottom / 2, h / 2);
+    c.lineTo(-wBottom / 2, h / 2);
+    c.closePath();
+    c.fill();
+
+    c.shadowColor = 'transparent';
+
+    // 바구니 격자 선
+    c.strokeStyle = 'rgba(255, 230, 180, 0.35)';
+    c.lineWidth = 1.8;
+    c.beginPath();
+    c.moveTo(-wTop * 0.3, -h / 2); c.lineTo(-wBottom * 0.1, h / 2);
+    c.moveTo(0, -h / 2); c.lineTo(wBottom * 0.2, h / 2);
+    c.moveTo(wTop * 0.3, -h / 2); c.lineTo(wBottom * 0.45, h / 2);
+    c.moveTo(wTop * 0.3, -h / 2); c.lineTo(wBottom * 0.1, h / 2);
+    c.moveTo(0, -h / 2); c.lineTo(-wBottom * 0.2, h / 2);
+    c.moveTo(-wTop * 0.3, -h / 2); c.lineTo(-wBottom * 0.45, h / 2);
+    c.moveTo(-wTop * 0.45, 0); c.lineTo(wTop * 0.45, 0);
+    c.stroke();
+
+    // 상단 림(Rim)
+    c.fillStyle = '#8d4d1e';
+    c.beginPath();
+    c.roundRect(-wTop / 2 - 2, -h / 2 - 3, wTop + 4, 6, 3);
+    c.fill();
+
+    c.restore();
+  }
+
+  // 화면 렌더링
+  function render() {
+    resizeCanvas();
+
+    ctx.save();
+
+    // 화면 흔들림 효과
+    if (screenShake > 0) {
+      var shakeX = (Math.random() - 0.5) * screenShake;
+      var shakeY = (Math.random() - 0.5) * screenShake;
+      ctx.translate(shakeX, shakeY);
+    }
+
+    ctx.clearRect(0, 0, LOGICAL_W, LOGICAL_H);
+
+    // 배경: 은은한 밤하늘 그라데이션
+    var bgGrad = ctx.createLinearGradient(0, 0, 0, LOGICAL_H);
+    bgGrad.addColorStop(0, '#131b2e');
+    bgGrad.addColorStop(1, '#1e293b');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+
+    // 배경 장식 격자 선
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+    ctx.lineWidth = 1;
+    for (var gx = 30; gx < LOGICAL_W; gx += 40) {
+      ctx.beginPath();
+      ctx.moveTo(gx, 0);
+      ctx.lineTo(gx, LOGICAL_H);
+      ctx.stroke();
+    }
+
+    // 바닥 잔디/지면 라인
+    ctx.fillStyle = '#1b3b22';
+    ctx.fillRect(0, LOGICAL_H - 12, LOGICAL_W, 12);
+    ctx.fillStyle = '#2e7d32';
+    ctx.fillRect(0, LOGICAL_H - 14, LOGICAL_W, 3);
+
+    // 아이템 그리기
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      if (it.type === 'apple') drawApple(ctx, it.x, it.y, it.radius);
+      else if (it.type === 'orange') drawOrange(ctx, it.x, it.y, it.radius);
+      else if (it.type === 'banana') drawBanana(ctx, it.x, it.y, it.radius);
+      else if (it.type === 'grape') drawGrape(ctx, it.x, it.y, it.radius);
+      else if (it.type === 'watermelon') drawWatermelon(ctx, it.x, it.y, it.radius);
+      else if (it.type === 'bomb') drawBomb(ctx, it.x, it.y, it.radius, it.tick);
+    }
+
+    // 바구니 그리기
+    drawBasket(ctx, basket.x, basket.y, basket.width, basket.height);
+
+    // 파티클 그리기
+    for (var p = 0; p < particles.length; p++) {
+      var part = particles[p];
+      ctx.save();
+      ctx.globalAlpha = part.alpha;
+      ctx.fillStyle = part.color;
+      ctx.beginPath();
+      ctx.arc(part.x, part.y, part.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 플로팅 텍스트 그리기
+    for (var f = 0; f < floatingTexts.length; f++) {
+      var ft = floatingTexts[f];
+      ctx.save();
+      ctx.globalAlpha = ft.alpha;
+      ctx.fillStyle = ft.color;
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 4;
+      ctx.fillText(ft.text, ft.x, ft.y);
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
+  // 준비 상태일 때 정적 렌더링
+  function renderStaticReady() {
+    resizeCanvas();
+    ctx.clearRect(0, 0, LOGICAL_W, LOGICAL_H);
+
+    var bgGrad = ctx.createLinearGradient(0, 0, 0, LOGICAL_H);
+    bgGrad.addColorStop(0, '#131b2e');
+    bgGrad.addColorStop(1, '#1e293b');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, LOGICAL_W, LOGICAL_H);
+
+    // 샘플 과일 미리보기
+    drawApple(ctx, LOGICAL_W * 0.25, 140, 20);
+    drawOrange(ctx, LOGICAL_W * 0.5, 120, 20);
+    drawWatermelon(ctx, LOGICAL_W * 0.75, 140, 24);
+
+    // 바닥과 바구니
+    ctx.fillStyle = '#1b3b22';
+    ctx.fillRect(0, LOGICAL_H - 12, LOGICAL_W, 12);
+    drawBasket(ctx, LOGICAL_W / 2, basket.y, basket.width, basket.height);
+  }
+
+  // 메인 게임 루프
+  function gameLoop(time) {
+    if (gameState !== 'playing') {
+      render();
+      return;
+    }
+
+    var dt = (time - lastFrameTime) / 1000;
+    lastFrameTime = time;
+
+    // 비정상적인 시간차 방지 (탭 전환 등)
+    if (dt > 0.1) dt = 0.1;
+
+    update(dt);
+    render();
+
+    if (gameState === 'playing') {
+      animationFrameId = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  // 터치 및 마우스 입력 처리 (모바일 390px 한 손 조작 최적화)
+  function handlePointer(clientX) {
+    if (gameState !== 'playing') return;
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = LOGICAL_W / rect.width;
+    var targetX = (clientX - rect.left) * scaleX;
+    basket.x = Math.max(basket.width / 2, Math.min(LOGICAL_W - basket.width / 2, targetX));
+  }
+
+  var isPointerDown = false;
+
+  canvas.addEventListener('pointerdown', function (e) {
+    isPointerDown = true;
+    handlePointer(e.clientX);
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+
+  canvas.addEventListener('pointermove', function (e) {
+    if (isPointerDown) {
+      handlePointer(e.clientX);
+    }
+  });
+
+  canvas.addEventListener('pointerup', function (e) {
+    isPointerDown = false;
+    try { canvas.releasePointerCapture(e.pointerId); } catch (err) {}
+  });
+
+  canvas.addEventListener('pointercancel', function () {
+    isPointerDown = false;
+  });
+
+  // 터치 전용 이벤트 보강 (iOS/안드로이드 터치 반응성 및 부드러운 드래그 보장)
+  canvas.addEventListener('touchstart', function (e) {
+    if (e.touches && e.touches.length > 0) {
+      isPointerDown = true;
+      handlePointer(e.touches[0].clientX);
+    }
+  }, { passive: true });
+
+  canvas.addEventListener('touchmove', function (e) {
+    if (e.touches && e.touches.length > 0) {
+      handlePointer(e.touches[0].clientX);
+    }
+  }, { passive: true });
+
+  canvas.addEventListener('touchend', function () {
+    isPointerDown = false;
+  }, { passive: true });
+
+  // 키보드 조작 이벤트
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft' || e.key === 'Left' || e.key === 'a' || e.key === 'A') {
+      keys.left = true;
+    } else if (e.key === 'ArrowRight' || e.key === 'Right' || e.key === 'd' || e.key === 'D') {
+      keys.right = true;
+    }
+  });
+
+  window.addEventListener('keyup', function (e) {
+    if (e.key === 'ArrowLeft' || e.key === 'Left' || e.key === 'a' || e.key === 'A') {
+      keys.left = false;
+    } else if (e.key === 'ArrowRight' || e.key === 'Right' || e.key === 'd' || e.key === 'D') {
+      keys.right = false;
+    }
+  });
+
+  // 창 크기 변경 시
+  window.addEventListener('resize', function () {
+    if (gameState === 'playing') {
+      render();
+    } else {
+      renderStaticReady();
+    }
+  });
+
+  // 초기화 실행
+  loadStorage();
+  resetToReadyState();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/mini-chess/">미니 체스</a> — 6×6 판의 작은 체스</li><li><a href="/balloon-rise/">풍선 올리기</a> — 장애물 피해 풍선 올리기</li><li><a href="/star-dodge/">별 피하기</a> — 쏟아지는 별 피하기</li><li><a href="/marble-drop/">구슬 떨어뜨리기</a> — 구슬을 떨어뜨려 점수 칸에 넣기</li><li><a href="/paddle-bounce/">탁구</a> — 공을 튕겨 오래 버티기</li><li><a href="/asteroid-dodge/">우주선 피하기</a> — 날아오는 운석 피하기</li><li><a href="/click-speed/">클릭 속도 재기</a> — 정해진 시간 동안 빠르게 누르기</li><li><a href="/rhythm-tap/">리듬 탭</a> — 떨어지는 노트를 박자에 맞춰 탭</li><li><a href="/dice-combo/">주사위 족보 맞추기</a> — 주사위 5개로 족보 칸 채우기</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

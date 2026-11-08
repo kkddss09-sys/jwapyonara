@@ -1,0 +1,1114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>한글 타자 연습 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 무료 한글 타자 연습 게임. 위에서 떨어지는 단어를 입력해 지우며 타자 실력과 반응 속도를 길러보세요. 쉬움, 보통, 어려움 3단계 지원.">
+<link rel="canonical" href="https://jwapyonara.com/hangul-typing/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="한글 타자 연습 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 하는 무료 한글 타자 연습 게임. 떨어지는 단어를 맞춰 최고 점수에 도전해 보세요.">
+<meta property="og:url" content="https://jwapyonara.com/hangul-typing/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "한글 타자 연습",
+  "url": "https://jwapyonara.com/hangul-typing/",
+  "description": "가입 없이 바로 즐기는 무료 한글 타자 연습 게임. 위에서 떨어지는 단어를 타이핑해 지우며 타자 실력을 키워보세요.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All"
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 (판 위) */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 바 */
+.typing-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+}
+.typing-status-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  text-align: left;
+}
+.typing-hearts {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.heart-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-block;
+  vertical-align: middle;
+}
+.typing-status-mid {
+  color: #ffd60a;
+  font-weight: 800;
+  font-size: 16px;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+.typing-status-right {
+  color: #a1a1a6;
+  flex: 1;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.typing-best-line {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 캔버스 감싸개 */
+.typing-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 12px;
+  aspect-ratio: 420 / 440;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #161922;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#typingCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 덮개 (시작 및 게임 종료) */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 20, 26, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  z-index: 10;
+}
+.canvas-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 8px;
+  color: #ffd60a;
+}
+.canvas-overlay p {
+  font-size: 15px;
+  margin: 0 0 16px;
+  color: #e5e5ea;
+  max-width: 290px;
+  line-height: 1.45;
+}
+.canvas-overlay .score-board {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  width: 80%;
+  max-width: 260px;
+}
+.score-board .final-score {
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffd60a;
+  margin-bottom: 4px;
+}
+.score-board .final-detail {
+  font-size: 13px;
+  color: #a1a1a6;
+}
+.canvas-overlay .btn-start {
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  background: var(--red, #1b64da);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 36px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+  max-width: 240px;
+  margin-bottom: 8px;
+}
+.canvas-overlay .btn-start:active {
+  opacity: 0.85;
+}
+.canvas-overlay .btn-overlay-rank {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 10px 24px;
+  min-height: 44px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+  max-width: 240px;
+}
+.canvas-overlay .btn-overlay-rank:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* 입력 바 */
+.typing-input-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.typing-input {
+  flex: 1;
+  min-width: 0;
+  height: 52px;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  padding: 0 16px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+  outline: none;
+  touch-action: manipulation;
+  transition: border-color 0.15s;
+}
+.typing-input:focus {
+  border-color: var(--red);
+}
+.typing-input::placeholder {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--dim, #8e8e93);
+}
+.typing-submit-btn {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  border: none;
+  border-radius: 12px;
+  background: var(--red, #1b64da);
+  color: #fff;
+  padding: 0 20px;
+  min-height: 52px;
+  cursor: pointer;
+  touch-action: manipulation;
+  flex-shrink: 0;
+}
+.typing-submit-btn:active {
+  opacity: 0.85;
+}
+
+/* 제어 단추 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+}
+.btn-sound {
+  background: var(--card, #fff);
+  border: 1.5px solid var(--line, #e5e5ea);
+  color: var(--ink, #1c1c1e);
+}
+.btn-sound:active {
+  background: var(--soft, #f2f2f7);
+}
+.btn-reset {
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #3a3a3c;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>한글 타자 연습,<br>떨어지는 단어를 맞춰 보세요</h1>
+  <p class="lead">위에서 내려오는 낱말을 입력해 없애는 무료 타자 게임. 가입 없이 컴퓨터와 스마트폰에서 타자 실력을 뽐내보세요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="typing-status-bar">
+      <div class="typing-status-left">
+        <span>생명</span>
+        <div class="typing-hearts" id="heartBox" aria-label="남은 생명"></div>
+      </div>
+      <div class="typing-status-mid" id="statusScore">0점</div>
+      <div class="typing-status-right" id="statusCount">지운 단어 0개</div>
+    </div>
+    <div class="typing-best-line" id="statusBest"></div>
+
+    <div class="typing-canvas-wrap" id="canvasWrap">
+      <canvas id="typingCanvas" width="420" height="440"></canvas>
+      <div class="canvas-overlay" id="overlayBox">
+        <h2 id="overlayTitle">한글 타자 연습</h2>
+        <p id="overlayDesc">쉬움 난이도로 시작해요</p>
+        <div class="score-board" id="scoreBoard" style="display:none;">
+          <div class="final-score" id="finalScoreText">0점</div>
+          <div class="final-detail" id="finalDetailText">지운 단어 0개</div>
+        </div>
+        <button type="button" class="btn-start" id="btnStartGame">게임 시작</button>
+        <button type="button" class="btn-overlay-rank" id="btnOverlayRank" style="display:none;">🏆 순위표 올리기</button>
+      </div>
+    </div>
+
+    <form class="typing-input-bar" id="inputForm" autocomplete="off">
+      <input type="text" id="wordInput" class="typing-input" placeholder="단어를 입력하고 엔터를 누르세요" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">
+      <button type="submit" class="typing-submit-btn" id="btnSubmit">입력</button>
+    </form>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-sound" id="btnSound">소리 켬</button>
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:8px;">
+      💡 단어를 치고 <b>엔터(Enter)</b>를 누르면 지워집니다. 바닥에 닿기 전에 빠르게 쳐보세요!
+    </p>
+  </section>
+
+  <p class="note">단어가 바닥 빨간 선에 닿으면 생명이 하나씩 줄어듭니다. 게임은 기기 안에서만 실행됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>단어 맞추기:</b> 위에서 떨어지는 한글 단어를 보고 아래 입력창에 그대로 친 뒤 엔터(Enter)를 누르거나 입력 버튼을 누릅니다.</li>
+      <li><b>생명과 바닥선:</b> 단어가 바닥의 빨간 감지선에 닿으면 생명이 1개 줄어듭니다. 생명 3개가 모두 소진되면 게임이 끝납니다.</li>
+      <li><b>난이도 구분:</b> 쉬움(느린 속도, 넉넉한 간격), 보통(적당한 속도), 어려움(빠른 속도와 연속 단어 등장).</li>
+      <li><b>점수 계산:</b> 지운 단어 수 × 난이도 배수(쉬움 1, 보통 2, 어려움 3) × 10 + 지운 총 글자 수 × 2 로 계산됩니다.</li>
+      <li><b>한글 조합 지원:</b> 한글 두벌식 키보드의 자음·모음 조합 중에도 오작동 없이 깔끔하게 엔터 처리가 지원됩니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단에서 내 손에 맞는 난이도(쉬움·보통·어려움)를 고릅니다.</li>
+      <li>시작 버튼을 누르면 위에서 다양한 일상 단어가 내려오기 시작합니다.</li>
+      <li>입력창을 누르고 자판으로 단어를 입력한 뒤 엔터를 누르면 단어가 팡 터지며 점수를 얻습니다.</li>
+      <li>동시에 여러 단어가 내려올 때는 가장 아래쪽에 있는 위험한 단어부터 먼저 지워 보세요.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>스마트폰이나 PC 자판 속도를 높이고 싶을 때, 심심할 때 가볍게 두뇌를 회전하고 순발력을 키우고 싶을 때 좋습니다. 프로그램 설치나 회원가입 없이 브라우저에서 바로 즐길 수 있습니다.</p>
+    <h2>알아 두면 좋은 것</h2>
+    <dl>
+      <dt>다양한 어휘 목록</dt>
+      <dd>200개 이상의 정갈한 일상 낱말(과일, 자연, 물건, 음식, 동물 등)이 무작위로 등장하여 어휘력과 타자 적응력을 함께 키워줍니다.</dd>
+      <dt>점수와 최고 기록 저장</dt>
+      <dd>난이도별 최고 점수는 브라우저 저장소에 자동으로 기록되며, 게임이 끝난 후 순위표에 내 기록을 올려 다른 사람들과 겨룰 수 있습니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>스마트폰 가상 키보드에서도 잘 동작하나요?</summary>
+      <p>네, 모바일 환경의 터치 키보드와 줄바꿈/완료 버튼에 최적화되어 있어 컴퓨터 키보드는 물론 스마트폰 한 손 타이핑으로도 편안하게 즐기실 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>효과음을 끄거나 켤 수 있나요?</summary>
+      <p>판 아래의 '소리 켬' 버튼을 누르면 언제든지 음소거와 소리 재생을 전환할 수 있습니다. 별도의 외부 오디오 파일 없이 웹 브라우저의 자체 오디오 생성 기능으로 가볍게 동작합니다.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // ── 200개 이상의 고유 한글 단어 목록 (총 240개) ──
+  var WORD_LIST = [
+    // 2글자 단어 (100개)
+    '하늘', '바다', '구름', '나무', '바람', '햇살', '별빛', '달빛', '꽃잎', '나비',
+    '호수', '산길', '바위', '파도', '모래', '강물', '들판', '노을', '새벽', '아침',
+    '점심', '저녁', '단풍', '낙엽', '이슬', '서리', '풀잎', '새싹', '화분', '정원',
+    '우산', '장화', '모자', '안경', '시계', '가방', '지갑', '신발', '양말', '장갑',
+    '의자', '책상', '침대', '이불', '베개', '서랍', '거울', '수건', '비누', '치약',
+    '칫솔', '샴푸', '물병', '도마', '냄비', '접시', '포크', '수저', '식탁', '부엌',
+    '거실', '창문', '현관', '열쇠', '계단', '마당', '지붕', '담장', '골목', '우체',
+    '공책', '연필', '볼펜', '자석', '가위', '도장', '편지', '봉투', '엽서', '상자',
+    '사과', '포도', '딸기', '수박', '참외', '자두', '레몬', '망고', '키위', '감자',
+    '당근', '양파', '마늘', '배추', '오이', '호박', '가지', '버섯', '상추', '깻잎',
+    // 3글자 단어 (80개)
+    '소나무', '단풍잎', '무지개', '은하수', '별똥별', '봄소식', '물방울', '달맞이',
+    '해돋이', '물안개', '소나기', '눈사람', '싸락눈', '초승달', '보름달', '산울림',
+    '비행기', '기차표', '자동차', '자전거', '정류장', '신호등', '건널목', '골목길',
+    '컴퓨터', '모니터', '키보드', '마우스', '스피커', '카메라', '충전기', '배터리',
+    '냉장고', '세탁기', '선풍기', '청소기', '다리미', '주전자', '냄비밥', '손수건',
+    '복숭아', '바나나', '오렌지', '토마토', '고구마', '양배추', '시금치', '콩나물',
+    '김칫국', '된장국', '미역국', '순두부', '비빔밥', '볶음밥', '떡볶이', '짜장면',
+    '도시락', '주먹밥', '초콜릿', '솜사탕', '꽈배기', '팥빙수', '군밤골', '가래떡',
+    '강아지', '고양이', '다람쥐', '호랑이', '코끼리', '원숭이', '병아리', '비둘기',
+    '올빼미', '두루미', '거북이', '돌고래', '진달래', '개나리', '도라지', '무궁화',
+    // 4글자 단어 (60개)
+    '가을바람', '아침햇살', '겨울바람', '시골풍경', '밤하늘빛', '푸른바다', '초록숲길', '하얀구름',
+    '도서관길', '그림책방', '운동장길', '골목길숲', '바람개비', '징검다리', '솔방울숲', '유리구슬',
+    '휴대전화', '스마트폰', '노트북컴', '손목시계', '벽걸이시', '탁상달력', '무선마우', '보조배터',
+    '텔레비전', '진공청소', '전자레인', '식기세척', '에어컨바', '공기청정', '헤어드라', '커피포트',
+    '딸기우유', '초코우유', '바나나맛', '과일바구', '단팥죽그', '군고구마', '찰옥수수', '호박전부',
+    '김치부침', '도토리묵', '잔치국수', '비빔국수', '찹쌀떡집', '붕어빵틀', '모듬김밥', '물냉면그',
+    '횡단보도', '샌드위치', '해바라기', '카네이션', '바다거북', '날다람쥐', '아기사슴', '아기토끼',
+    '얼룩송아', '사계절풍', '반딧불이', '보물상자'
+  ];
+
+  // DOM 요소 참조
+  var canvas = document.getElementById('typingCanvas');
+  var ctx = canvas.getContext('2d');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var scoreBoard = document.getElementById('scoreBoard');
+  var finalScoreText = document.getElementById('finalScoreText');
+  var finalDetailText = document.getElementById('finalDetailText');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var inputForm = document.getElementById('inputForm');
+  var wordInput = document.getElementById('wordInput');
+  var heartBox = document.getElementById('heartBox');
+  var statusScore = document.getElementById('statusScore');
+  var statusCount = document.getElementById('statusCount');
+  var statusBest = document.getElementById('statusBest');
+  var btnRestart = document.getElementById('btnRestart');
+  var btnSound = document.getElementById('btnSound');
+
+  // 게임 상태 변수
+  var gameState = 'ready'; // 'ready', 'playing', 'gameover'
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  var lives = 3;
+  var maxLives = 3;
+  var clearedWords = 0;
+  var clearedChars = 0;
+  var score = 0;
+
+  var fallingWords = []; // 활성 단어 목록
+  var particles = []; // 폭발 파티클 목록
+  var spawnTimer = null;
+  var animFrameId = null;
+  var lastFrameTime = 0;
+  var recentWordIndices = []; // 최근 단어 중복 방지 큐
+
+  // 사운드 설정
+  var soundEnabled = true;
+  var audioCtx = null;
+
+  // 로컬스토리지 최고 점수 기록
+  var bestEasy = 0;
+  var bestNormal = 0;
+  var bestHard = 0;
+
+  // 난이도별 설정
+  var LEVEL_CONFIG = {
+    easy: {
+      multiplier: 1,
+      spawnInterval: 2400,
+      fallSpeed: 40, // 픽셀/초
+      label: '쉬움'
+    },
+    normal: {
+      multiplier: 2,
+      spawnInterval: 1700,
+      fallSpeed: 64,
+      label: '보통'
+    },
+    hard: {
+      multiplier: 3,
+      spawnInterval: 1200,
+      fallSpeed: 92,
+      label: '어려움'
+    }
+  };
+
+  // ── WebAudio 사운드 생성기 ──
+  function getAudioCtx() {
+    if (!audioCtx) {
+      var AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtxClass) {
+        audioCtx = new AudioCtxClass();
+      }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    return audioCtx;
+  }
+
+  function playSound(type) {
+    if (!soundEnabled) return;
+    try {
+      var actx = getAudioCtx();
+      if (!actx) return;
+      var now = actx.currentTime;
+
+      if (type === 'match') {
+        // 단어 맞춤: 맑은 상승음
+        var osc = actx.createOscillator();
+        var gain = actx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.12); // E5
+
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+
+        osc.connect(gain);
+        gain.connect(actx.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } else if (type === 'miss') {
+        // 바닥 닿음: 둔탁한 감쇠음
+        var oscMiss = actx.createOscillator();
+        var gainMiss = actx.createGain();
+        oscMiss.type = 'sawtooth';
+        oscMiss.frequency.setValueAtTime(170, now);
+        oscMiss.frequency.exponentialRampToValueAtTime(70, now + 0.22);
+
+        gainMiss.gain.setValueAtTime(0.22, now);
+        gainMiss.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+        oscMiss.connect(gainMiss);
+        gainMiss.connect(actx.destination);
+        oscMiss.start(now);
+        oscMiss.stop(now + 0.25);
+      } else if (type === 'gameover') {
+        // 게임 오버: 3단 하강음
+        [240, 190, 140].forEach(function (freq, i) {
+          var o = actx.createOscillator();
+          var g = actx.createGain();
+          o.type = 'triangle';
+          o.frequency.setValueAtTime(freq, now + i * 0.11);
+
+          g.gain.setValueAtTime(0.2, now + i * 0.11);
+          g.gain.exponentialRampToValueAtTime(0.001, now + (i + 1) * 0.13);
+
+          o.connect(g);
+          g.connect(actx.destination);
+          o.start(now + i * 0.11);
+          o.stop(now + (i + 1) * 0.13);
+        });
+      }
+    } catch (e) {}
+  }
+
+  // ── 로컬 스토리지 읽기 및 저장 ──
+  function loadStorage() {
+    try {
+      bestEasy = parseInt(localStorage.getItem('zw_hangul-typing_best_easy'), 10) || 0;
+      bestNormal = parseInt(localStorage.getItem('zw_hangul-typing_best_normal'), 10) || 0;
+      bestHard = parseInt(localStorage.getItem('zw_hangul-typing_best_hard'), 10) || 0;
+
+      var savedSound = localStorage.getItem('zw_hangul-typing_sound');
+      if (savedSound === '0') {
+        soundEnabled = false;
+        btnSound.textContent = '소리 끔';
+      } else {
+        soundEnabled = true;
+        btnSound.textContent = '소리 켬';
+      }
+
+      var savedLevel = localStorage.getItem('zw_hangul-typing_level');
+      if (savedLevel === 'normal' || savedLevel === 'hard' || savedLevel === 'easy') {
+        currentLevel = savedLevel;
+      } else {
+        currentLevel = 'easy';
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+    updateStatusDisplay();
+  }
+
+  function saveBestScore() {
+    var key = 'zw_hangul-typing_best_' + currentLevel;
+    var currentBest = (currentLevel === 'hard') ? bestHard : (currentLevel === 'normal' ? bestNormal : bestEasy);
+    var clampedScore = Math.min(score, 99999999);
+
+    if (clampedScore > currentBest) {
+      if (currentLevel === 'hard') bestHard = clampedScore;
+      else if (currentLevel === 'normal') bestNormal = clampedScore;
+      else bestEasy = clampedScore;
+
+      try {
+        localStorage.setItem(key, String(clampedScore));
+      } catch (e) {}
+      return true;
+    }
+    return false;
+  }
+
+  // ── 화면 상태 및 텍스트 갱신 ──
+  function updateStatusDisplay() {
+    statusScore.textContent = score.toLocaleString('ko-KR') + '점';
+    statusCount.textContent = '지운 단어 ' + clearedWords + '개';
+
+    if (bestEasy > 0 || bestNormal > 0 || bestHard > 0) {
+      statusBest.textContent = '최고 기록 · 쉬움 ' + bestEasy.toLocaleString('ko-KR') + '점 · 보통 ' + bestNormal.toLocaleString('ko-KR') + '점 · 어려움 ' + bestHard.toLocaleString('ko-KR') + '점';
+    } else {
+      statusBest.textContent = '';
+    }
+
+    renderHearts();
+  }
+
+  function renderHearts() {
+    // 이모지 대신 깨끗한 인라인 SVG 하트 렌더링
+    var html = '';
+    for (var i = 0; i < maxLives; i++) {
+      if (i < lives) {
+        html += '<svg class="heart-icon" viewBox="0 0 24 24" fill="#e5484d" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+      } else {
+        html += '<svg class="heart-icon" viewBox="0 0 24 24" fill="#555" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+      }
+    }
+    heartBox.innerHTML = html;
+  }
+
+  function updateLevelButtons() {
+    btnDiffEasy.classList.toggle('on', currentLevel === 'easy');
+    btnDiffNormal.classList.toggle('on', currentLevel === 'normal');
+    btnDiffHard.classList.toggle('on', currentLevel === 'hard');
+  }
+
+  function updateOverlayDesc() {
+    var label = LEVEL_CONFIG[currentLevel].label;
+    overlayDesc.textContent = label + ' 난이도로 시작해요';
+  }
+
+  // 순위표 카드(rank.js)의 탭을 현재 난이도에 맞춤
+  function syncRankTab() {
+    try {
+      var idx = (currentLevel === 'hard') ? 2 : (currentLevel === 'normal' ? 1 : 0);
+      if (typeof ZW !== 'undefined') {
+        ZW.rankPick = idx;
+      }
+      var b = document.querySelector('.rk-tabs button[data-i="' + idx + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  // 난이도 변경 처리
+  function setLevel(lvl) {
+    if (lvl === currentLevel) return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_hangul-typing_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    resetToReady();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // 소리 토글 버튼
+  btnSound.addEventListener('click', function () {
+    soundEnabled = !soundEnabled;
+    btnSound.textContent = soundEnabled ? '소리 켬' : '소리 끔';
+    try {
+      localStorage.setItem('zw_hangul-typing_sound', soundEnabled ? '1' : '0');
+    } catch (e) {}
+    if (soundEnabled) {
+      playSound('match');
+    }
+  });
+
+  // ── 게임 루프 및 스폰 ──
+  function resetToReady() {
+    stopGameLoop();
+    gameState = 'ready';
+    lives = maxLives;
+    score = 0;
+    clearedWords = 0;
+    clearedChars = 0;
+    fallingWords = [];
+    particles = [];
+
+    overlayBox.style.display = 'flex';
+    overlayTitle.textContent = '한글 타자 연습';
+    updateOverlayDesc();
+    scoreBoard.style.display = 'none';
+    btnStartGame.textContent = '게임 시작';
+    btnOverlayRank.style.display = 'none';
+
+    updateStatusDisplay();
+    renderCanvas();
+  }
+
+  function startGame() {
+    stopGameLoop();
+    gameState = 'playing';
+    lives = maxLives;
+    score = 0;
+    clearedWords = 0;
+    clearedChars = 0;
+    fallingWords = [];
+    particles = [];
+    recentWordIndices = [];
+
+    overlayBox.style.display = 'none';
+    updateStatusDisplay();
+
+    wordInput.value = '';
+    wordInput.focus();
+
+    // 첫 단어 즉시 스폰
+    spawnWord();
+
+    // 주기적 스폰 타이머 등록
+    var interval = LEVEL_CONFIG[currentLevel].spawnInterval;
+    spawnTimer = setInterval(spawnWord, interval);
+
+    lastFrameTime = performance.now();
+    animFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  function stopGameLoop() {
+    if (spawnTimer) {
+      clearInterval(spawnTimer);
+      spawnTimer = null;
+    }
+    if (animFrameId) {
+      cancelAnimationFrame(animFrameId);
+      animFrameId = null;
+    }
+  }
+
+  function gameOver() {
+    stopGameLoop();
+    gameState = 'gameover';
+    playSound('gameover');
+
+    var isNewBest = saveBestScore();
+    updateStatusDisplay();
+    syncRankTab();
+
+    overlayBox.style.display = 'flex';
+    overlayTitle.textContent = '게임 종료';
+    overlayDesc.textContent = isNewBest ? '축하합니다! 새로운 최고 기록을 달성했어요.' : '모든 생명이 소진되었습니다.';
+    scoreBoard.style.display = 'block';
+    finalScoreText.textContent = score.toLocaleString('ko-KR') + '점';
+    finalDetailText.textContent = LEVEL_CONFIG[currentLevel].label + ' · 지운 단어 ' + clearedWords + '개';
+    btnStartGame.textContent = '다시 시작';
+    btnOverlayRank.style.display = 'block';
+  }
+
+  // 단어 생성 로직
+  function spawnWord() {
+    if (gameState !== 'playing') return;
+
+    // 최근 사용된 단어 중복 방지
+    var wordIndex = -1;
+    var attempts = 0;
+    while (attempts < 20) {
+      wordIndex = Math.floor(Math.random() * WORD_LIST.length);
+      if (recentWordIndices.indexOf(wordIndex) === -1) break;
+      attempts++;
+    }
+    recentWordIndices.push(wordIndex);
+    if (recentWordIndices.length > 25) {
+      recentWordIndices.shift();
+    }
+
+    var text = WORD_LIST[wordIndex];
+
+    // 단어 가로 폭 계산 (임시)
+    ctx.font = 'bold 18px Pretendard, -apple-system, sans-serif';
+    var textMetrics = ctx.measureText(text);
+    var boxWidth = Math.max(textMetrics.width + 24, 60);
+
+    // X 좌표: 화면 안쪽에서 겹치지 않게 무작위 생성
+    var maxX = 420 - boxWidth - 14;
+    var minX = 14;
+    var x = minX + Math.random() * (maxX - minX);
+
+    // 속도: 난이도 기준 ±15% 변화
+    var baseSpeed = LEVEL_CONFIG[currentLevel].fallSpeed;
+    var speed = baseSpeed * (0.85 + Math.random() * 0.3);
+
+    fallingWords.push({
+      text: text,
+      x: x,
+      y: -20,
+      width: boxWidth,
+      height: 34,
+      speed: speed
+    });
+  }
+
+  // ── 한글 입력 매칭 처리 ──
+  function handleInputSubmit(e) {
+    if (e) e.preventDefault();
+    if (gameState !== 'playing') return;
+
+    var typed = wordInput.value.trim();
+    if (!typed) return;
+
+    // 가장 바닥에 가까운(y가 큰) 일치 단어 찾기
+    var matchedIndex = -1;
+    var maxY = -9999;
+
+    for (var i = 0; i < fallingWords.length; i++) {
+      if (fallingWords[i].text === typed) {
+        if (fallingWords[i].y > maxY) {
+          maxY = fallingWords[i].y;
+          matchedIndex = i;
+        }
+      }
+    }
+
+    if (matchedIndex !== -1) {
+      // 일치 성공
+      var w = fallingWords[matchedIndex];
+      playSound('match');
+
+      // 점수 계산: 지운 단어 수 × 난이도 배수 × 10 + 글자 수 × 2
+      clearedWords++;
+      clearedChars += w.text.length;
+      var mult = LEVEL_CONFIG[currentLevel].multiplier;
+      score = Math.min((clearedWords * mult * 10) + (clearedChars * 2), 99999999);
+
+      // 성공 파티클 생성
+      createExplosion(w.x + w.width / 2, w.y + w.height / 2, '#ffd60a', 14);
+
+      // 단어 제거
+      fallingWords.splice(matchedIndex, 1);
+      updateStatusDisplay();
+    }
+
+    wordInput.value = '';
+  }
+
+  // 폼 제출 및 키 이벤트 바인딩 (한글 IME 조합 완벽 대응)
+  inputForm.addEventListener('submit', handleInputSubmit);
+
+  wordInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') {
+      // 일부 브라우저에서 keydown 중복 발생 방지
+      if (e.isComposing) return;
+      handleInputSubmit(e);
+    }
+  });
+
+  // ── 파티클 효과 ──
+  function createExplosion(x, y, color, count) {
+    for (var i = 0; i < count; i++) {
+      var angle = Math.random() * Math.PI * 2;
+      var speed = 40 + Math.random() * 120;
+      particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 3 + Math.random() * 3,
+        color: color,
+        alpha: 1.0,
+        life: 0.45 + Math.random() * 0.25
+      });
+    }
+  }
+
+  // ── 애니메이션 루프 ──
+  function gameLoop(now) {
+    var dt = (now - lastFrameTime) / 1000;
+    if (dt > 0.1) dt = 0.1; // 탭 전환 등으로 튀는 현상 방지
+    lastFrameTime = now;
+
+    if (gameState === 'playing') {
+      updateGame(dt);
+    }
+
+    renderCanvas();
+
+    if (gameState === 'playing') {
+      animFrameId = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  function updateGame(dt) {
+    var deadlineY = 380; // 바닥 위험선 Y 좌표
+
+    for (var i = fallingWords.length - 1; i >= 0; i--) {
+      var w = fallingWords[i];
+      w.y += w.speed * dt;
+
+      // 바닥선 닿음 체크
+      if (w.y + w.height >= deadlineY) {
+        // 생명 감소
+        lives--;
+        playSound('miss');
+        createExplosion(w.x + w.width / 2, deadlineY, '#e5484d', 16);
+        fallingWords.splice(i, 1);
+        updateStatusDisplay();
+
+        if (lives <= 0) {
+          gameOver();
+          return;
+        }
+      }
+    }
+
+    // 파티클 갱신
+    for (var p = particles.length - 1; p >= 0; p--) {
+      var pt = particles[p];
+      pt.x += pt.vx * dt;
+      pt.y += pt.vy * dt;
+      pt.alpha -= dt / pt.life;
+      if (pt.alpha <= 0) {
+        particles.splice(p, 1);
+      }
+    }
+  }
+
+  // ── 캔버스 렌더링 ──
+  function renderCanvas() {
+    var rect = canvas.getBoundingClientRect();
+    var width = rect.width || 420;
+    var height = (width * 440) / 420;
+    var dpr = window.devicePixelRatio || 1;
+
+    if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+    }
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale((width * dpr) / 420, (height * dpr) / 440);
+
+    // 1. 우주/다크 배경 그라데이션
+    var bgGrad = ctx.createLinearGradient(0, 0, 0, 440);
+    bgGrad.addColorStop(0, '#131722');
+    bgGrad.addColorStop(1, '#1b2130');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, 420, 440);
+
+    // 2. 배경 별빛 도트 장식
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+    var starSeeds = [
+      [30, 40], [120, 90], [250, 60], [380, 110],
+      [70, 200], [190, 170], [330, 230], [50, 310],
+      [280, 330], [140, 360], [370, 390], [220, 270]
+    ];
+    for (var s = 0; s < starSeeds.length; s++) {
+      ctx.beginPath();
+      ctx.arc(starSeeds[s][0], starSeeds[s][1], 1.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 3. 바닥 감지 위험선 (Y = 380)
+    var deadlineY = 380;
+    ctx.save();
+    ctx.strokeStyle = '#e5484d';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.moveTo(10, deadlineY);
+    ctx.lineTo(410, deadlineY);
+    ctx.stroke();
+
+    // 바닥 위험 구역 은은한 붉은 광선
+    var dangerGrad = ctx.createLinearGradient(0, deadlineY - 20, 0, deadlineY + 30);
+    dangerGrad.addColorStop(0, 'rgba(229, 72, 77, 0)');
+    dangerGrad.addColorStop(0.5, 'rgba(229, 72, 77, 0.12)');
+    dangerGrad.addColorStop(1, 'rgba(229, 72, 77, 0.25)');
+    ctx.fillStyle = dangerGrad;
+    ctx.fillRect(0, deadlineY - 15, 420, 75);
+
+    // 바닥 안내 문구
+    ctx.font = '11px Pretendard, -apple-system, sans-serif';
+    ctx.fillStyle = 'rgba(229, 72, 77, 0.8)';
+    ctx.textAlign = 'right';
+    ctx.fillText('위험선', 410, deadlineY - 6);
+    ctx.restore();
+
+    // 4. 떨어지는 단어 그리기
+    for (var i = 0; i < fallingWords.length; i++) {
+      var w = fallingWords[i];
+      var distToBottom = deadlineY - (w.y + w.height);
+
+      // 바닥에 가까워지면 색상 경고 변화
+      var boxBg = '#283244';
+      var borderColor = '#42526e';
+      if (distToBottom < 70) {
+        boxBg = '#8f2d18';
+        borderColor = '#e5484d';
+      } else if (distToBottom < 150) {
+        boxBg = '#694212';
+        borderColor = '#f59e0b';
+      }
+
+      // 둥근 캡슐 배경
+      ctx.save();
+      ctx.fillStyle = boxBg;
+      ctx.strokeStyle = borderColor;
+      ctx.lineWidth = 1.5;
+
+      roundRect(ctx, w.x, w.y, w.width, w.height, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      // 단어 글자
+      ctx.font = 'bold 17px Pretendard, -apple-system, sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(w.text, w.x + w.width / 2, w.y + w.height / 2 + 1);
+      ctx.restore();
+    }
+
+    // 5. 파티클 그리기
+    for (var p = 0; p < particles.length; p++) {
+      var pt = particles[p];
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, pt.alpha);
+      ctx.fillStyle = pt.color;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, pt.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // 둥근 사각형 도우미
+  function roundRect(context, x, y, width, height, radius) {
+    context.beginPath();
+    context.moveTo(x + radius, y);
+    context.lineTo(x + width - radius, y);
+    context.arcTo(x + width, y, x + width, y + radius, radius);
+    context.lineTo(x + width, y + height - radius);
+    context.arcTo(x + width, y + height, x + width - radius, y + height, radius);
+    context.lineTo(x + radius, y + height);
+    context.arcTo(x, y + height, x, y + height - radius, radius);
+    context.lineTo(x, y + radius);
+    context.arcTo(x, y, x + radius, y, radius);
+    context.closePath();
+  }
+
+  // ── 이벤트 리스너 바인딩 ──
+  btnStartGame.addEventListener('click', function () {
+    startGame();
+  });
+
+  btnRestart.addEventListener('click', function () {
+    startGame();
+  });
+
+  // 순위표 올리기 단추 (#btnOverlayRank)
+  btnOverlayRank.addEventListener('click', function () {
+    var jump = document.querySelector('.zw-rk-jump');
+    if (jump && jump.style.display !== 'none') {
+      jump.click();
+    } else {
+      var sec = document.querySelector('.zw-rank');
+      if (sec) {
+        sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        sec.classList.add('flash');
+        setTimeout(function () {
+          sec.classList.remove('flash');
+        }, 1800);
+      }
+    }
+  });
+
+  // 창 크기 변경 시 캔버스 다시 그리기
+  window.addEventListener('resize', function () {
+    renderCanvas();
+  });
+
+  // 초기화 실행
+  loadStorage();
+  resetToReady();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/checkers-8/">체커</a> — 컴퓨터와 체커 한 판</li><li><a href="/fleet-hunt/">함대 맞히기</a> — 좌표를 찍어 상대 함대 찾기</li><li><a href="/baduk-9/">바둑 9줄</a> — 9줄 판에서 컴퓨터와 바둑 한 판</li><li><a href="/mini-chess/">미니 체스</a> — 6×6 판의 작은 체스</li><li><a href="/domino-chain/">도미노</a> — 숫자를 맞춰 도미노 잇기</li><li><a href="/dot-box-land/">점 잇기 땅따먹기</a> — 선을 그어 네모 땅 차지하기</li><li><a href="/word-hangman/">글자 맞히기</a> — 글자를 하나씩 찍어 단어 맞히기</li><li><a href="/word-chain/">끝말잇기</a> — 컴퓨터와 끝말잇기</li><li><a href="/idiom-blank/">사자성어 빈칸</a> — 빈칸에 맞는 글자 고르기</li><li><a href="/dice-combo/">주사위 족보 맞추기</a> — 주사위 5개로 족보 칸 채우기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

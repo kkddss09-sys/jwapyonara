@@ -96,31 +96,43 @@ var TOOLS = [
   ['maze-escape', '미로 찾기', '가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시', '게임', true, '퍼즐'],
   ['stack-tower', '블록 쌓기', '가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시', '게임', true, '액션'],
   ['omok', '오목', '컴퓨터와 오목 한 판', '게임', true, '퍼즐'],
-  ['four-in-row', '4목 맞추기', '컴퓨터와 4개 먼저 잇기', '게임', true, '퍼즐'],
-  ['water-sort', '물 정렬', '색깔별로 물을 병에 모으기', '게임', true, '퍼즐'],
-  ['yutnori', '윷놀이', '컴퓨터와 윷 한 판', '게임', true, '두뇌'],
-  ['mahjong-match', '마작 짝 맞추기', '같은 패 짝지어 없애기', '게임', true, '퍼즐'],
-  ['reversi-flip', '돌 뒤집기', '컴퓨터와 돌 뒤집기 대결', '게임', true, '두뇌'],
-  ['klondike-solitaire', '솔리테어', '카드를 순서대로 쌓아 완성하기', '게임', true, '퍼즐'],
-  ['box-push', '상자 밀기', '상자를 목표 칸으로 밀기', '게임', true, '퍼즐'],
-  ['pipe-connect', '파이프 잇기', '돌려서 물길 연결하기', '게임', true, '퍼즐'],
-  ['checkers-8', '체커', '컴퓨터와 체커 한 판', '게임', true, '두뇌'],
-  ['fleet-hunt', '함대 맞히기', '좌표를 찍어 상대 함대 찾기', '게임', true, '두뇌'],
-  ['baduk-9', '바둑 9줄', '9줄 판에서 컴퓨터와 바둑 한 판', '게임', true, '두뇌'],
-  ['janggi-mini', '장기', '컴퓨터와 장기 한 판', '게임', true, '두뇌'],
-  ['gonu', '고누', '말 3개를 한 줄로 모으기', '게임', true, '두뇌'],
-  ['mancala', '만칼라', '구슬을 나눠 담아 곳간 채우기', '게임', true, '두뇌'],
-  ['mini-chess', '미니 체스', '6×6 판의 작은 체스', '게임', true, '두뇌'],
-  ['freecell-solitaire', '프리셀', '임시 칸을 써서 카드 쌓기', '게임', true, '퍼즐'],
-  ['domino-chain', '도미노', '숫자를 맞춰 도미노 잇기', '게임', true, '두뇌'],
-  ['peg-jump', '페그 솔리테어', '구슬을 뛰어넘어 하나만 남기기', '게임', true, '퍼즐'],
-  ['tangram-seven', '칠교', '일곱 조각으로 모양 맞추기', '게임', true, '퍼즐'],
-  ['dot-box-land', '점 잇기 땅따먹기', '선을 그어 네모 땅 차지하기', '게임', true, '두뇌'],
-  ['nonogram', '네모 로직', '숫자 힌트로 숨은 그림 찾기', '게임', true, '퍼즐'],
-  ['binary-fill', '0과 1 채우기', '규칙대로 0과 1 채우기', '게임', true, '퍼즐'],
-  ['sum-fill', '숫자 합 맞추기', '가로세로 합에 맞게 숫자 채우기', '게임', true, '퍼즐'],
-  ['word-hangman', '글자 맞히기', '글자를 하나씩 찍어 단어 맞히기', '게임', true, '두뇌'],
-  ['word-chain', '끝말잇기', '컴퓨터와 끝말잇기', '게임', true, '두뇌'],
+  ['four-in-row', '4목 맞추기', '컴퓨터와 4개 먼저 잇기', '게임', true, '퍼즐', '2026-11-08'],
+  ['water-sort', '물 정렬', '색깔별로 물을 병에 모으기', '게임', true, '퍼즐', '2026-11-08'],
+  ['yutnori', '윷놀이', '컴퓨터와 윷 한 판', '게임', true, '두뇌', '2026-11-08'],
+  ['mahjong-match', '마작 짝 맞추기', '같은 패 짝지어 없애기', '게임', true, '퍼즐', '2026-11-08'],
+  ['reversi-flip', '돌 뒤집기', '컴퓨터와 돌 뒤집기 대결', '게임', true, '두뇌', '2026-11-08'],
+  ['klondike-solitaire', '솔리테어', '카드를 순서대로 쌓아 완성하기', '게임', true, '퍼즐', '2026-11-08'],
+  ['box-push', '상자 밀기', '상자를 목표 칸으로 밀기', '게임', true, '퍼즐', '2026-11-08'],
+  ['pipe-connect', '파이프 잇기', '돌려서 물길 연결하기', '게임', true, '퍼즐', '2026-11-08'],
+  ['checkers-8', '체커', '컴퓨터와 체커 한 판', '게임', true, '두뇌', '2026-11-08'],
+  ['fleet-hunt', '함대 맞히기', '좌표를 찍어 상대 함대 찾기', '게임', true, '두뇌', '2026-11-08'],
+  ['baduk-9', '바둑 9줄', '9줄 판에서 컴퓨터와 바둑 한 판', '게임', true, '두뇌', '2026-11-08'],
+  ['janggi-mini', '장기', '컴퓨터와 장기 한 판', '게임', true, '두뇌', '2026-11-08'],
+  ['gonu', '고누', '말 3개를 한 줄로 모으기', '게임', true, '두뇌', '2026-11-08'],
+  ['mancala', '만칼라', '구슬을 나눠 담아 곳간 채우기', '게임', true, '두뇌', '2026-11-08'],
+  ['mini-chess', '미니 체스', '6×6 판의 작은 체스', '게임', true, '두뇌', '2026-11-08'],
+  ['freecell-solitaire', '프리셀', '임시 칸을 써서 카드 쌓기', '게임', true, '퍼즐', '2026-11-08'],
+  ['domino-chain', '도미노', '숫자를 맞춰 도미노 잇기', '게임', true, '두뇌', '2026-11-08'],
+  ['peg-jump', '페그 솔리테어', '구슬을 뛰어넘어 하나만 남기기', '게임', true, '퍼즐', '2026-11-08'],
+  ['tangram-seven', '칠교', '일곱 조각으로 모양 맞추기', '게임', true, '퍼즐', '2026-11-08'],
+  ['dot-box-land', '점 잇기 땅따먹기', '선을 그어 네모 땅 차지하기', '게임', true, '두뇌', '2026-11-08'],
+  ['nonogram', '네모 로직', '숫자 힌트로 숨은 그림 찾기', '게임', true, '퍼즐', '2026-11-08'],
+  ['binary-fill', '0과 1 채우기', '규칙대로 0과 1 채우기', '게임', true, '퍼즐', '2026-11-08'],
+  ['sum-fill', '숫자 합 맞추기', '가로세로 합에 맞게 숫자 채우기', '게임', true, '퍼즐', '2026-11-08'],
+  ['word-hangman', '글자 맞히기', '글자를 하나씩 찍어 단어 맞히기', '게임', true, '두뇌', '2026-11-08'],
+  ['word-chain', '끝말잇기', '컴퓨터와 끝말잇기', '게임', true, '두뇌', '2026-11-08'],
+  ['hangul-typing', '한글 타자 연습', '떨어지는 단어를 쳐서 지우기', '게임', true, '두뇌', '2026-11-08'],
+  ['idiom-blank', '사자성어 빈칸', '빈칸에 맞는 글자 고르기', '게임', true, '두뇌', '2026-11-08'],
+  ['proverb-complete', '속담 완성', '속담 뒷부분 맞히기', '게임', true, '두뇌', '2026-11-08'],
+  ['balloon-rise', '풍선 올리기', '장애물 피해 풍선 올리기', '게임', true, '반응과 손맛', '2026-11-08'],
+  ['star-dodge', '별 피하기', '쏟아지는 별 피하기', '게임', true, '반응과 손맛', '2026-11-08'],
+  ['fruit-catch', '과일 받기', '떨어지는 과일 바구니로 받기', '게임', true, '반응과 손맛', '2026-11-08'],
+  ['marble-drop', '구슬 떨어뜨리기', '구슬을 떨어뜨려 점수 칸에 넣기', '게임', true, '반응과 손맛', '2026-11-08'],
+  ['paddle-bounce', '탁구', '공을 튕겨 오래 버티기', '게임', true, '반응과 손맛', '2026-11-08'],
+  ['asteroid-dodge', '우주선 피하기', '날아오는 운석 피하기', '게임', true, '반응과 손맛', '2026-11-08'],
+  ['click-speed', '클릭 속도 재기', '정해진 시간 동안 빠르게 누르기', '게임', true, '반응과 손맛', '2026-11-08'],
+  ['rhythm-tap', '리듬 탭', '떨어지는 노트를 박자에 맞춰 탭', '게임', true, '반응과 손맛', '2026-11-08'],
+  ['dice-combo', '주사위 족보 맞추기', '주사위 5개로 족보 칸 채우기', '게임', true, '두뇌', '2026-11-08'],
   ['merge-numbers', '숫자 합치기', '같은 숫자를 밀어서 합치기', '게임', true, '퍼즐'],
   ['memory-match', '휴대폰 짝 맞추기', '같은 그림 두 장 찾기', '게임', true, '퍼즐'],
   ['sci-calc', '공학용 계산기', '삼각함수, 로그, 제곱, 괄호', '생활', true, '계산'],
@@ -235,6 +247,18 @@ var RANKS = {
   ,'sum-fill': { label: '숫자 합 맞추기 · 점수', better: 'high', unit: '점', variants: [{ id: 'sum-fill-easy', key: 'zw_sum-fill_best_easy', name: '쉬움' }, { id: 'sum-fill-normal', key: 'zw_sum-fill_best_normal', name: '보통' }, { id: 'sum-fill-hard', key: 'zw_sum-fill_best_hard', name: '어려움' }] }
   ,'word-hangman': { label: '글자 맞히기 · 점수', better: 'high', unit: '점', variants: [{ id: 'word-hangman-easy', key: 'zw_word-hangman_best_easy', name: '쉬움' }, { id: 'word-hangman-normal', key: 'zw_word-hangman_best_normal', name: '보통' }, { id: 'word-hangman-hard', key: 'zw_word-hangman_best_hard', name: '어려움' }] }
   ,'word-chain': { label: '끝말잇기 · 점수', better: 'high', unit: '점', variants: [{ id: 'word-chain-easy', key: 'zw_word-chain_best_easy', name: '쉬움' }, { id: 'word-chain-normal', key: 'zw_word-chain_best_normal', name: '보통' }, { id: 'word-chain-hard', key: 'zw_word-chain_best_hard', name: '어려움' }] }
+  ,'hangul-typing': { label: '한글 타자 연습 · 점수', better: 'high', unit: '타수', variants: [{ id: 'hangul-typing-easy', key: 'zw_hangul-typing_best_easy', name: '쉬움' }, { id: 'hangul-typing-normal', key: 'zw_hangul-typing_best_normal', name: '보통' }, { id: 'hangul-typing-hard', key: 'zw_hangul-typing_best_hard', name: '어려움' }] }
+  ,'idiom-blank': { label: '사자성어 빈칸 · 점수', better: 'high', unit: '개', variants: [{ id: 'idiom-blank-easy', key: 'zw_idiom-blank_best_easy', name: '쉬움' }, { id: 'idiom-blank-normal', key: 'zw_idiom-blank_best_normal', name: '보통' }, { id: 'idiom-blank-hard', key: 'zw_idiom-blank_best_hard', name: '어려움' }] }
+  ,'proverb-complete': { label: '속담 완성 · 점수', better: 'high', unit: '개', variants: [{ id: 'proverb-complete-easy', key: 'zw_proverb-complete_best_easy', name: '쉬움' }, { id: 'proverb-complete-normal', key: 'zw_proverb-complete_best_normal', name: '보통' }, { id: 'proverb-complete-hard', key: 'zw_proverb-complete_best_hard', name: '어려움' }] }
+  ,'balloon-rise': { label: '풍선 올리기 · 점수', better: 'high', unit: '점', variants: [{ id: 'balloon-rise-easy', key: 'zw_balloon-rise_best_easy', name: '쉬움' }, { id: 'balloon-rise-normal', key: 'zw_balloon-rise_best_normal', name: '보통' }, { id: 'balloon-rise-hard', key: 'zw_balloon-rise_best_hard', name: '어려움' }] }
+  ,'star-dodge': { label: '별 피하기 · 점수', better: 'high', unit: '점', variants: [{ id: 'star-dodge-easy', key: 'zw_star-dodge_best_easy', name: '쉬움' }, { id: 'star-dodge-normal', key: 'zw_star-dodge_best_normal', name: '보통' }, { id: 'star-dodge-hard', key: 'zw_star-dodge_best_hard', name: '어려움' }] }
+  ,'fruit-catch': { label: '과일 받기 · 점수', better: 'high', unit: '점', variants: [{ id: 'fruit-catch-easy', key: 'zw_fruit-catch_best_easy', name: '쉬움' }, { id: 'fruit-catch-normal', key: 'zw_fruit-catch_best_normal', name: '보통' }, { id: 'fruit-catch-hard', key: 'zw_fruit-catch_best_hard', name: '어려움' }] }
+  ,'marble-drop': { label: '구슬 떨어뜨리기 · 점수', better: 'high', unit: '점', variants: [{ id: 'marble-drop-easy', key: 'zw_marble-drop_best_easy', name: '쉬움' }, { id: 'marble-drop-normal', key: 'zw_marble-drop_best_normal', name: '보통' }, { id: 'marble-drop-hard', key: 'zw_marble-drop_best_hard', name: '어려움' }] }
+  ,'paddle-bounce': { label: '탁구 · 점수', better: 'high', unit: '점', variants: [{ id: 'paddle-bounce-easy', key: 'zw_paddle-bounce_best_easy', name: '쉬움' }, { id: 'paddle-bounce-normal', key: 'zw_paddle-bounce_best_normal', name: '보통' }, { id: 'paddle-bounce-hard', key: 'zw_paddle-bounce_best_hard', name: '어려움' }] }
+  ,'asteroid-dodge': { label: '우주선 피하기 · 점수', better: 'high', unit: '점', variants: [{ id: 'asteroid-dodge-easy', key: 'zw_asteroid-dodge_best_easy', name: '쉬움' }, { id: 'asteroid-dodge-normal', key: 'zw_asteroid-dodge_best_normal', name: '보통' }, { id: 'asteroid-dodge-hard', key: 'zw_asteroid-dodge_best_hard', name: '어려움' }] }
+  ,'click-speed': { label: '클릭 속도 재기 · 점수', better: 'high', unit: '회', variants: [{ id: 'click-speed-easy', key: 'zw_click-speed_best_easy', name: '쉬움' }, { id: 'click-speed-normal', key: 'zw_click-speed_best_normal', name: '보통' }, { id: 'click-speed-hard', key: 'zw_click-speed_best_hard', name: '어려움' }] }
+  ,'rhythm-tap': { label: '리듬 탭 · 점수', better: 'high', unit: '점', variants: [{ id: 'rhythm-tap-easy', key: 'zw_rhythm-tap_best_easy', name: '쉬움' }, { id: 'rhythm-tap-normal', key: 'zw_rhythm-tap_best_normal', name: '보통' }, { id: 'rhythm-tap-hard', key: 'zw_rhythm-tap_best_hard', name: '어려움' }] }
+  ,'dice-combo': { label: '주사위 족보 맞추기 · 점수', better: 'high', unit: '점', variants: [{ id: 'dice-combo-easy', key: 'zw_dice-combo_best_easy', name: '쉬움' }, { id: 'dice-combo-normal', key: 'zw_dice-combo_best_normal', name: '보통' }, { id: 'dice-combo-hard', key: 'zw_dice-combo_best_hard', name: '어려움' }] }
 };
 
 // ▼ 숫자 도우미 — 도구마다 다시 만들지 않게 여기 둔다

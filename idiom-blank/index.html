@@ -1,0 +1,1280 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>사자성어 빈칸 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 사자성어 빈칸 맞히기 퀴즈 게임. 네 글자 중 빈칸을 채우며 사자성어 실력과 어휘력을 키워보세요. 쉬움, 보통, 어려움 세 단계 지원.">
+<link rel="canonical" href="https://jwapyonara.com/idiom-blank/">
+<meta property="og:title" content="사자성어 빈칸 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 하는 사자성어 빈칸 맞히기 퀴즈 게임. 네 글자 중 빈칸을 채우며 사자성어 실력과 어휘력을 키워보세요.">
+<meta property="og:url" content="https://jwapyonara.com/idiom-blank/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="좌표나라">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "사자성어 빈칸",
+  "url": "https://jwapyonara.com/idiom-blank/",
+  "description": "가입 없이 바로 즐기는 무료 사자성어 빈칸 맞히기 퀴즈 게임. 쉬움, 보통, 어려움 난이도로 즐기는 한글 사자성어 퍼즐.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "KRW"
+  }
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 (판 위) */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 줄 */
+.game-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+}
+.game-status-score {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+.game-status-streak {
+  color: #ffffff;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.game-status-hearts {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+}
+.heart-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--danger, #d92d20);
+  transition: transform 0.2s, opacity 0.2s, color 0.2s;
+}
+.heart-icon.lost {
+  color: #636366;
+  opacity: 0.45;
+  transform: scale(0.85);
+}
+
+.game-best-line {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 게임 플레이 영역 감싸개 */
+.game-play-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto 12px;
+  border-radius: 16px;
+  background: var(--card);
+  border: 1.5px solid var(--line);
+  padding: 18px 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* 시작 및 결과 오버레이 */
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 20, 22, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  z-index: 20;
+}
+.game-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 8px;
+  color: #ffd60a;
+}
+.game-overlay p {
+  font-size: 15px;
+  margin: 0 0 16px;
+  color: #e5e5ea;
+  max-width: 290px;
+  line-height: 1.5;
+  word-break: keep-all;
+}
+.overlay-stats {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 18px;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 260px;
+  box-sizing: border-box;
+  font-size: 14px;
+  line-height: 1.8;
+}
+.overlay-stats b {
+  color: #ffd60a;
+  font-size: 18px;
+}
+.btn-start {
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  background: var(--red, #1b64da);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 32px;
+  min-height: 50px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+  max-width: 240px;
+}
+.btn-start:active {
+  opacity: 0.88;
+}
+.btn-overlay-rank {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  background: var(--soft, #e8f0fe);
+  color: var(--red, #1b64da);
+  border: 1.5px solid var(--red, #1b64da);
+  border-radius: 12px;
+  padding: 10px 20px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+  max-width: 240px;
+  margin-top: 8px;
+}
+.btn-overlay-rank:active {
+  background: var(--line);
+}
+
+/* 문제 진행 헤더 */
+.quiz-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.quiz-num {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--sub);
+  background: var(--fill);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+.quiz-combo-badge {
+  font-size: 12px;
+  font-weight: 800;
+  color: #d97706;
+  background: #fef3c7;
+  padding: 3px 10px;
+  border-radius: 999px;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.quiz-combo-badge.show {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* 뜻풀이 상자 */
+.meaning-card {
+  background: var(--fill, #f2f2f7);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.meaning-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--red);
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.meaning-text {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--ink);
+  word-break: keep-all;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 사자성어 글자 판 (4개 타일) */
+.idiom-tiles-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 20px;
+}
+.idiom-tile {
+  width: 66px;
+  height: 74px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 2px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--ink);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.06);
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.2s, border-color 0.2s, background 0.2s, color 0.2s;
+}
+.idiom-tile.blank {
+  background: var(--soft);
+  border: 2px dashed var(--red);
+  color: var(--red);
+}
+.idiom-tile.filled {
+  border-color: var(--ok, #12805c);
+  background: var(--okbg, #e6f6ef);
+  color: var(--ok, #12805c);
+  transform: scale(1.06);
+}
+
+/* 4지선다 버튼 그리드 */
+.choices-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.choice-btn {
+  font: inherit;
+  font-size: 24px;
+  font-weight: 800;
+  border: 2px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 14px;
+  padding: 12px 8px;
+  min-height: 58px;
+  cursor: pointer;
+  touch-action: manipulation;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.1s, border-color 0.15s, background 0.15s, color 0.15s;
+}
+.choice-btn:active:not(:disabled) {
+  transform: scale(0.96);
+  background: var(--fill);
+}
+.choice-btn.correct {
+  border-color: var(--ok, #12805c) !important;
+  background: var(--okbg, #e6f6ef) !important;
+  color: var(--ok, #12805c) !important;
+  transform: scale(1.02);
+}
+.choice-btn.wrong {
+  border-color: var(--danger, #d92d20) !important;
+  background: var(--dangerbg, #fdecea) !important;
+  color: var(--danger, #d92d20) !important;
+}
+
+/* 옵션 줄 */
+.game-options-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 4px 10px;
+  font-size: 14px;
+}
+.game-check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+}
+.game-check-label input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--red);
+  cursor: pointer;
+}
+.game-options-tip {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+}
+
+/* 제어 단추 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+}
+.btn-reset {
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #3a3a3c;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>사자성어 빈칸</h1>
+  <p class="lead">네 글자 중 한 글자를 맞히는 무료 사자성어 퀴즈 게임. 가입 없이 바로 즐겨보세요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="game-status-bar">
+      <div class="game-status-score" id="statusScore">점수 0</div>
+      <div class="game-status-streak" id="statusStreak">연속 0</div>
+      <div class="game-status-hearts" id="statusHearts" aria-label="남은 생명 3개">
+        <svg class="heart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/></svg>
+        <svg class="heart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/></svg>
+        <svg class="heart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/></svg>
+      </div>
+    </div>
+    <div class="game-best-line" id="statusBest"></div>
+
+    <div class="game-play-wrap" id="playWrap">
+      <div class="game-overlay" id="overlayBox">
+        <h2 id="overlayTitle">사자성어 빈칸</h2>
+        <p id="overlayDesc">쉬움으로 시작해요.<br>네 글자 중 비어 있는 글자를 골라보세요!</p>
+        <div class="overlay-stats" id="overlayStats" style="display:none;"></div>
+        <button type="button" class="btn-start" id="btnStartGame">게임 시작</button>
+        <button type="button" class="btn-overlay-rank" id="btnOverlayRank" style="display:none;">🏆 순위표 올리기</button>
+      </div>
+
+      <div class="quiz-header">
+        <span class="quiz-num" id="quizNum">문제 1</span>
+        <span class="quiz-combo-badge" id="quizComboBadge">5연속 보너스!</span>
+      </div>
+
+      <div class="meaning-card">
+        <span class="meaning-tag">뜻풀이</span>
+        <p class="meaning-text" id="idiomMeaning">뜻풀이가 여기에 나타납니다.</p>
+      </div>
+
+      <div class="idiom-tiles-wrap" id="tilesWrap">
+        <div class="idiom-tile" id="tile0">일</div>
+        <div class="idiom-tile blank" id="tile1">?</div>
+        <div class="idiom-tile" id="tile2">이</div>
+        <div class="idiom-tile" id="tile3">조</div>
+      </div>
+
+      <div class="choices-grid" id="choicesGrid">
+        <button type="button" class="choice-btn" data-idx="0">-</button>
+        <button type="button" class="choice-btn" data-idx="1">-</button>
+        <button type="button" class="choice-btn" data-idx="2">-</button>
+        <button type="button" class="choice-btn" data-idx="3">-</button>
+      </div>
+    </div>
+
+    <div class="game-options-bar">
+      <label class="game-check-label">
+        <input type="checkbox" id="chkSound" checked>
+        <span>효과음 켜기</span>
+      </label>
+      <span class="game-options-tip">WebAudio 직접 효과음</span>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:8px;">
+      💡 한자는 쓰지 않고 한글 소리와 뜻풀이로 누구나 쉽게 맞힐 수 있어요.
+    </p>
+  </section>
+
+  <p class="note">기기 안에서만 실행되며 점수와 최고 기록은 브라우저에 안전하게 보관됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>게임 규칙:</b> 사자성어 네 글자 중 한 글자가 빈칸으로 비워져 나옵니다. 아래 4개 보기 중에서 알맞은 글자를 하나 고르면 됩니다.</li>
+      <li><b>생명:</b> 틀릴 때마다 생명이 1개씩 줄어들며, 생명 3개를 모두 잃으면 게임이 끝납니다.</li>
+      <li><b>점수 계산:</b> 맞힌 문제마다 100점 × 난이도 배수(쉬움 1배, 보통 2배, 어려움 3배)가 주어집니다.</li>
+      <li><b>연속 정답 보너스:</b> 연속으로 5문제를 맞힐 때마다 보너스 점수 +100점이 추가됩니다.</li>
+      <li><b>난이도 구분:</b>
+        <ul>
+          <li><b>쉬움:</b> 일상에서 자주 접하는 아주 친숙한 50개 사자성어</li>
+          <li><b>보통:</b> 교양과 상식에 도움을 주는 중급 50개 사자성어</li>
+          <li><b>어려움:</b> 깊이 있는 고사성어와 고급 50개 사자성어</li>
+        </ul>
+      </li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>위쪽에서 난이도(쉬움·보통·어려움)를 고르고 '게임 시작'을 누릅니다.</li>
+      <li>제시된 뜻풀이와 세 글자를 힌트 삼아 비어 있는 글자를 유추해 보세요.</li>
+      <li>틀리지 않고 연속으로 맞힐수록 5연속마다 추가 보너스 점수가 쌓입니다.</li>
+      <li>게임이 끝나면 내 점수를 좌표나라 순위표에 올려 다른 사람들과 실력을 겨뤄보세요.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>출퇴근길이나 여유 시간에 2~3분 동안 가볍게 두뇌를 풀고 싶을 때, 알쏭달쏭한 사자성어 어휘력을 기르고 싶을 때 좋습니다. 다운로드 없이 모바일과 PC에서 바로 시작할 수 있습니다.</p>
+    <h2>알아 두면 좋은 것</h2>
+    <dl>
+      <dt>한자 없이 한글로 즐기는 퀴즈</dt>
+      <dd>어려운 한자 쓰기 부담 없이 순수 한글 소리와 뜻풀이로 진행되므로 어린이부터 어르신까지 온 가족이 함께 즐길 수 있습니다.</dd>
+      <dt>최고 점수 저장</dt>
+      <dd>난이도별 최고 점수는 브라우저의 로컬 저장소에 안전하게 보관되어 언제든 내 기록을 확인할 수 있습니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>오답을 골랐을 때 정답을 확인할 수 있나요?</summary>
+      <p>네, 오답을 선택하면 선택한 보기는 빨간색으로, 진짜 정답 보기는 초록색으로 잠시 표시되어 바른 글자를 확인하며 익힐 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>중간에 난이도를 바꾸면 어떻게 되나요?</summary>
+      <p>상단의 난이도 단추를 누르면 선택한 난이도의 새 게임 준비 상태로 전환되며 순위표 탭도 함께 바뀝니다.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // ── 사자성어 150개 데이터셋 (쉬움 50, 보통 50, 어려움 50) ──
+  var IDIOM_DATA = {
+    easy: [
+      ['일석이조', '돌 하나를 던져 새 두 마리를 잡는다는 뜻으로, 한 가지 일로 두 가지 이익을 얻음'],
+      ['작심삼일', '결심한 마음이 사흘을 가지 못한다는 뜻으로, 결심이 오래가지 못함'],
+      ['동문서답', '동쪽을 묻는데 서쪽을 대답한다는 뜻으로, 묻는 말에 엉뚱한 대답을 함'],
+      ['다홍치마', '같은 값이면 다홍치마라는 뜻으로, 조건이 같다면 더 좋은 것을 고름'],
+      ['전화위복', '재앙이 바뀌어 오히려 복이 된다는 뜻으로, 안 좋은 일이 좋은 일의 계기가 됨'],
+      ['역지사지', '처지를 바꾸어 생각한다는 뜻으로, 상대방의 입장에서 생각해 봄'],
+      ['설상가상', '눈 위에 서리가 덮인다는 뜻으로, 어려운 일에 또 어려운 일이 겹침'],
+      ['배은망덕', '은혜를 배반하고 덕을 잊는다는 뜻으로, 고마운 은혜를 저버림'],
+      ['유비무환', '준비가 있으면 걱정이 없다는 뜻으로, 미리 대비해 두면 걱정할 것이 없음'],
+      ['십시일반', '열 사람이 한 숟가락씩 밥을 보태면 한 그릇이 된다는 뜻으로, 여럿이 힘을 합침'],
+      ['승승장구', '싸움에서 이긴 기세를 타고 계속 나아간다는 뜻으로, 일이 순조롭게 잘 풀림'],
+      ['구사일생', '아홉 번 죽을 고비에서 한 번 살아난다는 뜻으로, 아슬아슬하게 살아남'],
+      ['고진감래', '쓴 것이 다하면 단 것이 온다는 뜻으로, 고생 끝에 즐거움이 찾아옴'],
+      ['다다익선', '많으면 많을수록 더욱 좋다는 뜻'],
+      ['대기만성', '큰 그릇은 늦게 만들어진다는 뜻으로, 크게 될 사람은 늦게 성공함'],
+      ['동고동락', '괴로움도 즐거움도 함께한다는 뜻으로, 고락을 같이함'],
+      ['마이동풍', '동풍이 말의 귀를 스쳐 지나간다는 뜻으로, 남의 말을 전혀 귀담아듣지 않음'],
+      ['부전자전', '아버지의 성격이나 모습이 아들에게 그대로 전해진다는 뜻'],
+      ['새옹지마', '인생의 길흉화복은 변화가 많아 예측하기 어렵다는 뜻'],
+      ['속수무책', '손을 묶은 것처럼 어찌할 방책이 없다는 뜻으로, 꼼짝없이 당함'],
+      ['수수방관', '팔짱을 끼고 바라만 본다는 뜻으로, 아무런 간섭이나 도움 없이 보고만 있음'],
+      ['시시비비', '옳은 것은 옳다 하고 그른 것은 그르다 한다는 뜻으로, 옳고 그름을 따짐'],
+      ['심사숙고', '깊이 생각하고 깊이 고심한다는 뜻으로, 신중하게 생각함'],
+      ['아전인수', '내 논에 물 대기라는 뜻으로, 자기에게만 이롭게 행동함'],
+      ['안하무인', '눈 아래에 사람이 없다는 뜻으로, 남을 업신여기고 방자함'],
+      ['어부지리', '두 사람이 다투는 사이에 제삼자가 이익을 챙긴다는 뜻'],
+      ['오비이락', '까마귀 날자 배 떨어진다는 뜻으로, 우연한 일로 의심을 받음'],
+      ['온고지신', '옛것을 익히고 그것으로 미루어 새것을 안다는 뜻'],
+      ['우공이산', '우공이 산을 옮긴다는 뜻으로, 끊임없이 노력하면 큰일도 이룸'],
+      ['유구무언', '입은 있으나 할 말이 없다는 뜻으로, 변명할 말이 없음'],
+      ['유유상종', '같은 무리끼리 서로 사귄다는 뜻으로, 비슷한 사람끼리 모임'],
+      ['이심전심', '마음에서 마음으로 통한다는 뜻으로, 말을 하지 않아도 뜻이 통함'],
+      ['일취월장', '날마다 나아가고 달마다 발전한다는 뜻으로, 눈부시게 발전함'],
+      ['자포자기', '스스로 자신을 해치고 버린다는 뜻으로, 모든 것을 포기함'],
+      ['적반하장', '도둑이 도리어 매를 든다는 뜻으로, 잘못한 사람이 오히려 성냄'],
+      ['전전긍긍', '몹시 두려워하며 조심하고 걱정함'],
+      ['정저지와', '우물 안 개구리라는 뜻으로, 견문이 좁아 넓은 세상을 모름'],
+      ['조삼모사', '아침에 세 개 저녁에 네 개라는 뜻으로, 눈앞의 얕은꾀로 남을 속임'],
+      ['주경야독', '낮에는 밭 갈고 밤에는 글을 읽는다는 뜻으로, 바쁜 중에도 열심히 공부함'],
+      ['죽마고우', '어릴 때 대나무 말을 타고 놀던 벗이라는 뜻으로, 오랜 소꿉친구'],
+      ['천고마비', '하늘이 높고 말이 살찐다는 뜻으로, 맑고 풍요로운 가을'],
+      ['칠전팔기', '일곱 번 넘어져도 여덟 번 일어난다는 뜻으로, 끝까지 굴하지 않고 분투함'],
+      ['탁상공론', '책상 위에서만 헛된 의논을 한다는 뜻으로, 실현성 없는 이론'],
+      ['파란만장', '물결이 만 장이나 높게 인다는 뜻으로, 일의 변화가 심함'],
+      ['풍전등화', '바람 앞의 등불이라는 뜻으로, 위태로운 처지'],
+      ['학수고대', '학처럼 목을 길게 빼고 기다린다는 뜻으로, 몹시 기다림'],
+      ['호형호제', '서로 형이라 부르고 아우라 부른다는 뜻으로, 매우 친한 사이'],
+      ['화룡점정', '용을 그리고 마지막에 눈동자를 찍는다는 뜻으로, 가장 중요한 마무리'],
+      ['횡설수설', '말을 이리저리 종잡을 수 없이 지껄임'],
+      ['금시초문', '이제야 비로소 처음으로 들음']
+    ],
+    normal: [
+      ['각골난망', '은혜를 뼈에 새겨 잊지 않는다는 뜻'],
+      ['감탄고토', '달면 삼키고 쓰면 뱉는다는 뜻으로, 자기 이익만 챙김'],
+      ['거두절미', '머리와 꼬리를 자른다는 뜻으로, 본론만 간단히 말함'],
+      ['견강부회', '가당치도 않은 말을 억지로 끌어다 자기주장에 맞춤'],
+      ['견물생심', '물건을 보면 그것을 가지고 싶은 욕심이 생김'],
+      ['결초보은', '풀을 묶어 은혜를 갚는다는 뜻으로, 죽어서도 은혜를 잊지 않음'],
+      ['고립무원', '외롭고 돕는 사람이 없다는 뜻으로, 홀로 고립됨'],
+      ['골육상잔', '가까운 혈육끼리 서로 다투고 해침'],
+      ['공명정대', '마음이 공평하고 처사가 정당함'],
+      ['과유불급', '지나친 것은 미치지 못한 것과 같다는 뜻'],
+      ['관포지교', '관중과 포숙아의 사귐처럼 영원히 변치 않는 깊은 우정'],
+      ['교언영색', '교묘한 말과 아첨하는 얼굴빛'],
+      ['구태의연', '조금도 새로워지지 않고 옛 모습 그대로임'],
+      ['군계일학', '닭 무리 속에 서 있는 한 마리의 학이라는 뜻으로, 뛰어난 인물'],
+      ['권모술수', '목적을 이루기 위해 수단과 방법을 가리지 않는 교묘한 모략'],
+      ['금과옥조', '금이나 옥처럼 귀중하게 여겨 꼭 지켜야 할 법칙'],
+      ['난형난제', '누가 형이고 아우인지 가리기 어렵다는 뜻으로, 우열을 가리기 힘듦'],
+      ['남부여대', '남자는 등에 지고 여자는 머리에 인다는 뜻으로, 가난하여 떠돌아다님'],
+      ['노심초사', '마음으로 애태우며 몹시 걱정함'],
+      ['단도직입', '칼 하나를 쥐고 바로 들어간다는 뜻으로, 거침없이 요점을 찌름'],
+      ['당랑거철', '사마귀가 수레바퀴를 막는다는 뜻으로, 자기 힘을 모르고 덤빔'],
+      ['도원결의', '복숭아 밭에서 맺은 의리라는 뜻으로, 굳게 맺은 맹세'],
+      ['동상이몽', '같은 자리에 누워 다른 꿈을 꾼다는 뜻으로, 겉은 같으나 생각이 다름'],
+      ['두문불출', '문을 닫아걸고 밖에 나가지 않음'],
+      ['만장일치', '모든 사람의 의견이 완전히 하나로 같음'],
+      ['맥수지탄', '보리만 무성한 것을 보고 탄식한다는 뜻으로, 나라가 망함을 한탄함'],
+      ['명경지수', '맑은 거울과 고요한 물이라는 뜻으로, 티 없이 맑고 고요한 마음'],
+      ['모순당착', '말이나 행동의 앞뒤가 서로 맞지 않음'],
+      ['무소부재', '존재하지 않는 곳이 없다는 뜻으로, 어디에나 다 있음'],
+      ['박학다식', '배운 것이 넓고 아는 것이 많음'],
+      ['백년가약', '백 년 동안 함께하자는 언약이라는 뜻으로, 부부의 혼인 약속'],
+      ['백전백승', '백 번 싸워 백 번 다 이긴다는 뜻'],
+      ['부화뇌동', '남의 말이나 행동에 줏대 없이 덩달아 따름'],
+      ['삼고초려', '인재를 맞이하기 위해 정성을 다해 세 번이나 찾아감'],
+      ['상전벽해', '뽕나무 밭이 푸른 바다로 변한다는 뜻으로, 세상일이 크게 변함'],
+      ['선공후사', '공적인 일을 먼저 하고 사적인 일은 뒤로 미룸'],
+      ['소탐대실', '작은 것을 탐내다가 도리어 큰 것을 잃음'],
+      ['수불석권', '손에서 책을 놓지 않고 늘 열심히 공부함'],
+      ['양두구육', '양의 머리를 걸어놓고 개고기를 판다는 뜻으로, 겉과 속이 다름'],
+      ['어불성설', '말이 이치에 전혀 맞지 않음'],
+      ['오합지졸', '까마귀 떼처럼 규율도 통일도 없는 무리'],
+      ['와신상담', '섶나무에 눕고 쓸개를 씹는다는 뜻으로, 원수를 갚거나 뜻을 이루기 위해 고난을 참음'],
+      ['외유내강', '겉으로는 부드러우나 속은 굳세고 곧음'],
+      ['용두사미', '처음은 거창하나 끝은 뱀의 꼬리처럼 흐지부지함'],
+      ['인과응보', '원인과 결과에 따라 그에 합당한 보답을 받음'],
+      ['일도양단', '칼로 한 번에 두 토막을 내듯 단호하게 처리함'],
+      ['자승자박', '자신이 꼰 줄로 자신을 묶는다는 뜻으로, 자기 행동에 자기가 얽매임'],
+      ['전무후무', '이전에도 없었고 앞으로도 없음'],
+      ['점입가경', '갈수록 경치가 더 아름다워진다는 뜻으로, 일이 점점 흥미진진해짐'],
+      ['조변석개', '아침저녁으로 뜯어고친다는 뜻으로, 계획이나 결정을 자주 바꿈']
+    ],
+    hard: [
+      ['간담상조', '간과 쓸개를 서로 꺼내 보인다는 뜻으로, 진심으로 사귐'],
+      ['거안제미', '밥상을 눈썹 높이로 들어 공손히 바친다는 뜻으로, 남편을 극진히 존경함'],
+      ['견문발검', '모기를 보고 칼을 뺀다는 뜻으로, 사소한 일에 거창하게 대처함'],
+      ['경국지색', '나라를 기울어지게 할 만큼 빼어난 미인'],
+      ['고식지계', '당장의 편안함만을 꾀하는 임시변통의 얕은 책략'],
+      ['곡학아세', '학문을 굽혀 세상 사람에게 아첨함'],
+      ['구우일모', '아홉 마리 소 가운데 하나의 털이라는 뜻으로, 매우 사소한 것'],
+      ['근묵자흑', '먹을 가까이하면 검어진다는 뜻으로, 나쁜 사람과 어울리면 나쁜 물이 듦'],
+      ['금의야행', '비단옷을 입고 밤길을 걷는다는 뜻으로, 아무 보람 없는 일'],
+      ['기호지세', '호랑이 등에 타고 달리는 기세라는 뜻으로, 중도에 그만둘 수 없음'],
+      ['단기지교', '짜던 베를 끊어 훈계한다는 뜻으로, 학업을 중도에 포기하지 말라는 가르침'],
+      ['당동벌이', '옳고 그름을 따지지 않고 같은 파는 돕고 다른 파는 배척함'],
+      ['도로무익', '헛되이 수고만 하고 아무런 이익이 없음'],
+      ['도탄지고', '진흙 구덩이나 숯불에 빠진 고통이라는 뜻으로, 몹시 곤궁한 처지'],
+      ['동병상련', '같은 병을 앓는 사람끼리 서로 가엾게 여김'],
+      ['득롱망촉', '농나라를 얻고 촉나라까지 바란다는 뜻으로, 끝없는 탐욕'],
+      ['만시지탄', '시기가 늦어 기회를 놓친 것을 한탄함'],
+      ['망양지탄', '갈림길이 많아 양을 잃고 탄식한다는 뜻으로, 진리를 찾기 어려움'],
+      ['면종복배', '앞에서는 복종하는 체하면서 속으로는 딴마음을 품음'],
+      ['묘두현령', '고양이 목에 방울 달기라는 뜻으로, 실행하기 어려운 헛된 의논'],
+      ['문전성시', '문 앞이 시장을 이루듯 찾아오는 손님이 끊이지 않음'],
+      ['백년하청', '황하의 강물이 맑아지기를 기다린다는 뜻으로, 가망 없는 일'],
+      ['백척간두', '백 척이나 되는 장대 끝에 섰다는 뜻으로, 몹시 위태로운 지경'],
+      ['법고창신', '옛것을 본받아 새로운 것을 창조함'],
+      ['사상누각', '모래 위에 세운 누각이라는 뜻으로, 기초가 부실하여 무너지기 쉬운 일'],
+      ['살신성인', '자신의 몸을 바쳐 인을 이룸'],
+      ['삼일천하', '정권을 잡은 기간이 매우 짧음을 이르는 말'],
+      ['생면부지', '태어나서 한 번도 만난 적이 없는 사람'],
+      ['양질호피', '속은 양인데 겉은 호랑이 가죽이라는 뜻으로, 겉만 번지르르함'],
+      ['언중유골', '말속에 뼈가 있다는 뜻으로, 말속에 숨은 뜻이 있음'],
+      ['염화미소', '꽃을 들자 미소로 답한다는 뜻으로, 마음에서 마음으로 통함'],
+      ['오리무중', '짙은 안갯속에서 갈피를 잡을 수 없음'],
+      ['요산요수', '산을 좋아하고 물을 좋아한다는 뜻으로, 자연을 즐김'],
+      ['일모도원', '날은 저물고 갈 길은 멀다는 뜻으로, 할 일은 많은데 시간이 부족함'],
+      ['일망타진', '그물을 한 번 쳐서 고기를 다 잡는다는 뜻으로, 한꺼번에 모조리 잡음'],
+      ['절차탁마', '옥이나 돌을 갈고 닦는다는 뜻으로, 학문이나 덕행을 닦음'],
+      ['조령모개', '아침에 내린 명령을 저녁에 고친다는 뜻으로, 지침이 자주 바뀜'],
+      ['지음', '자신의 음악을 알아주는 친구라는 뜻으로, 마음이 통하는 절친한 벗'],
+      ['청출어람', '쪽풀에서 뽑아낸 푸른 물감이 더 푸르다는 뜻으로, 제자가 스승보다 나음'],
+      ['취생몽사', '취한 듯 꿈꾸는 듯 아무 뜻 없이 일생을 보냄'],
+      ['표리부동', '겉과 속이 서로 다름'],
+      ['한단지몽', '한단에서 꾼 덧없는 꿈이라는 뜻으로, 인생의 부귀영화가 덧없음'],
+      ['함흥차사', '심부름을 간 사람이 한 번 가면 소식이 없음을 이르는 말'],
+      ['호연지기', '하늘과 땅 사이에 가득 찬 넓고 크고 곧은 원기'],
+      ['환골탈태', '뼈대를 바꾸고 태를 벗는다는 뜻으로, 모습이나 생각이 완전히 새로워짐'],
+      ['후생가외', '젊은 후배가 큰 인물이 될 수 있어 두려워할 만함'],
+      ['희로애락', '기쁨, 노여움, 슬픔, 즐거움의 인간 감정'],
+      ['교우이신', '믿음으로써 벗을 사귄다는 뜻'],
+      ['초동급부', '땔나무 하는 아이와 물 긷는 아낙네라는 뜻으로, 평범한 보통 사람들'],
+      ['박이부정', '여러 방면으로 널리 알기는 하지만 깊지 못함']
+    ]
+  };
+
+  // 전체 한글 글자 풀 (오답 생성용)
+  var ALL_CHARS = [];
+  (function () {
+    var charSet = {};
+    ['easy', 'normal', 'hard'].forEach(function (lvl) {
+      IDIOM_DATA[lvl].forEach(function (item) {
+        var w = item[0];
+        for (var i = 0; i < w.length; i++) {
+          charSet[w[i]] = true;
+        }
+      });
+    });
+    ALL_CHARS = Object.keys(charSet);
+  })();
+
+  // ── WebAudio 직접 효과음 모듈 ──
+  var Sound = (function () {
+    var ctx = null;
+    var enabled = true;
+    function getCtx() {
+      if (!ctx) {
+        var AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) ctx = new AudioCtx();
+      }
+      if (ctx && ctx.state === 'suspended') {
+        ctx.resume().catch(function () {});
+      }
+      return ctx;
+    }
+    return {
+      setEnabled: function (v) { enabled = !!v; },
+      playCorrect: function () {
+        if (!enabled) return;
+        var c = getCtx();
+        if (!c) return;
+        var now = c.currentTime;
+        var osc = c.createOscillator();
+        var gain = c.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(gain);
+        gain.connect(c.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      },
+      playBonus: function () {
+        if (!enabled) return;
+        var c = getCtx();
+        if (!c) return;
+        var now = c.currentTime;
+        var notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+        for (var i = 0; i < notes.length; i++) {
+          var osc = c.createOscillator();
+          var gain = c.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(notes[i], now + i * 0.08);
+          gain.gain.setValueAtTime(0.12, now + i * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.22);
+          osc.connect(gain);
+          gain.connect(c.destination);
+          osc.start(now + i * 0.08);
+          osc.stop(now + i * 0.08 + 0.22);
+        }
+      },
+      playWrong: function () {
+        if (!enabled) return;
+        var c = getCtx();
+        if (!c) return;
+        var now = c.currentTime;
+        var osc = c.createOscillator();
+        var gain = c.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(130, now + 0.28);
+        gain.gain.setValueAtTime(0.14, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.connect(gain);
+        gain.connect(c.destination);
+        osc.start(now);
+        osc.stop(now + 0.3);
+      },
+      playGameOver: function () {
+        if (!enabled) return;
+        var c = getCtx();
+        if (!c) return;
+        var now = c.currentTime;
+        var notes = [329.63, 293.66, 261.63, 196.0]; // E4, D4, C4, G3
+        for (var i = 0; i < notes.length; i++) {
+          var osc = c.createOscillator();
+          var gain = c.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(notes[i], now + i * 0.14);
+          gain.gain.setValueAtTime(0.14, now + i * 0.14);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.14 + 0.3);
+          osc.connect(gain);
+          gain.connect(c.destination);
+          osc.start(now + i * 0.14);
+          osc.stop(now + i * 0.14 + 0.3);
+        }
+      }
+    };
+  })();
+
+  // ── DOM 요소 ──
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var statusScore = document.getElementById('statusScore');
+  var statusStreak = document.getElementById('statusStreak');
+  var statusHearts = document.getElementById('statusHearts');
+  var statusBest = document.getElementById('statusBest');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var overlayStats = document.getElementById('overlayStats');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var quizNum = document.getElementById('quizNum');
+  var quizComboBadge = document.getElementById('quizComboBadge');
+  var idiomMeaning = document.getElementById('idiomMeaning');
+  var tile0 = document.getElementById('tile0');
+  var tile1 = document.getElementById('tile1');
+  var tile2 = document.getElementById('tile2');
+  var tile3 = document.getElementById('tile3');
+  var tiles = [tile0, tile1, tile2, tile3];
+  var choicesGrid = document.getElementById('choicesGrid');
+  var choiceBtns = choicesGrid.querySelectorAll('.choice-btn');
+  var chkSound = document.getElementById('chkSound');
+  var btnRestart = document.getElementById('btnRestart');
+
+  // ── 게임 상태 변수 ──
+  var gameState = 'ready'; // 'ready', 'playing', 'gameover'
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  var score = 0;
+  var hearts = 3;
+  var streak = 0;
+  var maxStreak = 0;
+  var solvedCount = 0;
+  var questionIndex = 0;
+  var isAnswering = false; // 정답/오답 연출 중 클릭 방지
+
+  // 문제 출제용 변수
+  var idiomQueue = [];
+  var currentQuestion = null; // { word, meaning, blankIdx, correctChar, choices }
+
+  // 최고 점수 기억 (정수)
+  var bestEasy = 0;
+  var bestNormal = 0;
+  var bestHard = 0;
+
+  // ── 로컬 스토리지 읽기 및 반영 ──
+  function loadStorage() {
+    try {
+      bestEasy = parseInt(localStorage.getItem('zw_idiom-blank_best_easy'), 10) || 0;
+      bestNormal = parseInt(localStorage.getItem('zw_idiom-blank_best_normal'), 10) || 0;
+      bestHard = parseInt(localStorage.getItem('zw_idiom-blank_best_hard'), 10) || 0;
+      var savedSound = localStorage.getItem('zw_idiom-blank_sound');
+      if (savedSound === '0') {
+        chkSound.checked = false;
+        Sound.setEnabled(false);
+      } else {
+        chkSound.checked = true;
+        Sound.setEnabled(true);
+      }
+      var savedLevel = localStorage.getItem('zw_idiom-blank_level');
+      if (savedLevel === 'normal' || savedLevel === 'hard' || savedLevel === 'easy') {
+        currentLevel = savedLevel;
+      } else {
+        currentLevel = 'easy';
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+    updateLevelButtons();
+    updateOverlayDesc();
+    updateStatusDisplay();
+    syncRankTab();
+    setTimeout(syncRankTab, 250);
+  }
+
+  // 전적 및 최고 기록 표시 갱신
+  function updateStatusDisplay() {
+    statusScore.textContent = '점수 ' + score.toLocaleString('ko-KR');
+    statusStreak.textContent = '연속 ' + streak;
+    if (bestEasy > 0 || bestNormal > 0 || bestHard > 0) {
+      statusBest.textContent = '최고 기록 · 쉬움 ' + bestEasy.toLocaleString('ko-KR') + '점 · 보통 ' + bestNormal.toLocaleString('ko-KR') + '점 · 어려움 ' + bestHard.toLocaleString('ko-KR') + '점';
+    } else {
+      statusBest.textContent = '';
+    }
+    updateHeartsDisplay();
+  }
+
+  // 하트 아이콘 표시 갱신
+  function updateHeartsDisplay() {
+    var heartSvgs = statusHearts.querySelectorAll('.heart-icon');
+    for (var i = 0; i < heartSvgs.length; i++) {
+      if (i < hearts) {
+        heartSvgs[i].classList.remove('lost');
+      } else {
+        heartSvgs[i].classList.add('lost');
+      }
+    }
+    statusHearts.setAttribute('aria-label', '남은 생명 ' + hearts + '개');
+  }
+
+  // 난이도 단추 상태 갱신
+  function updateLevelButtons() {
+    btnDiffEasy.classList.remove('on');
+    btnDiffNormal.classList.remove('on');
+    btnDiffHard.classList.remove('on');
+    if (currentLevel === 'normal') {
+      btnDiffNormal.classList.add('on');
+    } else if (currentLevel === 'hard') {
+      btnDiffHard.classList.add('on');
+    } else {
+      btnDiffEasy.classList.add('on');
+    }
+  }
+
+  // 오버레이 문구 갱신
+  function updateOverlayDesc() {
+    if (gameState === 'playing') return;
+    var name = (currentLevel === 'hard') ? '어려움' : (currentLevel === 'normal' ? '보통' : '쉬움');
+    overlayTitle.textContent = '사자성어 빈칸';
+    overlayDesc.innerHTML = name + '으로 시작해요.<br>네 글자 중 비어 있는 글자를 골라보세요!';
+    overlayStats.style.display = 'none';
+    btnOverlayRank.style.display = 'none';
+    btnStartGame.textContent = '게임 시작';
+  }
+
+  // 순위표 카드(rank.js) 쉬움/보통/어려움 탭 연동
+  function syncRankTab() {
+    try {
+      var i = 0;
+      if (currentLevel === 'normal') i = 1;
+      else if (currentLevel === 'hard') i = 2;
+      if (window.ZW) {
+        window.ZW.rankPick = i;
+      }
+      var b = document.querySelector('.rk-tabs button[data-i="' + i + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  // 난이도 변경 함수
+  function setLevel(lvl) {
+    if (lvl === currentLevel && gameState === 'ready') return;
+    currentLevel = (lvl === 'hard') ? 'hard' : (lvl === 'normal' ? 'normal' : 'easy');
+    try {
+      localStorage.setItem('zw_idiom-blank_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    syncRankTab();
+    resetToReadyState();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // 소리 옵션 저장
+  chkSound.addEventListener('change', function () {
+    var on = chkSound.checked;
+    Sound.setEnabled(on);
+    try {
+      localStorage.setItem('zw_idiom-blank_sound', on ? '1' : '0');
+    } catch (e) {}
+  });
+
+  // 준비 상태로 리셋
+  function resetToReadyState() {
+    gameState = 'ready';
+    score = 0;
+    hearts = 3;
+    streak = 0;
+    maxStreak = 0;
+    solvedCount = 0;
+    questionIndex = 0;
+    isAnswering = false;
+
+    updateStatusDisplay();
+    updateOverlayDesc();
+    overlayBox.style.display = 'flex';
+  }
+
+  // 문제 출제 큐 생성 (Fisher-Yates 셔플)
+  function createQueue() {
+    var pool = IDIOM_DATA[currentLevel].slice();
+    for (var i = pool.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var temp = pool[i];
+      pool[i] = pool[j];
+      pool[j] = temp;
+    }
+    return pool;
+  }
+
+  // 새 문제 생성 및 화면 렌더링
+  function nextQuestion() {
+    if (hearts <= 0) {
+      endGame();
+      return;
+    }
+
+    if (idiomQueue.length === 0) {
+      idiomQueue = createQueue();
+    }
+
+    var item = idiomQueue.pop();
+    var word = item[0];
+    var meaning = item[1];
+    var blankIdx = Math.floor(Math.random() * 4);
+    var correctChar = word[blankIdx];
+
+    // 오답 3개 무작위 추출 (중복 방지)
+    var choicesSet = {};
+    choicesSet[correctChar] = true;
+    var choices = [correctChar];
+
+    // 1순위: 같은 난이도 다른 사자성어의 글자들
+    var candidateChars = [];
+    IDIOM_DATA[currentLevel].forEach(function (other) {
+      if (other[0] !== word) {
+        candidateChars.push(other[0][blankIdx]);
+      }
+    });
+
+    // 섞기
+    for (var k = candidateChars.length - 1; k > 0; k--) {
+      var rk = Math.floor(Math.random() * (k + 1));
+      var t = candidateChars[k];
+      candidateChars[k] = candidateChars[rk];
+      candidateChars[rk] = t;
+    }
+
+    for (var c = 0; c < candidateChars.length && choices.length < 4; c++) {
+      var ch = candidateChars[c];
+      if (!choicesSet[ch]) {
+        choicesSet[ch] = true;
+        choices.push(ch);
+      }
+    }
+
+    // 부족하면 전체 글자 풀에서 보충
+    while (choices.length < 4) {
+      var randChar = ALL_CHARS[Math.floor(Math.random() * ALL_CHARS.length)];
+      if (!choicesSet[randChar]) {
+        choicesSet[randChar] = true;
+        choices.push(randChar);
+      }
+    }
+
+    // 보기 4개 셔플
+    for (var s = choices.length - 1; s > 0; s--) {
+      var sj = Math.floor(Math.random() * (s + 1));
+      var st = choices[s];
+      choices[s] = choices[sj];
+      choices[sj] = st;
+    }
+
+    currentQuestion = {
+      word: word,
+      meaning: meaning,
+      blankIdx: blankIdx,
+      correctChar: correctChar,
+      choices: choices
+    };
+
+    questionIndex++;
+    quizNum.textContent = '문제 ' + questionIndex;
+    idiomMeaning.textContent = meaning;
+
+    // 타일 렌더링
+    for (var t = 0; t < 4; t++) {
+      tiles[t].classList.remove('blank', 'filled');
+      if (t === blankIdx) {
+        tiles[t].textContent = '?';
+        tiles[t].classList.add('blank');
+      } else {
+        tiles[t].textContent = word[t];
+      }
+    }
+
+    // 보기 단추 렌더링
+    for (var b = 0; b < 4; b++) {
+      choiceBtns[b].textContent = choices[b];
+      choiceBtns[b].className = 'choice-btn';
+      choiceBtns[b].disabled = false;
+    }
+
+    isAnswering = false;
+  }
+
+  // 선택지 클릭 처리
+  function handleChoiceClick(e) {
+    if (gameState !== 'playing' || isAnswering || !currentQuestion) return;
+
+    var btn = e.target.closest('.choice-btn');
+    if (!btn) return;
+
+    var selectedChar = btn.textContent.trim();
+    isAnswering = true;
+
+    // 모든 버튼 비활성화
+    for (var i = 0; i < choiceBtns.length; i++) {
+      choiceBtns[i].disabled = true;
+    }
+
+    if (selectedChar === currentQuestion.correctChar) {
+      // 정답!
+      btn.classList.add('correct');
+      tiles[currentQuestion.blankIdx].textContent = currentQuestion.correctChar;
+      tiles[currentQuestion.blankIdx].classList.remove('blank');
+      tiles[currentQuestion.blankIdx].classList.add('filled');
+
+      solvedCount++;
+      streak++;
+      if (streak > maxStreak) maxStreak = streak;
+
+      // 점수 계산: 맞힌 문제마다 100 × 난이도 배수
+      var mult = (currentLevel === 'hard') ? 3 : (currentLevel === 'normal' ? 2 : 1);
+      var gained = 100 * mult;
+
+      // 연속 정답 보너스: 연속 5개마다 +100
+      var bonus = 0;
+      if (streak > 0 && streak % 5 === 0) {
+        bonus = 100;
+        gained += bonus;
+        quizComboBadge.textContent = streak + '연속 보너스! (+100)';
+        quizComboBadge.classList.add('show');
+        setTimeout(function () {
+          quizComboBadge.classList.remove('show');
+        }, 1200);
+        Sound.playBonus();
+      } else {
+        Sound.playCorrect();
+      }
+
+      score += gained;
+      if (score > 99999999) score = 99999999; // 상한 99999999 clamp
+
+      updateStatusDisplay();
+
+      setTimeout(function () {
+        nextQuestion();
+      }, 550);
+    } else {
+      // 오답!
+      btn.classList.add('wrong');
+      // 진짜 정답 표시
+      for (var j = 0; j < choiceBtns.length; j++) {
+        if (choiceBtns[j].textContent.trim() === currentQuestion.correctChar) {
+          choiceBtns[j].classList.add('correct');
+        }
+      }
+
+      hearts--;
+      streak = 0;
+      Sound.playWrong();
+      updateStatusDisplay();
+
+      if (hearts <= 0) {
+        setTimeout(function () {
+          endGame();
+        }, 900);
+      } else {
+        setTimeout(function () {
+          nextQuestion();
+        }, 850);
+      }
+    }
+  }
+
+  choicesGrid.addEventListener('click', handleChoiceClick);
+
+  // 게임 시작
+  function startNewGame() {
+    gameState = 'playing';
+    score = 0;
+    hearts = 3;
+    streak = 0;
+    maxStreak = 0;
+    solvedCount = 0;
+    questionIndex = 0;
+    isAnswering = false;
+    idiomQueue = createQueue();
+
+    overlayBox.style.display = 'none';
+    quizComboBadge.classList.remove('show');
+    updateStatusDisplay();
+    nextQuestion();
+  }
+
+  // 게임 종료
+  function endGame() {
+    gameState = 'gameover';
+    isAnswering = true;
+    Sound.playGameOver();
+
+    // 최고 기록 비교 및 로컬 스토리지 정수 저장 (최대 99999999 clamp)
+    var currentScore = Math.min(score, 99999999);
+    var isNewBest = false;
+    try {
+      if (currentLevel === 'hard') {
+        if (currentScore > bestHard) {
+          bestHard = currentScore;
+          localStorage.setItem('zw_idiom-blank_best_hard', String(bestHard));
+          isNewBest = true;
+        }
+      } else if (currentLevel === 'normal') {
+        if (currentScore > bestNormal) {
+          bestNormal = currentScore;
+          localStorage.setItem('zw_idiom-blank_best_normal', String(bestNormal));
+          isNewBest = true;
+        }
+      } else {
+        if (currentScore > bestEasy) {
+          bestEasy = currentScore;
+          localStorage.setItem('zw_idiom-blank_best_easy', String(bestEasy));
+          isNewBest = true;
+        }
+      }
+    } catch (e) {}
+
+    updateStatusDisplay();
+    syncRankTab();
+
+    // 결과 오버레이 표시
+    overlayTitle.textContent = isNewBest ? '신기록 달성!' : '게임 종료';
+    overlayDesc.innerHTML = isNewBest
+      ? '축하합니다! 이 난이도의 새로운 최고 기록을 세웠어요.<br>순위표에 내 기록을 올려보세요.'
+      : '생명을 모두 소진했어요. 다시 도전해 보세요!';
+
+    var levelName = (currentLevel === 'hard') ? '어려움' : (currentLevel === 'normal' ? '보통' : '쉬움');
+    overlayStats.innerHTML = '난이도: <b>' + levelName + '</b><br>'
+      + '최종 점수: <b>' + currentScore.toLocaleString('ko-KR') + '점</b><br>'
+      + '맞힌 문제: <b>' + solvedCount + '개</b> · 최고 연속: <b>' + maxStreak + '개</b>';
+    overlayStats.style.display = 'block';
+
+    btnStartGame.textContent = '다시 도전하기';
+    btnOverlayRank.style.display = 'block';
+    overlayBox.style.display = 'flex';
+  }
+
+  // 시작 버튼
+  btnStartGame.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  // 다시 하기 단추
+  btnRestart.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  // 결과창의 "🏆 순위표 올리기" 단추 (#btnOverlayRank)
+  btnOverlayRank.addEventListener('click', function () {
+    // common.js / rank.js의 .zw-rk-jump 단추가 있으면 트리거
+    var jump = document.querySelector('.zw-rk-jump');
+    if (jump && jump.style.display !== 'none') {
+      jump.click();
+    } else {
+      var rkSec = document.querySelector('.zw-rank');
+      if (rkSec) {
+        rkSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        rkSec.classList.add('flash');
+        setTimeout(function () { rkSec.classList.remove('flash'); }, 1800);
+      }
+    }
+  });
+
+  // 초기화 실행
+  loadStorage();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/checkers-8/">체커</a> — 컴퓨터와 체커 한 판</li><li><a href="/fleet-hunt/">함대 맞히기</a> — 좌표를 찍어 상대 함대 찾기</li><li><a href="/baduk-9/">바둑 9줄</a> — 9줄 판에서 컴퓨터와 바둑 한 판</li><li><a href="/janggi-mini/">장기</a> — 컴퓨터와 장기 한 판</li><li><a href="/gonu/">고누</a> — 말 3개를 한 줄로 모으기</li><li><a href="/mancala/">만칼라</a> — 구슬을 나눠 담아 곳간 채우기</li><li><a href="/mini-chess/">미니 체스</a> — 6×6 판의 작은 체스</li><li><a href="/domino-chain/">도미노</a> — 숫자를 맞춰 도미노 잇기</li><li><a href="/word-hangman/">글자 맞히기</a> — 글자를 하나씩 찍어 단어 맞히기</li><li><a href="/hangul-typing/">한글 타자 연습</a> — 떨어지는 단어를 쳐서 지우기</li><li><a href="/proverb-complete/">속담 완성</a> — 속담 뒷부분 맞히기</li><li><a href="/tictactoe/">틱택토</a> — 컴퓨터와 세 줄 만들기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

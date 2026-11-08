@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>클릭 속도 재기 무료 | 좌표나라</title>
+<meta name="description" content="제한 시간 동안 얼마나 빠르게 누를 수 있는지 클릭 속도(CPS)를 측정해 보세요. 가입 없이 모바일과 PC에서 즐기는 무료 클릭 속도 측정 게임.">
+<link rel="canonical" href="https://jwapyonara.com/click-speed/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="클릭 속도 재기 | 좌표나라">
+<meta property="og:description" content="제한 시간 동안 얼마나 빠르게 누를 수 있는지 클릭 속도(CPS)를 측정해 보세요. 가입 없이 즐기는 무료 게임.">
+<meta property="og:url" content="https://jwapyonara.com/click-speed/">
+<meta property="og:site_name" content="좌표나라">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "클릭 속도 재기",
+  "url": "https://jwapyonara.com/click-speed/",
+  "description": "제한 시간 동안 얼마나 빠르게 누를 수 있는지 클릭 속도(CPS)를 측정해 보세요. 가입 없이 즐기는 무료 게임.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All"
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 표시줄 */
+.click-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+}
+.click-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+.click-status-mid {
+  color: #ffffff;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+.click-status-right {
+  color: #30d158;
+  flex: 1.2;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.click-best-line {
+  font-size: 13px;
+  color: var(--sub, #8e8e93);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 게임 영역 감싸개 */
+.click-area-wrap {
+  position: relative;
+  width: 100%;
+  margin: 0 auto 12px;
+  min-height: 290px;
+  border-radius: 18px;
+  background: var(--fill, #f2f2f7);
+  border: 2px dashed var(--line, #e5e5ea);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  padding: 20px 14px;
+  box-sizing: border-box;
+}
+
+/* 대형 클릭 단추 */
+.click-btn {
+  width: 100%;
+  max-width: 260px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: none;
+  outline: none;
+  background: radial-gradient(circle at 35% 35%, #3b82f6, #1d4ed8);
+  box-shadow: 0 8px 24px rgba(29, 78, 216, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 0.05s ease, box-shadow 0.05s ease;
+  padding: 10px;
+  box-sizing: border-box;
+}
+.click-btn:active, .click-btn.active-press {
+  transform: scale(0.93);
+  box-shadow: 0 3px 10px rgba(29, 78, 216, 0.25), inset 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+.click-btn.state-ready {
+  background: radial-gradient(circle at 35% 35%, #2563eb, #1e40af);
+}
+.click-btn.state-countdown {
+  background: radial-gradient(circle at 35% 35%, #eab308, #ca8a04);
+  box-shadow: 0 8px 24px rgba(202, 138, 4, 0.4);
+}
+.click-btn.state-playing {
+  background: radial-gradient(circle at 35% 35%, #ef4444, #b91c1c);
+  box-shadow: 0 8px 24px rgba(185, 28, 28, 0.4);
+  animation: pulse-ring 1.8s infinite;
+}
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
+  70% { box-shadow: 0 0 0 14px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.click-btn-count {
+  font-size: 58px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.click-btn-label {
+  font-size: 16px;
+  font-weight: 800;
+  margin-top: 8px;
+  line-height: 1.3;
+  text-align: center;
+}
+.click-btn-sub {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.85;
+  margin-top: 4px;
+}
+
+/* 결과 덮개 창 */
+.result-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 20, 22, 0.92);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 20px 16px;
+  text-align: center;
+  z-index: 10;
+  box-sizing: border-box;
+}
+.result-overlay h2 {
+  font-size: 24px;
+  margin: 0 0 6px;
+  color: #ffd60a;
+}
+.result-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 800;
+  background: rgba(255, 214, 10, 0.16);
+  color: #ffd60a;
+  margin-bottom: 12px;
+}
+.result-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 12px;
+}
+.result-grid-item {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px 4px;
+}
+.result-grid-label {
+  font-size: 12px;
+  color: #a1a1a6;
+  margin-bottom: 4px;
+}
+.result-grid-val {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+}
+.result-score-line {
+  font-size: 15px;
+  color: #e5e5ea;
+  margin-bottom: 16px;
+}
+.result-score-line b {
+  font-size: 22px;
+  color: #30d158;
+}
+.result-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 280px;
+}
+.btn-overlay-rank {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  background: var(--red, #1b64da);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.btn-overlay-rank:active {
+  opacity: 0.9;
+}
+.btn-overlay-again {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  border-radius: 12px;
+  padding: 11px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.btn-overlay-again:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* 제어 단추 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-action:active {
+  background: #3a3a3c;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>클릭 속도 재기</h1>
+  <p class="lead">제한 시간 동안 얼마나 빠르게 누를 수 있는지 측정해 보세요. 시작 신호 3, 2, 1 뒤에 바로 시작됩니다.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움 (5초)</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통 (10초)</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움 (15초)</button>
+    </div>
+
+    <div class="click-status-bar">
+      <div class="click-status-left" id="statusTime">남은 시간 5.0초</div>
+      <div class="click-status-mid" id="statusCount">누른 수 0회</div>
+      <div class="click-status-right" id="statusCps">속도 0.0 CPS</div>
+    </div>
+    <div class="click-best-line" id="statusBest"></div>
+
+    <div class="click-area-wrap" id="areaWrap">
+      <button type="button" class="click-btn state-ready" id="btnClickTarget" aria-label="클릭 속도 측정 단추">
+        <span class="click-btn-count" id="btnMainText">시작</span>
+        <span class="click-btn-label" id="btnSubText">눌러서 3초 후 시작</span>
+        <span class="click-btn-sub" id="btnDescText">마우스와 터치 모두 가능</span>
+      </button>
+
+      <div class="result-overlay" id="overlayBox">
+        <h2>측정 완료!</h2>
+        <div class="result-badge" id="resultGrade">번개 손가락</div>
+        <div class="result-grid">
+          <div class="result-grid-item">
+            <div class="result-grid-label">누른 횟수</div>
+            <div class="result-grid-val" id="resClicks">0회</div>
+          </div>
+          <div class="result-grid-item">
+            <div class="result-grid-label">초당 속도</div>
+            <div class="result-grid-val" id="resCps">0.00</div>
+          </div>
+          <div class="result-grid-item">
+            <div class="result-grid-label">측정 시간</div>
+            <div class="result-grid-val" id="resDuration">10초</div>
+          </div>
+        </div>
+        <div class="result-score-line">최종 점수: <b id="resScore">0점</b></div>
+        <div class="result-btns">
+          <button type="button" class="btn-overlay-rank" id="btnOverlayRank">🏆 순위표 올리기</button>
+          <button type="button" class="btn-overlay-again" id="btnOverlayAgain">한 번 더 하기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action" id="btnRestart">새로 시작하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:8px;">
+      큰 단추를 빠르게 연타하세요. 마우스 클릭과 스마트폰 화면 터치 모두 지원합니다.
+    </p>
+  </section>
+
+  <p class="note">이 게임은 기기 브라우저 안에서만 실행되며 별도의 개인정보를 수집하지 않습니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>게임 목표:</b> 정해진 시간 동안 가운데 큰 단추를 최대한 많이 눌러 초당 클릭 수(CPS)와 점수를 높이는 게임입니다.</li>
+      <li><b>난이도와 시간:</b> 쉬움은 5초, 보통은 10초, 어려움은 15초 동안 측정합니다.</li>
+      <li><b>카운트다운:</b> 단추를 누르면 3, 2, 1 카운트다운 신호가 울린 뒤 측정이 시작됩니다.</li>
+      <li><b>점수 계산:</b> 최종 점수는 [누른 횟수 × 난이도 배수 × 10]으로 계산되며 최대 99,999,999점까지 인정됩니다.</li>
+      <li><b>순위표 등록:</b> 측정이 끝나면 '🏆 순위표 올리기' 단추를 눌러 내 기록을 순위표에 자랑해 보세요.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단에서 원하는 난이도(쉬움·보통·어려움)를 선택합니다.</li>
+      <li>가운데 큰 단추를 누르면 3, 2, 1 시작 신호가 카운트다운됩니다.</li>
+      <li>신호가 끝나면 제한 시간 동안 손가락이나 마우스로 빠르게 연타합니다.</li>
+      <li>측정이 끝나면 초당 클릭 횟수(CPS)와 최종 점수를 확인하고 순위표에 등록하세요.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>게임 전 손가락 피지컬을 점검하거나, 친구들과 누가 더 손가락이 빠른지 가볍게 내기할 때 좋습니다. 가입 없이 스마트폰과 PC 어디서나 10초 만에 즐길 수 있습니다.</p>
+    <h2>알아 두면 좋은 것</h2>
+    <dl>
+      <dt>초당 클릭 수(CPS)란?</dt>
+      <dd>CPS(Clicks Per Second)는 1초 동안 평균 몇 번 클릭했는지를 나타내는 단위입니다. 보통 일반인은 5~7 CPS, 연습된 게이머는 8~10 CPS 이상의 속도를 기록합니다.</dd>
+      <dt>난이도 배수 혜택</dt>
+      <dd>오랜 시간 집중력을 유지해야 하는 보통(10초)과 어려움(15초) 모드는 점수에 난이도 가중치 배수가 적용되어 더 높은 점수를 획득할 수 있습니다.</dd>
+      <dt>최고 기록 보관</dt>
+      <dd>달성한 난이도별 최고 점수는 브라우저에 안전하게 보관되어 언제든 이전 기록을 확인하고 도전할 수 있습니다.</dd>
+    </dl>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // 난이도 설정 (시간 및 점수 배수)
+  var LEVELS = {
+    easy: { time: 5, mult: 1, label: '쉬움 (5초)' },
+    normal: { time: 10, mult: 2, label: '보통 (10초)' },
+    hard: { time: 15, mult: 3, label: '어려움 (15초)' }
+  };
+
+  // DOM 요소
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var statusTime = document.getElementById('statusTime');
+  var statusCount = document.getElementById('statusCount');
+  var statusCps = document.getElementById('statusCps');
+  var statusBest = document.getElementById('statusBest');
+  var btnClickTarget = document.getElementById('btnClickTarget');
+  var btnMainText = document.getElementById('btnMainText');
+  var btnSubText = document.getElementById('btnSubText');
+  var btnDescText = document.getElementById('btnDescText');
+  var overlayBox = document.getElementById('overlayBox');
+  var resultGrade = document.getElementById('resultGrade');
+  var resClicks = document.getElementById('resClicks');
+  var resCps = document.getElementById('resCps');
+  var resDuration = document.getElementById('resDuration');
+  var resScore = document.getElementById('resScore');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnOverlayAgain = document.getElementById('btnOverlayAgain');
+  var btnRestart = document.getElementById('btnRestart');
+
+  // 게임 상태 변수
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  var gameState = 'ready'; // 'ready', 'countdown', 'playing', 'ended'
+  var clickCount = 0;
+  var countdownTimer = null;
+  var gameTimer = null;
+  var animFrameId = null;
+  var startTime = 0;
+  var totalDurationMs = 5000;
+
+  // 난이도별 최고 점수
+  var bestScores = {
+    easy: 0,
+    normal: 0,
+    hard: 0
+  };
+
+  // WebAudio 효과음 생성기 (외부 소리 파일 없이 직접 제작)
+  var audioCtx = null;
+  function getAudioContext() {
+    try {
+      if (!audioCtx) {
+        var AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtxClass) audioCtx = new AudioCtxClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    } catch (e) {}
+    return audioCtx;
+  }
+
+  function playTone(freq, duration, type, vol) {
+    try {
+      var ctx = getAudioContext();
+      if (!ctx) return;
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      var v = vol != null ? vol : 0.08;
+      gain.gain.setValueAtTime(v, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    } catch (e) {}
+  }
+
+  function soundClick() {
+    playTone(520, 0.035, 'sine', 0.09);
+  }
+
+  function soundCount(val) {
+    playTone(val === 0 ? 880 : 440, val === 0 ? 0.16 : 0.08, val === 0 ? 'triangle' : 'sine', 0.1);
+  }
+
+  function soundFinish() {
+    try {
+      playTone(523.25, 0.1, 'sine', 0.08);
+      setTimeout(function () { playTone(659.25, 0.1, 'sine', 0.08); }, 90);
+      setTimeout(function () { playTone(783.99, 0.2, 'sine', 0.08); }, 180);
+    } catch (e) {}
+  }
+
+  // 로컬 스토리지 로드
+  function loadStorage() {
+    try {
+      var se = localStorage.getItem('zw_click-speed_best_easy');
+      var sn = localStorage.getItem('zw_click-speed_best_normal');
+      var sh = localStorage.getItem('zw_click-speed_best_hard');
+      if (se && !isNaN(parseInt(se, 10))) bestScores.easy = parseInt(se, 10);
+      if (sn && !isNaN(parseInt(sn, 10))) bestScores.normal = parseInt(sn, 10);
+      if (sh && !isNaN(parseInt(sh, 10))) bestScores.hard = parseInt(sh, 10);
+
+      var savedLevel = localStorage.getItem('zw_click-speed_level');
+      if (savedLevel && LEVELS[savedLevel]) {
+        currentLevel = savedLevel;
+      }
+    } catch (e) {}
+
+    updateLevelButtons();
+    updateBestDisplay();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+    resetToReadyState();
+  }
+
+  // 최고 점수 화면 갱신
+  function updateBestDisplay() {
+    var hasRecord = bestScores.easy > 0 || bestScores.normal > 0 || bestScores.hard > 0;
+    if (hasRecord) {
+      statusBest.textContent = '최고 기록 · 쉬움 ' + (bestScores.easy ? bestScores.easy.toLocaleString('ko-KR') + '점' : '-')
+        + ' · 보통 ' + (bestScores.normal ? bestScores.normal.toLocaleString('ko-KR') + '점' : '-')
+        + ' · 어려움 ' + (bestScores.hard ? bestScores.hard.toLocaleString('ko-KR') + '점' : '-');
+    } else {
+      statusBest.textContent = '';
+    }
+  }
+
+  // 난이도 단추 상태 갱신
+  function updateLevelButtons() {
+    btnDiffEasy.classList.remove('on');
+    btnDiffNormal.classList.remove('on');
+    btnDiffHard.classList.remove('on');
+
+    if (currentLevel === 'easy') btnDiffEasy.classList.add('on');
+    else if (currentLevel === 'normal') btnDiffNormal.classList.add('on');
+    else if (currentLevel === 'hard') btnDiffHard.classList.add('on');
+  }
+
+  // 순위표 카드(rank.js) 탭 동기화
+  function syncRankTab() {
+    try {
+      var idx = currentLevel === 'easy' ? 0 : (currentLevel === 'normal' ? 1 : 2);
+      if (window.ZW) window.ZW.rankPick = idx;
+      var b = document.querySelector('.rk-tabs button[data-i="' + idx + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  // 타이머 모두 정지
+  function clearAllTimers() {
+    if (countdownTimer) {
+      clearInterval(countdownTimer);
+      countdownTimer = null;
+    }
+    if (gameTimer) {
+      clearTimeout(gameTimer);
+      gameTimer = null;
+    }
+    if (animFrameId) {
+      cancelAnimationFrame(animFrameId);
+      animFrameId = null;
+    }
+  }
+
+  // 준비 상태로 초기화
+  function resetToReadyState() {
+    clearAllTimers();
+    gameState = 'ready';
+    clickCount = 0;
+    totalDurationMs = LEVELS[currentLevel].time * 1000;
+
+    overlayBox.style.display = 'none';
+    statusTime.textContent = '남은 시간 ' + LEVELS[currentLevel].time.toFixed(1) + '초';
+    statusCount.textContent = '누른 수 0회';
+    statusCps.textContent = '속도 0.0 CPS';
+
+    btnClickTarget.className = 'click-btn state-ready';
+    btnMainText.textContent = '시작';
+    btnSubText.textContent = '눌러서 3초 후 시작';
+    btnDescText.textContent = '측정 시간: ' + LEVELS[currentLevel].time + '초';
+  }
+
+  // 난이도 전환
+  function setLevel(lvl) {
+    if (gameState === 'playing' || gameState === 'countdown') {
+      clearAllTimers();
+    }
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_click-speed_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    syncRankTab();
+    resetToReadyState();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // 3, 2, 1 카운트다운 시작
+  function startCountdown() {
+    if (gameState === 'countdown' || gameState === 'playing') return;
+    clearAllTimers();
+    gameState = 'countdown';
+
+    var count = 3;
+    btnClickTarget.className = 'click-btn state-countdown';
+    btnMainText.textContent = String(count);
+    btnSubText.textContent = '준비하세요!';
+    btnDescText.textContent = '신호와 함께 시작됩니다';
+    soundCount(count);
+
+    countdownTimer = setInterval(function () {
+      count--;
+      if (count > 0) {
+        btnMainText.textContent = String(count);
+        soundCount(count);
+      } else {
+        clearInterval(countdownTimer);
+        countdownTimer = null;
+        soundCount(0);
+        beginPlaying();
+      }
+    }, 1000);
+  }
+
+  // 실제 게임 측정 시작
+  function beginPlaying() {
+    gameState = 'playing';
+    clickCount = 0;
+    totalDurationMs = LEVELS[currentLevel].time * 1000;
+    startTime = performance.now();
+
+    btnClickTarget.className = 'click-btn state-playing';
+    btnMainText.textContent = '0';
+    btnSubText.textContent = '빠르게 누르세요!';
+    btnDescText.textContent = '연타 중!';
+
+    statusCount.textContent = '누른 수 0회';
+    statusCps.textContent = '속도 0.0 CPS';
+
+    // 매끄러운 타이머 및 CPS 갱신 루프
+    function updateFrame() {
+      if (gameState !== 'playing') return;
+      var now = performance.now();
+      var elapsed = now - startTime;
+      var remaining = Math.max(0, totalDurationMs - elapsed);
+
+      statusTime.textContent = '남은 시간 ' + (remaining / 1000).toFixed(1) + '초';
+      var currentCps = elapsed > 0 ? (clickCount / (elapsed / 1000)).toFixed(1) : '0.0';
+      statusCps.textContent = '속도 ' + currentCps + ' CPS';
+
+      if (remaining <= 0) {
+        finishGame();
+      } else {
+        animFrameId = requestAnimationFrame(updateFrame);
+      }
+    }
+
+    animFrameId = requestAnimationFrame(updateFrame);
+  }
+
+  // 클릭 발생 시 처리
+  function registerClick() {
+    if (gameState === 'ready') {
+      startCountdown();
+      return;
+    }
+    if (gameState !== 'playing') return;
+
+    clickCount++;
+    btnMainText.textContent = String(clickCount);
+    statusCount.textContent = '누른 수 ' + clickCount + '회';
+
+    // 누름 시각적 피드백
+    btnClickTarget.classList.add('active-press');
+    setTimeout(function () {
+      btnClickTarget.classList.remove('active-press');
+    }, 50);
+
+    soundClick();
+  }
+
+  // 게임 종료 및 결과 처리
+  function finishGame() {
+    clearAllTimers();
+    gameState = 'ended';
+
+    soundFinish();
+
+    var durationSec = LEVELS[currentLevel].time;
+    var cps = (clickCount / durationSec);
+    var mult = LEVELS[currentLevel].mult;
+
+    // 점수 계산: 누른 횟수 × 난이도 배수 × 10
+    var rawScore = Math.round(clickCount * mult * 10);
+    // 점수 최대값 99999999로 자른다
+    var score = Math.min(99999999, Math.max(0, rawScore));
+
+    // 결과 텍스트 산출
+    var gradeText = '빠른 손놀림';
+    if (cps >= 10) gradeText = '[전광석화] 신의 경지';
+    else if (cps >= 8) gradeText = '[초고속] 번개 손가락';
+    else if (cps >= 6) gradeText = '[고수] 프로 게이머급';
+    else if (cps >= 4) gradeText = '[보통] 준수한 순발력';
+    else gradeText = '[연습] 가벼운 손 풀기';
+
+    // 최고 기록 저장 및 갱신
+    var key = 'zw_click-speed_best_' + currentLevel;
+    var isNewBest = false;
+    try {
+      var prevBest = bestScores[currentLevel] || 0;
+      if (score > prevBest) {
+        bestScores[currentLevel] = score;
+        localStorage.setItem(key, String(score));
+        isNewBest = true;
+      }
+    } catch (e) {}
+
+    updateBestDisplay();
+
+    // 결과 덮개 채우기
+    resultGrade.textContent = isNewBest ? '최고 기록 달성! ' + gradeText : gradeText;
+    resClicks.textContent = clickCount.toLocaleString('ko-KR') + '회';
+    resCps.textContent = cps.toFixed(2) + ' CPS';
+    resDuration.textContent = durationSec + '초';
+    resScore.textContent = score.toLocaleString('ko-KR') + '점';
+
+    overlayBox.style.display = 'flex';
+    statusTime.textContent = '남은 시간 0.0초';
+  }
+
+  // 큰 단추 이벤트 처리 (마우스 및 터치)
+  btnClickTarget.addEventListener('pointerdown', function (e) {
+    e.preventDefault();
+    registerClick();
+  });
+
+  // 엔터 또는 스페이스 키보드 연타도 지원
+  btnClickTarget.addEventListener('keydown', function (e) {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      registerClick();
+    }
+  });
+
+  // 결과 창 "🏆 순위표 올리기" 단추
+  btnOverlayRank.addEventListener('click', function () {
+    try {
+      var jump = document.querySelector('.zw-rk-jump');
+      if (jump && jump.style.display !== 'none') {
+        jump.click();
+      } else {
+        var sec = document.querySelector('.zw-rank');
+        if (sec) {
+          sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+    } catch (e) {}
+  });
+
+  // 결과 창 "한 번 더 하기" 단추
+  btnOverlayAgain.addEventListener('click', function () {
+    resetToReadyState();
+    startCountdown();
+  });
+
+  // 하단 "새로 시작하기" 단추
+  btnRestart.addEventListener('click', function () {
+    resetToReadyState();
+  });
+
+  // 초기화 실행
+  loadStorage();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/make-ten/">합쳐서 10 만들기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/stack-tower/">블록 쌓기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/peg-jump/">페그 솔리테어</a> — 구슬을 뛰어넘어 하나만 남기기</li><li><a href="/sum-fill/">숫자 합 맞추기</a> — 가로세로 합에 맞게 숫자 채우기</li><li><a href="/balloon-rise/">풍선 올리기</a> — 장애물 피해 풍선 올리기</li><li><a href="/star-dodge/">별 피하기</a> — 쏟아지는 별 피하기</li><li><a href="/fruit-catch/">과일 받기</a> — 떨어지는 과일 바구니로 받기</li><li><a href="/marble-drop/">구슬 떨어뜨리기</a> — 구슬을 떨어뜨려 점수 칸에 넣기</li><li><a href="/paddle-bounce/">탁구</a> — 공을 튕겨 오래 버티기</li><li><a href="/asteroid-dodge/">우주선 피하기</a> — 날아오는 운석 피하기</li><li><a href="/rhythm-tap/">리듬 탭</a> — 떨어지는 노트를 박자에 맞춰 탭</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

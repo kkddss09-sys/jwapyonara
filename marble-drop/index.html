@@ -1,0 +1,1372 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>구슬 떨어뜨리기 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 즐기는 무료 구슬 떨어뜨리기 게임. 핀을 타고 튕기며 떨어지는 10개의 구슬로 최고 점수를 모아보세요.">
+<link rel="canonical" href="https://jwapyonara.com/marble-drop/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="구슬 떨어뜨리기 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 즐기는 무료 구슬 떨어뜨리기 게임. 핀을 타고 튕기며 떨어지는 10개의 구슬로 최고 점수를 모아보세요.">
+<meta property="og:url" content="https://jwapyonara.com/marble-drop/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "구슬 떨어뜨리기",
+  "url": "https://jwapyonara.com/marble-drop/",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All",
+  "browserRequirements": "Requires JavaScript. Requires HTML5.",
+  "description": "가입 없이 바로 즐기는 무료 구슬 떨어뜨리기 게임. 10개의 구슬을 떨어뜨려 핀에 튕기며 고득점 칸을 노리는 흥미진진한 물리 게임입니다."
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--line, #e3e3e8);
+  background: var(--card, #fff);
+  color: var(--ink, #1d1d1f);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.diff-seg button.on {
+  border-color: var(--red, #1b64da);
+  background: var(--soft, #e8f0fe);
+  color: var(--red, #1b64da);
+}
+
+/* 상태 바 */
+.marble-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+}
+.marble-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1.1;
+  text-align: left;
+  white-space: nowrap;
+}
+.marble-status-mid {
+  color: #ffffff;
+  flex: 1.3;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 16px;
+  font-weight: 800;
+}
+.marble-status-right {
+  color: #a1a1a6;
+  flex: 1;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.marble-best-line {
+  font-size: 13px;
+  color: var(--sub, #6e6e73);
+  text-align: right;
+  margin-bottom: 10px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 캔버스 감싸개 */
+.marble-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 12px;
+  aspect-ratio: 390 / 540;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #1c1d22;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#dropCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* 판 위 덮개 (시작 및 결과) */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 19, 23, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 24px 20px;
+  text-align: center;
+  z-index: 10;
+  backdrop-filter: blur(2px);
+}
+.canvas-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 8px;
+  color: #ffd60a;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.canvas-overlay p {
+  font-size: 15px;
+  margin: 0 0 16px;
+  color: #e5e5ea;
+  max-width: 300px;
+  line-height: 1.45;
+}
+.overlay-score-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 280px;
+  box-sizing: border-box;
+}
+.overlay-score-val {
+  font-size: 32px;
+  font-weight: 900;
+  color: #ffd60a;
+  margin-top: 4px;
+}
+.overlay-score-sub {
+  font-size: 13px;
+  color: #a1a1a6;
+}
+.overlay-badge-new {
+  display: inline-block;
+  background: #e5484d;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-bottom: 6px;
+  animation: pulseBadge 1s infinite alternate;
+}
+@keyframes pulseBadge {
+  0% { transform: scale(0.96); opacity: 0.9; }
+  100% { transform: scale(1.04); opacity: 1; }
+}
+
+.overlay-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 260px;
+}
+.canvas-overlay button {
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  min-height: 50px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+  box-sizing: border-box;
+  transition: transform .1s, opacity .15s;
+}
+.canvas-overlay button:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+.canvas-overlay .btn-start {
+  background: var(--red, #1b64da);
+  color: #fff;
+}
+.canvas-overlay .btn-overlay-rank {
+  background: var(--soft, #e8f0fe);
+  color: var(--red, #1b64da);
+  border: 1.5px solid var(--red, #1b64da);
+}
+.canvas-overlay .btn-overlay-restart {
+  background: #3a3a3c;
+  color: #fff;
+}
+
+/* 제어 단추 바 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.btn-action {
+  min-height: 50px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px 14px;
+  transition: opacity .15s, transform .1s;
+}
+.btn-action:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.btn-drop {
+  background: var(--red, #1b64da);
+  color: #fff;
+}
+.btn-drop:disabled {
+  background: #636366;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn-reset {
+  background: #2c2c2e;
+  color: #fff;
+  border: 1.5px solid #3a3a3c;
+}
+.btn-reset:active {
+  background: #3a3a3c;
+}
+
+/* 조작 도움말 */
+.sound-toggle-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px 10px;
+  font-size: 13px;
+  color: var(--sub, #6e6e73);
+}
+.sound-toggle-btn {
+  background: none;
+  border: 1px solid var(--line, #e3e3e8);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sub, #6e6e73);
+  cursor: pointer;
+}
+.sound-toggle-btn.on {
+  color: var(--ink, #1d1d1f);
+  border-color: var(--sub, #6e6e73);
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>구슬 떨어뜨리기</h1>
+  <p class="lead">위치를 정해 구슬을 굴려 보세요. 핀을 타고 튕기며 고득점 칸에 골인합니다.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움 (×1)</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통 (×2)</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움 (×3)</button>
+    </div>
+
+    <div class="marble-status-bar">
+      <div class="marble-status-left" id="statusBalls">구슬 10개 남음</div>
+      <div class="marble-status-mid" id="statusScore">0점</div>
+      <div class="marble-status-right" id="statusMultiplier">배수 ×1</div>
+    </div>
+    <div class="marble-best-line" id="statusBest"></div>
+
+    <div class="marble-canvas-wrap" id="canvasWrap">
+      <canvas id="dropCanvas" width="390" height="540"></canvas>
+      <div class="canvas-overlay" id="overlayBox">
+        <h2 id="overlayTitle">구슬 떨어뜨리기</h2>
+        <div class="overlay-score-box" id="overlayScoreBox" style="display:none;">
+          <div id="overlayBadgeNew" class="overlay-badge-new" style="display:none;">새로운 최고 기록!</div>
+          <div class="overlay-score-sub" id="overlayScoreDetail">기본 0점 × 배수 1</div>
+          <div class="overlay-score-val" id="overlayScoreVal">0점</div>
+        </div>
+        <p id="overlayDesc">쉬움 난이도로 시작해요. 1000점 칸이 넓고 함정이 좁습니다.</p>
+        <div class="overlay-btn-group" id="overlayBtnGroup">
+          <button type="button" class="btn-start" id="btnStartGame">게임 시작</button>
+          <button type="button" class="btn-overlay-rank" id="btnOverlayRank" style="display:none;">🏆 순위표 올리기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sound-toggle-bar">
+      <span>터치하거나 드래그해 구슬을 조준하세요</span>
+      <button type="button" class="sound-toggle-btn on" id="btnSound">효과음 켜짐</button>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-drop" id="btnDrop">구슬 떨어뜨리기</button>
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:8px;">
+      판 상단을 누르면 즉시 구슬이 떨어지며, 한 판에 총 10개의 구슬을 사용합니다.
+    </p>
+  </section>
+
+  <p class="note">모든 물리 연산은 브라우저 안에서 안전하게 실시간으로 계산됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>조준과 투하:</b> 판 상단을 손가락으로 누르거나 마우스로 드래그하면 구슬을 떨어뜨릴 가로 위치를 정할 수 있습니다. <b>구슬 떨어뜨리기</b> 단추를 누르거나 상단 판을 터치하면 구슬이 핀판으로 굴러 떨어집니다.</li>
+      <li><b>핀 튕김 물리:</b> 구슬이 황동 핀(못)에 부딪힐 때마다 반사 각도와 가속도가 생겨 매번 예측할 수 없는 흥미진진한 경로로 떨어집니다.</li>
+      <li><b>점수 칸 구성:</b> 아래 칸은 좌우 대칭으로 <b>100점 · 500점 · 1000점 · 0점(함정) · 1000점 · 500점 · 100점</b>으로 배치되어 있습니다. 가운데 0점 함정을 피해 양쪽 1000점 골든 칸을 노려보세요!</li>
+      <li><b>난이도 규칙:</b>
+        <ul>
+          <li><b>쉬움:</b> 1000점 대박 칸이 매우 넓고 0점 함정이 좁습니다. (최종 점수 배수: ×1)</li>
+          <li><b>보통:</b> 칸 너비가 균형 잡혀 있으며 집중 조준이 필요합니다. (최종 점수 배수: ×2)</li>
+          <li><b>어려움:</b> 1000점 칸이 좁고 0점 함정과 100점 칸이 넓습니다. 고난도 조준에 성공하면 높은 배수가 붙습니다. (최종 점수 배수: ×3)</li>
+        </ul>
+      </li>
+      <li><b>최종 점수:</b> 10개의 구슬로 획득한 기본 점수의 총합에 난이도 배수를 곱한 값이 최종 점수가 됩니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단에서 난이도(쉬움·보통·어려움)를 고릅니다.</li>
+      <li>화면 위쪽 조준선을 보며 원하는 가로 위치에 구슬을 맞춥니다.</li>
+      <li>떨어뜨리기 단추를 눌러 구슬이 핀을 튕기며 떨어지는 궤적을 지켜봅니다.</li>
+      <li>10개의 구슬을 모두 굴려 최고 점수를 달성하고 순위표에 기록을 올려보세요.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>짧은 시간 안에 가볍게 손맛과 스릴을 즐기고 싶을 때 좋습니다. 스마트폰과 PC 어디서나 1분이면 한 판을 시원하게 즐길 수 있습니다.</p>
+    <h2>알아 두면 좋은 것</h2>
+    <dl>
+      <dt>고득점 조준 비결</dt>
+      <dd>가운데 0점 함정 바로 위에서 떨어뜨리면 함정에 빠질 확률이 높습니다. 1000점 칸 바로 위 핀들의 좌우 경사를 활용할 수 있는 가로 위치를 찾아보세요.</dd>
+      <dt>난이도 배수의 마법</dt>
+      <dd>어려움 난이도는 1000점 칸이 좁지만 점수 배수가 3배이므로, 몇 번만 골인해도 쉬움 난이도보다 훨씬 높은 순위 점수를 기록할 수 있습니다.</dd>
+      <dt>기록 저장 안내</dt>
+      <dd>난이도별 최고 기록은 브라우저 로컬 저장소에 안전하게 보관됩니다.</dd>
+    </dl>
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>구슬이 떨어지는 도중 다른 구슬을 또 떨어뜨릴 수 있나요?</summary>
+      <p>구슬 1개마다 낙하 궤적과 득점의 재미를 온전히 즐길 수 있도록 한 번에 1개씩 떨어집니다. 구슬이 바닥 점수 칸에 닿으면 즉시 다음 구슬을 떨어뜨릴 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>순위표에는 어떤 점수가 등록되나요?</summary>
+      <p>10개의 구슬이 획득한 점수의 합계에 난이도 배수(1배, 2배, 3배)를 곱한 최종 합산 점수가 등록됩니다.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // --- DOM 요소 참조 ---
+  var canvas = document.getElementById('dropCanvas');
+  var ctx = canvas.getContext('2d');
+  var canvasWrap = document.getElementById('canvasWrap');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var overlayScoreBox = document.getElementById('overlayScoreBox');
+  var overlayBadgeNew = document.getElementById('overlayBadgeNew');
+  var overlayScoreDetail = document.getElementById('overlayScoreDetail');
+  var overlayScoreVal = document.getElementById('overlayScoreVal');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var btnDrop = document.getElementById('btnDrop');
+  var btnRestart = document.getElementById('btnRestart');
+  var btnSound = document.getElementById('btnSound');
+  var statusBalls = document.getElementById('statusBalls');
+  var statusScore = document.getElementById('statusScore');
+  var statusMultiplier = document.getElementById('statusMultiplier');
+  var statusBest = document.getElementById('statusBest');
+
+  // --- 게임 상수 ---
+  var V_WIDTH = 390;
+  var V_HEIGHT = 540;
+  var TOTAL_BALLS = 10;
+  var WALL_LEFT = 14;
+  var WALL_RIGHT = 376;
+  var FLOOR_Y = 512;
+  var SLOT_TOP_Y = 445;
+  var DROP_Y = 38;
+  var MARBLE_RADIUS = 7.5;
+  var PEG_RADIUS = 4.2;
+
+  // 난이도별 점수 배수
+  var MULTIPLIERS = {
+    easy: 1,
+    normal: 2,
+    hard: 3
+  };
+
+  // 슬롯 기본 점수 정의 (7개 칸)
+  var SLOT_SCORES = [100, 500, 1000, 0, 1000, 500, 100];
+
+  // 난이도별 슬롯 너비 가중치
+  var SLOT_WEIGHTS = {
+    easy:   [1.0, 1.3, 2.1, 0.6, 2.1, 1.3, 1.0], // 1000점 넓고 0점 좁음
+    normal: [1.4, 1.2, 1.0, 1.0, 1.0, 1.2, 1.4], // 균등형
+    hard:   [2.2, 1.1, 0.5, 1.8, 0.5, 1.1, 2.2]  // 1000점 아주 좁고 0점·100점 넓음
+  };
+
+  // 슬롯 색상 테마
+  var SLOT_THEMES = [
+    { bg: '#3a3d46', line: '#626875', text: '#e0e0e0', glow: 'rgba(224,224,224,0.3)' }, // 100
+    { bg: '#174033', line: '#2bb380', text: '#5bf5ba', glow: 'rgba(43,179,128,0.45)' }, // 500
+    { bg: '#4d3a08', line: '#f5c542', text: '#ffd60a', glow: 'rgba(255,214,10,0.6)' },  // 1000
+    { bg: '#381619', line: '#b33036', text: '#f26168', glow: 'rgba(242,97,104,0.35)' }, // 0
+    { bg: '#4d3a08', line: '#f5c542', text: '#ffd60a', glow: 'rgba(255,214,10,0.6)' },  // 1000
+    { bg: '#174033', line: '#2bb380', text: '#5bf5ba', glow: 'rgba(43,179,128,0.45)' }, // 500
+    { bg: '#3a3d46', line: '#626875', text: '#e0e0e0', glow: 'rgba(224,224,224,0.3)' }  // 100
+  ];
+
+  // --- 오디오 (Web Audio API) ---
+  var audioCtx = null;
+  var soundEnabled = true;
+
+  function initAudio() {
+    if (!audioCtx) {
+      try {
+        var AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtxClass) {
+          audioCtx = new AudioCtxClass();
+        }
+      } catch (e) {}
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(function () {});
+    }
+  }
+
+  function playSound(type) {
+    if (!soundEnabled) return;
+    initAudio();
+    if (!audioCtx) return;
+
+    try {
+      var now = audioCtx.currentTime;
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      if (type === 'hit') {
+        // 핀 튕김: 짧고 맑은 금속성 틱음
+        var freq = 650 + Math.random() * 250;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now);
+        osc.frequency.exponentialRampToValueAtTime(freq * 0.5, now + 0.035);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.035);
+        osc.start(now);
+        osc.stop(now + 0.035);
+      } else if (type === 'score') {
+        // 득점: 경쾌한 2음 차임
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.06); // E5
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+        osc.start(now);
+        osc.stop(now + 0.16);
+      } else if (type === 'zero') {
+        // 0점 꽝: 짧은 저음 둔탁음
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.09);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+        osc.start(now);
+        osc.stop(now + 0.09);
+      } else if (type === 'drop') {
+        // 투하
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(330, now + 0.06);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      }
+    } catch (e) {}
+  }
+
+  // --- 게임 상태 변수 ---
+  var currentLevel = 'easy';
+  var gameState = 'ready'; // 'ready', 'aiming', 'dropping', 'scored', 'ended'
+  var ballsRemaining = TOTAL_BALLS;
+  var currentScore = 0;
+  var ballResults = [];
+  var aimX = V_WIDTH / 2;
+  var isAimDragging = false;
+
+  // 최고 점수 기록 (localStorage)
+  var bestEasy = null;
+  var bestNormal = null;
+  var bestHard = null;
+
+  // 시뮬레이션 엔티티
+  var pins = [];
+  var slots = [];
+  var marble = null;
+  var floatingTexts = [];
+  var isOverlayShowing = true;
+
+  // --- 최고 점수 및 로컬 스토리지 ---
+  function loadStorage() {
+    try {
+      var re = localStorage.getItem('zw_marble-drop_best_easy');
+      var rn = localStorage.getItem('zw_marble-drop_best_normal');
+      var rh = localStorage.getItem('zw_marble-drop_best_hard');
+      if (re !== null && !isNaN(parseInt(re, 10))) bestEasy = Math.min(99999999, parseInt(re, 10));
+      if (rn !== null && !isNaN(parseInt(rn, 10))) bestNormal = Math.min(99999999, parseInt(rn, 10));
+      if (rh !== null && !isNaN(parseInt(rh, 10))) bestHard = Math.min(99999999, parseInt(rh, 10));
+
+      var savedLevel = localStorage.getItem('zw_marble-drop_level');
+      if (savedLevel === 'normal' || savedLevel === 'hard' || savedLevel === 'easy') {
+        currentLevel = savedLevel;
+      } else {
+        currentLevel = 'easy';
+      }
+
+      var savedSound = localStorage.getItem('zw_marble-drop_sound');
+      if (savedSound === '0') {
+        soundEnabled = false;
+        btnSound.textContent = '효과음 꺼짐';
+        btnSound.classList.remove('on');
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+    updateLevelButtons();
+    updateBestDisplay();
+    rebuildSlots();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+  }
+
+  function saveBestScore(level, score) {
+    var clamped = Math.min(99999999, Math.max(0, Math.floor(score)));
+    var isNew = false;
+    try {
+      if (level === 'easy') {
+        if (bestEasy === null || clamped > bestEasy) {
+          bestEasy = clamped;
+          localStorage.setItem('zw_marble-drop_best_easy', String(clamped));
+          isNew = true;
+        }
+      } else if (level === 'normal') {
+        if (bestNormal === null || clamped > bestNormal) {
+          bestNormal = clamped;
+          localStorage.setItem('zw_marble-drop_best_normal', String(clamped));
+          isNew = true;
+        }
+      } else if (level === 'hard') {
+        if (bestHard === null || clamped > bestHard) {
+          bestHard = clamped;
+          localStorage.setItem('zw_marble-drop_best_hard', String(clamped));
+          isNew = true;
+        }
+      }
+    } catch (e) {}
+    updateBestDisplay();
+    return isNew;
+  }
+
+  function updateBestDisplay() {
+    var str = '최고 기록 · ';
+    str += '쉬움 ' + (bestEasy !== null ? bestEasy.toLocaleString('ko-KR') + '점' : '-') + ' · ';
+    str += '보통 ' + (bestNormal !== null ? bestNormal.toLocaleString('ko-KR') + '점' : '-') + ' · ';
+    str += '어려움 ' + (bestHard !== null ? bestHard.toLocaleString('ko-KR') + '점' : '-');
+    statusBest.textContent = str;
+  }
+
+  function updateLevelButtons() {
+    btnDiffEasy.classList.remove('on');
+    btnDiffNormal.classList.remove('on');
+    btnDiffHard.classList.remove('on');
+    if (currentLevel === 'normal') btnDiffNormal.classList.add('on');
+    else if (currentLevel === 'hard') btnDiffHard.classList.add('on');
+    else btnDiffEasy.classList.add('on');
+
+    var m = MULTIPLIERS[currentLevel] || 1;
+    statusMultiplier.textContent = '배수 ×' + m;
+  }
+
+  // 순위표 카드(rank.js) 탭 동기화
+  function syncRankTab() {
+    try {
+      if (typeof ZW !== 'undefined') {
+        var idx = currentLevel === 'easy' ? 0 : (currentLevel === 'normal' ? 1 : 2);
+        ZW.rankPick = idx;
+        var b = document.querySelector('.rk-tabs button[data-i="' + idx + '"]');
+        if (b) b.click();
+      }
+    } catch (e) {}
+  }
+
+  // --- 슬롯 및 핀 초기화 ---
+  function rebuildSlots() {
+    slots = [];
+    var weights = SLOT_WEIGHTS[currentLevel] || SLOT_WEIGHTS.easy;
+    var totalW = 0;
+    for (var i = 0; i < weights.length; i++) totalW += weights[i];
+
+    var usableWidth = WALL_RIGHT - WALL_LEFT;
+    var curX = WALL_LEFT;
+
+    for (var s = 0; s < SLOT_SCORES.length; s++) {
+      var w = (weights[s] / totalW) * usableWidth;
+      slots.push({
+        index: s,
+        x1: curX,
+        x2: curX + w,
+        cx: curX + w / 2,
+        w: w,
+        score: SLOT_SCORES[s],
+        label: SLOT_SCORES[s] === 0 ? '0' : SLOT_SCORES[s].toLocaleString('ko-KR'),
+        theme: SLOT_THEMES[s],
+        flashTimer: 0
+      });
+      curX += w;
+    }
+  }
+
+  function initPins() {
+    pins = [];
+    // 8개 행의 핀 배치 (지그재그 패턴)
+    var rowCount = 8;
+    var startY = 82;
+    var rowSpacing = 44;
+
+    for (var r = 0; r < rowCount; r++) {
+      var y = startY + r * rowSpacing;
+      // 짝수 행: 7개 핀, 홀수 행: 8개 핀
+      var pinCount = (r % 2 === 0) ? 7 : 8;
+      var span = WALL_RIGHT - WALL_LEFT;
+      var step = span / (pinCount + 1);
+
+      for (var c = 1; c <= pinCount; c++) {
+        var x = WALL_LEFT + c * step;
+        pins.push({
+          x: x,
+          y: y,
+          r: PEG_RADIUS,
+          hitTimer: 0
+        });
+      }
+    }
+  }
+
+  // --- 구슬 생성 및 투하 ---
+  function dropMarble() {
+    if (gameState !== 'aiming' || ballsRemaining <= 0) return;
+
+    var clampedX = Math.max(WALL_LEFT + MARBLE_RADIUS + 4, Math.min(WALL_RIGHT - MARBLE_RADIUS - 4, aimX));
+    marble = {
+      x: clampedX,
+      y: DROP_Y,
+      vx: (Math.random() - 0.5) * 0.6,
+      vy: 1.2,
+      r: MARBLE_RADIUS,
+      active: true,
+      settled: false,
+      settleTimer: 0,
+      trail: []
+    };
+
+    gameState = 'dropping';
+    btnDrop.disabled = true;
+    playSound('drop');
+  }
+
+  // --- 새 게임 시작 / 준비 ---
+  function resetToReady() {
+    gameState = 'ready';
+    ballsRemaining = TOTAL_BALLS;
+    currentScore = 0;
+    ballResults = [];
+    marble = null;
+    floatingTexts = [];
+    aimX = V_WIDTH / 2;
+    isOverlayShowing = true;
+
+    rebuildSlots();
+    updateStatus();
+
+    overlayBox.style.display = 'flex';
+    overlayTitle.textContent = '구슬 떨어뜨리기';
+    overlayScoreBox.style.display = 'none';
+    overlayBadgeNew.style.display = 'none';
+    btnStartGame.style.display = 'block';
+    btnOverlayRank.style.display = 'none';
+
+    var lvlName = (currentLevel === 'hard') ? '어려움' : (currentLevel === 'normal' ? '보통' : '쉬움');
+    var m = MULTIPLIERS[currentLevel];
+    var feature = (currentLevel === 'hard') ? '1000점 칸이 좁고 함정이 넓지만 점수 3배!' : (currentLevel === 'normal' ? '균형 잡힌 난이도, 점수 2배!' : '1000점 칸이 넓고 함정이 좁아 쉬워요.');
+    overlayDesc.textContent = lvlName + ' 난이도로 시작해요. (배수 ×' + m + ')\n' + feature;
+
+    btnDrop.disabled = true;
+    render();
+  }
+
+  function startPlaying() {
+    gameState = 'aiming';
+    ballsRemaining = TOTAL_BALLS;
+    currentScore = 0;
+    ballResults = [];
+    marble = null;
+    floatingTexts = [];
+    isOverlayShowing = false;
+    overlayBox.style.display = 'none';
+
+    updateStatus();
+    btnDrop.disabled = false;
+  }
+
+  function finishGame() {
+    gameState = 'ended';
+    btnDrop.disabled = true;
+    isOverlayShowing = true;
+
+    var m = MULTIPLIERS[currentLevel];
+    var finalScore = Math.min(99999999, Math.max(0, currentScore * m));
+    var isNew = saveBestScore(currentLevel, finalScore);
+
+    overlayBox.style.display = 'flex';
+    overlayTitle.textContent = '게임 종료!';
+    overlayDesc.textContent = '10개의 구슬을 모두 완료했습니다.';
+
+    overlayScoreBox.style.display = 'block';
+    overlayScoreDetail.textContent = '기본 ' + currentScore.toLocaleString('ko-KR') + '점 × 난이도 배수 ' + m + '배';
+    overlayScoreVal.textContent = finalScore.toLocaleString('ko-KR') + '점';
+
+    if (isNew) {
+      overlayBadgeNew.style.display = 'inline-block';
+    } else {
+      overlayBadgeNew.style.display = 'none';
+    }
+
+    btnStartGame.style.display = 'block';
+    btnStartGame.textContent = '한 판 더 하기';
+    btnOverlayRank.style.display = 'block';
+
+    syncRankTab();
+  }
+
+  function updateStatus() {
+    statusBalls.textContent = '구슬 ' + ballsRemaining + '개 남음';
+    statusScore.textContent = currentScore.toLocaleString('ko-KR') + '점';
+    var m = MULTIPLIERS[currentLevel];
+    statusMultiplier.textContent = '배수 ×' + m;
+  }
+
+  function setLevel(lvl) {
+    if (lvl === currentLevel) return;
+    currentLevel = (lvl === 'hard' || lvl === 'normal') ? lvl : 'easy';
+    try {
+      localStorage.setItem('zw_marble-drop_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    rebuildSlots();
+    syncRankTab();
+    resetToReady();
+  }
+
+  // --- 이벤트 리스너 등록 ---
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  btnStartGame.addEventListener('click', function () {
+    initAudio();
+    startPlaying();
+  });
+
+  btnDrop.addEventListener('click', function () {
+    initAudio();
+    dropMarble();
+  });
+
+  btnRestart.addEventListener('click', function () {
+    initAudio();
+    startPlaying();
+  });
+
+  btnSound.addEventListener('click', function () {
+    soundEnabled = !soundEnabled;
+    try {
+      localStorage.setItem('zw_marble-drop_sound', soundEnabled ? '1' : '0');
+    } catch (e) {}
+    if (soundEnabled) {
+      btnSound.textContent = '효과음 켜짐';
+      btnSound.classList.add('on');
+      initAudio();
+      playSound('hit');
+    } else {
+      btnSound.textContent = '효과음 꺼짐';
+      btnSound.classList.remove('on');
+    }
+  });
+
+  // 결과 창 순위표 올리기 단추 (#btnOverlayRank)
+  btnOverlayRank.addEventListener('click', function () {
+    var jumpBtn = document.querySelector('.zw-rk-jump');
+    if (jumpBtn && jumpBtn.style.display !== 'none') {
+      jumpBtn.click();
+    } else {
+      var rkSec = document.querySelector('.zw-rank');
+      if (rkSec) {
+        rkSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        rkSec.classList.add('flash');
+        setTimeout(function () { rkSec.classList.remove('flash'); }, 1800);
+      }
+    }
+  });
+
+  // --- 캔버스 입력 좌표 변환 ---
+  function getCanvasPos(e) {
+    var rect = canvas.getBoundingClientRect();
+    var clientX = e.clientX;
+    var clientY = e.clientY;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+      clientY = e.changedTouches[0].clientY;
+    }
+    var scaleX = V_WIDTH / rect.width;
+    var scaleY = V_HEIGHT / rect.height;
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
+  }
+
+  function handlePointerDown(e) {
+    initAudio();
+    if (isOverlayShowing) return;
+    var pos = getCanvasPos(e);
+    isAimDragging = true;
+    aimX = Math.max(WALL_LEFT + MARBLE_RADIUS + 4, Math.min(WALL_RIGHT - MARBLE_RADIUS - 4, pos.x));
+
+    // 판 상단 조준 영역을 터치/클릭했을 때 바로 투하
+    if (gameState === 'aiming' && pos.y < 70) {
+      dropMarble();
+    }
+  }
+
+  function handlePointerMove(e) {
+    if (!isAimDragging && e.type !== 'mousemove') return;
+    if (isOverlayShowing) return;
+    var pos = getCanvasPos(e);
+    aimX = Math.max(WALL_LEFT + MARBLE_RADIUS + 4, Math.min(WALL_RIGHT - MARBLE_RADIUS - 4, pos.x));
+  }
+
+  function handlePointerUp() {
+    isAimDragging = false;
+  }
+
+  canvas.addEventListener('mousedown', handlePointerDown);
+  window.addEventListener('mousemove', handlePointerMove);
+  window.addEventListener('mouseup', handlePointerUp);
+
+  canvas.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    handlePointerDown(e);
+  }, { passive: false });
+
+  window.addEventListener('touchmove', function (e) {
+    if (isAimDragging) {
+      handlePointerMove(e);
+    }
+  }, { passive: false });
+
+  window.addEventListener('touchend', function () {
+    handlePointerUp();
+  });
+
+  // --- 물리 시뮬레이션 ---
+  var GRAVITY = 0.28;
+  var RESTITUTION_PEG = 0.62;
+  var RESTITUTION_WALL = 0.45;
+
+  function updatePhysics() {
+    // 핀 피드백 타이머 감소
+    for (var p = 0; p < pins.length; p++) {
+      if (pins[p].hitTimer > 0) pins[p].hitTimer--;
+    }
+    // 슬롯 점등 타이머 감소
+    for (var s = 0; s < slots.length; s++) {
+      if (slots[s].flashTimer > 0) slots[s].flashTimer--;
+    }
+    // 플로팅 텍스트 업데이트
+    for (var f = floatingTexts.length - 1; f >= 0; f--) {
+      var ft = floatingTexts[f];
+      ft.y += ft.vy;
+      ft.life--;
+      if (ft.life <= 0) {
+        floatingTexts.splice(f, 1);
+      }
+    }
+
+    if (!marble || !marble.active) return;
+
+    if (marble.settled) {
+      marble.settleTimer++;
+      if (marble.settleTimer > 20) {
+        // 구슬 처리 완료 후 다음 구슬 대기 또는 게임 종료
+        marble.active = false;
+        marble = null;
+        if (ballsRemaining <= 0) {
+          finishGame();
+        } else {
+          gameState = 'aiming';
+          btnDrop.disabled = false;
+        }
+      }
+      return;
+    }
+
+    // 궤적 잔상 기록
+    marble.trail.push({ x: marble.x, y: marble.y });
+    if (marble.trail.length > 6) marble.trail.shift();
+
+    // 뚫림 방지를 위해 3회 서브스텝 물리 연산
+    var subSteps = 3;
+    var subDt = 1 / subSteps;
+
+    for (var step = 0; step < subSteps; step++) {
+      marble.vy += GRAVITY * subDt;
+      marble.vx *= Math.pow(0.996, subDt);
+      marble.vy *= Math.pow(0.996, subDt);
+
+      marble.x += marble.vx * subDt;
+      marble.y += marble.vy * subDt;
+
+      // 1. 좌우 벽 충돌
+      if (marble.x - marble.r < WALL_LEFT) {
+        marble.x = WALL_LEFT + marble.r;
+        marble.vx = -marble.vx * RESTITUTION_WALL;
+        playSound('hit');
+      } else if (marble.x + marble.r > WALL_RIGHT) {
+        marble.x = WALL_RIGHT - marble.r;
+        marble.vx = -marble.vx * RESTITUTION_WALL;
+        playSound('hit');
+      }
+
+      // 2. 핀과의 원-원 충돌
+      for (var i = 0; i < pins.length; i++) {
+        var pin = pins[i];
+        var dx = marble.x - pin.x;
+        var dy = marble.y - pin.y;
+        var minDist = marble.r + pin.r;
+        var distSq = dx * dx + dy * dy;
+
+        if (distSq < minDist * minDist) {
+          var dist = Math.sqrt(distSq) || 0.001;
+          var nx = dx / dist;
+          var ny = dy / dist;
+
+          // 침투 보정
+          marble.x = pin.x + nx * (minDist + 0.1);
+          marble.y = pin.y + ny * (minDist + 0.1);
+
+          // 상대 속도 투영
+          var vn = marble.vx * nx + marble.vy * ny;
+          if (vn < 0) {
+            // 반사 및 미세한 스핀 섭동 부여
+            var spin = (Math.random() - 0.5) * 0.4;
+            marble.vx -= (1 + RESTITUTION_PEG) * vn * nx - ny * spin;
+            marble.vy -= (1 + RESTITUTION_PEG) * vn * ny + nx * spin;
+
+            pin.hitTimer = 10;
+            playSound('hit');
+          }
+        }
+      }
+
+      // 3. 슬롯 디바이더(칸막이 기둥 및 상단 캡) 충돌
+      for (var d = 0; d < slots.length; d++) {
+        var slot = slots[d];
+        var divX = slot.x1;
+        if (d > 0) {
+          // 디바이더 상단 캡 (원형 충돌체)
+          var capR = 2.5;
+          var cdx = marble.x - divX;
+          var cdy = marble.y - SLOT_TOP_Y;
+          var cDistSq = cdx * cdx + cdy * cdy;
+          var cMinDist = marble.r + capR;
+
+          if (cDistSq < cMinDist * cMinDist) {
+            var cDist = Math.sqrt(cDistSq) || 0.001;
+            var cnx = cdx / cDist;
+            var cny = cdy / cDist;
+            marble.x = divX + cnx * (cMinDist + 0.1);
+            marble.y = SLOT_TOP_Y + cny * (cMinDist + 0.1);
+            var cvn = marble.vx * cnx + marble.vy * cny;
+            if (cvn < 0) {
+              marble.vx -= (1 + RESTITUTION_PEG) * cvn * cnx;
+              marble.vy -= (1 + RESTITUTION_PEG) * cvn * cny;
+              playSound('hit');
+            }
+          }
+
+          // 디바이더 수직선 충돌 (y가 SLOT_TOP_Y 아래일 때)
+          if (marble.y >= SLOT_TOP_Y && marble.y <= FLOOR_Y) {
+            if (Math.abs(marble.x - divX) < marble.r) {
+              if (marble.x < divX) {
+                marble.x = divX - marble.r;
+                marble.vx = -Math.abs(marble.vx) * 0.5;
+              } else {
+                marble.x = divX + marble.r;
+                marble.vx = Math.abs(marble.vx) * 0.5;
+              }
+            }
+          }
+        }
+      }
+
+      // 4. 바닥 도달 및 득점 판정
+      if (marble.y >= FLOOR_Y - marble.r) {
+        marble.y = FLOOR_Y - marble.r;
+        marble.settled = true;
+        marble.vx = 0;
+        marble.vy = 0;
+
+        // 떨어진 슬롯 결정
+        var hitSlot = null;
+        for (var k = 0; k < slots.length; k++) {
+          if (marble.x >= slots[k].x1 && marble.x < slots[k].x2) {
+            hitSlot = slots[k];
+            break;
+          }
+        }
+        if (!hitSlot) hitSlot = slots[slots.length - 1];
+
+        // 득점 처리
+        var gained = hitSlot.score;
+        currentScore += gained;
+        ballsRemaining--;
+        ballResults.push(gained);
+        hitSlot.flashTimer = 22;
+
+        updateStatus();
+
+        if (gained > 0) {
+          playSound('score');
+          floatingTexts.push({
+            x: hitSlot.cx,
+            y: SLOT_TOP_Y - 12,
+            vy: -1.2,
+            text: '+' + gained.toLocaleString('ko-KR') + '점',
+            color: (gained >= 1000) ? '#ffd60a' : '#5bf5ba',
+            life: 36,
+            maxLife: 36
+          });
+        } else {
+          playSound('zero');
+          floatingTexts.push({
+            x: hitSlot.cx,
+            y: SLOT_TOP_Y - 12,
+            vy: -1.0,
+            text: '0점 (꽝)',
+            color: '#f26168',
+            life: 36,
+            maxLife: 36
+          });
+        }
+        break;
+      }
+    }
+  }
+
+  // --- 화면 렌더링 ---
+  function render() {
+    // 캔버스 크기 조정 (디바이스 픽셀 비율 대응)
+    var rect = canvas.getBoundingClientRect();
+    var cssW = rect.width || 390;
+    var cssH = rect.height || 540;
+    var dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale((canvas.width / V_WIDTH), (canvas.height / V_HEIGHT));
+
+    ctx.clearRect(0, 0, V_WIDTH, V_HEIGHT);
+
+    // 1. 보드 배경 (우주/네이비 톤 다크 그라데이션)
+    var bgGrad = ctx.createLinearGradient(0, 0, 0, V_HEIGHT);
+    bgGrad.addColorStop(0, '#12141a');
+    bgGrad.addColorStop(0.5, '#171a23');
+    bgGrad.addColorStop(1, '#0e1015');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, V_WIDTH, V_HEIGHT);
+
+    // 2. 외곽 메탈 프레임 (좌우 벽)
+    ctx.save();
+    ctx.fillStyle = '#2c2f38';
+    ctx.fillRect(0, 0, WALL_LEFT, V_HEIGHT);
+    ctx.fillRect(WALL_RIGHT, 0, V_WIDTH - WALL_RIGHT, V_HEIGHT);
+
+    ctx.strokeStyle = '#484d5c';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(WALL_LEFT, 0);
+    ctx.lineTo(WALL_LEFT, V_HEIGHT);
+    ctx.moveTo(WALL_RIGHT, 0);
+    ctx.lineTo(WALL_RIGHT, V_HEIGHT);
+    ctx.stroke();
+    ctx.restore();
+
+    // 3. 하단 슬롯 렌더링
+    for (var s = 0; s < slots.length; s++) {
+      var slot = slots[s];
+      var theme = slot.theme;
+
+      // 슬롯 배경
+      ctx.fillStyle = (slot.flashTimer > 0) ? theme.line : theme.bg;
+      ctx.fillRect(slot.x1 + 1, SLOT_TOP_Y, slot.w - 2, FLOOR_Y - SLOT_TOP_Y);
+
+      // 슬롯 점등 시 발광 효과
+      if (slot.flashTimer > 0) {
+        ctx.save();
+        ctx.fillStyle = theme.glow;
+        ctx.fillRect(slot.x1, SLOT_TOP_Y - 8, slot.w, FLOOR_Y - SLOT_TOP_Y + 8);
+        ctx.restore();
+      }
+
+      // 슬롯 외곽선
+      ctx.strokeStyle = theme.line;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(slot.x1 + 1, SLOT_TOP_Y, slot.w - 2, FLOOR_Y - SLOT_TOP_Y);
+
+      // 슬롯 점수 글자
+      ctx.save();
+      ctx.fillStyle = (slot.flashTimer > 0) ? '#ffffff' : theme.text;
+      ctx.font = 'bold ' + (slot.w < 35 ? '11px' : '13px') + ' -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(slot.label, slot.cx, SLOT_TOP_Y + 28);
+
+      if (slot.w >= 36) {
+        ctx.font = '9px -apple-system, sans-serif';
+        ctx.fillStyle = (slot.flashTimer > 0) ? '#ffffff' : 'rgba(255,255,255,0.45)';
+        ctx.fillText(slot.score === 0 ? '함정' : '점', slot.cx, SLOT_TOP_Y + 44);
+      }
+      ctx.restore();
+
+      // 슬롯 디바이더 기둥 (구분선)
+      if (s > 0) {
+        ctx.save();
+        ctx.strokeStyle = '#5a6070';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(slot.x1, SLOT_TOP_Y);
+        ctx.lineTo(slot.x1, FLOOR_Y);
+        ctx.stroke();
+
+        // 디바이더 상단 볼캡
+        ctx.fillStyle = '#8f97a8';
+        ctx.beginPath();
+        ctx.arc(slot.x1, SLOT_TOP_Y, 2.8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // 4. 바닥 베이스라인
+    ctx.strokeStyle = '#3a3e4b';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(WALL_LEFT, FLOOR_Y);
+    ctx.lineTo(WALL_RIGHT, FLOOR_Y);
+    ctx.stroke();
+
+    // 5. 핀(못) 렌더링
+    for (var p = 0; p < pins.length; p++) {
+      var pin = pins[p];
+      var isHit = pin.hitTimer > 0;
+
+      ctx.save();
+      if (isHit) {
+        // 충돌 시 번쩍임
+        ctx.shadowColor = '#ffd60a';
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = '#ffffff';
+      } else {
+        ctx.fillStyle = '#d4af37'; // 황동 골드
+      }
+
+      ctx.beginPath();
+      ctx.arc(pin.x, pin.y, pin.r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 핀 하이라이트 작은 광택
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.beginPath();
+      ctx.arc(pin.x - 1, pin.y - 1, pin.r * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 6. 상단 조준 가이드 및 대기 구슬
+    if (gameState === 'aiming' || gameState === 'ready') {
+      var curAimX = Math.max(WALL_LEFT + MARBLE_RADIUS + 4, Math.min(WALL_RIGHT - MARBLE_RADIUS - 4, aimX));
+
+      // 상단 투하 레일 가이드
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(WALL_LEFT + 10, DROP_Y);
+      ctx.lineTo(WALL_RIGHT - 10, DROP_Y);
+      ctx.stroke();
+
+      // 조준 점선 가이드 (아래로 연장)
+      ctx.strokeStyle = 'rgba(255, 214, 10, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(curAimX, DROP_Y + MARBLE_RADIUS + 2);
+      ctx.lineTo(curAimX, DROP_Y + 50);
+      ctx.stroke();
+      ctx.restore();
+
+      // 대기 구슬 렌더링
+      drawMarble(curAimX, DROP_Y, MARBLE_RADIUS, 1.0);
+    }
+
+    // 7. 떨어지는 구슬 및 잔상
+    if (marble && marble.active) {
+      // 잔상
+      for (var t = 0; t < marble.trail.length; t++) {
+        var tr = marble.trail[t];
+        var alpha = (t + 1) / (marble.trail.length + 1) * 0.3;
+        drawMarble(tr.x, tr.y, marble.r * 0.85, alpha);
+      }
+      // 본체 구슬
+      drawMarble(marble.x, marble.y, marble.r, 1.0);
+    }
+
+    // 8. 득점 플로팅 텍스트 렌더링
+    for (var ftIdx = 0; ftIdx < floatingTexts.length; ftIdx++) {
+      var item = floatingTexts[ftIdx];
+      var progress = item.life / item.maxLife;
+      ctx.save();
+      ctx.font = 'bold 15px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = item.color;
+      ctx.globalAlpha = Math.max(0, Math.min(1, progress * 1.5));
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 4;
+      ctx.fillText(item.text, item.x, item.y);
+      ctx.restore();
+    }
+  }
+
+  // 영롱한 구슬 렌더링 함수
+  function drawMarble(x, y, r, alpha) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+
+    // 바닥 그림자
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetY = 2;
+
+    // 구슬 구체 그라데이션
+    var grad = ctx.createRadialGradient(x - r * 0.35, y - r * 0.35, r * 0.1, x, y, r);
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(0.3, '#ffe066');
+    grad.addColorStop(0.7, '#f5a623');
+    grad.addColorStop(1, '#b56d05');
+
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 표면 광택 하이라이트
+    ctx.shadowColor = 'transparent';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.beginPath();
+    ctx.arc(x - r * 0.32, y - r * 0.32, r * 0.28, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // --- 메인 애니메이션 루프 ---
+  function gameLoop() {
+    updatePhysics();
+    render();
+    requestAnimationFrame(gameLoop);
+  }
+
+  // 창 크기 변경 시 재렌더링
+  window.addEventListener('resize', function () {
+    render();
+  });
+
+  // --- 초기화 실행 ---
+  initPins();
+  loadStorage();
+  resetToReady();
+  requestAnimationFrame(gameLoop);
+
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/freecell-solitaire/">프리셀</a> — 임시 칸을 써서 카드 쌓기</li><li><a href="/nonogram/">네모 로직</a> — 숫자 힌트로 숨은 그림 찾기</li><li><a href="/sum-fill/">숫자 합 맞추기</a> — 가로세로 합에 맞게 숫자 채우기</li><li><a href="/balloon-rise/">풍선 올리기</a> — 장애물 피해 풍선 올리기</li><li><a href="/star-dodge/">별 피하기</a> — 쏟아지는 별 피하기</li><li><a href="/fruit-catch/">과일 받기</a> — 떨어지는 과일 바구니로 받기</li><li><a href="/paddle-bounce/">탁구</a> — 공을 튕겨 오래 버티기</li><li><a href="/asteroid-dodge/">우주선 피하기</a> — 날아오는 운석 피하기</li><li><a href="/click-speed/">클릭 속도 재기</a> — 정해진 시간 동안 빠르게 누르기</li><li><a href="/rhythm-tap/">리듬 탭</a> — 떨어지는 노트를 박자에 맞춰 탭</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

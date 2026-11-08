@@ -1,0 +1,1131 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>풍선 올리기 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 즐기는 무료 풍선 올리기 게임. 화면을 가볍게 터치해 풍선을 띄우고 다가오는 구름 기둥 사이를 통과하여 최고 점수에 도전하세요.">
+<link rel="canonical" href="https://jwapyonara.com/balloon-rise/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="풍선 올리기 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 즐기는 무료 풍선 올리기 게임. 화면을 가볍게 터치해 풍선을 띄우고 다가오는 구름 기둥 사이를 통과하여 최고 점수에 도전하세요.">
+<meta property="og:url" content="https://jwapyonara.com/balloon-rise/">
+<link rel="stylesheet" href="../_common/common.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "풍선 올리기",
+  "url": "https://jwapyonara.com/balloon-rise/",
+  "description": "가입 없이 바로 즐기는 무료 풍선 올리기 게임. 화면을 가볍게 터치해 풍선을 띄우고 다가오는 구름 기둥 사이를 통과하여 최고 점수에 도전하세요.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All"
+}
+</script>
+<style>
+/* 난이도 선택 버튼 */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 바 */
+.game-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 8px;
+}
+.game-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+.game-status-mid {
+  color: #ffffff;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+.game-status-right {
+  color: #a1a1a6;
+  flex: 1.2;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+/* 캔버스 래퍼 */
+.game-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto 12px;
+  aspect-ratio: 9 / 13;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #5dade2;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: pointer;
+  touch-action: none;
+}
+
+/* 오버레이 */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 22, 28, 0.86);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 24px 20px;
+  text-align: center;
+  z-index: 10;
+  backdrop-filter: blur(2px);
+}
+.canvas-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 10px;
+  color: #ffd60a;
+  letter-spacing: -0.02em;
+}
+.canvas-overlay p {
+  font-size: 15px;
+  margin: 0 0 20px;
+  color: #e5e5ea;
+  max-width: 280px;
+  line-height: 1.5;
+}
+.overlay-score-box {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 12px 20px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 240px;
+  box-sizing: border-box;
+}
+.overlay-score-box .score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #c7c7cc;
+  margin: 4px 0;
+}
+.overlay-score-box .score-row.highlight {
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffd60a;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+.overlay-score-box .score-row b {
+  color: #fff;
+}
+.overlay-score-box .score-row.highlight b {
+  color: #ffd60a;
+}
+.overlay-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 260px;
+}
+.btn-overlay-start,
+.btn-overlay-restart {
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  background: var(--red, #1b64da);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  min-height: 50px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+}
+.btn-overlay-start:active,
+.btn-overlay-restart:active {
+  opacity: 0.88;
+}
+#btnOverlayRank {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  background: #3a3a3c;
+  color: #ffd60a;
+  border: 1.5px solid #ffd60a;
+  border-radius: 12px;
+  padding: 11px 20px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+}
+#btnOverlayRank:active {
+  background: #48484a;
+}
+
+/* 제어 단추 바 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+}
+.btn-reset {
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #3a3a3c;
+}
+.btn-sound {
+  background: var(--card, #fff);
+  border: 1.5px solid var(--line, #e5e5ea);
+  color: var(--ink, #1c1c1e);
+}
+.btn-sound:active {
+  background: var(--soft, #e8f0fe);
+}
+
+.tip-text {
+  text-align: center;
+  font-size: 13px;
+  color: var(--sub);
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>풍선 올리기</h1>
+  <p class="lead">화면을 가볍게 눌러 풍선을 띄우세요. 다가오는 구름 기둥 사이를 통과하면 점수가 올라갑니다.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="game-status-bar">
+      <div class="game-status-left" id="statusScore">0점</div>
+      <div class="game-status-mid" id="statusPassed">통과 0</div>
+      <div class="game-status-right" id="statusBest">최고 0점</div>
+    </div>
+
+    <div class="game-canvas-wrap" id="canvasWrap">
+      <canvas id="gameCanvas" width="360" height="520"></canvas>
+
+      <!-- 시작 전 덮개 -->
+      <div class="canvas-overlay" id="overlayStart">
+        <h2>풍선 올리기</h2>
+        <p id="overlayStartDesc">쉬움 난이도로 시작해요.<br>화면을 누르면 풍선이 떠오릅니다.</p>
+        <div class="overlay-btn-group">
+          <button type="button" class="btn-overlay-start" id="btnStartGame">게임 시작</button>
+        </div>
+      </div>
+
+      <!-- 게임 오버 덮개 -->
+      <div class="canvas-overlay" id="overlayGameOver" style="display: none;">
+        <h2>게임 종료</h2>
+        <p id="gameOverReason">구름에 부딪혔어요!</p>
+        <div class="overlay-score-box">
+          <div class="score-row"><span>통과한 구름</span><b id="finalPassed">0개</b></div>
+          <div class="score-row"><span>난이도 배수</span><b id="finalMult">×1</b></div>
+          <div class="score-row highlight"><span>최종 점수</span><b id="finalScore">0점</b></div>
+        </div>
+        <div class="overlay-btn-group">
+          <button type="button" class="btn-overlay-restart" id="btnRestart">다시 하기</button>
+          <button type="button" id="btnOverlayRank">🏆 순위표 올리기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-reset" id="btnReset">새로 시작</button>
+      <button type="button" class="btn-action btn-sound" id="btnSound">소리 켬</button>
+    </div>
+
+    <p class="tip-text">
+      화면 아무 곳이나 톡 누르거나 스페이스바를 누르면 풍선이 위로 떠오릅니다.
+    </p>
+  </section>
+
+  <p class="note">기기 화면 안에서만 실행되며 점수는 브라우저에 안전하게 보관됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>게임 규칙과 하는 법</summary>
+    <ul>
+      <li><b>기본 규칙:</b> 풍선은 가만히 두면 중력에 의해 천천히 내려갑니다. 화면을 터치하거나 클릭하면 위로 둥실 떠오릅니다.</li>
+      <li><b>구름 장애물:</b> 오른쪽에서 다가오는 구름 기둥(위아래) 사이의 빈 틈을 통과해야 합니다. 구름이나 화면 위·아래 끝에 닿으면 게임이 끝납니다.</li>
+      <li><b>점수 계산:</b> 구름 기둥 1개를 통과할 때마다 1점을 얻으며, 최종 점수는 <code>통과한 구름 수 × 난이도 배수(쉬움 1배, 보통 2배, 어려움 3배) × 10</code>으로 계산됩니다.</li>
+      <li><b>난이도 안내:</b> 쉬움(구름 틈이 넓고 느리게 이동), 보통(표준 속도와 틈), 어려움(구름 틈이 좁고 빠르게 이동) 3가지 모드가 있습니다.</li>
+      <li><b>순위표 올리기:</b> 게임이 끝나면 결과 창의 '🏆 순위표 올리기'를 눌러 내 최고 점수를 기록하고 순위를 확인해보세요.</li>
+      <li>이 게임은 좌표나라가 새로 제작한 무료 웹 게임입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단에서 원하는 난이도(쉬움·보통·어려움)를 선택합니다.</li>
+      <li>화면을 가볍게 톡톡 눌러 풍선의 높이를 부드럽게 조절합니다.</li>
+      <li>다가오는 구름 기둥의 틈새 높이를 미리 확인하고 타이밍에 맞춰 통과합니다.</li>
+      <li>높은 점수를 기록하여 명예의 순위표에 내 닉네임을 올려보세요.</li>
+    </ol>
+    <h2>이럴 때 추천해요</h2>
+    <p>대중교통 이동 중이나 잠시 쉬어가는 시간에 한 손으로 가볍게 몰입하기 좋은 아케이드 게임입니다. 단순한 터치 조작으로 남녀노소 누구나 즐길 수 있습니다.</p>
+    <h2>플레이 팁</h2>
+    <dl>
+      <dt>일정한 박자로 톡톡 터치</dt>
+      <dd>급하게 연타하기보다는 풍선이 살짝 내려올 때 일정한 박자로 가볍게 눌러주면 높이를 훨씬 안정적으로 제어할 수 있습니다.</dd>
+      <dt>시선은 다음 구름 틈새에 집중</dt>
+      <dd>현재 구름을 통과하는 순간 시선을 바로 다음에 다가오는 구름의 틈새로 옮기면 급격한 조작 없이 부드럽게 고도를 맞출 수 있습니다.</dd>
+    </dl>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // DOM 요소
+  var canvas = document.getElementById('gameCanvas');
+  var ctx = canvas.getContext('2d');
+  var canvasWrap = document.getElementById('canvasWrap');
+  var overlayStart = document.getElementById('overlayStart');
+  var overlayStartDesc = document.getElementById('overlayStartDesc');
+  var overlayGameOver = document.getElementById('overlayGameOver');
+  var gameOverReason = document.getElementById('gameOverReason');
+  var finalPassed = document.getElementById('finalPassed');
+  var finalMult = document.getElementById('finalMult');
+  var finalScore = document.getElementById('finalScore');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnRestart = document.getElementById('btnRestart');
+  var btnReset = document.getElementById('btnReset');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnSound = document.getElementById('btnSound');
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var statusScore = document.getElementById('statusScore');
+  var statusPassed = document.getElementById('statusPassed');
+  var statusBest = document.getElementById('statusBest');
+
+  // 논리 화면 해상도
+  var VIEW_W = 360;
+  var VIEW_H = 520;
+
+  // 난이도별 파라미터
+  var DIFF_SETTINGS = {
+    easy: {
+      gap: 175,
+      speed: 1.8,
+      spacing: 240,
+      gravity: 0.28,
+      jump: -5.4,
+      mult: 1,
+      name: '쉬움'
+    },
+    normal: {
+      gap: 140,
+      speed: 2.4,
+      spacing: 215,
+      gravity: 0.32,
+      jump: -5.8,
+      mult: 2,
+      name: '보통'
+    },
+    hard: {
+      gap: 115,
+      speed: 3.0,
+      spacing: 195,
+      gravity: 0.36,
+      jump: -6.2,
+      mult: 3,
+      name: '어려움'
+    }
+  };
+
+  // 게임 상태 변수
+  var gameState = 'ready'; // 'ready', 'playing', 'gameover'
+  var currentLevel = 'easy';
+  var animId = null;
+
+  // 풍선 상태
+  var balloon = {
+    x: 84,
+    y: 240,
+    vy: 0,
+    radius: 17,
+    angle: 0
+  };
+
+  // 구름 기둥 목록 [{ x, top, bottom, gap, passed }]
+  var clouds = [];
+  var passedCount = 0;
+  var currentScore = 0;
+
+  // 파티클 목록
+  var particles = [];
+
+  // 배경 흐르는 구름 장식 목록
+  var bgClouds = [
+    { x: 30, y: 70, w: 90, h: 32, speed: 0.4 },
+    { x: 190, y: 130, w: 120, h: 42, speed: 0.6 },
+    { x: 100, y: 380, w: 80, h: 30, speed: 0.35 }
+  ];
+
+  // 최고 점수 기억
+  var bestScores = {
+    easy: 0,
+    normal: 0,
+    hard: 0
+  };
+
+  // 소리 시스템 (WebAudio API)
+  var soundEnabled = true;
+  var audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      try {
+        var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      } catch (e) {}
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  function playSound(type) {
+    if (!soundEnabled || !audioCtx) return;
+    try {
+      var now = audioCtx.currentTime;
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+
+      if (type === 'jump') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.exponentialRampToValueAtTime(460, now + 0.08);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === 'score') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523.25, now); // C5
+        osc.frequency.setValueAtTime(659.25, now + 0.06); // E5
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.14);
+      } else if (type === 'hit') {
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(70, now + 0.16);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.16);
+      }
+    } catch (e) {}
+  }
+
+  // 로컬 스토리지 읽기
+  function loadStorage() {
+    try {
+      var re = localStorage.getItem('zw_balloon-rise_best_easy');
+      var rn = localStorage.getItem('zw_balloon-rise_best_normal');
+      var rh = localStorage.getItem('zw_balloon-rise_best_hard');
+      if (re && !isNaN(parseInt(re, 10))) bestScores.easy = Math.min(parseInt(re, 10), 99999999);
+      if (rn && !isNaN(parseInt(rn, 10))) bestScores.normal = Math.min(parseInt(rn, 10), 99999999);
+      if (rh && !isNaN(parseInt(rh, 10))) bestScores.hard = Math.min(parseInt(rh, 10), 99999999);
+
+      var savedLvl = localStorage.getItem('zw_balloon-rise_level');
+      if (savedLvl === 'normal' || savedLvl === 'hard' || savedLvl === 'easy') {
+        currentLevel = savedLvl;
+      }
+      var savedSound = localStorage.getItem('zw_balloon-rise_sound');
+      if (savedSound === '0') {
+        soundEnabled = false;
+        btnSound.textContent = '소리 끔';
+      } else {
+        soundEnabled = true;
+        btnSound.textContent = '소리 켬';
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+    }
+    updateLevelButtons();
+    updateStatusDisplay();
+    updateOverlayDesc();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+  }
+
+  // 상태 표시 업데이트
+  function updateStatusDisplay() {
+    statusScore.textContent = currentScore.toLocaleString('ko-KR') + '점';
+    statusPassed.textContent = '통과 ' + passedCount;
+    var best = bestScores[currentLevel] || 0;
+    statusBest.textContent = '최고 ' + best.toLocaleString('ko-KR') + '점';
+  }
+
+  // 난이도 단추 UI 갱신
+  function updateLevelButtons() {
+    btnDiffEasy.classList.remove('on');
+    btnDiffNormal.classList.remove('on');
+    btnDiffHard.classList.remove('on');
+    if (currentLevel === 'hard') {
+      btnDiffHard.classList.add('on');
+    } else if (currentLevel === 'normal') {
+      btnDiffNormal.classList.add('on');
+    } else {
+      btnDiffEasy.classList.add('on');
+    }
+  }
+
+  // 시작 덮개 설명 문구 갱신
+  function updateOverlayDesc() {
+    var conf = DIFF_SETTINGS[currentLevel];
+    if (overlayStartDesc) {
+      overlayStartDesc.innerHTML = '<b>' + conf.name + '</b> 난이도로 시작해요.<br>화면을 누르면 풍선이 떠오릅니다.';
+    }
+  }
+
+  // 순위표 탭 동기화 (오목 표준 syncRankTab 방식)
+  function syncRankTab() {
+    try {
+      var idx = (currentLevel === 'hard') ? 2 : ((currentLevel === 'normal') ? 1 : 0);
+      if (typeof ZW !== 'undefined') {
+        ZW.rankPick = idx;
+      }
+      var b = document.querySelector('.rk-tabs button[data-i="' + idx + '"]');
+      if (b) {
+        b.click();
+      }
+    } catch (e) {}
+  }
+
+  // 난이도 변경 처리
+  function setLevel(lvl) {
+    if (lvl !== 'easy' && lvl !== 'normal' && lvl !== 'hard') lvl = 'easy';
+    if (lvl === currentLevel && gameState === 'ready') return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_balloon-rise_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    resetToReadyState();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // 소리 켜기/끄기 토글
+  btnSound.addEventListener('click', function () {
+    soundEnabled = !soundEnabled;
+    btnSound.textContent = soundEnabled ? '소리 켬' : '소리 끔';
+    try {
+      localStorage.setItem('zw_balloon-rise_sound', soundEnabled ? '1' : '0');
+    } catch (e) {}
+    if (soundEnabled) initAudio();
+  });
+
+  // 준비 상태로 리셋
+  function resetToReadyState() {
+    gameState = 'ready';
+    balloon.x = 84;
+    balloon.y = 240;
+    balloon.vy = 0;
+    balloon.angle = 0;
+    clouds = [];
+    particles = [];
+    passedCount = 0;
+    currentScore = 0;
+
+    overlayGameOver.style.display = 'none';
+    overlayStart.style.display = 'flex';
+    updateOverlayDesc();
+    updateStatusDisplay();
+    render();
+  }
+
+  // 게임 시작
+  function startGame() {
+    initAudio();
+    gameState = 'playing';
+    balloon.x = 84;
+    balloon.y = 230;
+    balloon.vy = DIFF_SETTINGS[currentLevel].jump * 0.7;
+    balloon.angle = -0.15;
+    clouds = [];
+    particles = [];
+    passedCount = 0;
+    currentScore = 0;
+
+    overlayStart.style.display = 'none';
+    overlayGameOver.style.display = 'none';
+    updateStatusDisplay();
+    playSound('jump');
+
+    if (!animId) {
+      lastFrameTime = performance.now();
+      animId = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  // 풍선 띄우기 (조작 반응)
+  function flap() {
+    if (gameState === 'ready') {
+      startGame();
+      return;
+    }
+    if (gameState !== 'playing') return;
+
+    initAudio();
+    var conf = DIFF_SETTINGS[currentLevel];
+    balloon.vy = conf.jump;
+    balloon.angle = -0.28;
+    playSound('jump');
+
+    // 풍선 아래 공기 파티클 생성
+    for (var i = 0; i < 3; i++) {
+      particles.push({
+        x: balloon.x + (Math.random() * 8 - 4),
+        y: balloon.y + balloon.radius + 6,
+        vx: (Math.random() - 0.5) * 1.5,
+        vy: Math.random() * 2 + 1,
+        radius: Math.random() * 2.5 + 1.5,
+        color: 'rgba(255, 255, 255, 0.75)',
+        alpha: 1,
+        decay: 0.05
+      });
+    }
+  }
+
+  // 게임 오버 처리
+  function triggerGameOver(reason) {
+    if (gameState !== 'playing') return;
+    gameState = 'gameover';
+    playSound('hit');
+
+    // 충돌 파티클 폭발
+    for (var i = 0; i < 18; i++) {
+      var pAngle = Math.random() * Math.PI * 2;
+      var pSpeed = Math.random() * 4 + 1.5;
+      particles.push({
+        x: balloon.x,
+        y: balloon.y,
+        vx: Math.cos(pAngle) * pSpeed,
+        vy: Math.sin(pAngle) * pSpeed,
+        radius: Math.random() * 3 + 2,
+        color: (i % 2 === 0) ? '#ff4757' : '#ffd60a',
+        alpha: 1,
+        decay: 0.03
+      });
+    }
+
+    var conf = DIFF_SETTINGS[currentLevel];
+    var finalScoreVal = Math.min(currentScore, 99999999);
+
+    // 최고 기록 갱신
+    var prevBest = bestScores[currentLevel] || 0;
+    if (finalScoreVal > prevBest) {
+      bestScores[currentLevel] = finalScoreVal;
+      try {
+        localStorage.setItem('zw_balloon-rise_best_' + currentLevel, String(finalScoreVal));
+      } catch (e) {}
+    }
+    updateStatusDisplay();
+
+    // 결과 창 표시
+    gameOverReason.textContent = reason || '구름에 부딪혔어요!';
+    finalPassed.textContent = passedCount + '개';
+    finalMult.textContent = '×' + conf.mult;
+    finalScore.textContent = finalScoreVal.toLocaleString('ko-KR') + '점';
+    overlayGameOver.style.display = 'flex';
+  }
+
+  // 구름 기둥 생성
+  function spawnCloud() {
+    var conf = DIFF_SETTINGS[currentLevel];
+    var gap = conf.gap;
+    var minTop = 60;
+    var maxTop = VIEW_H - gap - 60;
+    var top = minTop + Math.random() * (maxTop - minTop);
+
+    clouds.push({
+      x: VIEW_W + 15,
+      width: 62,
+      top: top,
+      bottom: top + gap,
+      gap: gap,
+      passed: false
+    });
+  }
+
+  // 캔버스 크기 맞춤 (Retina 디스플레이 대응)
+  var dprScale = 1;
+  function updateMetrics() {
+    var rect = canvas.getBoundingClientRect();
+    var w = rect.width || 360;
+    var h = rect.height || 520;
+    var dpr = window.devicePixelRatio || 1;
+    dprScale = dpr;
+
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(canvas.width / VIEW_W, canvas.height / VIEW_H);
+  }
+
+  // 물리 및 위치 업데이트
+  var lastFrameTime = performance.now();
+  function update(dt) {
+    var conf = DIFF_SETTINGS[currentLevel];
+
+    // 배경 장식 구름 이동
+    for (var b = 0; b < bgClouds.length; b++) {
+      var bgc = bgClouds[b];
+      bgc.x -= bgc.speed;
+      if (bgc.x + bgc.w < -10) {
+        bgc.x = VIEW_W + 20;
+        bgc.y = 40 + Math.random() * (VIEW_H - 120);
+      }
+    }
+
+    // 파티클 업데이트
+    for (var p = particles.length - 1; p >= 0; p--) {
+      var pt = particles[p];
+      pt.x += pt.vx;
+      pt.y += pt.vy;
+      pt.alpha -= pt.decay;
+      if (pt.alpha <= 0) {
+        particles.splice(p, 1);
+      }
+    }
+
+    if (gameState !== 'playing') return;
+
+    // 풍선 물리 업데이트
+    balloon.vy += conf.gravity;
+    balloon.y += balloon.vy;
+
+    // 각도 자연스럽게 조정 (떨어질 때 고개 숙임)
+    if (balloon.vy > 0) {
+      balloon.angle = Math.min(balloon.angle + 0.02, 0.45);
+    }
+
+    // 화면 천장 및 바닥 충돌 판정
+    if (balloon.y - balloon.radius <= 0) {
+      triggerGameOver('하늘 높이 벗어났어요!');
+      return;
+    }
+    if (balloon.y + balloon.radius >= VIEW_H) {
+      triggerGameOver('바닥에 닿았어요!');
+      return;
+    }
+
+    // 구름 기둥 스폰 체크
+    var shouldSpawn = false;
+    if (clouds.length === 0) {
+      shouldSpawn = true;
+    } else {
+      var lastCloud = clouds[clouds.length - 1];
+      if (VIEW_W - lastCloud.x >= conf.spacing) {
+        shouldSpawn = true;
+      }
+    }
+    if (shouldSpawn) {
+      spawnCloud();
+    }
+
+    // 구름 이동 및 충돌 판정
+    for (var c = clouds.length - 1; c >= 0; c--) {
+      var cl = clouds[c];
+      cl.x -= conf.speed;
+
+      // 점수 획득 판정 (통과)
+      if (!cl.passed && (cl.x + cl.width < balloon.x)) {
+        cl.passed = true;
+        passedCount++;
+        currentScore = Math.min(passedCount * conf.mult * 10, 99999999);
+        updateStatusDisplay();
+        playSound('score');
+
+        // 통과 축하 반짝이 파티클
+        for (var k = 0; k < 6; k++) {
+          particles.push({
+            x: balloon.x + (Math.random() * 20 - 10),
+            y: balloon.y + (Math.random() * 20 - 10),
+            vx: (Math.random() - 0.5) * 2,
+            vy: (Math.random() - 0.5) * 2,
+            radius: Math.random() * 2.5 + 1.5,
+            color: '#ffd60a',
+            alpha: 1,
+            decay: 0.04
+          });
+        }
+      }
+
+      // 충돌 판정 (원 vs 기둥)
+      // 풍선의 중심과 반경(여유 마진 포함)
+      var marginR = balloon.radius * 0.85;
+      if (balloon.x + marginR > cl.x && balloon.x - marginR < cl.x + cl.width) {
+        // 위쪽 구름과 충돌
+        if (balloon.y - marginR < cl.top) {
+          triggerGameOver('위쪽 구름에 부딪혔어요!');
+          return;
+        }
+        // 아래쪽 구름과 충돌
+        if (balloon.y + marginR > cl.bottom) {
+          triggerGameOver('아래쪽 구름에 부딪혔어요!');
+          return;
+        }
+      }
+
+      // 화면 밖으로 완전히 벗어난 구름 제거
+      if (cl.x + cl.width < -30) {
+        clouds.splice(c, 1);
+      }
+    }
+  }
+
+  // 메인 루프
+  function gameLoop(timestamp) {
+    var dt = (timestamp - lastFrameTime) / 1000;
+    lastFrameTime = timestamp;
+    if (dt > 0.1) dt = 0.1;
+
+    update(dt);
+    render();
+
+    animId = requestAnimationFrame(gameLoop);
+  }
+
+  // 렌더링 함수
+  function render() {
+    updateMetrics();
+
+    // 1. 하늘 배경 그라데이션
+    var bgGrad = ctx.createLinearGradient(0, 0, 0, VIEW_H);
+    bgGrad.addColorStop(0, '#4aa3df');
+    bgGrad.addColorStop(0.65, '#87ceeb');
+    bgGrad.addColorStop(1, '#bfe9ff');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+    // 2. 원경 장식 구름 (소프트 화이트)
+    for (var b = 0; b < bgClouds.length; b++) {
+      var bgc = bgClouds[b];
+      drawSoftBgCloud(bgc.x, bgc.y, bgc.w, bgc.h);
+    }
+
+    // 3. 구름 기둥들 그리기
+    for (var i = 0; i < clouds.length; i++) {
+      drawCloudPillar(clouds[i]);
+    }
+
+    // 4. 파티클 그리기
+    for (var p = 0; p < particles.length; p++) {
+      var pt = particles[p];
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, pt.alpha);
+      ctx.fillStyle = pt.color;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 5. 풍선 그리기
+    drawBalloon(balloon.x, balloon.y, balloon.radius, balloon.angle);
+  }
+
+  // 배경 장식 구름 그리기
+  function drawSoftBgCloud(x, y, w, h) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
+    var r = h * 0.5;
+    ctx.beginPath();
+    ctx.arc(x + r, y + r, r, 0, Math.PI * 2);
+    ctx.arc(x + w * 0.45, y + r * 0.6, r * 1.25, 0, Math.PI * 2);
+    ctx.arc(x + w - r, y + r, r * 0.85, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  // 구름 기둥 그리기 (위아래 푹신한 뭉게구름 기둥)
+  function drawCloudPillar(cl) {
+    var x = cl.x;
+    var w = cl.width;
+    var top = cl.top;
+    var bottom = cl.bottom;
+
+    ctx.save();
+
+    // [위쪽 구름 기둥]
+    var topGrad = ctx.createLinearGradient(x, 0, x + w, 0);
+    topGrad.addColorStop(0, '#eaf2f8');
+    topGrad.addColorStop(0.3, '#ffffff');
+    topGrad.addColorStop(1, '#d8e5ee');
+    ctx.fillStyle = topGrad;
+
+    // 기둥 몸체
+    ctx.beginPath();
+    ctx.rect(x + 4, 0, w - 8, top - 12);
+    ctx.fill();
+
+    // 기둥 끝 뭉게구름 머리 (풍성한 솜사탕 형태)
+    drawPuffCluster(x, top - 20, w, 24, true);
+
+    // [아래쪽 구름 기둥]
+    var btmGrad = ctx.createLinearGradient(x, 0, x + w, 0);
+    btmGrad.addColorStop(0, '#eaf2f8');
+    btmGrad.addColorStop(0.3, '#ffffff');
+    btmGrad.addColorStop(1, '#d8e5ee');
+    ctx.fillStyle = btmGrad;
+
+    // 기둥 몸체
+    ctx.beginPath();
+    ctx.rect(x + 4, bottom + 12, w - 8, VIEW_H - bottom - 12);
+    ctx.fill();
+
+    // 기둥 시작 뭉게구름 머리
+    drawPuffCluster(x, bottom - 4, w, 24, false);
+
+    ctx.restore();
+  }
+
+  // 뭉게구름 덩어리 호 그리기
+  function drawPuffCluster(x, y, w, h, isTopPillar) {
+    ctx.save();
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetY = isTopPillar ? 3 : -3;
+
+    var cy = isTopPillar ? (y + h) : (y + 4);
+
+    ctx.beginPath();
+    // 3개의 볼륨감 있는 원형 호 결합
+    ctx.arc(x + 10, cy, 15, 0, Math.PI * 2);
+    ctx.arc(x + w * 0.5, isTopPillar ? (cy + 4) : (cy - 4), 18, 0, Math.PI * 2);
+    ctx.arc(x + w - 10, cy, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 은은한 외곽선 테두리
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = '#cddbe6';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // 풍선 그리기 (직접 그린 산뜻한 고무 풍선 디자인)
+  function drawBalloon(bx, by, r, angle) {
+    ctx.save();
+    ctx.translate(bx, by);
+    ctx.rotate(angle);
+
+    // 풍선 그림자
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 4;
+
+    // 풍선 본체 그라데이션 (선명한 코랄 레드)
+    var bGrad = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r * 1.15);
+    bGrad.addColorStop(0, '#ff7675');
+    bGrad.addColorStop(0.55, '#d63031');
+    bGrad.addColorStop(1, '#a11213');
+    ctx.fillStyle = bGrad;
+
+    // 풍선 외형 베지어 곡선 (위가 살짝 둥글고 아래가 약간 모아진 형태)
+    ctx.beginPath();
+    ctx.moveTo(0, r * 1.1);
+    ctx.bezierCurveTo(r * 1.1, r * 0.9, r * 1.25, -r * 0.9, 0, -r * 1.05);
+    ctx.bezierCurveTo(-r * 1.25, -r * 0.9, -r * 1.1, r * 0.9, 0, r * 1.1);
+    ctx.fill();
+
+    // 풍선 하이라이트 (빛 반사 타원)
+    ctx.shadowColor = 'transparent';
+    ctx.save();
+    ctx.translate(-r * 0.35, -r * 0.42);
+    ctx.rotate(-0.35);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, r * 0.25, r * 0.45, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 풍선 아래 묶음 매듭 (작은 삼각형)
+    ctx.fillStyle = '#b71516';
+    ctx.beginPath();
+    ctx.moveTo(0, r * 1.08);
+    ctx.lineTo(-4, r * 1.28);
+    ctx.lineTo(4, r * 1.28);
+    ctx.closePath();
+    ctx.fill();
+
+    // 풍선 줄 (살랑거리는 실)
+    ctx.strokeStyle = '#555555';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(0, r * 1.28);
+    ctx.quadraticCurveTo(-5, r * 1.55, 3, r * 1.95);
+    ctx.quadraticCurveTo(-2, r * 2.25, 1, r * 2.5);
+    ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // 조작 이벤트 리스너 등록
+  function handleInput(e) {
+    if (e) {
+      if (e.target && (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('a'))) {
+        return;
+      }
+      if (e.type === 'touchstart' || e.type === 'touchend') {
+        e.preventDefault();
+      }
+    }
+    flap();
+  }
+
+  canvasWrap.addEventListener('mousedown', function (e) {
+    if (e.button === 0) handleInput(e);
+  });
+  canvasWrap.addEventListener('touchstart', function (e) {
+    handleInput(e);
+  }, { passive: false });
+
+  // 키보드 지원 (스페이스바, 위 화살표)
+  window.addEventListener('keydown', function (e) {
+    if (e.code === 'Space' || e.code === 'ArrowUp') {
+      e.preventDefault();
+      flap();
+    }
+  });
+
+  // 버튼 이벤트 리스너
+  btnStartGame.addEventListener('click', function () {
+    startGame();
+  });
+  btnRestart.addEventListener('click', function () {
+    startGame();
+  });
+  btnReset.addEventListener('click', function () {
+    resetToReadyState();
+  });
+
+  // 순위표 올리기 바로가기 버튼
+  btnOverlayRank.addEventListener('click', function () {
+    var jump = document.querySelector('.zw-rk-jump');
+    if (jump) {
+      jump.click();
+    } else {
+      var rk = document.querySelector('.zw-rank');
+      if (rk) {
+        rk.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        rk.classList.add('flash');
+        setTimeout(function () { rk.classList.remove('flash'); }, 1800);
+      }
+    }
+  });
+
+  // 윈도우 리사이즈
+  window.addEventListener('resize', function () {
+    render();
+  });
+
+  // 초기화 실행
+  loadStorage();
+  resetToReadyState();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/idiom-blank/">사자성어 빈칸</a> — 빈칸에 맞는 글자 고르기</li><li><a href="/star-dodge/">별 피하기</a> — 쏟아지는 별 피하기</li><li><a href="/fruit-catch/">과일 받기</a> — 떨어지는 과일 바구니로 받기</li><li><a href="/marble-drop/">구슬 떨어뜨리기</a> — 구슬을 떨어뜨려 점수 칸에 넣기</li><li><a href="/paddle-bounce/">탁구</a> — 공을 튕겨 오래 버티기</li><li><a href="/asteroid-dodge/">우주선 피하기</a> — 날아오는 운석 피하기</li><li><a href="/click-speed/">클릭 속도 재기</a> — 정해진 시간 동안 빠르게 누르기</li><li><a href="/rhythm-tap/">리듬 탭</a> — 떨어지는 노트를 박자에 맞춰 탭</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

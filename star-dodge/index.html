@@ -1,0 +1,1344 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>별 피하기 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 하는 무료 별 피하기 게임. 위에서 떨어지는 별똥별을 피해 우주선을 조종하고 최고 점수에 도전해 보세요.">
+<link rel="canonical" href="https://jwapyonara.com/star-dodge/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="별 피하기 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 하는 무료 별 피하기 게임. 위에서 떨어지는 별똥별을 피해 우주선을 조종하고 최고 점수에 도전해 보세요.">
+<meta property="og:url" content="https://jwapyonara.com/star-dodge/">
+<meta property="og:site_name" content="좌표나라">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "별 피하기 무료",
+  "url": "https://jwapyonara.com/star-dodge/",
+  "description": "가입 없이 바로 하는 무료 별 피하기 게임. 위에서 떨어지는 별똥별을 피해 우주선을 조종하고 최고 점수에 도전해 보세요.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All"
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 (판 위) - 3단계 */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 표시 줄 */
+.game-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1c1c1e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 11px 16px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.game-status-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  text-align: left;
+}
+.life-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.life-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  color: #ff453a;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.life-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.life-icon.lost {
+  opacity: 0.22;
+  transform: scale(0.85);
+  color: #8e8e93;
+}
+.game-status-mid {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.game-status-right {
+  color: #ffffff;
+  flex: 1.1;
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+}
+.game-best-line {
+  font-size: 13px;
+  color: var(--sub, #8e8e93);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 캔버스 감싸개 */
+.game-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 12px;
+  aspect-ratio: 2 / 3;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #080c18;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: grab;
+}
+#gameCanvas:active {
+  cursor: grabbing;
+}
+
+/* 판 위 덮개 (시작 전 / 게임 종료) */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 14, 26, 0.88);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 24px;
+  text-align: center;
+  z-index: 10;
+}
+.canvas-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 8px;
+  color: #ffd60a;
+  letter-spacing: -0.02em;
+}
+.canvas-overlay p {
+  font-size: 15px;
+  margin: 0 0 16px;
+  color: #e5e5ea;
+  max-width: 290px;
+  line-height: 1.45;
+}
+.overlay-score-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  padding: 12px 20px;
+  margin-bottom: 16px;
+  width: 100%;
+  max-width: 260px;
+}
+.overlay-score-box .score-val {
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffd60a;
+  line-height: 1.2;
+}
+.overlay-score-box .score-time {
+  font-size: 14px;
+  color: #a1a1a6;
+  margin-top: 4px;
+}
+.overlay-score-box .new-record {
+  display: inline-block;
+  background: var(--red, #1b64da);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-top: 6px;
+}
+.overlay-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 260px;
+}
+.btn-start {
+  font: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  background: var(--red, #1b64da);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 13px 24px;
+  min-height: 50px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+}
+.btn-start:active {
+  opacity: 0.88;
+}
+#btnOverlayRank {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  background: #ffd60a;
+  color: #1c1c1e;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+}
+#btnOverlayRank:active {
+  opacity: 0.88;
+}
+
+/* 터치 한 손 조작용 좌우 버튼 바 (모바일 친화) */
+.touch-nav-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-touch-move {
+  min-height: 54px;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.btn-touch-move:active {
+  background: var(--soft);
+  color: var(--red);
+  border-color: var(--red);
+}
+.btn-touch-move svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* 제어 단추 */
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+}
+.btn-sound {
+  background: var(--card, #fff);
+  border: 1.5px solid var(--line, #e5e5ea);
+  color: var(--ink, #1c1c1e);
+}
+.btn-sound:active {
+  background: var(--soft, #f2f2f7);
+}
+.btn-reset {
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #3a3a3c;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>별 피하기 한 판,<br>우주선을 조종해 보세요</h1>
+  <p class="lead">위에서 쏟아지는 별똥별을 피하세요. 오래 버틸수록 높은 점수를 얻습니다.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="game-status-bar">
+      <div class="game-status-left" aria-label="남은 생명">
+        <span class="life-badge">
+          <span class="life-icon" id="life1" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </span>
+          <span class="life-icon" id="life2" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </span>
+          <span class="life-icon" id="life3" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          </span>
+        </span>
+      </div>
+      <div class="game-status-mid" id="statusTime">0.0초</div>
+      <div class="game-status-right" id="statusScore">0점</div>
+    </div>
+    <div class="game-best-line" id="statusBest"></div>
+
+    <div class="game-canvas-wrap" id="canvasWrap">
+      <canvas id="gameCanvas" width="360" height="540"></canvas>
+      <div class="canvas-overlay" id="overlayBox">
+        <h2 id="overlayTitle">별 피하기</h2>
+        <p id="overlayDesc">쉬움으로 시작해요</p>
+        <div class="overlay-score-box" id="overlayScoreWrap" style="display:none;">
+          <div class="score-val" id="overlayScoreVal">0점</div>
+          <div class="score-time" id="overlayScoreTime">버틴 시간 0.0초</div>
+          <div id="overlayRecordBadge" style="display:none;"><span class="new-record">최고 기록 달성!</span></div>
+        </div>
+        <div class="overlay-buttons">
+          <button type="button" class="btn-start" id="btnStartGame">게임 시작</button>
+          <button type="button" id="btnOverlayRank" style="display:none;">🏆 순위표 올리기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 모바일 한 손 조작용 좌우 버튼 -->
+    <div class="touch-nav-bar" aria-label="우주선 좌우 이동">
+      <button type="button" class="btn-touch-move" id="btnMoveLeft">
+        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        <span>왼쪽</span>
+      </button>
+      <button type="button" class="btn-touch-move" id="btnMoveRight">
+        <span>오른쪽</span>
+        <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+      </button>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-sound" id="btnSound">소리 켬</button>
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:8px;">
+      화면을 좌우로 터치하거나 드래그하여 우주선을 피하세요. 키보드 좌우 방향키도 지원합니다.
+    </p>
+  </section>
+
+  <p class="note">기기 안에서만 실행되며 조작 정보는 외부로 전송되지 않습니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>조작 방법:</b> 화면의 판을 손가락으로 누른 채 좌우로 끌거나, 판 아래 '왼쪽'·'오른쪽' 버튼을 눌러 우주선을 움직입니다. 컴퓨터에서는 키보드 좌우 방향키(←, →) 또는 A, D 키로 움직일 수 있습니다.</li>
+      <li><b>생명:</b> 총 3번의 기회가 주어집니다. 별똥별과 부딪힐 때마다 생명이 1개씩 줄어들며, 부딪힌 직후에는 약 1.2초 동안 깜빡이며 무적 상태가 됩니다.</li>
+      <li><b>점수 계산:</b> 점수는 '버틴 시간(초) × 난이도 배수 × 20'으로 계산됩니다. 오래 버틸수록 별똥별이 더 빠르고 촘촘하게 떨어집니다.</li>
+      <li><b>난이도 배수:</b> 쉬움은 1.0배, 보통은 1.5배, 어려움은 2.0배의 점수를 획득합니다.</li>
+      <li>이 게임은 좌표나라가 새로 만든 것입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>판 위에서 쉬움·보통·어려움 중 원하는 난이도를 고릅니다.</li>
+      <li>'게임 시작'을 누르면 위에서 다양한 크기의 별똥별이 떨어집니다.</li>
+      <li>손가락을 판 위에 대고 부드럽게 좌우로 미끄러지듯 움직이며 빈 공간을 찾아 별똥별을 피하세요.</li>
+      <li>3번 부딪히면 게임이 끝나며, 획득한 최고 점수를 아래 순위표에 올려 다른 사람들과 실력을 겨뤄보세요.</li>
+    </ol>
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>출퇴근길 지하철이나 버스 안에서, 혹은 쉬는 시간 1~2분 동안 가볍게 순발력과 집중력을 기르고 싶을 때 즐기기 좋습니다. 설치 없이 바로 열립니다.</p>
+    <h2>알아 두면 좋은 팁</h2>
+    <dl>
+      <dt>중앙 부근을 지키기</dt>
+      <dd>양쪽 구석으로 몰리면 갑자기 떨어지는 별똥별을 피할 공간이 좁아집니다. 가능하면 중앙 부근에서 미세하게 좌우로 피하는 것이 유리합니다.</dd>
+      <dt>무적 시간 활용</dt>
+      <dd>별똥별에 부딪힌 뒤 약 1.2초 동안은 우주선이 깜빡이며 어떤 별과 닿아도 피해를 입지 않습니다. 이 시간을 이용해 안전한 구역으로 재빠르게 이동하세요.</dd>
+      <dt>최고 점수 저장</dt>
+      <dd>기록한 최고 점수는 브라우저에 안전하게 저장되며, 결과 창에서 '순위표 올리기'를 눌러 실시간 순위표에 등록할 수 있습니다.</dd>
+    </dl>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // DOM 요소
+  var canvas = document.getElementById('gameCanvas');
+  var ctx = canvas.getContext('2d');
+  var canvasWrap = document.getElementById('canvasWrap');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var overlayScoreWrap = document.getElementById('overlayScoreWrap');
+  var overlayScoreVal = document.getElementById('overlayScoreVal');
+  var overlayScoreTime = document.getElementById('overlayScoreTime');
+  var overlayRecordBadge = document.getElementById('overlayRecordBadge');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+  var btnRestart = document.getElementById('btnRestart');
+  var btnSound = document.getElementById('btnSound');
+  var btnMoveLeft = document.getElementById('btnMoveLeft');
+  var btnMoveRight = document.getElementById('btnMoveRight');
+  var statusTime = document.getElementById('statusTime');
+  var statusScore = document.getElementById('statusScore');
+  var statusBest = document.getElementById('statusBest');
+  var lifeIcons = [
+    document.getElementById('life1'),
+    document.getElementById('life2'),
+    document.getElementById('life3')
+  ];
+
+  // 가상 해상도 기준 (360 x 540)
+  var VW = 360;
+  var VH = 540;
+
+  // 게임 상태 변수
+  var gameState = 'ready'; // 'ready', 'playing', 'gameover'
+  var currentLevel = 'easy'; // 'easy', 'normal', 'hard'
+  var lives = 3;
+  var elapsedTime = 0; // 초 단위
+  var score = 0;
+  var soundEnabled = true;
+
+  // 최고 점수 (로컬스토리지)
+  var bestEasy = null;
+  var bestNormal = null;
+  var bestHard = null;
+
+  // 난이도 설정 테이블
+  var LEVEL_CONFIG = {
+    easy: {
+      mult: 1.0,
+      name: '쉬움',
+      speedMin: 140,
+      speedMax: 210,
+      spawnInterval: 0.72,
+      minInterval: 0.40,
+      speedGrowth: 0.05
+    },
+    normal: {
+      mult: 1.5,
+      name: '보통',
+      speedMin: 210,
+      speedMax: 290,
+      spawnInterval: 0.54,
+      minInterval: 0.28,
+      speedGrowth: 0.07
+    },
+    hard: {
+      mult: 2.0,
+      name: '어려움',
+      speedMin: 280,
+      speedMax: 380,
+      spawnInterval: 0.40,
+      minInterval: 0.20,
+      speedGrowth: 0.09
+    }
+  };
+
+  // 플레이어 우주선 상태
+  var player = {
+    x: VW / 2,
+    y: 475,
+    w: 32,
+    h: 42,
+    radius: 13,
+    targetX: VW / 2,
+    speed: 460, // px per sec
+    invulnerableTimer: 0,
+    flameCycle: 0
+  };
+
+  // 장애물(별똥별) 목록
+  var stars = [];
+  var spawnTimer = 0;
+
+  // 충돌 시 시각 효과(파티클)
+  var particles = [];
+  var screenShake = 0;
+
+  // 배경 우주 별빛 (원경)
+  var bgStars = [];
+  function initBgStars() {
+    bgStars = [];
+    for (var i = 0; i < 40; i++) {
+      bgStars.push({
+        x: Math.random() * VW,
+        y: Math.random() * VH,
+        r: Math.random() * 1.5 + 0.6,
+        alpha: Math.random() * 0.7 + 0.3,
+        speed: Math.random() * 25 + 15
+      });
+    }
+  }
+  initBgStars();
+
+  // WebAudio API 기반 짧은 효과음 (외부 파일 없음)
+  var audioCtx = null;
+  function getAudioContext() {
+    if (!audioCtx) {
+      try {
+        var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      } catch (e) {}
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(function () {});
+    }
+    return audioCtx;
+  }
+
+  function playSound(type) {
+    if (!soundEnabled) return;
+    try {
+      var ctxAudio = getAudioContext();
+      if (!ctxAudio) return;
+
+      var now = ctxAudio.currentTime;
+      var osc = ctxAudio.createOscillator();
+      var gain = ctxAudio.createGain();
+      osc.connect(gain);
+      gain.connect(ctxAudio.destination);
+
+      if (type === 'start') {
+        // 경쾌한 짧은 아르페지오
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.14);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.16);
+        osc.start(now);
+        osc.stop(now + 0.16);
+      } else if (type === 'hit') {
+        // 피격 둔탁한 톱니파
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.18);
+        gain.gain.setValueAtTime(0.24, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.18);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } else if (type === 'over') {
+        // 게임오버 하강 톤
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.35);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.linearRampToValueAtTime(0.01, now + 0.36);
+        osc.start(now);
+        osc.stop(now + 0.36);
+      }
+    } catch (e) {}
+  }
+
+  // 로컬 스토리지 읽기
+  function loadStorage() {
+    try {
+      var rawE = localStorage.getItem('zw_star-dodge_best_easy');
+      var rawN = localStorage.getItem('zw_star-dodge_best_normal');
+      var rawH = localStorage.getItem('zw_star-dodge_best_hard');
+      if (rawE && !isNaN(parseInt(rawE, 10))) { bestEasy = parseInt(rawE, 10); }
+      if (rawN && !isNaN(parseInt(rawN, 10))) { bestNormal = parseInt(rawN, 10); }
+      if (rawH && !isNaN(parseInt(rawH, 10))) { bestHard = parseInt(rawH, 10); }
+
+      var savedLvl = localStorage.getItem('zw_star-dodge_level');
+      if (savedLvl === 'normal' || savedLvl === 'hard' || savedLvl === 'easy') {
+        currentLevel = savedLvl;
+      } else {
+        currentLevel = 'easy';
+      }
+
+      var savedSound = localStorage.getItem('zw_star-dodge_sound');
+      if (savedSound === '0') {
+        soundEnabled = false;
+      } else {
+        soundEnabled = true;
+      }
+    } catch (e) {
+      currentLevel = 'easy';
+      soundEnabled = true;
+    }
+    updateSoundButton();
+    updateLevelButtons();
+    updateOverlayDesc();
+    updateStatusDisplay();
+    syncRankTab();
+    setTimeout(syncRankTab, 200);
+  }
+
+  // 상태 줄 및 최고 기록 갱신
+  function updateStatusDisplay() {
+    statusTime.textContent = elapsedTime.toFixed(1) + '초';
+    statusScore.textContent = Math.round(score).toLocaleString('ko-KR') + '점';
+
+    if (bestEasy !== null || bestNormal !== null || bestHard !== null) {
+      statusBest.textContent = '최고 기록 · 쉬움 ' + (bestEasy !== null ? bestEasy.toLocaleString('ko-KR') + '점' : '-')
+        + ' · 보통 ' + (bestNormal !== null ? bestNormal.toLocaleString('ko-KR') + '점' : '-')
+        + ' · 어려움 ' + (bestHard !== null ? bestHard.toLocaleString('ko-KR') + '점' : '-');
+    } else {
+      statusBest.textContent = '';
+    }
+
+    // 생명 아이콘 갱신
+    for (var i = 0; i < 3; i++) {
+      if (lifeIcons[i]) {
+        if (i < lives) {
+          lifeIcons[i].classList.remove('lost');
+        } else {
+          lifeIcons[i].classList.add('lost');
+        }
+      }
+    }
+  }
+
+  // 난이도 단추 표시 갱신
+  function updateLevelButtons() {
+    btnDiffEasy.classList.toggle('on', currentLevel === 'easy');
+    btnDiffNormal.classList.toggle('on', currentLevel === 'normal');
+    btnDiffHard.classList.toggle('on', currentLevel === 'hard');
+  }
+
+  // 덮개 설명 문구 갱신
+  function updateOverlayDesc() {
+    if (gameState === 'ready') {
+      var cfg = LEVEL_CONFIG[currentLevel] || LEVEL_CONFIG.easy;
+      overlayDesc.textContent = cfg.name + '으로 시작해요';
+    }
+  }
+
+  // 소리 버튼 문구 갱신
+  function updateSoundButton() {
+    btnSound.textContent = soundEnabled ? '소리 켬' : '소리 끔';
+  }
+
+  // 순위표 카드(rank.js)의 쉬움/보통/어려움 탭을 지금 난이도에 맞춘다
+  function syncRankTab() {
+    try {
+      var idx = 0;
+      if (currentLevel === 'normal') idx = 1;
+      else if (currentLevel === 'hard') idx = 2;
+
+      if (window.ZW) {
+        window.ZW.rankPick = idx;
+      }
+      var b = document.querySelector('.rk-tabs button[data-i="' + idx + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  // 난이도 변경 함수
+  function setLevel(lvl) {
+    if (lvl !== 'easy' && lvl !== 'normal' && lvl !== 'hard') return;
+    if (lvl === currentLevel && gameState === 'ready') return;
+    currentLevel = lvl;
+    try {
+      localStorage.setItem('zw_star-dodge_level', currentLevel);
+    } catch (e) {}
+    updateLevelButtons();
+    updateOverlayDesc();
+    syncRankTab();
+    resetToReadyState();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // 소리 버튼 클릭
+  btnSound.addEventListener('click', function () {
+    soundEnabled = !soundEnabled;
+    try {
+      localStorage.setItem('zw_star-dodge_sound', soundEnabled ? '1' : '0');
+    } catch (e) {}
+    updateSoundButton();
+    if (soundEnabled) {
+      playSound('start');
+    }
+  });
+
+  // 준비 상태로 초기화
+  function resetToReadyState() {
+    gameState = 'ready';
+    lives = 3;
+    elapsedTime = 0;
+    score = 0;
+    stars = [];
+    particles = [];
+    screenShake = 0;
+    player.x = VW / 2;
+    player.targetX = VW / 2;
+    player.invulnerableTimer = 0;
+
+    overlayBox.style.display = 'flex';
+    overlayTitle.textContent = '별 피하기';
+    updateOverlayDesc();
+    overlayScoreWrap.style.display = 'none';
+    btnOverlayRank.style.display = 'none';
+    btnStartGame.textContent = '게임 시작';
+
+    updateStatusDisplay();
+  }
+
+  // 새 게임 시작
+  function startNewGame() {
+    getAudioContext();
+    playSound('start');
+
+    gameState = 'playing';
+    lives = 3;
+    elapsedTime = 0;
+    score = 0;
+    stars = [];
+    particles = [];
+    screenShake = 0;
+    spawnTimer = 0;
+
+    player.x = VW / 2;
+    player.targetX = VW / 2;
+    player.invulnerableTimer = 0;
+
+    overlayBox.style.display = 'none';
+    updateStatusDisplay();
+  }
+
+  // 게임 오버 처리
+  function gameOver() {
+    gameState = 'gameover';
+    playSound('over');
+
+    var finalScore = Math.min(99999999, Math.max(0, Math.floor(score)));
+    var isNewRecord = false;
+
+    try {
+      if (currentLevel === 'easy') {
+        if (bestEasy === null || finalScore > bestEasy) {
+          bestEasy = finalScore;
+          localStorage.setItem('zw_star-dodge_best_easy', String(finalScore));
+          isNewRecord = true;
+        }
+      } else if (currentLevel === 'normal') {
+        if (bestNormal === null || finalScore > bestNormal) {
+          bestNormal = finalScore;
+          localStorage.setItem('zw_star-dodge_best_normal', String(finalScore));
+          isNewRecord = true;
+        }
+      } else if (currentLevel === 'hard') {
+        if (bestHard === null || finalScore > bestHard) {
+          bestHard = finalScore;
+          localStorage.setItem('zw_star-dodge_best_hard', String(finalScore));
+          isNewRecord = true;
+        }
+      }
+    } catch (e) {}
+
+    updateStatusDisplay();
+    syncRankTab();
+
+    // 오버레이 표시
+    overlayBox.style.display = 'flex';
+    overlayTitle.textContent = '게임 종료';
+    overlayDesc.textContent = (currentLevel === 'easy' ? '쉬움' : (currentLevel === 'normal' ? '보통' : '어려움')) + ' 난이도에서 도전 완료!';
+    overlayScoreWrap.style.display = 'block';
+    overlayScoreVal.textContent = finalScore.toLocaleString('ko-KR') + '점';
+    overlayScoreTime.textContent = '버틴 시간 ' + elapsedTime.toFixed(1) + '초';
+    overlayRecordBadge.style.display = isNewRecord ? 'inline-block' : 'none';
+
+    btnOverlayRank.style.display = 'block';
+    btnStartGame.textContent = '다시 도전하기';
+  }
+
+  // 순위표 올리기 단추 클릭 (#btnOverlayRank)
+  btnOverlayRank.addEventListener('click', function () {
+    var jump = document.querySelector('.zw-rk-jump');
+    if (jump) {
+      jump.click();
+    } else {
+      var rk = document.querySelector('.zw-rank');
+      if (rk) {
+        rk.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  });
+
+  // 다시 하기 단추
+  btnRestart.addEventListener('click', function () {
+    startNewGame();
+  });
+  btnStartGame.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  // 터치/키보드 조작 관련
+  var keyState = { left: false, right: false };
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+      keyState.left = true;
+    } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+      keyState.right = true;
+    }
+  });
+  window.addEventListener('keyup', function (e) {
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+      keyState.left = false;
+    } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+      keyState.right = false;
+    }
+  });
+
+  // 판 아래 터치 버튼 (길게 누르기 및 터치 지원)
+  function setupTouchMoveButton(btn, isLeft) {
+    var timer = null;
+    function startMove(e) {
+      if (e) e.preventDefault();
+      if (isLeft) keyState.left = true;
+      else keyState.right = true;
+    }
+    function stopMove(e) {
+      if (isLeft) keyState.left = false;
+      else keyState.right = false;
+    }
+    btn.addEventListener('mousedown', startMove);
+    btn.addEventListener('mouseup', stopMove);
+    btn.addEventListener('mouseleave', stopMove);
+    btn.addEventListener('touchstart', startMove, { passive: false });
+    btn.addEventListener('touchend', stopMove);
+    btn.addEventListener('touchcancel', stopMove);
+  }
+  setupTouchMoveButton(btnMoveLeft, true);
+  setupTouchMoveButton(btnMoveRight, false);
+
+  // 캔버스 터치 및 마우스 드래그 이동
+  var isDragging = false;
+  function updatePlayerTargetFromEvent(e) {
+    var rect = canvas.getBoundingClientRect();
+    var clientX = e.clientX;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+    }
+    var scaleX = VW / rect.width;
+    var touchX = (clientX - rect.left) * scaleX;
+    player.targetX = Math.max(player.radius + 6, Math.min(VW - player.radius - 6, touchX));
+  }
+
+  canvas.addEventListener('mousedown', function (e) {
+    isDragging = true;
+    updatePlayerTargetFromEvent(e);
+  });
+  window.addEventListener('mousemove', function (e) {
+    if (isDragging && gameState === 'playing') {
+      updatePlayerTargetFromEvent(e);
+    }
+  });
+  window.addEventListener('mouseup', function () {
+    isDragging = false;
+  });
+
+  canvas.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    isDragging = true;
+    updatePlayerTargetFromEvent(e);
+  }, { passive: false });
+  canvas.addEventListener('touchmove', function (e) {
+    e.preventDefault();
+    if (gameState === 'playing') {
+      updatePlayerTargetFromEvent(e);
+    }
+  }, { passive: false });
+  canvas.addEventListener('touchend', function (e) {
+    e.preventDefault();
+    isDragging = false;
+  }, { passive: false });
+  canvas.addEventListener('touchcancel', function () {
+    isDragging = false;
+  });
+
+  // 별똥별 생성
+  function spawnStar() {
+    var cfg = LEVEL_CONFIG[currentLevel] || LEVEL_CONFIG.easy;
+    var growth = 1 + Math.min(1.0, elapsedTime * cfg.speedGrowth * 0.1);
+
+    var r = Math.random() * 6 + 8; // 반지름 8~14
+    var speed = (Math.random() * (cfg.speedMax - cfg.speedMin) + cfg.speedMin) * growth;
+    var x = Math.random() * (VW - r * 2 - 10) + r + 5;
+    var angle = (Math.random() - 0.5) * 0.35; // 약간의 기울기
+
+    // 별 유형: 0=일반 노랑, 1=빠른 청백색 유성, 2=묵직한 붉은 별
+    var type = 0;
+    var rand = Math.random();
+    if (rand < 0.22) {
+      type = 1; // 빠른 유성
+      speed *= 1.25;
+      r = Math.max(7, r * 0.85);
+    } else if (rand > 0.85) {
+      type = 2; // 거대 유성
+      speed *= 0.85;
+      r = r * 1.35;
+    }
+
+    stars.push({
+      x: x,
+      y: -r * 2,
+      r: r,
+      vx: Math.sin(angle) * speed * 0.35,
+      vy: Math.cos(angle) * speed,
+      type: type,
+      rot: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 4
+    });
+  }
+
+  // 충돌 파티클 생성
+  function createExplosion(x, y, count) {
+    for (var i = 0; i < count; i++) {
+      var angle = Math.random() * Math.PI * 2;
+      var speed = Math.random() * 160 + 50;
+      particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 0.35,
+        maxLife: 0.35,
+        r: Math.random() * 3 + 1.5,
+        color: Math.random() > 0.4 ? '#ffd60a' : '#ff453a'
+      });
+    }
+  }
+
+  // 캔버스 크기 맞추기
+  function resizeCanvas() {
+    var rect = canvasWrap.getBoundingClientRect();
+    var width = rect.width || 360;
+    var height = rect.height || 540;
+    var dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale((width * dpr) / VW, (height * dpr) / VH);
+  }
+
+  // 주 게임 루프
+  var lastTimestamp = 0;
+  function gameLoop(timestamp) {
+    if (!lastTimestamp) lastTimestamp = timestamp;
+    var dt = (timestamp - lastTimestamp) / 1000;
+    lastTimestamp = timestamp;
+
+    // 비정상적인 프레임 튐 방지
+    if (dt > 0.1) dt = 0.1;
+
+    update(dt);
+    render();
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  // 게임 로직 업데이트
+  function update(dt) {
+    // 배경 별 이동
+    for (var b = 0; b < bgStars.length; b++) {
+      var bs = bgStars[b];
+      bs.y += bs.speed * dt;
+      if (bs.y > VH) {
+        bs.y = -5;
+        bs.x = Math.random() * VW;
+      }
+    }
+
+    // 파티클 업데이트
+    for (var p = particles.length - 1; p >= 0; p--) {
+      var pt = particles[p];
+      pt.x += pt.vx * dt;
+      pt.y += pt.vy * dt;
+      pt.life -= dt;
+      if (pt.life <= 0) {
+        particles.splice(p, 1);
+      }
+    }
+
+    // 화면 흔들림 감쇄
+    if (screenShake > 0) {
+      screenShake -= dt * 14;
+      if (screenShake < 0) screenShake = 0;
+    }
+
+    // 플레이어 불꽃 애니메이션
+    player.flameCycle += dt * 18;
+
+    if (gameState !== 'playing') return;
+
+    var cfg = LEVEL_CONFIG[currentLevel] || LEVEL_CONFIG.easy;
+
+    // 시간 및 점수 계산: 버틴 초 × 난이도 배수 × 20
+    elapsedTime += dt;
+    score = elapsedTime * cfg.mult * 20;
+    updateStatusDisplay();
+
+    // 키보드/버튼 입력 이동
+    var moveDist = player.speed * dt;
+    if (keyState.left) {
+      player.targetX -= moveDist;
+    }
+    if (keyState.right) {
+      player.targetX += moveDist;
+    }
+    player.targetX = Math.max(player.radius + 6, Math.min(VW - player.radius - 6, player.targetX));
+
+    // 플레이어 부드러운 위치 추종
+    player.x += (player.targetX - player.x) * Math.min(1, dt * 18);
+
+    // 무적 시간 차감
+    if (player.invulnerableTimer > 0) {
+      player.invulnerableTimer -= dt;
+      if (player.invulnerableTimer < 0) player.invulnerableTimer = 0;
+    }
+
+    // 별똥별 스폰 계산
+    spawnTimer += dt;
+    var currentInterval = Math.max(cfg.minInterval, cfg.spawnInterval - elapsedTime * 0.0035);
+    if (spawnTimer >= currentInterval) {
+      spawnTimer = 0;
+      spawnStar();
+
+      // 시간 경과에 따라 가끔 2개 동시 생성
+      if (elapsedTime > 25 && Math.random() < 0.28) {
+        spawnStar();
+      }
+    }
+
+    // 별똥별 이동 및 충돌 체크
+    var playerHitRadius = player.radius * 0.85; // 관대한 피격 판정
+
+    for (var i = stars.length - 1; i >= 0; i--) {
+      var s = stars[i];
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      s.rot += s.rotSpeed * dt;
+
+      // 화면 밖으로 나감
+      if (s.y > VH + s.r * 2) {
+        stars.splice(i, 1);
+        continue;
+      }
+
+      // 충돌 검사 (무적 시간이 아닐 때)
+      if (player.invulnerableTimer <= 0) {
+        var dx = s.x - player.x;
+        var dy = (s.y - (player.y - 4)); // 중심 살짝 보정
+        var distSq = dx * dx + dy * dy;
+        var hitDist = playerHitRadius + s.r * 0.8;
+
+        if (distSq < hitDist * hitDist) {
+          // 부딪힘!
+          lives--;
+          player.invulnerableTimer = 1.25; // 1.25초 무적
+          screenShake = 6;
+          createExplosion(player.x, player.y, 22);
+          playSound('hit');
+          updateStatusDisplay();
+
+          // 충돌한 별 제거
+          stars.splice(i, 1);
+
+          if (lives <= 0) {
+            gameOver();
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  // 별(유성) 그리기 함수
+  function drawStar(s) {
+    ctx.save();
+    ctx.translate(s.x, s.y);
+
+    // 1. 유성 꼬리(Trail)
+    var tailLen = Math.min(48, s.r * 3.2);
+    var tailGrad = ctx.createLinearGradient(0, 0, -s.vx * 0.08, -tailLen);
+    if (s.type === 1) {
+      tailGrad.addColorStop(0, 'rgba(56, 189, 248, 0.7)');
+      tailGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+    } else if (s.type === 2) {
+      tailGrad.addColorStop(0, 'rgba(255, 69, 58, 0.75)');
+      tailGrad.addColorStop(1, 'rgba(255, 69, 58, 0)');
+    } else {
+      tailGrad.addColorStop(0, 'rgba(255, 214, 10, 0.7)');
+      tailGrad.addColorStop(1, 'rgba(255, 214, 10, 0)');
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(-s.r * 0.7, 0);
+    ctx.lineTo(0, -tailLen);
+    ctx.lineTo(s.r * 0.7, 0);
+    ctx.closePath();
+    ctx.fillStyle = tailGrad;
+    ctx.fill();
+
+    // 2. 유성 코어 회전
+    ctx.rotate(s.rot);
+
+    var glow = ctx.createRadialGradient(0, 0, s.r * 0.2, 0, 0, s.r);
+    if (s.type === 1) {
+      // 청백색 유성
+      glow.addColorStop(0, '#ffffff');
+      glow.addColorStop(0.5, '#7dd3fc');
+      glow.addColorStop(1, '#0284c7');
+    } else if (s.type === 2) {
+      // 거대 붉은 유성
+      glow.addColorStop(0, '#ffffff');
+      glow.addColorStop(0.4, '#ff9f0a');
+      glow.addColorStop(1, '#d92d20');
+    } else {
+      // 황금 별똥별
+      glow.addColorStop(0, '#ffffff');
+      glow.addColorStop(0.5, '#ffd60a');
+      glow.addColorStop(1, '#d97706');
+    }
+
+    // 4각 또는 5각 기하학적 별 형상
+    ctx.beginPath();
+    var points = 4;
+    var innerR = s.r * 0.45;
+    for (var k = 0; k < points * 2; k++) {
+      var rad = (Math.PI / points) * k;
+      var curR = (k % 2 === 0) ? s.r : innerR;
+      var px = Math.cos(rad) * curR;
+      var py = Math.sin(rad) * curR;
+      if (k === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fillStyle = glow;
+    ctx.fill();
+
+    // 중심 밝은 핵
+    ctx.beginPath();
+    ctx.arc(0, 0, s.r * 0.35, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // 우주선 그리기 함수
+  function drawShip(x, y, invuln) {
+    ctx.save();
+    ctx.translate(x, y);
+
+    // 무적 상태 깜빡임
+    if (invuln > 0 && Math.floor(invuln * 16) % 2 === 0) {
+      ctx.globalAlpha = 0.3;
+    }
+
+    // 1. 추진 엔진 불꽃 (Animated Thruster)
+    var flameH = 14 + Math.sin(player.flameCycle) * 5;
+    var flameGrad = ctx.createLinearGradient(0, 14, 0, 14 + flameH);
+    flameGrad.addColorStop(0, '#ffffff');
+    flameGrad.addColorStop(0.3, '#ffd60a');
+    flameGrad.addColorStop(1, 'rgba(255, 69, 58, 0)');
+
+    ctx.beginPath();
+    ctx.moveTo(-6, 14);
+    ctx.quadraticCurveTo(0, 14 + flameH, 0, 14 + flameH);
+    ctx.quadraticCurveTo(0, 14 + flameH, 6, 14);
+    ctx.closePath();
+    ctx.fillStyle = flameGrad;
+    ctx.fill();
+
+    // 2. 우주선 날개 및 바디
+    // 주익 (Wings)
+    ctx.beginPath();
+    ctx.moveTo(0, -20);
+    ctx.lineTo(16, 14);
+    ctx.lineTo(8, 11);
+    ctx.lineTo(0, 14);
+    ctx.lineTo(-8, 11);
+    ctx.lineTo(-16, 14);
+    ctx.closePath();
+    ctx.fillStyle = '#1e293b';
+    ctx.fill();
+
+    // 동체 (Fuselage - 밝은 블루/시안)
+    ctx.beginPath();
+    ctx.moveTo(0, -22);
+    ctx.lineTo(9, 8);
+    ctx.lineTo(0, 13);
+    ctx.lineTo(-9, 8);
+    ctx.closePath();
+    var bodyGrad = ctx.createLinearGradient(-9, 0, 9, 0);
+    bodyGrad.addColorStop(0, '#2563eb');
+    bodyGrad.addColorStop(0.5, '#60a5fa');
+    bodyGrad.addColorStop(1, '#1d4ed8');
+    ctx.fillStyle = bodyGrad;
+    ctx.fill();
+
+    // 조종석 콕핏 (Cockpit)
+    ctx.beginPath();
+    ctx.ellipse(0, -5, 3.5, 7.5, 0, 0, Math.PI * 2);
+    var glassGrad = ctx.createLinearGradient(0, -12, 0, 2);
+    glassGrad.addColorStop(0, '#ffffff');
+    glassGrad.addColorStop(0.6, '#38bdf8');
+    glassGrad.addColorStop(1, '#0284c7');
+    ctx.fillStyle = glassGrad;
+    ctx.fill();
+
+    // 날개 끝 사이드 라이트
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath();
+    ctx.arc(14, 12, 1.8, 0, Math.PI * 2);
+    ctx.arc(-14, 12, 1.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // 전체 화면 렌더링
+  function render() {
+    ctx.save();
+
+    // 화면 흔들림 효과
+    if (screenShake > 0) {
+      var shakeX = (Math.random() - 0.5) * screenShake;
+      var shakeY = (Math.random() - 0.5) * screenShake;
+      ctx.translate(shakeX, shakeY);
+    }
+
+    // 1. 우주 배경 그라데이션
+    var bgGrad = ctx.createLinearGradient(0, 0, 0, VH);
+    bgGrad.addColorStop(0, '#060913');
+    bgGrad.addColorStop(0.6, '#0b1329');
+    bgGrad.addColorStop(1, '#111c3d');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, VW, VH);
+
+    // 2. 원경 별빛 렌더링
+    for (var b = 0; b < bgStars.length; b++) {
+      var bs = bgStars[b];
+      ctx.beginPath();
+      ctx.arc(bs.x, bs.y, bs.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, ' + bs.alpha + ')';
+      ctx.fill();
+    }
+
+    // 3. 파티클 렌더링
+    for (var p = 0; p < particles.length; p++) {
+      var pt = particles[p];
+      var pAlpha = pt.life / pt.maxLife;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, pt.r * pAlpha, 0, Math.PI * 2);
+      ctx.fillStyle = pt.color;
+      ctx.globalAlpha = pAlpha;
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+    }
+
+    // 4. 별똥별(장애물) 렌더링
+    for (var s = 0; s < stars.length; s++) {
+      drawStar(stars[s]);
+    }
+
+    // 5. 플레이어 우주선 렌더링
+    if (gameState === 'playing' || gameState === 'gameover') {
+      drawShip(player.x, player.y, player.invulnerableTimer);
+    }
+
+    ctx.restore();
+  }
+
+  // 창 크기 변경 시 캔버스 반응형 리사이즈
+  window.addEventListener('resize', function () {
+    resizeCanvas();
+  });
+
+  // 초기화 실행
+  loadStorage();
+  resizeCanvas();
+  requestAnimationFrame(gameLoop);
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/ranking/">게임 순위판</a> — 게임마다 10등까지 한눈에</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/reversi-flip/">돌 뒤집기</a> — 컴퓨터와 돌 뒤집기 대결</li><li><a href="/tangram-seven/">칠교</a> — 일곱 조각으로 모양 맞추기</li><li><a href="/balloon-rise/">풍선 올리기</a> — 장애물 피해 풍선 올리기</li><li><a href="/fruit-catch/">과일 받기</a> — 떨어지는 과일 바구니로 받기</li><li><a href="/marble-drop/">구슬 떨어뜨리기</a> — 구슬을 떨어뜨려 점수 칸에 넣기</li><li><a href="/paddle-bounce/">탁구</a> — 공을 튕겨 오래 버티기</li><li><a href="/asteroid-dodge/">우주선 피하기</a> — 날아오는 운석 피하기</li><li><a href="/click-speed/">클릭 속도 재기</a> — 정해진 시간 동안 빠르게 누르기</li><li><a href="/rhythm-tap/">리듬 탭</a> — 떨어지는 노트를 박자에 맞춰 탭</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/number-baseball/">숫자 야구</a> — 스트라이크와 볼로 세 자리 맞히기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

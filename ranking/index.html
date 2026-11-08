@@ -11,6 +11,16 @@
   .rk-chips { display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 14px; }
   .rk-chips button { font:inherit; font-size:14px; font-weight:700; border:1.5px solid var(--line); background:var(--card); color:var(--sub); border-radius:999px; padding:8px 14px; cursor:pointer; min-height:40px; }
   .rk-chips button.on { background:var(--panel); border-color:var(--panel); color:#fff; }
+  .rk-h { font-size:15px; margin:14px 4px 4px; color:var(--sub); font-weight:700; }
+  .rk-all { font:inherit; font-size:14px; font-weight:700; border:1.5px dashed var(--line); background:transparent; color:var(--ink); border-radius:12px; padding:10px 14px; cursor:pointer; min-height:44px; width:100%; text-align:left; margin:2px 0 10px; }
+  .rk-allbox { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:10px 12px; margin:0 0 14px; }
+  .rk-allbox input { width:100%; font:inherit; font-size:16px; padding:10px 12px; border:1.5px solid var(--line); border-radius:10px; background:var(--fill); color:var(--ink); margin:0 0 8px; }
+  .rk-grp { border-top:1px solid var(--line); padding:4px 0; }
+  .rk-grp:first-of-type { border-top:0; }
+  .rk-grp summary { cursor:pointer; font-weight:700; font-size:14px; padding:8px 2px; list-style:none; }
+  .rk-grp summary small { color:var(--sub); font-weight:500; }
+  .rk-grp .rk-chips { margin:2px 0 8px; }
+  .rk-none { color:var(--sub); font-size:14px; padding:6px 2px; }
   .rk-sub { display:flex; gap:8px; margin:0 0 10px; }
   .rk-sub button { font:inherit; font-size:14px; font-weight:600; border:1px solid var(--line); background:var(--fill); color:var(--ink); border-radius:10px; padding:6px 14px; cursor:pointer; }
   .rk-sub button.on { background:var(--soft); color:var(--red); border-color:var(--red); }
@@ -30,6 +40,7 @@
   .rk-sum th, .rk-sum td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); }
   .rk-sum th { color:var(--sub); font-weight:600; }
   .rk-sum a { color:inherit; font-weight:700; }
+  .rk-more { font:inherit; font-size:14px; font-weight:700; border:1.5px solid var(--line); background:var(--card); color:var(--ink); border-radius:12px; padding:10px 14px; cursor:pointer; min-height:44px; width:100%; margin-top:10px; }
   .rk-del { margin-left:8px; font:inherit; font-size:12px; font-weight:800; line-height:1.2; padding:1px 7px; border-radius:6px; border:1px solid var(--red); background:transparent; color:var(--red); cursor:pointer; }
   .rk-adm { margin:8px 0; padding:6px 10px; border-radius:10px; background:var(--soft); font-size:12px; font-weight:700; color:var(--red); }
   .rk-adm u { margin-left:8px; cursor:pointer; text-decoration:underline; }
@@ -40,18 +51,29 @@
   <h1>게임 순위판<br>게임마다 10등까지</h1>
   <p class="lead">닉네임과 점수만 올라가는 가벼운 순위판이에요. 게임을 한 판 하고, 게임 쪽 아래 "내 기록 올리기"를 누르면 여기에도 보여요.</p>
 
-  <section aria-label="게임 고르기">
-    <div class="rk-chips" id="chips"></div>
+  <section aria-label="게임 고르기" id="pick">
+    <h2 class="rk-h" id="hotH">🔥 인기 게임</h2>
+    <div class="rk-chips" id="chipsHot"><span class="rk-none">불러오는 중…</span></div>
+    <h2 class="rk-h" id="newH" hidden>🆕 새로 나온 게임</h2>
+    <div class="rk-chips" id="chipsNew" hidden></div>
+    <button type="button" class="rk-all" id="allBtn" aria-expanded="false" aria-controls="allBox">🔎 전체 게임에서 찾기 ▾</button>
+    <div class="rk-allbox" id="allBox" hidden>
+      <input type="search" id="q" placeholder="게임 이름을 쳐 보세요 (예: 윷, 퍼즐)" autocomplete="off" aria-label="게임 이름 찾기">
+      <div id="allList"></div>
+    </div>
     <div class="rk-sub" id="sub" hidden></div>
     <div class="rk-board" id="board"><p class="rk-empty">불러오는 중…</p></div>
   </section>
 
   <h2 style="font-size:19px;margin:28px 4px 8px">게임별 1등 한눈에</h2>
   <div class="rk-board" style="overflow-x:auto"><table class="rk-sum" id="sum"><thead><tr><th>게임</th><th>1등</th><th>기록</th></tr></thead><tbody></tbody></table></div>
+  <button type="button" class="rk-more" id="moreBtn" hidden>더 보기</button>
 
   <section class="guide">
     <h2>순위는 이렇게 매겨져요</h2>
     <p>점수가 높을수록 좋은 게임(뱀 게임, 두더지 잡기, 숫자 합치기 등)은 높은 점수 순서로, 시간이나 횟수가 적을수록 좋은 게임(지뢰찾기, 스도쿠, 숫자 야구 등)은 빠르거나 적은 기록 순서로 10등까지 보여 줍니다. 같은 닉네임은 더 좋은 기록일 때만 바뀌어요.</p>
+    <h2>"인기 게임"은 어떻게 정하나요</h2>
+    <p>순위표에 올라온 기록이 많은 게임 순서예요. 새로 나온 게임은 기록이 쌓이기 전이라 "새로 나온 게임"에 따로 보여요.</p>
     <h2>기록 올리는 방법</h2>
     <ol><li>해 보고 싶은 게임을 눌러 한 판 합니다.</li><li>게임 쪽 아래의 "순위표" 칸에 닉네임을 적습니다(한글·영문·숫자 2~8자).</li><li>"내 기록 올리기"를 누르면 이 순위판에 나타납니다.</li></ol>
     <h2>알아 두세요</h2>
@@ -61,12 +83,18 @@
 <script src="../_common/common.js"></script>
 <script>
 (function () {
+  // 2026-11-08 개편: 게임이 천 개가 되어도 가볍게. 순위판이 열릴 때 서버에 보내는 요청은 "한 번에 보기" 1번 + 고른 게임 1번(전에는 게임마다 128번).
   var R = ZW.RANKS, API = (ZW.RANK_API || '').replace(/\/$/, '');
-  var ids = Object.keys(R), cur = null, sub = 0;
-  var chips = document.getElementById('chips'), subEl = document.getElementById('sub'), board = document.getElementById('board');
+  var ids = Object.keys(R), cur = null, sub = 0, sum = null;
+  var T = {};
+  ZW.TOOLS.forEach(function (t) { if (t[0]) T[t[0]] = t; });
+  var $ = function (id) { return document.getElementById(id); };
+  var hotEl = $('chipsHot'), newEl = $('chipsNew'), newH = $('newH'), subEl = $('sub'), board = $('board');
+  var allBtn = $('allBtn'), allBox = $('allBox'), qEl = $('q'), allList = $('allList'), sumBody = document.querySelector('#sum tbody'), moreBtn = $('moreBtn');
   var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var fmt = function (cfg, n) { return Number(n).toLocaleString('ko-KR') + cfg.unit; };
-  var nameOf = function (g) { var t = ZW.TOOLS.filter(function (x) { return x[0] === g; })[0]; return t ? t[1] : g; };
+  var nameOf = function (g) { return T[g] ? T[g][1] : g; };
+  var dateOf = function (g) { return (T[g] && T[g][6]) || ''; };
   var apiId = function (g, i) { var c = R[g]; return c.variants ? c.variants[i || 0].id : g; };
   var cache = {};
   // ── 운영자 모드(2026-10-27): 주소 끝에 #admin → 열쇠(이 탭 sessionStorage만) → 순위 옆 삭제 단추. 열쇠는 코드에 적지 않고 서버가 확인한다 ──
@@ -86,9 +114,25 @@
     cache[id] = fetch(API + '/api/rank?game=' + encodeURIComponent(id)).then(function (r) { return r.json(); }).then(function (d) { return d.top || []; }).catch(function () { return null; });
     return cache[id];
   }
+  // ── 인기: 순위표에 올라온 기록 수(난이도 합). 서버가 counts 를 안 주는 옛 상태면 "기록이 있는 난이도 수"로 대신한다 ──
+  function countOf(g) {
+    var c = R[g], n = 0;
+    (c.variants || [{ id: g }]).forEach(function (v) {
+      if (sum && sum.counts && typeof sum.counts[v.id] === 'number') n += sum.counts[v.id];
+      else if (sum && sum.games && sum.games[v.id] && sum.games[v.id].length) n += 1;
+    });
+    return n;
+  }
+  var byName = function (a, b) { return nameOf(a).localeCompare(nameOf(b), 'ko'); };
+  function chip(g) { return '<button type="button" data-g="' + esc(g) + '">' + esc(nameOf(g)) + '</button>'; }
+  function select(g, scroll) {
+    cur = g; sub = 0; show();
+    try { history.replaceState(null, '', location.pathname + '?g=' + encodeURIComponent(g)); } catch (e) {}
+    if (scroll) { try { board.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }
+  }
   function show() {
     var cfg = R[cur], id = apiId(cur, sub);
-    chips.querySelectorAll('button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-g') === cur); });
+    document.querySelectorAll('.rk-chips button').forEach(function (b) { b.classList.toggle('on', b.getAttribute('data-g') === cur); });
     if (cfg.variants) {
       subEl.hidden = false;
       subEl.innerHTML = cfg.variants.map(function (v, i) { return '<button type="button" data-i="' + i + '" class="' + (i === sub ? 'on' : '') + '">' + esc(v.name) + '</button>'; }).join('');
@@ -100,9 +144,57 @@
       board.innerHTML = head + body + '<a class="rk-go" href="../' + cur + '/index.html">' + esc(nameOf(cur)) + ' 하러 가기 →</a>';
     });
   }
-  chips.innerHTML = ids.map(function (g) { return '<button type="button" data-g="' + g + '">' + esc(nameOf(g)) + '</button>'; }).join('');
-  chips.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; cur = b.getAttribute('data-g'); sub = 0; show(); });
-  subEl.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; sub = Number(b.getAttribute('data-i')); show(); });
+  // ── 전체 게임 찾기: 소분류로 접고, 이름으로 거른다 ──
+  function buildAll() {
+    var groups = {};
+    ids.forEach(function (g) { var k = (T[g] && T[g][5]) || '기타'; (groups[k] = groups[k] || []).push(g); });
+    allList.innerHTML = Object.keys(groups).sort(function (a, b) { return a.localeCompare(b, 'ko'); }).map(function (k) {
+      return '<details class="rk-grp"><summary>' + esc(k) + ' <small>(' + groups[k].length + ')</small></summary><div class="rk-chips">' + groups[k].sort(byName).map(chip).join('') + '</div></details>';
+    }).join('') + '<p class="rk-none" id="noHit" hidden>맞는 게임이 없어요.</p>';
+  }
+  function filterAll() {
+    var q = qEl.value.trim().toLowerCase(), any = false;
+    allList.querySelectorAll('details.rk-grp').forEach(function (d) {
+      var vis = 0;
+      d.querySelectorAll('button').forEach(function (b) {
+        var hit = !q || nameOf(b.getAttribute('data-g')).toLowerCase().indexOf(q) >= 0 || (T[b.getAttribute('data-g')] && String(T[b.getAttribute('data-g')][2]).toLowerCase().indexOf(q) >= 0) || d.firstChild.textContent.toLowerCase().indexOf(q) >= 0;
+        b.hidden = !hit; if (hit) vis++;
+      });
+      d.hidden = !vis; if (vis) any = true; d.open = !!q && vis > 0;
+    });
+    var nh = $('noHit'); if (nh) nh.hidden = any;
+  }
+  allBtn.addEventListener('click', function () {
+    var open = allBox.hidden;
+    allBox.hidden = !open; allBtn.setAttribute('aria-expanded', String(open));
+    allBtn.textContent = open ? '🔎 전체 게임에서 찾기 ▴' : '🔎 전체 게임에서 찾기 ▾';
+    if (open) { try { qEl.focus({ preventScroll: true }); } catch (e) {} }
+  });
+  qEl.addEventListener('input', filterAll);
+  document.getElementById('pick').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('.rk-chips button') : null;
+    if (b) { select(b.getAttribute('data-g'), true); return; }
+    var s = e.target.closest ? e.target.closest('.rk-sub button') : null;
+    if (s) { sub = Number(s.getAttribute('data-i')); show(); }
+  });
+  // ── 게임별 1등 표: 인기 순으로 10개 먼저, "더 보기"로 20개씩 ──
+  var order = [], shown = 0;
+  function rowsFor(g) {
+    var c = R[g];
+    (c.variants || [{ id: g, name: '' }]).forEach(function (v) {
+      var tr = document.createElement('tr');
+      var t = sum && sum.games ? sum.games[v.id] : null;
+      tr.innerHTML = '<td><a href="../' + g + '/index.html">' + esc(nameOf(g)) + (v.name ? ' · ' + esc(v.name) : '') + '</a></td><td>' + (t ? (t.length ? esc(t[0].name) : '아직 없음') : '-') + '</td><td>' + (t && t.length ? esc(fmt(c, t[0].score)) : '') + '</td>';
+      sumBody.appendChild(tr);
+    });
+  }
+  function addRows(n) {
+    order.slice(shown, shown + n).forEach(rowsFor);
+    shown = Math.min(order.length, shown + n);
+    moreBtn.hidden = shown >= order.length;
+    moreBtn.textContent = '더 보기 (' + shown + ' / ' + order.length + ')';
+  }
+  moreBtn.addEventListener('click', function () { addRows(20); });
   var adm = document.createElement('p');
   adm.className = 'rk-adm';
   adm.hidden = true;
@@ -130,26 +222,25 @@
     if (e.target && e.target.id === 'rk-adm-off') { ssSet('zw_admin_key', null); delete cache[apiId(cur, sub)]; show(); paintAdmin(); }
   });
   window.addEventListener('hashchange', function () { if (adminFromHash()) { delete cache[apiId(cur, sub)]; show(); paintAdmin(); } });
-  var q = new URLSearchParams(location.search).get('g');
-  cur = (q && R[q]) ? q : ids[0]; show(); paintAdmin();
-  // 게임별 1등 요약
-  var tb = document.querySelector('#sum tbody');
-  ids.forEach(function (g) {
-    var c = R[g];
-    (c.variants || [{ id: g, name: '' }]).forEach(function (v) {
-      var tr = document.createElement('tr');
-      tr.innerHTML = '<td><a href="../' + g + '/index.html">' + esc(nameOf(g)) + (v.name ? ' · ' + esc(v.name) : '') + '</a></td><td>…</td><td></td>';
-      tb.appendChild(tr);
-      top(v.id).then(function (t) {
-        var c2 = tr.children;
-        if (t === null) { c2[1].textContent = '-'; return; }
-        c2[1].textContent = t.length ? t[0].name : '아직 없음';
-        c2[2].textContent = t.length ? fmt(c, t[0].score) : '';
-      });
-    });
-  });
+
+  // ── 시작: 서버에서 "게임별 1등 + 기록 수"를 한 번에 받아 인기·새 게임·표를 그린다 ──
+  function start(d) {
+    sum = d;
+    order = ids.slice().sort(function (a, b) { return countOf(b) - countOf(a) || (dateOf(b) < dateOf(a) ? -1 : dateOf(b) > dateOf(a) ? 1 : 0) || byName(a, b); });
+    var hot = order.filter(function (g) { return countOf(g) > 0; }).slice(0, 10);
+    if (!hot.length) hot = order.slice(0, 10);                    // 서버가 안 열릴 때는 목록 앞쪽 10개
+    hotEl.innerHTML = hot.map(chip).join('');
+    var fresh = ids.filter(function (g) { return dateOf(g); }).sort(function (a, b) { return dateOf(b) < dateOf(a) ? -1 : dateOf(b) > dateOf(a) ? 1 : byName(a, b); }).slice(0, 10);
+    if (fresh.length) { newEl.innerHTML = fresh.map(chip).join(''); newEl.hidden = false; newH.hidden = false; }
+    buildAll();
+    addRows(10);
+    var q = new URLSearchParams(location.search).get('g');
+    cur = (q && R[q]) ? q : hot[0];
+    show(); paintAdmin();
+  }
+  fetch(API + '/api/rank?top3=1&n=1').then(function (r) { return r.json(); }).then(function (d) { return d && d.games ? d : null; }).catch(function () { return null; }).then(start);
 })();
 </script>
-<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/yutnori/">윷놀이</a> — 컴퓨터와 윷 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/klondike-solitaire/">솔리테어</a> — 카드를 순서대로 쌓아 완성하기</li><li><a href="/baduk-9/">바둑 9줄</a> — 9줄 판에서 컴퓨터와 바둑 한 판</li><li><a href="/mancala/">만칼라</a> — 구슬을 나눠 담아 곳간 채우기</li><li><a href="/domino-chain/">도미노</a> — 숫자를 맞춰 도미노 잇기</li><li><a href="/binary-fill/">0과 1 채우기</a> — 규칙대로 0과 1 채우기</li><li><a href="/word-hangman/">글자 맞히기</a> — 글자를 하나씩 찍어 단어 맞히기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li></ul></nav><!--/zw-static-links-->
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/chosung-quiz/">한글 초성 퀴즈</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/klondike-solitaire/">솔리테어</a> — 카드를 순서대로 쌓아 완성하기</li><li><a href="/domino-chain/">도미노</a> — 숫자를 맞춰 도미노 잇기</li><li><a href="/binary-fill/">0과 1 채우기</a> — 규칙대로 0과 1 채우기</li><li><a href="/word-hangman/">글자 맞히기</a> — 글자를 하나씩 찍어 단어 맞히기</li><li><a href="/fruit-catch/">과일 받기</a> — 떨어지는 과일 바구니로 받기</li><li><a href="/marble-drop/">구슬 떨어뜨리기</a> — 구슬을 떨어뜨려 점수 칸에 넣기</li><li><a href="/paddle-bounce/">탁구</a> — 공을 튕겨 오래 버티기</li><li><a href="/number-updown/">숫자 맞히기</a> — 업 다운으로 숫자 찾기</li><li><a href="/rps/">가위바위보</a> — 컴퓨터와 한 판</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/color-memory/">색깔 기억하기</a> — 불이 켜진 순서를 따라 누르기</li></ul></nav><!--/zw-static-links-->
 </body>
 </html>

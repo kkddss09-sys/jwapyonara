@@ -1,0 +1,1225 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>탁구 무료 | 좌표나라</title>
+<meta name="description" content="가입 없이 바로 즐기는 무료 탁구 게임. 화면 아래 막대로 공을 튕겨 받아내며 최고 점수에 도전해보세요.">
+<link rel="canonical" href="https://jwapyonara.com/paddle-bounce/">
+<meta property="og:title" content="탁구 무료 | 좌표나라">
+<meta property="og:description" content="가입 없이 바로 즐기는 무료 탁구 게임. 화면 아래 막대로 공을 튕겨 받아내며 최고 점수에 도전해보세요.">
+<meta property="og:url" content="https://jwapyonara.com/paddle-bounce/">
+<meta property="og:type" content="website">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "탁구",
+  "url": "https://jwapyonara.com/paddle-bounce/",
+  "description": "가입 없이 바로 즐기는 무료 탁구 게임. 화면 아래 막대로 공을 튕겨 받아내며 최고 점수에 도전해보세요.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "All"
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+/* 난이도 선택 버튼 */
+.diff-seg {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.diff-seg button {
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  border: 1.5px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 12px;
+  padding: 10px 4px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.diff-seg button.on {
+  border-color: var(--red);
+  background: var(--soft);
+  color: var(--red);
+}
+
+/* 상태 표시 줄 */
+.paddle-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2c2c2e;
+  color: #fff;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 6px;
+}
+.paddle-status-left {
+  color: #ffd60a;
+  font-weight: 800;
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+.paddle-status-mid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex: 1;
+  text-align: center;
+}
+.paddle-status-right {
+  color: #a1a1a6;
+  flex: 1;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 14px;
+}
+.paddle-best-line {
+  font-size: 13px;
+  color: var(--dim, #8e8e93);
+  text-align: right;
+  margin-bottom: 12px;
+  padding-right: 4px;
+  min-height: 18px;
+}
+
+/* 생명 하트 아이콘 */
+.heart-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #e5484d;
+  transition: transform 0.2s, opacity 0.2s;
+}
+.heart-icon svg {
+  width: 19px;
+  height: 19px;
+  fill: currentColor;
+}
+.heart-icon.lost {
+  color: #55555c;
+  opacity: 0.35;
+  transform: scale(0.85);
+}
+
+/* 캔버스 감싸개 */
+.paddle-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 12px;
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0f1c29;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#paddleCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: grab;
+}
+#paddleCanvas:active {
+  cursor: grabbing;
+}
+
+/* 판 위 덮개 (시작 및 결과 창) */
+.canvas-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 24, 33, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  padding: 20px;
+  text-align: center;
+  z-index: 10;
+  backdrop-filter: blur(2px);
+}
+.canvas-overlay h2 {
+  font-size: 26px;
+  margin: 0 0 8px;
+  color: #ffd60a;
+}
+.canvas-overlay p {
+  font-size: 15px;
+  margin: 0 0 16px;
+  color: #e5e5ea;
+  max-width: 290px;
+  line-height: 1.45;
+}
+.canvas-overlay .score-banner {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 10px 18px;
+  margin-bottom: 16px;
+  width: 80%;
+  max-width: 240px;
+}
+.canvas-overlay .score-banner .big-score {
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffd60a;
+}
+.canvas-overlay .score-banner .sub-stat {
+  font-size: 13px;
+  color: #a1a1a6;
+  margin-top: 2px;
+}
+.overlay-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 230px;
+}
+.canvas-overlay .btn-start {
+  font: inherit;
+  font-size: 17px;
+  font-weight: 800;
+  background: var(--red, #1b64da);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+}
+.canvas-overlay .btn-start:active {
+  opacity: 0.85;
+}
+.btn-overlay-rank {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  background: #2c2c2e;
+  border: 1.5px solid var(--red, #1b64da);
+  color: #ffd60a;
+  border-radius: 12px;
+  padding: 11px 20px;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: manipulation;
+  width: 100%;
+}
+.btn-overlay-rank:active {
+  background: #3a3a3c;
+}
+
+/* 옵션 및 제어 바 */
+.paddle-options-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 4px 10px;
+  font-size: 14px;
+}
+.control-bar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.btn-action {
+  min-height: 48px;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  padding: 10px;
+}
+.btn-reset {
+  background: #2c2c2e;
+  color: #fff;
+}
+.btn-reset:active {
+  background: #3a3a3c;
+}
+.btn-sound {
+  background: var(--card, #fff);
+  border: 1.5px solid var(--line, #e5e5ea);
+  color: var(--ink, #1c1c1e);
+  min-width: 54px;
+  padding: 0 12px;
+}
+.btn-sound svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <h1>탁구 한 판,<br>공을 끝까지 받아쳐 보세요</h1>
+  <p class="lead">화면 아래 막대로 공을 튕겨 계속 받아냅니다. 튕길 때마다 속도가 빨라져요.</p>
+
+  <section class="card">
+    <div class="diff-seg" role="tablist" aria-label="난이도 선택">
+      <button type="button" class="on" id="btnDiffEasy" data-diff="easy">쉬움</button>
+      <button type="button" id="btnDiffNormal" data-diff="normal">보통</button>
+      <button type="button" id="btnDiffHard" data-diff="hard">어려움</button>
+    </div>
+
+    <div class="paddle-status-bar">
+      <div class="paddle-status-left" id="statusScore">0점</div>
+      <div class="paddle-status-mid" id="statusLives" aria-label="남은 생명">
+        <span class="heart-icon active" id="heart1">
+          <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </span>
+        <span class="heart-icon active" id="heart2">
+          <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </span>
+        <span class="heart-icon active" id="heart3">
+          <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </span>
+      </div>
+      <div class="paddle-status-right" id="statusBounces">튕김 0회</div>
+    </div>
+    <div class="paddle-best-line" id="statusBest"></div>
+
+    <div class="paddle-canvas-wrap" id="canvasWrap">
+      <canvas id="paddleCanvas" width="400" height="533"></canvas>
+      <div class="canvas-overlay" id="overlayBox">
+        <h2 id="overlayTitle">탁구</h2>
+        <p id="overlayDesc">쉬움으로 시작해요.<br>막대를 좌우로 움직여 공을 받아치세요!</p>
+        <div class="score-banner" id="scoreBanner" style="display:none;">
+          <div class="big-score" id="overlayFinalScore">0점</div>
+          <div class="sub-stat" id="overlayFinalStat">튕긴 횟수 0회</div>
+        </div>
+        <div class="overlay-buttons">
+          <button type="button" class="btn-start" id="btnStartGame">시작</button>
+          <button type="button" class="btn-overlay-rank" id="btnOverlayRank" style="display:none;">🏆 순위표 올리기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-bar">
+      <button type="button" class="btn-action btn-reset" id="btnRestart">다시 하기</button>
+      <button type="button" class="btn-action btn-sound" id="btnSoundToggle" aria-label="효과음 켜기/끄기">
+        <svg id="iconSoundOn" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        <svg id="iconSoundOff" viewBox="0 0 24 24" style="display:none;"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+      </button>
+    </div>
+
+    <p class="note" style="text-align:center; margin-bottom:0; margin-top:8px;">
+      💡 화면을 손가락으로 밀거나 좌우 방향키로 막대를 조종하세요.
+    </p>
+  </section>
+
+  <p class="note">공이 막대의 가장자리에 맞을수록 각도가 더 꺾여 날아갑니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">쉬는 김에 오늘 시세도 보고 가세요<small>매일 오후 1~6시에 시세표가 올라와요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>하는 법</summary>
+    <ul>
+      <li><b>게임 목표:</b> 화면 아래 막대로 공을 튕겨 떨어뜨리지 않고 계속 받아 냅니다.</li>
+      <li><b>점수 계산:</b> 공이 막대에 닿을 때마다 1점(튕김 1회)이 오르고, 점수는 <b>튕긴 횟수 × 난이도 배수 × 10</b>으로 계산됩니다.</li>
+      <li><b>속도 증가:</b> 공을 받아칠 때마다 공의 이동 속도가 조금씩 빨라집니다.</li>
+      <li><b>생명:</b> 공을 아래로 떨어뜨리면 생명 1개가 줄어듭니다. 생명 3개를 모두 잃으면 게임이 끝납니다.</li>
+      <li><b>난이도:</b>
+        <ul>
+          <li><b>쉬움:</b> 막대가 길고 속도가 느려 입문자에게 적합합니다 (점수 배수 1배).</li>
+          <li><b>보통:</b> 표준 크기 막대와 빠른 템포를 즐길 수 있습니다 (점수 배수 2배).</li>
+          <li><b>어려움:</b> 막대가 짧고 속도가 매우 빠릅니다 (점수 배수 3배).</li>
+        </ul>
+      </li>
+      <li><b>조작 방법:</b> 스마트폰 화면을 손가락으로 드래그하거나, 마우스 이동 또는 키보드 좌우 방향키(또는 A/D 키)로 막대를 움직입니다.</li>
+    </ul>
+  </details>
+
+  <section class="guide">
+    <h2>이렇게 즐기세요</h2>
+    <ol>
+      <li>상단에서 원하는 난이도(쉬움·보통·어려움)를 선택합니다.</li>
+      <li>'시작' 단추를 누르면 공이 위쪽으로 힘차게 발사됩니다.</li>
+      <li>공이 내려오는 위치를 예측하여 막대를 좌우로 재빠르게 이동시킵니다.</li>
+      <li>막대의 중앙으로 치면 위쪽으로 안정되게 솟구치고, 끝부분으로 칠수록 날카로운 각도로 튕깁니다.</li>
+      <li>공의 속도가 점점 빨라질 때의 긴장감을 즐기며 최고 기록을 경신해 보세요.</li>
+    </ol>
+
+    <h2>이럴 때 쓰면 좋아요</h2>
+    <p>집중력과 반사신경을 기르고 싶을 때, 쉬는 시간 1~2분 동안 가볍게 기분 전환을 하고 싶을 때 언제 어디서나 즐길 수 있습니다.</p>
+
+    <h2>알아 두면 좋은 것</h2>
+    <dl>
+      <dt>각도 조절의 묘미</dt>
+      <dd>공이 막대의 중앙에 맞으면 정직하게 수직에 가깝게 올라가지만, 막대의 좌우 가장자리에 맞을수록 좌우로 넓게 꺾여 날아갑니다. 벽에 튕기는 경로를 미리 내다보고 받아치면 장기전에 유리합니다.</dd>
+      <dt>최고 기록 저장</dt>
+      <dd>각 난이도별 최고 점수는 브라우저 저장소에 안전하게 보관됩니다. 게임이 끝난 후 순위표에 내 기록을 올려 다른 사람들과 실력을 견줘 보세요.</dd>
+    </dl>
+
+    <h2>자주 묻는 질문</h2>
+    <details>
+      <summary>키보드와 스마트폰 터치 모두 지원되나요?</summary>
+      <p>네, 스마트폰에서는 손가락으로 막대를 가볍게 끌어 이동할 수 있으며, PC에서는 마우스 커서 이동 및 키보드 좌우 화살표 키(또는 A·D 키)로 자유롭게 플레이할 수 있습니다.</p>
+    </details>
+    <details>
+      <summary>효과음을 끌 수 있나요?</summary>
+      <p>'다시 하기' 옆의 스피커 모양 버튼을 누르면 언제든지 효과음을 켜거나 끌 수 있습니다.</p>
+    </details>
+  </section>
+</main>
+
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  // DOM 요소
+  var canvas = document.getElementById('paddleCanvas');
+  var ctx = canvas.getContext('2d');
+  var canvasWrap = document.getElementById('canvasWrap');
+  var overlayBox = document.getElementById('overlayBox');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlayDesc = document.getElementById('overlayDesc');
+  var scoreBanner = document.getElementById('scoreBanner');
+  var overlayFinalScore = document.getElementById('overlayFinalScore');
+  var overlayFinalStat = document.getElementById('overlayFinalStat');
+  var btnStartGame = document.getElementById('btnStartGame');
+  var btnOverlayRank = document.getElementById('btnOverlayRank');
+  var btnRestart = document.getElementById('btnRestart');
+  var btnSoundToggle = document.getElementById('btnSoundToggle');
+  var iconSoundOn = document.getElementById('iconSoundOn');
+  var iconSoundOff = document.getElementById('iconSoundOff');
+
+  var btnDiffEasy = document.getElementById('btnDiffEasy');
+  var btnDiffNormal = document.getElementById('btnDiffNormal');
+  var btnDiffHard = document.getElementById('btnDiffHard');
+
+  var statusScore = document.getElementById('statusScore');
+  var statusBounces = document.getElementById('statusBounces');
+  var statusBest = document.getElementById('statusBest');
+  var heart1 = document.getElementById('heart1');
+  var heart2 = document.getElementById('heart2');
+  var heart3 = document.getElementById('heart3');
+
+  // 내부 논리 좌표계
+  var LOGICAL_WIDTH = 400;
+  var LOGICAL_HEIGHT = 533;
+
+  // 난이도별 설정
+  var DIFF_SETTINGS = {
+    easy: {
+      name: '쉬움',
+      multiplier: 1,
+      paddleWidth: 110,
+      paddleSpeed: 9,
+      baseSpeed: 5.2,
+      speedInc: 0.12,
+      maxSpeed: 10.5,
+      ballRadius: 9
+    },
+    normal: {
+      name: '보통',
+      multiplier: 2,
+      paddleWidth: 84,
+      paddleSpeed: 11,
+      baseSpeed: 6.4,
+      speedInc: 0.15,
+      maxSpeed: 12.8,
+      ballRadius: 8.5
+    },
+    hard: {
+      name: '어려움',
+      multiplier: 3,
+      paddleWidth: 64,
+      paddleSpeed: 13,
+      baseSpeed: 7.8,
+      speedInc: 0.18,
+      maxSpeed: 15.2,
+      ballRadius: 8
+    }
+  };
+
+  // 게임 상태 변수
+  var gameState = 'ready'; // 'ready', 'playing', 'paused', 'gameover'
+  var currentDiff = 'easy'; // 'easy', 'normal', 'hard'
+  var bounceCount = 0;
+  var currentScore = 0;
+  var lives = 3;
+  var soundEnabled = true;
+
+  // 최고 점수 기억 (정수)
+  var bestScores = {
+    easy: 0,
+    normal: 0,
+    hard: 0
+  };
+
+  // 막대(패들) 객체
+  var paddle = {
+    x: (LOGICAL_WIDTH - 110) / 2,
+    y: LOGICAL_HEIGHT - 38,
+    width: 110,
+    height: 14,
+    radius: 7,
+    targetX: (LOGICAL_WIDTH - 110) / 2
+  };
+
+  // 공 객체
+  var ball = {
+    x: LOGICAL_WIDTH / 2,
+    y: LOGICAL_HEIGHT / 2,
+    vx: 0,
+    vy: 0,
+    speed: 5.2,
+    radius: 9,
+    trail: []
+  };
+
+  // 충돌 파티클 목록
+  var particles = [];
+
+  // 키보드 입력 상태
+  var keys = {
+    left: false,
+    right: false
+  };
+
+  // 포인터(터치/마우스) 인터랙션 중 여부
+  var isPointerActive = false;
+
+  // 애니메이션 프레임 ID
+  var animFrameId = null;
+
+  // WebAudio 사운드 합성
+  var audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      try {
+        var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      } catch (e) {}
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(function () {});
+    }
+  }
+
+  function playTone(freqStart, freqEnd, type, duration, vol) {
+    if (!soundEnabled) return;
+    initAudio();
+    if (!audioCtx) return;
+
+    try {
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      var now = audioCtx.currentTime;
+
+      osc.type = type || 'sine';
+      osc.frequency.setValueAtTime(freqStart, now);
+      if (freqEnd && freqEnd !== freqStart) {
+        osc.frequency.exponentialRampToValueAtTime(Math.max(10, freqEnd), now + duration);
+      }
+
+      var maxVol = (vol == null ? 0.2 : vol);
+      gain.gain.setValueAtTime(maxVol, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + duration);
+    } catch (e) {}
+  }
+
+  function soundPaddleHit() {
+    playTone(480, 880, 'sine', 0.07, 0.25);
+  }
+
+  function soundWallHit() {
+    playTone(320, 360, 'sine', 0.04, 0.15);
+  }
+
+  function soundMiss() {
+    playTone(240, 90, 'triangle', 0.22, 0.3);
+  }
+
+  function soundGameOver() {
+    if (!soundEnabled) return;
+    playTone(360, 280, 'sine', 0.15, 0.25);
+    setTimeout(function () {
+      playTone(280, 160, 'triangle', 0.35, 0.3);
+    }, 140);
+  }
+
+  // 점수 범위 자르기 (표준: 99999999)
+  function clampScore(val) {
+    var n = Math.floor(Number(val)) || 0;
+    if (n < 0) n = 0;
+    if (n > 99999999) n = 99999999;
+    return n;
+  }
+
+  // 로컬 저장소 읽기
+  function loadStorage() {
+    try {
+      var eVal = localStorage.getItem('zw_paddle-bounce_best_easy');
+      var nVal = localStorage.getItem('zw_paddle-bounce_best_normal');
+      var hVal = localStorage.getItem('zw_paddle-bounce_best_hard');
+      if (eVal) bestScores.easy = clampScore(eVal);
+      if (nVal) bestScores.normal = clampScore(nVal);
+      if (hVal) bestScores.hard = clampScore(hVal);
+
+      var savedDiff = localStorage.getItem('zw_paddle-bounce_diff');
+      if (savedDiff && DIFF_SETTINGS[savedDiff]) {
+        currentDiff = savedDiff;
+      }
+      var savedSound = localStorage.getItem('zw_paddle-bounce_sound');
+      if (savedSound === '0') {
+        soundEnabled = false;
+      }
+    } catch (e) {}
+
+    updateSoundButton();
+    updateLevelButtons();
+    updateOverlayDesc();
+    updateBestDisplay();
+    syncRankTab();
+    setTimeout(syncRankTab, 250);
+  }
+
+  // 최고 점수 화면 갱신
+  function updateBestDisplay() {
+    var hasAny = (bestScores.easy > 0 || bestScores.normal > 0 || bestScores.hard > 0);
+    if (hasAny) {
+      statusBest.textContent = '최고 기록 · 쉬움 ' + bestScores.easy.toLocaleString('ko-KR') + '점 · 보통 ' +
+        bestScores.normal.toLocaleString('ko-KR') + '점 · 어려움 ' + bestScores.hard.toLocaleString('ko-KR') + '점';
+    } else {
+      statusBest.textContent = '';
+    }
+  }
+
+  // 순위표 탭 동기화 (표준 3번 & 5번 규칙)
+  function syncRankTab() {
+    try {
+      var idx = 0;
+      if (currentDiff === 'normal') idx = 1;
+      else if (currentDiff === 'hard') idx = 2;
+
+      if (window.ZW) {
+        ZW.rankPick = idx;
+      }
+      var b = document.querySelector('.rk-tabs button[data-i="' + idx + '"]');
+      if (b) b.click();
+    } catch (e) {}
+  }
+
+  // 난이도 단추 스타일 갱신
+  function updateLevelButtons() {
+    btnDiffEasy.classList.remove('on');
+    btnDiffNormal.classList.remove('on');
+    btnDiffHard.classList.remove('on');
+
+    if (currentDiff === 'hard') {
+      btnDiffHard.classList.add('on');
+    } else if (currentDiff === 'normal') {
+      btnDiffNormal.classList.add('on');
+    } else {
+      btnDiffEasy.classList.add('on');
+    }
+  }
+
+  // 덮개 설명 문구 갱신
+  function updateOverlayDesc() {
+    var cfg = DIFF_SETTINGS[currentDiff];
+    if (gameState === 'ready') {
+      overlayTitle.textContent = '탁구';
+      overlayDesc.innerHTML = '<b>' + cfg.name + '</b>으로 시작해요.<br>막대를 좌우로 움직여 공을 받아치세요!';
+      scoreBanner.style.display = 'none';
+      btnStartGame.textContent = '시작';
+      btnOverlayRank.style.display = 'none';
+    }
+  }
+
+  // 난이도 변경 처리
+  function setLevel(lvl) {
+    if (!DIFF_SETTINGS[lvl]) return;
+    if (lvl === currentDiff && gameState !== 'ready') return;
+
+    currentDiff = lvl;
+    try {
+      localStorage.setItem('zw_paddle-bounce_diff', currentDiff);
+    } catch (e) {}
+
+    updateLevelButtons();
+    syncRankTab();
+    resetToReadyState();
+  }
+
+  btnDiffEasy.addEventListener('click', function () { setLevel('easy'); });
+  btnDiffNormal.addEventListener('click', function () { setLevel('normal'); });
+  btnDiffHard.addEventListener('click', function () { setLevel('hard'); });
+
+  // 소리 토글 버튼
+  function updateSoundButton() {
+    if (soundEnabled) {
+      iconSoundOn.style.display = 'block';
+      iconSoundOff.style.display = 'none';
+    } else {
+      iconSoundOn.style.display = 'none';
+      iconSoundOff.style.display = 'block';
+    }
+  }
+
+  btnSoundToggle.addEventListener('click', function () {
+    soundEnabled = !soundEnabled;
+    try {
+      localStorage.setItem('zw_paddle-bounce_sound', soundEnabled ? '1' : '0');
+    } catch (e) {}
+    updateSoundButton();
+    if (soundEnabled) {
+      initAudio();
+      soundPaddleHit();
+    }
+  });
+
+  // 생명 표시 UI 갱신
+  function updateLivesDisplay() {
+    heart1.className = 'heart-icon' + (lives >= 1 ? ' active' : ' lost');
+    heart2.className = 'heart-icon' + (lives >= 2 ? ' active' : ' lost');
+    heart3.className = 'heart-icon' + (lives >= 3 ? ' active' : ' lost');
+  }
+
+  // 점수 및 튕긴 횟수 UI 갱신
+  function updateScoreDisplay() {
+    statusScore.textContent = currentScore.toLocaleString('ko-KR') + '점';
+    statusBounces.textContent = '튕김 ' + bounceCount + '회';
+  }
+
+  // 새 판 준비 상태
+  function resetToReadyState() {
+    gameState = 'ready';
+    bounceCount = 0;
+    currentScore = 0;
+    lives = 3;
+    particles = [];
+
+    var cfg = DIFF_SETTINGS[currentDiff];
+    paddle.width = cfg.paddleWidth;
+    paddle.x = (LOGICAL_WIDTH - paddle.width) / 2;
+    paddle.targetX = paddle.x;
+
+    ball.radius = cfg.ballRadius;
+    ball.x = LOGICAL_WIDTH / 2;
+    ball.y = paddle.y - ball.radius - 2;
+    ball.vx = 0;
+    ball.vy = 0;
+    ball.speed = cfg.baseSpeed;
+    ball.trail = [];
+
+    updateScoreDisplay();
+    updateLivesDisplay();
+    updateOverlayDesc();
+    overlayBox.style.display = 'flex';
+    render();
+  }
+
+  // 게임 시작
+  function startNewGame() {
+    initAudio();
+    var cfg = DIFF_SETTINGS[currentDiff];
+
+    gameState = 'playing';
+    bounceCount = 0;
+    currentScore = 0;
+    lives = 3;
+    particles = [];
+
+    paddle.width = cfg.paddleWidth;
+    paddle.x = (LOGICAL_WIDTH - paddle.width) / 2;
+    paddle.targetX = paddle.x;
+
+    ball.radius = cfg.ballRadius;
+    ball.speed = cfg.baseSpeed;
+    ball.trail = [];
+
+    launchBallFromPaddle();
+
+    updateScoreDisplay();
+    updateLivesDisplay();
+    overlayBox.style.display = 'none';
+
+    if (!animFrameId) {
+      lastFrameTime = performance.now();
+      animFrameId = requestAnimationFrame(gameLoop);
+    }
+  }
+
+  // 패들 위에서 공 발사
+  function launchBallFromPaddle() {
+    var cfg = DIFF_SETTINGS[currentDiff];
+    ball.x = paddle.x + paddle.width / 2;
+    ball.y = paddle.y - ball.radius - 1;
+
+    // 약간 좌/우로 비스듬하게 상향 발사
+    var randomDir = (Math.random() < 0.5 ? -1 : 1);
+    var angle = randomDir * (Math.PI * 0.12 + Math.random() * Math.PI * 0.14); // 약 20~45도
+
+    ball.vx = ball.speed * Math.sin(angle);
+    ball.vy = -ball.speed * Math.cos(angle);
+    ball.trail = [];
+  }
+
+  // 생명 차감 후 공 재배치 (잠시 일시정지)
+  function handleBallLost() {
+    lives--;
+    updateLivesDisplay();
+    soundMiss();
+
+    if (lives <= 0) {
+      handleGameOver();
+    } else {
+      gameState = 'paused';
+      // 0.8초 후 재발사
+      setTimeout(function () {
+        if (gameState === 'paused') {
+          var cfg = DIFF_SETTINGS[currentDiff];
+          ball.speed = Math.max(cfg.baseSpeed, ball.speed * 0.85); // 속도 살짝 완화
+          launchBallFromPaddle();
+          gameState = 'playing';
+        }
+      }, 750);
+    }
+  }
+
+  // 게임 오버 처리
+  function handleGameOver() {
+    gameState = 'gameover';
+    soundGameOver();
+
+    var finalClamped = clampScore(currentScore);
+    var isNewBest = false;
+    var bestKey = 'zw_paddle-bounce_best_' + currentDiff;
+
+    try {
+      if (finalClamped > bestScores[currentDiff]) {
+        bestScores[currentDiff] = finalClamped;
+        localStorage.setItem(bestKey, String(finalClamped));
+        isNewBest = true;
+      }
+    } catch (e) {}
+
+    updateBestDisplay();
+
+    // 결과 덮개 표시
+    overlayTitle.textContent = '게임 종료';
+    overlayDesc.textContent = (isNewBest ? '🎉 최고 기록을 경신했습니다!' : '수고하셨습니다! 다시 도전해 보세요.');
+    overlayFinalScore.textContent = finalClamped.toLocaleString('ko-KR') + '점';
+    overlayFinalStat.textContent = '튕긴 횟수 ' + bounceCount + '회' + (isNewBest ? ' · 신기록' : '');
+    scoreBanner.style.display = 'block';
+
+    btnStartGame.textContent = '다시 하기';
+    btnOverlayRank.style.display = 'block';
+    overlayBox.style.display = 'flex';
+
+    // 순위표의 점수 올리기 단추 상태 갱신을 위해 재동기화
+    syncRankTab();
+  }
+
+  // 캔버스 디스플레이 비율 및 좌표 스케일링
+  var scale = 1;
+  function updateCanvasMetrics() {
+    var rect = canvas.getBoundingClientRect();
+    var width = rect.width || 400;
+    var height = rect.height || 533;
+    var dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale((canvas.width / LOGICAL_WIDTH), (canvas.height / LOGICAL_HEIGHT));
+    scale = width / LOGICAL_WIDTH;
+  }
+
+  // 터치/마우스 위치를 논리 좌표로 변환
+  function getLogicalXFromEvent(e) {
+    var rect = canvas.getBoundingClientRect();
+    var clientX = e.clientX;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+      clientX = e.changedTouches[0].clientX;
+    }
+    var px = (clientX - rect.left) / (rect.width / LOGICAL_WIDTH);
+    return Math.max(0, Math.min(LOGICAL_WIDTH, px));
+  }
+
+  // 파티클 생성
+  function createParticles(x, y, count, color) {
+    for (var i = 0; i < count; i++) {
+      var ang = Math.random() * Math.PI * 2;
+      var spd = 1.5 + Math.random() * 3.5;
+      particles.push({
+        x: x,
+        y: y,
+        vx: Math.cos(ang) * spd,
+        vy: Math.sin(ang) * spd,
+        radius: 2 + Math.random() * 2,
+        alpha: 1,
+        color: color || '#ffd60a'
+      });
+    }
+  }
+
+  // 게임 업데이트
+  var lastFrameTime = performance.now();
+  function update(dt) {
+    var cfg = DIFF_SETTINGS[currentDiff];
+
+    // 1. 패들 이동 (터치/마우스 또는 키보드)
+    if (keys.left) {
+      paddle.targetX -= cfg.paddleSpeed;
+    }
+    if (keys.right) {
+      paddle.targetX += cfg.paddleSpeed;
+    }
+    paddle.targetX = Math.max(0, Math.min(LOGICAL_WIDTH - paddle.width, paddle.targetX));
+    paddle.x += (paddle.targetX - paddle.x) * 0.45;
+
+    // 2. 일시정지 상태(공 놓침 후 재발사 대기)일 때는 패들만 따라다님
+    if (gameState === 'paused') {
+      ball.x = paddle.x + paddle.width / 2;
+      ball.y = paddle.y - ball.radius - 1;
+    }
+
+    // 3. 게임 진행 중일 때 공 물리 계산
+    if (gameState === 'playing') {
+      // 잔상 저장
+      ball.trail.push({ x: ball.x, y: ball.y });
+      if (ball.trail.length > 4) {
+        ball.trail.shift();
+      }
+
+      ball.x += ball.vx;
+      ball.y += ball.vy;
+
+      // 좌우 벽 충돌
+      if (ball.x - ball.radius <= 10) {
+        ball.x = 10 + ball.radius;
+        ball.vx = Math.abs(ball.vx);
+        soundWallHit();
+        createParticles(ball.x, ball.y, 4, '#5ac8fa');
+      } else if (ball.x + ball.radius >= LOGICAL_WIDTH - 10) {
+        ball.x = LOGICAL_WIDTH - 10 - ball.radius;
+        ball.vx = -Math.abs(ball.vx);
+        soundWallHit();
+        createParticles(ball.x, ball.y, 4, '#5ac8fa');
+      }
+
+      // 상단 벽 충돌
+      if (ball.y - ball.radius <= 10) {
+        ball.y = 10 + ball.radius;
+        ball.vy = Math.abs(ball.vy);
+        soundWallHit();
+        createParticles(ball.x, ball.y, 4, '#5ac8fa');
+      }
+
+      // 막대(패들) 충돌 판정
+      var paddleTop = paddle.y;
+      var paddleBottom = paddle.y + paddle.height;
+      var paddleLeft = paddle.x;
+      var paddleRight = paddle.x + paddle.width;
+
+      if (ball.vy > 0 && ball.y + ball.radius >= paddleTop && ball.y - ball.radius <= paddleBottom) {
+        if (ball.x + ball.radius * 0.6 >= paddleLeft && ball.x - ball.radius * 0.6 <= paddleRight) {
+          // 충돌 성공!
+          ball.y = paddleTop - ball.radius;
+          bounceCount++;
+          currentScore = clampScore(bounceCount * cfg.multiplier * 10);
+          updateScoreDisplay();
+
+          // 속도 점진적 증가
+          ball.speed = Math.min(cfg.maxSpeed, ball.speed + cfg.speedInc);
+
+          // 타격 위치에 따른 꺾임 각도 (-1: 맨 왼쪽, 0: 중앙, 1: 맨 오른쪽)
+          var hitOffset = (ball.x - (paddle.x + paddle.width / 2)) / (paddle.width / 2);
+          hitOffset = Math.max(-1, Math.min(1, hitOffset));
+
+          var maxBounceAngle = Math.PI * 0.38; // 약 68도
+          var bounceAngle = hitOffset * maxBounceAngle;
+
+          ball.vx = ball.speed * Math.sin(bounceAngle);
+          ball.vy = -ball.speed * Math.cos(bounceAngle);
+
+          soundPaddleHit();
+          createParticles(ball.x, ball.y + ball.radius, 7, '#ffd60a');
+        }
+      }
+
+      // 공이 아래로 떨어졌을 때
+      if (ball.y - ball.radius > LOGICAL_HEIGHT) {
+        handleBallLost();
+      }
+    }
+
+    // 4. 파티클 업데이트
+    for (var p = particles.length - 1; p >= 0; p--) {
+      var pt = particles[p];
+      pt.x += pt.vx;
+      pt.y += pt.vy;
+      pt.alpha -= 0.04;
+      if (pt.alpha <= 0) {
+        particles.splice(p, 1);
+      }
+    }
+  }
+
+  // 캔버스 렌더링
+  function render() {
+    updateCanvasMetrics();
+
+    // 1. 탁구대 바닥 그라데이션
+    var bgGrad = ctx.createLinearGradient(0, 0, 0, LOGICAL_HEIGHT);
+    bgGrad.addColorStop(0, '#0c1a26');
+    bgGrad.addColorStop(1, '#162b3d');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+
+    // 2. 탁구대 라인
+    ctx.save();
+    // 외곽 테두리 라인
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(10, 10, LOGICAL_WIDTH - 20, LOGICAL_HEIGHT - 20);
+
+    // 상단 네트 라인
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(10, 48);
+    ctx.lineTo(LOGICAL_WIDTH - 10, 48);
+    ctx.stroke();
+
+    // 중앙 세로 보조선
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([8, 8]);
+    ctx.beginPath();
+    ctx.moveTo(LOGICAL_WIDTH / 2, 48);
+    ctx.lineTo(LOGICAL_WIDTH / 2, LOGICAL_HEIGHT - 10);
+    ctx.stroke();
+    ctx.restore();
+
+    // 3. 파티클 그리기
+    for (var i = 0; i < particles.length; i++) {
+      var pt = particles[i];
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, pt.alpha);
+      ctx.fillStyle = pt.color;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, pt.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 4. 공 잔상 효과
+    if (gameState === 'playing' && ball.trail.length > 0) {
+      for (var t = 0; t < ball.trail.length; t++) {
+        var tr = ball.trail[t];
+        var trailAlpha = (t + 1) / (ball.trail.length + 1) * 0.25;
+        ctx.save();
+        ctx.globalAlpha = trailAlpha;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(tr.x, tr.y, ball.radius * 0.85, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // 5. 공 그리기
+    ctx.save();
+    // 그림자
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetX = 1;
+    ctx.shadowOffsetY = 3;
+
+    var ballGrad = ctx.createRadialGradient(
+      ball.x - ball.radius * 0.35,
+      ball.y - ball.radius * 0.35,
+      ball.radius * 0.1,
+      ball.x,
+      ball.y,
+      ball.radius
+    );
+    ballGrad.addColorStop(0, '#ffffff');
+    ballGrad.addColorStop(0.7, '#ffaa44');
+    ballGrad.addColorStop(1, '#e67300');
+
+    ctx.fillStyle = ballGrad;
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 6. 막대(패들) 그리기
+    ctx.save();
+    // 패들 본체 그림자
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 4;
+
+    // 패들 둥근 사각형 경로
+    var px = paddle.x;
+    var py = paddle.y;
+    var pw = paddle.width;
+    var ph = paddle.height;
+    var pr = paddle.radius;
+
+    ctx.beginPath();
+    ctx.moveTo(px + pr, py);
+    ctx.lineTo(px + pw - pr, py);
+    ctx.quadraticCurveTo(px + pw, py, px + pw, py + pr);
+    ctx.lineTo(px + pw, py + ph - pr);
+    ctx.quadraticCurveTo(px + pw, py + ph, px + pw - pr, py + ph);
+    ctx.lineTo(px + pr, py + ph);
+    ctx.quadraticCurveTo(px, py + ph, px, py + ph - pr);
+    ctx.lineTo(px, py + pr);
+    ctx.quadraticCurveTo(px, py, px + pr, py);
+    ctx.closePath();
+
+    // 패들 러버 그라데이션 (스포티한 레드 & 오렌지)
+    var paddleGrad = ctx.createLinearGradient(px, py, px, py + ph);
+    paddleGrad.addColorStop(0, '#ff4d4f');
+    paddleGrad.addColorStop(0.6, '#d92629');
+    paddleGrad.addColorStop(1, '#8a0f12');
+    ctx.fillStyle = paddleGrad;
+    ctx.fill();
+
+    // 상단 반사광 테두리
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // 중앙 손잡이/마커
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.fillRect(px + pw / 2 - 8, py + ph - 4, 16, 2);
+    ctx.restore();
+  }
+
+  // 메인 게임 루프
+  function gameLoop(time) {
+    var dt = (time - lastFrameTime) / 1000;
+    lastFrameTime = time;
+
+    update(dt);
+    render();
+
+    animFrameId = requestAnimationFrame(gameLoop);
+  }
+
+  // 입력 이벤트 바인딩
+  function onPointerMove(e) {
+    if (gameState !== 'playing' && gameState !== 'paused') return;
+    var px = getLogicalXFromEvent(e);
+    paddle.targetX = px - paddle.width / 2;
+  }
+
+  canvas.addEventListener('mousemove', onPointerMove);
+  canvas.addEventListener('touchmove', function (e) {
+    e.preventDefault();
+    onPointerMove(e);
+  }, { passive: false });
+
+  canvas.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    initAudio();
+    onPointerMove(e);
+  }, { passive: false });
+
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+      keys.left = true;
+    } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+      keys.right = true;
+    }
+  });
+
+  window.addEventListener('keyup', function (e) {
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+      keys.left = false;
+    } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+      keys.right = false;
+    }
+  });
+
+  // 단추 이벤트
+  btnStartGame.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  btnRestart.addEventListener('click', function () {
+    startNewGame();
+  });
+
+  // 순위표 올리기 단추 연동 (표준 4번 & 5번 규칙)
+  btnOverlayRank.addEventListener('click', function () {
+    var jump = document.querySelector('.zw-rk-jump');
+    if (jump && jump.style.display !== 'none') {
+      jump.click();
+    } else {
+      var sec = document.querySelector('.zw-rank');
+      if (sec) {
+        sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        sec.classList.add('flash');
+        setTimeout(function () {
+          sec.classList.remove('flash');
+        }, 1800);
+      }
+    }
+  });
+
+  // 창 크기 변경 시
+  window.addEventListener('resize', function () {
+    render();
+  });
+
+  // 초기화 실행
+  loadStorage();
+  resetToReadyState();
+  lastFrameTime = performance.now();
+  animFrameId = requestAnimationFrame(gameLoop);
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/mental-math/">암산 속도 게임</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/peg-jump/">페그 솔리테어</a> — 구슬을 뛰어넘어 하나만 남기기</li><li><a href="/word-chain/">끝말잇기</a> — 컴퓨터와 끝말잇기</li><li><a href="/proverb-complete/">속담 완성</a> — 속담 뒷부분 맞히기</li><li><a href="/balloon-rise/">풍선 올리기</a> — 장애물 피해 풍선 올리기</li><li><a href="/star-dodge/">별 피하기</a> — 쏟아지는 별 피하기</li><li><a href="/fruit-catch/">과일 받기</a> — 떨어지는 과일 바구니로 받기</li><li><a href="/marble-drop/">구슬 떨어뜨리기</a> — 구슬을 떨어뜨려 점수 칸에 넣기</li><li><a href="/asteroid-dodge/">우주선 피하기</a> — 날아오는 운석 피하기</li><li><a href="/click-speed/">클릭 속도 재기</a> — 정해진 시간 동안 빠르게 누르기</li><li><a href="/rhythm-tap/">리듬 탭</a> — 떨어지는 노트를 박자에 맞춰 탭</li><li><a href="/snake/">뱀 게임</a> — 먹이를 먹고 길어지기</li><li><a href="/reaction-time/">반응속도 테스트</a> — 화면이 바뀌면 바로 누르기</li><li><a href="/whack-mole/">두더지 잡기</a> — 튀어나온 두더지 누르기</li><li><a href="/sudoku/">스도쿠</a> — 빈칸에 1~9를 채워 보세요</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>
