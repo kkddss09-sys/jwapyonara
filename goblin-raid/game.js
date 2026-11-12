@@ -1827,9 +1827,12 @@
     }
 
     const cd = def.cooldown != null ? def.cooldown : 12;
+    const resolvedSkillId = typeof def.skillId === 'number'
+      ? def.skillId
+      : (typeof def.id === 'number' ? def.id : 11);
     return {
       id: def.id != null ? def.id : def.key,
-      skillId: def.id != null ? def.id : (def.skillId != null ? def.skillId : 11),
+      skillId: resolvedSkillId,
       key: def.key || def.id,
       name: def.name,
       icon: def.icon || '⚔️',
@@ -2719,14 +2722,18 @@
   }
 
   /**
-   * 레벨업 선택지 3종 생성 (규칙 6번 & 조각 5)
+   * 레벨업 선택지 3종 생성 (규칙 6번 & 조각 15 원작 정렬 42종 표 연동)
    * 스탯 및 스킬 풀에서 무작위 3장 중복 없이 선택
+   * - 스킬 카드는 SKILLS_DATA 중 isImplemented: true인 것에서 생성
+   * - 직업 고유 스킬(uniqueClassId)은 해당 직업일 때만 후보에 포함
+   * - 슬롯 4칸이 가득 차면 신규 습득(skill_learn) 카드는 제외하고 연마(skill_upgrade) 및 스탯 카드만 제공
+   * - 설명과 쿨다운은 표 값 반영 (예: 눈부신 섬광 15턴, 1회용은 1회용)
    */
   function getLevelupOptions(gameState = {}, rng = null) {
     const randomFn = typeof rng === 'function' ? rng : (gameState && typeof gameState.rng === 'function' ? gameState.rng : Math.random);
     const player = (gameState && gameState.player) || {};
     const playerSkills = Array.isArray(player.skills) ? player.skills : [];
-    const playerSkillIds = playerSkills.map(s => s.id);
+    const playerClassId = (player && player.classId) || 'adventurer';
 
     // 스탯 카드 풀 (6종)
     const statPool = [
@@ -2786,29 +2793,57 @@
       }
     ];
 
-    // 스킬 카드 풀 (습득 또는 강화)
+    // 조각 15: 레벨업의 스킬 카드(신규 습득·연마)를 SKILLS_DATA 중 isImplemented: true인 것에서 만든다.
+    // 직업 고유 스킬(uniqueClassId)은 그 직업일 때만 카드에 나온다.
     const skillPool = [];
-    for (const sId of SKILL_IDS) {
-      const sDef = SKILLS[sId];
-      if (playerSkillIds.includes(sId)) {
-        // 이미 보유 중: 쿨다운 감소 연마
+    const canLearnNew = playerSkills.length < 4;
+
+    const availableSkills = SKILLS_DATA.filter(sDef => {
+      if (!sDef.isImplemented) return false;
+      if (sDef.uniqueClassId && sDef.uniqueClassId !== playerClassId) return false;
+      return true;
+    });
+
+    for (const sDef of availableSkills) {
+      // 보유 여부 검사 (숫자 ID, 키, 레거시 ID 호환)
+      const existing = playerSkills.find(s => {
+        if (!s) return false;
+        if (s.id === sDef.id || s.skillId === sDef.id) return true;
+        if (s.key && (s.key === sDef.key || s.key === sDef.id)) return true;
+        if (s.id === sDef.key) return true;
+        if (typeof s.id === 'string' && SKILLS[s.id] && SKILLS[s.id].skillId === sDef.id) return true;
+        return false;
+      });
+
+      if (existing) {
+        // 이미 보유 중: 쿨다운 감소 연마 카드
+        const isSingleUse = sDef.cooldown === -1;
+        const upgradeDesc = isSingleUse
+          ? `${sDef.name} 강화 (1회용)`
+          : `쿨다운 1턴 감소 (현재 쿨다운 -1)`;
         skillPool.push({
-          id: `skill_upgrade_${sId}`,
+          id: `skill_upgrade_${sDef.id}`,
           type: 'skill_upgrade',
-          skillId: sId,
+          skillId: sDef.id,
+          key: sDef.key,
           name: `${sDef.name} 연마`,
-          desc: `쿨다운 1턴 감소 (현재 쿨다운 -1)`,
-          icon: sDef.icon
+          desc: upgradeDesc,
+          icon: sDef.icon,
+          cooldown: sDef.cooldown
         });
-      } else if (playerSkills.length < 4) {
-        // 미보유 및 슬롯 여유: 신규 스킬 습득
+      } else if (canLearnNew) {
+        // 미보유 및 슬롯 여유 (4칸 미만): 신규 스킬 습득 카드
+        const isSingleUse = sDef.cooldown === -1;
+        const cdText = isSingleUse ? '1회용' : `쿨다운 ${sDef.cooldown}턴`;
         skillPool.push({
-          id: `skill_learn_${sId}`,
+          id: `skill_learn_${sDef.id}`,
           type: 'skill_learn',
-          skillId: sId,
+          skillId: sDef.id,
+          key: sDef.key,
           name: `스킬: ${sDef.name}`,
-          desc: `${sDef.desc} (쿨다운 ${sDef.cooldown}턴)`,
-          icon: sDef.icon
+          desc: `${sDef.desc} (${cdText})`,
+          icon: sDef.icon,
+          cooldown: sDef.cooldown
         });
       }
     }
@@ -2828,7 +2863,7 @@
   }
 
   /**
-   * 레벨업 보상 선택 적용 (조각 5)
+   * 레벨업 보상 선택 적용 (조각 5 & 조각 15)
    */
   function chooseLevelupReward(gameState, optionId) {
     if (!gameState || !gameState.pendingChoice || gameState.pendingChoice.type !== 'levelup') {
@@ -2859,22 +2894,30 @@
         player.coinBonus = (player.coinBonus || 0) + chosen.value;
       }
     } else if (chosen.type === 'skill_learn') {
-      const sDef = SKILLS[chosen.skillId];
-      if (sDef) {
+      const newSkill = createSkillInstance(chosen.skillId);
+      if (newSkill) {
         const skills = (player.skills || []).map(s => ({ ...s }));
         if (skills.length < 4) {
-          skills.push(createSkillInstance(chosen.skillId));
+          skills.push(newSkill);
           player.skills = skills;
         }
       }
     } else if (chosen.type === 'skill_upgrade') {
       const skills = (player.skills || []).map(s => {
-        if (s.id === chosen.skillId) {
-          const newCd = Math.max(2, (s.cooldown || 5) - 1);
+        const isTarget = s.id === chosen.skillId ||
+          s.skillId === chosen.skillId ||
+          s.key === chosen.skillId ||
+          (typeof chosen.skillId === 'number' && typeof s.id === 'string' && SKILLS[s.id] && SKILLS[s.id].skillId === chosen.skillId) ||
+          (typeof chosen.skillId === 'string' && typeof s.id === 'number' && SKILLS[chosen.skillId] && SKILLS[chosen.skillId].skillId === s.id);
+
+        if (isTarget) {
+          const baseCd = s.cooldown != null ? s.cooldown : 5;
+          const newCd = baseCd === -1 ? -1 : Math.max(1, baseCd - 1);
           return {
             ...s,
             cooldown: newCd,
-            currentCooldown: Math.min(s.currentCooldown || 0, newCd)
+            currentCooldown: Math.min(s.currentCooldown || 0, newCd),
+            rank: (s.rank || 1) + 1
           };
         }
         return { ...s };
@@ -2959,7 +3002,17 @@
       skillIdx = skillIndexOrId;
       usedSkill = skills[skillIdx];
     } else {
-      skillIdx = skills.findIndex(s => s.id === skillIndexOrId || s.skillId === skillIndexOrId || s.key === skillIndexOrId);
+      skillIdx = skills.findIndex(s => {
+        if (!s) return false;
+        if (s.id === skillIndexOrId || s.skillId === skillIndexOrId || s.key === skillIndexOrId) return true;
+        if (typeof skillIndexOrId === 'string' && SKILLS[skillIndexOrId]) {
+          if (s.id === SKILLS[skillIndexOrId].skillId || s.skillId === SKILLS[skillIndexOrId].skillId) return true;
+        }
+        if (typeof skillIndexOrId === 'number' && typeof s.id === 'string' && SKILLS[s.id]) {
+          if (SKILLS[s.id].skillId === skillIndexOrId) return true;
+        }
+        return false;
+      });
       if (skillIdx >= 0) {
         usedSkill = skills[skillIdx];
       } else {
@@ -3582,6 +3635,7 @@
       raceId: p.raceId != null ? p.raceId : ((CLASSES[p.classId] && CLASSES[p.classId].defaultRaceId != null) ? CLASSES[p.classId].defaultRaceId : 0),
       skills: Array.isArray(p.skills) ? p.skills.map(s => ({
         id: s.id,
+        skillId: s.skillId != null ? s.skillId : (typeof s.id === 'number' ? s.id : (SKILLS[s.id] ? SKILLS[s.id].skillId : undefined)),
         name: s.name,
         icon: s.icon,
         cooldown: s.cooldown,
@@ -3635,16 +3689,30 @@
 
     if (Array.isArray(data.skills)) {
       p.skills = data.skills.map(s => {
-        const baseDef = SKILLS[s.id] || {};
+        const baseDef = (typeof s.id === 'number' ? SKILLS_DATA.find(d => d.id === s.id) : null)
+          || SKILLS[s.id]
+          || SKILLS_DATA.find(d => d.key === s.id)
+          || {};
+        const cd = s.cooldown != null ? s.cooldown : (baseDef.cooldown != null ? baseDef.cooldown : 5);
+        const resolvedSkillId = typeof s.skillId === 'number'
+          ? s.skillId
+          : (typeof baseDef.skillId === 'number'
+            ? baseDef.skillId
+            : (typeof baseDef.id === 'number'
+              ? baseDef.id
+              : (s.skillId != null ? s.skillId : s.id)));
         return {
           id: s.id,
+          skillId: resolvedSkillId,
+          key: s.key || baseDef.key || s.id,
           name: s.name || baseDef.name || s.id,
           icon: s.icon || baseDef.icon || '⚔️',
-          cooldown: s.cooldown != null ? s.cooldown : (baseDef.cooldown || 5),
+          cooldown: cd,
           currentCooldown: s.currentCooldown != null ? s.currentCooldown : 0,
           charge: s.charge != null ? s.charge : 0,
           rank: s.rank != null ? s.rank : 1,
-          desc: s.desc || baseDef.desc || ''
+          desc: s.desc || baseDef.desc || '',
+          singleUse: Boolean(s.singleUse || baseDef.singleUse || cd === -1)
         };
       });
     }

@@ -437,7 +437,6 @@
     stroke-linecap: round;
     stroke-linejoin: round;
     fill: none;
-    filter: drop-shadow(0 0 6px #ffb02e);
   }
 
   /* ── 4가지 연출 애니메이션 (시안 D) ── */
@@ -594,7 +593,6 @@
     position: absolute;
     inset: 0;
     background: rgba(9, 7, 13, 0.93);
-    backdrop-filter: blur(4px);
     border-radius: 22px;
     z-index: 40;
     display: none;
@@ -604,7 +602,6 @@
     padding: 14px;
     gap: 10px;
     text-align: center;
-    animation: fadeIn 0.2s ease;
   }
   .modal-overlay.show { display: flex; }
   @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
@@ -842,6 +839,21 @@
     color: var(--sub);
     margin-top: 2px;
     line-height: 1.3;
+  }
+  /* 처치 예고 X (원작: 줄이 적을 처치할 때 X 표시, 2026-11-13) */
+  .kill-x {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    font-weight: 900;
+    line-height: 1;
+    color: #ff2e3d;
+    -webkit-text-stroke: 2px #fff;
+    pointer-events: none;
+    z-index: 4;
   }
 </style>
 </head>
@@ -1408,6 +1420,8 @@
     const cells = boardGrid.querySelectorAll('.cell');
     cells.forEach(c => {
       c.className = 'cell';
+      const oldX = c.querySelector('.kill-x');
+      if (oldX) oldX.remove();
     });
 
     if (currentPath.length === 0) {
@@ -1447,6 +1461,20 @@
     if (isAttack) {
       const atkInfo = GR.calculateAttack(gameState.board, currentPath, gameState.player);
       chainInfoText.innerHTML = `<span>⚔️ 총공격: <strong>${atkInfo.totalAttack}</strong> (칼 ${atkInfo.swordCount} · 적 ${atkInfo.enemyCount})</span>`;
+      // 처치 예고 X: 체력 <= max(0, 총공격 - 방어) 인 줄 안의 적 위에 표시
+      currentPath.forEach(pos => {
+        const t = gameState.board[pos.y][pos.x];
+        if (!t || t.type !== 'enemy') return;
+        if (t.hp <= Math.max(0, atkInfo.totalAttack - (t.armor || 0))) {
+          const cell = boardGrid.querySelector(`[data-x="${pos.x}"][data-y="${pos.y}"]`);
+          if (cell) {
+            const x = document.createElement('div');
+            x.className = 'kill-x';
+            x.textContent = '✕';
+            cell.appendChild(x);
+          }
+        }
+      });
     } else {
       const resCalc = GR.calculateResourceGain(firstTile.type, len);
       let label = '';
@@ -1469,6 +1497,7 @@
    */
   // 1) 타격 및 처치 연출
   function triggerHitEffect(killedPositions = [], damagedPositions = [], totalAtk = 0) {
+    return; // 연출 끔(속도 우선, 2026-11-13)
     damagedPositions.forEach(pos => {
       const cell = boardGrid.querySelector(`[data-x="${pos.x}"][data-y="${pos.y}"]`);
       if (!cell) return;
@@ -1510,7 +1539,7 @@
 
   // 2) 적 반격 연출 (달려듦, 화면 흔들림, 비네트 플래시, 체력 감소)
   function triggerCounterattackEffect(totalDmg = 0) {
-    if (totalDmg <= 0) return;
+    return; // 연출 끔(속도 우선, 2026-11-13)
 
     phoneContainer.classList.remove('anim-shake');
     void phoneContainer.offsetWidth;
@@ -1534,6 +1563,7 @@
 
   // 3) 레벨업 연출 (금빛 링 파동, 레벨업 문구)
   function triggerLevelupEffect() {
+    return; // 연출 끔(속도 우선, 2026-11-13)
     const ring = document.createElement('div');
     ring.className = 'levelup-ring';
     phoneContainer.appendChild(ring);
@@ -1675,12 +1705,10 @@
         }
         logBox.innerHTML = msg;
 
-        // 연출 종료 후 보드 갱신 (약 450ms)
-        setTimeout(() => {
-          isAnimating = false;
-          currentPath = [];
-          renderBoard();
-        }, 450);
+        // 속도 우선(사용자 요청 2026-11-13): 연출을 기다리지 않고 바로 보드 갱신
+        isAnimating = false;
+        currentPath = [];
+        renderBoard();
       } else {
         isAnimating = false;
         currentPath = [];
