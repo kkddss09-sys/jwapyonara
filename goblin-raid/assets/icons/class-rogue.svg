@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256">
+<title>도적 (고블린 레이드 직업 아이콘)</title>
+<defs><radialGradient id="gBg" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#2a2233"/><stop offset=".8" stop-color="#14101a"/></radialGradient>
+<filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#9aa6b6" flood-opacity=".9"/></filter></defs>
+<rect width="100" height="100" rx="22" fill="url(#gBg)"/>
+<rect x="1.5" y="1.5" width="97" height="97" rx="21" fill="none" stroke="#5b4a2e" stroke-width="3"/>
+<rect x="4" y="4" width="92" height="92" rx="19" fill="none" stroke="#1b1420" stroke-width="2"/>
+<g transform="translate(14 14) scale(.72)" filter="url(#glow)"><path d="M28 80 L66 24 L74 30 L36 86 Z" fill="#cfd8e3" stroke="#0b0810" stroke-width="3" stroke-linejoin="round"/><path d="M24 74 L38 84 L30 90 Z" fill="#7b4a24" stroke="#0b0810" stroke-width="3"/></g>
+</svg>

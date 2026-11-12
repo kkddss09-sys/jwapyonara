@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256">
+<title>성기사 (고블린 레이드 직업 아이콘)</title>
+<defs><radialGradient id="gBg" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#2a2233"/><stop offset=".8" stop-color="#14101a"/></radialGradient>
+<filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#4f86e6" flood-opacity=".9"/></filter></defs>
+<rect width="100" height="100" rx="22" fill="url(#gBg)"/>
+<rect x="1.5" y="1.5" width="97" height="97" rx="21" fill="none" stroke="#5b4a2e" stroke-width="3"/>
+<rect x="4" y="4" width="92" height="92" rx="19" fill="none" stroke="#1b1420" stroke-width="2"/>
+<g transform="translate(14 14) scale(.72)" filter="url(#glow)"><path d="M50 14 L82 24 V50 C82 70 68 82 50 90 C32 82 18 70 18 50 V24 Z" fill="#4f86e6" stroke="#0b0810" stroke-width="3"/><path d="M50 30 V74 M32 46 H68" stroke="#ffe27a" stroke-width="7" stroke-linecap="round"/></g>
+</svg>

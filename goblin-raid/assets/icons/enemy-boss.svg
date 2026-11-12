@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256">
+<title>우두머리 (보스) (고블린 레이드 시안 D)</title>
+<defs>
+<linearGradient id="gMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f7fb"/><stop offset=".5" stop-color="#a9b6c7"/><stop offset="1" stop-color="#5d6b80"/></linearGradient>
+<linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a8"/><stop offset=".5" stop-color="#e5a82a"/><stop offset="1" stop-color="#8f5d0b"/></linearGradient>
+<radialGradient id="gBg" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#2a2233"/><stop offset=".8" stop-color="#14101a"/></radialGradient>
+<filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#ffc233" flood-opacity=".9"/></filter>
+</defs>
+<rect width="100" height="100" rx="22" fill="url(#gBg)"/>
+<rect x="1.5" y="1.5" width="97" height="97" rx="21" fill="none" stroke="#5b4a2e" stroke-width="3"/>
+<rect x="4" y="4" width="92" height="92" rx="19" fill="none" stroke="#1b1420" stroke-width="2"/>
+<g transform="translate(4 4) scale(.92)" filter="url(#glow)">
+<path fill="#21242a" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M10 60 C0 40 6 22 20 14 C18 28 24 40 30 44 Z"/><path fill="#21242a" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M90 60 C100 40 94 22 80 14 C82 28 76 40 70 44 Z"/><path fill="url(#gMetal)" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M16 56 C16 30 32 18 50 18 C68 18 84 30 84 56 Z"/><path fill="url(#gGold)" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M22 24 L26 6 L38 18 L50 2 L62 18 L74 6 L78 24 Z"/><path fill="#f2c9a0" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M24 56 H76 V66 C76 82 66 94 50 94 C34 94 24 82 24 66 Z"/><rect fill="#21242a" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" x="45" y="34" width="10" height="26" rx="3"/><path fill="#1f1f1f" d="M28 64 L45 68 L43 75 L28 72 Z"/><path fill="#1f1f1f" d="M72 64 L55 68 L57 75 L72 72 Z"/><rect fill="#1f1f1f" x="40" y="83" width="20" height="4.5" rx="2.2"/><circle fill="#e5a82a" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" cx="50" cy="10" r="3.2"/>
+</g>
+</svg>

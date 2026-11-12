@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256">
+<title>도망자 (고블린 레이드 시안 D)</title>
+<defs>
+<linearGradient id="gMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f7fb"/><stop offset=".5" stop-color="#a9b6c7"/><stop offset="1" stop-color="#5d6b80"/></linearGradient>
+<linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a8"/><stop offset=".5" stop-color="#e5a82a"/><stop offset="1" stop-color="#8f5d0b"/></linearGradient>
+<radialGradient id="gBg" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#2a2233"/><stop offset=".8" stop-color="#14101a"/></radialGradient>
+<filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#3fd0b4" flood-opacity=".9"/></filter>
+</defs>
+<rect width="100" height="100" rx="22" fill="url(#gBg)"/>
+<rect x="1.5" y="1.5" width="97" height="97" rx="21" fill="none" stroke="#5b4a2e" stroke-width="3"/>
+<rect x="4" y="4" width="92" height="92" rx="19" fill="none" stroke="#1b1420" stroke-width="2"/>
+<g transform="translate(4 4) scale(.92)" filter="url(#glow)">
+<path fill="#e9fff9" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M22 54 C6 54 -2 40 6 26 C10 36 18 42 28 44 Z"/><path fill="#e9fff9" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M78 54 C94 54 102 40 94 26 C90 36 82 42 72 44 Z"/><path fill="#3fd0b4" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M24 46 C24 26 36 16 50 16 C64 16 76 26 76 46 Z"/><path fill="#f2c9a0" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M22 46 C22 30 34 22 50 22 C66 22 78 30 78 46 V62 C78 80 66 92 50 92 C34 92 22 80 22 62 Z"/><path fill="#1f1f1f" d="M29 56 L45 61 L43 68 L29 65 Z"/><path fill="#1f1f1f" d="M71 56 L55 61 L57 68 L71 65 Z"/><rect fill="#1f1f1f" x="40" y="77" width="20" height="4.5" rx="2.2"/><circle fill="#14101a" stroke="#e5a82a" stroke-width="3" cx="80" cy="22" r="15"/><path fill="#fff" d="M73 12 H87 L80 22 L87 32 H73 L80 22 Z"/>
+</g>
+</svg>

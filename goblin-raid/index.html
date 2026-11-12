@@ -1,0 +1,2363 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>고블린 레이드 — 선 이어 고블린 무리와 싸우는 무료 퍼즐 게임 | 좌표나라</title>
+<meta name="description" content="칼·방패·물약·코인을 선으로 이어 몰려오는 고블린을 물리치는 무료 퍼즐 게임. 가입 없이 폰에서 바로, 기록은 내 기기에만 저장돼요.">
+<link rel="canonical" href="https://jwapyonara.com/goblin-raid/">
+<meta property="og:title" content="고블린 레이드 — 무료 퍼즐 게임">
+<meta property="og:description" content="선을 이어 칼·방패·물약·코인을 모으고 고블린을 물리치세요. 가입 없이 바로 시작.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://jwapyonara.com/goblin-raid/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"고블린 레이드","url":"https://jwapyonara.com/goblin-raid/","description":"선을 이어 고블린 무리와 싸우는 무료 퍼즐 게임","inLanguage":"ko","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<style>
+  :root {
+    --bg: #15131a;
+    --card: #201d27;
+    --ink: #f2eee7;
+    --sub: #a59f95;
+    --line: #38333f;
+    --gold: #e5a82a;
+    --red: #d7263d;
+    --green: #2f9e57;
+    --blue: #3b7de0;
+    --purple: #9b5de5;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 8px 10px 40px;
+    overflow-x: hidden;
+    touch-action: pan-y;
+  }
+  button {
+    font: inherit;
+    border: 1px solid var(--line);
+    background: #2e2a37;
+    color: var(--ink);
+    border-radius: 999px;
+    cursor: pointer;
+    padding: 6px 14px;
+    transition: transform 0.1s ease, background 0.15s ease;
+  }
+  button:active {
+    transform: translateY(1px);
+    background: #24202c;
+  }
+
+  /* ── 폰 화면 컨테이너 (시안 D) ── */
+  .phone {
+    width: 100%;
+    max-width: 380px;
+    background: #0d0a12;
+    border-radius: 22px;
+    padding: 12px;
+    border: 2px solid #3a3042;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 헤더 */
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2px 2px;
+  }
+  .game-title {
+    font-size: 1.15rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .header-btns {
+    display: flex;
+    gap: 6px;
+  }
+  .btn-icon {
+    padding: 3px 8px;
+    font-size: 0.78rem;
+    border-radius: 8px;
+    background: #1f1b26;
+    border: 1px solid var(--line);
+  }
+
+  /* HUD */
+  .turn-hud {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #b9b0a2;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .turn-hud b {
+    color: var(--gold);
+  }
+
+  .hud-bars {
+    display: grid;
+    gap: 5px;
+  }
+  .bar {
+    position: relative;
+    height: 19px;
+    border-radius: 7px;
+    background: #1b1520;
+    border: 1px solid #3a3042;
+    overflow: hidden;
+  }
+  .bar i {
+    position: absolute;
+    inset: 0 auto 0 0;
+    transition: width 0.3s ease;
+  }
+  .bar span {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 1px 2px #000;
+    z-index: 1;
+  }
+  .hp i { background: linear-gradient(#ff6b7e, #c4243b); }
+  .ar i { background: linear-gradient(#7db2ff, #2a5ab8); }
+  .xp i { background: linear-gradient(#c78bff, #7a3bd1); }
+  .gd i { background: linear-gradient(#ffe27a, #c98a10); }
+  .up i { background: linear-gradient(#9ce6ff, #2e8fb8); }
+
+  .small-bars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+  }
+  .small-bars .bar {
+    height: 15px;
+  }
+  .small-bars .bar span {
+    font-size: 9.5px;
+  }
+
+  /* 부가 스탯 정보 */
+  .stat-sub-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--sub);
+    padding: 0 2px;
+  }
+  .stat-sub-row span b {
+    color: #fff;
+  }
+  .poison-alert {
+    color: #ff4757;
+    font-weight: 800;
+    display: none;
+  }
+
+  /* 액티브 스킬 슬롯 (조각 5 연동) */
+  .skills-slot-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+  }
+  .skill-cell {
+    background: #191421;
+    border: 1px solid #3a3042;
+    border-radius: 8px;
+    padding: 3px 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 44px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .skill-cell.ready {
+    border-color: var(--gold);
+    box-shadow: 0 0 8px rgba(229, 168, 42, 0.4);
+    background: #231d2e;
+  }
+  .skill-cell.cooldown {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(0.7);
+  }
+  .skill-cell.empty {
+    opacity: 0.2;
+    border-style: dashed;
+    cursor: default;
+  }
+  .skill-cell-icon {
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .skill-cell-name {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .skill-cell-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #d7263d;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 900;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #000;
+  }
+
+  /* 체인 안내 바 */
+  .chain-info-bar {
+    background: #14101a;
+    border: 1px solid #3a3042;
+    border-radius: 8px;
+    padding: 5px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    min-height: 32px;
+  }
+  .chain-info-text {
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .chain-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 999px;
+  }
+  .badge-valid {
+    background: rgba(47, 158, 87, 0.2);
+    color: #55d777;
+    border: 1px solid #2f9e57;
+  }
+  .badge-invalid {
+    background: rgba(229, 168, 42, 0.15);
+    color: #ffe27a;
+    border: 1px solid rgba(229, 168, 42, 0.4);
+  }
+
+  /* ── 6x6 보드 ── */
+  .board-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    background: #09070d;
+    border: 2px solid #3a3042;
+    border-radius: 14px;
+    padding: 5px;
+    touch-action: none;
+    box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.8);
+  }
+  .board-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* 타일 셀 */
+  .cell {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    background: #1a1522;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+  }
+  .cell img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;
+    border-radius: 7px;
+  }
+  .cell.selected {
+    transform: scale(1.08);
+    z-index: 3;
+    box-shadow: 0 0 10px rgba(229, 168, 42, 0.6);
+  }
+  .cell.selected-sword,
+  .cell.selected-attack {
+    box-shadow: 0 0 12px #ff4757;
+  }
+  .cell.selected-shield {
+    box-shadow: 0 0 12px #4da3ff;
+  }
+  .cell.selected-potion {
+    box-shadow: 0 0 12px #48d689;
+  }
+  .cell.selected-coin {
+    box-shadow: 0 0 12px #ffd166;
+  }
+
+  /* 상태 이상 */
+  .cell.frozen {
+    border: 2px solid #70a1ff !important;
+    opacity: 0.75;
+  }
+  .cell.frozen::after {
+    content: "❄️";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 11px;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .cell.burning {
+    border: 2px solid #ff4757 !important;
+    box-shadow: 0 0 10px rgba(255, 71, 87, 0.8);
+  }
+  .cell.burning::after {
+    content: "🔥";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 11px;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .cell.acid {
+    border: 2px solid #a55eea !important;
+    box-shadow: 0 0 10px rgba(165, 94, 234, 0.7);
+  }
+  .cell.acid::after {
+    content: "☣️";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 11px;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .cell.poisoned {
+    border: 2px solid #2ed573 !important;
+    box-shadow: 0 0 10px rgba(46, 213, 115, 0.7);
+  }
+  .cell.poisoned::after {
+    content: "🧪";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 11px;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .cell.boss-glow {
+    border: 2px solid var(--gold) !important;
+    box-shadow: 0 0 10px rgba(229, 168, 42, 0.8) !important;
+  }
+
+  /* 적 스탯 뱃지 (시안 D 규칙) */
+  .st {
+    position: absolute;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 3px;
+    border-radius: 8.5px;
+    font-size: 10.5px;
+    font-weight: 900;
+    line-height: 17px;
+    text-align: center;
+    color: #fff;
+    border: 1.5px solid #0b0810;
+    pointer-events: none;
+    z-index: 3;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  }
+  .st.atk { left: 2px; bottom: 2px; background: #d7263d; }
+  .st.hp { right: 2px; bottom: 2px; background: #2f9e57; }
+  .st.arm { left: 2px; top: 2px; background: #3b7de0; }
+  .st.cd { left: 2px; top: 2px; background: #e5a82a; color: #1b1420; }
+
+  /* SVG 오버레이 선 */
+  .svg-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .chain-polyline {
+    stroke: #ffd166;
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+    filter: drop-shadow(0 0 6px #ffb02e);
+  }
+
+  /* ── 4가지 연출 애니메이션 (시안 D) ── */
+  /* a) 선 잇기 펄스 */
+  @keyframes pulse { 40% { transform: scale(1.15); filter: brightness(1.5); } }
+  .anim-pulse { animation: pulse 0.35s ease-out 1; }
+
+  /* b) 타격 · 처치 */
+  @keyframes hit { 0% { filter: brightness(3) saturate(0); transform: translateX(-3px); } 100% { filter: none; transform: translateX(3px); } }
+  @keyframes die { to { transform: scale(0.1) rotate(25deg); opacity: 0; } }
+  @keyframes rise {
+    0% { opacity: 0; transform: translateY(10px) scale(0.7); }
+    30% { opacity: 1; transform: translateY(0) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-28px) scale(1); }
+  }
+  @keyframes burst {
+    0% { opacity: 1; transform: translate(0, 0) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.2); }
+  }
+
+  .anim-hit { animation: hit 0.15s linear 2 alternate; }
+  .anim-die { animation: die 0.3s ease-in forwards; }
+
+  .float-num {
+    position: absolute;
+    font-weight: 900;
+    font-size: 20px;
+    color: #ffd54a;
+    text-shadow: 0 2px 0 #7a1f10, 0 0 8px #ff7a1a;
+    opacity: 0;
+    z-index: 10;
+    pointer-events: none;
+    animation: rise 0.75s ease-out forwards;
+  }
+  .float-num.dmg-player {
+    color: #ff6b7e;
+    text-shadow: 0 2px 0 #3a0a14, 0 0 8px #ff2a4b;
+  }
+
+  .spark {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    margin: -3px;
+    border-radius: 50%;
+    background: #ffd54a;
+    box-shadow: 0 0 6px #ffb02e;
+    pointer-events: none;
+    z-index: 10;
+    animation: burst 0.5s ease-out forwards;
+  }
+
+  /* c) 적 반격 */
+  @keyframes lunge { 50% { transform: translateY(24px) scale(1.15); } }
+  @keyframes shake {
+    20% { transform: translate(-4px, 2px); }
+    40% { transform: translate(4px, -2px); }
+    60% { transform: translate(-2px, 1px); }
+    80% { transform: translate(2px, 0); }
+  }
+  @keyframes vig {
+    0% { box-shadow: inset 0 0 50px 18px rgba(255, 30, 60, 0.75); }
+    100% { box-shadow: inset 0 0 40px 10px rgba(255, 30, 60, 0); }
+  }
+
+  .anim-lunge { animation: lunge 0.3s ease-in 1; }
+  .anim-shake { animation: shake 0.35s linear 1; }
+  .vignette-flash {
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    pointer-events: none;
+    z-index: 20;
+    animation: vig 0.5s ease-out forwards;
+  }
+
+  /* d) 레벨업 */
+  @keyframes ring {
+    0% { opacity: 1; transform: scale(0.6); }
+    100% { opacity: 0; transform: scale(4.5); }
+  }
+  @keyframes lvup {
+    0% { opacity: 0; transform: translateY(16px) scale(0.6); }
+    30% { opacity: 1; transform: translateY(0) scale(1.15); }
+    100% { opacity: 0; transform: translateY(-24px) scale(1); }
+  }
+  @keyframes glow {
+    30% { filter: brightness(1.7) drop-shadow(0 0 12px #ffd54a); transform: scale(1.1); }
+  }
+
+  .levelup-ring {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 60px;
+    height: 60px;
+    margin: -30px 0 0 -30px;
+    border-radius: 50%;
+    border: 4px solid #ffd54a;
+    box-shadow: 0 0 16px #ffb02e;
+    pointer-events: none;
+    z-index: 15;
+    animation: ring 0.75s ease-out forwards;
+  }
+  .levelup-banner {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 45%;
+    text-align: center;
+    font-weight: 900;
+    letter-spacing: 2px;
+    font-size: 24px;
+    color: #ffe27a;
+    text-shadow: 0 2px 0 #7a4a08, 0 0 12px #ffb02e;
+    pointer-events: none;
+    z-index: 16;
+    animation: lvup 0.9s ease-out forwards;
+  }
+
+  /* 안내 로그 박스 */
+  .log-box {
+    background: #15101c;
+    border: 1px dashed #3a3042;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 11.5px;
+    color: var(--sub);
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.35;
+  }
+
+  /* 하단 액션 */
+  .bottom-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .btn-action {
+    flex: 1;
+    padding: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 8px;
+    background: #252030;
+    border: 1px solid #3a3042;
+  }
+
+  /* ── 모달 공통 ── */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(9, 7, 13, 0.93);
+    backdrop-filter: blur(4px);
+    border-radius: 22px;
+    z-index: 40;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    gap: 10px;
+    text-align: center;
+    animation: fadeIn 0.2s ease;
+  }
+  .modal-overlay.show { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+
+  .modal-title {
+    font-size: 1.25rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+  }
+  .modal-desc {
+    font-size: 12px;
+    color: var(--sub);
+    margin-top: -4px;
+  }
+
+  .choice-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 100%;
+  }
+  .choice-card {
+    background: #1a1523;
+    border: 1px solid #3a3042;
+    border-radius: 10px;
+    padding: 9px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+  }
+  .choice-card:active {
+    background: #251d33;
+    border-color: var(--gold);
+    transform: translateY(1px);
+  }
+  .choice-card-left b {
+    display: block;
+    font-size: 13px;
+    color: #fff;
+  }
+  .choice-card-left small {
+    display: block;
+    font-size: 11px;
+    color: #55d777;
+    margin-top: 1px;
+  }
+  .choice-card-btn {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(229, 168, 42, 0.15);
+    color: var(--gold);
+    border: 1px solid rgba(229, 168, 42, 0.4);
+    font-weight: 700;
+  }
+
+  /* ── 직업 선택 화면 (시안 D) ── */
+  .cls-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-height: 380px;
+    overflow-y: auto;
+    padding: 4px 2px;
+  }
+  .cc {
+    position: relative;
+    border-radius: 12px;
+    padding: 8px 6px;
+    text-align: center;
+    background: radial-gradient(circle at 50% 30%, #2a2233 0%, #14101a 85%);
+    box-shadow: inset 0 0 0 1.5px #5b4a2e;
+    color: #f2eee7;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+  }
+  .cc:active { transform: scale(0.97); }
+  .cc img { width: 44px; height: 44px; display: block; margin: 0 auto; border-radius: 6px; }
+  .cc b { display: block; font-size: 12.5px; margin-top: 3px; }
+  .cc small { display: block; font-size: 10px; color: #b9b0a2; line-height: 1.25; margin-top: 1px; }
+  .cc.lock { opacity: 0.5; filter: grayscale(0.8); cursor: not-allowed; }
+  .cc.lock::after { content: "🔒"; position: absolute; top: 4px; right: 6px; font-size: 12px; }
+  .cc.sel { box-shadow: inset 0 0 0 2.5px var(--gold), 0 0 12px rgba(229, 168, 42, 0.55); }
+
+  /* 게임오버 스탯 & 명예의 전당 */
+  .go-box {
+    background: #14101b;
+    border: 1px solid #3a3042;
+    border-radius: 10px;
+    padding: 10px 14px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+  }
+  .go-row { display: flex; justify-content: space-between; }
+  .scores-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    text-align: center;
+    margin-top: 4px;
+  }
+  .scores-table th, .scores-table td {
+    padding: 3px 2px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .scores-table th { color: var(--sub); font-weight: 600; }
+  .scores-table td { color: #fff; }
+
+  /* 도움말 모달 가이드 */
+  .guide-box {
+    text-align: left;
+    font-size: 12px;
+    color: var(--ink);
+    line-height: 1.5;
+    background: #14101b;
+    border: 1px solid #3a3042;
+    border-radius: 10px;
+    padding: 10px 12px;
+    width: 100%;
+  }
+  .guide-box p { margin-bottom: 6px; }
+  .guide-box b { color: var(--gold); }
+
+  /* 조각 11: 퍽과 결함 설정 UI */
+  .perk-flaw-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    margin: 8px 0;
+  }
+  .perk-slot-pair {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: #181420;
+    border: 1px solid #3a3042;
+    border-radius: 8px;
+    padding: 6px 8px;
+  }
+  .perk-slot-pair.locked {
+    opacity: 0.45;
+    background: #110e16;
+  }
+  .slot-label {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--sub);
+    width: 38px;
+  }
+  .perk-select {
+    flex: 1;
+    background: #14101b;
+    border: 1px solid #3b7de0;
+    color: #9ce6ff;
+    border-radius: 6px;
+    padding: 5px 6px;
+    font-size: 11px;
+    outline: none;
+  }
+  .flaw-select {
+    flex: 1;
+    background: #14101b;
+    border: 1px solid #d7263d;
+    color: #ff9ca8;
+    border-radius: 6px;
+    padding: 5px 6px;
+    font-size: 11px;
+    outline: none;
+  }
+  .slot-pair-alert {
+    font-size: 11px;
+    min-height: 18px;
+    color: #ff4757;
+    text-align: center;
+    font-weight: 700;
+  }
+
+  /* 조각 13: 업적 카드 스타일 */
+  .ach-card {
+    background: #191421;
+    border: 1px solid #3a3042;
+    border-radius: 10px;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+    transition: all 0.15s ease;
+  }
+  .ach-card.unlocked {
+    border-color: #ffd54a;
+    background: radial-gradient(circle at 10% 50%, rgba(229, 168, 42, 0.15) 0%, #1a1523 75%);
+    box-shadow: 0 0 8px rgba(229, 168, 42, 0.25);
+  }
+  .ach-card.locked {
+    opacity: 0.55;
+    background: #120e17;
+  }
+  .ach-icon {
+    font-size: 24px;
+    width: 32px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .ach-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .ach-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .ach-card.unlocked .ach-name {
+    color: #ffe27a;
+  }
+  .ach-date {
+    font-size: 10px;
+    color: #55d777;
+    font-weight: 600;
+  }
+  .ach-desc {
+    font-size: 11px;
+    color: var(--sub);
+    margin-top: 2px;
+    line-height: 1.3;
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="phone" id="phone-container">
+    <!-- 비네트 플래시 오버레이 -->
+    <div id="vignette" style="display:none;" class="vignette-flash"></div>
+
+    <!-- 헤더 -->
+    <div class="game-header">
+      <div class="game-title">
+        <span>⚔️ 고블린 레이드</span>
+      </div>
+      <div class="header-btns">
+        <button class="btn-icon" id="btn-save-code-modal" title="기록 저장 코드">💾 저장 코드</button>
+        <button class="btn-icon" id="btn-achievements-modal" style="color:#ffd54a; border-color:#e5a82a;" title="업적과 도전과제">🏆 <span id="hdr-ach-count">0/10</span></button>
+        <button class="btn-icon" id="btn-guide" title="도움말">❓ 도움말</button>
+        <button class="btn-icon" id="btn-race-modal" style="color:#55d777; border-color:#2f9e57;">🧬 <span id="hdr-race-name">평원</span></button>
+        <button class="btn-icon" id="btn-class-modal" style="color:var(--gold); border-color:var(--gold);">👤 <span id="hdr-class-name">모험가</span></button>
+      </div>
+    </div>
+
+    <!-- 턴/처치/점수 HUD -->
+    <div class="turn-hud">
+      <span>턴 <b id="val-turn">1</b> · Lv.<b id="val-level">1</b></span>
+      <span>처치 <b id="val-kills">0</b> · 점수 <b id="val-score">0</b></span>
+    </div>
+
+    <!-- 큰 HUD 바 (체력, 방패) -->
+    <div class="hud-bars">
+      <div class="bar hp" id="bar-hp-wrap">
+        <i id="bar-hp-fill" style="width:100%"></i>
+        <span><em>체력</em><em id="txt-hp">20 / 20</em></span>
+      </div>
+      <div class="bar ar" id="bar-ar-wrap">
+        <i id="bar-ar-fill" style="width:0%"></i>
+        <span><em>방패</em><em id="txt-ar">0 / 10</em></span>
+      </div>
+      <!-- 작은 바 3개 (경험치, 골드, 강화) -->
+      <div class="small-bars">
+        <div class="bar xp">
+          <i id="bar-xp-fill" style="width:0%"></i>
+          <span><em>XP</em><em id="txt-xp">0%</em></span>
+        </div>
+        <div class="bar gd">
+          <i id="bar-gd-fill" style="width:0%"></i>
+          <span><em>골드</em><em id="txt-gd">0%</em></span>
+        </div>
+        <div class="bar up">
+          <i id="bar-up-fill" style="width:0%"></i>
+          <span><em>강화</em><em id="txt-up">0%</em></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 부가 스탯 및 상태 -->
+    <div class="stat-sub-row">
+      <span>⚔️ 완력 <b id="val-base-atk">1</b> · 무기 +<b id="val-weapon-atk">1</b></span>
+      <span>🛡️ 최대방패 <b id="val-max-armor">10</b></span>
+      <span class="poison-alert" id="alert-poison">☣️ 독 감염!</span>
+    </div>
+
+    <!-- 액티브 스킬 슬롯 4칸 -->
+    <div class="skills-slot-row" id="skills-slots"></div>
+
+    <!-- 체인 상태 정보 바 -->
+    <div class="chain-info-bar">
+      <div class="chain-info-text" id="chain-info-text">
+        <span>같은 칸을 3개 이상 이어보세요!</span>
+      </div>
+      <div id="chain-badge-wrap"></div>
+    </div>
+
+    <!-- 6x6 보드 래퍼 -->
+    <div class="board-wrap" id="board-wrap">
+      <div class="board-grid" id="board-grid"></div>
+      <svg class="svg-overlay" id="svg-overlay">
+        <defs>
+          <filter id="glow-filter" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#ffd166" flood-opacity="0.9"/>
+          </filter>
+        </defs>
+        <polyline id="chain-polyline" class="chain-polyline" points="" filter="url(#glow-filter)" />
+      </svg>
+    </div>
+
+    <!-- 로그 박스 -->
+    <div class="log-box" id="log-box">
+      🛡️ 방패 초과분은 강화 게이지로 누적됩니다.<br>
+      ⚔️ 칼 줄에 적을 붙여 100% 피해를 입히세요!
+    </div>
+
+    <!-- 하단 액션 버튼 -->
+    <div class="bottom-actions">
+      <button class="btn-action" id="btn-continue-game" style="display:none; background:#1b3b22; color:#55d777; border-color:#2f9e57;">▶ 이어하기</button>
+      <button class="btn-action" id="btn-open-classes">직업 변경 (10종)</button>
+      <button class="btn-action" id="btn-open-races">종족 변경 (10종)</button>
+      <button class="btn-action" id="btn-restart-game">새 게임 시작</button>
+    </div>
+
+    <!-- ── 모달들 ── -->
+    <!-- 레벨업 모달 -->
+    <div class="modal-overlay" id="modal-levelup">
+      <div class="modal-title" style="color:#ffe27a;">🎉 레벨업 달성!</div>
+      <div class="modal-desc">원하는 특성이나 스킬을 1개 선택하세요.</div>
+      <div class="choice-list" id="levelup-choices"></div>
+    </div>
+
+    <!-- 방패 영구 강화 모달 -->
+    <div class="modal-overlay" id="modal-upgrade">
+      <div class="modal-title" style="color:#9ce6ff;">🛡️ 방패 영구 강화!</div>
+      <div class="modal-desc">강화 게이지가 가득 찼습니다. 강화 효과를 선택하세요.</div>
+      <div class="choice-list" id="upgrade-choices"></div>
+    </div>
+
+    <!-- 떠돌이 상점 모달 -->
+    <div class="modal-overlay" id="modal-shop">
+      <div class="modal-title" style="color:#ffe27a;">🪙 떠돌이 상점</div>
+      <div class="modal-desc">골드가 모였습니다. 장비를 1개 선택하세요.</div>
+      <div class="choice-list" id="shop-choices"></div>
+    </div>
+
+    <!-- 직업 선택 모달 (10종) -->
+    <div class="modal-overlay" id="modal-class">
+      <div class="modal-title" style="color:#ffe27a;">🛡️ 직업 선택 (10종)</div>
+      <div class="modal-desc">특수 적을 처치하면 새로운 직업이 해제됩니다.</div>
+      <div class="cls-grid" id="class-grid-list"></div>
+      <button class="btn-action" id="btn-close-class-modal" style="margin-top:6px; width:100%;">닫기</button>
+    </div>
+
+    <!-- 게임 오버 모달 -->
+    <div class="modal-overlay" id="modal-gameover">
+      <div class="modal-title" style="color:#d7263d;">💀 게임 오버 💀</div>
+      <div class="go-box">
+        <div class="go-row"><span>직업</span><b id="go-class-name">모험가</b></div>
+        <div class="go-row"><span>생존 턴 수</span><b id="go-val-turn">0턴</b></div>
+        <div class="go-row"><span>처치한 적</span><b id="go-val-kills">0마리</b></div>
+        <div class="go-row"><span>최종 점수</span><b id="go-val-score" style="color:var(--gold);">0점</b></div>
+      </div>
+      <div style="width:100%; text-align:left; background:#120e18; border:1px solid #3a3042; border-radius:8px; padding:6px 10px;">
+        <div style="font-size:11px; font-weight:800; color:var(--gold); margin-bottom:2px;">🏆 역대 최고 기록 (TOP 5)</div>
+        <table class="scores-table">
+          <thead>
+            <tr><th>순위</th><th>직업</th><th>턴</th><th>처치</th><th>점수</th></tr>
+          </thead>
+          <tbody id="scores-tbody"></tbody>
+        </table>
+      </div>
+      <button class="btn-action" id="btn-go-restart" style="background:#d7263d; color:#fff; border-color:#ff6b7e; width:100%; padding:10px; font-size:14px;">다시 도전하기</button>
+    </div>
+
+    <!-- 도움말 모달 -->
+    <div class="modal-overlay" id="modal-guide">
+      <div class="modal-title" style="color:#ffe27a;">📖 한 판 가이드</div>
+      <div class="guide-box">
+        <p>1. <b>선 잇기</b>: 8방향(상하좌우·대각선)으로 같은 칸을 3개 이상 잇습니다. 직전 칸으로 되돌리면 취소됩니다.</p>
+        <p>2. <b>칼과 적</b>: 칼 줄에는 적을 함께 이어 공격합니다. 각 적에게 100%씩 피해가 들어가며, 체력이 0이 되면 처치됩니다.</p>
+        <p>3. <b>턴 종료와 반격</b>: 손을 뗄 때마다 한 턴이 끝납니다. 살아남은 모든 적이 플레이어를 공격하며, 방패가 먼저 흡수한 뒤 체력이 깎입니다.</p>
+        <p>4. <b>자원 활용</b>: 방패 초과분은 강화 게이지로 누적되며, 골드가 차면 상점이 열리고, 경험치가 차면 레벨업 특성을 선택합니다.</p>
+      </div>
+      <button class="btn-action" id="btn-close-guide" style="width:100%;">확인했습니다</button>
+    </div>
+
+    <!-- 저장 코드 관리 모달 (조각 10) -->
+    <div class="modal-overlay" id="modal-save-code">
+      <div class="modal-title" style="color:#ffe27a;">💾 기록 저장 코드</div>
+      <div class="modal-desc">영구 기록을 코드로 내보내거나 다른 기기에서 불러옵니다.</div>
+      <div style="width:100%; display:flex; flex-direction:column; gap:8px; text-align:left;">
+        <div>
+          <label style="font-size:11px; color:var(--sub); display:block; margin-bottom:2px;">내 기록 코드 (복사하여 보관)</label>
+          <div style="display:flex; gap:4px;">
+            <input type="text" id="export-code-input" readonly style="flex:1; background:#14101b; border:1px solid #3a3042; border-radius:6px; color:#fff; padding:6px; font-size:11px; font-family:monospace;" />
+            <button class="btn-action" id="btn-copy-code" style="padding:6px 10px; font-size:11px;">복사</button>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:11px; color:var(--sub); display:block; margin-bottom:2px;">코드 붙여넣어 불러오기</label>
+          <div style="display:flex; gap:4px;">
+            <input type="text" id="import-code-input" placeholder="GR1-xxxx-xxxx..." style="flex:1; background:#14101b; border:1px solid #3a3042; border-radius:6px; color:#fff; padding:6px; font-size:11px; font-family:monospace;" />
+            <button class="btn-action" id="btn-import-code" style="padding:6px 10px; font-size:11px; background:#2f9e57; color:#fff; border-color:#55d777;">불러오기</button>
+          </div>
+        </div>
+        <div id="save-code-msg" style="font-size:11px; min-height:16px; color:var(--gold); text-align:center;"></div>
+      </div>
+      <button class="btn-action" id="btn-close-save-code" style="width:100%; margin-top:4px;">닫기</button>
+    </div>
+
+    <!-- 퍽과 결함 직업 설정 모달 (조각 11) -->
+    <div class="modal-overlay" id="modal-perk-flaw">
+      <div class="modal-title" style="color:#3b7de0;" id="pf-modal-title">⚙️ 직업 설정: 전사</div>
+      <div class="modal-desc" id="pf-modal-desc">파랑 퍽과 빨강 결함을 각 슬롯에 짝으로 맞춰 장착하세요.</div>
+      <div class="perk-flaw-slots" id="perk-flaw-slots-container"></div>
+      <div class="slot-pair-alert" id="pf-status-msg"></div>
+      <div style="display:flex; gap:6px; width:100%;">
+        <button class="btn-action" id="btn-cancel-perk-flaw" style="flex:1;">취소</button>
+        <button class="btn-action" id="btn-confirm-perk-flaw" style="flex:1; background:#3b7de0; color:#fff; border-color:#7db2ff;">확정 및 시작</button>
+      </div>
+    </div>
+
+    <!-- 종족 선택 모달 (10종) (조각 12) -->
+    <div class="modal-overlay" id="modal-race">
+      <div class="modal-title" style="color:#55d777;">🧬 종족 선택 (10종)</div>
+      <div class="modal-desc">직업 레벨 5 달성 시 종족 변경이 가능합니다. (고유 보너스 & 숙적)</div>
+      <div class="cls-grid" id="race-grid-list"></div>
+      <button class="btn-action" id="btn-close-race-modal" style="margin-top:6px; width:100%;">닫기</button>
+    </div>
+
+    <!-- 업적 모달 (조각 13) -->
+    <div class="modal-overlay" id="modal-achievements">
+      <div class="modal-title" style="color:#ffd54a;">🏆 도전 과제와 업적</div>
+      <div class="modal-desc" id="ach-summary-text">달성한 업적: 0 / 10</div>
+      <div class="ach-list-container" id="achievements-list" style="width:100%; max-height:360px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:4px 2px;"></div>
+      <button class="btn-action" id="btn-close-achievements" style="width:100%; margin-top:4px;">닫기</button>
+    </div>
+
+  </div>
+</main>
+
+<script src="game.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  const GR = window.GoblinRaid;
+  if (!GR) {
+    console.error('GoblinRaid 모듈을 로드하지 못했습니다.');
+    return;
+  }
+
+  // DOM 캐싱
+  const phoneContainer = document.getElementById('phone-container');
+  const boardWrap = document.getElementById('board-wrap');
+  const boardGrid = document.getElementById('board-grid');
+  const chainPolyline = document.getElementById('chain-polyline');
+  const chainInfoText = document.getElementById('chain-info-text');
+  const chainBadgeWrap = document.getElementById('chain-badge-wrap');
+  const logBox = document.getElementById('log-box');
+  const vignette = document.getElementById('vignette');
+
+  const hdrClassName = document.getElementById('hdr-class-name');
+  const valTurn = document.getElementById('val-turn');
+  const valLevel = document.getElementById('val-level');
+  const valKills = document.getElementById('val-kills');
+  const valScore = document.getElementById('val-score');
+  const valBaseAtk = document.getElementById('val-base-atk');
+  const valWeaponAtk = document.getElementById('val-weapon-atk');
+  const valMaxArmor = document.getElementById('val-max-armor');
+  const alertPoison = document.getElementById('alert-poison');
+
+  const barHpFill = document.getElementById('bar-hp-fill');
+  const txtHp = document.getElementById('txt-hp');
+  const barArFill = document.getElementById('bar-ar-fill');
+  const txtAr = document.getElementById('txt-ar');
+  const barXpFill = document.getElementById('bar-xp-fill');
+  const txtXp = document.getElementById('txt-xp');
+  const barGdFill = document.getElementById('bar-gd-fill');
+  const txtGd = document.getElementById('txt-gd');
+  const barUpFill = document.getElementById('bar-up-fill');
+  const txtUp = document.getElementById('txt-up');
+
+  const skillsSlots = document.getElementById('skills-slots');
+
+  // 모달들
+  const modalLevelup = document.getElementById('modal-levelup');
+  const levelupChoices = document.getElementById('levelup-choices');
+  const modalUpgrade = document.getElementById('modal-upgrade');
+  const upgradeChoices = document.getElementById('upgrade-choices');
+  const modalShop = document.getElementById('modal-shop');
+  const shopChoices = document.getElementById('shop-choices');
+  const modalClass = document.getElementById('modal-class');
+  const classGridList = document.getElementById('class-grid-list');
+  const modalGameover = document.getElementById('modal-gameover');
+  const goClassName = document.getElementById('go-class-name');
+  const goValTurn = document.getElementById('go-val-turn');
+  const goValKills = document.getElementById('go-val-kills');
+  const goValScore = document.getElementById('go-val-score');
+  const scoresTbody = document.getElementById('scores-tbody');
+  const modalGuide = document.getElementById('modal-guide');
+
+  // 버튼들
+  const btnGuide = document.getElementById('btn-guide');
+  const btnCloseGuide = document.getElementById('btn-close-guide');
+  const btnClassModal = document.getElementById('btn-class-modal');
+  const btnOpenClasses = document.getElementById('btn-open-classes');
+  const btnCloseClassModal = document.getElementById('btn-close-class-modal');
+  const btnRestartGame = document.getElementById('btn-restart-game');
+  const btnGoRestart = document.getElementById('btn-go-restart');
+  const btnContinueGame = document.getElementById('btn-continue-game');
+  const btnSaveCodeModal = document.getElementById('btn-save-code-modal');
+  const modalSaveCode = document.getElementById('modal-save-code');
+  const btnCloseSaveCode = document.getElementById('btn-close-save-code');
+  const exportCodeInput = document.getElementById('export-code-input');
+  const btnCopyCode = document.getElementById('btn-copy-code');
+  const importCodeInput = document.getElementById('import-code-input');
+  const btnImportCode = document.getElementById('btn-import-code');
+  const saveCodeMsg = document.getElementById('save-code-msg');
+
+  // 조각 11: 퍽과 결함 모달 DOM
+  const modalPerkFlaw = document.getElementById('modal-perk-flaw');
+  const pfModalTitle = document.getElementById('pf-modal-title');
+  const pfModalDesc = document.getElementById('pf-modal-desc');
+  const perkFlawSlotsContainer = document.getElementById('perk-flaw-slots-container');
+  const pfStatusMsg = document.getElementById('pf-status-msg');
+  const btnCancelPerkFlaw = document.getElementById('btn-cancel-perk-flaw');
+  const btnConfirmPerkFlaw = document.getElementById('btn-confirm-perk-flaw');
+  let settingClassId = 'adventurer';
+
+  // 조각 12: 종족 모달 DOM
+  const btnRaceModal = document.getElementById('btn-race-modal');
+  const hdrRaceName = document.getElementById('hdr-race-name');
+  const btnOpenRaces = document.getElementById('btn-open-races');
+  const modalRace = document.getElementById('modal-race');
+  const raceGridList = document.getElementById('race-grid-list');
+  const btnCloseRaceModal = document.getElementById('btn-close-race-modal');
+
+  // 조각 13: 업적 모달 DOM
+  const btnAchievementsModal = document.getElementById('btn-achievements-modal');
+  const hdrAchCount = document.getElementById('hdr-ach-count');
+  const modalAchievements = document.getElementById('modal-achievements');
+  const achievementsList = document.getElementById('achievements-list');
+  const achSummaryText = document.getElementById('ach-summary-text');
+  const btnCloseAchievements = document.getElementById('btn-close-achievements');
+
+  // 상태 변수
+  let currentSeed = Date.now();
+  let rng = GR.createRNG(currentSeed);
+  let currentClassId = 'adventurer';
+  let unlockData = GR.loadUnlockData();
+  let gameState = GR.createGameState({ seed: currentSeed, classId: currentClassId, unlockData });
+  let currentPath = [];
+  let isDragging = false;
+  let isAnimating = false;
+  let scoreSavedThisRun = false;
+
+  const TILE_CHAIN_COLORS = {
+    sword: '#ff4757',
+    shield: '#4da3ff',
+    potion: '#48d689',
+    coin: '#ffd166',
+    enemy: '#ff4757',
+    attack: '#ff4757'
+  };
+
+  /**
+   * HUD 상태 업데이트
+   */
+  function updateHUD() {
+    const p = gameState.player;
+    const cDef = GR.CLASSES[p.classId] || GR.CLASSES.adventurer;
+    hdrClassName.textContent = cDef.name;
+    const currentRaceId = (p && p.raceId != null) ? p.raceId : 0;
+    const rDef = (GR.RACES_DATA && GR.RACES_DATA.find(r => r.id === currentRaceId)) || (GR.RACES_DATA && GR.RACES_DATA[0]);
+    if (hdrRaceName && rDef) {
+      hdrRaceName.textContent = rDef.name.replace(' 고블린', '');
+    }
+    valTurn.textContent = gameState.turn;
+    valLevel.textContent = p.level || 1;
+    valKills.textContent = gameState.kills;
+    valScore.textContent = (gameState.score || 0).toLocaleString();
+    valBaseAtk.textContent = p.baseAtk;
+    valWeaponAtk.textContent = p.weaponAtk;
+    valMaxArmor.textContent = p.maxArmor;
+
+    alertPoison.style.display = p.isPoisoned ? 'inline' : 'none';
+
+    // 체력
+    const hpPct = Math.max(0, Math.min(100, (p.hp / p.maxHp) * 100));
+    barHpFill.style.width = hpPct + '%';
+    txtHp.textContent = `${p.hp} / ${p.maxHp}`;
+
+    // 방어
+    const arPct = Math.max(0, Math.min(100, (p.armor / p.maxArmor) * 100));
+    barArFill.style.width = arPct + '%';
+    txtAr.textContent = `${p.armor} / ${p.maxArmor}`;
+
+    // 경험치 (조각 8: 100 단위 게이지)
+    const maxExp = p.maxExp || 100;
+    const xpPct = Math.max(0, Math.min(100, ((p.exp || 0) / maxExp) * 100));
+    barXpFill.style.width = xpPct + '%';
+    txtXp.textContent = `${p.exp || 0}%`;
+
+    // 골드 (조각 8: 100 단위 게이지)
+    const maxGold = p.maxGold || 100;
+    const gdPct = Math.max(0, Math.min(100, ((p.gold || 0) / maxGold) * 100));
+    barGdFill.style.width = gdPct + '%';
+    txtGd.textContent = `${p.gold || 0}%`;
+
+    // 강화 (조각 8: 100 단위 게이지)
+    const maxUp = p.maxShieldGauge || 100;
+    const upPct = Math.max(0, Math.min(100, ((p.shieldGauge || 0) / maxUp) * 100));
+    barUpFill.style.width = upPct + '%';
+    txtUp.textContent = `${p.shieldGauge || 0}%`;
+
+    renderSkillsUI();
+    checkModals();
+    updateContinueButton();
+
+    // 조각 13: 헤더 업적 달성 수치 갱신
+    const currentProf = GR.loadProfile();
+    const curAchCount = (currentProf && Array.isArray(currentProf.achievements)) ? currentProf.achievements.length : 0;
+    if (hdrAchCount) {
+      hdrAchCount.textContent = `${curAchCount}/${GR.ACHIEVEMENTS_DATA ? GR.ACHIEVEMENTS_DATA.length : 10}`;
+    }
+
+    if (gameState.isGameOver) {
+      showGameOverModal();
+    }
+  }
+
+  /**
+   * 조각 10: 이어하기 버튼 상태 갱신
+   */
+  function updateContinueButton() {
+    if (!btnContinueGame) return;
+    if (GR.hasSavedRun() && !gameState.isGameOver) {
+      const saved = GR.loadRunState();
+      if (saved) {
+        btnContinueGame.style.display = 'block';
+        btnContinueGame.textContent = `▶ 이어하기 (${saved.turn}턴)`;
+        return;
+      }
+    }
+    btnContinueGame.style.display = 'none';
+  }
+
+  /**
+   * 액티브 스킬 UI
+   */
+  function renderSkillsUI() {
+    skillsSlots.innerHTML = '';
+    const skills = gameState.player.skills || [];
+
+    for (let i = 0; i < 4; i++) {
+      const slot = document.createElement('div');
+      const sk = skills[i];
+
+      if (!sk) {
+        slot.className = 'skill-cell empty';
+        slot.innerHTML = '<span class="skill-cell-icon">➕</span><span class="skill-cell-name">빈 슬롯</span>';
+      } else {
+        const isReady = (sk.currentCooldown || 0) <= 0;
+        slot.className = `skill-cell ${isReady ? 'ready' : 'cooldown'}`;
+        slot.innerHTML = `
+          <span class="skill-cell-icon">${sk.icon || '⚔️'}</span>
+          <span class="skill-cell-name">${sk.name}</span>
+          ${!isReady ? `<span class="skill-cell-badge">${sk.currentCooldown}</span>` : ''}
+        `;
+        if (isReady && !gameState.isGameOver && !gameState.pendingChoice && !isAnimating) {
+          slot.title = `${sk.desc} (클릭하여 사용)`;
+          slot.addEventListener('click', () => {
+            const res = GR.useSkill(gameState, i, {}, rng);
+            if (res.applied) {
+              gameState = res.gameState;
+              let logText = `✨ <strong>[${sk.name}]</strong> 발동!`;
+              if (res.fireBreathTarget) {
+                logText += ` 🔥 화염 숨결! 적에게 불이 붙었습니다.`;
+              }
+              logBox.innerHTML = logText;
+              triggerLevelupEffect();
+              renderBoard();
+            }
+          });
+        }
+      }
+      skillsSlots.appendChild(slot);
+    }
+  }
+
+  /**
+   * 6x6 보드 렌더링
+   */
+  function renderBoard() {
+    boardGrid.innerHTML = '';
+    const board = gameState.board;
+
+    for (let y = 0; y < GR.BOARD_HEIGHT; y++) {
+      for (let x = 0; x < GR.BOARD_WIDTH; x++) {
+        const tile = board[y][x];
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.dataset.x = x;
+        cell.dataset.y = y;
+
+        if (tile.isFrozen) cell.classList.add('frozen');
+        if (tile.isBurning) cell.classList.add('burning');
+        if (tile.isAcid) cell.classList.add('acid');
+        if (tile.isPoisoned) cell.classList.add('poisoned');
+
+        // 타일 SVG (시안 D & 조각 9 원작 특수 적 아이콘)
+        let svgPath = '';
+        let fallbackEmoji = '❓';
+
+        if (tile.type === 'enemy') {
+          if (tile.specialId != null) {
+            svgPath = GR.getSpecialEnemySvg(tile.specialId);
+            fallbackEmoji = tile.specialType ? (GR.SPECIAL_ENEMY_ICONS[tile.specialType] || '👑') : '👑';
+            if (!tile.specialType) {
+              cell.classList.add('boss-glow');
+            }
+          } else {
+            svgPath = tile.specialType
+              ? (GR.SPECIAL_ENEMY_SVGS[tile.specialType] || 'assets/icons/tile-enemy.svg')
+              : 'assets/icons/tile-enemy.svg';
+            fallbackEmoji = tile.specialType
+              ? (GR.SPECIAL_ENEMY_ICONS[tile.specialType] || '💀')
+              : '💀';
+          }
+        } else {
+          svgPath = GR.TILE_SVGS[tile.type] || `assets/icons/tile-${tile.type}.svg`;
+          fallbackEmoji = GR.TILE_ICONS[tile.type] || '❓';
+        }
+
+        const img = document.createElement('img');
+        img.src = svgPath;
+        img.alt = tile.type;
+        img.onerror = () => {
+          img.style.display = 'none';
+          cell.textContent = fallbackEmoji;
+        };
+        cell.appendChild(img);
+
+        // 적 스탯 표시 (시안 D 배치: atk=빨강 좌하단, hp=초록 우하단, arm=파랑 좌상단, cd=금색 좌상단)
+        if (tile.type === 'enemy') {
+          const atkSpan = document.createElement('span');
+          atkSpan.className = 'st atk';
+          let displayAtk = tile.atk;
+          if (tile.isPoisoned && displayAtk > 1) {
+            displayAtk = Math.floor(displayAtk / 2);
+          }
+          atkSpan.textContent = displayAtk;
+          cell.appendChild(atkSpan);
+
+          const hpSpan = document.createElement('span');
+          hpSpan.className = 'st hp';
+          hpSpan.textContent = tile.hp;
+          cell.appendChild(hpSpan);
+
+          if (tile.countdown != null) {
+            const cdSpan = document.createElement('span');
+            cdSpan.className = 'st cd';
+            cdSpan.textContent = tile.countdown;
+            cell.appendChild(cdSpan);
+          } else if (tile.armor > 0) {
+            const armSpan = document.createElement('span');
+            armSpan.className = 'st arm';
+            armSpan.textContent = tile.armor;
+            cell.appendChild(armSpan);
+          }
+        }
+
+        boardGrid.appendChild(cell);
+      }
+    }
+
+    updateHUD();
+    updateSelectionUI();
+  }
+
+  /**
+   * 선 잇기 선택 시각 피드백
+   */
+  function updateSelectionUI() {
+    const cells = boardGrid.querySelectorAll('.cell');
+    cells.forEach(c => {
+      c.className = 'cell';
+    });
+
+    if (currentPath.length === 0) {
+      chainPolyline.setAttribute('points', '');
+      chainInfoText.innerHTML = '<span>같은 칸을 3개 이상 이어보세요!</span>';
+      chainBadgeWrap.innerHTML = '';
+      return;
+    }
+
+    const firstPos = currentPath[0];
+    const firstTile = gameState.board[firstPos.y][firstPos.x];
+    const isAttack = GR.isAttackType(firstTile.type);
+    const chainColor = isAttack ? TILE_CHAIN_COLORS.attack : (TILE_CHAIN_COLORS[firstTile.type] || '#ffd166');
+    chainPolyline.setAttribute('stroke', chainColor);
+
+    const pathSet = new Set(currentPath.map(p => `${p.x},${p.y}`));
+    cells.forEach(cell => {
+      const key = `${cell.dataset.x},${cell.dataset.y}`;
+      if (pathSet.has(key)) {
+        cell.classList.add('selected', isAttack ? 'selected-attack' : `selected-${firstTile.type}`);
+      }
+    });
+
+    const wrapRect = boardWrap.getBoundingClientRect();
+    const points = currentPath.map(pos => {
+      const cell = boardGrid.querySelector(`[data-x="${pos.x}"][data-y="${pos.y}"]`);
+      if (!cell) return '0,0';
+      const r = cell.getBoundingClientRect();
+      const cx = (r.left + r.width / 2) - wrapRect.left;
+      const cy = (r.top + r.height / 2) - wrapRect.top;
+      return `${cx},${cy}`;
+    }).join(' ');
+
+    chainPolyline.setAttribute('points', points);
+
+    const len = currentPath.length;
+    if (isAttack) {
+      const atkInfo = GR.calculateAttack(gameState.board, currentPath, gameState.player);
+      chainInfoText.innerHTML = `<span>⚔️ 총공격: <strong>${atkInfo.totalAttack}</strong> (칼 ${atkInfo.swordCount} · 적 ${atkInfo.enemyCount})</span>`;
+    } else {
+      const resCalc = GR.calculateResourceGain(firstTile.type, len);
+      let label = '';
+      if (firstTile.type === 'shield') label = `방패 +${resCalc.gain}`;
+      else if (firstTile.type === 'potion') label = `체력 +${resCalc.gain + (gameState.player.potionBonus || 0)}`;
+      else if (firstTile.type === 'coin') label = `골드 +${resCalc.gain + (gameState.player.coinBonus || 0)}`;
+
+      chainInfoText.innerHTML = `<span>${GR.TILE_ICONS[firstTile.type]} <strong>${label}</strong> (${len}칸${resCalc.multiplier > 1 ? ` ×${resCalc.multiplier}` : ''})</span>`;
+    }
+
+    if (len >= 3) {
+      chainBadgeWrap.innerHTML = '<span class="chain-badge badge-valid">확정 가능!</span>';
+    } else {
+      chainBadgeWrap.innerHTML = `<span class="chain-badge badge-invalid">${3 - len}칸 더 필요</span>`;
+    }
+  }
+
+  /**
+   * 4가지 연출 애니메이션 실행기
+   */
+  // 1) 타격 및 처치 연출
+  function triggerHitEffect(killedPositions = [], damagedPositions = [], totalAtk = 0) {
+    damagedPositions.forEach(pos => {
+      const cell = boardGrid.querySelector(`[data-x="${pos.x}"][data-y="${pos.y}"]`);
+      if (!cell) return;
+      cell.classList.add('anim-hit');
+
+      // 피해 숫자 팝업
+      const num = document.createElement('div');
+      num.className = 'float-num';
+      num.textContent = `-${pos.damage || totalAtk}`;
+      num.style.left = '50%';
+      num.style.top = '10%';
+      cell.appendChild(num);
+    });
+
+    killedPositions.forEach(pos => {
+      const cell = boardGrid.querySelector(`[data-x="${pos.x}"][data-y="${pos.y}"]`);
+      if (!cell) return;
+      cell.classList.add('anim-die');
+
+      // 스파크 파편 5개
+      const sparkDirs = [
+        { dx: '-30px', dy: '-30px' },
+        { dx: '30px', dy: '-30px' },
+        { dx: '-30px', dy: '30px' },
+        { dx: '30px', dy: '30px' },
+        { dx: '0', dy: '-40px' }
+      ];
+      sparkDirs.forEach(dir => {
+        const sp = document.createElement('div');
+        sp.className = 'spark';
+        sp.style.setProperty('--dx', dir.dx);
+        sp.style.setProperty('--dy', dir.dy);
+        sp.style.left = '50%';
+        sp.style.top = '50%';
+        cell.appendChild(sp);
+      });
+    });
+  }
+
+  // 2) 적 반격 연출 (달려듦, 화면 흔들림, 비네트 플래시, 체력 감소)
+  function triggerCounterattackEffect(totalDmg = 0) {
+    if (totalDmg <= 0) return;
+
+    phoneContainer.classList.remove('anim-shake');
+    void phoneContainer.offsetWidth;
+    phoneContainer.classList.add('anim-shake');
+
+    vignette.style.display = 'block';
+    vignette.classList.remove('vignette-flash');
+    void vignette.offsetWidth;
+    vignette.classList.add('vignette-flash');
+    setTimeout(() => { vignette.style.display = 'none'; }, 550);
+
+    // 체력바 쪽에 반격 대미지 팝업
+    const num = document.createElement('div');
+    num.className = 'float-num dmg-player';
+    num.textContent = `-${totalDmg}`;
+    num.style.left = '50%';
+    num.style.top = '120px';
+    phoneContainer.appendChild(num);
+    setTimeout(() => { num.remove(); }, 800);
+  }
+
+  // 3) 레벨업 연출 (금빛 링 파동, 레벨업 문구)
+  function triggerLevelupEffect() {
+    const ring = document.createElement('div');
+    ring.className = 'levelup-ring';
+    phoneContainer.appendChild(ring);
+
+    const banner = document.createElement('div');
+    banner.className = 'levelup-banner';
+    banner.textContent = 'LEVEL UP!';
+    phoneContainer.appendChild(banner);
+
+    setTimeout(() => {
+      ring.remove();
+      banner.remove();
+    }, 900);
+  }
+
+  /**
+   * 터치 / 마우스 좌표 변환
+   */
+  function getTilePosFromEvent(e) {
+    const clientX = e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : null);
+    const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : null);
+    if (clientX == null || clientY == null) return null;
+
+    const el = document.elementFromPoint(clientX, clientY);
+    if (!el) return null;
+    const cell = el.closest('.cell');
+    if (!cell) return null;
+
+    const x = parseInt(cell.dataset.x, 10);
+    const y = parseInt(cell.dataset.y, 10);
+    if (Number.isNaN(x) || Number.isNaN(y)) return null;
+    return { x, y };
+  }
+
+  function handleStart(e) {
+    if (gameState.isGameOver || gameState.pendingChoice || isAnimating) return;
+    const pos = getTilePosFromEvent(e);
+    if (!pos) return;
+
+    isDragging = true;
+    currentPath = [pos];
+    updateSelectionUI();
+    if (e.cancelable) e.preventDefault();
+  }
+
+  function handleMove(e) {
+    if (!isDragging || gameState.isGameOver || gameState.pendingChoice || isAnimating) return;
+    const pos = getTilePosFromEvent(e);
+    if (!pos) return;
+
+    const nextPath = GR.stepChain(gameState.board, currentPath, pos);
+    if (nextPath !== currentPath) {
+      currentPath = nextPath;
+      updateSelectionUI();
+    }
+    if (e.cancelable) e.preventDefault();
+  }
+
+  function handleEnd(e) {
+    if (!isDragging || gameState.isGameOver || gameState.pendingChoice || isAnimating) return;
+    isDragging = false;
+
+    if (GR.isValidChain(gameState.board, currentPath)) {
+      isAnimating = true;
+      const turnRes = GR.resolveTurn(gameState, currentPath, rng);
+
+      if (turnRes.resolved) {
+        gameState = turnRes.gameState;
+
+        // 특수 적 처치 시 영구 언락 데이터 저장
+        if (turnRes.expResult && turnRes.expResult.killedSpecialCount > 0) {
+          unlockData.specialKills = (unlockData.specialKills || 0) + turnRes.expResult.killedSpecialCount;
+          GR.saveUnlockData(unlockData);
+        }
+
+        // 조각 10: 판 진행 자동 저장 또는 게임 오버 시 삭제
+        if (!gameState.isGameOver) {
+          GR.saveRunState(gameState, null, currentSeed);
+        } else {
+          GR.clearRunState();
+        }
+        updateContinueButton();
+
+        // 연출 효과 트리거
+        if (turnRes.attackResult && turnRes.enemyAttackSummary) {
+          const killed = turnRes.enemyAttackSummary.killedPositions || [];
+          const damaged = turnRes.enemyAttackSummary.results || [];
+          triggerHitEffect(killed, damaged, turnRes.attackResult.totalAttack);
+        }
+
+        if (turnRes.counterResult && turnRes.counterResult.totalDamage > 0) {
+          setTimeout(() => {
+            triggerCounterattackEffect(turnRes.counterResult.totalDamage);
+          }, 300);
+        }
+
+        if (turnRes.expResult && turnRes.expResult.didLevelUp) {
+          setTimeout(() => {
+            triggerLevelupEffect();
+          }, 400);
+        }
+
+        // 로그 메시지 구성
+        let msg = '';
+        if (turnRes.attackResult) {
+          msg += `⚔️ 총공격 ${turnRes.attackResult.totalAttack}! (처치 ${turnRes.enemyAttackSummary.killedCount}마리) `;
+          if (turnRes.expResult.gainedExp > 0) msg += `+${turnRes.expResult.gainedExp} EXP `;
+        } else if (turnRes.resourceResult) {
+          const rr = turnRes.resourceResult;
+          if (rr.type === 'shield') msg += `🛡️ 방패 +${rr.addedArmor}${rr.overflow > 0 ? ` (강화+${rr.overflow})` : ''}! `;
+          else if (rr.type === 'potion') msg += `🧪 체력 +${rr.healed} 회복! `;
+          else if (rr.type === 'coin') msg += `🪙 골드 +${rr.gain} 획득! `;
+        }
+
+        if (turnRes.counterResult) {
+          const tot = turnRes.counterResult.totalDamage;
+          if (tot > 0) {
+            msg += `💀 적 반격: ${tot} (방패 -${turnRes.counterResult.armorDamage}, 체력 -${turnRes.counterResult.hpDamage})`;
+          }
+        }
+
+        // 조각 13: 체인 길이 및 턴 결과 기반 업적 검사
+        const profForAch = GR.loadProfile();
+        const achRes = GR.checkAchievements(gameState, profForAch, {
+          autoGrant: true,
+          chainLength: currentPath.length,
+          turn: gameState.turn,
+          score: gameState.score,
+          specialKills: profForAch.specialKills
+        });
+        if (achRes.newlyUnlocked && achRes.newlyUnlocked.length > 0) {
+          const achNames = achRes.newlyUnlocked.map(a => `[${a.name}]`).join(', ');
+          msg += ` · 🏆 <strong>업적 달성!</strong> ${achNames}`;
+          triggerLevelupEffect();
+        }
+
+        if (gameState.isGameOver) {
+          msg = '💀 체력이 0이 되어 쓰러졌습니다... 게임 오버!';
+        }
+        logBox.innerHTML = msg;
+
+        // 연출 종료 후 보드 갱신 (약 450ms)
+        setTimeout(() => {
+          isAnimating = false;
+          currentPath = [];
+          renderBoard();
+        }, 450);
+      } else {
+        isAnimating = false;
+        currentPath = [];
+        renderBoard();
+      }
+    } else {
+      if (currentPath.length > 0) {
+        logBox.innerHTML = '3칸 이상 연결해야 확정됩니다.';
+      }
+      currentPath = [];
+      renderBoard();
+    }
+
+    if (e && e.cancelable) e.preventDefault();
+  }
+
+  // 포인터 및 터치 이벤트 바인딩
+  boardWrap.addEventListener('pointerdown', (e) => {
+    boardWrap.setPointerCapture?.(e.pointerId);
+    handleStart(e);
+  });
+  boardWrap.addEventListener('pointermove', handleMove);
+  boardWrap.addEventListener('pointerup', (e) => {
+    boardWrap.releasePointerCapture?.(e.pointerId);
+    handleEnd(e);
+  });
+  boardWrap.addEventListener('pointercancel', (e) => {
+    boardWrap.releasePointerCapture?.(e.pointerId);
+    handleEnd(e);
+  });
+
+  // 터치 스크롤 방지
+  boardWrap.addEventListener('touchstart', (e) => { if (e.cancelable) e.preventDefault(); }, { passive: false });
+  boardWrap.addEventListener('touchmove', (e) => { if (e.cancelable) e.preventDefault(); }, { passive: false });
+
+  /**
+   * 모달 체크 및 렌더링
+   */
+  function checkModals() {
+    if (gameState.isGameOver) {
+      modalLevelup.classList.remove('show');
+      modalUpgrade.classList.remove('show');
+      modalShop.classList.remove('show');
+      return;
+    }
+
+    const pending = gameState.pendingChoice;
+    if (!pending) {
+      modalLevelup.classList.remove('show');
+      modalUpgrade.classList.remove('show');
+      modalShop.classList.remove('show');
+      return;
+    }
+
+    if (pending.type === 'levelup') {
+      renderLevelupChoices(pending.options || GR.getLevelupOptions(gameState, rng));
+      modalLevelup.classList.add('show');
+    } else if (pending.type === 'upgrade') {
+      renderUpgradeChoices(pending.options || GR.getUpgradeOptions());
+      modalUpgrade.classList.add('show');
+    } else if (pending.type === 'shop') {
+      renderShopChoices(pending.options || GR.getShopOptions());
+      modalShop.classList.add('show');
+    }
+  }
+
+  function renderLevelupChoices(options) {
+    levelupChoices.innerHTML = '';
+    options.forEach(opt => {
+      const card = document.createElement('div');
+      card.className = 'choice-card';
+      card.innerHTML = `
+        <div class="choice-card-left">
+          <b>${opt.icon || '⭐'} ${opt.name}</b>
+          <small>${opt.desc}</small>
+        </div>
+        <button class="choice-card-btn">선택</button>
+      `;
+      card.addEventListener('click', () => {
+        const res = GR.chooseLevelupReward(gameState, opt.id);
+        if (res.applied) {
+          gameState = res.gameState;
+          logBox.innerHTML = `🎉 <strong>${opt.name}</strong> 습득 완료!`;
+          renderBoard();
+        }
+      });
+      levelupChoices.appendChild(card);
+    });
+  }
+
+  function renderUpgradeChoices(options) {
+    upgradeChoices.innerHTML = '';
+    options.forEach(opt => {
+      const card = document.createElement('div');
+      card.className = 'choice-card';
+      card.innerHTML = `
+        <div class="choice-card-left">
+          <b>${opt.name}</b>
+          <small>${opt.desc}</small>
+        </div>
+        <button class="choice-card-btn">강화</button>
+      `;
+      card.addEventListener('click', () => {
+        const res = GR.chooseUpgrade(gameState, opt.id);
+        if (res.applied) {
+          gameState = res.gameState;
+          logBox.innerHTML = `✨ <strong>${opt.name}</strong> 완료! (${opt.desc})`;
+          renderBoard();
+        }
+      });
+      upgradeChoices.appendChild(card);
+    });
+  }
+
+  function renderShopChoices(options) {
+    shopChoices.innerHTML = '';
+    options.forEach(opt => {
+      const card = document.createElement('div');
+      card.className = 'choice-card';
+      card.innerHTML = `
+        <div class="choice-card-left">
+          <b>${opt.name}</b>
+          <small>${opt.desc}</small>
+        </div>
+        <button class="choice-card-btn">구매</button>
+      `;
+      card.addEventListener('click', () => {
+        const res = GR.chooseShopItem(gameState, opt.id);
+        if (res.applied) {
+          gameState = res.gameState;
+          logBox.innerHTML = `🪙 상점에서 <strong>${opt.name}</strong> 획득! (${opt.desc})`;
+          renderBoard();
+        }
+      });
+      shopChoices.appendChild(card);
+    });
+  }
+
+  /**
+   * 직업 선택 모달 (시안 D 반영)
+   */
+  function renderClassModal() {
+    classGridList.innerHTML = '';
+    unlockData = GR.loadUnlockData();
+
+    GR.CLASS_IDS.forEach(cid => {
+      const cDef = GR.CLASSES[cid];
+      const isUnlocked = GR.isClassUnlocked(cid, unlockData);
+      const isSelected = (cid === currentClassId);
+
+      const card = document.createElement('div');
+      card.className = `cc ${isUnlocked ? '' : 'lock'} ${isSelected ? 'sel' : ''}`;
+
+      card.innerHTML = `
+        <img src="${cDef.iconSvg}" alt="${cDef.name}" onerror="this.style.display='none'">
+        <b>${cDef.name}</b>
+        <small>${cDef.title}<br>${isUnlocked ? (cDef.unlockDesc || '사용 가능') : `🔒 특수 적 처치 시 해제`}</small>
+      `;
+
+      if (isUnlocked) {
+        card.addEventListener('click', () => {
+          modalClass.classList.remove('show');
+          if (GR.canCustomizePerks(cid)) {
+            openPerkFlawModal(cid);
+          } else {
+            currentClassId = cid;
+            startNewGame({ perks: [], flaws: [] });
+          }
+        });
+      }
+      classGridList.appendChild(card);
+    });
+  }
+
+  /**
+   * 조각 11: 퍽과 결함 직업 설정 모달
+   */
+  function openPerkFlawModal(classId) {
+    settingClassId = classId;
+    const cDef = GR.CLASSES[classId] || GR.CLASSES.adventurer;
+    pfModalTitle.textContent = `⚙️ 직업 설정: ${cDef.name}`;
+
+    const prof = GR.loadProfile();
+    const classProg = (prof.classProgress && prof.classProgress[classId]) || { level: 1 };
+    const savedSetting = (prof.classPerkSettings && prof.classPerkSettings[classId]) || { perks: [], flaws: [] };
+    const slotCount = GR.getPerkSlotCount(classId, classProg.level);
+
+    pfModalDesc.textContent = `파랑 퍽과 빨강 결함을 각 슬롯에 짝으로 맞춰 장착하세요 (사용 가능 슬롯: ${slotCount}쌍).`;
+    pfStatusMsg.textContent = '';
+    perkFlawSlotsContainer.innerHTML = '';
+
+    for (let i = 0; i < GR.MAX_PERK_SLOTS; i++) {
+      const isLocked = (i >= slotCount);
+      const row = document.createElement('div');
+      row.className = `perk-slot-pair ${isLocked ? 'locked' : ''}`;
+
+      const savedPerkId = (savedSetting.perks && savedSetting.perks[i] != null && savedSetting.perks[i] !== 255)
+        ? savedSetting.perks[i]
+        : '';
+      const savedFlawId = (savedSetting.flaws && savedSetting.flaws[i] != null && savedSetting.flaws[i] !== 255)
+        ? savedSetting.flaws[i]
+        : '';
+
+      let perkOptionsHtml = `<option value="">-- 퍽 선택 안 함 --</option>`;
+      GR.PERKS_DATA.forEach(p => {
+        const isSel = String(savedPerkId) === String(p.id) ? 'selected' : '';
+        perkOptionsHtml += `<option value="${p.id}" ${isSel}>${p.icon} ${p.name} (${p.desc})</option>`;
+      });
+
+      let flawOptionsHtml = `<option value="">-- 결함 선택 안 함 --</option>`;
+      GR.FLAWS_DATA.forEach(f => {
+        const isSel = String(savedFlawId) === String(f.id) ? 'selected' : '';
+        flawOptionsHtml += `<option value="${f.id}" ${isSel}>${f.icon} ${f.name} (${f.desc})</option>`;
+      });
+
+      row.innerHTML = `
+        <span class="slot-label">${isLocked ? '🔒 슬롯' : `슬롯 ${i + 1}`}</span>
+        <select class="perk-select" data-slot="${i}" ${isLocked ? 'disabled' : ''}>
+          ${isLocked ? '<option>🔒 미해제</option>' : perkOptionsHtml}
+        </select>
+        <select class="flaw-select" data-slot="${i}" ${isLocked ? 'disabled' : ''}>
+          ${isLocked ? '<option>🔒 미해제</option>' : flawOptionsHtml}
+        </select>
+      `;
+
+      perkFlawSlotsContainer.appendChild(row);
+    }
+
+    function checkValidity() {
+      const perkSelects = perkFlawSlotsContainer.querySelectorAll('.perk-select');
+      const flawSelects = perkFlawSlotsContainer.querySelectorAll('.flaw-select');
+      const currentPerks = [];
+      const currentFlaws = [];
+
+      for (let i = 0; i < slotCount; i++) {
+        const pVal = perkSelects[i] && perkSelects[i].value !== '' ? Number(perkSelects[i].value) : null;
+        const fVal = flawSelects[i] && flawSelects[i].value !== '' ? Number(flawSelects[i].value) : null;
+        currentPerks.push(pVal);
+        currentFlaws.push(fVal);
+      }
+
+      const isValid = GR.canConfirmPerkFlawSetup(settingClassId, currentPerks, currentFlaws, classProg.level);
+      if (!isValid) {
+        let hasMismatched = false;
+        let hasDuplicate = false;
+        const seenP = new Set();
+        const seenF = new Set();
+
+        for (let i = 0; i < slotCount; i++) {
+          const p = currentPerks[i];
+          const f = currentFlaws[i];
+          if (p != null && f == null) hasMismatched = true;
+          if (p != null) {
+            if (seenP.has(p)) hasDuplicate = true;
+            seenP.add(p);
+          }
+          if (f != null) {
+            if (seenF.has(f)) hasDuplicate = true;
+            seenF.add(f);
+          }
+        }
+
+        if (hasMismatched) {
+          pfStatusMsg.textContent = '⚠️ 퍽을 장착한 슬롯에는 반드시 결함을 함께 짝지어야 합니다!';
+        } else if (hasDuplicate) {
+          pfStatusMsg.textContent = '⚠️ 동일한 퍽 또는 결함을 중복 장착할 수 없습니다!';
+        } else {
+          pfStatusMsg.textContent = '⚠️ 유효하지 않은 퍽/결함 조합입니다.';
+        }
+        btnConfirmPerkFlaw.disabled = true;
+        btnConfirmPerkFlaw.style.opacity = '0.5';
+      } else {
+        pfStatusMsg.textContent = '';
+        btnConfirmPerkFlaw.disabled = false;
+        btnConfirmPerkFlaw.style.opacity = '1';
+      }
+      return { isValid, currentPerks, currentFlaws };
+    }
+
+    perkFlawSlotsContainer.querySelectorAll('select').forEach(sel => {
+      sel.addEventListener('change', checkValidity);
+    });
+
+    checkValidity();
+    modalPerkFlaw.classList.add('show');
+  }
+
+  if (btnCancelPerkFlaw) {
+    btnCancelPerkFlaw.addEventListener('click', () => {
+      modalPerkFlaw.classList.remove('show');
+    });
+  }
+
+  if (btnConfirmPerkFlaw) {
+    btnConfirmPerkFlaw.addEventListener('click', () => {
+      const prof = GR.loadProfile();
+      const classProg = (prof.classProgress && prof.classProgress[settingClassId]) || { level: 1 };
+      const slotCount = GR.getPerkSlotCount(settingClassId, classProg.level);
+
+      const perkSelects = perkFlawSlotsContainer.querySelectorAll('.perk-select');
+      const flawSelects = perkFlawSlotsContainer.querySelectorAll('.flaw-select');
+      const chosenPerks = [];
+      const chosenFlaws = [];
+
+      for (let i = 0; i < slotCount; i++) {
+        const pVal = perkSelects[i] && perkSelects[i].value !== '' ? Number(perkSelects[i].value) : null;
+        const fVal = flawSelects[i] && flawSelects[i].value !== '' ? Number(flawSelects[i].value) : null;
+        chosenPerks.push(pVal);
+        chosenFlaws.push(fVal);
+      }
+
+      if (!GR.canConfirmPerkFlawSetup(settingClassId, chosenPerks, chosenFlaws, classProg.level)) {
+        return;
+      }
+
+      if (!prof.classPerkSettings) prof.classPerkSettings = {};
+      prof.classPerkSettings[settingClassId] = { perks: chosenPerks, flaws: chosenFlaws };
+      GR.saveProfile(prof);
+
+      currentClassId = settingClassId;
+      modalPerkFlaw.classList.remove('show');
+      startNewGame({ perks: chosenPerks, flaws: chosenFlaws });
+    });
+  }
+
+  btnClassModal.addEventListener('click', () => {
+    renderClassModal();
+    modalClass.classList.add('show');
+  });
+  btnOpenClasses.addEventListener('click', () => {
+    renderClassModal();
+    modalClass.classList.add('show');
+  });
+  btnCloseClassModal.addEventListener('click', () => {
+    modalClass.classList.remove('show');
+  });
+
+  /**
+   * 조각 12: 종족 선택 모달 (10종)
+   */
+  function renderRaceModal() {
+    if (!raceGridList) return;
+    raceGridList.innerHTML = '';
+    const prof = GR.loadProfile();
+    const classProg = (prof.classProgress && prof.classProgress[currentClassId]) || { level: 1 };
+    const classLevel = classProg.level || 1;
+    const canChange = GR.canChangeRace(classLevel);
+    const currentRaceId = (gameState.player && gameState.player.raceId != null)
+      ? gameState.player.raceId
+      : (prof.classRaceSettings && prof.classRaceSettings[currentClassId] != null
+        ? prof.classRaceSettings[currentClassId]
+        : ((GR.CLASSES[currentClassId] && GR.CLASSES[currentClassId].defaultRaceId != null) ? GR.CLASSES[currentClassId].defaultRaceId : 0));
+
+    GR.RACES_DATA.forEach(rDef => {
+      const isUnlocked = GR.isRaceUnlocked(rDef.id, prof);
+      const isSelected = (rDef.id === currentRaceId);
+      const card = document.createElement('div');
+      card.className = `cc ${(!canChange || !isUnlocked) ? 'lock' : ''} ${isSelected ? 'sel' : ''}`;
+
+      let statusText = '선택 가능';
+      if (!canChange) {
+        statusText = `🔒 직업 Lv.5 필요 (현재 Lv.${classLevel})`;
+      } else if (!isUnlocked) {
+        statusText = '🔒 미해제';
+      }
+
+      card.innerHTML = `
+        <div style="font-size:32px; line-height:1.2;">${rDef.icon || '🧬'}</div>
+        <b>${rDef.name}</b>
+        <small style="color:var(--gold); font-weight:700;">${rDef.bonusName}</small>
+        <small>${rDef.bonusDesc}</small>
+        <small style="color:#ff6b7e;">숙적: #${rDef.mortalEnemyId} ${rDef.mortalEnemyDesc}</small>
+        <small style="margin-top:2px; color:${isSelected ? 'var(--gold)' : '#aaa'};">${isSelected ? '✓ 현재 장착 중' : statusText}</small>
+      `;
+
+      if (canChange && isUnlocked) {
+        card.addEventListener('click', () => {
+          if (gameState.player) {
+            gameState.player.raceId = rDef.id;
+          }
+          if (!prof.classRaceSettings) prof.classRaceSettings = {};
+          prof.classRaceSettings[currentClassId] = rDef.id;
+          GR.saveProfile(prof);
+          if (GR.saveRunState && gameState) {
+            GR.saveRunState(gameState);
+          }
+          updateHUD();
+          modalRace.classList.remove('show');
+          logBox.innerHTML = `종족을 [${rDef.name}] (보너스: ${rDef.bonusName})으로 변경했습니다.`;
+        });
+      }
+
+      raceGridList.appendChild(card);
+    });
+  }
+
+  if (btnRaceModal) {
+    btnRaceModal.addEventListener('click', () => {
+      renderRaceModal();
+      modalRace.classList.add('show');
+    });
+  }
+  if (btnOpenRaces) {
+    btnOpenRaces.addEventListener('click', () => {
+      renderRaceModal();
+      modalRace.classList.add('show');
+    });
+  }
+  if (btnCloseRaceModal) {
+    btnCloseRaceModal.addEventListener('click', () => {
+      modalRace.classList.remove('show');
+    });
+  }
+
+  /**
+   * 게임 오버 모달 & 최고 기록 (명예의 전당)
+   */
+  function showGameOverModal() {
+    const p = gameState.player;
+    const cDef = GR.CLASSES[p.classId] || GR.CLASSES.adventurer;
+    goClassName.textContent = cDef.name;
+    goValTurn.textContent = `${gameState.turn}턴`;
+    goValKills.textContent = `${gameState.kills}마리`;
+    goValScore.textContent = `${(gameState.score || 0).toLocaleString()}점`;
+
+    if (!scoreSavedThisRun) {
+      scoreSavedThisRun = true;
+      GR.clearRunState(); // 조각 10: 게임 오버 시 판 진행 삭제
+      const res = GR.saveHighScore({
+        turn: gameState.turn,
+        kills: gameState.kills,
+        score: gameState.score,
+        classId: p.classId,
+        className: cDef.name
+      }, null, 10);
+      GR.updateProfileWithGameResult(null, {
+        turn: gameState.turn,
+        kills: gameState.kills,
+        score: gameState.score,
+        classId: p.classId,
+        className: cDef.name
+      });
+      renderHighScores(res.highScores);
+    }
+    updateContinueButton();
+    modalGameover.classList.add('show');
+  }
+
+  function renderHighScores(scores) {
+    scoresTbody.innerHTML = '';
+    const list = Array.isArray(scores) ? scores : GR.loadHighScores(null, 10);
+    if (list.length === 0) {
+      scoresTbody.innerHTML = '<tr><td colspan="5" style="color:var(--sub);">기록이 없습니다.</td></tr>';
+      return;
+    }
+    list.forEach((entry, idx) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>#${idx + 1}</td>
+        <td>${entry.className || '모험가'}</td>
+        <td>${entry.turn}턴</td>
+        <td>${entry.kills}마리</td>
+        <td style="color:var(--gold); font-weight:800;">${entry.score.toLocaleString()}</td>
+      `;
+      scoresTbody.appendChild(tr);
+    });
+  }
+
+  /**
+   * 새 게임 시작
+   */
+  function startNewGame(customOptions = {}) {
+    currentSeed = Date.now();
+    rng = GR.createRNG(currentSeed);
+    unlockData = GR.loadUnlockData();
+    scoreSavedThisRun = false;
+    isAnimating = false;
+    currentPath = [];
+    GR.clearRunState(); // 새 게임 시작 시 이전 판 진행 삭제
+
+    let perks = customOptions.perks;
+    let flaws = customOptions.flaws;
+    const prof = GR.loadProfile();
+    const classProg = (prof.classProgress && prof.classProgress[currentClassId]) || { level: 1 };
+
+    if (!perks || !flaws) {
+      const savedSetting = (prof.classPerkSettings && prof.classPerkSettings[currentClassId]);
+      if (savedSetting && GR.canCustomizePerks(currentClassId)) {
+        perks = savedSetting.perks || [];
+        flaws = savedSetting.flaws || [];
+      } else {
+        perks = [];
+        flaws = [];
+      }
+    }
+
+    const savedRaceId = (prof.classRaceSettings && prof.classRaceSettings[currentClassId] != null)
+      ? prof.classRaceSettings[currentClassId]
+      : undefined;
+    const raceVal = GR.validateRaceSelection(currentClassId, savedRaceId, classProg.level);
+    const currentRaceId = (raceVal && typeof raceVal === 'object' && raceVal.raceId != null) ? raceVal.raceId : raceVal;
+
+    gameState = GR.createGameState({
+      seed: currentSeed,
+      classId: currentClassId,
+      raceId: currentRaceId,
+      unlockData,
+      perks,
+      flaws
+    });
+    modalGameover.classList.remove('show');
+    const cDef = GR.CLASSES[currentClassId] || GR.CLASSES.adventurer;
+    const rDef = (GR.RACES_DATA && GR.RACES_DATA.find(r => r.id === currentRaceId)) || (GR.RACES_DATA && GR.RACES_DATA[0]);
+    const activePerksCount = (gameState.player?.activePerks || []).length;
+    const activeFlawsCount = (gameState.player?.activeFlaws || []).length;
+    const perkMsg = activePerksCount > 0 ? ` (퍽 ${activePerksCount} / 결함 ${activeFlawsCount})` : '';
+    const raceMsg = rDef ? ` · [${rDef.name}]` : '';
+    logBox.innerHTML = `새 게임이 시작되었습니다. [${cDef.name}]${raceMsg}${perkMsg}와 함께 살아남으세요!`;
+    updateHUD();
+    renderBoard();
+    updateContinueButton();
+  }
+
+  btnRestartGame.addEventListener('click', () => startNewGame());
+  btnGoRestart.addEventListener('click', () => startNewGame());
+
+  // 조각 10: 이어하기 버튼
+  if (btnContinueGame) {
+    btnContinueGame.addEventListener('click', () => {
+      const saved = GR.loadRunState();
+      if (!saved) {
+        logBox.innerHTML = '저장된 모험 진행이 없습니다.';
+        updateContinueButton();
+        return;
+      }
+      gameState = saved;
+      currentSeed = saved.seed || Date.now();
+      rng = saved.rng || GR.createRNG(saved.rngState || currentSeed);
+      currentClassId = saved.player?.classId || 'adventurer';
+      scoreSavedThisRun = false;
+      isAnimating = false;
+      currentPath = [];
+      modalGameover.classList.remove('show');
+      logBox.innerHTML = `저장된 ${saved.turn}턴 모험을 이어합니다!`;
+      updateHUD();
+      renderBoard();
+      updateContinueButton();
+    });
+  }
+
+  // 조각 10: 저장 코드 모달 이벤트
+  if (btnSaveCodeModal) {
+    btnSaveCodeModal.addEventListener('click', () => {
+      const prof = GR.loadProfile();
+      const code = GR.exportProfileCode(prof);
+      exportCodeInput.value = code;
+      saveCodeMsg.textContent = '';
+      importCodeInput.value = '';
+      modalSaveCode.classList.add('show');
+    });
+  }
+
+  if (btnCloseSaveCode) {
+    btnCloseSaveCode.addEventListener('click', () => {
+      modalSaveCode.classList.remove('show');
+    });
+  }
+
+  if (btnCopyCode) {
+    btnCopyCode.addEventListener('click', () => {
+      if (exportCodeInput.value) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(exportCodeInput.value).then(() => {
+            saveCodeMsg.textContent = '클립보드에 코드가 복사되었습니다!';
+          }).catch(() => {
+            exportCodeInput.select();
+            saveCodeMsg.textContent = '코드를 복사하세요 (Ctrl+C)';
+          });
+        } else {
+          exportCodeInput.select();
+          saveCodeMsg.textContent = '코드를 복사하세요 (Ctrl+C)';
+        }
+      }
+    });
+  }
+
+  if (btnImportCode) {
+    btnImportCode.addEventListener('click', () => {
+      const code = importCodeInput.value.trim();
+      if (!code) {
+        saveCodeMsg.textContent = '불러올 저장 코드를 입력하세요.';
+        return;
+      }
+      const res = GR.importProfileCode(code, null);
+      if (res.success) {
+        unlockData = GR.loadUnlockData();
+        saveCodeMsg.textContent = '성공적으로 기록을 불러왔습니다!';
+        setTimeout(() => {
+          modalSaveCode.classList.remove('show');
+          renderHighScores();
+        }, 900);
+      } else {
+        saveCodeMsg.textContent = `불러오기 실패: ${res.reason === 'checksum_mismatch' ? '코드가 변조되었거나 잘못되었습니다.' : '유효하지 않은 코드입니다.'}`;
+      }
+    });
+  }
+
+  /**
+   * 조각 13: 업적 모달 렌더링
+   */
+  function renderAchievementsModal() {
+    if (!achievementsList) return;
+    achievementsList.innerHTML = '';
+    const prof = GR.loadProfile();
+    const achievements = GR.ACHIEVEMENTS_DATA || [];
+    let unlockedCount = 0;
+
+    achievements.forEach(ach => {
+      const isUnlocked = GR.isAchievementUnlocked(prof, ach.id);
+      if (isUnlocked) unlockedCount++;
+
+      let unlockedDate = '';
+      if (isUnlocked && Array.isArray(prof.achievements)) {
+        const found = prof.achievements.find(a => (typeof a === 'string' ? (a === ach.id || a === ach.key) : a && (a.id === ach.id || a.key === ach.key || a.key === ach.id || a.id === ach.key)));
+        if (found && found.unlockedAt) {
+          try {
+            unlockedDate = new Date(found.unlockedAt).toLocaleDateString('ko-KR');
+          } catch (_) {}
+        }
+      }
+
+      const card = document.createElement('div');
+      card.className = `ach-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+      card.innerHTML = `
+        <div class="ach-icon">${isUnlocked ? (ach.icon || '🏆') : '🔒'}</div>
+        <div class="ach-info">
+          <div class="ach-name">
+            <span>${ach.name}</span>
+            ${isUnlocked ? `<span class="ach-date">✓ ${unlockedDate || '달성'}</span>` : ''}
+          </div>
+          <div class="ach-desc">${ach.desc}</div>
+        </div>
+      `;
+      achievementsList.appendChild(card);
+    });
+
+    if (achSummaryText) {
+      achSummaryText.textContent = `달성한 업적: ${unlockedCount} / ${achievements.length}`;
+    }
+    if (hdrAchCount) {
+      hdrAchCount.textContent = `${unlockedCount}/${achievements.length}`;
+    }
+  }
+
+  // 조각 13: 업적 모달 이벤트 바인딩
+  if (btnAchievementsModal) {
+    btnAchievementsModal.addEventListener('click', () => {
+      renderAchievementsModal();
+      modalAchievements.classList.add('show');
+    });
+  }
+
+  if (btnCloseAchievements) {
+    btnCloseAchievements.addEventListener('click', () => {
+      modalAchievements.classList.remove('show');
+    });
+  }
+
+  // 도움말 모달
+  btnGuide.addEventListener('click', () => { modalGuide.classList.add('show'); });
+  btnCloseGuide.addEventListener('click', () => { modalGuide.classList.remove('show'); });
+
+  // 초기 시작
+  updateContinueButton();
+  renderBoard();
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/peg-jump/">페그 솔리테어</a> — 구슬을 뛰어넘어 하나만 남기기</li><li><a href="/tangram-seven/">칠교</a> — 일곱 조각으로 모양 맞추기</li><li><a href="/nonogram/">네모 로직</a> — 숫자 힌트로 숨은 그림 찾기</li><li><a href="/sum-fill/">숫자 합 맞추기</a> — 가로세로 합에 맞게 숫자 채우기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>
