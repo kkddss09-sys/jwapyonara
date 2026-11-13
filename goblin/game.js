@@ -3226,7 +3226,7 @@
       }
     }
 
-    // 7. 10칸 이상 줄이면 주사위 버프 발동 (원작에 없는 우리 고유 규칙 유지)
+    // 7. 10칸 이상 줄이면 주사위 버프 발동 (우리 고유 규칙 유지)
     var diceLog = '';
     if (path.length >= 10) {
       var diceBuff;
@@ -3284,7 +3284,7 @@
       return nextState;
     }
 
-    // 8. 살아남은 모든 몬스터의 반격 (원작 핵심 메커니즘)
+    // 8. 살아남은 모든 몬스터의 반격 (핵심 메커니즘)
     var skipEnemy = false;
     var absorbAll = false;
     for (var aIdx = 0; aIdx < nextState.activeBuffs.length; aIdx++) {
@@ -3417,7 +3417,7 @@
     filterProfanity: filterProfanity,
     generateMockLeaderboard: generateMockLeaderboard,
     createChallengeBattle: createChallengeBattle,
-    // 조각 9 & 10 추가 (고블린 레이드 기본 규칙 및 원작 1차 규칙)
+    // 조각 9 & 10 추가 (고블린 레이드 기본 규칙)
     DEFAULT_RAID_BOARD_SIZE: DEFAULT_RAID_BOARD_SIZE,
     RAID_SPAWN_RATES: RAID_SPAWN_RATES,
     createRaidCell: createRaidCell,
