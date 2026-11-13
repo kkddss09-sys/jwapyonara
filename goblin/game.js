@@ -1098,7 +1098,7 @@
       ? state.rankPoints
       : 0;
 
-    // 조각 10: 던전 레이드 최고 점수 (raidBest)
+    // 조각 10: 고블린 레이드 최고 점수 (raidBest)
     var raidBest = (state && typeof state.raidBest === 'number' && !isNaN(state.raidBest) && state.raidBest >= 0)
       ? state.raidBest
       : 0;
@@ -2227,7 +2227,7 @@
   }
 
   // ==========================================
-  // 조각 9 & 10: 던전 레이드 기본 규칙 (6x6, 무한 서바이벌, 특수 몬스터)
+  // 조각 9 & 10: 고블린 레이드 기본 규칙 (6x6, 무한 서바이벌, 특수 몬스터)
   // ==========================================
 
   var DEFAULT_RAID_BOARD_SIZE = 6;
@@ -2564,7 +2564,7 @@
       score: (typeof opts.score === 'number' && !isNaN(opts.score)) ? opts.score : 0,
       level: lvl,
       status: 'playing',
-      logs: ['[Lv.' + lvl + ' 난이도] 던전 레이드 서바이벌 시작! 끝까지 생존하여 최고 점수를 기록하세요!'],
+      logs: ['[Lv.' + lvl + ' 난이도] 고블린 레이드 서바이벌 시작! 끝까지 생존하여 최고 점수를 기록하세요!'],
       lastEvents: [],
       activeBuffs: [],
       lastDiceBuff: null,
@@ -3417,7 +3417,7 @@
     filterProfanity: filterProfanity,
     generateMockLeaderboard: generateMockLeaderboard,
     createChallengeBattle: createChallengeBattle,
-    // 조각 9 & 10 추가 (던전 레이드 기본 규칙 및 원작 1차 규칙)
+    // 조각 9 & 10 추가 (고블린 레이드 기본 규칙 및 원작 1차 규칙)
     DEFAULT_RAID_BOARD_SIZE: DEFAULT_RAID_BOARD_SIZE,
     RAID_SPAWN_RATES: RAID_SPAWN_RATES,
     createRaidCell: createRaidCell,

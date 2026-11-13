@@ -7,7 +7,6 @@
  * 조각 4: 특수 적 7종 (도망자·치유사·산성술사·화염술사·빙결술사·폭탄병·변환술사)
  * 조각 5: 경험치·레벨업·직업 10종·스킬 5종·점수 저장 (localStorage goblin_raid_v1)
  * 조각 6: 반응형 화면·SVG 아이콘 연동·체인 탐색 및 전체 흐름 시뮬레이션
- * 조각 7: 원작 정렬 ① - 칸 추첨 5종 균등(각 20%), 시작 판 적 없음, 플레이어 최대체력 40/공격 3, 적 능력치 곡선(난이도 0~3, L>40 보정), 적 공격 규칙(동결 제외, 독 절반)
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -25,7 +24,6 @@
   const TILE_TYPES = ['sword', 'shield', 'potion', 'coin', 'enemy'];
 
   /**
-   * 조각 7 - 원작판 5종 타일 균등 출현 가중치 (각 20%)
    */
   const UNIFORM_TILE_WEIGHTS = {
     sword: 20,
@@ -57,7 +55,6 @@
   };
 
   /**
-   * 조각 9 - 승급 타이머 초기 대기 및 원작 특수 적 ID 상수
    */
   const PROMOTION_COOLDOWN_INITIAL = 50;
 
@@ -153,7 +150,6 @@
   };
 
   /**
-   * 조각 9 - 원작판 특수 적 스탯 배율 (원작판 3번 표)
    * (공격, 방어, 체력 순)
    * ID1=(×3,×3,×6) · ID2=(×2,유지,×3) · ID3=(0,×6,×6) · ID5=(×2,×10,÷2) ·
    * ID9=(유지,×2,×4) · ID10=(유지,×2,×6) · ID16=(×3,×2,×3) ·
@@ -203,8 +199,6 @@
   }
 
   /**
-   * 직업 10종 정의 (조각 5 및 조각 14 원작 정렬 11절 반영)
-   * 원작 10개 직업: 모험가, 전사, 레인저, 사제, 바바리안, 마법사, 도적, 성기사, 약탈자, 암살자
    * 일반 새 판 시작 최대 체력: 50 (마법사 40, 전사 60), 기본 공격 3 (바바리안 4), 기본 무기 공격 2, 최대 방어 합 4 (레인저 3)
    * 모험가만 처음 열림 (canCustomizePerks: false), 다른 직업은 특수 적 처치 해제 카운터(한 판 최대 3회)
    */
@@ -394,7 +388,6 @@
   const CLASS_IDS = Object.keys(CLASSES);
 
   /**
-   * 조각 18 - 직업별 첫 고정 퍽·결함 쌍 (원작-대조표 101행, 정밀2 §2·4)
    * 레인저 6/6, 약탈자 2/2, 사제 5/5, 바바리안 4/4, 마법사 1/1, 도적 7/7, 성기사 8/8, 전사 9/9, 암살자 3/3
    */
   const CLASS_FIXED_PERK_FLAWS = {
@@ -411,7 +404,6 @@
   };
 
   /**
-   * 조각 14 - 스킬 42종 기본 쿨다운 (원작판 11절 원문 표 확인값)
    * 0=13, 1=16, 2=15, 3=16, 4=18, 5=18, 6=15, 7=20, 8=18, 9=18,
    * 10=35, 11=12, 12=18, 13=15, 14=25, 15=15, 16=14, 17=15, 18=15, 19=15,
    * 20=18, 21=20, 22=18, 23=15, 24=25, 25=14, 26=12, 27=16, 28=14, 29=20,
@@ -427,7 +419,6 @@
   ];
 
   /**
-   * 조각 14 & 조각 22 - 스킬 42종 데이터 표 (원작 42종 전원 구현, 원작-대조표-2 기준)
    * 조각 22: 스킬 ID 0~41 전체 구현 완료 (isImplemented: true)
    * 33번은 1회용 (사용 후 스킬 목록에서 영구 제거)
    */
@@ -477,7 +468,6 @@
   ];
 
   /**
-   * 조각 14 - 직업별 기본 스킬 풀 20개 (원작-정밀-규칙-2.md 2번 표)
    */
   const CLASS_SKILL_POOLS = {
     adventurer: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
@@ -493,7 +483,6 @@
   };
 
   /**
-   * 조각 11 - 퍽 10종 데이터 표 (원작-정밀-규칙-2.md 4번 표, 새 한국어 이름)
    * 퍽(파랑 #3b7de0, 각 10종)
    */
   const MAX_PERK_SLOTS = 4;
@@ -512,7 +501,6 @@
   ];
 
   /**
-   * 조각 11 - 결함 10종 데이터 표 (원작-정밀-규칙-2.md 4번 표, 새 한국어 이름)
    * 결함(빨강 #d7263d, 각 10종)
    */
   const FLAWS_DATA = [
@@ -529,7 +517,6 @@
   ];
 
   /**
-   * 조각 12 - 종족 10종 데이터 표 (원작-정밀-규칙-2.md 3번 표 반영, 고블린 세계 임시 이름)
    * 종족마다 고유 보너스와 숙적(Mortal Enemy) 특수 적이 존재함
    */
   const RACES_DATA = [
@@ -659,7 +646,6 @@
   };
 
   /**
-   * 조각 21 - 종족 ID별 기본 직업 매핑 (원작-대조표-2 227행, Game::IsRaceUnlocked @ 000248a0)
    */
   const RACE_TO_DEFAULT_CLASS = {
     0: 'adventurer',
@@ -675,7 +661,6 @@
   };
 
   /**
-   * 조각 13 - 업적 10종 데이터 표 (원작 구조 및 고블린 세계 임시 이름)
    * 특수 적 처치, 직업 레벨 5·10, 직업 해제, 턴 생존, 체인 연결, 점수 달성
    */
   const ACHIEVEMENTS_DATA = [
@@ -1058,7 +1043,6 @@
   }
 
   /**
-   * 조각 12 - 종족 변경 가능 여부 검사 (원작 Validate 함수: 직업 레벨 5부터 종족 변경 가능)
    */
   function canChangeRace(classLevel = 1) {
     return Math.max(1, Math.floor(classLevel || 1)) >= 5;
@@ -1066,11 +1050,9 @@
 
   /**
    * 조각 12 & 조각 21 - 종족 해제 여부 검사 (순수 함수)
-   * 원작-대조표-2 227행, Game::IsRaceUnlocked @ 000248a0: 그 종족 기본 직업의 레벨>4 확인
    * - 종족 0(평원 고블린): 기본 해제
    * - 직업의 기본 종족: 해당 직업은 언제나 사용 가능
    * - options.unlockedRaces에 포함되어 있으면 해제
-   * - 원작 조건: 대상 종족의 기본 직업(Base Class) 레벨이 5 이상(level > 4)일 때 해제
    */
   function isRaceUnlocked(raceId, options = {}) {
     const rId = Math.floor(Number(raceId) || 0);
@@ -1111,7 +1093,6 @@
 
   /**
    * 조각 12 - 직업 및 레벨에 따른 종족 선택 유효성 검사 및 정규화 (순수 함수)
-   * 원작 CharacterClass::Validate: 직업 레벨 5 미만이면 해당 직업의 기본 종족으로 되돌림
    */
   function validateRaceSelection(classId, raceId, classLevel = 1, unlockedRaces = [0]) {
     const classDef = CLASSES[classId] || CLASSES.adventurer;
@@ -1177,7 +1158,6 @@
   }
 
   /**
-   * 조각 11 - 직업의 퍽 커스터마이징 가능 여부 판정 (모험가는 불가, 원작판 11절 및 조각 11)
    */
   function canCustomizePerks(classId) {
     if (!classId) return false;
@@ -1214,7 +1194,6 @@
   }
 
   /**
-   * 조각 11 - 퍽·결함 짝 검사 순수 함수 (원작 규칙: 퍽 하나마다 결함 하나를 짝으로 맞춤)
    * - 슬롯 각 4칸 중, 같은 슬롯에 결함이 없으면 그 슬롯의 퍽은 null로 지워짐
    * - 같은 종류 안 중복 ID 방지
    * - 짝이 맞지 않거나 누락이 있으면 isValid = false
@@ -1250,7 +1229,6 @@
         }
       }
 
-      // 같은 슬롯에 결함이 없으면 퍽은 제거됨 (원작 Validate 함수)
       if (p != null && f == null) {
         p = null;
         hasMismatchedPair = true;
@@ -1281,7 +1259,6 @@
       return !hasAnyPerk && !hasAnyFlaw;
     }
 
-    // 조각 18: 첫 고정 퍽·결함 쌍과 슬롯0 변경 금지 (원작-대조표 101행, 정밀2 §2·4)
     const fixedPair = CLASS_FIXED_PERK_FLAWS[classId];
     if (fixedPair && classId !== 'adventurer') {
       const p0 = (perks[0] != null && perks[0] !== 255) ? Number(perks[0]) : null;
@@ -1456,7 +1433,6 @@
   const MAX_CLASS_UNLOCKS_PER_RUN = 3;
 
   /**
-   * 조각 8 - 스탯 선택 옵션 4종 정의 (규칙-명세서-원작판 6번)
    * 기본 공격 +2, 방패 복구 +2, 최대 체력 +10 및 임시 선택지 무기 공격 +1
    */
   const STAT_UPGRADE_OPTIONS = [
@@ -1556,7 +1532,6 @@
   }
 
   /**
-   * 원작판 정수 균등 난수 R(a, b): a 이상 b 이하 정수 균등 난수 (a > b면 바꿔 계산)
    */
   function randomInt(a, b, rng = null) {
     const randomFn = typeof rng === 'function' ? rng : Math.random;
@@ -1567,7 +1542,6 @@
   }
 
   /**
-   * 조각 7 - 원작판 적 능력치 곡선 계산 순수 함수
    * @param {number} turn 현재 턴 T
    * @param {number} difficulty 난이도 0~3 (기본 1)
    * @param {number} L 플레이어 정수 레벨/XP 인덱스: floor((현재 XP + 누적 XP) / 100)
@@ -1627,7 +1601,6 @@
   }
 
   /**
-   * 턴 수에 따른 기본 적 스탯 계산 (원작판 능력치 곡선 적용)
    */
   function createEnemyStats(turn = 1, options = {}) {
     let difficulty = 1;
@@ -1644,7 +1617,6 @@
   }
 
   /**
-   * 적 타일 생성 헬퍼 (조각 4 특수 적 7종 지원, 조각 7 원작 정렬: 동결·독·표식 상태 지원, 조각 9: specialId 및 baseHp 지원)
    */
   function createEnemyTile(x, y, id, turn = 1, customStats = {}) {
     const defaultStats = createEnemyStats(turn, customStats);
@@ -1713,7 +1685,6 @@
   }
 
   /**
-   * 조각 9 - 적 타일을 특수 적(ID 1~32)으로 승급 (원작판 3번 배율 및 원작 번호 능력 연동)
    */
   function promoteEnemy(tile, specialId, player = null, options = {}) {
     if (!tile || tile.type !== 'enemy') return tile;
@@ -1739,7 +1710,6 @@
     const sId = Math.max(1, Math.min(32, Math.floor(specialId || 1)));
     const multipliers = getSpecialEnemyMultipliers(sId);
 
-    // 조각 21 (원작-대조표-2 239행): 특수 적 능력치는 생성 기반 (GenerateStats @ 00063098: 현재 턴·난이도로 새로 생성)
     // 단위 시험의 명시적 customStats/originalBaseHp가 지정되지 않고 turn이 주어진 경우 현재 턴·난이도 곡선으로 새 스탯 생성
     let baseAtk, baseArmor, baseHp;
     if (effectiveOptions && effectiveOptions.turn != null && effectiveOptions.hp == null && tile.originalBaseHp == null) {
@@ -1759,7 +1729,6 @@
     const activeFlaws = (effectiveOptions && effectiveOptions.activeFlaws)
       || (effectivePlayer && Array.isArray(effectivePlayer.flaws) ? effectivePlayer.flaws.filter(f => f != null) : []);
 
-    // 조각 11: 결함 9 (요란한 발소리) - 특수 적 체력 +5% (원작판: 정수 버림)
     let newHp = rawHp;
     if (activeFlaws.includes(9)) {
       newHp = Math.floor(newHp * 1.05);
@@ -1812,7 +1781,6 @@
     }
 
     // 조각 12 & 조각 20(대조표-2 121행): 숙적 12 (부식괴물)
-    // RandomiseTile @ 0002d584: 숙적 12 등장 때 방패 0 (플레이어 종족 숙적이 12일 때만)
     const playerRaceId = (effectivePlayer && effectivePlayer.raceId != null) ? effectivePlayer.raceId : (effectiveOptions && effectiveOptions.raceId != null ? effectiveOptions.raceId : 0);
     const isMortal12Effective = (playerRaceId === 5 || getMortalEnemyForRace(playerRaceId) === 12);
     if (sId === 12 && isMortal12Effective && effectivePlayer) {
@@ -1820,7 +1788,6 @@
     }
 
     // 조각 20(대조표-2 140행): 특수 적 ID 31 (도주자)
-    // RandomiseTile @ 0002d584 → JumpDown @ 0002d3cc: 생성/승급 직후 같은 열 맨 아래 칸으로 이동
     if (sId === 31 && effectiveOptions && effectiveOptions.board) {
       const b = effectiveOptions.board;
       const h = b.length;
@@ -1869,7 +1836,6 @@
   }
 
   /**
-   * 조각 9 - 승급 후 다음 대기 턴 수 계산 순수 함수 (규칙-명세서-원작판 8번)
    * - 난이도 0 = R(정수(200/√T), 정수(300/√T)) + 5
    * - 난이도 1 = R(정수(200/√S), 정수(300/√S))
    * - 난이도 2·3 = R(정수(150/√S), 정수(300/√S))
@@ -1967,7 +1933,6 @@
         promoted = true;
         promotedEnemy = board[chosen.y][chosen.x];
         let nextCooldown = calculateNextPromotionCooldown(turn, difficulty, playerL, randomFn);
-        // 조각 18 & 조각 21 (원작-대조표-2 212행): 결함 8 (적들의 광기)은 특수 적 1턴 일찍 등장 (원작 GenerateStats: 새 대기 -1 시 최소 1)
         if (activeFlaws.includes(8)) {
           nextCooldown = Math.max(1, nextCooldown - 1);
         }
@@ -2043,7 +2008,6 @@
   }
 
   /**
-   * 조각 14 & 조각 21 - 특수 적 처치 기반 직업 해제 / 성장 진행 순수 함수 (규칙-명세서-원작판 11절 & 원작-대조표-2 230·231행)
    * 비쉬움(비 Easy) 난이도에서 특수 적 처치 시 카운터 감소, 0 도달 시:
    * - 현재 비기본직업 레벨 10 미만일 때 R(0,1) 갈림길: 0이면 현재 직업 성장(레벨+1), 1이면 미해제 직업 중 무작위 1개 해제
    * - 기본직업(모험가)이거나 레벨 10 이상이면 미해제 직업 해제
@@ -2086,7 +2050,6 @@
           currentClassLevel = gameState.player.classLevel;
         }
 
-        // 조각 21 (원작-대조표-2 231행): 현재 비기본직업 레벨 10 미만일 때 R(0,1) 갈림길
         const canBranchLevelUp = (currentClassId !== 'adventurer' && currentClassLevel < 10);
         const shouldLevelUpCurrent = canBranchLevelUp && (randomInt(0, 1, randomFn) === 0);
 
@@ -2177,7 +2140,6 @@
   }
 
   /**
-   * 플레이어 기본 상태 객체 생성 (조각 14 원작판 11절 반영)
    * - 기본 물약 회복 1, 기본 방패 복구 1 (DEFAULT_POTION_HEAL_PER_TOKEN, DEFAULT_SHIELD_RECOVERY_PER_TOKEN)
    * - 기본 힘·민첩·활력·행운 각 1
    * - 일반 새 판 시작 최대 체력: 50 (마법사 40, 전사 60), 기본 공격 3 (바바리안 4), 기본 무기 공격 2, 최대 방어 합 4 (레인저 3)
@@ -2270,7 +2232,6 @@
     }
 
     const validated = validatePerkFlawPairs(rawPerks, rawFlaws, MAX_PERK_SLOTS);
-    // 조각 21 (원작-대조표-2 195행): 테스트 및 직접 설정 호환 - perks/flaws가 단독 제공된 경우 필터링으로 소실되지 않도록 보존
     const hasExplicitPerks = Array.isArray(initial.perks) && initial.perks.length > 0;
     const hasExplicitFlaws = Array.isArray(initial.flaws) && initial.flaws.length > 0;
     const effectivePerks = (hasExplicitPerks && !hasExplicitFlaws)
@@ -2356,7 +2317,6 @@
   }
 
   /**
-   * 조각 8 & 조각 11 - 4번째 칸부터 칸마다 확률로 추가 토큰 계산 (규칙-명세서-원작판 4번)
    * - 1~3번째 칸은 추가 토큰 0개, 4번째 칸부터 각 칸마다 R(1, 100) <= bonusChance(기본 20)이면 추가 토큰 +1
    * - 퍽 2 (과감한 돌파): 10칸 이상 연결 시 보너스 확률 100%
    * @param {number} length 체인 길이
@@ -2391,7 +2351,6 @@
   }
 
   /**
-   * 조각 8 & 조각 11 - 원작판 리소스 토큰 계산 순수 함수
    * - 결함 2 (자만심): 딱 3칸만 모으면 보상 없음 (0 반환)
    * - 퍽 7 (알뜰한 감각): 코인 보너스 확률 +10%p
    * - 결함 4 (무모한 맹진): 방패 보너스 확률 -10%p
@@ -2446,7 +2405,6 @@
 
   /**
    * 자원(방패·물약·코인) 획득 기본 계산
-   * rng 또는 useBonusTokens 옵션 제공 시 조각 8 원작판 토큰 계산, 미제공 시 조각 3 배수표 호환
    */
   function calculateResourceGain(type, length, rng = null, options = {}) {
     const l = Math.max(0, Math.floor(length || 0));
@@ -2467,7 +2425,6 @@
       };
     }
 
-    // 조각 16: 자원 연결 길이 배수 옛 경로 제거 -> 기본적으로 원작 토큰 방식 사용
     if (options && options.useLegacyMultiplier) {
       const multiplier = getLengthMultiplier(l);
       const gain = Math.floor(l * multiplier);
@@ -2495,7 +2452,6 @@
   }
 
   /**
-   * 조각 8 - 100 단위 게이지 자원 누적 계산 (규칙-명세서-원작판 6번 순수 함수)
    * 게이지가 100 이상 도달 시: 누적 완료분 +100, 잔량 = 값 % 100, 메뉴 열기 트리거
    */
   function addGaugeResource(currentValue = 0, addedAmount = 0, accumulatedValue = 0, threshold = GAUGE_MAX) {
@@ -2528,7 +2484,6 @@
   }
 
   /**
-   * 조각 8 - 방패 토큰 적용 순수 함수 (규칙-명세서-원작판 6번)
    * - 이미 방패가 최대면 그 토큰은 강화 토큰으로 감
    * - 최대가 아니면 방패 = min(최대, 방패 + recoveryPerToken)
    * - 한 번의 복구에서 넘친 양은 강화로 넘기지 않음 (버려지고, 다음 토큰부터 강화로 분기)
@@ -2659,7 +2614,6 @@
   }
 
   /**
-   * 조각 8 - 원작판 점수 공식 순수 함수 (규칙-명세서-원작판 7번)
    * 점수 = 턴 + (현재 XP + 누적 XP) + (현재 골드 + 누적 골드) + (현재 강화 + 누적 강화) + 100 × 장착 스킬 등급의 합
    */
   function calculateScore(gameStateOrParams) {
@@ -2711,7 +2665,6 @@
   }
 
   /**
-   * 조각 8 - 스탯 선택 옵션 목록 반환 (원작판 6번)
    * 기본 공격 +2 · 방패 복구 +2 · 최대 체력 +10 + 임시 선택지(무기 공격 +1)
    */
   function getStatUpgradeOptions() {
@@ -3004,7 +2957,6 @@
   }
 
   /**
-   * 조각 21 - 스킬 해제 여부 검사 순수 함수 (원작-대조표-2 228행, Game::IsSkillUnlocked @ 000248e8)
    * - 0~30번 스킬은 기본 허용
    * - 고유 스킬(uniqueClassId): 현재 직업의 고유 스킬이거나, 해당 고유 직업의 직업 레벨이 10 이상일 때 해제되어 공유 가능
    */
@@ -3040,7 +2992,6 @@
   }
 
   /**
-   * 레벨업 선택지 3종 생성 (규칙 6번 & 조각 15 원작 정렬 42종 표 연동)
    * 스탯 및 스킬 풀에서 무작위 3장 중복 없이 선택
    * - 스킬 카드는 SKILLS_DATA 중 isImplemented: true인 것에서 생성
    * - 직업 고유 스킬(uniqueClassId)은 해당 직업이거나 해당 직업 레벨 10 이상(조각 21)일 때 후보에 포함
@@ -3112,7 +3063,6 @@
       }
     ];
 
-    // 조각 15, 21 & 조각 22: 직업별 레벨업 스킬 풀 실제 사용 (원작-대조표-2 100행: CharacterClass::GetSkillPool @ 0003707c)
     // 직업 0(모험가)은 isSkillUnlocked 적용, 타 직업은 CLASS_SKILL_POOLS 적용
     let targetSkillPool = null;
     if (playerClassId !== 'adventurer' && CLASS_SKILL_POOLS[playerClassId]) {
@@ -3147,7 +3097,6 @@
       });
 
       if (existing) {
-        // 조각 22: 스킬 강화 상한 (원작-대조표-2 102행: 등급 10이면 추가 감소 없음, 등급 최대 10)
         // 이미 10등급에 도달한 스킬은 연마 카드를 생성하지 않음
         if ((existing.rank || 1) >= 10) {
           continue;
@@ -3249,7 +3198,6 @@
         if (isTarget) {
           const currentRank = s.rank || 1;
           if (currentRank >= 10) {
-            // 조각 22: 스킬 강화 상한 (원작-대조표-2 102행: 기존 등급 10이면 쿨다운 추가 감소 없음, 등급 최대 10)
             return {
               ...s,
               rank: 10
@@ -3298,7 +3246,6 @@
   }
 
   /**
-   * 조각 22 - 스킬 사용 가능 대상 검사 (원작-대조표-2 103행: Skill::CanActivate @ 00060100)
    * 대상이 없으면 스킬 발동 불가 및 쿨다운 미소모
    */
   function hasValidSkillTarget(gameState, skillId) {
@@ -3607,9 +3554,6 @@
 
   /**
    * 액티브 스킬 사용 (조각 5 & 조각 14 & 조각 22)
-   * 조각 22 - 스킬 ID 0~41 전체 원작 효과 구현 및 사용 규칙:
-   * - 미보유 스킬 직접 호출 금지 (원작-대조표-2 104행, options.force 미지정 시 skill_not_owned)
-   * - 스킬 사용 가능 대상 검사 (원작-대조표-2 103행, 대상 없으면 no_valid_target 및 쿨다운 미소모)
    * - 수집 스킬의 특수 적 제외, 자원/XP 토큰 지급 처리
    */
   function useSkill(gameState, skillIndexOrId, options = {}, rng = null) {
@@ -3645,7 +3589,6 @@
       if (skillIdx >= 0) {
         usedSkill = skills[skillIdx];
       } else {
-        // 조각 22: 미보유 스킬 직접 호출 금지 (원작-대조표-2 104행: Skill::Activate @ 00060210)
         // options.force나 options.allowUnowned가 없는 한 호출 거절
         if (!options.force && !options.allowUnowned) {
           return { gameState, applied: false, reason: 'skill_not_owned' };
@@ -3662,7 +3605,6 @@
       ? usedSkill.skillId
       : (typeof usedSkill.id === 'number' ? usedSkill.id : (SKILLS[usedSkill.id] ? SKILLS[usedSkill.id].skillId : null));
 
-    // 조각 22: 스킬 사용 가능 대상 검사 (원작-대조표-2 103행: Skill::CanActivate @ 00060100)
     // 대상이 없으면 사용 및 쿨다운 소모 안 함
     if (!options.force && sId != null && !hasValidSkillTarget(gameState, sId)) {
       return { gameState, applied: false, reason: 'no_valid_target', skill: usedSkill };
@@ -3701,7 +3643,6 @@
       eventDetail = { type: 'steal', skillId: 0, name: '약탈' };
 
     } else if (sId === 1 || usedSkill.key === 'freeze') {
-      // 1: 빙결 - 판의 모든 적 동결(isFrozen) 및 이번 턴 공격 차단 (원작 FreezeSkulls @ 00029eb0)
       activeEffects.freezeTurn = true;
       let frozenCount = 0;
       for (let y = 0; y < boardH; y++) {
@@ -3781,7 +3722,6 @@
       eventDetail = { type: 'counterattack', skillId: 4, name: '반격 태세' };
 
     } else if (sId === 5 || usedSkill.key === 'shatter') {
-      // 5: 방어구 파쇄 - 일반 적만 방어 0, 공격 > 1일 때 1 (원작 ShatterDefence @ 00028554)
       let count = 0;
       for (let y = 0; y < boardH; y++) {
         for (let x = 0; x < boardW; x++) {
@@ -3796,7 +3736,6 @@
       eventDetail = { type: 'shatter', skillId: 5, count };
 
     } else if (sId === 6 || usedSkill.key === 'golden_touch') {
-      // 6: 황금 변환 - 화살 제외 칼만 코인으로 변환 및 상태 초기화 (원작 ConvertTiles @ 0002a440)
       let count = 0;
       for (let y = 0; y < boardH; y++) {
         for (let x = 0; x < boardW; x++) {
@@ -5522,7 +5461,6 @@
   /**
    * 단일 타일 객체 생성
    * 조각 11: 퍽 1(마나 물약 5%), 퍽 6(화살 5%), 결함 7(파손 방패 3%), 결함 3(적 체력 +1)
-   * 조각 21: 보충 때 활성 퍽·결함 전달 누락 및 빈 배열 우선순위 수정, 보충 생성 적의 승급 타이머 검사(IsTimeToPromote)
    */
   function createRandomTile(randomFn, x, y, id, tileTypes, turn = 1, weights = null, enemyStats = {}, options = {}) {
     let type = pickRandomTileType(randomFn, tileTypes, weights);
@@ -5578,7 +5516,6 @@
       if (options.allowLegacySpecialSpawn && !stats.specialType && stats.allowSpecial !== false && shouldSpawnSpecialEnemy(turn, randomFn)) {
         stats.specialType = pickRandomSpecialEnemyType(randomFn);
       }
-      // 조각 11 & 조각 21 (원작-대조표-2 207행): 결함 3 (교활한 적들) - 일반 적 체력 +1
       if (activeFlaws.includes(3)) {
         const curve = calculateEnemyCurve(turn, stats.difficulty != null ? stats.difficulty : 1, stats.L || 0, randomFn);
         const baseH = stats.hp != null ? stats.hp : curve.hp;
@@ -5587,7 +5524,6 @@
         stats.baseHp = stats.hp;
       }
 
-      // 조각 21 (원작-대조표-2 238행): 승급은 보충 중 생성되는 적이 타이머를 검사 (IsTimeToPromote @ 000250b0 → SetType → Promote)
       const promotionState = options.promotionState || (options.promotionCooldown != null ? options : (enemyStats.promotionState || null));
       const shouldCheckPromotion = Boolean(
         promotionState &&
@@ -5806,7 +5742,6 @@
    * 다음 칸으로 체인을 연장할 수 있는지 검사
    * - 규칙 2: 칼 줄에는 적 칸을 이을 수 있음. 적만으로 이은 줄도 가능.
    * - 방패, 물약, 코인은 같은 종류끼리만 연결.
-   * - 조각 4 & 조각 19(대조표 44행): 얼어붙은 칸 검사 (원작: 동결된 적은 선택/연결 허용)
    */
   function canConnect(board, path, nextPos) {
     if (!board || !nextPos) return false;
@@ -5814,7 +5749,6 @@
     const width = board[0] ? board[0].length : 0;
     if (!isInside(nextPos, width, height)) return false;
 
-    // 조각 4 & 조각 19(대조표 44행): 얼어붙은 칸 검사 (원작: 동결된 적은 선택/연결 허용)
     const nextTile = getTile(board, nextPos);
     if (!nextTile || (nextTile.isFrozen && nextTile.type !== 'enemy')) {
       return false;
@@ -5956,7 +5890,6 @@
       weaponAtk *= options.boostWeaponAtk;
     }
 
-    // 조각 12 & 조각 19(대조표 59행): 종족 8 (용혈 고블린) - 숙적 8(빙결괴물)이 판에 있으면 기본 공격력 절반 (원작: 하한 없음)
     const raceId = player.raceId != null ? player.raceId : ((options && options.raceId != null) ? options.raceId : 0);
     let effectiveBaseAtk = baseAtk;
     if (raceId === 8 && (options.hasMortalEnemy8 || isMortalEnemyOnBoard(board, 8))) {
@@ -6138,7 +6071,6 @@
         const runnerTokens = (killed && isOriginalRunner) ? randomInt(15, 25, randomFn) : 0;
 
         // 조각 18 & 조각 20(대조표-2 141행): 특수 적 ID 32 (리치)
-        // AttackSkull @ 0002f630: 사망 대신 상태1·공격/방어/독0·HP1·이번 턴 부활유예
         let transformedToPhylactery = false;
         if (killed && tile.specialId === 32) {
           tile.isPhylactery = true;
@@ -6148,7 +6080,6 @@
           tile.armor = 0;
           tile.poison = 0;
           tile.isPoisoned = false;
-          // 조각 18 호환: 원작 규칙(턴/난이도/useOriginalRules) 활성화 시에만 부활 유예 플래그 부여
           const useOriginalLich = Boolean(options && (options.useOriginalRules || options.turn != null || options.difficulty != null));
           tile.revivalGrace = useOriginalLich;
           transformedToPhylactery = true;
@@ -6259,7 +6190,6 @@
     }
 
     // 조각 17 & 조각 20(대조표-2 130행): 특수 적 ID 21 (복수자)
-    // AddRevengeHealth @ 0002d294: 생존 ID 21 공격 += 이번 AttackSkull 처치 카운터
     const totalKills = killedPositions.length;
     let vengefulBoostedCount = 0;
     if (totalKills > 0 && board && Array.isArray(board)) {
@@ -6301,7 +6231,6 @@
   }
 
   /**
-   * 보드 위의 적 반격 공격력 합산 (규칙 4번 & 조각 7 원작 정렬)
    * 이번 턴에 처치된 적은 반격하지 않음
    * 조각 7 적 공격 규칙:
    * - 공격 가능 = 적 칸, 표식 없음(!marked), 동결 아님(!isFrozen), 공격력 > 0
@@ -6349,7 +6278,6 @@
         const tile = board[y][x];
         // 조각 7 & 조각 19: 공격 가능 판정 (동결 아님, 표식 없음, 이번 턴 새로 보충된 적 아님, 적 칸, 체력 > 0)
         if (tile && tile.type === 'enemy' && tile.hp > 0 && !tile.marked && !tile.isFrozen && !tile.spawnedThisTurn) {
-          // 조각 4 호환: 원작 ID가 없는 레거시 폭탄병(specialType === 'bomb')은 폭발 턴(카운트다운 1 이하)에 일반 반격을 하지 않음
           if (tile.specialId == null && tile.specialType === 'bomb' && (tile.countdown == null || tile.countdown <= 1)) {
             continue;
           }
@@ -6415,7 +6343,6 @@
   }
 
   /**
-   * 반격 피해를 플레이어에게 적용 (규칙 4번 & 조각 17 원작 정렬)
    * 방패(armor)가 먼저 흡수 -> 남은 피해만 체력(hp)을 깎음 -> 체력 0 이하면 게임 오버
    * 조각 17: 방패 막은 피해마다 내구 판정 (기본 손상 확률 50%, ID 29 존재 시 내구 0으로 100% 손상)
    */
@@ -6466,7 +6393,6 @@
 
   /**
    * 조각 4 & 조각 9: 턴 종료 시 특수 적 능력 발동 및 환경 효과 (규칙 8번)
-   * 조각 9 원작 번호 지원:
    * - 3 도망: 카운트 5, 0이면 도망, 처치 시 코인 토큰 R(15,25)
    * - 4 치유/축복: 다친 적 최대 2명 완전 회복, 없으면 다른 적 최대 2명 공격+1
    * - 6 산성: 물약 1개를 산성 물약으로 변환
@@ -6528,8 +6454,6 @@
       }
     }
 
-    // 조각 12 & 조각 21 (원작-대조표-2 223행): 종족 7 (늑대 고블린) - 쇠약화 (ProcessCripples @ 0002f558)
-    // 원작 순서: 특수 적 능력들 실행 '전에', specialId == 0인 '일반 적'만 체력이 방어력보다 낮으면 즉시 처치
     if (player && player.raceId === 7) {
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
@@ -6571,7 +6495,6 @@
         ? Math.floor(enemy.specialId)
         : null;
 
-      // 조각 9: 원작 번호 ID가 명시된 경우 원작 번호 규칙 우선 실행
       if (sId != null) {
         if (sId === 3) {
           // 3 도망: 매 실행 카운트 -1, 0이면 도망 (처치 시 코인 토큰 R(15,25))
@@ -6801,7 +6724,6 @@
           }
         } else if (sId === 13) {
           // 조각 18 & 조각 20(대조표-2 122행): 13 도둑괴물
-          // StealGold @ 00034a68 / 000348e8: 코인 있으면 최대 2칸만; 없을 때 소지골드 최대 2점·숙적이면 점당 공격 HP피해
           const thiefAtk = enemy.atk != null ? enemy.atk : 1;
           const playerRaceId = (player && player.raceId != null) ? player.raceId : 0;
           const isMortalSauren = (playerRaceId === 3 || getMortalEnemyForRace(playerRaceId) === 13);
@@ -6832,7 +6754,6 @@
               stolenCoins++;
             }
           } else {
-            // 코인이 전혀 없을 때만 소지골드 최대 2점 훔침 (원작: StealGold @ 00034a68 / 000348e8)
             const useOriginal = Boolean(options && (options.useOriginalRules || options.difficulty != null || options.turn != null || player?.useOriginalRules));
             const maxGoldSteal = useOriginal ? 2 : 5;
             const goldAmount = Math.min(maxGoldSteal, Math.max(0, (player && player.gold) || 0));
@@ -6859,7 +6780,6 @@
           });
         } else if (sId === 14) {
           // 조각 18 & 조각 20(대조표-2 123행): 14 혼돈괴물
-          // JumpEnemy @ 0002f370: 일반 적/비적·미매칭 칸만 착지 후보; 교환 후 원래 자리의 착지 타일 소멸
           const removedKeys = new Set(tilesToRemove.map(t => `${t.x},${t.y}`));
           const validPositions = [];
           for (let y = 0; y < height; y++) {
@@ -6902,7 +6822,6 @@
           }
         } else if (sId === 16) {
           // 조각 18 & 조각 20(대조표-2 125행): 16 암살괴물
-          // StabAttack @ 0002f250: 숙적 16이면 아래 칸 특수적 여부 검사 후 그 칸 보상없이 매칭; 맨아래서 공격×2 HP피해
           const playerRaceId = (player && player.raceId != null) ? player.raceId : 0;
           const isMortalFaun = (playerRaceId === 4 || getMortalEnemyForRace(playerRaceId) === 16);
 
@@ -6951,7 +6870,6 @@
           });
         } else if (sId === 18) {
           // 조각 18 & 조각 20(대조표-2 127행): 18 연금술사
-          // ConvertRandomTiles @ 0002e6bc: 미매칭 일반칸 최대 2개 RandomiseTile (5종 재추첨이므로 같은 종류·적도 가능)
           const removedKeys = new Set(tilesToRemove.map(t => `${t.x},${t.y}`));
           const candidates = [];
           for (let y = 0; y < height; y++) {
@@ -6997,7 +6915,6 @@
           });
         } else if (sId === 19) {
           // 조각 18 & 조각 20(대조표-2 128행): 19 불안정괴물
-          // 초기 5, 매 턴 -1, 0이면 TeleportEnemy @ 00029ad8로 자기 포함 판 전체 제거·재생성
           const playerRaceId = (player && player.raceId != null) ? player.raceId : 0;
           const isMortalEnemy = (playerRaceId === 9 || getMortalEnemyForRace(playerRaceId) === 19);
 
@@ -7080,7 +6997,6 @@
           }
         } else if (sId === 23) {
           // 조각 18 & 조각 20(대조표-2 132행): 23 기름진 자
-          // LowerSkulls @ 0002f154: 열마다 적 바로 아래 비적 칸을 찾아 하나 보상없이 소멸, 이후 낙하
           const removedKeys = new Set(tilesToRemove.map(t => `${t.x},${t.y}`));
           let lowerConsumedCount = 0;
           for (let x = 0; x < width; x++) {
@@ -7108,7 +7024,6 @@
           });
         } else if (sId === 24) {
           // 조각 18 & 조각 20(대조표-2 133행): 24 우두머리
-          // AttractSkulls @ 0002e22c: 먼 적과 주변 비적 중 각각 무작위 추첨·교환
           const neighbors = getNeighbors({ x: enemy.x, y: enemy.y }, width, height);
           const nonEnemyNeighbors = neighbors.filter(n => {
             const t = board[n.y][n.x];
@@ -7170,7 +7085,6 @@
           });
         } else if (sId === 25) {
           // 조각 18 & 조각 20(대조표-2 134행): 25 자석괴물
-          // AttractShieldsSwords @ 0002defc: 먼 칼/방패와 주변 기타칸을 무작위 쌍으로 교환
           const neighbors = getNeighbors({ x: enemy.x, y: enemy.y }, width, height);
           const nonResourceNeighbors = neighbors.filter(n => {
             const t = board[n.y][n.x];
@@ -7231,7 +7145,6 @@
           });
         } else if (sId === 26) {
           // 조각 18 & 조각 20(대조표-2 135행): 26 난폭자
-          // ThrowSkull @ 0002eeb0: 미매칭·미표식 일반 적만 골라 HP값의 직접 HP피해 토큰
           const removedKeys = new Set(tilesToRemove.map(t => `${t.x},${t.y}`));
           const otherNormalEnemies = [];
           for (let y = 0; y < height; y++) {
@@ -7265,7 +7178,6 @@
           }
         } else if (sId === 28) {
           // 조각 18 & 조각 20(대조표-2 137행): 28 포식자
-          // 5턴마다 DestroyUpgrade @ 0002ecb8 → 무작위 장비의 양수 강화 스탯 ReduceStat
           const currentCd = enemy.countdown != null ? enemy.countdown : 5;
           const nextCd = Math.max(0, currentCd - 1);
           enemy.countdown = nextCd;
@@ -7715,7 +7627,6 @@
   }
 
   /**
-   * 한 턴 전체 처리 (조각 3 확장 및 조각 8 원작 정렬 지원)
    * 체인 판정 -> 자원 획득(방패·물약·코인) 또는 공격/피해 계산
    * -> 타일 제거/낙하/보충 -> 적 반격 -> 방패/체력 깎임 -> 게임 오버 판정
    * -> 게이지 만땅 시 일시정지 + 선택 대기 상태(pendingChoice)
@@ -7968,15 +7879,12 @@
     const initialFlaws = (player && Array.isArray(player.flaws) ? player.flaws.filter(f => f != null) : []);
     const initialPerks = (player && Array.isArray(player.perks) ? player.perks.filter(p => p != null) : []);
 
-    // 조각 21 (원작-대조표-2 238행): 승급은 보충 중 생성되는 적이 타이머를 검사
     const promotionState = {
       promotionCooldown: initialPromotionCooldown,
       promoted: false,
       promotedEnemy: null
     };
 
-    // ── 조각 19(대조표 72행): 원작 턴 처리 순서 개편 ──
-    // 1. 일반 매칭 직후 1차 낙하·보충 실행 (MoveMatchedTiles)
     // 조각 18: 특수 적 ID 31 (도주자) 강제 하강 감지용 이전 y 좌표 맵
     const prevYMap31 = new Map();
     for (let y = 0; y < board.length; y++) {
@@ -8002,7 +7910,6 @@
 
     let newBoard = chainResult.board;
 
-    // 조각 20(대조표-2 140행): 특수 적 ID 31 (도주자) 1차 낙하 피해 검사 (MoveMatchedTiles @ 0002fd7c → Stab @ 0002fcd8)
     let fallDmg1 = 0;
     for (let y = 0; y < newBoard.length; y++) {
       for (let x = 0; x < newBoard[y].length; x++) {
@@ -8042,7 +7949,6 @@
     player.hp = counterResult.newHp;
 
     // 조각 17 & 조각 19 & 조각 20(대조표-2 76·118행): 특수 적 ID 9 (맹독)
-    // ProcessAttack @ 000311b8: 막지 못한 경우(hpDamage > 0) 독량 갱신
     if (counterResult.hpDamage > 0 && counterattackInfo.attackingEnemies && counterattackInfo.attackingEnemies.length > 0) {
       let id9AtkSum = 0;
       for (const att of counterattackInfo.attackingEnemies) {
@@ -8058,7 +7964,6 @@
     }
 
     // 조각 20(대조표-2 129행): 특수 적 ID 20 (흡혈귀)
-    // ProcessVampires @ 0002d18c: HP 피해 처리 분기(hpDamage > 0)에서 생존 ID 20에 GetAttack만큼 회복; 숙적이면 상한 없음
     if (counterResult.hpDamage > 0 && newBoard && Array.isArray(newBoard)) {
       const isWerewolfMortal = (player.raceId === 7 || getMortalEnemyForRace(player.raceId) === 20);
       for (let y = 0; y < newBoard.length; y++) {
@@ -8091,7 +7996,6 @@
       }
     }
 
-    // ── 3. EndOfTurn ──
     const burnedPositions = [];
     const poisonedPositions = [];
     let abilityResult = { tilesToRemove: [], totalSpecialDamage: 0 };
@@ -8185,7 +8089,6 @@
           }
         }
 
-        // 특수 적 능력 실행 (ActivateAbility)
         abilityResult = activateSpecialAbilities(newBoard, player, randomFn, {
           turn,
           difficulty,
@@ -8258,7 +8161,6 @@
           }
         }
 
-        // 조각 20(대조표-2 117행): 원작은 ID 8 처치 시 즉시 해제하지 않음 (레거시 비원작 모드에서만 호환)
         if (!useOriginalRules && killedIceMage) {
           for (let y = 0; y < newBoard.length; y++) {
             for (let x = 0; x < newBoard[y].length; x++) {
@@ -8312,7 +8214,6 @@
         currentExp = xpRes.currentValue;
         currentAccumulatedExp = xpRes.accumulatedValue;
         if (xpRes.openedMenu && !counterResult.isGameOver) {
-          // 조각 21 (원작-대조표-2 220행): 종족 4 (뿔 고블린) - 레벨업 메뉴가 열릴 때 체력이 25% 미만이면 최대 체력의 25%로 즉시 회복
           if (player.raceId === 4 && counterResult.newHp < (player.maxHp || 40) * 0.25) {
             counterResult.newHp = Math.floor((player.maxHp || 40) * 0.25);
             player.hp = counterResult.newHp;
@@ -8331,7 +8232,6 @@
       currentExp += gainedExp;
       while (currentExp >= currentMaxExp && !counterResult.isGameOver) {
         currentExp -= currentMaxExp;
-        // 조각 21 (원작-대조표-2 220행): 종족 4 (뿔 고블린) 레벨업 시 즉시 회복
         if (player.raceId === 4 && counterResult.newHp < (player.maxHp || 40) * 0.25) {
           counterResult.newHp = Math.floor((player.maxHp || 40) * 0.25);
           player.hp = counterResult.newHp;
@@ -8431,8 +8331,6 @@
       }
     }
 
-    // 조각 18 & 조각 21: 결함 8 (적들의 광기)은 특수 적 1턴 일찍 등장 (원작 타이머 방식: 새 대기 -1 시 최소 1)
-    // 조각 21 (원작-대조표-2 238행): 보충 중 적 승급이 이미 발생했으면 새 대기를 유지하고, 보충 중 승급이 없었으면 턴 종료 타이머 1 감소
     let currentPromotionCooldown;
     let promotedEnemyInfo = null;
     const playerFlaws = (player && Array.isArray(player.flaws) ? player.flaws.filter(f => f != null) : []);
@@ -8490,7 +8388,6 @@
             id: newBoard[chosenTarget.y][chosenTarget.x].id
           };
           let nextCooldown = calculateNextPromotionCooldown(turn + 1, difficulty, playerL, randomFn);
-          // 조각 18 & 조각 21 (원작-대조표-2 212행): 결함 8 새 대기 -1 시 최소 1
           if (playerFlaws.includes(8)) {
             nextCooldown = Math.max(1, nextCooldown - 1);
           }
@@ -8543,7 +8440,6 @@
       activeEffects: {}
     };
 
-    // 조각 10 & 조각 17: EndOfTurn 마지막 단계 - 판 진행 자동 저장 또는 게임 오버 시 삭제
     try {
       const storageToUse = options && options.storage ? options.storage : null;
       if (!nextGameState.isGameOver) {

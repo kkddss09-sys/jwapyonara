@@ -2257,7 +2257,7 @@
       <button id="tab-stage-10" class="stage-tab-btn" type="button">👑 10스테이지 (영주)</button>
     </div>
 
-    <!-- 조각 11: 던전 레이드 장비 스탯 & 3대 게이지 막대 -->
+    <!-- 조각 11: 고블린 레이드 장비 스탯 & 3대 게이지 막대 -->
     <div id="raid-hud" class="raid-hud" style="display: none;">
       <div class="raid-stats-row">
         <div class="raid-stat-pill" title="플레이어 레벨"><span class="raid-stat-icon">🧌</span> <span id="raid-player-level">Lv.1</span></div>
@@ -2422,7 +2422,7 @@
       같은 칸 3개 이상을 이어요. 칼로 몬스터까지 이으면 몬스터가 맞아요. 몬스터만 이어도 돼요. 끝까지 버텨서 점수를 올려요.
     </div>
 
-    <!-- 조각 10: 던전 레이드 규칙 가이드 (접기 가능, localStorage 기억) -->
+    <!-- 조각 10: 고블린 레이드 규칙 가이드 (접기 가능, localStorage 기억) -->
     <div id="raid-guide-box" class="raid-guide-box" style="display: none;">
       <div class="raid-guide-content">
         <span class="guide-icon">💡</span>
@@ -3130,7 +3130,7 @@
       function updateBattleUI() {
         updateProfileUI();
 
-        // 조각 10 & 11: 던전 레이드 모드 (판 위 몬스터 칸, 6x6 무한 서바이벌, 3대 게이지 막대)
+        // 조각 10 & 11: 고블린 레이드 모드 (판 위 몬스터 칸, 6x6 무한 서바이벌, 3대 게이지 막대)
         if (currentMode === 'normal' && raidState) {
           if (raidHud) raidHud.style.display = 'flex';
 
@@ -3570,7 +3570,7 @@
         battleModal.style.display = 'none';
       }
 
-      // 조각 10: 던전 레이드 게임 오버 전용 팝업 (점수, 최고기록, 처치수, 버틴턴, 다시 시작)
+      // 조각 10: 고블린 레이드 게임 오버 전용 팝업 (점수, 최고기록, 처치수, 버틴턴, 다시 시작)
       function showRaidGameOverModal(state) {
         modalPromoBanner.style.display = 'none';
         modalIcon.textContent = '💀';
@@ -4185,7 +4185,7 @@
         var pathToResolve = currentPath;
         currentPath = [];
 
-        // 조각 9: 던전 레이드 규칙 해결
+        // 조각 9: 고블린 레이드 규칙 해결
         if (currentMode === 'normal' && raidState) {
           if (pathToResolve.length >= 3) {
             var nextState = GoblinCore.resolveRaidChain(raidState, pathToResolve, rng);
