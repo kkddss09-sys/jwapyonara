@@ -1295,12 +1295,12 @@
         slot.className = 'skill-cell empty';
         slot.innerHTML = '<span class="skill-cell-icon">➕</span><span class="skill-cell-name">빈 슬롯</span>';
       } else {
-        const isReady = (sk.currentCooldown || 0) <= 0;
+        const isReady = (sk.currentCooldown || 0) <= 0 && GR.canUseSkill(gameState.player, i, gameState);
         slot.className = `skill-cell ${isReady ? 'ready' : 'cooldown'}`;
         slot.innerHTML = `
           <span class="skill-cell-icon">${sk.icon || '⚔️'}</span>
           <span class="skill-cell-name">${sk.name}</span>
-          ${!isReady ? `<span class="skill-cell-badge">${sk.currentCooldown}</span>` : ''}
+          ${!isReady ? `<span class="skill-cell-badge">${sk.currentCooldown || (GR.canUseSkill(gameState.player, i, gameState) ? '' : '✕')}</span>` : ''}
         `;
         if (isReady && !gameState.isGameOver && !gameState.pendingChoice && !isAnimating) {
           slot.title = `${sk.desc} (클릭하여 사용)`;
@@ -1313,8 +1313,10 @@
                 logText += ` 🔥 화염 숨결! 적에게 불이 붙었습니다.`;
               }
               logBox.innerHTML = logText;
-              triggerLevelupEffect();
               renderBoard();
+              renderUI();
+            } else if (res.reason === 'no_valid_target') {
+              logBox.innerHTML = `⚠️ <strong>[${sk.name}]</strong> 사용할 대상이 없습니다.`;
             }
           });
         }
@@ -1342,6 +1344,10 @@
         if (tile.isBurning) cell.classList.add('burning');
         if (tile.isAcid) cell.classList.add('acid');
         if (tile.isPoisoned) cell.classList.add('poisoned');
+        if (tile.isBroken) cell.classList.add('broken');
+        if (tile.isArrow) cell.classList.add('arrow');
+        if (tile.isManaPotion) cell.classList.add('mana-potion');
+        if (tile.isPhylactery || tile.type === 'phylactery') cell.classList.add('phylactery');
 
         // 타일 SVG (시안 D & 조각 9 원작 특수 적 아이콘)
         let svgPath = '';
@@ -2217,7 +2223,8 @@
       raceId: currentRaceId,
       unlockData,
       perks,
-      flaws
+      flaws,
+      profile: prof
     });
     modalGameover.classList.remove('show');
     const cDef = GR.CLASSES[currentClassId] || GR.CLASSES.adventurer;

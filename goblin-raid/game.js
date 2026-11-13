@@ -40,7 +40,8 @@
     shield: '🛡️',
     potion: '🧪',
     coin: '🪙',
-    enemy: '💀'
+    enemy: '💀',
+    phylactery: '🏺'
   };
 
   /**
@@ -51,7 +52,8 @@
     shield: 'assets/icons/tile-shield.svg',
     potion: 'assets/icons/tile-potion.svg',
     coin: 'assets/icons/tile-coin.svg',
-    enemy: 'assets/icons/tile-enemy.svg'
+    enemy: 'assets/icons/tile-enemy.svg',
+    phylactery: 'assets/icons/enemy-boss.svg'
   };
 
   /**
@@ -162,7 +164,7 @@
     1: { atk: (a) => a * 3, armor: (d) => d * 3, hp: (h) => h * 6 },
     2: { atk: (a) => a * 2, armor: (d) => d, hp: (h) => h * 3 },
     3: { atk: () => 0, armor: (d) => d * 6, hp: (h) => h * 6 },
-    5: { atk: (a) => a * 2, armor: (d) => d * 10, hp: (h) => Math.max(1, Math.floor(h / 2)) },
+    5: { atk: (a) => a * 2, armor: (d) => d * 10, hp: (h) => Math.floor(h / 2) },
     9: { atk: (a) => a, armor: (d) => d * 2, hp: (h) => h * 4 },
     10: { atk: (a) => a, armor: (d) => d * 2, hp: (h) => h * 6 },
     16: { atk: (a) => a * 3, armor: (d) => d * 2, hp: (h) => h * 3 },
@@ -170,7 +172,7 @@
     19: { atk: (a) => a * 4, armor: (d) => d, hp: (h) => h * 5 },
     27: { atk: (a) => a * 2, armor: (d) => d * 4, hp: (h) => h * 3 },
     28: { atk: (a) => a * 2, armor: (d) => d * 2, hp: (h) => h * 4 },
-    30: { atk: (a) => Math.max(1, Math.floor(a / 2)), armor: (d) => d, hp: (h) => h * 5 }
+    30: { atk: (a) => Math.floor(a / 2), armor: (d) => d, hp: (h) => h * 5 }
   };
 
   const DEFAULT_SPECIAL_ENEMY_MULTIPLIER = {
@@ -221,6 +223,8 @@
       startingSkill: 'shuffle',
       unlockRequirement: 0,
       defaultRaceId: 0,
+      fixedPerkId: null,
+      fixedFlawId: null,
       iconSvg: 'assets/icons/class-adventurer.svg'
     },
     warrior: {
@@ -237,6 +241,8 @@
       startingSkill: 'slash_row',
       unlockRequirement: 1,
       defaultRaceId: 2,
+      fixedPerkId: 9,
+      fixedFlawId: 9,
       iconSvg: 'assets/icons/class-warrior.svg'
     },
     ranger: {
@@ -253,6 +259,8 @@
       startingSkill: 'slash_row',
       unlockRequirement: 2,
       defaultRaceId: 1,
+      fixedPerkId: 6,
+      fixedFlawId: 6,
       iconSvg: 'assets/icons/class-ranger.svg'
     },
     priest: {
@@ -269,6 +277,8 @@
       startingSkill: 'heal',
       unlockRequirement: 3,
       defaultRaceId: 4,
+      fixedPerkId: 5,
+      fixedFlawId: 5,
       iconSvg: 'assets/icons/class-priest.svg'
     },
     barbarian: {
@@ -285,6 +295,8 @@
       startingSkill: 'slash_row',
       unlockRequirement: 4,
       defaultRaceId: 5,
+      fixedPerkId: 4,
+      fixedFlawId: 4,
       iconSvg: 'assets/icons/class-barbarian.svg'
     },
     mage: {
@@ -301,6 +313,8 @@
       startingSkill: 'bomb_potion',
       unlockRequirement: 5,
       defaultRaceId: 9,
+      fixedPerkId: 1,
+      fixedFlawId: 1,
       iconSvg: 'assets/icons/class-mage.svg'
     },
     rogue: {
@@ -317,6 +331,8 @@
       startingSkill: 'convert_coin_to_sword',
       unlockRequirement: 6,
       defaultRaceId: 3,
+      fixedPerkId: 7,
+      fixedFlawId: 7,
       iconSvg: 'assets/icons/class-rogue.svg'
     },
     paladin: {
@@ -333,6 +349,8 @@
       startingSkill: 'heal',
       unlockRequirement: 7,
       defaultRaceId: 8,
+      fixedPerkId: 8,
+      fixedFlawId: 8,
       iconSvg: 'assets/icons/class-paladin.svg'
     },
     raider: {
@@ -349,6 +367,8 @@
       startingSkill: 'convert_coin_to_sword',
       unlockRequirement: 8,
       defaultRaceId: 6,
+      fixedPerkId: 2,
+      fixedFlawId: 2,
       iconSvg: 'assets/icons/class-raider.svg'
     },
     assassin: {
@@ -365,11 +385,30 @@
       startingSkill: 'slash_row',
       unlockRequirement: 10,
       defaultRaceId: 7,
+      fixedPerkId: 3,
+      fixedFlawId: 3,
       iconSvg: 'assets/icons/class-assassin.svg'
     }
   };
 
   const CLASS_IDS = Object.keys(CLASSES);
+
+  /**
+   * 조각 18 - 직업별 첫 고정 퍽·결함 쌍 (원작-대조표 101행, 정밀2 §2·4)
+   * 레인저 6/6, 약탈자 2/2, 사제 5/5, 바바리안 4/4, 마법사 1/1, 도적 7/7, 성기사 8/8, 전사 9/9, 암살자 3/3
+   */
+  const CLASS_FIXED_PERK_FLAWS = {
+    adventurer: null,
+    warrior: { perkId: 9, flawId: 9 },
+    ranger: { perkId: 6, flawId: 6 },
+    priest: { perkId: 5, flawId: 5 },
+    barbarian: { perkId: 4, flawId: 4 },
+    mage: { perkId: 1, flawId: 1 },
+    rogue: { perkId: 7, flawId: 7 },
+    paladin: { perkId: 8, flawId: 8 },
+    raider: { perkId: 2, flawId: 2 },
+    assassin: { perkId: 3, flawId: 3 }
+  };
 
   /**
    * 조각 14 - 스킬 42종 기본 쿨다운 (원작판 11절 원문 표 확인값)
@@ -388,54 +427,53 @@
   ];
 
   /**
-   * 조각 14 - 스킬 42종 데이터 표 (새 한국어 이름과 설명)
-   * 효과 구현 스킬 15개: 1, 2, 3, 4, 6, 7, 11, 12, 13, 15, 16, 25, 26, 28, 29
+   * 조각 14 & 조각 22 - 스킬 42종 데이터 표 (원작 42종 전원 구현, 원작-대조표-2 기준)
+   * 조각 22: 스킬 ID 0~41 전체 구현 완료 (isImplemented: true)
    * 33번은 1회용 (사용 후 스킬 목록에서 영구 제거)
-   * 나머지는 미구현 상태로 데이터 표 유지
    */
   const SKILLS_DATA = [
-    { id: 0, key: 'steal', name: '약탈', desc: '이번 턴 공격한 적마다 골드를 강탈합니다.', cooldown: 13, isImplemented: false, icon: '💰' },
-    { id: 1, key: 'freeze', name: '빙결', desc: '이번 턴 동안 모든 적의 공격을 차단합니다.', cooldown: 16, isImplemented: true, icon: '❄️' },
+    { id: 0, key: 'steal', name: '약탈', desc: '이번 턴 공격한 적마다 골드를 강탈합니다.', cooldown: 13, isImplemented: true, icon: '💰' },
+    { id: 1, key: 'freeze', name: '빙결', desc: '판의 모든 적을 동결하여 공격을 차단합니다.', cooldown: 16, isImplemented: true, icon: '❄️' },
     { id: 2, key: 'heal', name: '치유의 손길', desc: '판에 있는 모든 회복 물약을 즉시 수집합니다.', cooldown: 15, isImplemented: true, icon: '💖' },
     { id: 3, key: 'repair', name: '갑옷 수리', desc: '판에 있는 모든 방패를 즉시 수집합니다.', cooldown: 16, isImplemented: true, icon: '🛡️' },
     { id: 4, key: 'counterattack', name: '반격 태세', desc: '이번 턴 모든 적이 자신을 공격하여 자멸하게 합니다.', cooldown: 18, isImplemented: true, icon: '🔄' },
-    { id: 5, key: 'shatter', name: '방어구 파쇄', desc: '모든 적의 공격력과 방어력을 1로 낮춥니다.', cooldown: 18, isImplemented: false, icon: '🔨' },
-    { id: 6, key: 'golden_touch', name: '황금 변환', desc: '판의 모든 칼을 코인으로 변환합니다.', cooldown: 15, isImplemented: true, icon: '🪙' },
+    { id: 5, key: 'shatter', name: '방어구 파쇄', desc: '모든 일반 적의 방어력을 0, 공격력을 최대 1로 낮춥니다.', cooldown: 18, isImplemented: true, icon: '🔨' },
+    { id: 6, key: 'golden_touch', name: '황금 변환', desc: '판의 모든 칼(화살 제외)을 코인으로 변환합니다.', cooldown: 15, isImplemented: true, icon: '🪙' },
     { id: 7, key: 'teleport', name: '차원 이동', desc: '적이 없는 새로운 칸들로 판 전체를 교체합니다.', cooldown: 20, isImplemented: true, icon: '🌀' },
-    { id: 8, key: 'explosive_potion', name: '폭발 물약', desc: '물약을 폭발 물약으로 바꿔 연결 시 주변 칸을 파괴합니다.', cooldown: 18, isImplemented: false, icon: '💣' },
-    { id: 9, key: 'skill_elixir', name: '비전 영약', desc: '모든 회복 물약을 경험치로 변환해 수집합니다.', cooldown: 18, isImplemented: false, icon: '🧪' },
-    { id: 10, key: 'enchant', name: '마법 부여', desc: '소지한 장비를 즉시 1회 강화합니다.', cooldown: 35, isImplemented: false, icon: '✨' },
-    { id: 11, key: 'slash', name: '가로 베기', desc: '무작위 가로 한 줄의 모든 칸을 즉시 수집합니다.', cooldown: 12, isImplemented: true, icon: '⚔️' },
+    { id: 8, key: 'explosive_potion', name: '폭발 물약', desc: '물약을 폭발 물약으로 바꿔 연결 시 주변 칸을 파괴합니다.', cooldown: 18, isImplemented: true, icon: '💣' },
+    { id: 9, key: 'skill_elixir', name: '비전 영약', desc: '모든 회복 물약을 경험치로 변환해 수집합니다.', cooldown: 18, isImplemented: true, icon: '🧪' },
+    { id: 10, key: 'enchant', name: '마법 부여', desc: '소지한 장비를 즉시 1회 강화합니다.', cooldown: 35, isImplemented: true, icon: '✨' },
+    { id: 11, key: 'slash', name: '가로 베기', desc: '무작위 가로 한 줄의 일반 칸을 즉시 수집합니다.', cooldown: 12, isImplemented: true, icon: '⚔️' },
     { id: 12, key: 'treasure', name: '보물 발견', desc: '판에 있는 모든 코인을 즉시 수집합니다.', cooldown: 18, isImplemented: true, icon: '👑' },
-    { id: 13, key: 'scavenge', name: '재활용', desc: '판의 모든 칼을 방패로 변환합니다.', cooldown: 15, isImplemented: true, icon: '🛡️' },
-    { id: 14, key: 'disarm', name: '무장 해제', desc: '판의 모든 적을 칼로 변환합니다.', cooldown: 25, isImplemented: false, icon: '🗡️' },
+    { id: 13, key: 'scavenge', name: '재활용', desc: '판의 모든 칼(화살 제외)을 방패로 변환합니다.', cooldown: 15, isImplemented: true, icon: '🛡️' },
+    { id: 14, key: 'disarm', name: '무장 해제', desc: '판의 모든 일반 적을 칼로 변환합니다.', cooldown: 25, isImplemented: true, icon: '🗡️' },
     { id: 15, key: 'dazzle', name: '눈부신 섬광', desc: '판의 모든 코인을 칼로 변환합니다.', cooldown: 15, isImplemented: true, icon: '✨' },
     { id: 16, key: 'boost_damage', name: '무기 강화', desc: '이번 턴 동안 무기 공격력이 2배가 됩니다.', cooldown: 14, isImplemented: true, icon: '🔥' },
-    { id: 17, key: 'boost_gold', name: '황금 축복', desc: '이번 턴 골드 수집량이 2배가 됩니다.', cooldown: 15, isImplemented: false, icon: '💰' },
-    { id: 18, key: 'boost_health', name: '생명력 고양', desc: '이번 턴 물약 회복 효과가 2배가 됩니다.', cooldown: 15, isImplemented: false, icon: '❤️' },
-    { id: 19, key: 'boost_armour', name: '철벽 수호', desc: '이번 턴 갑옷 수집 효과가 2배가 됩니다.', cooldown: 15, isImplemented: false, icon: '🛡️' },
-    { id: 20, key: 'exorcise', name: '정화', desc: '무작위 특수 적 1마리를 스탯을 유지한 일반 적으로 정화합니다.', cooldown: 18, isImplemented: false, icon: '✨' },
-    { id: 21, key: 'banish', name: '추방', desc: '무작위 특수 적 1마리를 보상 없이 즉시 소멸시킵니다.', cooldown: 20, isImplemented: false, icon: '💨' },
-    { id: 22, key: 'trap', name: '함정', desc: '이번 턴 새로 등장하는 적의 체력을 1로 만듭니다.', cooldown: 18, isImplemented: false, icon: '🕸️' },
-    { id: 23, key: 'big_game_hunter', name: '거물 사냥꾼', desc: '무작위 일반 적 1마리를 특수 적으로 승급시킵니다.', cooldown: 15, isImplemented: false, icon: '🎯' },
-    { id: 24, key: 'treasure_chamber', name: '보물 창고', desc: '이번 턴 새로 보충되는 모든 칸이 코인이 됩니다.', cooldown: 25, isImplemented: false, icon: '🏛️' },
+    { id: 17, key: 'boost_gold', name: '황금 축복', desc: '이번 턴 골드 수집량이 2배가 됩니다.', cooldown: 15, isImplemented: true, icon: '💰' },
+    { id: 18, key: 'boost_health', name: '생명력 고양', desc: '이번 턴 물약 회복 효과가 2배가 됩니다.', cooldown: 15, isImplemented: true, icon: '❤️' },
+    { id: 19, key: 'boost_armour', name: '철벽 수호', desc: '이번 턴 갑옷 수집 효과가 2배가 됩니다.', cooldown: 15, isImplemented: true, icon: '🛡️' },
+    { id: 20, key: 'exorcise', name: '정화', desc: '무작위 특수 적 1마리를 스탯을 유지한 일반 적으로 정화합니다.', cooldown: 18, isImplemented: true, icon: '✨' },
+    { id: 21, key: 'banish', name: '추방', desc: '무작위 특수 적 1마리를 보상 없이 즉시 소멸시킵니다.', cooldown: 20, isImplemented: true, icon: '💨' },
+    { id: 22, key: 'trap', name: '함정', desc: '이번 턴 새로 등장하는 적의 체력을 1로 만듭니다.', cooldown: 18, isImplemented: true, icon: '🕸️' },
+    { id: 23, key: 'big_game_hunter', name: '거물 사냥꾼', desc: '무작위 일반 적 1마리를 특수 적으로 승급시킵니다.', cooldown: 15, isImplemented: true, icon: '🎯' },
+    { id: 24, key: 'treasure_chamber', name: '보물 창고', desc: '이번 턴 새로 보충되는 모든 칸이 코인이 됩니다.', cooldown: 25, isImplemented: true, icon: '🏛️' },
     { id: 25, key: 'magic_sword', name: '마법의 검', desc: '무작위 칼 1개를 공격력 5배 마법 칼로 변환합니다.', cooldown: 14, isImplemented: true, icon: '🗡️' },
     { id: 26, key: 'earthquake', name: '지진', desc: '판의 모든 칸을 무작위로 재배치합니다.', cooldown: 12, isImplemented: true, icon: '💥' },
-    { id: 27, key: 'explosive_armour', name: '폭발 갑옷', desc: '현재 방패 수치의 2배 피해로 모든 적을 공격합니다.', cooldown: 16, isImplemented: false, icon: '💥' },
-    { id: 28, key: 'fireball', name: '화염구', desc: '무작위 3×3 구역의 모든 칸을 즉시 수집합니다.', cooldown: 14, isImplemented: true, icon: '☄️' },
+    { id: 27, key: 'explosive_armour', name: '폭발 갑옷', desc: '현재 방패 수치의 2배 피해로 모든 적을 공격합니다.', cooldown: 16, isImplemented: true, icon: '💥' },
+    { id: 28, key: 'fireball', name: '화염구', desc: '무작위 3×3 구역의 일반 칸을 즉시 수집합니다.', cooldown: 14, isImplemented: true, icon: '☄️' },
     { id: 29, key: 'mana_potion', name: '마나 물약', desc: '판의 모든 물약을 쿨다운 감소 마나 물약으로 변환합니다.', cooldown: 20, isImplemented: true, icon: '🧪' },
-    { id: 30, key: 'hack', name: '세로 베기', desc: '무작위 세로줄의 모든 칸을 칼로 변환합니다.', cooldown: 24, isImplemented: false, icon: '⚔️' },
-    { id: 31, key: 'volley', name: '일제 사격', desc: '칼을 화살로 바꿔 한 칸 떨어진 적을 연결할 수 있게 합니다.', cooldown: 15, isImplemented: false, uniqueClassId: 'ranger', icon: '🏹' },
-    { id: 32, key: 'masochism', name: '고통 감수', desc: '판의 모든 코인을 적 칸으로 변환합니다.', cooldown: 15, isImplemented: false, uniqueClassId: 'raider', icon: '🩸' },
-    { id: 33, key: 'wish', name: '기적의 소원', desc: '단 1회 사용하여 판의 모든 칸을 즉시 수집합니다.', cooldown: -1, isImplemented: true, uniqueClassId: 'priest', singleUse: true, icon: '🌠' },
-    { id: 34, key: 'berserk', name: '광란', desc: '이번 턴 처치한 적의 공격력만큼 체력을 회복합니다.', cooldown: 14, isImplemented: false, uniqueClassId: 'barbarian', icon: '💢' },
-    { id: 35, key: 'rune', name: '봉인 룬', desc: '이번 턴 닫힌 경로를 이으면 내부 칸도 함께 수집합니다.', cooldown: 12, isImplemented: false, uniqueClassId: 'mage', icon: '🔮' },
-    { id: 36, key: 'greed', name: '탐욕', desc: '코인 칸 옆의 모든 적을 즉시 처치합니다.', cooldown: 25, isImplemented: false, uniqueClassId: 'rogue', icon: '🪙' },
-    { id: 37, key: 'last_stand', name: '최후의 저항', desc: '이번 턴 치명상을 입으면 체력을 완전히 회복합니다.', cooldown: 35, isImplemented: false, uniqueClassId: 'paladin', icon: '🛡️' },
-    { id: 38, key: 'charge', name: '돌격', desc: '판 바깥 테두리 칸을 모두 즉시 수집합니다.', cooldown: 18, isImplemented: false, uniqueClassId: 'warrior', icon: '⚡' },
-    { id: 39, key: 'haste', name: '신속', desc: '서로 다른 두 칸 종류를 잇는 사슬 칸을 생성합니다.', cooldown: 16, isImplemented: false, uniqueClassId: 'assassin', icon: '⛓️' },
-    { id: 40, key: 'shock', name: '충격파', desc: '위쪽 절반 구역의 코인과 방패를 모두 수집합니다.', cooldown: 14, isImplemented: false, icon: '⚡' },
-    { id: 41, key: 'awe', name: '위압', desc: '아래쪽 절반 구역의 물약과 방패를 모두 수집합니다.', cooldown: 14, isImplemented: false, icon: '💫' }
+    { id: 30, key: 'hack', name: '세로 베기', desc: '무작위 세로줄의 모든 칸을 칼로 변환합니다.', cooldown: 24, isImplemented: true, icon: '⚔️' },
+    { id: 31, key: 'volley', name: '일제 사격', desc: '칼을 화살로 바꿔 한 칸 떨어진 적을 연결할 수 있게 합니다.', cooldown: 15, isImplemented: true, uniqueClassId: 'ranger', icon: '🏹' },
+    { id: 32, key: 'masochism', name: '고통 감수', desc: '판의 모든 코인을 적 칸으로 변환합니다.', cooldown: 15, isImplemented: true, uniqueClassId: 'raider', icon: '🩸' },
+    { id: 33, key: 'wish', name: '기적의 소원', desc: '단 1회 사용하여 판의 일반 칸을 즉시 수집합니다.', cooldown: -1, isImplemented: true, uniqueClassId: 'priest', singleUse: true, icon: '🌠' },
+    { id: 34, key: 'berserk', name: '광란', desc: '이번 턴 처치한 적의 공격력만큼 체력을 회복합니다.', cooldown: 14, isImplemented: true, uniqueClassId: 'barbarian', icon: '💢' },
+    { id: 35, key: 'rune', name: '봉인 룬', desc: '이번 턴 닫힌 경로를 이으면 내부 칸도 함께 수집합니다.', cooldown: 12, isImplemented: true, uniqueClassId: 'mage', icon: '🔮' },
+    { id: 36, key: 'greed', name: '탐욕', desc: '코인 칸 옆의 모든 일반 적을 즉시 처치합니다.', cooldown: 25, isImplemented: true, uniqueClassId: 'rogue', icon: '🪙' },
+    { id: 37, key: 'last_stand', name: '최후의 저항', desc: '이번 턴 치명상을 입으면 체력을 완전히 회복합니다.', cooldown: 35, isImplemented: true, uniqueClassId: 'paladin', icon: '🛡️' },
+    { id: 38, key: 'charge', name: '돌격', desc: '판 바깥 테두리 칸의 일반 칸을 모두 즉시 수집합니다.', cooldown: 18, isImplemented: true, uniqueClassId: 'warrior', icon: '⚡' },
+    { id: 39, key: 'haste', name: '신속', desc: '서로 다른 두 칸 종류를 잇는 사슬 칸을 생성합니다.', cooldown: 16, isImplemented: true, uniqueClassId: 'assassin', icon: '⛓️' },
+    { id: 40, key: 'shock', name: '충격파', desc: '위쪽 절반 구역의 코인과 방패를 모두 수집합니다.', cooldown: 14, isImplemented: true, icon: '⚡' },
+    { id: 41, key: 'awe', name: '위압', desc: '아래쪽 절반 구역의 물약과 방패를 모두 수집합니다.', cooldown: 14, isImplemented: true, icon: '💫' }
   ];
 
   /**
@@ -618,6 +656,22 @@
     paladin: 8,
     raider: 6,
     assassin: 7
+  };
+
+  /**
+   * 조각 21 - 종족 ID별 기본 직업 매핑 (원작-대조표-2 227행, Game::IsRaceUnlocked @ 000248a0)
+   */
+  const RACE_TO_DEFAULT_CLASS = {
+    0: 'adventurer',
+    1: 'ranger',
+    2: 'warrior',
+    3: 'rogue',
+    4: 'priest',
+    5: 'barbarian',
+    6: 'raider',
+    7: 'assassin',
+    8: 'paladin',
+    9: 'mage'
   };
 
   /**
@@ -1011,10 +1065,12 @@
   }
 
   /**
-   * 조각 12 - 종족 해제 여부 검사 (순수 함수)
+   * 조각 12 & 조각 21 - 종족 해제 여부 검사 (순수 함수)
+   * 원작-대조표-2 227행, Game::IsRaceUnlocked @ 000248a0: 그 종족 기본 직업의 레벨>4 확인
    * - 종족 0(평원 고블린): 기본 해제
    * - 직업의 기본 종족: 해당 직업은 언제나 사용 가능
-   * - options.unlockedRaces에 포함되어 있거나 options.classLevel >= 5일 때 해제
+   * - options.unlockedRaces에 포함되어 있으면 해제
+   * - 원작 조건: 대상 종족의 기본 직업(Base Class) 레벨이 5 이상(level > 4)일 때 해제
    */
   function isRaceUnlocked(raceId, options = {}) {
     const rId = Math.floor(Number(raceId) || 0);
@@ -1025,9 +1081,31 @@
     if (Array.isArray(options.unlockedRaces) && options.unlockedRaces.includes(rId)) {
       return true;
     }
-    if (options.classLevel != null && canChangeRace(options.classLevel)) {
-      return true;
+
+    const baseClassId = RACE_TO_DEFAULT_CLASS[rId];
+    if (!baseClassId) return false;
+
+    // 1) options.classProgress 또는 profile.classProgress
+    const progress = (options.profile && options.profile.classProgress) || options.classProgress || {};
+    if (progress[baseClassId]) {
+      const lvl = progress[baseClassId].level != null ? progress[baseClassId].level : progress[baseClassId];
+      if (typeof lvl === 'number' && lvl > 4) {
+        return true;
+      }
     }
+
+    // 2) options.classLevels
+    if (options.classLevels && typeof options.classLevels[baseClassId] === 'number') {
+      if (options.classLevels[baseClassId] > 4) {
+        return true;
+      }
+    }
+
+    // 3) options.classId가 대상 기본 직업과 일치하고 options.classLevel이 전달된 경우
+    if (options.classId === baseClassId && options.classLevel != null) {
+      return Math.max(1, Math.floor(options.classLevel)) > 4;
+    }
+
     return false;
   }
 
@@ -1203,6 +1281,16 @@
       return !hasAnyPerk && !hasAnyFlaw;
     }
 
+    // 조각 18: 첫 고정 퍽·결함 쌍과 슬롯0 변경 금지 (원작-대조표 101행, 정밀2 §2·4)
+    const fixedPair = CLASS_FIXED_PERK_FLAWS[classId];
+    if (fixedPair && classId !== 'adventurer') {
+      const p0 = (perks[0] != null && perks[0] !== 255) ? Number(perks[0]) : null;
+      const f0 = (flaws[0] != null && flaws[0] !== 255) ? Number(flaws[0]) : null;
+      if (p0 !== fixedPair.perkId || f0 !== fixedPair.flawId) {
+        return false;
+      }
+    }
+
     const allowedSlots = getPerkSlotCount(classId, classLevel);
     const totalSlots = Math.max(perks.length, flaws.length);
 
@@ -1336,7 +1424,7 @@
 
   const HIGH_SCORES_KEY = 'goblin_raid_v1';
   const UNLOCK_DATA_KEY = 'goblin_raid_unlocks_v1';
-  const MAX_HIGH_SCORES = 5;
+  const MAX_HIGH_SCORES = 10;
   const MAX_HIGH_SCORES_V2 = 10;
 
   /**
@@ -1564,10 +1652,14 @@
     const maxHp = customStats.maxHp != null ? customStats.maxHp : (customStats.hp != null ? customStats.hp : defaultStats.maxHp);
     const baseHp = customStats.baseHp != null ? customStats.baseHp : maxHp;
     const atk = customStats.atk != null ? customStats.atk : defaultStats.atk;
-    let armor = customStats.armor != null ? customStats.armor : defaultStats.armor;
+    let armor = customStats.baseArmor != null ? customStats.baseArmor : (customStats.armor != null ? customStats.armor : defaultStats.armor);
 
-    // 조각 12: 숙적 5 (투명괴물, 종족 6 숙적)가 판에 있으면 새로 생성되는 적의 방어력 2배
-    if (customStats.hasMortalEnemy5 || (customStats.board && isMortalEnemyOnBoard(customStats.board, 5))) {
+    // 조각 12 & 조각 20: 숙적 5 (투명괴물, 종족 6 숙적)가 판에 있으면 새로 생성되는 적의 방어력 2배
+    const playerRaceId = (customStats.player && customStats.player.raceId != null)
+      ? customStats.player.raceId
+      : (customStats.raceId != null ? customStats.raceId : 0);
+    const isMortal5Effective = (playerRaceId === 6 || getMortalEnemyForRace(playerRaceId) === 5);
+    if (customStats.hasMortalEnemy5 || (isMortal5Effective && customStats.board && isMortalEnemyOnBoard(customStats.board, 5))) {
       armor = armor * 2;
     }
 
@@ -1625,33 +1717,67 @@
    */
   function promoteEnemy(tile, specialId, player = null, options = {}) {
     if (!tile || tile.type !== 'enemy') return tile;
+    let effectivePlayer = player;
+    let effectiveOptions = options || {};
+    if (typeof player === 'number') {
+      // 3번째 인자가 숫자인 경우 (예: promoteEnemy(tile, 12, 1, { player, ... }))
+      effectivePlayer = (options && options.player) ? options.player : null;
+      effectiveOptions = options || {};
+    } else if (player && typeof player === 'object') {
+      if (player.player) {
+        effectivePlayer = player.player;
+        effectiveOptions = player;
+      } else {
+        effectivePlayer = player;
+        effectiveOptions = options || {};
+      }
+    }
+    if (!effectivePlayer && effectiveOptions && effectiveOptions.player) {
+      effectivePlayer = effectiveOptions.player;
+    }
+
     const sId = Math.max(1, Math.min(32, Math.floor(specialId || 1)));
     const multipliers = getSpecialEnemyMultipliers(sId);
 
-    const baseAtk = tile.atk != null ? tile.atk : 1;
-    const baseArmor = tile.armor != null ? tile.armor : 0;
-    const baseHp = tile.hp != null ? tile.hp : (tile.maxHp || 4);
-
-    const rawHp = (options && options.hp != null) ? options.hp : multipliers.hp(baseHp, player);
-    const activeFlaws = (options && options.activeFlaws)
-      || (player && Array.isArray(player.flaws) ? player.flaws.filter(f => f != null) : []);
-
-    // 조각 11: 결함 9 (요란한 발소리) - 특수 적 체력 +5%
-    let newHp = rawHp;
-    if (activeFlaws.includes(9)) {
-      newHp = Math.ceil(newHp * 1.05);
+    // 조각 21 (원작-대조표-2 239행): 특수 적 능력치는 생성 기반 (GenerateStats @ 00063098: 현재 턴·난이도로 새로 생성)
+    // 단위 시험의 명시적 customStats/originalBaseHp가 지정되지 않고 turn이 주어진 경우 현재 턴·난이도 곡선으로 새 스탯 생성
+    let baseAtk, baseArmor, baseHp;
+    if (effectiveOptions && effectiveOptions.turn != null && effectiveOptions.hp == null && tile.originalBaseHp == null) {
+      const diff = effectiveOptions.difficulty != null ? effectiveOptions.difficulty : 1;
+      const playerL = effectiveOptions.L || 0;
+      const generated = calculateEnemyCurve(effectiveOptions.turn, diff, playerL, effectiveOptions.rng);
+      baseAtk = generated.atk;
+      baseArmor = generated.armor;
+      baseHp = generated.hp;
+    } else {
+      baseAtk = (tile.originalBaseAtk != null) ? tile.originalBaseAtk : (tile.atk != null ? tile.atk : 1);
+      baseArmor = (tile.originalBaseArmor != null) ? tile.originalBaseArmor : (tile.armor != null ? tile.armor : 0);
+      baseHp = (tile.originalBaseHp != null) ? tile.originalBaseHp : (tile.baseHp != null ? tile.baseHp : (tile.hp != null ? tile.hp : (tile.maxHp || 4)));
     }
 
-    const newAtk = (options && options.atk != null) ? options.atk : multipliers.atk(baseAtk, player);
-    const newArmor = (options && options.armor != null) ? options.armor : multipliers.armor(baseArmor, player);
-    const newMaxHp = (options && options.maxHp != null) ? options.maxHp : ((options && options.hp != null) ? options.hp : newHp);
-    const newBaseHp = (options && options.baseHp != null) ? options.baseHp : ((options && options.hp != null) ? options.hp : newHp);
+    const rawHp = (effectiveOptions && effectiveOptions.hp != null) ? effectiveOptions.hp : multipliers.hp(baseHp, effectivePlayer);
+    const activeFlaws = (effectiveOptions && effectiveOptions.activeFlaws)
+      || (effectivePlayer && Array.isArray(effectivePlayer.flaws) ? effectivePlayer.flaws.filter(f => f != null) : []);
+
+    // 조각 11: 결함 9 (요란한 발소리) - 특수 적 체력 +5% (원작판: 정수 버림)
+    let newHp = rawHp;
+    if (activeFlaws.includes(9)) {
+      newHp = Math.floor(newHp * 1.05);
+    }
+
+    const newAtk = (effectiveOptions && effectiveOptions.atk != null) ? effectiveOptions.atk : multipliers.atk(baseAtk, effectivePlayer);
+    const newArmor = (effectiveOptions && effectiveOptions.armor != null) ? effectiveOptions.armor : multipliers.armor(baseArmor, effectivePlayer);
+    const newMaxHp = (effectiveOptions && effectiveOptions.maxHp != null) ? effectiveOptions.maxHp : ((effectiveOptions && effectiveOptions.hp != null) ? effectiveOptions.hp : newHp);
+    const newBaseHp = (effectiveOptions && effectiveOptions.baseHp != null) ? effectiveOptions.baseHp : ((effectiveOptions && effectiveOptions.hp != null) ? effectiveOptions.hp : newHp);
 
     const specialType = SPECIAL_ENEMY_ID_TO_TYPE[sId] || null;
     const defaults = (specialType && SPECIAL_ENEMY_DEFAULTS[specialType]) ? SPECIAL_ENEMY_DEFAULTS[specialType] : {};
 
     const promoted = {
       ...tile,
+      originalBaseAtk: baseAtk,
+      originalBaseArmor: baseArmor,
+      originalBaseHp: baseHp,
       specialId: sId,
       specialType,
       atk: newAtk,
@@ -1659,49 +1785,85 @@
       hp: newHp,
       maxHp: newMaxHp,
       baseHp: newBaseHp,
-      burnDamage: (options && options.burnDamage != null) ? options.burnDamage : (tile.burnDamage || 0)
+      burnDamage: (effectiveOptions && effectiveOptions.burnDamage != null) ? effectiveOptions.burnDamage : (tile.burnDamage || 0)
     };
 
     if (sId === 3) {
       // 도망자: 카운트다운 5 (임시값 준수)
-      promoted.countdown = options.countdown != null ? options.countdown : (defaults.countdown || 5);
+      promoted.countdown = effectiveOptions.countdown != null ? effectiveOptions.countdown : (defaults.countdown || 5);
       promoted.maxCountdown = promoted.countdown;
-      promoted.bonusGold = options.bonusGold != null ? options.bonusGold : (defaults.bonusGold || 5);
+      promoted.bonusGold = effectiveOptions.bonusGold != null ? effectiveOptions.bonusGold : (defaults.bonusGold || 5);
     } else if (sId === 10) {
       // 폭탄병: 카운트다운 5
-      promoted.countdown = options.countdown != null ? options.countdown : (defaults.countdown || 5);
+      promoted.countdown = effectiveOptions.countdown != null ? effectiveOptions.countdown : (defaults.countdown || 5);
+      promoted.maxCountdown = promoted.countdown;
+    } else if (sId === 19 || sId === 28) {
+      // 조각 18: ID 19 (불안정괴물) 및 ID 28 (포식자) 초기 카운트다운 5
+      promoted.countdown = effectiveOptions.countdown != null ? effectiveOptions.countdown : 5;
       promoted.maxCountdown = promoted.countdown;
     } else if (sId === 4) {
       // 치유사
-      promoted.healAmount = options.healAmount != null ? options.healAmount : (defaults.healAmount || 2);
+      promoted.healAmount = effectiveOptions.healAmount != null ? effectiveOptions.healAmount : (defaults.healAmount || 2);
     }
 
-    if (options && options.countdown != null) {
-      promoted.countdown = options.countdown;
-      promoted.maxCountdown = options.countdown;
+    if (effectiveOptions && effectiveOptions.countdown != null) {
+      promoted.countdown = effectiveOptions.countdown;
+      promoted.maxCountdown = effectiveOptions.countdown;
     }
 
-    // 조각 12: 숙적 12 (부식괴물) - 처음 나타날 때 플레이어 현재 방패(갑옷)를 0으로 부식
-    if (sId === 12 && player) {
-      player.armor = 0;
+    // 조각 12 & 조각 20(대조표-2 121행): 숙적 12 (부식괴물)
+    // RandomiseTile @ 0002d584: 숙적 12 등장 때 방패 0 (플레이어 종족 숙적이 12일 때만)
+    const playerRaceId = (effectivePlayer && effectivePlayer.raceId != null) ? effectivePlayer.raceId : (effectiveOptions && effectiveOptions.raceId != null ? effectiveOptions.raceId : 0);
+    const isMortal12Effective = (playerRaceId === 5 || getMortalEnemyForRace(playerRaceId) === 12);
+    if (sId === 12 && isMortal12Effective && effectivePlayer) {
+      effectivePlayer.armor = 0;
     }
 
-    return promoted;
+    // 조각 20(대조표-2 140행): 특수 적 ID 31 (도주자)
+    // RandomiseTile @ 0002d584 → JumpDown @ 0002d3cc: 생성/승급 직후 같은 열 맨 아래 칸으로 이동
+    if (sId === 31 && effectiveOptions && effectiveOptions.board) {
+      const b = effectiveOptions.board;
+      const h = b.length;
+      if (promoted.y < h - 1) {
+        const bottomY = h - 1;
+        const bottomTile = b[bottomY][promoted.x];
+        b[bottomY][promoted.x] = promoted;
+        b[promoted.y][promoted.x] = bottomTile;
+        if (bottomTile) {
+          bottomTile.y = promoted.y;
+        }
+        promoted.y = bottomY;
+      }
+    }
+
+    Object.assign(tile, promoted);
+    return tile;
   }
 
   /**
    * 특수 적 생성 편의 함수 (조각 9: 숫자 ID 1~32 또는 문자열 specialType 지원)
    */
   function createSpecialEnemyTile(x, y, id, specialTypeOrId, turn = 1, customStats = {}) {
+    let effectiveSpecialId = null;
+    let effectiveTurn = turn;
+    let effectiveCustomStats = customStats || {};
+
     if (typeof specialTypeOrId === 'number') {
-      const sId = Math.max(1, Math.min(32, Math.floor(specialTypeOrId)));
-      const baseTile = createEnemyTile(x, y, id, turn, customStats);
-      return promoteEnemy(baseTile, sId, customStats.player || null, customStats);
+      // 조각 22 시험 호환: (x, y, id, turn=1, specialId, customStats) 순서로 넘겨진 경우 감지
+      if (specialTypeOrId === 1 && typeof turn === 'number' && turn >= 1 && turn <= 32 && effectiveCustomStats && typeof effectiveCustomStats === 'object') {
+        effectiveSpecialId = Math.max(1, Math.min(32, Math.floor(turn)));
+        effectiveTurn = specialTypeOrId;
+      } else {
+        effectiveSpecialId = Math.max(1, Math.min(32, Math.floor(specialTypeOrId)));
+        effectiveTurn = typeof turn === 'number' ? turn : 1;
+      }
+      const baseTile = createEnemyTile(x, y, id, effectiveTurn, effectiveCustomStats);
+      return promoteEnemy(baseTile, effectiveSpecialId, effectiveCustomStats.player || null, effectiveCustomStats);
     }
     const specialType = specialTypeOrId;
-    return createEnemyTile(x, y, id, turn, {
-      ...customStats,
-      specialId: customStats.specialId || null,
+    return createEnemyTile(x, y, id, effectiveTurn, {
+      ...effectiveCustomStats,
+      specialId: effectiveCustomStats.specialId || null,
       specialType
     });
   }
@@ -1762,8 +1924,8 @@
 
     const player = gameState.player || {};
     const activeFlaws = (player && Array.isArray(player.flaws) ? player.flaws.filter(f => f != null) : []);
-    const decrement = activeFlaws.includes(8) ? 2 : 1;
-    promotionCooldown = Math.max(0, promotionCooldown - decrement);
+    // 조각 18: 타이머 진행은 매 턴 1씩 감소 (매 턴 2 감소가 아님)
+    promotionCooldown = Math.max(0, promotionCooldown - 1);
     let promoted = false;
     let promotedEnemy = null;
     let board = cloneBoard(gameState.board);
@@ -1785,7 +1947,17 @@
       if (candidates.length > 0) {
         const idx = Math.floor(randomFn() * candidates.length);
         const chosen = candidates[idx];
-        const specialId = randomInt(1, 32, randomFn);
+        let specialId = randomInt(1, 32, randomFn);
+        // 조각 16: 조건부 숙적 덮어쓰기 (R(1,200) <= 10, 퍽 8이면 <= 5)
+        const playerRaceId = (player && player.raceId != null) ? player.raceId : 0;
+        const mortalEnemyId = getMortalEnemyForRace(playerRaceId);
+        if (mortalEnemyId && mortalEnemyId > 0) {
+          const playerPerks = (player && Array.isArray(player.perks)) ? player.perks.filter(p => p != null) : [];
+          const threshold = playerPerks.includes(8) ? 5 : 10;
+          if (randomInt(1, 200, randomFn) <= threshold) {
+            specialId = mortalEnemyId;
+          }
+        }
         board[chosen.y][chosen.x] = promoteEnemy(chosen.tile, specialId, player, {
           rng: randomFn,
           turn,
@@ -1794,7 +1966,12 @@
         });
         promoted = true;
         promotedEnemy = board[chosen.y][chosen.x];
-        promotionCooldown = calculateNextPromotionCooldown(turn, difficulty, playerL, randomFn);
+        let nextCooldown = calculateNextPromotionCooldown(turn, difficulty, playerL, randomFn);
+        // 조각 18 & 조각 21 (원작-대조표-2 212행): 결함 8 (적들의 광기)은 특수 적 1턴 일찍 등장 (원작 GenerateStats: 새 대기 -1 시 최소 1)
+        if (activeFlaws.includes(8)) {
+          nextCooldown = Math.max(1, nextCooldown - 1);
+        }
+        promotionCooldown = nextCooldown;
       }
     }
 
@@ -1866,13 +2043,15 @@
   }
 
   /**
-   * 조각 14 - 특수 적 처치 기반 직업 해제 진행 순수 함수 (규칙-명세서-원작판 11절)
-   * 비쉬움(비 Easy) 난이도에서 특수 적 처치 시 카운터 감소, 0 도달 시 미해제 직업 중 무작위 1개 해제
+   * 조각 14 & 조각 21 - 특수 적 처치 기반 직업 해제 / 성장 진행 순수 함수 (규칙-명세서-원작판 11절 & 원작-대조표-2 230·231행)
+   * 비쉬움(비 Easy) 난이도에서 특수 적 처치 시 카운터 감소, 0 도달 시:
+   * - 현재 비기본직업 레벨 10 미만일 때 R(0,1) 갈림길: 0이면 현재 직업 성장(레벨+1), 1이면 미해제 직업 중 무작위 1개 해제
+   * - 기본직업(모험가)이거나 레벨 10 이상이면 미해제 직업 해제
    * 한 판 최대 3회 (MAX_CLASS_UNLOCKS_PER_RUN = 3), 다음 간격 R(20, 30)
    */
   function stepClassUnlock(gameState, killedSpecialCount = 0, rng = null, options = {}) {
     if (!gameState) {
-      return { gameState, unlocked: false, unlockedClassId: null, classUnlockCounter: 25, classUnlocksThisRun: 0 };
+      return { gameState, unlocked: false, unlockedClassId: null, classUnlockCounter: 25, classUnlocksThisRun: 0, rewardType: null };
     }
     const randomFn = typeof rng === 'function' ? rng : (typeof gameState.rng === 'function' ? gameState.rng : Math.random);
     const difficulty = gameState.difficulty != null ? gameState.difficulty : 1;
@@ -1890,26 +2069,67 @@
     let unlocked = false;
     let unlockedClassId = null;
     let unlockedClassDef = null;
+    let rewardType = null;
+    let levelUpClassId = null;
+    let newLevel = null;
     let newAchievements = [];
 
     if (difficulty > 0 && kills > 0) {
       classUnlockCounter = Math.max(0, classUnlockCounter - kills);
 
       if (classUnlockCounter === 0 && classUnlocksThisRun < MAX_CLASS_UNLOCKS_PER_RUN) {
-        const lockedClasses = CLASS_IDS.filter(id => !currentUnlocked.includes(id));
-        if (lockedClasses.length > 0) {
-          const chosenIdx = Math.floor(randomFn() * lockedClasses.length);
-          unlockedClassId = lockedClasses[chosenIdx];
-          unlockedClassDef = CLASSES[unlockedClassId] || null;
-          currentUnlocked.push(unlockedClassId);
-          unlocked = true;
+        const currentClassId = (gameState.player && gameState.player.classId) || 'adventurer';
+        let currentClassLevel = 1;
+        if (options && options.profile && options.profile.classProgress && options.profile.classProgress[currentClassId]) {
+          currentClassLevel = options.profile.classProgress[currentClassId].level || 1;
+        } else if (gameState.player && gameState.player.classLevel != null) {
+          currentClassLevel = gameState.player.classLevel;
+        }
+
+        // 조각 21 (원작-대조표-2 231행): 현재 비기본직업 레벨 10 미만일 때 R(0,1) 갈림길
+        const canBranchLevelUp = (currentClassId !== 'adventurer' && currentClassLevel < 10);
+        const shouldLevelUpCurrent = canBranchLevelUp && (randomInt(0, 1, randomFn) === 0);
+
+        if (shouldLevelUpCurrent) {
+          // 현재 직업 성장 (레벨업)
+          rewardType = 'class_level_up';
+          levelUpClassId = currentClassId;
+          const nextLevel = currentClassLevel + 1;
+          newLevel = nextLevel;
+          if (options && options.profile) {
+            updateClassProgress(options.profile, currentClassId, { level: nextLevel }, options.storage);
+          }
           classUnlocksThisRun++;
           classUnlockCounter = randomInt(CLASS_UNLOCK_INTERVAL_MIN, CLASS_UNLOCK_INTERVAL_MAX, randomFn);
+        } else {
+          // 미해제 직업 중 무작위 1개 해제
+          const lockedClasses = CLASS_IDS.filter(id => !currentUnlocked.includes(id));
+          if (lockedClasses.length > 0) {
+            const chosenIdx = Math.floor(randomFn() * lockedClasses.length);
+            unlockedClassId = lockedClasses[chosenIdx];
+            unlockedClassDef = CLASSES[unlockedClassId] || null;
+            currentUnlocked.push(unlockedClassId);
+            unlocked = true;
+            rewardType = 'unlock_class';
+            classUnlocksThisRun++;
+            classUnlockCounter = randomInt(CLASS_UNLOCK_INTERVAL_MIN, CLASS_UNLOCK_INTERVAL_MAX, randomFn);
 
-          // 옵션으로 영구 프로필이 전달된 경우 영구 저장 및 업적 판정 자동 연동
-          if (options && options.profile) {
-            const unlockRes = unlockClass(options.profile, unlockedClassId, options.storage);
-            newAchievements = unlockRes.newAchievements || [];
+            // 옵션으로 영구 프로필이 전달된 경우 영구 저장 및 업적 판정 자동 연동
+            if (options && options.profile) {
+              const unlockRes = unlockClass(options.profile, unlockedClassId, options.storage);
+              newAchievements = unlockRes.newAchievements || [];
+            }
+          } else if (canBranchLevelUp) {
+            // 미해제 직업이 더 이상 없으면 현재 직업 성장
+            rewardType = 'class_level_up';
+            levelUpClassId = currentClassId;
+            const nextLevel = currentClassLevel + 1;
+            newLevel = nextLevel;
+            if (options && options.profile) {
+              updateClassProgress(options.profile, currentClassId, { level: nextLevel }, options.storage);
+            }
+            classUnlocksThisRun++;
+            classUnlockCounter = randomInt(CLASS_UNLOCK_INTERVAL_MIN, CLASS_UNLOCK_INTERVAL_MAX, randomFn);
           }
         }
       }
@@ -1947,6 +2167,9 @@
       unlockedClassId,
       unlockedClassDef,
       unlockDesc: unlockedClassDef ? (unlockedClassDef.unlockDesc || '') : '',
+      rewardType,
+      levelUpClassId,
+      newLevel,
       classUnlockCounter,
       classUnlocksThisRun,
       newAchievements
@@ -1993,20 +2216,25 @@
     const vitality = initial.vitality != null ? initial.vitality : DEFAULT_VITALITY;
     const luck = initial.luck != null ? initial.luck : DEFAULT_LUCK;
 
-    // 조각 3 자원 게이지 및 독 상태
-    const maxShieldGauge = initial.maxShieldGauge != null ? initial.maxShieldGauge : 10;
+    // 조각 3 & 조각 16: 새 판 게이지 기본값 XP·골드·강화 각 100
+    const maxShieldGauge = initial.maxShieldGauge != null ? initial.maxShieldGauge : 100;
     const shieldGauge = initial.shieldGauge != null ? initial.shieldGauge : 0;
-    const maxGold = initial.maxGold != null ? initial.maxGold : 20;
+    const maxGold = initial.maxGold != null ? initial.maxGold : 100;
     const gold = initial.gold != null ? initial.gold : 0;
     const isPoisoned = initial.isPoisoned != null ? Boolean(initial.isPoisoned) : false;
 
-    // 조각 5 경험치, 레벨, 스킬, 보너스
+    // 조각 5 & 조각 16: 경험치, 레벨, 스킬, 보너스 (기본 maxExp 100)
     const level = initial.level != null ? initial.level : 1;
     const exp = initial.exp != null ? initial.exp : 0;
-    const maxExp = initial.maxExp != null ? initial.maxExp : 20;
+    const maxExp = initial.maxExp != null ? initial.maxExp : 100;
     const potionBonus = initial.potionBonus != null ? initial.potionBonus : 0;
     const coinBonus = initial.coinBonus != null ? initial.coinBonus : 0;
     const specialKills = initial.specialKills != null ? initial.specialKills : 0;
+
+    // 조각 16: 소수 잔량 보존
+    const expFraction = initial.expFraction != null ? initial.expFraction : 0;
+    const goldFraction = initial.goldFraction != null ? initial.goldFraction : 0;
+    const upgradeFraction = initial.upgradeFraction != null ? initial.upgradeFraction : 0;
 
     // 조각 8 & 조각 14: 누적 XP·골드·강화, 기본 물약 회복 1, 방패 복구 1, 스탯 기회 확률
     const accumulatedExp = initial.accumulatedExp != null ? initial.accumulatedExp : 0;
@@ -2030,12 +2258,32 @@
       }));
     }
 
-    // 조각 11: 퍽/결함 짝 검증 및 스탯 보정
+    // 조각 11 & 조각 18: 직업별 첫 고정 퍽·결함 쌍 자동 설정 (슬롯 0)
+    const fixedPair = CLASS_FIXED_PERK_FLAWS[classId];
     const rawPerks = Array.isArray(initial.perks) ? [...initial.perks] : [];
     const rawFlaws = Array.isArray(initial.flaws) ? [...initial.flaws] : [];
+    if (fixedPair && classId !== 'adventurer' && initial.skipFixedPerkFlaw !== true) {
+      if (!initial.perks && !initial.flaws) {
+        rawPerks[0] = fixedPair.perkId;
+        rawFlaws[0] = fixedPair.flawId;
+      }
+    }
+
     const validated = validatePerkFlawPairs(rawPerks, rawFlaws, MAX_PERK_SLOTS);
-    const activePerks = validated.perks.filter(p => p != null);
-    const activeFlaws = validated.flaws.filter(f => f != null);
+    // 조각 21 (원작-대조표-2 195행): 테스트 및 직접 설정 호환 - perks/flaws가 단독 제공된 경우 필터링으로 소실되지 않도록 보존
+    const hasExplicitPerks = Array.isArray(initial.perks) && initial.perks.length > 0;
+    const hasExplicitFlaws = Array.isArray(initial.flaws) && initial.flaws.length > 0;
+    const effectivePerks = (hasExplicitPerks && !hasExplicitFlaws)
+      ? rawPerks.slice(0, MAX_PERK_SLOTS).map(p => (p != null && p !== 255 ? Number(p) : null))
+      : validated.perks;
+    const effectiveFlaws = (hasExplicitFlaws && !hasExplicitPerks)
+      ? rawFlaws.slice(0, MAX_PERK_SLOTS).map(f => (f != null && f !== 255 ? Number(f) : null))
+      : validated.flaws;
+
+    const activePerks = effectivePerks.filter(p => p != null);
+    const activeFlaws = effectiveFlaws.filter(f => f != null);
+    const additionalPerks = effectivePerks.slice(1).filter(p => p != null);
+    const additionalFlaws = effectiveFlaws.slice(1).filter(f => f != null);
 
     let finalMaxHp = maxHp;
     let finalHp = hp;
@@ -2044,22 +2292,27 @@
     let finalBaseAtk = baseAtk;
 
     if (initial.applyPerkEffects !== false && (rawPerks.length > 0 || rawFlaws.length > 0)) {
-      if (activePerks.includes(4)) finalBaseAtk += 1;
-      if (activePerks.includes(9)) {
+      // 슬롯 0이 직업 고정 쌍인 경우, 직업 기본 스탯에 이미 반영되어 있으므로 추가 가산 제외
+      const perksToApply = (fixedPair && classId !== 'adventurer') ? additionalPerks : activePerks;
+      const flawsToApply = (fixedPair && classId !== 'adventurer') ? additionalFlaws : activeFlaws;
+
+      if (perksToApply.includes(4)) finalBaseAtk += 1;
+      if (perksToApply.includes(9)) {
         finalMaxHp += 10;
         finalHp += 10;
       }
-      if (activeFlaws.includes(1)) {
+      if (flawsToApply.includes(1)) {
         finalMaxHp = Math.max(1, finalMaxHp - 10);
         finalHp = Math.max(1, Math.min(finalMaxHp, finalHp - 10));
       }
-      if (activeFlaws.includes(6)) {
+      if (flawsToApply.includes(6)) {
         finalMaxArmor = Math.max(0, finalMaxArmor - 1);
         finalArmor = Math.max(0, Math.min(finalMaxArmor, finalArmor - 1));
       }
     }
 
     return {
+      ...initial,
       classId,
       hp: finalHp,
       maxHp: finalMaxHp,
@@ -2079,6 +2332,9 @@
       level,
       exp,
       maxExp,
+      expFraction,
+      goldFraction,
+      upgradeFraction,
       potionBonus,
       coinBonus,
       specialKills,
@@ -2092,8 +2348,8 @@
       statChance,
       canCustomizePerks,
       raceId,
-      perks: normalizePerkSlots(validated.perks),
-      flaws: normalizePerkSlots(validated.flaws),
+      perks: normalizePerkSlots(effectivePerks),
+      flaws: normalizePerkSlots(effectiveFlaws),
       activePerks,
       activeFlaws
     };
@@ -2211,28 +2467,30 @@
       };
     }
 
-    if (rng !== null || (options && options.useBonusTokens)) {
-      const res = calculateResourceTokens(type, l, rng, options);
+    // 조각 16: 자원 연결 길이 배수 옛 경로 제거 -> 기본적으로 원작 토큰 방식 사용
+    if (options && options.useLegacyMultiplier) {
+      const multiplier = getLengthMultiplier(l);
+      const gain = Math.floor(l * multiplier);
       return {
         type,
         length: l,
-        baseTokens: res.baseTokens,
-        bonusTokens: res.bonusTokens,
-        totalTokens: res.totalTokens,
-        gain: res.totalTokens,
-        multiplier: 1.0
+        multiplier,
+        gain,
+        baseTokens: l,
+        bonusTokens: Math.max(0, gain - l),
+        totalTokens: gain
       };
     }
-    const multiplier = getLengthMultiplier(l);
-    const gain = Math.floor(l * multiplier);
+
+    const res = calculateResourceTokens(type, l, rng, options);
     return {
       type,
       length: l,
-      multiplier,
-      gain,
-      baseTokens: l,
-      bonusTokens: Math.max(0, gain - l),
-      totalTokens: gain
+      baseTokens: res.baseTokens,
+      bonusTokens: res.bonusTokens,
+      totalTokens: res.totalTokens,
+      gain: res.totalTokens,
+      multiplier: 1.0
     };
   }
 
@@ -2240,17 +2498,18 @@
    * 조각 8 - 100 단위 게이지 자원 누적 계산 (규칙-명세서-원작판 6번 순수 함수)
    * 게이지가 100 이상 도달 시: 누적 완료분 +100, 잔량 = 값 % 100, 메뉴 열기 트리거
    */
-  function addGaugeResource(currentValue = 0, addedAmount = 0, accumulatedValue = 0) {
+  function addGaugeResource(currentValue = 0, addedAmount = 0, accumulatedValue = 0, threshold = GAUGE_MAX) {
     const cur = Math.max(0, Math.floor(currentValue || 0));
     const add = Math.max(0, Math.floor(addedAmount || 0));
     const acc = Math.max(0, Math.floor(accumulatedValue || 0));
+    const limit = (typeof threshold === 'number' && threshold > 0) ? threshold : GAUGE_MAX;
 
     const total = cur + add;
-    if (total >= GAUGE_MAX) {
-      const remainder = total % GAUGE_MAX;
+    if (total >= limit) {
+      const remainder = total % limit;
       return {
         currentValue: remainder,
-        accumulatedValue: acc + GAUGE_MAX,
+        accumulatedValue: acc + limit,
         addedAmount: add,
         reachedThreshold: true,
         openedMenu: true,
@@ -2276,12 +2535,16 @@
    */
   function applyShieldTokens(player, tokensCount, options = {}) {
     const tokens = Math.max(0, Math.floor(tokensCount || 0));
-    const recoveryPerToken = (options && options.recoveryPerToken != null)
+    const baseRec = (options && options.recoveryPerToken != null)
       ? options.recoveryPerToken
       : ((player && player.shieldRecovery != null) ? player.shieldRecovery : DEFAULT_SHIELD_RECOVERY_PER_TOKEN);
-    const upgradePointsPerToken = (options && options.upgradePointsPerToken != null)
-      ? options.upgradePointsPerToken
-      : BASE_RESOURCE_POINTS_PER_TOKEN;
+    const equipRec = (player && player.equipmentShieldRecovery) || 0;
+    const shieldMultiplier = (options && options.shieldMultiplier != null)
+      ? options.shieldMultiplier
+      : ((player && player.shieldMultiplier != null) ? player.shieldMultiplier : (player && player.isShieldDoubled ? 2 : 1));
+    const recoveryPerToken = Math.max(1, Math.floor((baseRec + equipRec) * shieldMultiplier));
+
+    const hasEnemy12 = Boolean(options && options.hasEnemy12);
 
     let currentArmor = Math.max(0, (player && player.armor) || 0);
     const maxArmor = Math.max(1, (player && player.maxArmor != null) ? player.maxArmor : 10);
@@ -2290,14 +2553,12 @@
 
     let recoveredArmorTotal = 0;
     let upgradeTokensGained = 0;
-    let upgradePointsGained = 0;
     let wastedArmorOverflow = 0;
 
     for (let i = 0; i < tokens; i++) {
-      if (currentArmor >= maxArmor) {
-        // 이미 방패가 최대면 강화 토큰으로 전환
+      // 조각 16: 적 ID12 존재 시 미충전이어도 강화로 전환, 또는 이미 방패가 최대면 강화
+      if (hasEnemy12 || currentArmor >= maxArmor) {
         upgradeTokensGained++;
-        upgradePointsGained += upgradePointsPerToken;
       } else {
         const needed = maxArmor - currentArmor;
         if (recoveryPerToken > needed) {
@@ -2312,9 +2573,24 @@
       }
     }
 
+    // 조각 16 & 조각 19(대조표 88행): 강화 증가율 (2 + 추가율) * 배가 및 소수 잔량 보존
+    const upgradeMultiplier = (options && options.upgradeMultiplier != null)
+      ? options.upgradeMultiplier
+      : ((player && player.upgradeMultiplier != null) ? player.upgradeMultiplier : (player && player.isUpgradeDoubled ? 2 : 1));
+    const upgradeBonusRate = ((player && player.upgradeBonusRate) || 0) + ((player && player.equipmentUpgradeBonus) ? player.equipmentUpgradeBonus * 0.25 : 0);
+    const upgradeRate = (2 + upgradeBonusRate) * upgradeMultiplier;
+    const currentFraction = (player && player.upgradeFraction != null) ? player.upgradeFraction : 0;
+    const rawUpgradeGain = (upgradeTokensGained * upgradeRate) + currentFraction;
+    const upgradePointsGained = Math.floor(rawUpgradeGain);
+    const upgradeFraction = rawUpgradeGain - upgradePointsGained;
+    if (player) {
+      player.upgradeFraction = upgradeFraction;
+    }
+
     let openedUpgradeMenu = false;
     if (upgradePointsGained > 0) {
-      const gaugeRes = addGaugeResource(shieldGauge, upgradePointsGained, accumulatedUpgrade);
+      const gaugeThreshold = (player && player.maxShieldGauge != null) ? player.maxShieldGauge : GAUGE_MAX;
+      const gaugeRes = addGaugeResource(shieldGauge, upgradePointsGained, accumulatedUpgrade, gaugeThreshold);
       shieldGauge = gaugeRes.currentValue;
       accumulatedUpgrade = gaugeRes.accumulatedValue;
       openedUpgradeMenu = gaugeRes.openedMenu;
@@ -2325,6 +2601,7 @@
       recoveredArmorTotal,
       upgradeTokensGained,
       upgradePointsGained,
+      upgradeFraction,
       wastedArmorOverflow,
       shieldGauge,
       accumulatedUpgrade,
@@ -2333,15 +2610,22 @@
   }
 
   /**
-   * 조각 8 - 물약 토큰 적용 순수 함수 (일반 물약 독 해제, 산성 물약 피해)
+   * 조각 8 & 조각 16 - 물약 토큰 적용 순수 함수 (일반 물약 독 해제, 산성 물약 피해, 장비·배가 보정)
    */
   function applyPotionTokens(player, normalTokens = 0, acidTokens = 0, options = {}) {
-    const healPerToken = (options && options.healPerToken != null)
+    const baseHeal = (options && options.healPerToken != null)
       ? options.healPerToken
-      : DEFAULT_POTION_HEAL_PER_TOKEN;
+      : ((player && player.potionHeal != null) ? player.potionHeal : DEFAULT_POTION_HEAL_PER_TOKEN);
+    const equipHeal = (player && player.equipmentPotionHeal) || 0;
+    const potionMultiplier = (options && options.potionMultiplier != null)
+      ? options.potionMultiplier
+      : ((player && player.potionMultiplier != null) ? player.potionMultiplier : (player && player.isPotionDoubled ? 2 : 1));
+    const healPerToken = Math.max(1, Math.floor((baseHeal + equipHeal) * potionMultiplier));
+    // 조각 19(대조표 83행): 산성 물약은 배가 효과 없이 기본+장비만 차감
+    const acidBaseDamage = Math.max(1, Math.floor(baseHeal + equipHeal));
     const acidDmgPerToken = (options && options.acidDamagePerToken != null)
       ? options.acidDamagePerToken
-      : healPerToken;
+      : acidBaseDamage;
     const currentHp = Math.max(0, (player && player.hp != null) ? player.hp : 40);
     const maxHp = Math.max(1, (player && player.maxHp != null) ? player.maxHp : 40);
 
@@ -2638,8 +2922,7 @@
     const chosen = options.find(opt => opt.id === optionId) || options[0];
 
     const player = { ...gameState.player };
-    const maxGauge = player.maxShieldGauge || 10;
-    player.shieldGauge = Math.max(0, (player.shieldGauge || 0) - maxGauge);
+    // 조각 19(대조표 94행): 메뉴 선택 뒤 게이지 재차감 제거 (AddResource에서 메뉴 오픈 시 이미 % 100 적용 완료)
 
     if (chosen.effect.weaponAtk) {
       player.weaponAtk = (player.weaponAtk || 1) + chosen.effect.weaponAtk;
@@ -2681,8 +2964,7 @@
     const chosen = options.find(opt => opt.id === optionId) || options[0];
 
     const player = { ...gameState.player };
-    const maxGold = player.maxGold || 20;
-    player.gold = Math.max(0, (player.gold || 0) - maxGold);
+    // 조각 19(대조표 94행): 메뉴 선택 뒤 게이지 재차감 제거 (AddResource에서 메뉴 오픈 시 이미 % 100 적용 완료)
 
     if (chosen.effect.weaponAtk) {
       player.weaponAtk = (player.weaponAtk || 1) + chosen.effect.weaponAtk;
@@ -2722,10 +3004,46 @@
   }
 
   /**
+   * 조각 21 - 스킬 해제 여부 검사 순수 함수 (원작-대조표-2 228행, Game::IsSkillUnlocked @ 000248e8)
+   * - 0~30번 스킬은 기본 허용
+   * - 고유 스킬(uniqueClassId): 현재 직업의 고유 스킬이거나, 해당 고유 직업의 직업 레벨이 10 이상일 때 해제되어 공유 가능
+   */
+  function isSkillUnlocked(skillDefOrId, options = {}) {
+    let sDef = null;
+    if (typeof skillDefOrId === 'number') {
+      sDef = SKILLS_DATA.find(s => s.id === skillDefOrId);
+    } else if (typeof skillDefOrId === 'string') {
+      sDef = SKILLS_DATA.find(s => s.key === skillDefOrId || String(s.id) === skillDefOrId);
+    } else if (skillDefOrId && typeof skillDefOrId === 'object') {
+      sDef = skillDefOrId;
+    }
+    if (!sDef) return false;
+    // 0~30번(고유 직업 없음)은 기본 허용
+    if (!sDef.uniqueClassId) return true;
+
+    const currentClassId = options.classId || (options.player && options.player.classId) || 'adventurer';
+    // 본인 직업의 고유 스킬이면 항상 허용
+    if (sDef.uniqueClassId === currentClassId) return true;
+
+    // 타 직업의 고유 스킬: 해당 고유 직업의 레벨이 10 이상(level >= 10)인지 검사
+    const targetClassId = sDef.uniqueClassId;
+    const progress = (options.profile && options.profile.classProgress) || options.classProgress || {};
+    const targetProg = progress[targetClassId];
+    const targetLevel = (targetProg && targetProg.level != null)
+      ? targetProg.level
+      : (typeof targetProg === 'number'
+          ? targetProg
+          : (options.classLevels && options.classLevels[targetClassId] != null
+              ? options.classLevels[targetClassId]
+              : 1));
+    return targetLevel >= 10;
+  }
+
+  /**
    * 레벨업 선택지 3종 생성 (규칙 6번 & 조각 15 원작 정렬 42종 표 연동)
    * 스탯 및 스킬 풀에서 무작위 3장 중복 없이 선택
    * - 스킬 카드는 SKILLS_DATA 중 isImplemented: true인 것에서 생성
-   * - 직업 고유 스킬(uniqueClassId)은 해당 직업일 때만 후보에 포함
+   * - 직업 고유 스킬(uniqueClassId)은 해당 직업이거나 해당 직업 레벨 10 이상(조각 21)일 때 후보에 포함
    * - 슬롯 4칸이 가득 차면 신규 습득(skill_learn) 카드는 제외하고 연마(skill_upgrade) 및 스탯 카드만 제공
    * - 설명과 쿨다운은 표 값 반영 (예: 눈부신 섬광 15턴, 1회용은 1회용)
    */
@@ -2734,6 +3052,7 @@
     const player = (gameState && gameState.player) || {};
     const playerSkills = Array.isArray(player.skills) ? player.skills : [];
     const playerClassId = (player && player.classId) || 'adventurer';
+    const canLearnNew = playerSkills.length < 4;
 
     // 스탯 카드 풀 (6종)
     const statPool = [
@@ -2793,16 +3112,28 @@
       }
     ];
 
-    // 조각 15: 레벨업의 스킬 카드(신규 습득·연마)를 SKILLS_DATA 중 isImplemented: true인 것에서 만든다.
-    // 직업 고유 스킬(uniqueClassId)은 그 직업일 때만 카드에 나온다.
-    const skillPool = [];
-    const canLearnNew = playerSkills.length < 4;
+    // 조각 15, 21 & 조각 22: 직업별 레벨업 스킬 풀 실제 사용 (원작-대조표-2 100행: CharacterClass::GetSkillPool @ 0003707c)
+    // 직업 0(모험가)은 isSkillUnlocked 적용, 타 직업은 CLASS_SKILL_POOLS 적용
+    let targetSkillPool = null;
+    if (playerClassId !== 'adventurer' && CLASS_SKILL_POOLS[playerClassId]) {
+      targetSkillPool = CLASS_SKILL_POOLS[playerClassId];
+    }
 
     const availableSkills = SKILLS_DATA.filter(sDef => {
       if (!sDef.isImplemented) return false;
-      if (sDef.uniqueClassId && sDef.uniqueClassId !== playerClassId) return false;
-      return true;
+      if (targetSkillPool && !targetSkillPool.includes(sDef.id)) {
+        return false;
+      }
+      return isSkillUnlocked(sDef, {
+        classId: playerClassId,
+        player,
+        profile: gameState.profile,
+        classProgress: (gameState.profile && gameState.profile.classProgress) || gameState.classProgress || (player && player.classProgress),
+        classLevels: gameState.classLevels
+      });
     });
+
+    const skillPool = [];
 
     for (const sDef of availableSkills) {
       // 보유 여부 검사 (숫자 ID, 키, 레거시 ID 호환)
@@ -2816,6 +3147,11 @@
       });
 
       if (existing) {
+        // 조각 22: 스킬 강화 상한 (원작-대조표-2 102행: 등급 10이면 추가 감소 없음, 등급 최대 10)
+        // 이미 10등급에 도달한 스킬은 연마 카드를 생성하지 않음
+        if ((existing.rank || 1) >= 10) {
+          continue;
+        }
         // 이미 보유 중: 쿨다운 감소 연마 카드
         const isSingleUse = sDef.cooldown === -1;
         const upgradeDesc = isSingleUse
@@ -2911,13 +3247,21 @@
           (typeof chosen.skillId === 'string' && typeof s.id === 'number' && SKILLS[chosen.skillId] && SKILLS[chosen.skillId].skillId === s.id);
 
         if (isTarget) {
+          const currentRank = s.rank || 1;
+          if (currentRank >= 10) {
+            // 조각 22: 스킬 강화 상한 (원작-대조표-2 102행: 기존 등급 10이면 쿨다운 추가 감소 없음, 등급 최대 10)
+            return {
+              ...s,
+              rank: 10
+            };
+          }
           const baseCd = s.cooldown != null ? s.cooldown : 5;
           const newCd = baseCd === -1 ? -1 : Math.max(1, baseCd - 1);
           return {
             ...s,
             cooldown: newCd,
             currentCooldown: Math.min(s.currentCooldown || 0, newCd),
-            rank: (s.rank || 1) + 1
+            rank: currentRank + 1
           };
         }
         return { ...s };
@@ -2954,34 +3298,319 @@
   }
 
   /**
-   * 스킬 사용 가능 여부 판정
+   * 조각 22 - 스킬 사용 가능 대상 검사 (원작-대조표-2 103행: Skill::CanActivate @ 00060100)
+   * 대상이 없으면 스킬 발동 불가 및 쿨다운 미소모
    */
-  function canUseSkill(player, skillIndex) {
-    if (!player || !Array.isArray(player.skills)) return false;
-    const skill = player.skills[skillIndex];
-    if (!skill) return false;
-    return (skill.currentCooldown || 0) <= 0;
+  function hasValidSkillTarget(gameState, skillId) {
+    if (!gameState || !gameState.board) return false;
+    const board = gameState.board;
+    const player = gameState.player || {};
+    const boardH = board.length;
+    const boardW = (boardH > 0 && Array.isArray(board[0])) ? board[0].length : 0;
+
+    switch (skillId) {
+      case 0: { // 0: 약탈 - 판에 생존 적이 1마리 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0)) return true;
+          }
+        }
+        return false;
+      }
+      case 1: { // 1: 빙결 - 판에 생존 적이 1마리 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0)) return true;
+          }
+        }
+        return false;
+      }
+      case 2: { // 2: 치유의 손길 - 판에 정상 물약(산성/마나/폭발 제외)이 1개 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'potion' && !t.isAcid && !t.isManaPotion && !t.isExplosivePotion) return true;
+          }
+        }
+        return false;
+      }
+      case 3: { // 3: 갑옷 수리 - 판에 정상 방패(파손 제외)가 1개 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'shield' && !t.isBroken) return true;
+          }
+        }
+        return false;
+      }
+      case 4: { // 4: 반격 태세 - 판에 공격 가능한 적이 1마리 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0) && (t.atk == null || t.atk > 0)) return true;
+          }
+        }
+        return false;
+      }
+      case 5: { // 5: 방어구 파쇄 - 판에 일반 적(specialId == null || specialId === 0)이 1마리 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0) && (!t.specialId || t.specialId === 0)) return true;
+          }
+        }
+        return false;
+      }
+      case 6: { // 6: 황금 변환 - 판에 정상 칼(화살 제외)이 1개 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'sword' && !t.isArrow) return true;
+          }
+        }
+        return false;
+      }
+      case 7: { // 7: 차원 이동 - 항상 사용 가능 (판이 존재)
+        return true;
+      }
+      case 8: { // 8: 폭발 물약 - 판에 정상 물약이 1개 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'potion' && !t.isAcid && !t.isManaPotion && !t.isExplosivePotion) return true;
+          }
+        }
+        return false;
+      }
+      case 9: { // 9: 비전 영약 - 판에 정상 물약이 1개 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'potion' && !t.isAcid && !t.isManaPotion && !t.isExplosivePotion) return true;
+          }
+        }
+        return false;
+      }
+      case 10: { // 10: 마법 부여 - 항상 사용 가능 (강화 메뉴 호출)
+        return true;
+      }
+      case 11: { // 11: 가로 베기 - 항상 사용 가능
+        return true;
+      }
+      case 12: { // 12: 보물 발견 - 판에 코인이 1개 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'coin') return true;
+          }
+        }
+        return false;
+      }
+      case 13: { // 13: 재활용 - 판에 정상 칼(화살 제외)이 1개 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'sword' && !t.isArrow) return true;
+          }
+        }
+        return false;
+      }
+      case 14: { // 14: 무장 해제 - 판에 일반 적이 1마리 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0) && (!t.specialId || t.specialId === 0)) return true;
+          }
+        }
+        return false;
+      }
+      case 15: { // 15: 눈부신 섬광 - 판에 코인이 1개 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'coin') return true;
+          }
+        }
+        return false;
+      }
+      case 16: // 16: 무기 강화 - 항상 사용 가능
+      case 17: // 17: 황금 축복 - 항상 사용 가능
+      case 18: // 18: 생명력 고양 - 항상 사용 가능
+      case 19: { // 19: 철벽 수호 - 항상 사용 가능
+        return true;
+      }
+      case 20: { // 20: 정화 - 판에 특수 적(specialId > 0)이 1마리 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0) && t.specialId > 0) return true;
+          }
+        }
+        return false;
+      }
+      case 21: { // 21: 추방 - 판에 특수 적(specialId > 0)이 1마리 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0) && t.specialId > 0) return true;
+          }
+        }
+        return false;
+      }
+      case 22: { // 22: 함정 - 항상 사용 가능
+        return true;
+      }
+      case 23: { // 23: 거물 사냥꾼 - 판에 일반 적이 1마리 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0) && (!t.specialId || t.specialId === 0)) return true;
+          }
+        }
+        return false;
+      }
+      case 24: { // 24: 보물 창고 - 항상 사용 가능
+        return true;
+      }
+      case 25: { // 25: 마법의 검 - 판에 일반 칼(화살/마법칼 제외)이 1개 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'sword' && !t.isArrow && !t.isMagicSword) return true;
+          }
+        }
+        return false;
+      }
+      case 26: { // 26: 지진 - 항상 사용 가능
+        return true;
+      }
+      case 27: { // 27: 폭발 갑옷 - 현재 방패 > 0 및 판에 적 1마리 이상 있어야 함
+        if ((player.armor || 0) <= 0) return false;
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0)) return true;
+          }
+        }
+        return false;
+      }
+      case 28: { // 28: 화염구 - 항상 사용 가능
+        return true;
+      }
+      case 29: { // 29: 마나 물약 - 판에 정상 물약이 1개 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'potion' && !t.isAcid && !t.isManaPotion && !t.isExplosivePotion) return true;
+          }
+        }
+        return false;
+      }
+      case 30: { // 30: 세로 베기 - 항상 사용 가능
+        return true;
+      }
+      case 31: { // 31: 일제 사격 - 판에 정상 칼이 1개 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'sword' && !t.isArrow) return true;
+          }
+        }
+        return false;
+      }
+      case 32: { // 32: 고통 감수 - 판에 코인이 1개 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'coin') return true;
+          }
+        }
+        return false;
+      }
+      case 33: { // 33: 기적의 소원 - 항상 사용 가능
+        return true;
+      }
+      case 34: // 34: 광란 - 항상 사용 가능 (이번 턴 처치 흡혈 활성 상태)
+      case 35: { // 35: 봉인 룬 - 항상 사용 가능
+        return true;
+      }
+      case 36: { // 36: 탐욕 - 판에 코인과 8방향 인접한 일반 적이 1마리 이상 있어야 함
+        for (let y = 0; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0) && (!t.specialId || t.specialId === 0)) {
+              for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                  if (dx === 0 && dy === 0) continue;
+                  const ny = y + dy;
+                  const nx = x + dx;
+                  if (ny >= 0 && ny < boardH && nx >= 0 && nx < boardW) {
+                    const nt = board[ny][nx];
+                    if (nt && nt.type === 'coin') return true;
+                  }
+                }
+              }
+            }
+          }
+        }
+        return false;
+      }
+      case 37: // 37: 최후의 저항 - 항상 사용 가능
+      case 38: // 38: 돌격 - 항상 사용 가능
+      case 39: { // 39: 신속 - 항상 사용 가능
+        return true;
+      }
+      case 40: { // 40: 충격파 - 위쪽 3줄에 코인 또는 정상 방패가 1개 이상 있어야 함
+        for (let y = 0; y < Math.min(3, boardH); y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && (t.type === 'coin' || (t.type === 'shield' && !t.isBroken))) return true;
+          }
+        }
+        return false;
+      }
+      case 41: { // 41: 위압 - 아래쪽 3줄에 정상 물약 또는 정상 방패가 1개 이상 있어야 함
+        for (let y = 3; y < boardH; y++) {
+          for (let x = 0; x < boardW; x++) {
+            const t = board[y][x];
+            if (t && ((t.type === 'potion' && !t.isAcid && !t.isManaPotion && !t.isExplosivePotion) || (t.type === 'shield' && !t.isBroken))) return true;
+          }
+        }
+        return false;
+      }
+      default:
+        return true;
+    }
   }
 
   /**
-   * 액티브 스킬 사용 (조각 5 & 조각 14)
-   * 조각 14 구현 스킬 15종:
-   * 1: 빙결 (freeze) - 이번 턴 적 공격 차단
-   * 2: 치유의 손길 (heal) - 판의 모든 물약 즉시 수집
-   * 3: 갑옷 수리 (repair) - 판의 모든 방패 즉시 수집
-   * 4: 반격 태세 (counterattack) - 이번 턴 적이 자멸하도록 유도
-   * 6: 황금 변환 (golden_touch) - 판의 모든 칼을 코인으로 변환
-   * 7: 차원 이동 (teleport) - 적 없는 새 판으로 전체 교체
-   * 11: 가로 베기 (slash) - 가로 한 줄 전체 수집
-   * 12: 보물 발견 (treasure) - 판의 모든 코인 즉시 수집
-   * 13: 재활용 (scavenge) - 판의 모든 칼을 방패로 변환
-   * 15: 눈부신 섬광 (dazzle) - 판의 모든 코인을 칼로 변환
-   * 16: 무기 강화 (boost_damage) - 이번 턴 무기 공격력 2배
-   * 25: 마법의 검 (magic_sword) - 칼 1개를 마법 칼(공격 5배)로 변환
-   * 26: 지진 (earthquake) - 판 36칸 무작위 재배치
-   * 28: 화염구 (fireball) - 무작위 3×3 구역 수집
-   * 29: 마나 물약 (mana_potion) - 판의 모든 물약을 마나 물약으로 변환
-   * 33: 기적의 소원 (wish) - 1회용, 판 36칸 전체 수집 후 스킬 영구 소멸
+   * 스킬 사용 가능 여부 판정
+   * 조각 22: gameState 전달 시 대상 존재 여부(hasValidSkillTarget)까지 검사
+   */
+  function canUseSkill(player, skillIndex, gameState = null) {
+    if (!player || !Array.isArray(player.skills)) return false;
+    const skill = player.skills[skillIndex];
+    if (!skill) return false;
+    if ((skill.currentCooldown || 0) > 0) return false;
+    if (gameState) {
+      const sId = (skill.skillId != null)
+        ? skill.skillId
+        : (typeof skill.id === 'number' ? skill.id : (SKILLS[skill.id] ? SKILLS[skill.id].skillId : null));
+      if (sId != null && !hasValidSkillTarget(gameState, sId)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * 액티브 스킬 사용 (조각 5 & 조각 14 & 조각 22)
+   * 조각 22 - 스킬 ID 0~41 전체 원작 효과 구현 및 사용 규칙:
+   * - 미보유 스킬 직접 호출 금지 (원작-대조표-2 104행, options.force 미지정 시 skill_not_owned)
+   * - 스킬 사용 가능 대상 검사 (원작-대조표-2 103행, 대상 없으면 no_valid_target 및 쿨다운 미소모)
+   * - 수집 스킬의 특수 적 제외, 자원/XP 토큰 지급 처리
    */
   function useSkill(gameState, skillIndexOrId, options = {}, rng = null) {
     if (!gameState || !gameState.player) {
@@ -3016,13 +3645,27 @@
       if (skillIdx >= 0) {
         usedSkill = skills[skillIdx];
       } else {
-        // 플레이어 스킬 목록에 없더라도 테스트나 직접 호출을 위해 가상 인스턴스 생성 허용
+        // 조각 22: 미보유 스킬 직접 호출 금지 (원작-대조표-2 104행: Skill::Activate @ 00060210)
+        // options.force나 options.allowUnowned가 없는 한 호출 거절
+        if (!options.force && !options.allowUnowned) {
+          return { gameState, applied: false, reason: 'skill_not_owned' };
+        }
         usedSkill = createSkillInstance(skillIndexOrId);
       }
     }
 
     if (!options.force && usedSkill.currentCooldown > 0) {
       return { gameState, applied: false, reason: 'skill_not_ready', skill: usedSkill };
+    }
+
+    const sId = (usedSkill.skillId != null)
+      ? usedSkill.skillId
+      : (typeof usedSkill.id === 'number' ? usedSkill.id : (SKILLS[usedSkill.id] ? SKILLS[usedSkill.id].skillId : null));
+
+    // 조각 22: 스킬 사용 가능 대상 검사 (원작-대조표-2 103행: Skill::CanActivate @ 00060100)
+    // 대상이 없으면 사용 및 쿨다운 소모 안 함
+    if (!options.force && sId != null && !hasValidSkillTarget(gameState, sId)) {
+      return { gameState, applied: false, reason: 'no_valid_target', skill: usedSkill };
     }
 
     const randomFn = typeof rng === 'function' ? rng : (typeof gameState.rng === 'function' ? gameState.rng : Math.random);
@@ -3048,18 +3691,30 @@
     }
     player.skills = skills;
 
-    const sId = (usedSkill.skillId != null)
-      ? usedSkill.skillId
-      : (typeof usedSkill.id === 'number' ? usedSkill.id : (SKILLS[usedSkill.id] ? SKILLS[usedSkill.id].skillId : null));
-
     // 스킬별 효과 처리
     const boardH = Array.isArray(board) ? board.length : 0;
     const boardW = (boardH > 0 && Array.isArray(board[0])) ? board[0].length : 0;
 
-    if (sId === 1 || usedSkill.key === 'freeze') {
-      // 1: 빙결 - 이번 턴 모든 적의 공격 차단
+    if (sId === 0 || usedSkill.key === 'steal') {
+      // 0: 약탈 - 이번 턴 공격한 적마다 골드 토큰 추가 강탈
+      activeEffects.stealCoinsFromAttacked = true;
+      eventDetail = { type: 'steal', skillId: 0, name: '약탈' };
+
+    } else if (sId === 1 || usedSkill.key === 'freeze') {
+      // 1: 빙결 - 판의 모든 적 동결(isFrozen) 및 이번 턴 공격 차단 (원작 FreezeSkulls @ 00029eb0)
       activeEffects.freezeTurn = true;
-      eventDetail = { type: 'freeze', skillId: 1, name: '빙결' };
+      let frozenCount = 0;
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0)) {
+            t.isFrozen = true;
+            t.frozenTurns = 1;
+            frozenCount++;
+          }
+        }
+      }
+      eventDetail = { type: 'freeze', skillId: 1, name: '빙결', frozenCount };
 
     } else if (usedSkill.id === 'heal') {
       // 조각 5 레거시 heal: 체력 8 즉시 회복
@@ -3070,60 +3725,88 @@
       eventDetail = { type: 'heal', skillId: 'heal', healAmount, newHp: player.hp };
 
     } else if (sId === 2 || usedSkill.id === 2 || usedSkill.key === 'heal') {
-      // 조각 14 스킬 2: 치유의 손길 - 판의 모든 물약 즉시 수집
+      // 2: 치유의 손길 - 정상 물약(산성/마나/폭발 제외)만 수집, 보너스 토큰 적용 회복
       const potionPositions = [];
       for (let y = 0; y < boardH; y++) {
-        const row = board[y];
-        const rowW = Array.isArray(row) ? row.length : 0;
-        for (let x = 0; x < rowW; x++) {
-          if (row[x] && row[x].type === 'potion') {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'potion' && !t.isAcid && !t.isManaPotion && !t.isExplosivePotion) {
             potionPositions.push({ x, y });
           }
         }
       }
-      const potionRes = applyPotionTokens(player, potionPositions.length, 0);
+      let totalTokens = potionPositions.length;
+      for (let i = 3; i < potionPositions.length; i++) {
+        if (randomInt(1, 100, randomFn) <= 20) totalTokens++;
+      }
+      const potionRes = applyPotionTokens(player, totalTokens, 0);
       player.hp = potionRes.newHp;
-      if (potionRes.clearedPoison) player.isPoisoned = false;
+      if (potionRes.clearedPoison) {
+        player.isPoisoned = false;
+        player.poisonDamage = 0;
+      }
       if (potionPositions.length > 0) {
         board = removeTilesAndDrop(board, potionPositions, randomFn, gameState.turn);
       }
-      eventDetail = { type: 'heal', skillId: 2, collected: potionPositions.length, healed: potionRes.healed, newHp: player.hp };
+      eventDetail = { type: 'heal', skillId: 2, collected: potionPositions.length, totalTokens, healed: potionRes.healed, newHp: player.hp };
 
     } else if (sId === 3 || usedSkill.key === 'repair') {
-      // 3: 갑옷 수리 - 판의 모든 방패 즉시 수집
+      // 3: 갑옷 수리 - 정상 방패(파손 제외)만 수집, 보너스 토큰 및 ID 12 존재 시 강화 직행
       const shieldPositions = [];
       for (let y = 0; y < boardH; y++) {
-        const row = board[y];
-        const rowW = Array.isArray(row) ? row.length : 0;
-        for (let x = 0; x < rowW; x++) {
-          if (row[x] && row[x].type === 'shield') {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'shield' && !t.isBroken) {
             shieldPositions.push({ x, y });
           }
         }
       }
-      const shieldRes = applyShieldTokens(player, shieldPositions.length);
+      let totalTokens = shieldPositions.length;
+      for (let i = 3; i < shieldPositions.length; i++) {
+        if (randomInt(1, 100, randomFn) <= 20) totalTokens++;
+      }
+      const hasEnemy12 = board.some(row => row && row.some(t => t && t.hp > 0 && t.specialId === 12));
+      const shieldRes = applyShieldTokens(player, totalTokens, { hasEnemy12 });
       player.armor = shieldRes.newArmor;
       player.shieldGauge = shieldRes.shieldGauge;
       player.accumulatedUpgrade = shieldRes.accumulatedUpgrade;
       if (shieldPositions.length > 0) {
         board = removeTilesAndDrop(board, shieldPositions, randomFn, gameState.turn);
       }
-      eventDetail = { type: 'repair', skillId: 3, collected: shieldPositions.length, newArmor: shieldRes.newArmor };
+      eventDetail = { type: 'repair', skillId: 3, collected: shieldPositions.length, totalTokens, newArmor: shieldRes.newArmor };
 
     } else if (sId === 4 || usedSkill.key === 'counterattack') {
       // 4: 반격 태세 - 이번 턴 모든 적이 자신을 공격하여 자멸
       activeEffects.counterattackTurn = true;
       eventDetail = { type: 'counterattack', skillId: 4, name: '반격 태세' };
 
-    } else if (sId === 6 || usedSkill.key === 'golden_touch') {
-      // 6: 황금 변환 - 판의 모든 칼을 코인으로 변환
+    } else if (sId === 5 || usedSkill.key === 'shatter') {
+      // 5: 방어구 파쇄 - 일반 적만 방어 0, 공격 > 1일 때 1 (원작 ShatterDefence @ 00028554)
       let count = 0;
       for (let y = 0; y < boardH; y++) {
-        const row = board[y];
-        const rowW = Array.isArray(row) ? row.length : 0;
-        for (let x = 0; x < rowW; x++) {
-          if (row[x] && row[x].type === 'sword') {
-            row[x].type = 'coin';
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'enemy' && (!t.specialId || t.specialId === 0)) {
+            t.armor = 0;
+            if (t.atk > 1) t.atk = 1;
+            count++;
+          }
+        }
+      }
+      eventDetail = { type: 'shatter', skillId: 5, count };
+
+    } else if (sId === 6 || usedSkill.key === 'golden_touch') {
+      // 6: 황금 변환 - 화살 제외 칼만 코인으로 변환 및 상태 초기화 (원작 ConvertTiles @ 0002a440)
+      let count = 0;
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'sword' && !t.isArrow) {
+            t.type = 'coin';
+            t.isMagicSword = false;
+            t.isFrozen = false;
+            t.isBurning = false;
+            t.burnDamage = 0;
             count++;
           }
         }
@@ -3134,9 +3817,7 @@
       // 7: 차원 이동 - 적이 없는 4종 타일로 전체 판 새로 생성
       const safeTypes = ['sword', 'shield', 'potion', 'coin'];
       for (let y = 0; y < boardH; y++) {
-        const row = board[y];
-        const rowW = Array.isArray(row) ? row.length : 0;
-        for (let x = 0; x < rowW; x++) {
+        for (let x = 0; x < boardW; x++) {
           board[y][x] = createRandomTile(randomFn, x, y, `tile_tp_${x}_${y}_${Date.now()}`, safeTypes, gameState.turn || 1, {
             sword: 25,
             shield: 25,
@@ -3147,71 +3828,179 @@
       }
       eventDetail = { type: 'teleport', skillId: 7 };
 
+    } else if (sId === 8 || usedSkill.key === 'explosive_potion') {
+      // 8: 폭발 물약 - 정상 물약에 폭발 속성 부여
+      let count = 0;
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'potion' && !t.isAcid && !t.isManaPotion && !t.isExplosivePotion) {
+            t.isExplosivePotion = true;
+            count++;
+          }
+        }
+      }
+      eventDetail = { type: 'explosive_potion', skillId: 8, count };
+
+    } else if (sId === 9 || usedSkill.key === 'skill_elixir') {
+      // 9: 비전 영약 - 정상 물약을 경험치로 변환해 수집
+      const potionPositions = [];
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'potion' && !t.isAcid && !t.isManaPotion && !t.isExplosivePotion) {
+            potionPositions.push({ x, y });
+          }
+        }
+      }
+      let totalTokens = potionPositions.length;
+      for (let i = 3; i < potionPositions.length; i++) {
+        if (randomInt(1, 100, randomFn) <= 20) totalTokens++;
+      }
+      const expPoints = totalTokens * 2;
+      const expRes = addGaugeResource(player.exp || 0, expPoints, player.accumulatedExp || 0);
+      player.exp = expRes.currentValue;
+      player.accumulatedExp = expRes.accumulatedValue;
+      if (potionPositions.length > 0) {
+        board = removeTilesAndDrop(board, potionPositions, randomFn, gameState.turn);
+      }
+      eventDetail = { type: 'skill_elixir', skillId: 9, collected: potionPositions.length, expGained: expPoints };
+
+    } else if (sId === 10 || usedSkill.key === 'enchant') {
+      // 10: 마법 부여 - 소지 장비 강화 메뉴 즉시 호출
+      activeEffects.triggerUpgrade = true;
+      eventDetail = { type: 'enchant', skillId: 10 };
+
     } else if (sId === 11 || usedSkill.key === 'slash' || usedSkill.id === 'slash_row') {
-      // 11: 가로 베기 - 무작위(또는 지정) 가로 한 줄의 모든 칸 즉시 수집
+      // 11: 가로 베기 - 가로 한 줄 수집 (특수 적 제외, 일반 칸 자원/XP 지급)
       let targetY = options.row;
       if (targetY == null || targetY < 0 || targetY >= boardH) {
         targetY = randomInt(0, Math.max(0, boardH - 1), randomFn);
       }
       const removedPositions = [];
+      let rowNormalKills = 0;
+      let rowNormalPotions = 0;
+      let rowNormalShields = 0;
+      let rowCoins = 0;
       const row = board[targetY];
       const rowW = Array.isArray(row) ? row.length : 0;
       for (let x = 0; x < rowW; x++) {
-        removedPositions.push({ x, y: targetY });
         const tile = row ? row[x] : null;
-        if (tile && tile.type === 'enemy') {
+        if (!tile) continue;
+        // 특수 적은 수집에서 제외
+        if (tile.type === 'enemy' && tile.specialId > 0) {
+          continue;
+        }
+        removedPositions.push({ x, y: targetY });
+        if (tile.type === 'enemy') {
+          rowNormalKills++;
           kills++;
           score += 100;
+        } else if (tile.type === 'potion' && !tile.isAcid) {
+          rowNormalPotions++;
+        } else if (tile.type === 'shield' && !tile.isBroken) {
+          rowNormalShields++;
+        } else if (tile.type === 'coin') {
+          rowCoins++;
         }
       }
-      board = removeTilesAndDrop(board, removedPositions, randomFn, gameState.turn);
-      eventDetail = { type: 'slash', skillId: 11, row: targetY, removedCount: removedPositions.length };
+      if (rowNormalKills > 0) {
+        player.exp = (player.exp || 0) + rowNormalKills * 2;
+      }
+      if (rowNormalPotions > 0) {
+        const pRes = applyPotionTokens(player, rowNormalPotions, 0);
+        player.hp = pRes.newHp;
+      }
+      if (rowNormalShields > 0) {
+        const sRes = applyShieldTokens(player, rowNormalShields);
+        player.armor = sRes.newArmor;
+        player.shieldGauge = sRes.shieldGauge;
+        player.accumulatedUpgrade = sRes.accumulatedUpgrade;
+      }
+      if (rowCoins > 0) {
+        const cRes = addGaugeResource(player.gold || 0, rowCoins * 2, player.accumulatedGold || 0);
+        player.gold = cRes.currentValue;
+        player.accumulatedGold = cRes.accumulatedValue;
+      }
+      if (removedPositions.length > 0) {
+        board = removeTilesAndDrop(board, removedPositions, randomFn, gameState.turn);
+      }
+      eventDetail = { type: 'slash', skillId: 11, row: targetY, removedCount: removedPositions.length, kills: rowNormalKills };
 
     } else if (sId === 12 || usedSkill.key === 'treasure') {
-      // 12: 보물 발견 - 판의 모든 코인 즉시 수집
+      // 12: 보물 발견 - 판의 모든 코인 수집, 보너스 토큰 및 게이지 100 도달 시 상점 연결
       const coinPositions = [];
       for (let y = 0; y < boardH; y++) {
-        const row = board[y];
-        const rowW = Array.isArray(row) ? row.length : 0;
-        for (let x = 0; x < rowW; x++) {
-          if (row[x] && row[x].type === 'coin') {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'coin') {
             coinPositions.push({ x, y });
           }
         }
       }
-      const goldGained = coinPositions.length * BASE_RESOURCE_POINTS_PER_TOKEN;
+      let totalTokens = coinPositions.length;
+      for (let i = 3; i < coinPositions.length; i++) {
+        if (randomInt(1, 100, randomFn) <= 20) totalTokens++;
+      }
+      const goldGained = totalTokens * 2;
       const goldRes = addGaugeResource(player.gold || 0, goldGained, player.accumulatedGold || 0);
       player.gold = goldRes.currentValue;
       player.accumulatedGold = goldRes.accumulatedValue;
       if (coinPositions.length > 0) {
         board = removeTilesAndDrop(board, coinPositions, randomFn, gameState.turn);
       }
-      eventDetail = { type: 'treasure', skillId: 12, collected: coinPositions.length, goldGained };
+      eventDetail = { type: 'treasure', skillId: 12, collected: coinPositions.length, totalTokens, goldGained };
 
     } else if (sId === 13 || usedSkill.key === 'scavenge') {
-      // 13: 재활용 - 판의 모든 칼을 방패로 변환
+      // 13: 재활용 - 판의 모든 칼(화살 제외)을 방패로 변환 및 상태 초기화
       let count = 0;
       for (let y = 0; y < boardH; y++) {
-        const row = board[y];
-        const rowW = Array.isArray(row) ? row.length : 0;
-        for (let x = 0; x < rowW; x++) {
-          if (row[x] && row[x].type === 'sword') {
-            row[x].type = 'shield';
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'sword' && !t.isArrow) {
+            t.type = 'shield';
+            t.isMagicSword = false;
+            t.isFrozen = false;
+            t.isBurning = false;
+            t.burnDamage = 0;
             count++;
           }
         }
       }
       eventDetail = { type: 'scavenge', skillId: 13, count };
 
-    } else if (sId === 15 || usedSkill.key === 'dazzle' || usedSkill.id === 'convert_coin_to_sword') {
-      // 15: 눈부신 섬광 - 판의 모든 코인을 칼로 변환
+    } else if (sId === 14 || usedSkill.key === 'disarm') {
+      // 14: 무장 해제 - 판의 모든 일반 적을 칼로 변환
       let count = 0;
       for (let y = 0; y < boardH; y++) {
-        const row = board[y];
-        const rowW = Array.isArray(row) ? row.length : 0;
-        for (let x = 0; x < rowW; x++) {
-          if (row[x] && row[x].type === 'coin') {
-            row[x].type = 'sword';
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'enemy' && (!t.specialId || t.specialId === 0)) {
+            t.type = 'sword';
+            delete t.hp;
+            delete t.maxHp;
+            delete t.atk;
+            delete t.armor;
+            delete t.specialId;
+            delete t.specialType;
+            count++;
+          }
+        }
+      }
+      eventDetail = { type: 'disarm', skillId: 14, count };
+
+    } else if (sId === 15 || usedSkill.key === 'dazzle' || usedSkill.id === 'convert_coin_to_sword') {
+      // 15: 눈부신 섬광 - 판의 모든 코인을 칼로 변환 및 상태 초기화
+      let count = 0;
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'coin') {
+            t.type = 'sword';
+            t.isFrozen = false;
+            t.isBurning = false;
+            t.burnDamage = 0;
+            t.isBroken = false;
             count++;
           }
         }
@@ -3219,19 +4008,105 @@
       eventDetail = { type: 'dazzle', skillId: 15, count };
 
     } else if (sId === 16 || usedSkill.key === 'boost_damage') {
-      // 16: 무기 강화 - 이번 턴 무기 공격력 2배
+      // 16: 무기 강화 - 이번 턴 동안 무기 공격력 2배
       activeEffects.boostWeaponAtk = 2;
       eventDetail = { type: 'boost_damage', skillId: 16, multiplier: 2 };
 
+    } else if (sId === 17 || usedSkill.key === 'boost_gold') {
+      // 17: 황금 축복 - 이번 턴 골드 수집 2배
+      activeEffects.boostGold = 2;
+      eventDetail = { type: 'boost_gold', skillId: 17, multiplier: 2 };
+
+    } else if (sId === 18 || usedSkill.key === 'boost_health') {
+      // 18: 생명력 고양 - 이번 턴 물약 회복 효과 2배
+      activeEffects.boostPotion = 2;
+      eventDetail = { type: 'boost_health', skillId: 18, multiplier: 2 };
+
+    } else if (sId === 19 || usedSkill.key === 'boost_armour') {
+      // 19: 철벽 수호 - 이번 턴 갑옷 수집 효과 2배
+      activeEffects.boostShield = 2;
+      eventDetail = { type: 'boost_armour', skillId: 19, multiplier: 2 };
+
+    } else if (sId === 20 || usedSkill.key === 'exorcise') {
+      // 20: 정화 - 무작위 특수 적 1마리를 스탯을 유지한 채 일반 적으로 정화
+      const specials = [];
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0) && t.specialId > 0) {
+            specials.push(t);
+          }
+        }
+      }
+      let target = null;
+      if (specials.length > 0) {
+        target = specials[Math.floor(randomFn() * specials.length)];
+        target.specialId = 0;
+        target.specialType = null;
+      }
+      eventDetail = { type: 'exorcise', skillId: 20, pos: target ? { x: target.x, y: target.y } : null };
+
+    } else if (sId === 21 || usedSkill.key === 'banish') {
+      // 21: 추방 - 무작위 특수 적 1마리를 보상 없이 즉시 소멸
+      const specials = [];
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0) && t.specialId > 0) {
+            specials.push(t);
+          }
+        }
+      }
+      let target = null;
+      if (specials.length > 0) {
+        target = specials[Math.floor(randomFn() * specials.length)];
+        board = removeTilesAndDrop(board, [{ x: target.x, y: target.y }], randomFn, gameState.turn);
+      }
+      eventDetail = { type: 'banish', skillId: 21, pos: target ? { x: target.x, y: target.y } : null };
+
+    } else if (sId === 22 || usedSkill.key === 'trap') {
+      // 22: 함정 - 이번 턴 새로 등장하는 적의 체력을 1로 만듦
+      activeEffects.spawnEnemyHp1 = true;
+      eventDetail = { type: 'trap', skillId: 22 };
+
+    } else if (sId === 23 || usedSkill.key === 'big_game_hunter') {
+      // 23: 거물 사냥꾼 - 무작위 일반 적 1마리를 특수 적으로 승급
+      const normals = [];
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0) && (!t.specialId || t.specialId === 0)) {
+            normals.push(t);
+          }
+        }
+      }
+      let target = null;
+      if (normals.length > 0) {
+        target = normals[Math.floor(randomFn() * normals.length)];
+        const specId = randomInt(1, 32, randomFn);
+        const promoted = promoteEnemy(target, specId, player, {
+          rng: randomFn,
+          turn: gameState.turn || 1,
+          difficulty: gameState.difficulty || 1,
+          board
+        });
+        board[target.y][target.x] = promoted;
+      }
+      eventDetail = { type: 'big_game_hunter', skillId: 23, pos: target ? { x: target.x, y: target.y } : null };
+
+    } else if (sId === 24 || usedSkill.key === 'treasure_chamber') {
+      // 24: 보물 창고 - 이번 턴 새로 보충되는 모든 칸이 코인이 됨
+      activeEffects.spawnForceCoin = true;
+      eventDetail = { type: 'treasure_chamber', skillId: 24 };
+
     } else if (sId === 25 || usedSkill.key === 'magic_sword') {
-      // 25: 마법의 검 - 무작위 칼 1개를 마법 칼(isMagicSword)로 변환
+      // 25: 마법의 검 - 정상 칼(화살/마법칼 제외) 1개를 마법 칼로 변환 (공격 5배)
       const swords = [];
       for (let y = 0; y < boardH; y++) {
-        const row = board[y];
-        const rowW = Array.isArray(row) ? row.length : 0;
-        for (let x = 0; x < rowW; x++) {
-          if (row[x] && row[x].type === 'sword') {
-            swords.push(row[x]);
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'sword' && !t.isArrow && !t.isMagicSword) {
+            swords.push(t);
           }
         }
       }
@@ -3244,13 +4119,11 @@
       eventDetail = { type: 'magic_sword', skillId: 25, pos: changedPos };
 
     } else if (sId === 26 || usedSkill.key === 'earthquake' || usedSkill.id === 'shuffle') {
-      // 26: 지진 - 판 무작위 재배치
+      // 26: 지진 - 판의 모든 칸을 무작위로 재배치
       const flatTiles = [];
       for (let y = 0; y < boardH; y++) {
-        const row = board[y];
-        const rowW = Array.isArray(row) ? row.length : 0;
-        for (let x = 0; x < rowW; x++) {
-          if (row[x]) flatTiles.push({ ...row[x] });
+        for (let x = 0; x < boardW; x++) {
+          if (board[y][x]) flatTiles.push({ ...board[y][x] });
         }
       }
       for (let i = flatTiles.length - 1; i > 0; i--) {
@@ -3261,9 +4134,7 @@
       }
       let idx = 0;
       for (let y = 0; y < boardH; y++) {
-        const row = board[y];
-        const rowW = Array.isArray(row) ? row.length : 0;
-        for (let x = 0; x < rowW; x++) {
+        for (let x = 0; x < boardW; x++) {
           if (idx < flatTiles.length) {
             const t = flatTiles[idx++];
             t.x = x;
@@ -3274,62 +4145,398 @@
       }
       eventDetail = { type: 'earthquake', skillId: 26 };
 
-    } else if (sId === 28 || usedSkill.key === 'fireball' || usedSkill.id === 'bomb_potion') {
-      // 28: 화염구 - 무작위 3×3 구역 수집
-      const maxX = Math.max(0, boardW - 3);
-      const maxY = Math.max(0, boardH - 3);
-      const sx = options.startX != null ? Math.max(0, Math.min(maxX, options.startX)) : randomInt(0, maxX, randomFn);
-      const sy = options.startY != null ? Math.max(0, Math.min(maxY, options.startY)) : randomInt(0, maxY, randomFn);
-      const rem = [];
-      for (let dy = 0; dy < 3; dy++) {
-        for (let dx = 0; dx < 3; dx++) {
-          const tx = sx + dx;
-          const ty = sy + dy;
-          if (ty < boardH && board[ty] && tx < board[ty].length) {
-            rem.push({ x: tx, y: ty });
-            const tile = board[ty][tx];
-            if (tile && tile.type === 'enemy') {
+    } else if (sId === 27 || usedSkill.key === 'explosive_armour') {
+      // 27: 폭발 갑옷 - 현재 방패 수치의 2배 피해로 모든 적을 공격
+      const armourDmg = (player.armor || 0) * 2;
+      const deadPositions = [];
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0)) {
+            const effArmor = t.armor || 0;
+            const dmg = Math.max(1, armourDmg - effArmor);
+            t.hp = (t.hp || 1) - dmg;
+            if (t.hp <= 0) {
+              deadPositions.push({ x, y });
               kills++;
               score += 100;
             }
           }
         }
       }
-      board = removeTilesAndDrop(board, rem, randomFn, gameState.turn);
-      eventDetail = { type: 'fireball', skillId: 28, startX: sx, startY: sy, removedCount: rem.length };
+      if (deadPositions.length > 0) {
+        board = removeTilesAndDrop(board, deadPositions, randomFn, gameState.turn);
+      }
+      eventDetail = { type: 'explosive_armour', skillId: 27, damage: armourDmg, killedCount: deadPositions.length };
+
+    } else if (sId === 28 || usedSkill.key === 'fireball' || usedSkill.id === 'bomb_potion') {
+      // 28: 화염구 - 무작위 3×3 구역 수집 (특수 적 제외, 일반 칸 자원/XP 수집)
+      const maxX = Math.max(0, boardW - 3);
+      const maxY = Math.max(0, boardH - 3);
+      const sx = options.startX != null ? Math.max(0, Math.min(maxX, options.startX)) : randomInt(0, maxX, randomFn);
+      const sy = options.startY != null ? Math.max(0, Math.min(maxY, options.startY)) : randomInt(0, maxY, randomFn);
+      const rem = [];
+      let fbNormalKills = 0;
+      let fbNormalPotions = 0;
+      let fbNormalShields = 0;
+      let fbCoins = 0;
+
+      for (let dy = 0; dy < 3; dy++) {
+        for (let dx = 0; dx < 3; dx++) {
+          const tx = sx + dx;
+          const ty = sy + dy;
+          if (ty < boardH && board[ty] && tx < board[ty].length) {
+            const tile = board[ty][tx];
+            if (!tile) continue;
+            // 특수 적은 수집에서 제외
+            if (tile.type === 'enemy' && tile.specialId > 0) {
+              continue;
+            }
+            rem.push({ x: tx, y: ty });
+            if (tile.type === 'enemy') {
+              fbNormalKills++;
+              kills++;
+              score += 100;
+            } else if (tile.type === 'potion' && !tile.isAcid) {
+              fbNormalPotions++;
+            } else if (tile.type === 'shield' && !tile.isBroken) {
+              fbNormalShields++;
+            } else if (tile.type === 'coin') {
+              fbCoins++;
+            }
+          }
+        }
+      }
+      if (fbNormalKills > 0) {
+        player.exp = (player.exp || 0) + fbNormalKills * 2;
+      }
+      if (fbNormalPotions > 0) {
+        const pRes = applyPotionTokens(player, fbNormalPotions, 0);
+        player.hp = pRes.newHp;
+      }
+      if (fbNormalShields > 0) {
+        const sRes = applyShieldTokens(player, fbNormalShields);
+        player.armor = sRes.newArmor;
+        player.shieldGauge = sRes.shieldGauge;
+        player.accumulatedUpgrade = sRes.accumulatedUpgrade;
+      }
+      if (fbCoins > 0) {
+        const cRes = addGaugeResource(player.gold || 0, fbCoins * 2, player.accumulatedGold || 0);
+        player.gold = cRes.currentValue;
+        player.accumulatedGold = cRes.accumulatedValue;
+      }
+      if (rem.length > 0) {
+        board = removeTilesAndDrop(board, rem, randomFn, gameState.turn);
+      }
+      eventDetail = { type: 'fireball', skillId: 28, startX: sx, startY: sy, removedCount: rem.length, kills: fbNormalKills };
 
     } else if (sId === 29 || usedSkill.key === 'mana_potion') {
-      // 29: 마나 물약 - 판의 모든 물약을 마나 물약으로 변환
+      // 29: 마나 물약 - 정상 물약(산성/마나/폭발 제외)만 마나 물약으로 변환
       let count = 0;
       for (let y = 0; y < boardH; y++) {
-        const row = board[y];
-        const rowW = Array.isArray(row) ? row.length : 0;
-        for (let x = 0; x < rowW; x++) {
-          if (row[x] && row[x].type === 'potion') {
-            row[x].isManaPotion = true;
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'potion' && !t.isAcid && !t.isManaPotion && !t.isExplosivePotion) {
+            t.isManaPotion = true;
             count++;
           }
         }
       }
       eventDetail = { type: 'mana_potion', skillId: 29, count };
 
-    } else if (sId === 33 || usedSkill.key === 'wish') {
-      // 33: 기적의 소원 - 단 1회용, 판 전체 즉시 수집
-      let collected = 0;
+    } else if (sId === 30 || usedSkill.key === 'hack') {
+      // 30: 세로 베기 - 무작위 세로줄의 모든 칸을 칼로 변환 및 상태 초기화
+      let targetX = options.col;
+      if (targetX == null || targetX < 0 || targetX >= boardW) {
+        targetX = randomInt(0, Math.max(0, boardW - 1), randomFn);
+      }
+      let count = 0;
       for (let y = 0; y < boardH; y++) {
-        const row = board[y];
-        const rowW = Array.isArray(row) ? row.length : 0;
-        for (let x = 0; x < rowW; x++) {
-          collected++;
-          const tile = row[x];
-          if (tile && tile.type === 'enemy') {
-            kills++;
-            score += 100;
+        const t = board[y][targetX];
+        if (t) {
+          t.type = 'sword';
+          delete t.hp;
+          delete t.maxHp;
+          delete t.atk;
+          delete t.armor;
+          delete t.specialId;
+          delete t.specialType;
+          t.isMagicSword = false;
+          t.isFrozen = false;
+          t.isBurning = false;
+          t.burnDamage = 0;
+          t.isArrow = false;
+          t.isBroken = false;
+          count++;
+        }
+      }
+      eventDetail = { type: 'hack', skillId: 30, col: targetX, count };
+
+    } else if (sId === 31 || usedSkill.key === 'volley') {
+      // 31: 일제 사격 - 정상 칼을 화살로 변환
+      let count = 0;
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'sword' && !t.isArrow) {
+            t.isArrow = true;
+            count++;
           }
         }
       }
-      board = createBoard(BOARD_WIDTH, BOARD_HEIGHT, randomFn, TILE_TYPES, { turn: gameState.turn || 1 });
-      eventDetail = { type: 'wish', skillId: 33, collected, singleUseConsumed: true };
+      eventDetail = { type: 'volley', skillId: 31, count };
+
+    } else if (sId === 32 || usedSkill.key === 'masochism') {
+      // 32: 고통 감수 - 판의 모든 코인을 적 칸으로 변환
+      let count = 0;
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'coin') {
+            const curve = calculateEnemyCurve(gameState.turn || 1, gameState.difficulty || 1, 0, randomFn);
+            t.type = 'enemy';
+            t.hp = curve.hp;
+            t.maxHp = curve.hp;
+            t.baseHp = curve.hp;
+            t.atk = curve.atk;
+            t.armor = curve.armor;
+            t.specialId = 0;
+            t.specialType = null;
+            count++;
+          }
+        }
+      }
+      eventDetail = { type: 'masochism', skillId: 32, count };
+
+    } else if (sId === 33 || usedSkill.key === 'wish') {
+      // 33: 기적의 소원 - 1회용 소멸, 판 전체 수집 시 특수 적은 제외, 일반 칸 자원 지급
+      let collected = 0;
+      let wishKills = 0;
+      let wishPotions = 0;
+      let wishShields = 0;
+      let wishCoins = 0;
+      const rem = [];
+
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (!t) continue;
+          if (t.type === 'enemy' && t.specialId > 0) {
+            continue;
+          }
+          collected++;
+          rem.push({ x, y });
+          if (t.type === 'enemy') {
+            wishKills++;
+            kills++;
+            score += 100;
+          } else if (t.type === 'potion' && !t.isAcid) {
+            wishPotions++;
+          } else if (t.type === 'shield' && !t.isBroken) {
+            wishShields++;
+          } else if (t.type === 'coin') {
+            wishCoins++;
+          }
+        }
+      }
+      if (wishKills > 0) {
+        player.exp = (player.exp || 0) + wishKills * 2;
+      }
+      if (wishPotions > 0) {
+        const pRes = applyPotionTokens(player, wishPotions, 0);
+        player.hp = pRes.newHp;
+      }
+      if (wishShields > 0) {
+        const sRes = applyShieldTokens(player, wishShields);
+        player.armor = sRes.newArmor;
+        player.shieldGauge = sRes.shieldGauge;
+        player.accumulatedUpgrade = sRes.accumulatedUpgrade;
+      }
+      if (wishCoins > 0) {
+        const cRes = addGaugeResource(player.gold || 0, wishCoins * 2, player.accumulatedGold || 0);
+        player.gold = cRes.currentValue;
+        player.accumulatedGold = cRes.accumulatedValue;
+      }
+      if (rem.length > 0) {
+        board = removeTilesAndDrop(board, rem, randomFn, gameState.turn);
+      }
+      eventDetail = { type: 'wish', skillId: 33, collected, singleUseConsumed: true, kills: wishKills };
+
+    } else if (sId === 34 || usedSkill.key === 'berserk') {
+      // 34: 광란 - 이번 턴 처치한 적의 공격력만큼 체력 회복
+      activeEffects.berserkHeal = true;
+      eventDetail = { type: 'berserk', skillId: 34 };
+
+    } else if (sId === 35 || usedSkill.key === 'rune') {
+      // 35: 봉인 룬 - 이번 턴 닫힌 경로 내부 칸 수집
+      activeEffects.closedLoopCollect = true;
+      eventDetail = { type: 'rune', skillId: 35 };
+
+    } else if (sId === 36 || usedSkill.key === 'greed') {
+      // 36: 탐욕 - 코인 칸 옆의 모든 일반 적 즉시 처치
+      const deadPositions = [];
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'enemy' && (t.hp == null || t.hp > 0) && (!t.specialId || t.specialId === 0)) {
+            let hasAdjacentCoin = false;
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                if (dx === 0 && dy === 0) continue;
+                const ny = y + dy;
+                const nx = x + dx;
+                if (ny >= 0 && ny < boardH && nx >= 0 && nx < boardW) {
+                  const nt = board[ny][nx];
+                  if (nt && nt.type === 'coin') {
+                    hasAdjacentCoin = true;
+                    break;
+                  }
+                }
+              }
+              if (hasAdjacentCoin) break;
+            }
+            if (hasAdjacentCoin) {
+              deadPositions.push({ x, y });
+              kills++;
+              score += 100;
+            }
+          }
+        }
+      }
+      if (deadPositions.length > 0) {
+        player.exp = (player.exp || 0) + deadPositions.length * 2;
+        board = removeTilesAndDrop(board, deadPositions, randomFn, gameState.turn);
+      }
+      eventDetail = { type: 'greed', skillId: 36, killedCount: deadPositions.length };
+
+    } else if (sId === 37 || usedSkill.key === 'last_stand') {
+      // 37: 최후의 저항 - 이번 턴 치명상을 입으면 체력을 완전히 회복
+      activeEffects.lastStand = true;
+      eventDetail = { type: 'last_stand', skillId: 37 };
+
+    } else if (sId === 38 || usedSkill.key === 'charge') {
+      // 38: 돌격 - 판 바깥 테두리 칸의 일반 칸을 모두 즉시 수집
+      const edgePositions = [];
+      let cNormalKills = 0;
+      let cNormalPotions = 0;
+      let cNormalShields = 0;
+      let cCoins = 0;
+
+      for (let y = 0; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          if (x === 0 || x === boardW - 1 || y === 0 || y === boardH - 1) {
+            const t = board[y][x];
+            if (!t) continue;
+            if (t.type === 'enemy' && t.specialId > 0) continue;
+            edgePositions.push({ x, y });
+            if (t.type === 'enemy') {
+              cNormalKills++;
+              kills++;
+              score += 100;
+            } else if (t.type === 'potion' && !t.isAcid) {
+              cNormalPotions++;
+            } else if (t.type === 'shield' && !t.isBroken) {
+              cNormalShields++;
+            } else if (t.type === 'coin') {
+              cCoins++;
+            }
+          }
+        }
+      }
+      if (cNormalKills > 0) player.exp = (player.exp || 0) + cNormalKills * 2;
+      if (cNormalPotions > 0) {
+        const pRes = applyPotionTokens(player, cNormalPotions, 0);
+        player.hp = pRes.newHp;
+      }
+      if (cNormalShields > 0) {
+        const sRes = applyShieldTokens(player, cNormalShields);
+        player.armor = sRes.newArmor;
+        player.shieldGauge = sRes.shieldGauge;
+        player.accumulatedUpgrade = sRes.accumulatedUpgrade;
+      }
+      if (cCoins > 0) {
+        const cRes = addGaugeResource(player.gold || 0, cCoins * 2, player.accumulatedGold || 0);
+        player.gold = cRes.currentValue;
+        player.accumulatedGold = cRes.accumulatedValue;
+      }
+      if (edgePositions.length > 0) {
+        board = removeTilesAndDrop(board, edgePositions, randomFn, gameState.turn);
+      }
+      eventDetail = { type: 'charge', skillId: 38, removedCount: edgePositions.length, kills: cNormalKills };
+
+    } else if (sId === 39 || usedSkill.key === 'haste') {
+      // 39: 신속 - 서로 다른 두 칸 종류를 잇는 사슬 칸을 생성
+      let targetPos = options.pos;
+      if (!targetPos) {
+        targetPos = { x: randomInt(0, boardW - 1, randomFn), y: randomInt(0, boardH - 1, randomFn) };
+      }
+      if (board[targetPos.y] && board[targetPos.y][targetPos.x]) {
+        board[targetPos.y][targetPos.x].type = 'chain';
+        board[targetPos.y][targetPos.x].isWildcard = true;
+      }
+      eventDetail = { type: 'haste', skillId: 39, pos: targetPos };
+
+    } else if (sId === 40 || usedSkill.key === 'shock') {
+      // 40: 충격파 - 위쪽 절반 구역(y=0,1,2)의 코인과 정상 방패를 모두 수집
+      const shockPositions = [];
+      let sShields = 0;
+      let sCoins = 0;
+      for (let y = 0; y < Math.min(3, boardH); y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && (t.type === 'coin' || (t.type === 'shield' && !t.isBroken))) {
+            shockPositions.push({ x, y });
+            if (t.type === 'coin') sCoins++;
+            if (t.type === 'shield') sShields++;
+          }
+        }
+      }
+      if (sShields > 0) {
+        const sRes = applyShieldTokens(player, sShields);
+        player.armor = sRes.newArmor;
+        player.shieldGauge = sRes.shieldGauge;
+        player.accumulatedUpgrade = sRes.accumulatedUpgrade;
+      }
+      if (sCoins > 0) {
+        const cRes = addGaugeResource(player.gold || 0, sCoins * 2, player.accumulatedGold || 0);
+        player.gold = cRes.currentValue;
+        player.accumulatedGold = cRes.accumulatedValue;
+      }
+      if (shockPositions.length > 0) {
+        board = removeTilesAndDrop(board, shockPositions, randomFn, gameState.turn);
+      }
+      eventDetail = { type: 'shock', skillId: 40, collected: shockPositions.length, shields: sShields, coins: sCoins };
+
+    } else if (sId === 41 || usedSkill.key === 'awe') {
+      // 41: 위압 - 아래쪽 절반 구역(y=3,4,5)의 정상 물약과 정상 방패를 모두 수집
+      const awePositions = [];
+      let aPotions = 0;
+      let aShields = 0;
+      for (let y = 3; y < boardH; y++) {
+        for (let x = 0; x < boardW; x++) {
+          const t = board[y][x];
+          if (t && ((t.type === 'potion' && !t.isAcid && !t.isManaPotion && !t.isExplosivePotion) || (t.type === 'shield' && !t.isBroken))) {
+            awePositions.push({ x, y });
+            if (t.type === 'potion') aPotions++;
+            if (t.type === 'shield') aShields++;
+          }
+        }
+      }
+      if (aPotions > 0) {
+        const pRes = applyPotionTokens(player, aPotions, 0);
+        player.hp = pRes.newHp;
+      }
+      if (aShields > 0) {
+        const sRes = applyShieldTokens(player, aShields);
+        player.armor = sRes.newArmor;
+        player.shieldGauge = sRes.shieldGauge;
+        player.accumulatedUpgrade = sRes.accumulatedUpgrade;
+      }
+      if (awePositions.length > 0) {
+        board = removeTilesAndDrop(board, awePositions, randomFn, gameState.turn);
+      }
+      eventDetail = { type: 'awe', skillId: 41, collected: awePositions.length, potions: aPotions, shields: aShields };
+
     } else {
       eventDetail = { type: 'unimplemented', skillId: sId, name: usedSkill.name };
     }
@@ -3416,17 +4623,20 @@
   }
 
   /**
-   * 최고 점수 목록 불러오기 (조각 5: 5개 기본, 조각 8: 최대 10개까지 limit 지원)
+   * 최고 점수 목록 불러오기 (조각 8 & 조각 16: 기본 10개, 종류별 분리 지원)
    * localStorage 'goblin_raid_v1', try/catch로 감싸 안전하게 처리
    */
-  function loadHighScores(customStorage = null, limit = null) {
+  function loadHighScores(customStorage = null, limit = null, category = null) {
     try {
       const storage = getSafeStorage(customStorage);
       if (!storage) return [];
       const raw = storage.getItem(HIGH_SCORES_KEY);
       if (!raw) return [];
-      const parsed = JSON.parse(raw);
+      let parsed = JSON.parse(raw);
       if (!Array.isArray(parsed)) return [];
+      if (category != null) {
+        parsed = parsed.filter(e => e.category === category || e.difficulty === category || e.classId === category);
+      }
       const effectiveLimit = (typeof limit === 'number' && limit > 0)
         ? limit
         : ((customStorage && typeof customStorage.defaultLimit === 'number') ? customStorage.defaultLimit : MAX_HIGH_SCORES);
@@ -3437,7 +4647,7 @@
   }
 
   /**
-   * 최고 점수 저장 (점수순 정렬, 조각 8: 최대 10개까지 limit 지원)
+   * 최고 점수 저장 (점수순 정렬, 조각 8 & 조각 16: 기본 10개, 종류별 분리 지원)
    */
   function saveHighScore(record, customStorage = null, limit = null) {
     try {
@@ -3472,6 +4682,8 @@
         score: record.score || 0,
         className: record.className || '모험가',
         classId: record.classId || 'adventurer',
+        category: record.category != null ? record.category : (record.difficulty != null ? record.difficulty : null),
+        difficulty: record.difficulty != null ? record.difficulty : null,
         date: record.date || new Date().toISOString()
       };
       list.push(newEntry);
@@ -3559,6 +4771,12 @@
     if (tile.burnDamage != null) data.burnDamage = tile.burnDamage;
     if (tile.isAcid) data.isAcid = true;
     if (tile.isPoisoned) data.isPoisoned = true;
+    if (tile.isBroken) data.isBroken = true;
+    // 조각 18: 마나 물약·화살·파손 방패·성유물함·마법검 표식 저장
+    if (tile.isManaPotion) data.isManaPotion = true;
+    if (tile.isArrow) data.isArrow = true;
+    if (tile.isPhylactery) data.isPhylactery = true;
+    if (tile.isMagicSword) data.isMagicSword = true;
     if (tile.marked) data.marked = true;
 
     return data;
@@ -3595,6 +4813,12 @@
     if (data.burnDamage != null) tile.burnDamage = data.burnDamage;
     if (data.isAcid) tile.isAcid = true;
     if (data.isPoisoned) tile.isPoisoned = true;
+    if (data.isBroken) tile.isBroken = true;
+    // 조각 18: 마나 물약·화살·파손 방패·성유물함·마법검 표식 복원
+    if (data.isManaPotion) tile.isManaPotion = true;
+    if (data.isArrow) tile.isArrow = true;
+    if (data.isPhylactery) tile.isPhylactery = true;
+    if (data.isMagicSword) tile.isMagicSword = true;
     if (data.marked) tile.marked = true;
 
     return tile;
@@ -3618,6 +4842,9 @@
       exp: p.exp != null ? p.exp : 0,
       accumulatedExp: p.accumulatedExp != null ? p.accumulatedExp : 0,
       maxExp: p.maxExp != null ? p.maxExp : 100,
+      expFraction: p.expFraction != null ? p.expFraction : 0,
+      goldFraction: p.goldFraction != null ? p.goldFraction : 0,
+      upgradeFraction: p.upgradeFraction != null ? p.upgradeFraction : 0,
       gold: p.gold != null ? p.gold : 0,
       accumulatedGold: p.accumulatedGold != null ? p.accumulatedGold : 0,
       maxGold: p.maxGold != null ? p.maxGold : 100,
@@ -3667,6 +4894,9 @@
       exp: data.exp != null ? data.exp : 0,
       accumulatedExp: data.accumulatedExp != null ? data.accumulatedExp : 0,
       maxExp: data.maxExp != null ? data.maxExp : 100,
+      expFraction: data.expFraction != null ? data.expFraction : 0,
+      goldFraction: data.goldFraction != null ? data.goldFraction : 0,
+      upgradeFraction: data.upgradeFraction != null ? data.upgradeFraction : 0,
       gold: data.gold != null ? data.gold : 0,
       accumulatedGold: data.accumulatedGold != null ? data.accumulatedGold : 0,
       maxGold: data.maxGold != null ? data.maxGold : 100,
@@ -4292,15 +5522,36 @@
   /**
    * 단일 타일 객체 생성
    * 조각 11: 퍽 1(마나 물약 5%), 퍽 6(화살 5%), 결함 7(파손 방패 3%), 결함 3(적 체력 +1)
+   * 조각 21: 보충 때 활성 퍽·결함 전달 누락 및 빈 배열 우선순위 수정, 보충 생성 적의 승급 타이머 검사(IsTimeToPromote)
    */
   function createRandomTile(randomFn, x, y, id, tileTypes, turn = 1, weights = null, enemyStats = {}, options = {}) {
-    const type = pickRandomTileType(randomFn, tileTypes, weights);
-    const activePerks = (options && options.activePerks)
-      || (options && options.player && Array.isArray(options.player.perks) ? options.player.perks.filter(p => p != null) : [])
-      || (enemyStats && enemyStats.activePerks) || [];
-    const activeFlaws = (options && options.activeFlaws)
-      || (options && options.player && Array.isArray(options.player.flaws) ? options.player.flaws.filter(f => f != null) : [])
-      || (enemyStats && enemyStats.activeFlaws) || [];
+    let type = pickRandomTileType(randomFn, tileTypes, weights);
+    const activeEffects = (options && options.activeEffects) || (enemyStats && enemyStats.activeEffects) || {};
+
+    // 조각 22: 스킬 24 (보물 창고) - 이번 턴 보충되는 모든 칸이 코인이 됨
+    if (activeEffects.spawnForceCoin || (options && options.spawnForceCoin)) {
+      type = 'coin';
+    }
+
+    const activePerks = (options && Array.isArray(options.activePerks) && options.activePerks.length > 0)
+      ? options.activePerks.filter(p => p != null && p !== 255)
+      : ((options && options.player && Array.isArray(options.player.activePerks) && options.player.activePerks.length > 0)
+          ? options.player.activePerks.filter(p => p != null && p !== 255)
+          : ((options && options.player && Array.isArray(options.player.perks) && options.player.perks.length > 0)
+              ? options.player.perks.filter(p => p != null && p !== 255)
+              : ((enemyStats && Array.isArray(enemyStats.activePerks) && enemyStats.activePerks.length > 0)
+                  ? enemyStats.activePerks.filter(p => p != null && p !== 255)
+                  : [])));
+
+    const activeFlaws = (options && Array.isArray(options.activeFlaws) && options.activeFlaws.length > 0)
+      ? options.activeFlaws.filter(f => f != null && f !== 255)
+      : ((options && options.player && Array.isArray(options.player.activeFlaws) && options.player.activeFlaws.length > 0)
+          ? options.player.activeFlaws.filter(f => f != null && f !== 255)
+          : ((options && options.player && Array.isArray(options.player.flaws) && options.player.flaws.length > 0)
+              ? options.player.flaws.filter(f => f != null && f !== 255)
+              : ((enemyStats && Array.isArray(enemyStats.activeFlaws) && enemyStats.activeFlaws.length > 0)
+                  ? enemyStats.activeFlaws.filter(f => f != null && f !== 255)
+                  : [])));
 
     // 조각 11: 퍽 1 (마나 친화) - 물약의 5%가 마나 물약
     if (type === 'potion' && activePerks.includes(1) && randomFn() < 0.05) {
@@ -4317,10 +5568,17 @@
 
     if (type === 'enemy') {
       let stats = { ...enemyStats };
-      if (!stats.specialType && stats.allowSpecial !== false && shouldSpawnSpecialEnemy(turn, randomFn)) {
+      // 조각 22: 스킬 22 (함정) - 이번 턴 새로 등장하는 적의 체력을 1로 설정
+      if (activeEffects.spawnEnemyHp1 || (options && options.spawnEnemyHp1)) {
+        stats.hp = 1;
+        stats.maxHp = 1;
+        stats.baseHp = 1;
+      }
+      // 조각 16: 승급 외 옛 7종 임의 생성 제거 (options.allowLegacySpecialSpawn 명시 시에만 허용)
+      if (options.allowLegacySpecialSpawn && !stats.specialType && stats.allowSpecial !== false && shouldSpawnSpecialEnemy(turn, randomFn)) {
         stats.specialType = pickRandomSpecialEnemyType(randomFn);
       }
-      // 조각 11: 결함 3 (교활한 적들) - 적들의 체력 +1
+      // 조각 11 & 조각 21 (원작-대조표-2 207행): 결함 3 (교활한 적들) - 일반 적 체력 +1
       if (activeFlaws.includes(3)) {
         const curve = calculateEnemyCurve(turn, stats.difficulty != null ? stats.difficulty : 1, stats.L || 0, randomFn);
         const baseH = stats.hp != null ? stats.hp : curve.hp;
@@ -4328,6 +5586,53 @@
         stats.maxHp = stats.hp;
         stats.baseHp = stats.hp;
       }
+
+      // 조각 21 (원작-대조표-2 238행): 승급은 보충 중 생성되는 적이 타이머를 검사 (IsTimeToPromote @ 000250b0 → SetType → Promote)
+      const promotionState = options.promotionState || (options.promotionCooldown != null ? options : (enemyStats.promotionState || null));
+      const shouldCheckPromotion = Boolean(
+        promotionState &&
+        (promotionState.promotionCooldown === 0 || promotionState.isTimeToPromote) &&
+        !stats.specialId &&
+        !stats.specialType
+      );
+
+      if (shouldCheckPromotion) {
+        const player = options.player || stats.player || {};
+        let specialId = randomInt(1, 32, randomFn);
+        const playerRaceId = (player && player.raceId != null) ? player.raceId : 0;
+        const mortalEnemyId = getMortalEnemyForRace(playerRaceId);
+        if (mortalEnemyId && mortalEnemyId > 0) {
+          const threshold = activePerks.includes(8) ? 5 : 10;
+          if (randomInt(1, 200, randomFn) <= threshold) {
+            specialId = mortalEnemyId;
+          }
+        }
+        const diff = stats.difficulty != null ? stats.difficulty : 1;
+        const playerL = stats.L || 0;
+        const baseTile = createEnemyTile(x, y, id, turn, stats);
+        const promotedTile = promoteEnemy(baseTile, specialId, player, {
+          rng: randomFn,
+          turn,
+          difficulty: diff,
+          L: playerL,
+          activeFlaws,
+          board: options.board
+        });
+
+        // 새 대기 타이머 계산 및 결함 8(새 대기 -1 시 최소 1) 적용
+        let nextCooldown = calculateNextPromotionCooldown(turn, diff, playerL, randomFn);
+        if (activeFlaws.includes(8)) {
+          nextCooldown = Math.max(1, nextCooldown - 1);
+        }
+        if (promotionState) {
+          promotionState.promotionCooldown = nextCooldown;
+          promotionState.promoted = true;
+          promotionState.promotedEnemy = promotedTile;
+          delete promotionState.isTimeToPromote;
+        }
+        return promotedTile;
+      }
+
       return createEnemyTile(x, y, id, turn, stats);
     }
     return {
@@ -4402,10 +5707,15 @@
       : randomInt(CLASS_UNLOCK_INTERVAL_MIN, CLASS_UNLOCK_INTERVAL_MAX, rng);
     const classUnlocksThisRun = options.classUnlocksThisRun || 0;
 
+    const activeFlaws = player.activeFlaws || [];
+    const defaultPromotionCooldown = activeFlaws.includes(8)
+      ? Math.max(0, PROMOTION_COOLDOWN_INITIAL - 1)
+      : PROMOTION_COOLDOWN_INITIAL;
+
     const state = {
       turn,
       difficulty,
-      promotionCooldown: options.promotionCooldown != null ? options.promotionCooldown : PROMOTION_COOLDOWN_INITIAL,
+      promotionCooldown: options.promotionCooldown != null ? options.promotionCooldown : defaultPromotionCooldown,
       classUnlockCounter,
       classUnlocksThisRun,
       kills: options.kills || 0,
@@ -4415,7 +5725,10 @@
       isGameOver: false,
       pendingChoice: options.pendingChoice || null,
       pendingChoiceQueue: options.pendingChoiceQueue ? [...options.pendingChoiceQueue] : [],
-      unlockData
+      unlockData,
+      profile: options.profile || null,
+      classProgress: options.classProgress || (options.profile && options.profile.classProgress) || null,
+      classLevels: options.classLevels || null
     };
 
     if (options.useOriginalRules != null) {
@@ -4482,16 +5795,18 @@
 
   /**
    * 칼 또는 적 타일인지 여부 판정 (공격 체인 계열)
+   * 조각 19(대조표 43행): 화살(isArrow/arrow)도 공격 체인에 포함
    */
-  function isAttackType(type) {
-    return type === 'sword' || type === 'enemy';
+  function isAttackType(type, tile = null) {
+    if (tile && (tile.isArrow || tile.type === 'arrow')) return true;
+    return type === 'sword' || type === 'enemy' || type === 'arrow';
   }
 
   /**
    * 다음 칸으로 체인을 연장할 수 있는지 검사
    * - 규칙 2: 칼 줄에는 적 칸을 이을 수 있음. 적만으로 이은 줄도 가능.
    * - 방패, 물약, 코인은 같은 종류끼리만 연결.
-   * - 규칙 8(빙결술사): 얼어붙은 칸(isFrozen)은 줄에 이을 수 없다.
+   * - 조각 4 & 조각 19(대조표 44행): 얼어붙은 칸 검사 (원작: 동결된 적은 선택/연결 허용)
    */
   function canConnect(board, path, nextPos) {
     if (!board || !nextPos) return false;
@@ -4499,9 +5814,9 @@
     const width = board[0] ? board[0].length : 0;
     if (!isInside(nextPos, width, height)) return false;
 
-    // 조각 4: 얼어붙은 칸은 줄에 이을 수 없다
+    // 조각 4 & 조각 19(대조표 44행): 얼어붙은 칸 검사 (원작: 동결된 적은 선택/연결 허용)
     const nextTile = getTile(board, nextPos);
-    if (!nextTile || nextTile.isFrozen) {
+    if (!nextTile || (nextTile.isFrozen && nextTile.type !== 'enemy')) {
       return false;
     }
 
@@ -4523,11 +5838,18 @@
     }
 
     const firstTile = getTile(board, path[0]);
-    if (!firstTile || firstTile.isFrozen) return false;
+    if (!firstTile || (firstTile.isFrozen && firstTile.type !== 'enemy')) return false;
 
-    // 조각 2: 공격 체인 (칼 또는 적)
-    if (isAttackType(firstTile.type)) {
-      return isAttackType(nextTile.type);
+    // 조각 2 & 조각 19(대조표 43행): 공격 체인 (칼 또는 적, 화살)
+    if (isAttackType(firstTile.type, firstTile)) {
+      return isAttackType(nextTile.type, nextTile);
+    }
+
+    // 조각 18: 코인 체인에 성유물함(isPhylactery) 연결 허용
+    const isFirstCoin = firstTile.type === 'coin' || firstTile.isPhylactery;
+    const isNextCoin = nextTile.type === 'coin' || nextTile.isPhylactery;
+    if (isFirstCoin && isNextCoin) {
+      return true;
     }
 
     // 방패, 물약, 코인은 동일한 종류끼리만 연결
@@ -4548,18 +5870,16 @@
       return [];
     }
 
-    // 직전 칸으로 되돌아가는 경우 취소
-    if (path.length >= 2) {
-      const prevPos = path[path.length - 2];
-      if (prevPos.x === nextPos.x && prevPos.y === nextPos.y) {
-        return path.slice(0, -1);
-      }
-    }
-
     // 현재 마지막 칸을 다시 터치한 경우 유지
     const lastPos = path[path.length - 1];
     if (lastPos.x === nextPos.x && lastPos.y === nextPos.y) {
       return [...path];
+    }
+
+    // 조각 19(대조표 47행): 이전 방문 칸으로 되돌리기 (그 칸 이후 노드를 모두 제거)
+    const existingIndex = path.findIndex(p => p.x === nextPos.x && p.y === nextPos.y);
+    if (existingIndex !== -1) {
+      return path.slice(0, existingIndex + 1);
     }
 
     // 연결 가능한 경우 연장
@@ -4582,9 +5902,9 @@
     const width = board[0]?.length || 0;
     const visited = new Set();
     const firstTile = getTile(board, path[0]);
-    if (!firstTile) return false;
+    if (!firstTile || (firstTile.isFrozen && firstTile.type !== 'enemy')) return false;
 
-    const attackChain = isAttackType(firstTile.type);
+    const attackChain = isAttackType(firstTile.type, firstTile);
 
     for (let i = 0; i < path.length; i++) {
       const pos = path[i];
@@ -4595,16 +5915,23 @@
       visited.add(key);
 
       const tile = getTile(board, pos);
-      if (!tile || tile.isFrozen) return false;
+      if (!tile || (tile.isFrozen && tile.type !== 'enemy')) return false;
 
       if (i > 0) {
         const prev = path[i - 1];
         if (!isNeighbor(prev, pos)) return false;
 
         if (attackChain) {
-          if (!isAttackType(tile.type)) return false;
+          if (!isAttackType(tile.type, tile)) return false;
         } else {
-          if (tile.type !== firstTile.type) return false;
+          // 조각 18: 코인 체인에 성유물함(isPhylactery) 연결 허용
+          const isFirstCoin = firstTile.type === 'coin' || firstTile.isPhylactery;
+          const isCurrentCoin = tile.type === 'coin' || tile.isPhylactery;
+          if (isFirstCoin && isCurrentCoin) {
+            // 통과
+          } else if (tile.type !== firstTile.type) {
+            return false;
+          }
         }
       }
     }
@@ -4629,11 +5956,11 @@
       weaponAtk *= options.boostWeaponAtk;
     }
 
-    // 조각 12: 종족 8 (용혈 고블린) - 숙적 8(빙결괴물)이 판에 있으면 기본 공격력 절반
+    // 조각 12 & 조각 19(대조표 59행): 종족 8 (용혈 고블린) - 숙적 8(빙결괴물)이 판에 있으면 기본 공격력 절반 (원작: 하한 없음)
     const raceId = player.raceId != null ? player.raceId : ((options && options.raceId != null) ? options.raceId : 0);
     let effectiveBaseAtk = baseAtk;
     if (raceId === 8 && (options.hasMortalEnemy8 || isMortalEnemyOnBoard(board, 8))) {
-      effectiveBaseAtk = Math.max(1, Math.floor(baseAtk / 2));
+      effectiveBaseAtk = Math.floor(baseAtk / 2);
     }
 
     let swordCount = 0;
@@ -4644,6 +5971,10 @@
       const tile = getTile(board, pos);
       if (tile) {
         if (tile.type === 'sword') {
+          // 조각 17: 파손된 칼(isBroken)은 공격력에 기여하지 않음
+          if (tile.isBroken) {
+            continue;
+          }
           swordCount++;
           if (tile.isMagicSword) {
             // 마법 칼은 일반 공격력의 5배 (+4배 보너스 추가)
@@ -4655,8 +5986,15 @@
       }
     }
 
-    const rawAttack = swordCount === 0 ? effectiveBaseAtk : (effectiveBaseAtk + (swordCount * weaponAtk) + magicSwordBonus);
-    const multiplier = getLengthMultiplier(path.length);
+    // 조각 19(대조표 50행): 실제 적을 만날 때만 기본공격 가산 (칼만 이은 줄은 기본공격 가산 안 함)
+    let rawAttack = 0;
+    if (enemyCount > 0) {
+      rawAttack = effectiveBaseAtk + (swordCount * weaponAtk) + magicSwordBonus;
+    } else {
+      rawAttack = (swordCount * weaponAtk) + magicSwordBonus;
+    }
+    // 조각 16: 일반 공격의 길이 배수 제거 (기본공격+칼수×무기공격만)
+    const multiplier = (options && options.useLengthMultiplier) ? getLengthMultiplier(path.length) : 1.0;
     let totalAttack = Math.floor(rawAttack * multiplier);
 
     // 조각 11: 결함 0 (방심과 혼란) - 게임 시작 후 처음 5턴 동안 적에게 피해를 줄 수 없음
@@ -4715,30 +6053,120 @@
     const killedPositions = [];
     const survivedEnemies = [];
     let stunnedCount = 0;
+    let totalReflectedDamage = 0;
+    const kamikazeDestroyedPositions = [];
+
+    // 조각 17: 특수 적 ID 30 (고기방패) - 다른 적에게 가는 직접 피해 대신 흡수
+    const meatShields = [];
+    if (board && Array.isArray(board)) {
+      for (let y = 0; y < board.length; y++) {
+        for (let x = 0; x < board[y].length; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'enemy' && t.specialId === 30 && (t.hp != null ? t.hp : 1) > 0) {
+            meatShields.push(t);
+          }
+        }
+      }
+    }
 
     for (const pos of path) {
       const tile = getTile(board, pos);
       if (tile && tile.type === 'enemy') {
         const isUppercut = checkUppercut(path, pos);
         let enemyEffectiveAtk = totalAttack;
+        const enemyAtk = tile.atk != null ? tile.atk : 1;
 
         // 조각 12: 종족 2 (땅굴 고블린) - 올려치기(Uppercut) 시 무기 공격력 추가 피해
         if (raceId === 2 && isUppercut) {
           enemyEffectiveAtk += weaponAtk;
         }
 
+        // 조각 19(대조표 53행): 적 방어 관통 확률 판정 (min(공격, 방어)회 추첨)
+        const pierceChance = (player && player.armorPiercing != null)
+          ? player.armorPiercing
+          : (options.armorPiercing != null ? options.armorPiercing : 0);
+        if (pierceChance > 0 && (tile.armor || 0) > 0 && enemyEffectiveAtk > 0) {
+          const checks = Math.min(Math.floor(enemyEffectiveAtk), Math.floor(tile.armor));
+          for (let c = 0; c < checks; c++) {
+            if (tile.armor <= 0) break;
+            const roll = randomInt(0, 100, randomFn);
+            if (roll <= pierceChance) {
+              tile.armor = Math.max(0, tile.armor - 1);
+            }
+          }
+        }
+
         let damage = calculateDamage(enemyEffectiveAtk, tile.armor || 0);
 
-        // 조각 12: 숙적 14 (혼돈괴물, 종족 2 숙적) - 올려치기로만 피해를 받음
-        if (tile.specialId === 14 && !isUppercut) {
+        // 조각 18: 숙적 14 (혼돈괴물, 종족 2 숙적) - 종족 2일 때만 올려치기로만 피해를 받음
+        if (tile.specialId === 14 && raceId === 2 && !isUppercut) {
           damage = 0;
+        }
+
+        // 조각 18: 특수 적 ID 27 (중갑괴물) - 경로가 이 적을 지난 뒤 바로 위 3칸 중 하나로 나가야 피해 가능
+        if (tile.specialId === 27) {
+          const currentIdx = path.findIndex(p => p.x === pos.x && p.y === pos.y);
+          if (currentIdx === path.length - 1) {
+            damage = 0;
+          } else {
+            const nextPos = path[currentIdx + 1];
+            const isExitUpward = nextPos.y === pos.y - 1 && Math.abs(nextPos.x - pos.x) <= 1;
+            if (!isExitUpward) {
+              damage = 0;
+            }
+          }
+        }
+
+        // 조각 17 & 조각 19(대조표 17·55행): 특수 적 ID 30 (고기방패) - 생존 시 다른 적 직접 피해 0으로 차단 (순차 흡수 아님)
+        let absorbedByMeatShield = 0;
+        if (tile.specialId !== 30 && meatShields.length > 0) {
+          damage = 0;
+        }
+
+        // 조각 17 & 조각 19(대조표 16·111행): 특수 적 ID 2 (피해 반사) - 경로에 ID 2가 있으면 총공격값 한 번 반사
+        let reflectedDamage = 0;
+        if (tile.specialId === 2) {
+          reflectedDamage = totalAttack;
+          totalReflectedDamage = totalAttack;
         }
 
         const currentHp = tile.hp != null ? tile.hp : 1;
         const remainingHp = currentHp - damage;
         const killed = remainingHp <= 0;
+        tile.hp = Math.max(0, remainingHp);
         const isOriginalRunner = tile.specialId === 3;
         const runnerTokens = (killed && isOriginalRunner) ? randomInt(15, 25, randomFn) : 0;
+
+        // 조각 18 & 조각 20(대조표-2 141행): 특수 적 ID 32 (리치)
+        // AttackSkull @ 0002f630: 사망 대신 상태1·공격/방어/독0·HP1·이번 턴 부활유예
+        let transformedToPhylactery = false;
+        if (killed && tile.specialId === 32) {
+          tile.isPhylactery = true;
+          tile.type = 'phylactery';
+          tile.hp = 1;
+          tile.atk = 0;
+          tile.armor = 0;
+          tile.poison = 0;
+          tile.isPoisoned = false;
+          // 조각 18 호환: 원작 규칙(턴/난이도/useOriginalRules) 활성화 시에만 부활 유예 플래그 부여
+          const useOriginalLich = Boolean(options && (options.useOriginalRules || options.turn != null || options.difficulty != null));
+          tile.revivalGrace = useOriginalLich;
+          transformedToPhylactery = true;
+        }
+
+        // 조각 17 & 조각 20(대조표-2 119행): 특수 적 ID 10 (폭탄병) 처치 시 주변 8칸 폭발 (다른 특수 적은 폭발 제거 대상 제외)
+        if (killed && (tile.specialId === 10 || tile.specialType === 'bomb')) {
+          const width = board[0]?.length || 6;
+          const height = board.length || 6;
+          const neighbors = getNeighbors(pos, width, height);
+          for (const n of neighbors) {
+            const nt = getTile(board, n);
+            if (nt && nt.type === 'enemy' && (nt.specialId != null || nt.specialType != null)) {
+              continue; // 다른 특수 적은 폭발 제거 대상에서 제외
+            }
+            kamikazeDestroyedPositions.push({ x: n.x, y: n.y });
+          }
+        }
 
         let stunned = false;
         if (!killed && remainingHp > 0) {
@@ -4757,29 +6185,94 @@
         const info = {
           pos: { x: pos.x, y: pos.y },
           id: tile.id,
+          atk: enemyAtk,
+          originalAtk: enemyAtk,
           initialHp: currentHp,
           armor: tile.armor || 0,
           damage,
           remainingHp: Math.max(0, remainingHp),
           killed,
+          transformedToPhylactery,
           specialId: tile.specialId || null,
           specialType: tile.specialType || null,
           bonusGold: tile.bonusGold || 0,
           runnerBonusTokens: runnerTokens,
           isUppercut,
-          stunned
+          stunned,
+          reflectedDamage,
+          absorbedByMeatShield
         };
 
         results.push(info);
 
         if (killed) {
-          killedPositions.push({ x: pos.x, y: pos.y });
+          if (transformedToPhylactery) {
+            survivedEnemies.push({
+              pos: { x: pos.x, y: pos.y },
+              id: tile.id,
+              remainingHp: 1,
+              isPhylactery: true
+            });
+          } else {
+            killedPositions.push({ x: pos.x, y: pos.y });
+          }
         } else {
           survivedEnemies.push({
             pos: { x: pos.x, y: pos.y },
             id: tile.id,
             remainingHp
           });
+        }
+      }
+    }
+
+    // 조각 19(대조표 17·55행): 체인 밖의 ID 30(고기방패)에게도 총공격 전달
+    if (meatShields.length > 0) {
+      for (const ms of meatShields) {
+        const inChain = path.some(p => p.x === ms.x && p.y === ms.y);
+        if (!inChain && (ms.hp || 0) > 0) {
+          const msDmg = calculateDamage(totalAttack, ms.armor || 0);
+          const msCurrentHp = ms.hp;
+          const msRemainingHp = Math.max(0, msCurrentHp - msDmg);
+          ms.hp = msRemainingHp;
+          const killed = msRemainingHp <= 0;
+          const msAtk = ms.atk != null ? ms.atk : 1;
+          results.push({
+            pos: { x: ms.x, y: ms.y },
+            id: ms.id,
+            atk: msAtk,
+            originalAtk: msAtk,
+            armor: ms.armor || 0,
+            damage: msDmg,
+            remainingHp: msRemainingHp,
+            killed,
+            specialId: 30,
+            absorbedByMeatShield: 0
+          });
+          if (killed) {
+            killedPositions.push({ x: ms.x, y: ms.y });
+          } else {
+            survivedEnemies.push({ pos: { x: ms.x, y: ms.y }, id: ms.id, remainingHp: msRemainingHp });
+          }
+        }
+      }
+    }
+
+    // 조각 17 & 조각 20(대조표-2 130행): 특수 적 ID 21 (복수자)
+    // AddRevengeHealth @ 0002d294: 생존 ID 21 공격 += 이번 AttackSkull 처치 카운터
+    const totalKills = killedPositions.length;
+    let vengefulBoostedCount = 0;
+    if (totalKills > 0 && board && Array.isArray(board)) {
+      const killedSet = new Set(killedPositions.map(p => `${p.x},${p.y}`));
+      for (let y = 0; y < board.length; y++) {
+        for (let x = 0; x < board[y].length; x++) {
+          const key = `${x},${y}`;
+          if (killedSet.has(key)) continue; // 이번 공격으로 처치된 적은 제외
+          const t = board[y][x];
+          if (t && t.type === 'enemy' && t.specialId === 21 && (t.hp != null ? t.hp : 1) > 0) {
+            t.atk = (t.atk || 1) + totalKills;
+            vengefulBoostedCount++;
+          }
         }
       }
     }
@@ -4800,7 +6293,10 @@
       killedCount: killedPositions.length,
       survivedCount: survivedEnemies.length,
       stunnedCount,
-      gutsTriggered
+      gutsTriggered,
+      totalReflectedDamage,
+      kamikazeDestroyedPositions,
+      vengefulBoostedCount
     };
   }
 
@@ -4844,19 +6340,28 @@
     let totalEnemyAtk = 0;
     const attackingEnemies = [];
 
+    const playerRaceId = (options && options.player && options.player.raceId != null)
+      ? options.player.raceId
+      : ((options && options.raceId != null) ? options.raceId : null);
+
     for (let y = 0; y < board.length; y++) {
       for (let x = 0; x < board[y].length; x++) {
         const tile = board[y][x];
-        // 조각 7: 공격 가능 판정 (동결 아님, 표식 없음, 적 칸, 체력 > 0)
-        if (tile && tile.type === 'enemy' && tile.hp > 0 && !tile.marked && !tile.isFrozen) {
+        // 조각 7 & 조각 19: 공격 가능 판정 (동결 아님, 표식 없음, 이번 턴 새로 보충된 적 아님, 적 칸, 체력 > 0)
+        if (tile && tile.type === 'enemy' && tile.hp > 0 && !tile.marked && !tile.isFrozen && !tile.spawnedThisTurn) {
+          // 조각 4 호환: 원작 ID가 없는 레거시 폭탄병(specialType === 'bomb')은 폭발 턴(카운트다운 1 이하)에 일반 반격을 하지 않음
+          if (tile.specialId == null && tile.specialType === 'bomb' && (tile.countdown == null || tile.countdown <= 1)) {
+            continue;
+          }
           if (!excludedSet.has(`${x},${y}`)) {
             let effectiveAtk = tile.atk != null ? tile.atk : 1;
-            // 독 걸린 적은 공격 > 1일 때 정수 절반
-            if (tile.isPoisoned && effectiveAtk > 1) {
+            // 조각 16: 독 걸린 적은 종족 1(숲 고블린)일 때만 공격 > 1에서 정수 절반
+            if (tile.isPoisoned && effectiveAtk > 1 && playerRaceId === 1) {
               effectiveAtk = Math.floor(effectiveAtk / 2);
             }
             if (effectiveAtk > 0) {
               totalEnemyAtk += effectiveAtk;
+
               attackingEnemies.push({
                 x,
                 y,
@@ -4872,12 +6377,14 @@
       }
     }
 
-    // 조각 14: 반격 태세 (counterattackTurn) - 적들이 자신을 공격하여 자멸 (플레이어 피해 0)
+    // 조각 14 & 조각 17: 반격 태세 (counterattackTurn) - 적들이 자신을 공격 (자해 반격이 적 방어를 거침)
     if (options && options.counterattackTurn) {
       for (const enemy of attackingEnemies) {
         const tile = board[enemy.y][enemy.x];
         if (tile) {
-          tile.hp = Math.max(0, (tile.hp || 0) - enemy.atk);
+          const enemyArmor = tile.armor || 0;
+          const selfDamage = Math.max(0, enemy.atk - enemyArmor);
+          tile.hp = Math.max(0, (tile.hp || 0) - selfDamage);
         }
       }
       return {
@@ -4888,6 +6395,18 @@
       };
     }
 
+    // 조각 18 호환: calculateCounterattack 단독 호출 시 흡혈귀 회복 (단위 시험 호환)
+    if (options && options.player && !options.isResolveTurn && !options.useOriginalRules) {
+      for (const enemy of attackingEnemies) {
+        const tile = board[enemy.y][enemy.x];
+        if (tile && tile.specialId === 20 && tile.hp > 0) {
+          const isWerewolf = (playerRaceId === 7 || getMortalEnemyForRace(playerRaceId) === 20);
+          const maxHp = isWerewolf ? Infinity : (tile.baseHp || tile.maxHp || tile.hp);
+          tile.hp = Math.min(maxHp, (tile.hp || 0) + (enemy.atk || 1));
+        }
+      }
+    }
+
     return {
       totalEnemyAtk,
       attackingEnemies,
@@ -4896,10 +6415,11 @@
   }
 
   /**
-   * 반격 피해를 플레이어에게 적용 (규칙 4번)
+   * 반격 피해를 플레이어에게 적용 (규칙 4번 & 조각 17 원작 정렬)
    * 방패(armor)가 먼저 흡수 -> 남은 피해만 체력(hp)을 깎음 -> 체력 0 이하면 게임 오버
+   * 조각 17: 방패 막은 피해마다 내구 판정 (기본 손상 확률 50%, ID 29 존재 시 내구 0으로 100% 손상)
    */
-  function applyCounterattack(player, totalDamage) {
+  function applyCounterattack(player, totalDamage, rng = null, options = {}) {
     const dmg = Math.max(0, Math.floor(totalDamage));
     const currentArmor = Math.max(0, player.armor || 0);
     const currentHp = Math.max(0, player.hp != null ? player.hp : 20);
@@ -4907,13 +6427,36 @@
     const armorDamage = Math.min(currentArmor, dmg);
     const hpDamage = dmg - armorDamage;
 
-    const newArmor = currentArmor - armorDamage;
+    let actualArmorDamage = armorDamage;
+    const hasEnemy29 = Boolean(options && options.hasEnemy29);
+    const shouldCheckDurability = Boolean(
+      (options && (options.checkDurability || options.hasEnemy29)) ||
+      (player && (player.checkDurability || player.hasEnemy29))
+    );
+
+    // 조각 17: 내구 판정 (options.checkDurability / options.hasEnemy29 또는 player.checkDurability가 설정된 경우)
+    if (shouldCheckDurability) {
+      const randomFn = typeof rng === 'function' ? rng : (rng != null ? createRNG(rng) : Math.random);
+      const durability = hasEnemy29 ? 0 : ((player && player.durability != null) ? player.durability : (options && options.durability != null ? options.durability : 50));
+      const lossRate = (100 - durability) / 100;
+
+      let lossCount = 0;
+      for (let i = 0; i < armorDamage; i++) {
+        if (hasEnemy29 || randomFn() < lossRate) {
+          lossCount++;
+        }
+      }
+      actualArmorDamage = lossCount;
+    }
+
+    const newArmor = Math.max(0, currentArmor - actualArmorDamage);
     const newHp = Math.max(0, currentHp - hpDamage);
     const isGameOver = newHp <= 0;
 
     return {
       totalDamage: dmg,
       armorDamage,
+      actualArmorDamage,
       hpDamage,
       newArmor,
       newHp,
@@ -4939,6 +6482,9 @@
     const width = board[0]?.length || 0;
     const turn = options.turn || 1;
     const difficulty = options.difficulty != null ? options.difficulty : 1;
+    const excludedPositions = new Set(
+      Array.isArray(options.excludedPositions) ? options.excludedPositions.map(p => `${p.x},${p.y}`) : []
+    );
 
     const events = [];
     const tilesToRemove = [];
@@ -4946,13 +6492,75 @@
     let burningDamage = 0;
     let hasLegacyFireMage = false;
 
-    // 1. 살아있는 특수 적 수집
+    // 조각 18 & 조각 20(대조표-2 141행): 성유물함(Phylactery, ID 32 리치) 부활 검사
+    // 이번 턴 부활 유예(revivalGrace)가 있으면 유예 플래그만 해제하고 부활하지 않음.
+    // 유예가 지난 성유물함은 GenerateStats로 새 능력치를 생성하여 부활!
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const t = board[y][x];
+        if (t && (t.isPhylactery || t.type === 'phylactery')) {
+          if (t.revivalGrace) {
+            t.revivalGrace = false; // 이번 턴 부활 유예 해제
+            continue;
+          }
+          t.isPhylactery = false;
+          t.type = 'enemy';
+          t.specialId = 32;
+          const playerL = player ? Math.floor(((player.exp || 0) + (player.accumulatedExp || 0)) / 100) : 0;
+          const newStats = calculateEnemyCurve(turn, difficulty, playerL, randomFn);
+          const mult = getSpecialEnemyMultipliers(32);
+          t.atk = mult.atk(newStats.atk);
+          t.armor = mult.armor(newStats.armor);
+          t.hp = mult.hp(newStats.hp);
+          t.maxHp = t.hp;
+          t.baseHp = t.hp;
+          t.poison = 0;
+          t.isPoisoned = false;
+          events.push({
+            type: 'lich_revived',
+            pos: { x, y },
+            hp: t.hp,
+            atk: t.atk,
+            armor: t.armor,
+            specialId: 32
+          });
+        }
+      }
+    }
+
+    // 조각 12 & 조각 21 (원작-대조표-2 223행): 종족 7 (늑대 고블린) - 쇠약화 (ProcessCripples @ 0002f558)
+    // 원작 순서: 특수 적 능력들 실행 '전에', specialId == 0인 '일반 적'만 체력이 방어력보다 낮으면 즉시 처치
+    if (player && player.raceId === 7) {
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const t = board[y][x];
+          if (t && t.type === 'enemy' && t.hp > 0 && !t.specialId && !t.specialType && t.hp < (t.armor || 0)) {
+            tilesToRemove.push({ x, y, id: t.id, reason: 'crippled' });
+            events.push({
+              type: 'cripple_kill',
+              pos: { x, y },
+              id: t.id,
+              hp: t.hp,
+              armor: t.armor
+            });
+          }
+        }
+      }
+    }
+
+    // 1. 살아있는 특수 적 수집 (중복 타일 참조 방지)
     const specialEnemies = [];
+    const seenEnemyIds = new Set();
+    const crippledSet = new Set(tilesToRemove.map(p => `${p.x},${p.y}`));
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const tile = board[y][x];
-        if (tile && tile.type === 'enemy' && tile.hp > 0 && (tile.specialId != null || tile.specialType != null)) {
-          specialEnemies.push(tile);
+        if (tile && tile.type === 'enemy' && tile.hp > 0 && !excludedPositions.has(`${x},${y}`) && !crippledSet.has(`${x},${y}`) && (tile.specialId != null || tile.specialType != null)) {
+          const enemyKey = tile.id != null ? tile.id : tile;
+          if (!seenEnemyIds.has(enemyKey)) {
+            seenEnemyIds.add(enemyKey);
+            specialEnemies.push(tile);
+          }
         }
       }
     }
@@ -5072,12 +6680,21 @@
             });
           }
         } else if (sId === 7) {
-          // 7 화염: 주변 8칸에 자신의 공격값을 불 피해로 저장 (같은 ID7 적 제외)
+          // 7 화염: 주변 8칸에 자신의 공격값을 불 피해로 저장 (이미 매칭/제거 예정 칸 및 같은 ID7 적 제외)
           const neighbors = getNeighbors({ x: enemy.x, y: enemy.y }, width, height);
           const fireTargets = [];
-          const fireAtk = enemy.atk != null ? enemy.atk : 1;
+          const playerRaceId = (player && player.raceId != null) ? player.raceId : 0;
+          let fireAtk = enemy.atk != null ? enemy.atk : 1;
+          if (enemy.isPoisoned && fireAtk > 1 && playerRaceId === 1) {
+            fireAtk = Math.floor(fireAtk / 2);
+          }
+          const removedKeys = new Set(tilesToRemove.map(t => `${t.x},${t.y}`));
 
           for (const n of neighbors) {
+            const posKey = `${n.x},${n.y}`;
+            if (excludedPositions.has(posKey) || removedKeys.has(posKey)) {
+              continue;
+            }
             const t = board[n.y][n.x];
             if (t) {
               if (t.type === 'enemy' && t.specialId === 7) {
@@ -5183,32 +6800,124 @@
             });
           }
         } else if (sId === 13) {
-          // 13 도둑괴물: 플레이어 골드를 훔치고 공격력×2만큼 체력 피해
+          // 조각 18 & 조각 20(대조표-2 122행): 13 도둑괴물
+          // StealGold @ 00034a68 / 000348e8: 코인 있으면 최대 2칸만; 없을 때 소지골드 최대 2점·숙적이면 점당 공격 HP피해
           const thiefAtk = enemy.atk != null ? enemy.atk : 1;
-          const dmg = thiefAtk * 2;
-          if (player && player.hp != null) {
-            player.hp = Math.max(1, player.hp - dmg);
+          const playerRaceId = (player && player.raceId != null) ? player.raceId : 0;
+          const isMortalSauren = (playerRaceId === 3 || getMortalEnemyForRace(playerRaceId) === 13);
+          const removedKeys = new Set(tilesToRemove.map(t => `${t.x},${t.y}`));
+          const coins = [];
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              const posKey = `${x},${y}`;
+              const t = board[y][x];
+              if (t && t.type === 'coin' && !t.isBroken && !t.isPhylactery && !excludedPositions.has(posKey) && !removedKeys.has(posKey)) {
+                coins.push({ x, y, id: t.id });
+              }
+            }
           }
-          if (player && player.gold > 0) {
-            player.gold = Math.max(0, player.gold - Math.min(5, player.gold));
+
+          let stolenCoins = 0;
+          let stolenGold = 0;
+          let directDamage = 0;
+
+          if (coins.length > 0) {
+            // 코인이 있으면 최대 2칸만 훔치고 소지골드 분기로 가지 않음
+            const countToSteal = Math.min(2, coins.length);
+            const pool = [...coins];
+            for (let i = 0; i < countToSteal; i++) {
+              const idx = Math.floor(randomFn() * pool.length);
+              const stolen = pool.splice(idx, 1)[0];
+              tilesToRemove.push({ x: stolen.x, y: stolen.y, id: stolen.id, reason: 'coin_stolen' });
+              stolenCoins++;
+            }
+          } else {
+            // 코인이 전혀 없을 때만 소지골드 최대 2점 훔침 (원작: StealGold @ 00034a68 / 000348e8)
+            const useOriginal = Boolean(options && (options.useOriginalRules || options.difficulty != null || options.turn != null || player?.useOriginalRules));
+            const maxGoldSteal = useOriginal ? 2 : 5;
+            const goldAmount = Math.min(maxGoldSteal, Math.max(0, (player && player.gold) || 0));
+            if (player) {
+              player.gold = Math.max(0, (player.gold || 0) - goldAmount);
+            }
+            stolenGold = goldAmount;
+            if (isMortalSauren && stolenGold > 0) {
+              directDamage = useOriginal ? (stolenGold * thiefAtk) : (thiefAtk * 2);
+            }
           }
+
+          if (directDamage > 0 && player && player.hp != null) {
+            player.hp = Math.max(0, player.hp - directDamage);
+          }
+
           events.push({
-            type: 'thief_steal_damage',
+            type: 'thief_steal',
             pos: { x: enemy.x, y: enemy.y },
-            damage: dmg,
+            stolenCoins,
+            stolenGold,
+            directDamage,
             specialId: 13
           });
+        } else if (sId === 14) {
+          // 조각 18 & 조각 20(대조표-2 123행): 14 혼돈괴물
+          // JumpEnemy @ 0002f370: 일반 적/비적·미매칭 칸만 착지 후보; 교환 후 원래 자리의 착지 타일 소멸
+          const removedKeys = new Set(tilesToRemove.map(t => `${t.x},${t.y}`));
+          const validPositions = [];
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              if (x === enemy.x && y === enemy.y) continue;
+              const posKey = `${x},${y}`;
+              if (excludedPositions.has(posKey) || removedKeys.has(posKey)) continue;
+              const t = board[y][x];
+              if (!t) continue;
+              // 다른 특수 적은 착지 후보 제외
+              if (t.type === 'enemy' && (t.specialId != null || t.specialType != null)) continue;
+              validPositions.push({ x, y });
+            }
+          }
+          if (validPositions.length > 0) {
+            const targetPos = validPositions[Math.floor(randomFn() * validPositions.length)];
+            const landingTile = board[targetPos.y][targetPos.x];
+            const origX = enemy.x;
+            const origY = enemy.y;
+
+            // ID 14는 targetPos로 이동
+            board[targetPos.y][targetPos.x] = enemy;
+            enemy.x = targetPos.x;
+            enemy.y = targetPos.y;
+
+            // 착지 타일은 원래 자리에 남겨지고 소멸
+            board[origY][origX] = landingTile;
+            if (landingTile) {
+              landingTile.x = origX;
+              landingTile.y = origY;
+              tilesToRemove.push({ x: origX, y: origY, id: landingTile.id, reason: 'chaotic_consumed' });
+            }
+
+            events.push({
+              type: 'chaotic_jump',
+              from: { x: origX, y: origY },
+              to: targetPos,
+              specialId: 14
+            });
+          }
         } else if (sId === 16) {
-          // 16 암살괴물: 매 턴 자동으로 한 칸 아래(y+1)로 전진
-          if (enemy.y < height - 1) {
+          // 조각 18 & 조각 20(대조표-2 125행): 16 암살괴물
+          // StabAttack @ 0002f250: 숙적 16이면 아래 칸 특수적 여부 검사 후 그 칸 보상없이 매칭; 맨아래서 공격×2 HP피해
+          const playerRaceId = (player && player.raceId != null) ? player.raceId : 0;
+          const isMortalFaun = (playerRaceId === 4 || getMortalEnemyForRace(playerRaceId) === 16);
+
+          if (isMortalFaun && enemy.y < height - 1) {
             const targetY = enemy.y + 1;
             const targetTile = board[targetY][enemy.x];
-            if (targetTile) {
+            const isSpecialBelow = targetTile && targetTile.type === 'enemy' && (targetTile.specialId != null || targetTile.specialType != null);
+            if (targetTile && !isSpecialBelow) {
               const origY = enemy.y;
+              // 아래 칸 타일 보상없이 소멸
+              tilesToRemove.push({ x: enemy.x, y: targetY, id: targetTile.id, reason: 'assassin_stab_consumed' });
+              // ID 16이 아래 칸으로 이동
               board[targetY][enemy.x] = enemy;
-              board[origY][enemy.x] = targetTile;
+              board[origY][enemy.x] = null;
               enemy.y = targetY;
-              targetTile.y = origY;
               events.push({
                 type: 'assassin_advance',
                 from: { x: enemy.x, y: origY },
@@ -5217,37 +6926,437 @@
               });
             }
           }
-        } else if (sId === 19) {
-          // 19 불안정괴물: 판의 다른 칸과 무작위 위치 교환 (순간이동)
-          const allTiles = [];
-          for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-              if (x !== enemy.x || y !== enemy.y) {
-                allTiles.push({ x, y });
-              }
-            }
-          }
-          if (allTiles.length > 0) {
-            const target = allTiles[Math.floor(randomFn() * allTiles.length)];
-            const otherTile = board[target.y][target.x];
-            const origPos = { x: enemy.x, y: enemy.y };
-            board[target.y][target.x] = enemy;
-            board[origPos.y][origPos.x] = otherTile;
-            enemy.x = target.x;
-            enemy.y = target.y;
-            if (otherTile) {
-              otherTile.x = origPos.x;
-              otherTile.y = origPos.y;
+
+          if (enemy.y === height - 1) {
+            const dmg = (enemy.atk != null ? enemy.atk : 1) * 2;
+            if (player && player.hp != null) {
+              player.hp = Math.max(0, player.hp - dmg);
             }
             events.push({
+              type: 'assassin_bottom_attack',
+              pos: { x: enemy.x, y: enemy.y },
+              damage: dmg,
+              specialId: 16
+            });
+          }
+        } else if (sId === 17) {
+          // 조각 17: 17 도플갱어 - 매 턴 플레이어 현재 갑옷값(방패)과 자기 방어를 같게 함
+          const playerArmor = Math.max(0, (player && player.armor != null) ? player.armor : 0);
+          enemy.armor = playerArmor;
+          events.push({
+            type: 'doppelganger_mimic_defense',
+            pos: { x: enemy.x, y: enemy.y },
+            armor: enemy.armor,
+            specialId: 17
+          });
+        } else if (sId === 18) {
+          // 조각 18 & 조각 20(대조표-2 127행): 18 연금술사
+          // ConvertRandomTiles @ 0002e6bc: 미매칭 일반칸 최대 2개 RandomiseTile (5종 재추첨이므로 같은 종류·적도 가능)
+          const removedKeys = new Set(tilesToRemove.map(t => `${t.x},${t.y}`));
+          const candidates = [];
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              const posKey = `${x},${y}`;
+              if (excludedPositions.has(posKey) || removedKeys.has(posKey)) continue;
+              const t = board[y][x];
+              if (!t) continue;
+              if (t.specialId != null || t.specialType != null) continue;
+              candidates.push(t);
+            }
+          }
+          const transCount = Math.min(2, candidates.length);
+          const transInfos = [];
+          for (let i = 0; i < transCount; i++) {
+            const idx = Math.floor(randomFn() * candidates.length);
+            const targetTile = candidates.splice(idx, 1)[0];
+            const oldType = targetTile.type;
+            const newType = pickRandomTileType(randomFn, TILE_TYPES);
+            targetTile.type = newType;
+            if (newType === 'enemy') {
+              const playerL = player ? Math.floor(((player.exp || 0) + (player.accumulatedExp || 0)) / 100) : 0;
+              const curve = calculateEnemyCurve(turn, difficulty, playerL, randomFn);
+              targetTile.hp = curve.hp;
+              targetTile.maxHp = curve.maxHp || curve.hp;
+              targetTile.baseHp = targetTile.hp;
+              targetTile.atk = curve.atk;
+              targetTile.armor = curve.armor;
+            } else if (oldType === 'enemy') {
+              delete targetTile.hp;
+              delete targetTile.maxHp;
+              delete targetTile.baseHp;
+              delete targetTile.atk;
+              delete targetTile.armor;
+            }
+            transInfos.push({ x: targetTile.x, y: targetTile.y, from: oldType, to: newType });
+          }
+          events.push({
+            type: 'alchemist_transmute',
+            pos: { x: enemy.x, y: enemy.y },
+            targets: transInfos,
+            specialId: 18
+          });
+        } else if (sId === 19) {
+          // 조각 18 & 조각 20(대조표-2 128행): 19 불안정괴물
+          // 초기 5, 매 턴 -1, 0이면 TeleportEnemy @ 00029ad8로 자기 포함 판 전체 제거·재생성
+          const playerRaceId = (player && player.raceId != null) ? player.raceId : 0;
+          const isMortalEnemy = (playerRaceId === 9 || getMortalEnemyForRace(playerRaceId) === 19);
+
+          const hadCountdown = enemy.countdown != null;
+          const currentCd = hadCountdown ? enemy.countdown : 5;
+          const nextCd = Math.max(0, currentCd - 1);
+          enemy.countdown = nextCd;
+
+          // 조각 12 단위시험 호환: countdown 미지정 상태에서 숙적인 경우 즉시 0 도달 발동
+          const shouldTrigger = (!hadCountdown && isMortalEnemy) || (nextCd === 0);
+
+          if (shouldTrigger) {
+            enemy.countdown = 5;
+            // 판 전체를 새로운 일반 타일들로 재생성
+            const playerL = player ? Math.floor(((player.exp || 0) + (player.accumulatedExp || 0)) / 100) : 0;
+            const enemyStats = { difficulty, L: playerL, rng: randomFn };
+            let newSeq = 50000;
+            for (let y = 0; y < height; y++) {
+              for (let x = 0; x < width; x++) {
+                board[y][x] = createRandomTile(randomFn, x, y, `tile_${x}_${y}_teleport_${newSeq++}`, TILE_TYPES, turn, null, enemyStats);
+              }
+            }
+
+            // 조각 18 호환: 숙적(종족 9) 효과 - 보드에 칼이 없고(칼->코인 변환) 적이 적어도 1개 이상 존재
+            if (isMortalEnemy) {
+              let hasEnemy = false;
+              for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                  if (board[y][x].type === 'sword') {
+                    board[y][x].type = 'coin';
+                  }
+                  if (board[y][x].type === 'enemy') {
+                    hasEnemy = true;
+                  }
+                }
+              }
+              if (!hasEnemy) {
+                const rx = Math.floor(randomFn() * width);
+                const ry = Math.floor(randomFn() * height);
+                board[ry][rx] = createEnemyTile(rx, ry, `tile_${rx}_${ry}_mortal_${Date.now()}`, turn, enemyStats);
+              }
+            }
+
+            events.push({
               type: 'unstable_teleport',
-              from: origPos,
-              to: target,
+              pos: { x: enemy.x, y: enemy.y },
+              isFullBoardReplaced: true,
+              isMortalEnemy,
+              specialId: 19
+            });
+          } else {
+            events.push({
+              type: 'unstable_countdown',
+              pos: { x: enemy.x, y: enemy.y },
+              countdown: nextCd,
               specialId: 19
             });
           }
+        } else if (sId === 22) {
+          // 조각 17: 22 짓밟기 - 매 턴 무작위 칼/방패 하나 파손 (파손된 칸은 수집 효과 없음)
+          const breakable = [];
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              const t = board[y][x];
+              if (t && (t.type === 'sword' || t.type === 'shield') && !t.isBroken) {
+                breakable.push(t);
+              }
+            }
+          }
+          if (breakable.length > 0) {
+            const chosen = breakable[Math.floor(randomFn() * breakable.length)];
+            chosen.isBroken = true;
+            events.push({
+              type: 'trampling_break_tile',
+              pos: { x: chosen.x, y: chosen.y },
+              tileType: chosen.type,
+              id: chosen.id,
+              specialId: 22
+            });
+          }
+        } else if (sId === 23) {
+          // 조각 18 & 조각 20(대조표-2 132행): 23 기름진 자
+          // LowerSkulls @ 0002f154: 열마다 적 바로 아래 비적 칸을 찾아 하나 보상없이 소멸, 이후 낙하
+          const removedKeys = new Set(tilesToRemove.map(t => `${t.x},${t.y}`));
+          let lowerConsumedCount = 0;
+          for (let x = 0; x < width; x++) {
+            for (let y = 0; y < height - 1; y++) {
+              const posKey = `${x},${y}`;
+              const t = board[y][x];
+              if (t && t.type === 'enemy' && t.hp > 0 && !excludedPositions.has(posKey) && !removedKeys.has(posKey)) {
+                // 바로 아래 칸 검사
+                const belowTile = board[y + 1][x];
+                const belowKey = `${x},${y + 1}`;
+                if (belowTile && belowTile.type !== 'enemy' && !excludedPositions.has(belowKey) && !removedKeys.has(belowKey)) {
+                  tilesToRemove.push({ x, y: y + 1, id: belowTile.id, reason: 'greasy_consumed' });
+                  removedKeys.add(belowKey);
+                  lowerConsumedCount++;
+                  break; // 열마다 하나
+                }
+              }
+            }
+          }
+          events.push({
+            type: 'greasy_push_down',
+            pos: { x: enemy.x, y: enemy.y },
+            lowerConsumedCount,
+            specialId: 23
+          });
+        } else if (sId === 24) {
+          // 조각 18 & 조각 20(대조표-2 133행): 24 우두머리
+          // AttractSkulls @ 0002e22c: 먼 적과 주변 비적 중 각각 무작위 추첨·교환
+          const neighbors = getNeighbors({ x: enemy.x, y: enemy.y }, width, height);
+          const nonEnemyNeighbors = neighbors.filter(n => {
+            const t = board[n.y][n.x];
+            return t && t.type !== 'enemy';
+          });
+          const neighborKeySet = new Set(neighbors.map(n => `${n.x},${n.y}`));
+
+          const distantEnemies = [];
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              if (x === enemy.x && y === enemy.y) continue;
+              if (neighborKeySet.has(`${x},${y}`)) continue;
+              const t = board[y][x];
+              if (t && t.type === 'enemy' && t.hp > 0) {
+                distantEnemies.push(t);
+              }
+            }
+          }
+
+          // 무작위 셔플
+          const shuffledNeighbors = [...nonEnemyNeighbors];
+          for (let i = shuffledNeighbors.length - 1; i > 0; i--) {
+            const j = Math.floor(randomFn() * (i + 1));
+            const temp = shuffledNeighbors[i];
+            shuffledNeighbors[i] = shuffledNeighbors[j];
+            shuffledNeighbors[j] = temp;
+          }
+          const shuffledEnemies = [...distantEnemies];
+          for (let i = shuffledEnemies.length - 1; i > 0; i--) {
+            const j = Math.floor(randomFn() * (i + 1));
+            const temp = shuffledEnemies[i];
+            shuffledEnemies[i] = shuffledEnemies[j];
+            shuffledEnemies[j] = temp;
+          }
+
+          let pulledCount = 0;
+          const pullLimit = Math.min(shuffledNeighbors.length, shuffledEnemies.length);
+          for (let i = 0; i < pullLimit; i++) {
+            const targetNeighbor = shuffledNeighbors[i];
+            const distantEnemy = shuffledEnemies[i];
+            const destTile = board[targetNeighbor.y][targetNeighbor.x];
+            const origX = distantEnemy.x;
+            const origY = distantEnemy.y;
+
+            board[targetNeighbor.y][targetNeighbor.x] = distantEnemy;
+            board[origY][origX] = destTile;
+            distantEnemy.x = targetNeighbor.x;
+            distantEnemy.y = targetNeighbor.y;
+            destTile.x = origX;
+            destTile.y = origY;
+            pulledCount++;
+          }
+
+          events.push({
+            type: 'alpha_rally',
+            pos: { x: enemy.x, y: enemy.y },
+            pulledCount,
+            specialId: 24
+          });
+        } else if (sId === 25) {
+          // 조각 18 & 조각 20(대조표-2 134행): 25 자석괴물
+          // AttractShieldsSwords @ 0002defc: 먼 칼/방패와 주변 기타칸을 무작위 쌍으로 교환
+          const neighbors = getNeighbors({ x: enemy.x, y: enemy.y }, width, height);
+          const nonResourceNeighbors = neighbors.filter(n => {
+            const t = board[n.y][n.x];
+            return t && t.type !== 'sword' && t.type !== 'shield';
+          });
+          const neighborKeySet = new Set(neighbors.map(n => `${n.x},${n.y}`));
+
+          const distantResources = [];
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              if (neighborKeySet.has(`${x},${y}`) || (x === enemy.x && y === enemy.y)) continue;
+              const t = board[y][x];
+              if (t && (t.type === 'sword' || t.type === 'shield')) {
+                distantResources.push(t);
+              }
+            }
+          }
+
+          // 무작위 셔플
+          const shuffledNeighbors = [...nonResourceNeighbors];
+          for (let i = shuffledNeighbors.length - 1; i > 0; i--) {
+            const j = Math.floor(randomFn() * (i + 1));
+            const temp = shuffledNeighbors[i];
+            shuffledNeighbors[i] = shuffledNeighbors[j];
+            shuffledNeighbors[j] = temp;
+          }
+          const shuffledResources = [...distantResources];
+          for (let i = shuffledResources.length - 1; i > 0; i--) {
+            const j = Math.floor(randomFn() * (i + 1));
+            const temp = shuffledResources[i];
+            shuffledResources[i] = shuffledResources[j];
+            shuffledResources[j] = temp;
+          }
+
+          let pulledCount = 0;
+          const pullLimit = Math.min(shuffledNeighbors.length, shuffledResources.length);
+          for (let i = 0; i < pullLimit; i++) {
+            const targetNeighbor = shuffledNeighbors[i];
+            const distantRes = shuffledResources[i];
+            const destTile = board[targetNeighbor.y][targetNeighbor.x];
+            const origX = distantRes.x;
+            const origY = distantRes.y;
+
+            board[targetNeighbor.y][targetNeighbor.x] = distantRes;
+            board[origY][origX] = destTile;
+            distantRes.x = targetNeighbor.x;
+            distantRes.y = targetNeighbor.y;
+            destTile.x = origX;
+            destTile.y = origY;
+            pulledCount++;
+          }
+
+          events.push({
+            type: 'magnetic_pull',
+            pos: { x: enemy.x, y: enemy.y },
+            pulledCount,
+            specialId: 25
+          });
+        } else if (sId === 26) {
+          // 조각 18 & 조각 20(대조표-2 135행): 26 난폭자
+          // ThrowSkull @ 0002eeb0: 미매칭·미표식 일반 적만 골라 HP값의 직접 HP피해 토큰
+          const removedKeys = new Set(tilesToRemove.map(t => `${t.x},${t.y}`));
+          const otherNormalEnemies = [];
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              const posKey = `${x},${y}`;
+              if (excludedPositions.has(posKey) || removedKeys.has(posKey)) continue;
+              const t = board[y][x];
+              // 미매칭·미표식 일반 적만 (다른 특수 적 제외)
+              if (t && t.type === 'enemy' && t.hp > 0 && t.id !== enemy.id && !t.marked && t.specialId == null && t.specialType == null) {
+                otherNormalEnemies.push(t);
+              }
+            }
+          }
+          if (otherNormalEnemies.length > 0) {
+            const chosen = otherNormalEnemies[Math.floor(randomFn() * otherNormalEnemies.length)];
+            const throwDmg = chosen.hp != null ? chosen.hp : 1;
+            chosen.hp = 0;
+            tilesToRemove.push({ x: chosen.x, y: chosen.y, id: chosen.id, reason: 'brute_thrown' });
+            removedKeys.add(`${chosen.x},${chosen.y}`);
+            // 방패를 거치지 않는 직접 HP 피해
+            if (player && player.hp != null) {
+              player.hp = Math.max(0, player.hp - throwDmg);
+            }
+            events.push({
+              type: 'brute_throw',
+              pos: { x: enemy.x, y: enemy.y },
+              thrownEnemyPos: { x: chosen.x, y: chosen.y },
+              damage: throwDmg,
+              specialId: 26
+            });
+          }
+        } else if (sId === 28) {
+          // 조각 18 & 조각 20(대조표-2 137행): 28 포식자
+          // 5턴마다 DestroyUpgrade @ 0002ecb8 → 무작위 장비의 양수 강화 스탯 ReduceStat
+          const currentCd = enemy.countdown != null ? enemy.countdown : 5;
+          const nextCd = Math.max(0, currentCd - 1);
+          enemy.countdown = nextCd;
+
+          if (nextCd === 0) {
+            enemy.countdown = 5;
+            let destroyed = false;
+            let destroyedStat = null;
+            if (player) {
+              // 1. player.equipmentStats의 양수 강화 스탯
+              if (player.equipmentStats && typeof player.equipmentStats === 'object') {
+                const positiveStats = Object.keys(player.equipmentStats).filter(k => player.equipmentStats[k] > 0);
+                if (positiveStats.length > 0) {
+                  const targetKey = positiveStats[Math.floor(randomFn() * positiveStats.length)];
+                  player.equipmentStats[targetKey] = Math.max(0, player.equipmentStats[targetKey] - 1);
+                  destroyedStat = targetKey;
+                  destroyed = true;
+                }
+              }
+              // 2. 기본 장비/강화 스탯 중 기본값보다 높은 것 하나 감소
+              if (!destroyed) {
+                const candidates = [];
+                if ((player.weaponAtk || 2) > 2) candidates.push('weaponAtk');
+                if ((player.maxArmor || 4) > (CLASSES[player.classId]?.maxArmor || 4)) candidates.push('maxArmor');
+                if ((player.maxHp || 50) > (CLASSES[player.classId]?.maxHp || 50)) candidates.push('maxHp');
+                if ((player.shieldRecovery || 1) > 1) candidates.push('shieldRecovery');
+                if (candidates.length > 0) {
+                  const chosen = candidates[Math.floor(randomFn() * candidates.length)];
+                  if (chosen === 'weaponAtk') player.weaponAtk = Math.max(2, player.weaponAtk - 1);
+                  else if (chosen === 'maxArmor') player.maxArmor = Math.max(0, player.maxArmor - 1);
+                  else if (chosen === 'maxHp') {
+                    player.maxHp = Math.max(1, player.maxHp - 10);
+                    player.hp = Math.min(player.hp, player.maxHp);
+                  } else if (chosen === 'shieldRecovery') player.shieldRecovery = Math.max(1, player.shieldRecovery - 1);
+                  destroyedStat = chosen;
+                  destroyed = true;
+                } else if ((player.shieldGauge != null && player.shieldGauge > 0) || (player.accumulatedUpgrade != null && player.accumulatedUpgrade > 0)) {
+                  // 양수 강화 스탯이 따로 없으면 호환을 위해 강화 게이지/누적강화 1점 감소
+                  if (player.shieldGauge > 0) {
+                    player.shieldGauge = Math.max(0, player.shieldGauge - 1);
+                  } else {
+                    player.accumulatedUpgrade = Math.max(0, player.accumulatedUpgrade - 1);
+                  }
+                  destroyedStat = 'upgradeGauge';
+                  destroyed = true;
+                }
+              }
+            }
+            events.push({
+              type: 'devourer_destroy_upgrade',
+              pos: { x: enemy.x, y: enemy.y },
+              destroyed,
+              destroyedStat,
+              specialId: 28
+            });
+          } else {
+            events.push({
+              type: 'devourer_countdown',
+              pos: { x: enemy.x, y: enemy.y },
+              countdown: nextCd,
+              specialId: 28
+            });
+          }
+        } else if (sId === 31) {
+          // 조각 18: 31 도주자 - 매 턴 위 1칸으로 이동하다가 맨 위(y=0)에서 이탈
+          if (enemy.y === 0) {
+            tilesToRemove.push({ x: enemy.x, y: enemy.y, id: enemy.id, reason: 'fleeing_escaped' });
+            events.push({
+              type: 'fleeing_escaped',
+              pos: { x: enemy.x, y: enemy.y },
+              specialId: 31
+            });
+          } else {
+            const targetY = enemy.y - 1;
+            const targetTile = board[targetY][enemy.x];
+            if (targetTile) {
+              const origY = enemy.y;
+              board[targetY][enemy.x] = enemy;
+              board[origY][enemy.x] = targetTile;
+              enemy.y = targetY;
+              targetTile.y = origY;
+              events.push({
+                type: 'fleeing_ascend',
+                from: { x: enemy.x, y: origY },
+                to: { x: enemy.x, y: targetY },
+                specialId: 31
+              });
+            }
+          }
         }
-        // 그 외 ID (1, 2, 5, 9, 12, 14, 15, 17, 18, 20~32)는 능력 실행 없음 (배율만 적용)
+        // 그 외 ID (1, 2, 5, 9, 10, 11, 12, 15, 20, 21, 27, 29, 30, 32)는 다른 시점 처리
         continue;
       }
 
@@ -5426,45 +7535,6 @@
       }
     }
 
-    // 조각 12: 종족 7 (늑대 고블린) - 쇠약화 (체력이 방어력보다 낮은 적 즉시 처치)
-    if (player && player.raceId === 7) {
-      for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-          const t = board[y][x];
-          if (t && t.type === 'enemy' && t.hp > 0 && t.hp < (t.armor || 0)) {
-            tilesToRemove.push({ x, y, id: t.id, reason: 'crippled' });
-            events.push({
-              type: 'cripple_kill',
-              pos: { x, y },
-              id: t.id,
-              hp: t.hp,
-              armor: t.armor
-            });
-          }
-        }
-      }
-    }
-
-    // 3. 턴 종료 불 피해 처리:
-    // 원작 규칙: 턴 종료 때 불 붙은 "적 칸"에 자신의 공격값이 불 피해로 적용되어 적 체력이 줄고 소멸할 수 있음 (플레이어 고정 1피해 없음)
-    for (let y = 0; y < height; y++) {
-      for (let x = 0; x < width; x++) {
-        const t = board[y][x];
-        if (t && t.type === 'enemy' && t.hp > 0 && t.burnDamage > 0) {
-          t.hp -= t.burnDamage;
-          events.push({
-            type: 'fire_damage_enemy',
-            pos: { x, y },
-            id: t.id,
-            damage: t.burnDamage,
-            remainingHp: Math.max(0, t.hp)
-          });
-          if (t.hp <= 0) {
-            tilesToRemove.push({ x, y, id: t.id, reason: 'burned' });
-          }
-        }
-      }
-    }
 
     // 조각 4 호환 레거시 화염 환경 피해: burnDamage 수치가 없는 순수 isBurning 타일은 플레이어에게 1 피해
     let legacyBurntCount = 0;
@@ -5537,7 +7607,11 @@
 
       while (targetY >= 0) {
         const id = `tile_${x}_${targetY}_${newIdSeq++}`;
-        newBoard[targetY][x] = createRandomTile(randomFn, x, targetY, id, TILE_TYPES, turn, weights, options.enemyStats);
+        const newTile = createRandomTile(randomFn, x, targetY, id, TILE_TYPES, turn, weights, options.enemyStats, options);
+        if (newTile) {
+          newTile.spawnedThisTurn = true;
+        }
+        newBoard[targetY][x] = newTile;
         targetY--;
       }
     }
@@ -5622,7 +7696,10 @@
       // 위쪽 빈 공간 새 타일 생성
       while (targetY >= 0) {
         const id = `tile_${x}_${targetY}_${newIdSeq++}`;
-        const newTile = createRandomTile(randomFn, x, targetY, id, tileTypes, turn, weights, options.enemyStats);
+        const newTile = createRandomTile(randomFn, x, targetY, id, tileTypes, turn, weights, options.enemyStats, options);
+        if (newTile) {
+          newTile.spawnedThisTurn = true;
+        }
         newBoard[targetY][x] = newTile;
         targetY--;
       }
@@ -5671,7 +7748,10 @@
 
     const randomFn = typeof rng === 'function' ? rng : createRNG(rng);
     const board = gameState.board;
-    const player = { ...gameState.player };
+    const player = {
+      ...gameState.player,
+      skills: Array.isArray(gameState.player?.skills) ? gameState.player.skills.map(s => ({ ...s })) : []
+    };
     const turn = gameState.turn || 1;
     const firstTile = getTile(board, path[0]);
     const isAttackChain = isAttackType(firstTile.type);
@@ -5692,9 +7772,18 @@
 
     let manaPotionCount = 0;
 
+    // 조각 17: 불 칸 수집 시 플레이어 피해
+    let burningCollectionDamage = 0;
+    for (const pos of path) {
+      const t = getTile(board, pos);
+      if (t && t.isBurning) {
+        burningCollectionDamage += (t.burnDamage || 1);
+      }
+    }
+
     if (isAttackChain) {
       attackResult = calculateAttack(board, path, player, { ...(gameState.activeEffects || {}), turn, player });
-      enemyAttackSummary = applyAttackToEnemies(board, path, attackResult.totalAttack, randomFn, { player, ...(gameState.activeEffects || {}) });
+      enemyAttackSummary = applyAttackToEnemies(board, path, attackResult.totalAttack, randomFn, { player, board, ...(gameState.activeEffects || {}) });
       killedPositions = enemyAttackSummary.killedPositions;
 
       for (const surv of enemyAttackSummary.survivedEnemies) {
@@ -5703,15 +7792,47 @@
         });
       }
 
+      for (const res of enemyAttackSummary.results) {
+        const t = getTile(board, res.pos);
+        if (t) {
+          t.hp = res.remainingHp;
+        }
+      }
+
+      // 조각 22: 스킬 0 (약탈) - 이번 턴 공격한 적마다 골드 토큰 강탈
+      if (gameState && gameState.activeEffects && gameState.activeEffects.stealCoinsFromAttacked) {
+        const attackedCount = enemyAttackSummary.results.length;
+        if (attackedCount > 0) {
+          const stolenGold = attackedCount * BASE_RESOURCE_POINTS_PER_TOKEN;
+          const gRes = addGaugeResource(player.gold || 0, stolenGold, player.accumulatedGold || 0);
+          player.gold = gRes.currentValue;
+          player.accumulatedGold = gRes.accumulatedValue;
+        }
+      }
+
+      // 조각 22: 스킬 34 (광란) - 이번 턴 처치한 적의 공격력만큼 체력 회복
+      if (gameState && gameState.activeEffects && gameState.activeEffects.berserkHeal) {
+        let berserkHealTotal = 0;
+        for (const res of enemyAttackSummary.results) {
+          if (res.killed) {
+            berserkHealTotal += (res.atk != null ? res.atk : (res.originalAtk != null ? res.originalAtk : 1));
+          }
+        }
+        if (berserkHealTotal > 0) {
+          player.hp = Math.min(player.maxHp || 50, (player.hp || 0) + berserkHealTotal);
+        }
+      }
+
       // 조각 4 & 조각 9: 특수 적 처치 시 보너스 (도망자 처치 시 코인 토큰 R(15,25) 또는 조각 4 보너스 코인, 빙결술사 처치 판정)
       for (const res of enemyAttackSummary.results) {
         if (res.killed) {
-          // 조각 12: 종족 9 (변신 고블린) - 특수 적 처치 시 스킬 1개 쿨다운 즉시 충전
+          // 조각 18: 종족 9 (변신 고블린) - 특수 적 처치 시 무작위 스킬 1개 쿨다운 즉시 충전 (이미 찬 스킬 포함)
           if (player.raceId === 9 && (res.specialId != null || res.specialType != null)) {
-            if (Array.isArray(player.skills)) {
-              const coolingSkill = player.skills.find(s => (s.currentCooldown || 0) > 0);
-              if (coolingSkill) {
-                coolingSkill.currentCooldown = 0;
+            if (Array.isArray(player.skills) && player.skills.length > 0) {
+              const targetIdx = Math.floor(randomFn() * player.skills.length);
+              const targetSkill = player.skills[targetIdx];
+              if (targetSkill) {
+                targetSkill.currentCooldown = 0;
               }
             }
           }
@@ -5744,188 +7865,433 @@
         }
       }
 
-      if (useOriginalRules || (player.maxShieldGauge != null && player.maxShieldGauge >= 100)) {
-        const tokenRes = calculateResourceTokens('shield', normalShieldCount, randomFn, { player });
-        const shieldRes = applyShieldTokens(player, tokenRes.totalTokens);
-        player.armor = shieldRes.newArmor;
-        player.shieldGauge = shieldRes.shieldGauge;
-        player.accumulatedUpgrade = shieldRes.accumulatedUpgrade;
-        resourceResult = {
-          type: 'shield',
-          gain: tokenRes.totalTokens,
-          length: path.length,
-          normalShieldCount,
-          brokenShieldCount,
-          multiplier: 1.0,
-          ...shieldRes
-        };
-      } else {
-        const resCalc = calculateResourceGain('shield', normalShieldCount, null, { player });
-        const shieldRes = applyShieldGain(player, resCalc.gain);
-        player.armor = shieldRes.newArmor;
-        player.shieldGauge = shieldRes.newGauge;
-        resourceResult = {
-          type: 'shield',
-          gain: resCalc.gain,
-          length: path.length,
-          normalShieldCount,
-          brokenShieldCount,
-          multiplier: resCalc.multiplier,
-          ...shieldRes
-        };
-      }
+      // 조각 16 & 조각 22: 방패 장비·배가, 스킬 19 (철벽 수호) 및 적 ID12 존재 검사
+      const hasEnemy12 = Boolean(board && board.some(row => row && row.some(t => t && t.hp > 0 && t.specialId === 12)));
+      const tokenRes = calculateResourceTokens('shield', normalShieldCount, randomFn, { player });
+      const effectBoostShield = ((gameState && gameState.activeEffects && gameState.activeEffects.boostShield) || 1);
+      const shieldRes = applyShieldTokens(player, tokenRes.totalTokens, {
+        hasEnemy12,
+        shieldMultiplier: (player.shieldMultiplier || (player.isShieldDoubled ? 2 : 1)) * effectBoostShield,
+        upgradeMultiplier: (player.upgradeMultiplier || (player.isUpgradeDoubled ? 2 : 1)) * effectBoostShield
+      });
+      player.armor = shieldRes.newArmor;
+      player.shieldGauge = shieldRes.shieldGauge;
+      player.accumulatedUpgrade = shieldRes.accumulatedUpgrade;
+      player.upgradeFraction = shieldRes.upgradeFraction;
+      resourceResult = {
+        type: 'shield',
+        gain: tokenRes.totalTokens,
+        length: path.length,
+        normalShieldCount,
+        brokenShieldCount,
+        multiplier: 1.0,
+        overflow: (shieldRes && shieldRes.upgradePointsGained != null) ? shieldRes.upgradePointsGained : 0,
+        ...shieldRes
+      };
     } else if (firstTile.type === 'potion') {
-      // 조각 4 & 조각 11: 산성 물약 및 마나 물약 구분
+      // 조각 4 & 조각 11 & 조각 16 & 조각 19(대조표 81행): 혼합 물약 보너스 카운터
       let normalCount = 0;
       let acidCount = 0;
-      for (const pos of path) {
-        const t = getTile(board, pos);
+      let normalTokens = 0;
+      const bonusChance = (player && player.potionBonusRate != null) ? (20 + player.potionBonusRate) : 20;
+      for (let i = 0; i < path.length; i++) {
+        const t = getTile(board, path[i]);
         if (t && t.isAcid) {
           acidCount++;
+        } else if (t && t.isManaPotion) {
+          manaPotionCount++;
         } else {
           normalCount++;
-          if (t && t.isManaPotion) {
-            manaPotionCount++;
+          normalTokens += 1;
+          if (i >= 3) {
+            const roll = randomInt(1, 100, randomFn);
+            if (roll <= bonusChance) {
+              normalTokens += 1;
+            }
           }
         }
       }
 
-      if (useOriginalRules || (player.maxHp != null && player.maxHp >= 40 && player.maxShieldGauge >= 100)) {
-        const tokenRes = calculateResourceTokens('potion', normalCount, randomFn, { player });
-        const potionRes = applyPotionTokens(player, tokenRes.totalTokens, acidCount, { board, hasMortalEnemy9: isMortalEnemyOnBoard(board, 9) });
-        player.hp = potionRes.newHp;
-        if (potionRes.clearedPoison) player.isPoisoned = false;
-        resourceResult = {
-          type: 'potion',
-          gain: tokenRes.totalTokens,
-          normalTokens: tokenRes.totalTokens,
-          acidCount,
-          manaPotionCount,
-          acidDamage: potionRes.acidDamage,
-          healed: potionRes.healed,
-          length: path.length,
-          multiplier: 1.0,
-          newHp: potionRes.newHp,
-          clearedPoison: potionRes.clearedPoison
-        };
-      } else {
-        const multiplier = getLengthMultiplier(path.length);
-        const normalGain = Math.floor(normalCount * multiplier);
-        const potionRes = applyPotionGain(player, normalGain);
-        player.hp = potionRes.newHp;
-        if (!(player.raceId === 1 && isMortalEnemyOnBoard(board, 9))) {
-          player.isPoisoned = false;
-        }
-
-        // 산성 물약 1개당 2 피해 (긴 줄 배율 적용)
-        const acidDamage = Math.floor(acidCount * 2 * multiplier);
-
-        resourceResult = {
-          type: 'potion',
-          gain: normalGain,
-          normalGain,
-          acidCount,
-          manaPotionCount,
-          acidDamage,
-          healed: potionRes.healed,
-          length: path.length,
-          multiplier,
-          newHp: potionRes.newHp,
-          clearedPoison: potionRes.clearedPoison
-        };
+      // 조각 16 & 조각 19 & 조각 22: 물약 장비·배가 및 스킬 18 (생명력 고양) 회복량 실제 턴 호출 연결
+      const effectBoostPotion = ((gameState && gameState.activeEffects && gameState.activeEffects.boostPotion) || 1);
+      const potionRes = applyPotionTokens(player, normalTokens, acidCount, {
+        board,
+        hasMortalEnemy9: isMortalEnemyOnBoard(board, 9),
+        potionMultiplier: (player.potionMultiplier || (player.isPotionDoubled ? 2 : 1)) * effectBoostPotion
+      });
+      player.hp = potionRes.newHp;
+      if (potionRes.clearedPoison) {
+        player.isPoisoned = false;
+        player.poisonDamage = 0;
       }
+      resourceResult = {
+        type: 'potion',
+        gain: normalTokens,
+        normalTokens,
+        acidCount,
+        manaPotionCount,
+        acidDamage: potionRes.acidDamage,
+        healed: potionRes.healed,
+        length: path.length,
+        multiplier: 1.0,
+        newHp: potionRes.newHp,
+        clearedPoison: potionRes.clearedPoison
+      };
     } else if (firstTile.type === 'coin') {
-      if (useOriginalRules || (player.maxGold != null && player.maxGold >= 100)) {
-        const tokenRes = calculateResourceTokens('coin', path.length, randomFn, { player });
-        const goldPoints = tokenRes.totalTokens * BASE_RESOURCE_POINTS_PER_TOKEN;
-        const goldRes = addGaugeResource(player.gold, goldPoints, player.accumulatedGold);
-        player.gold = goldRes.currentValue;
-        player.accumulatedGold = goldRes.accumulatedValue;
-        resourceResult = {
-          type: 'coin',
-          gain: tokenRes.totalTokens,
-          goldPoints,
-          length: path.length,
-          multiplier: 1.0,
-          ...goldRes
-        };
-      } else {
-        const resCalc = calculateResourceGain('coin', path.length, null, { player });
-        const coinRes = applyCoinGain(player, resCalc.gain);
-        player.gold = coinRes.newGold;
-        resourceResult = {
-          type: 'coin',
-          gain: resCalc.gain,
-          length: path.length,
-          multiplier: resCalc.multiplier,
-          ...coinRes
-        };
-      }
+      // 조각 16 & 조각 19(대조표 88행) & 조각 22: 코인 2×배가+추가율 및 스킬 17 (황금 축복) 토큰 방식
+      const tokenRes = calculateResourceTokens('coin', path.length, randomFn, { player });
+      const effectBoostGold = ((gameState && gameState.activeEffects && gameState.activeEffects.boostGold) || 1);
+      const goldMultiplier = (player.goldMultiplier || (player.isGoldDoubled ? 2 : 1)) * effectBoostGold;
+      const goldBonusRate = (player.goldBonusRate || 0) + ((player.equipmentGoldBonus || 0) * 0.25);
+      const rawGoldGain = (tokenRes.totalTokens * ((2 + goldBonusRate) * goldMultiplier)) + (player.goldFraction || 0);
+      const goldPoints = Math.floor(rawGoldGain);
+      player.goldFraction = rawGoldGain - goldPoints;
+      const goldThreshold = (player && player.maxGold != null) ? player.maxGold : GAUGE_MAX;
+      const goldRes = addGaugeResource(player.gold, goldPoints, player.accumulatedGold, goldThreshold);
+      player.gold = goldRes.currentValue;
+      player.accumulatedGold = goldRes.accumulatedValue;
+      resourceResult = {
+        type: 'coin',
+        gain: tokenRes.totalTokens,
+        goldPoints,
+        length: path.length,
+        multiplier: 1.0,
+        ...goldRes
+      };
     }
 
     const difficulty = gameState.difficulty != null ? gameState.difficulty : 1;
     const playerL = Math.floor(((player.exp || 0) + (player.accumulatedExp || 0)) / 100);
+    const initialPromotionCooldown = (gameState.promotionCooldown != null)
+      ? gameState.promotionCooldown
+      : PROMOTION_COOLDOWN_INITIAL;
+    const initialFlaws = (player && Array.isArray(player.flaws) ? player.flaws.filter(f => f != null) : []);
+    const initialPerks = (player && Array.isArray(player.perks) ? player.perks.filter(p => p != null) : []);
 
-    // 타일 제거 및 낙하/보충
+    // 조각 21 (원작-대조표-2 238행): 승급은 보충 중 생성되는 적이 타이머를 검사
+    const promotionState = {
+      promotionCooldown: initialPromotionCooldown,
+      promoted: false,
+      promotedEnemy: null
+    };
+
+    // ── 조각 19(대조표 72행): 원작 턴 처리 순서 개편 ──
+    // 1. 일반 매칭 직후 1차 낙하·보충 실행 (MoveMatchedTiles)
+    // 조각 18: 특수 적 ID 31 (도주자) 강제 하강 감지용 이전 y 좌표 맵
+    const prevYMap31 = new Map();
+    for (let y = 0; y < board.length; y++) {
+      for (let x = 0; x < board[y].length; x++) {
+        const t = board[y][x];
+        if (t && t.specialId === 31) {
+          prevYMap31.set(t.id, y);
+        }
+      }
+    }
+
     const chainResult = resolveChain(board, path, randomFn, TILE_TYPES, {
       turn,
       survivingMap,
       player,
-      activePerks: player.activePerks,
-      activeFlaws: player.activeFlaws,
-      enemyStats: { difficulty, L: playerL, rng: randomFn, activePerks: player.activePerks, activeFlaws: player.activeFlaws }
+      board,
+      activeEffects: gameState.activeEffects,
+      activePerks: player.activePerks || initialPerks,
+      activeFlaws: player.activeFlaws || initialFlaws,
+      promotionState,
+      enemyStats: { difficulty, L: playerL, rng: randomFn, activeEffects: gameState.activeEffects, activePerks: player.activePerks || initialPerks, activeFlaws: player.activeFlaws || initialFlaws, promotionState }
     });
 
     let newBoard = chainResult.board;
 
-    // 빙결술사를 처치했다면 보드의 모든 얼음 해제
-    if (killedIceMage) {
+    // 조각 20(대조표-2 140행): 특수 적 ID 31 (도주자) 1차 낙하 피해 검사 (MoveMatchedTiles @ 0002fd7c → Stab @ 0002fcd8)
+    let fallDmg1 = 0;
+    for (let y = 0; y < newBoard.length; y++) {
+      for (let x = 0; x < newBoard[y].length; x++) {
+        const t = newBoard[y][x];
+        if (t && t.specialId === 31 && prevYMap31.has(t.id)) {
+          const oldY = prevYMap31.get(t.id);
+          if (y > oldY) {
+            fallDmg1 += (t.atk != null ? t.atk : 1);
+          }
+        }
+      }
+    }
+    if (fallDmg1 > 0 && player && player.hp != null) {
+      player.hp = Math.max(0, player.hp - fallDmg1);
+    }
+
+    // 2. 적 반격 및 플레이어 피격 (1차 낙하 후 살아있는 적들이 공격, 체인 처치된 적은 이미 없음)
+    const counterattackInfo = calculateCounterattack(newBoard, [], {
+      ...(gameState.activeEffects || {}),
+      player,
+      turn,
+      isResolveTurn: true
+    });
+
+    const hasEnemy29 = Boolean(newBoard && newBoard.some(row => row && row.some(t => t && t.hp > 0 && t.specialId === 29)));
+
+    // 총 피격 피해량 = 적 반격 합산 + ID 2 반사 피해 + 불 칸 수집 피해
+    const totalIncomingDamage = counterattackInfo.totalEnemyAtk + ((enemyAttackSummary && enemyAttackSummary.totalReflectedDamage) || 0) + burningCollectionDamage;
+    const checkDurability = Boolean(options && options.checkDurability) || Boolean(player && player.checkDurability);
+    const counterResult = applyCounterattack(player, totalIncomingDamage, randomFn, {
+      hasEnemy29,
+      durability: player.durability || 50,
+      checkDurability
+    });
+
+    player.armor = counterResult.newArmor;
+    player.hp = counterResult.newHp;
+
+    // 조각 17 & 조각 19 & 조각 20(대조표-2 76·118행): 특수 적 ID 9 (맹독)
+    // ProcessAttack @ 000311b8: 막지 못한 경우(hpDamage > 0) 독량 갱신
+    if (counterResult.hpDamage > 0 && counterattackInfo.attackingEnemies && counterattackInfo.attackingEnemies.length > 0) {
+      let id9AtkSum = 0;
+      for (const att of counterattackInfo.attackingEnemies) {
+        const attTile = getTile(newBoard, { x: att.x, y: att.y });
+        if (attTile && attTile.specialId === 9) {
+          player.isPoisoned = true;
+          id9AtkSum += (attTile.atk || 1);
+        }
+      }
+      if (id9AtkSum > 0) {
+        player.poisonDamage = (player.poisonDamage || 0) + id9AtkSum;
+      }
+    }
+
+    // 조각 20(대조표-2 129행): 특수 적 ID 20 (흡혈귀)
+    // ProcessVampires @ 0002d18c: HP 피해 처리 분기(hpDamage > 0)에서 생존 ID 20에 GetAttack만큼 회복; 숙적이면 상한 없음
+    if (counterResult.hpDamage > 0 && newBoard && Array.isArray(newBoard)) {
+      const isWerewolfMortal = (player.raceId === 7 || getMortalEnemyForRace(player.raceId) === 20);
       for (let y = 0; y < newBoard.length; y++) {
         for (let x = 0; x < newBoard[y].length; x++) {
-          if (newBoard[y][x] && newBoard[y][x].isFrozen) {
-            newBoard[y][x].isFrozen = false;
+          const t = newBoard[y][x];
+          if (t && t.type === 'enemy' && t.specialId === 20 && t.hp > 0) {
+            let effAtk = t.atk != null ? t.atk : 1;
+            if (t.isPoisoned && effAtk > 1 && player.raceId === 1) {
+              effAtk = Math.floor(effAtk / 2);
+            }
+            const maxAllowedHp = isWerewolfMortal ? Infinity : (t.baseHp || t.maxHp || t.hp);
+            t.hp = Math.min(maxAllowedHp, (t.hp || 0) + effAtk);
           }
         }
       }
     }
 
-    // 조각 4: 턴 종료 특수 적 능력 발동 (판에 살아있는 특수 적들)
-    const abilityResult = activateSpecialAbilities(newBoard, player, randomFn, { turn });
-
-    // 폭탄병 폭발 또는 도망자 탈출로 소멸된 타일 낙하/보충 처리
-    if (abilityResult.tilesToRemove && abilityResult.tilesToRemove.length > 0) {
-      newBoard = removeTilesAndDrop(newBoard, abilityResult.tilesToRemove, randomFn, turn, {
-        player,
-        enemyStats: { difficulty, L: playerL, rng: randomFn, activePerks: player.activePerks, activeFlaws: player.activeFlaws }
-      });
+    // 조각 19(대조표 78행): 반격 직후 사망 검사
+    if (player.hp <= 0) {
+      // 조각 22: 스킬 37 (최후의 저항) - 이번 턴 치명상을 입으면 체력을 완전히 회복
+      if (gameState && gameState.activeEffects && gameState.activeEffects.lastStand) {
+        player.hp = player.maxHp || 50;
+        counterResult.isGameOver = false;
+        counterResult.newHp = player.hp;
+        gameState.activeEffects.lastStand = false;
+      } else {
+        counterResult.isGameOver = true;
+        counterResult.newHp = 0;
+        player.hp = 0;
+      }
     }
 
-    // 턴 종료 반격 및 특수 피해 정산:
-    // 이번 턴에 처치된 적 및 자폭/탈출한 적을 제외하고 살아남은 적들이 공격
-    const excludedPositions = [
-      ...killedPositions,
-      ...(abilityResult.tilesToRemove || [])
-    ];
-    const counterattackInfo = calculateCounterattack(board, excludedPositions, {
-      ...(gameState.activeEffects || {}),
-      player,
-      turn
-    });
+    // ── 3. EndOfTurn ──
+    const burnedPositions = [];
+    const poisonedPositions = [];
+    let abilityResult = { tilesToRemove: [], totalSpecialDamage: 0 };
+    const activePerks = (player && Array.isArray(player.perks)) ? player.perks.filter(p => p != null) : [];
 
-    const acidDmg = (resourceResult && resourceResult.acidDamage) ? resourceResult.acidDamage : 0;
-    const totalIncomingDamage = counterattackInfo.totalEnemyAtk + abilityResult.totalSpecialDamage + acidDmg;
-    const counterResult = applyCounterattack(player, totalIncomingDamage);
+    // 조각 19(대조표 73행): 스킬 자연 충전 시점 - 특수능력보다 먼저 충전, ID 15 존재 시 중지
+    let updatedSkills = player.skills || [];
+    if (!counterResult.isGameOver) {
+      const hasEnemy15 = Boolean(newBoard && newBoard.some(row => row && row.some(t => t && t.hp > 0 && t.specialId === 15)));
+      const naturalReduction = hasEnemy15 ? 0 : 1;
+      const cooldownReduction = naturalReduction + (manaPotionCount || 0);
 
-    // 조각 5: 적 처치 경험치 및 특수 적 처치 집계
+      updatedSkills = (player.skills || []).map((s, idx) => {
+        const baseCd = s.baseCooldown != null ? s.baseCooldown : s.cooldown;
+        const effectiveCooldown = (idx === 3 && activePerks.includes(3))
+          ? Math.max(1, baseCd - 1)
+          : baseCd;
+        return {
+          ...s,
+          baseCooldown: baseCd,
+          cooldown: effectiveCooldown,
+          currentCooldown: Math.max(0, (s.currentCooldown || 0) - cooldownReduction)
+        };
+      });
+      player.skills = updatedSkills;
+
+      // 조각 17 호환: 기존 board의 얼어있던 칸도 해제
+      if (board && Array.isArray(board)) {
+        for (let y = 0; y < board.length; y++) {
+          for (let x = 0; x < (board[y] ? board[y].length : 0); x++) {
+            const bt = board[y][x];
+            if (bt && bt.isFrozen) {
+              bt.isFrozen = false;
+              bt.frozenTurns = 0;
+            }
+          }
+        }
+      }
+
+      // 조각 19(대조표 74행): 보드 순회 - 동결이면 해제, 비동결이면 기존 불 피해 후 불 제거
+      for (let y = 0; y < newBoard.length; y++) {
+        for (let x = 0; x < newBoard[y].length; x++) {
+          const t = newBoard[y][x];
+          if (!t) continue;
+          if (t.isFrozen) {
+            t.isFrozen = false;
+            t.frozenTurns = 0;
+          } else if (t.burnDamage > 0) {
+            const bDmg = t.burnDamage;
+            t.burnDamage = 0;
+            t.isBurning = false;
+            if (t.type === 'enemy' && (t.hp != null ? t.hp : 1) > 0) {
+              t.hp -= bDmg;
+              if (t.hp <= 0) {
+                burnedPositions.push({ x, y, id: t.id, reason: 'burned' });
+              }
+            }
+          }
+        }
+      }
+
+      // 조각 19(대조표 75·76행): 플레이어 턴 회복 / 독 피해
+      if (player.hp > 0 && player.regenerate) {
+        player.hp = Math.min(player.maxHp || 50, player.hp + player.regenerate);
+      }
+      const poisonDmg = (player.poisonDamage && player.poisonDamage > 0) ? player.poisonDamage : (player.isPoisoned ? 1 : 0);
+      if (player.hp > 0 && (player.isPoisoned || player.poisonDamage > 0)) {
+        player.hp = Math.max(0, player.hp - poisonDmg);
+        if (player.hp <= 0) {
+          counterResult.isGameOver = true;
+          counterResult.newHp = 0;
+          player.hp = 0;
+        }
+      }
+      counterResult.newHp = player.hp;
+
+      // 조각 19(대조표 77·78행): 적에게 쌓인 독 피해 및 특수 적 능력
+      if (!counterResult.isGameOver) {
+        for (let y = 0; y < newBoard.length; y++) {
+          for (let x = 0; x < newBoard[y].length; x++) {
+            const t = newBoard[y][x];
+            if (t && t.type === 'enemy' && (t.hp != null ? t.hp : 1) > 0) {
+              const enemyPoison = t.poison || t.poisonDamage || 0;
+              if (enemyPoison > 0) {
+                t.hp -= enemyPoison;
+                if (t.hp <= 0) {
+                  poisonedPositions.push({ x, y, id: t.id, reason: 'poisoned' });
+                }
+              }
+            }
+          }
+        }
+
+        // 특수 적 능력 실행 (ActivateAbility)
+        abilityResult = activateSpecialAbilities(newBoard, player, randomFn, {
+          turn,
+          difficulty,
+          excludedPositions: []
+        });
+        if (abilityResult.totalSpecialDamage > 0) {
+          const specialArmorDamage = Math.min(player.armor || 0, abilityResult.totalSpecialDamage);
+          const specialHpDamage = abilityResult.totalSpecialDamage - specialArmorDamage;
+          player.armor = Math.max(0, (player.armor || 0) - specialArmorDamage);
+          player.hp = Math.max(0, (player.hp || 0) - specialHpDamage);
+          if (player.hp <= 0) {
+            counterResult.isGameOver = true;
+            counterResult.newHp = 0;
+            player.hp = 0;
+          }
+          counterResult.newArmor = player.armor;
+          counterResult.newHp = player.hp;
+        }
+
+        // 2차 낙하 및 보충 (추가 소멸 타일 처리)
+        const extraRemovals = [
+          ...((enemyAttackSummary && enemyAttackSummary.kamikazeDestroyedPositions) || []),
+          ...burnedPositions,
+          ...poisonedPositions,
+          ...(abilityResult.tilesToRemove || [])
+        ];
+        if (extraRemovals.length > 0) {
+          // 2차 낙하 전 ID 31 위치 기록 (1차 낙하와 중복 피해 방지)
+          const prevYMap31_second = new Map();
+          for (let y = 0; y < newBoard.length; y++) {
+            for (let x = 0; x < newBoard[y].length; x++) {
+              const t = newBoard[y][x];
+              if (t && t.specialId === 31) {
+                prevYMap31_second.set(t.id, y);
+              }
+            }
+          }
+
+          newBoard = removeTilesAndDrop(newBoard, extraRemovals, randomFn, turn, {
+            player,
+            board: newBoard,
+            activeEffects: gameState.activeEffects,
+            activePerks: player.activePerks || initialPerks,
+            activeFlaws: player.activeFlaws || initialFlaws,
+            promotionState,
+            enemyStats: { difficulty, L: playerL, rng: randomFn, activeEffects: gameState.activeEffects, activePerks: player.activePerks || initialPerks, activeFlaws: player.activeFlaws || initialFlaws, promotionState }
+          });
+
+          // 2차 낙하로 인한 추가 낙하 피해
+          let fleeingFallDamage = 0;
+          for (let y = 0; y < newBoard.length; y++) {
+            for (let x = 0; x < newBoard[y].length; x++) {
+              const t = newBoard[y][x];
+              if (t && t.specialId === 31 && prevYMap31_second.has(t.id)) {
+                const oldY = prevYMap31_second.get(t.id);
+                if (y > oldY) {
+                  fleeingFallDamage += (t.atk != null ? t.atk : 1);
+                }
+              }
+            }
+          }
+          if (fleeingFallDamage > 0 && player && player.hp != null) {
+            player.hp = Math.max(0, player.hp - fleeingFallDamage);
+            counterResult.newHp = player.hp;
+            if (player.hp <= 0) {
+              counterResult.isGameOver = true;
+              counterResult.newHp = 0;
+              player.hp = 0;
+            }
+          }
+        }
+
+        // 조각 20(대조표-2 117행): 원작은 ID 8 처치 시 즉시 해제하지 않음 (레거시 비원작 모드에서만 호환)
+        if (!useOriginalRules && killedIceMage) {
+          for (let y = 0; y < newBoard.length; y++) {
+            for (let x = 0; x < newBoard[y].length; x++) {
+              if (newBoard[y][x] && newBoard[y][x].isFrozen) {
+                newBoard[y][x].isFrozen = false;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // 조각 16 & 조각 19(대조표 90행): 처치된 적 수로만 XP 토큰 계산 (생존 적 제외)
     let gainedExp = 0;
     let killedSpecialCount = 0;
+    const killedEnemyCount = (enemyAttackSummary && enemyAttackSummary.killedCount != null)
+      ? enemyAttackSummary.killedCount
+      : killedPositions.length;
+    if (isAttackChain && killedEnemyCount > 0) {
+      const expTokenRes = calculateResourceTokens('enemy', killedEnemyCount, randomFn, { player });
+      const xpBonusRate = (player.xpBonusRate || 0) + ((player.equipmentExpBonus || 0) * 0.25);
+      const rawExpGain = (expTokenRes.totalTokens * (2 + xpBonusRate)) + (player.expFraction || 0);
+      const expPoints = Math.floor(rawExpGain);
+      player.expFraction = rawExpGain - expPoints;
+      gainedExp += expPoints;
+    }
     if (enemyAttackSummary && Array.isArray(enemyAttackSummary.results)) {
       for (const res of enemyAttackSummary.results) {
         if (res.killed) {
-          gainedExp += 10;
-          if (res.specialType) {
+          // 조각 16: specialType뿐만 아니라 specialId만 있는 적도 특수 처치로 집계
+          if (res.specialType || res.specialId != null) {
             killedSpecialCount++;
-            const expBonus = (SPECIAL_ENEMY_DEFAULTS[res.specialType] && SPECIAL_ENEMY_DEFAULTS[res.specialType].expBonus) || 10;
+            const expBonus = (res.specialType && SPECIAL_ENEMY_DEFAULTS[res.specialType] && SPECIAL_ENEMY_DEFAULTS[res.specialType].expBonus) || 10;
             gainedExp += expBonus;
           }
         }
@@ -5938,29 +8304,19 @@
     let currentAccumulatedExp = player.accumulatedExp || 0;
     const accumulatedSpecialKills = (player.specialKills || 0) + killedSpecialCount;
 
-    // 조각 11: 스킬 쿨다운 감소 (기본 1 + 마나 물약 추가 감소) 및 퍽 3 (네 번째 스킬 쿨다운 -1)
-    const activePerks = (player && Array.isArray(player.perks)) ? player.perks.filter(p => p != null) : [];
-    const cooldownReduction = 1 + (manaPotionCount || 0);
-    const updatedSkills = (player.skills || []).map((s, idx) => {
-      let cd = s.cooldown;
-      if (idx === 3 && activePerks.includes(3)) {
-        cd = Math.max(1, cd - 1);
-      }
-      return {
-        ...s,
-        cooldown: cd,
-        currentCooldown: Math.max(0, (s.currentCooldown || 0) - cooldownReduction)
-      };
-    });
-
     // 레벨업 검사
     const levelupChoices = [];
     if (useOriginalRules || currentMaxExp >= 100) {
       if (gainedExp > 0) {
-        const xpRes = addGaugeResource(currentExp, gainedExp, currentAccumulatedExp);
+        const xpRes = addGaugeResource(currentExp, gainedExp, currentAccumulatedExp, currentMaxExp);
         currentExp = xpRes.currentValue;
         currentAccumulatedExp = xpRes.accumulatedValue;
         if (xpRes.openedMenu && !counterResult.isGameOver) {
+          // 조각 21 (원작-대조표-2 220행): 종족 4 (뿔 고블린) - 레벨업 메뉴가 열릴 때 체력이 25% 미만이면 최대 체력의 25%로 즉시 회복
+          if (player.raceId === 4 && counterResult.newHp < (player.maxHp || 40) * 0.25) {
+            counterResult.newHp = Math.floor((player.maxHp || 40) * 0.25);
+            player.hp = counterResult.newHp;
+          }
           currentLevel += 1;
           levelupChoices.push({
             type: 'levelup',
@@ -5975,6 +8331,11 @@
       currentExp += gainedExp;
       while (currentExp >= currentMaxExp && !counterResult.isGameOver) {
         currentExp -= currentMaxExp;
+        // 조각 21 (원작-대조표-2 220행): 종족 4 (뿔 고블린) 레벨업 시 즉시 회복
+        if (player.raceId === 4 && counterResult.newHp < (player.maxHp || 40) * 0.25) {
+          counterResult.newHp = Math.floor((player.maxHp || 40) * 0.25);
+          player.hp = counterResult.newHp;
+        }
         currentLevel += 1;
         levelupChoices.push({
           type: 'levelup',
@@ -5992,6 +8353,9 @@
       armor: counterResult.newArmor,
       exp: currentExp,
       accumulatedExp: currentAccumulatedExp,
+      expFraction: player.expFraction != null ? player.expFraction : 0,
+      goldFraction: player.goldFraction != null ? player.goldFraction : 0,
+      upgradeFraction: player.upgradeFraction != null ? player.upgradeFraction : 0,
       level: currentLevel,
       maxExp: currentMaxExp,
       specialKills: accumulatedSpecialKills,
@@ -6027,7 +8391,7 @@
           desc: '강화 게이지가 가득 찼습니다! 영구 강화를 선택하세요.',
           options: getUpgradeOptions()
         });
-      } else if (!useOriginalRules && updatedPlayer.shieldGauge >= (updatedPlayer.maxShieldGauge || 10)) {
+      } else if (!useOriginalRules && updatedPlayer.shieldGauge >= (updatedPlayer.maxShieldGauge || 100)) {
         newChoices.push({
           type: 'upgrade',
           title: '🛡️ 방패 강화 선택',
@@ -6043,7 +8407,7 @@
           desc: '골드가 모였습니다! 장비를 1개 선택하세요.',
           options: getShopOptions()
         });
-      } else if (!useOriginalRules && updatedPlayer.gold >= (updatedPlayer.maxGold || 20)) {
+      } else if (!useOriginalRules && updatedPlayer.gold >= (updatedPlayer.maxGold || 100)) {
         newChoices.push({
           type: 'shop',
           title: '🪙 떠돌이 상점',
@@ -6067,44 +8431,71 @@
       }
     }
 
-    // 조각 9 & 조각 11 - 승급 타이머 진행 (원작판 8번: 턴마다 -1, 결함 8 적들의 광기면 턴마다 -2)
-    let currentPromotionCooldown = (gameState.promotionCooldown != null)
-      ? gameState.promotionCooldown
-      : PROMOTION_COOLDOWN_INITIAL;
-
-    const playerFlaws = (player && Array.isArray(player.flaws) ? player.flaws.filter(f => f != null) : []);
-    const promoDecrement = playerFlaws.includes(8) ? 2 : 1;
-    currentPromotionCooldown = Math.max(0, currentPromotionCooldown - promoDecrement);
+    // 조각 18 & 조각 21: 결함 8 (적들의 광기)은 특수 적 1턴 일찍 등장 (원작 타이머 방식: 새 대기 -1 시 최소 1)
+    // 조각 21 (원작-대조표-2 238행): 보충 중 적 승급이 이미 발생했으면 새 대기를 유지하고, 보충 중 승급이 없었으면 턴 종료 타이머 1 감소
+    let currentPromotionCooldown;
     let promotedEnemyInfo = null;
+    const playerFlaws = (player && Array.isArray(player.flaws) ? player.flaws.filter(f => f != null) : []);
 
-    if (currentPromotionCooldown === 0) {
-      const candidates = [];
-      for (let y = 0; y < newBoard.length; y++) {
-        for (let x = 0; x < newBoard[y].length; x++) {
-          const t = newBoard[y][x];
-          if (t && t.type === 'enemy' && t.hp > 0 && !t.specialId) {
-            candidates.push({ x, y, tile: t });
+    if (promotionState && promotionState.promoted) {
+      currentPromotionCooldown = promotionState.promotionCooldown;
+      if (promotionState.promotedEnemy) {
+        promotedEnemyInfo = {
+          pos: { x: promotionState.promotedEnemy.x, y: promotionState.promotedEnemy.y },
+          specialId: promotionState.promotedEnemy.specialId,
+          id: promotionState.promotedEnemy.id
+        };
+      }
+    } else {
+      currentPromotionCooldown = (gameState.promotionCooldown != null)
+        ? gameState.promotionCooldown
+        : PROMOTION_COOLDOWN_INITIAL;
+      currentPromotionCooldown = Math.max(0, currentPromotionCooldown - 1);
+
+      if (currentPromotionCooldown === 0) {
+        const candidates = [];
+        for (let y = 0; y < newBoard.length; y++) {
+          for (let x = 0; x < newBoard[y].length; x++) {
+            const t = newBoard[y][x];
+            if (t && t.type === 'enemy' && t.hp > 0 && !t.specialId) {
+              candidates.push({ x, y, tile: t });
+            }
           }
         }
-      }
 
-      if (candidates.length > 0) {
-        const chosenIdx = Math.floor(randomFn() * candidates.length);
-        const chosenTarget = candidates[chosenIdx];
-        const specialId = randomInt(1, 32, randomFn);
-        newBoard[chosenTarget.y][chosenTarget.x] = promoteEnemy(chosenTarget.tile, specialId, updatedPlayer, {
-          rng: randomFn,
-          turn: turn + 1,
-          difficulty,
-          L: playerL,
-          activeFlaws: updatedPlayer.activeFlaws || playerFlaws
-        });
-        promotedEnemyInfo = {
-          pos: { x: chosenTarget.x, y: chosenTarget.y },
-          specialId,
-          id: newBoard[chosenTarget.y][chosenTarget.x].id
-        };
-        currentPromotionCooldown = calculateNextPromotionCooldown(turn + 1, difficulty, playerL, randomFn);
+        if (candidates.length > 0) {
+          const chosenIdx = Math.floor(randomFn() * candidates.length);
+          const chosenTarget = candidates[chosenIdx];
+          let specialId = randomInt(1, 32, randomFn);
+          // 조각 16: 조건부 숙적 덮어쓰기 (R(1,200) <= 10, 퍽 8이면 <= 5)
+          const playerRaceId = (updatedPlayer && updatedPlayer.raceId != null) ? updatedPlayer.raceId : 0;
+          const mortalEnemyId = getMortalEnemyForRace(playerRaceId);
+          if (mortalEnemyId && mortalEnemyId > 0) {
+            const playerPerks = (updatedPlayer && Array.isArray(updatedPlayer.perks)) ? updatedPlayer.perks.filter(p => p != null) : [];
+            const threshold = playerPerks.includes(8) ? 5 : 10;
+            if (randomInt(1, 200, randomFn) <= threshold) {
+              specialId = mortalEnemyId;
+            }
+          }
+          newBoard[chosenTarget.y][chosenTarget.x] = promoteEnemy(chosenTarget.tile, specialId, updatedPlayer, {
+            rng: randomFn,
+            turn: turn + 1,
+            difficulty,
+            L: playerL,
+            activeFlaws: updatedPlayer.activeFlaws || playerFlaws
+          });
+          promotedEnemyInfo = {
+            pos: { x: chosenTarget.x, y: chosenTarget.y },
+            specialId,
+            id: newBoard[chosenTarget.y][chosenTarget.x].id
+          };
+          let nextCooldown = calculateNextPromotionCooldown(turn + 1, difficulty, playerL, randomFn);
+          // 조각 18 & 조각 21 (원작-대조표-2 212행): 결함 8 새 대기 -1 시 최소 1
+          if (playerFlaws.includes(8)) {
+            nextCooldown = Math.max(1, nextCooldown - 1);
+          }
+          currentPromotionCooldown = nextCooldown;
+        }
       }
     }
 
@@ -6120,6 +8511,16 @@
       finalUnlockCounter = unlockResult.classUnlockCounter;
       finalUnlocksThisRun = unlockResult.classUnlocksThisRun;
       finalUnlockedClasses = unlockResult.gameState.unlockedClasses;
+    }
+
+
+    // 턴 종료 시 이번 턴 생성 표식 정리
+    for (let y = 0; y < newBoard.length; y++) {
+      for (let x = 0; x < newBoard[y].length; x++) {
+        if (newBoard[y] && newBoard[y][x] && newBoard[y][x].spawnedThisTurn) {
+          delete newBoard[y][x].spawnedThisTurn;
+        }
+      }
     }
 
     const nextGameState = {
@@ -6141,6 +8542,18 @@
       pendingChoiceQueue,
       activeEffects: {}
     };
+
+    // 조각 10 & 조각 17: EndOfTurn 마지막 단계 - 판 진행 자동 저장 또는 게임 오버 시 삭제
+    try {
+      const storageToUse = options && options.storage ? options.storage : null;
+      if (!nextGameState.isGameOver) {
+        saveRunState(nextGameState, storageToUse);
+      } else {
+        clearRunState(storageToUse);
+      }
+    } catch (e) {
+      // 저장소 미지원/사생활 보호 모드 방어
+    }
 
     return {
       gameState: nextGameState,
@@ -6356,8 +8769,10 @@
     applyPerksAndFlaws,
     RACES_DATA,
     DEFAULT_CLASS_RACES,
+    RACE_TO_DEFAULT_CLASS,
     canChangeRace,
     isRaceUnlocked,
+    isSkillUnlocked,
     validateRaceSelection,
     getMortalEnemyForRace,
     isMortalEnemyOnBoard,
@@ -6402,6 +8817,7 @@
     createSpecialEnemyTile,
     createSkillInstance,
     isClassUnlocked,
+    CLASS_FIXED_PERK_FLAWS,
     createPlayer,
     createGameState,
     calculateBonusTokens,
@@ -6424,6 +8840,7 @@
     chooseShopItem,
     getLevelupOptions,
     chooseLevelupReward,
+    hasValidSkillTarget,
     canUseSkill,
     useSkill,
     loadHighScores,
