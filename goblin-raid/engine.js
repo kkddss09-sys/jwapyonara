@@ -17,6 +17,7 @@
  * 조각 26: 턴 처리 순서·사망 검사·반격 건너뛰기·메뉴 닫기 [교정 26.1 ~ 26.6]
  * 조각 27: 보충·특수 적·연결칸 재추첨 [교정 27.1 ~ 27.6] (숙적 5 보충 실시간 판 반영, 19 방교체 무제한 재추첨, 32 재생 대기시간 재정의, 숙적 12 방패0 일반보충 한정, 연결칸 생성 특수적만 재추첨, 종족 9 예외없는 스킬 완충)
  * 조각 31: 처치 집계를 실제 공격 처치로 한정 [교정 31.1, 31.2] (ID 21·스킬 34·종족 6을 실제 공격 처치로만 집계, 종족 6 +1을 첫 낙하 직후 불·반사 전으로 배치)
+ * 조각 34: 적 체력·능력치 계산을 기준처럼 실수 정밀도(float32)로 [교정 34.1, 34.2] (결함 9 체력 fround 버림 계산, 난이도 1~3 S 및 레벨초과 배율 fround 연산으로 교정, +1e-9 제거)
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -2158,14 +2159,13 @@
       // [교정 19.4] 난이도 0은 완료턴수를 그대로 쓰며 레벨 40 초과 배율을 적용하지 않는다.
       S = tick;
     } else {
+      // [교정 34.2] 대기 난이도 1~3의 적 능력치 계산 두 단계 32비트 실수(float32) 연산
       const D = effectiveDiff === 1 ? 700 : (effectiveDiff === 2 ? 750 : 500);
-      if (tick > 500) {
-        S = Math.floor((tick * (D + tick - 500)) / D + 1e-9);
-      } else {
-        S = tick;
-      }
+      const g = Math.max(1, Math.fround(Math.fround(Math.fround(tick - 500) / Math.fround(D)) + 1));
+      S = Math.trunc(Math.fround(Math.fround(tick) * g));
       if (L > 40) {
-        S = Math.floor((S * (60 + L - 40)) / 60 + 1e-9);
+        const multL = Math.fround(Math.fround(Math.fround(L - 40) / Math.fround(60)) + 1);
+        S = Math.trunc(Math.fround(Math.fround(S) * multL));
       }
     }
 
@@ -2449,9 +2449,9 @@
       finalDef = mult.def;
       finalHp = mult.hp;
 
-      // 특수 적만 결함 9: 체력 * 1.05 버림 [H2]
+      // [교정 34.1] 특수 적만 결함 9: 32비트 실수(float32) 체력 * 1.05 버림 [H2]
       if (session && session.hero && session.hero.flaws && session.hero.flaws.includes(9)) {
-        finalHp = Math.floor(finalHp * 1.05);
+        finalHp = Math.trunc(Math.fround(Math.fround(finalHp) * Math.fround(1.05)));
       }
     } else {
       // 일반 적만 결함 3: 체력 +1 [H2]
