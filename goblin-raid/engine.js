@@ -18,6 +18,7 @@
  * 조각 27: 보충·특수 적·연결칸 재추첨 [교정 27.1 ~ 27.6] (숙적 5 보충 실시간 판 반영, 19 방교체 무제한 재추첨, 32 재생 대기시간 재정의, 숙적 12 방패0 일반보충 한정, 연결칸 생성 특수적만 재추첨, 종족 9 예외없는 스킬 완충)
  * 조각 31: 처치 집계를 실제 공격 처치로 한정 [교정 31.1, 31.2] (ID 21·스킬 34·종족 6을 실제 공격 처치로만 집계, 종족 6 +1을 첫 낙하 직후 불·반사 전으로 배치)
  * 조각 34: 적 체력·능력치 계산을 기준처럼 실수 정밀도(float32)로 [교정 34.1, 34.2] (결함 9 체력 fround 버림 계산, 난이도 1~3 S 및 레벨초과 배율 fround 연산으로 교정, +1e-9 제거)
+ * 조각 35: 이을 수 있는 줄이 없는 판 새로 섞기 · 스킬 0 코인 토큰 휴면 칸 제외 [교정 35.1 ~ 35.3] (판 막힘 방지 새로 섞기, board_reshuffled 사건 기록, 스킬 0 shellState=1 휴면 칸 코인 토큰 제외)
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -100,7 +101,9 @@
     'normal_start_hp_50_shield_4_flaw6_3',
     'tile_enemy_choice_rng_save_fields',
     'achievement_58_and_74_conditions',
-    'choice_zero_card_prevention_safety_guard'
+    'choice_zero_card_prevention_safety_guard',
+    'reshuffle_unsolvable_board',
+    'skill0_exclude_dormant_shell'
   ];
 
   // 조각 29: 난이도 4단계 상수 및 이름 변환 헬퍼 [추가 29.1, 29.2]
@@ -536,7 +539,7 @@
    * 세션 생성 (makeSession)
    */
   function makeSession(options = {}) {
-    const rng = options.rng || null;
+    const rng = options.rng || (options.seed != null ? createRNG(options.seed) : null);
     const difficulty = (typeof options.difficulty === 'number' && Number.isInteger(options.difficulty) && options.difficulty >= 0 && options.difficulty <= 3)
       ? options.difficulty
       : 1; // 기본 난이도 보통(1) [추가 29.1, 29.2]
@@ -748,6 +751,11 @@
 
     // [교정 20.5] 기본 시작 체력 40 + 첫 장신구 10 = 50, 기본 방패 0 + 첫 세 부위 1/2/1 = 4(결함 6이면 3)를 재합산으로 얻는다.
     recalculateHeroStats(session);
+
+    // [교정 35.1, 35.2] 새 판 시작 직후 이을 수 있는 줄이 하나도 없으면 새로 섞기 (단위 시험 격리 옵션 지원)
+    if (!options.skipInitialReshuffle) {
+      checkAndReshuffleBoard(session);
+    }
 
     return session;
   }
@@ -1025,6 +1033,172 @@
     if (res.isWaitingAfterWaypoint) return false; // 경유 칸 다음 칼/적이 아직 없음
     if (res.lastNormalKind === 'reward') return path.length === 1;
     return res.effectiveLength >= 3;
+  }
+
+  // ==========================================
+  // [조각 35] 판 막힘 방지 새로 섞기 (교정 35.1, 35.2)
+  // ==========================================
+
+  /**
+   * 판 위에 이을 수 있는 줄(길이 3 이상 유효 연결)이 하나라도 있는지 확인 [교정 35.1]
+   */
+  function hasAnyValidChain(session) {
+    if (!session || !Array.isArray(session.cells) || session.phase === 'end') return false;
+
+    function searchChain(path) {
+      const lastCoord = path[path.length - 1];
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          if (dx === 0 && dy === 0) continue;
+          const nx = lastCoord.x + dx;
+          const ny = lastCoord.y + dy;
+          if (nx < 0 || nx >= BOARD_WIDTH || ny < 0 || ny >= BOARD_HEIGHT) continue;
+          if (path.some(p => p.x === nx && p.y === ny)) continue;
+
+          const nextCoord = { x: nx, y: ny };
+          if (canConnect(session, path, nextCoord)) {
+            const nextPath = [...path, nextCoord];
+            if (isValidChain(session, nextPath)) {
+              const res = analyzePath(session, nextPath);
+              if (res.effectiveLength >= 3) {
+                return true;
+              }
+            }
+            if (nextPath.length < 4) {
+              if (searchChain(nextPath)) return true;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    for (let i = 0; i < session.cells.length; i++) {
+      const cell = session.cells[i];
+      if (!cell || cell.erased) continue;
+      if (isRewardCell(cell)) continue;
+      const isEnemy = (cell.kind === KIND_ENEMY || cell.kindCode === 1);
+      if (cell.frozen && !isEnemy) continue;
+
+      const p0 = { x: cell.x, y: cell.y };
+      if (!canConnect(session, [], p0)) continue;
+      if (searchChain([p0])) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * 자원 칸 중 서로 이웃한 3칸 찾기 헬퍼 [교정 35.1]
+   */
+  function findThreeAdjacentResourceCells(session, resourceCells) {
+    if (!session || !Array.isArray(resourceCells) || resourceCells.length < 3) return null;
+    const resSet = new Set(resourceCells);
+
+    for (const c1 of resourceCells) {
+      for (let dx1 = -1; dx1 <= 1; dx1++) {
+        for (let dy1 = -1; dy1 <= 1; dy1++) {
+          if (dx1 === 0 && dy1 === 0) continue;
+          const c2 = getCell(session, c1.x + dx1, c1.y + dy1);
+          if (c2 && resSet.has(c2) && c2 !== c1) {
+            for (let dx2 = -1; dx2 <= 1; dx2++) {
+              for (let dy2 = -1; dy2 <= 1; dy2++) {
+                if (dx2 === 0 && dy2 === 0) continue;
+                const c3 = getCell(session, c2.x + dx2, c2.y + dy2);
+                if (c3 && resSet.has(c3) && c3 !== c1 && c3 !== c2) {
+                  return [c1, c2, c3];
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
+   * 판 막힘 방지 새로 섞기 [교정 35.1, 35.2]
+   * - 판 위에 이을 수 있는 줄(길이 3 이상 유효 연결)이 하나도 없으면 새로 섞는다.
+   * - 적 칸과 특수 칸(직업 보상 칸·연결 칸·휴면 칸 등)의 위치와 체력·상태는 그대로 두고, 일반 자원 칸(물약·방패·코인·칼)의 종류만 다시 뽑는다.
+   * - 다시 뽑은 뒤에도 이을 수 있는 줄이 없으면 최대 10번까지 다시 뽑고, 그래도 없으면 자원 칸 중 3칸(서로 이웃)을 같은 종류로 맞춘다.
+   * - 섞기는 턴을 소비하지 않고, 적의 반격도 일으키지 않는다.
+   * - 섞기가 일어났음을 events에 { type: 'board_reshuffled' }로 남긴다.
+   */
+  function checkAndReshuffleBoard(session) {
+    if (!session || !Array.isArray(session.cells) || session.phase === 'end') return false;
+
+    // 이미 이을 수 있는 줄이 하나라도 있으면 섞지 않는다
+    if (hasAnyValidChain(session)) {
+      return false;
+    }
+
+    // 적 칸 및 특수 칸(직업 보상 칸·연결 칸·휴면 칸 등) 판별
+    const isSpecialOrEnemy = (c) => {
+      if (!c) return true;
+      if (isRewardCell(c)) return true;
+      if (c.bridgeForm === 'bridge' || c.kind === KIND_BRIDGE || c.kindCode === 6) return true;
+      if (c.kind === KIND_ENEMY || c.kindCode === 1 || c.enemy != null) return true;
+      return false;
+    };
+
+    // 일반 자원 칸 (물약·방패·코인·칼)
+    const resourceCells = session.cells.filter(c => !c.erased && !isSpecialOrEnemy(c));
+    if (resourceCells.length === 0) {
+      session.events = session.events || [];
+      session.events.push({ type: 'board_reshuffled' });
+      return true;
+    }
+
+    const perks = (session.hero && session.hero.perks) || [];
+    const flaws = (session.hero && session.hero.flaws) || [];
+    let success = false;
+
+    // 최대 10번까지 다시 뽑기 시도 [교정 35.1]
+    for (let attempt = 0; attempt < 10; attempt++) {
+      for (const cell of resourceCells) {
+        let code = drawInt(session.rng, 0, 4, 'cellKind');
+        while (code === 1) {
+          code = drawInt(session.rng, 0, 4, 'cellKind');
+        }
+        morphCellKind(cell, code);
+
+        // 변형 칸 생성 규칙 [C2]
+        if (cell.kind === KIND_POTION && perks.includes(1)) {
+          const roll = drawInt(session.rng, 1, 100, 'potionForm');
+          if (roll < 6) cell.potionForm = 'charge';
+        } else if (cell.kind === KIND_SWORD && perks.includes(6)) {
+          const roll = drawInt(session.rng, 1, 100, 'arrow');
+          if (roll < 6) cell.arrow = true;
+        } else if (cell.kind === KIND_SHIELD && flaws.includes(7)) {
+          const roll = drawInt(session.rng, 1, 100, 'broken');
+          if (roll < 4) cell.broken = true;
+        }
+      }
+
+      if (hasAnyValidChain(session)) {
+        success = true;
+        break;
+      }
+    }
+
+    // 그래도 없으면 자원 칸 중 3칸(서로 이웃)을 같은 종류로 맞춘다 [교정 35.1]
+    if (!success && resourceCells.length >= 3) {
+      const trio = findThreeAdjacentResourceCells(session, resourceCells);
+      if (trio) {
+        for (const cell of trio) {
+          morphCellKind(cell, KIND_POTION);
+        }
+      }
+    }
+
+    // 사건 기록 [교정 35.2]
+    session.events = session.events || [];
+    session.events.push({ type: 'board_reshuffled' });
+
+    return true;
   }
 
   // ==========================================
@@ -1470,7 +1644,9 @@
 
       if (cell.kind === KIND_ENEMY || cell.kindCode === 1) {
         // [S00 / 0 공격줍기] "이번턴 직접연결로공격한각적에서 공격직전 코인토큰1개. 처치여부와무관,공통추가율·배가·메뉴 적용."
-        if (session.hero && session.hero.activeNow && (session.hero.activeNow.skill0 || session.hero.activeNow.coinOnAttack)) {
+        // [교정 35.3] 휴면(변환) 상태인 칸(shellState가 1인 적 칸)에는 코인 토큰을 주지 않는다. 다른 지급 경로는 그대로 둔다.
+        const isDormantShell = Boolean(cell.enemy && cell.enemy.shellState === 1);
+        if (!isDormantShell && session.hero && session.hero.activeNow && (session.hero.activeNow.skill0 || session.hero.activeNow.coinOnAttack)) {
           const extraRates = getExtraRates(session);
           const coinMult = (session.hero.activeNow.skill17 || session.hero.activeNow.doubleCoins || session.hero.activeNow.doubleGold) ? 2 : 1;
           applySingleToken(session, 'coins', coinMult, extraRates.coins);
@@ -3564,6 +3740,11 @@
 
     // 다음 입력을 위한 보충 표식 해제
     clearRetaliationSkips(session);
+
+    // [교정 35.1, 35.2] 턴 처리가 끝나고 판이 안정된 뒤 이을 수 있는 줄이 없으면 새로 섞기
+    if (session.phase !== 'end') {
+      checkAndReshuffleBoard(session);
+    }
   }
 
   // ==========================================
@@ -5477,6 +5658,9 @@
       applyDropAndRefill(session, true);
       finalizeFirstDropSpawnAchievement(session);
       checkHeroSurvival(session);
+      if (session.phase !== 'end') {
+        checkAndReshuffleBoard(session);
+      }
 
       session.events = session.events || [];
       session.events.push({ type: 'save_profile' }, { type: 'save_run' });
@@ -8783,6 +8967,10 @@
     PROVISIONAL_ITEMS,
     CONFIRMED_CORRECTIONS,
     // 조각 33 상점·강화 멈춤 방지 안전장치 노출 [교정 33.1]
-    cleanWaitingChoices
+    cleanWaitingChoices,
+    // 조각 35 판 막힘 방지 새로 섞기 노출 [교정 35.1]
+    hasAnyValidChain,
+    checkAndReshuffleBoard,
+    reshuffleBoard: checkAndReshuffleBoard
   };
 }));

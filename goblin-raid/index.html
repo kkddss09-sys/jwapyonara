@@ -1494,7 +1494,20 @@
   /**
    * 6x6 보드 렌더링
    */
+  let lastReshuffleCount = null;
+  function notifyReshuffleIfAny() {
+    try {
+      const ev = (gameState && gameState._session && gameState._session.events) || [];
+      const cnt = ev.filter(e => e && e.type === 'board_reshuffled').length;
+      if (lastReshuffleCount !== null && cnt > lastReshuffleCount) {
+        logBox.innerHTML = '🔀 이을 수 있는 줄이 없어서 판을 새로 섞었어요.';
+      }
+      lastReshuffleCount = cnt;
+    } catch (_) {}
+  }
+
   function renderBoard() {
+    notifyReshuffleIfAny();
     boardGrid.innerHTML = '';
     const board = gameState.board;
 
