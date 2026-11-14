@@ -81,6 +81,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 8px;
     padding: 0 2px 2px;
   }
   .game-title {
@@ -94,9 +96,13 @@
   }
   .header-btns {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
     gap: 6px;
   }
+  .game-title { white-space: nowrap; }
   .btn-icon {
+    white-space: nowrap;
     padding: 3px 8px;
     font-size: 0.78rem;
     border-radius: 8px;
@@ -1943,21 +1949,35 @@
 
   function renderLevelupChoices(options) {
     levelupChoices.innerHTML = '';
+    let picked = [], need = 2;
+    try {
+      const wc = gameState && gameState._session && gameState._session.waitingChoices;
+      const lc = wc && wc.find(c => c && c.type === 'levelup');
+      if (lc) { picked = Array.isArray(lc.picks) ? lc.picks : []; need = lc.picksNeeded || 2; }
+    } catch (_) {}
+    const descEl = modalLevelup.querySelector('.modal-desc');
+    if (descEl) descEl.textContent = `특성이나 스킬을 ${need}개 고르세요. (${picked.length}/${need} 선택함)`;
     options.forEach(opt => {
       const card = document.createElement('div');
       card.className = 'choice-card';
+      const isPicked = picked.includes(opt.id);
+      if (isPicked) card.style.opacity = '0.45';
       card.innerHTML = `
         <div class="choice-card-left">
           <b>${opt.icon || '⭐'} ${opt.name}</b>
           <small>${opt.desc}</small>
         </div>
-        <button class="choice-card-btn">선택</button>
+        <button class="choice-card-btn">${isPicked ? '✔ 선택함' : '선택'}</button>
       `;
       card.addEventListener('click', () => {
+        if (isPicked) return;
         const res = GR.chooseLevelupReward(gameState, opt.id);
         if (res.applied) {
           gameState = res.gameState;
-          logBox.innerHTML = `🎉 <strong>${opt.name}</strong> 습득 완료!`;
+          const left = Math.max(0, need - picked.length - 1);
+          logBox.innerHTML = left > 0
+            ? `🎉 <strong>${opt.name}</strong> 선택! 하나 더 고르세요.`
+            : `🎉 <strong>${opt.name}</strong> 습득 완료!`;
           renderBoard();
         }
       });
@@ -2338,6 +2358,11 @@
     const tbody = document.getElementById('rank-tbody');
     tabs.innerHTML = '';
     RANK_MODES.forEach((m, i) => {
+      if (typeof m.key === 'string' && i !== rankModeIdx) {
+        let has = false;
+        try { has = (GR.loadHighScores(m.key, 1) || []).length > 0; } catch (_) {}
+        if (!has) return;
+      }
       const b = document.createElement('button');
       b.className = 'btn-icon';
       b.textContent = m.label;
