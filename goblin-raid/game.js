@@ -1323,11 +1323,11 @@
     return choice.cards.map((c, idx) => ({
       id: idx,
       type: c.type,
-      name: c.name,
+      name: c.type === 'skill' ? c.name : `${slotNameKo(c.slot)} 장비`,
       slot: c.slot,
       gear: c.gear,
       actionKey: c.actionKey,
-      desc: c.desc || (c.type === 'skill' ? '새 스킬 습득 또는 교체' : `장비 ${c.slot != null ? c.slot : ''}`)
+      desc: c.desc || (c.type === 'skill' ? '새 스킬 습득 또는 교체' : `${slotNameKo(c.slot)} 칸의 장비를 새 장비로 바꿉니다`)
     }));
   }
 
@@ -1372,6 +1372,11 @@
     };
   }
 
+  const SLOT_NAME_KO = ['무기', '머리', '방패', '몸통', '장신구'];
+  function slotNameKo(slot) {
+    return SLOT_NAME_KO[slot] || '장비';
+  }
+
   /**
    * getUpgradeOptions [O2, 교정 33.1]
    */
@@ -1383,7 +1388,7 @@
     return choice.cards.map((c, idx) => ({
       id: idx,
       type: c.type,
-      name: c.name,
+      name: `${slotNameKo(c.slot)} 강화`,
       slot: c.slot,
       boostId: c.boostId,
       increaseAmount: c.increaseAmount,

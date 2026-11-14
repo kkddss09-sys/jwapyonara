@@ -173,6 +173,7 @@
     var word = q.value.trim(), html = '', shown = 0;
     if (!word) {
       html += '<div class="catgrid">' + catCard('휴대폰', true) + catCard('부동산', true) + '</div>';
+      html += '<a class="catcard" href="goblin-raid/" style="margin-top:12px;flex-direction:row;align-items:center;gap:12px;padding:14px 16px"><b style="font-size:18px;white-space:nowrap">🛡️ 고블린 레이드</b><span style="flex:1">선을 이어 고블린과 싸우는 무료 퍼즐 게임</span><small>하러 가기 ›</small></a>';
       html += '<div class="catgrid small">' + CATS.slice(2).map(function (c) { return catCard(c, false); }).join('') + '</div>';
       // 게시판 바로가기 (사진·영상 중심으로 먼저, 글 게시판은 작게). 줄 바꾸려면 아래 BOARDS 표만 고친다.
       if (typeof BOARD_OPEN === 'undefined' || BOARD_OPEN) {
