@@ -47,6 +47,28 @@
   const BOARD_HEIGHT = 6;
   const MAX_PERK_SLOTS = 4;
 
+  // 조각 29: 난이도 4단계 이름 목록 및 변환 헬퍼 [추가 29.1, 29.2]
+  const DIFFICULTY_NAMES = ['쉬움', '보통', '어려움', '지옥'];
+
+  function getDifficultyName(difficulty) {
+    let d = difficulty;
+    if (typeof d === 'string') {
+      const parsed = parseInt(d, 10);
+      if (!Number.isNaN(parsed)) d = parsed;
+    }
+    if (d === 0) return '쉬움';
+    if (d === 1) return '보통';
+    if (d === 2) return '어려움';
+    if (d === 3) return '지옥';
+    if (typeof difficulty === 'string') {
+      if (difficulty === 'easy' || difficulty === '쉬움') return '쉬움';
+      if (difficulty === 'normal' || difficulty === '보통') return '보통';
+      if (difficulty === 'hard' || difficulty === '어려움') return '어려움';
+      if (difficulty === 'hell' || difficulty === 'nightmare' || difficulty === '지옥') return '지옥';
+    }
+    return '보통';
+  }
+
   const TILE_ICONS = {
     sword: '⚔️',
     shield: '🛡️',
@@ -712,12 +734,18 @@
       ? session.waitingChoices[0]
       : null;
 
+    const difficulty = (session && typeof session.difficulty === 'number' && Number.isInteger(session.difficulty) && session.difficulty >= 0 && session.difficulty <= 3)
+      ? session.difficulty
+      : 1;
+
     return {
       board,
       player,
       turn: session.tick || 0,
       kills: session.killLedger || 0,
       score: currentScore,
+      difficulty,
+      difficultyName: getDifficultyName(difficulty),
       isGameOver: session.phase === 'end' || (hero.life != null && hero.life <= 0),
       pendingChoice,
       _session: session
@@ -800,6 +828,13 @@
 
     const skillPool = Array.isArray(options.skillPool) ? [...options.skillPool] : undefined;
 
+    let difficulty = 1;
+    if (typeof options.difficulty === 'number' && Number.isInteger(options.difficulty) && options.difficulty >= 0 && options.difficulty <= 3) {
+      difficulty = options.difficulty;
+    } else {
+      difficulty = 1;
+    }
+
     const session = RC.makeSession({
       classKey,
       raceKey,
@@ -809,7 +844,7 @@
       skillSwaps,
       skillPool,
       profile,
-      difficulty: options.difficulty != null ? options.difficulty : 1,
+      difficulty,
       mode: options.mode || 'normal',
       rng
     });
@@ -1353,6 +1388,33 @@
   const STORAGE_KEY_PROFILE = 'goblin_raid_v1_profile';
   const STORAGE_KEY_UNLOCKS = 'goblin_raid_v1_unlocks';
   const STORAGE_KEY_SCORES = 'goblin_raid_v1_scores';
+  const STORAGE_KEY_DIFFICULTY = 'goblin_raid_v1_difficulty'; // 조각 29: 난이도 선택값 저장 키 [추가 29.4]
+
+  function saveSelectedDifficulty(difficulty) {
+    try {
+      let d = 1;
+      if (typeof difficulty === 'number' && Number.isInteger(difficulty) && difficulty >= 0 && difficulty <= 3) {
+        d = difficulty;
+      }
+      storage.setItem(STORAGE_KEY_DIFFICULTY, String(d));
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function loadSelectedDifficulty() {
+    try {
+      const raw = storage.getItem(STORAGE_KEY_DIFFICULTY);
+      if (raw != null) {
+        const val = parseInt(raw, 10);
+        if (Number.isInteger(val) && val >= 0 && val <= 3) {
+          return val;
+        }
+      }
+    } catch (_) {}
+    return 1; // 기본값 보통 [추가 29.1, 29.4]
+  }
 
   // 옛 사이트 저장 이름 (최고 기록·이어하기·프로필·해금) [교정 25.4]
   const LEGACY_STORAGE_KEY_SCORES = 'goblin_raid_v1';
@@ -2167,6 +2229,7 @@
     chooseUpgrade,
     clearRunState,
     createGameState,
+    createDefaultProfile,
     createRNG,
     createSeededRng: createRNG,
     exportProfileCode,
@@ -2196,6 +2259,12 @@
     useSkill,
     validateRaceSelection,
     cancelChain,
+    // 조각 29 난이도 4단계 선택 관련 노출 [추가 29.1, 29.2, 29.4]
+    DIFFICULTY_NAMES,
+    getDifficultyName,
+    saveSelectedDifficulty,
+    loadSelectedDifficulty,
+    STORAGE_KEY_DIFFICULTY,
     // 보조 함수 및 연결층 헬퍼
     sessionToGameState,
     getRuleCore: getRC,
