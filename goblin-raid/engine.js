@@ -43,6 +43,7 @@
   const KIND_COIN = 'coin';     // 2
   const KIND_SHIELD = 'shield'; // 3
   const KIND_SWORD = 'sword';   // 4
+  const KIND_BRIDGE = 'bridge'; // 6 [교정 24.8]
 
   const KIND_CODE_TO_NAME = [KIND_POTION, KIND_ENEMY, KIND_COIN, KIND_SHIELD, KIND_SWORD];
   const KIND_NAME_TO_CODE = {
@@ -51,11 +52,14 @@
     coin: 2,
     shield: 3,
     sword: 4,
+    bridge: 6,
     '물약': 0,
     '적': 1,
     '코인': 2,
     '방패': 3,
-    '칼': 4
+    '칼': 4,
+    '다리': 6,
+    '연결칸': 6
   };
 
   // 조각 2 피해 종류 상수 [D2]
@@ -281,8 +285,14 @@
     let kindCode = 0;
     let kindName = KIND_POTION;
     if (typeof newKindCodeOrName === 'number') {
-      kindCode = Math.max(0, Math.min(4, Math.floor(newKindCodeOrName)));
-      kindName = KIND_CODE_TO_NAME[kindCode] || KIND_POTION;
+      const rawCode = Math.floor(newKindCodeOrName);
+      if (rawCode === 6) {
+        kindCode = 6;
+        kindName = KIND_BRIDGE;
+      } else {
+        kindCode = Math.max(0, Math.min(4, rawCode));
+        kindName = KIND_CODE_TO_NAME[kindCode] || KIND_POTION;
+      }
     } else if (typeof newKindCodeOrName === 'string') {
       kindName = newKindCodeOrName;
       kindCode = KIND_NAME_TO_CODE[kindName] != null ? KIND_NAME_TO_CODE[kindName] : 0;
@@ -647,16 +657,9 @@
       for (let y = 0; y < BOARD_HEIGHT; y++) {
         for (let x = 0; x < BOARD_WIDTH; x++) {
           let code = drawInt(rng, 0, 4, 'cellKind');
-          // 시작 판에는 적을 다시 뽑는다 [C1, 교정 15.1]
-          // 10회 제한·코인 대체는 없다. 시험 난수는 반드시 유한 횟수 뒤 적 아닌 값을 준다.
-          // 영원히 적만 주는 공급자(시험 입력 오류)에 의한 프로세스 중단(무한 루프) 방지 안전 가드 (30회 한도)
-          let enemyRetryCount = 0;
+          // 시작 판에는 적을 다시 뽑는다 [C1, 교정 15.1, 교정 23.3]
+          // 횟수 제한·물약 강제 대체 없이 적이 아닌 값이 나올 때까지 계속 다시 뽑는다.
           while (code === 1) {
-            enemyRetryCount++;
-            if (enemyRetryCount >= 30) {
-              code = 0; // 비적(물약)으로 안전 탈출
-              break;
-            }
             code = drawInt(rng, 0, 4, 'cellKind');
           }
 
@@ -709,6 +712,8 @@
       _turnEnemySpawnCount: 0,
       _emittedOnce: {},
       profile: options.profile || null,
+      ...(Array.isArray(options.skillPool) ? { skillPool: [...options.skillPool] } : {}),
+      ...(Array.isArray(options.skillSwaps) ? { skillSwaps: [...options.skillSwaps] } : {}),
       randomState: (options.randomState != null && typeof options.randomState !== 'function') ? options.randomState : null,
       events: [],
       provisional: [...PROVISIONAL_ITEMS],
@@ -823,7 +828,7 @@
       }
 
       if (i === 0) {
-        if (cell.bridgeForm === 'bridge') {
+        if (cell.kind === KIND_BRIDGE || cell.bridgeForm === 'bridge') {
           prevWasBridge = true;
           lastNormalKind = 'bridge';
         } else if (isCombatCell(cell)) {
@@ -853,7 +858,7 @@
         return { valid: false, waypoints: [], effectiveLength: 0 };
       }
 
-      const isCurBridge = (cell.bridgeForm === 'bridge');
+      const isCurBridge = (cell.kind === KIND_BRIDGE || cell.bridgeForm === 'bridge');
       const isPrevArrowSword = Boolean(prevCell.arrow && (prevCell.kind === KIND_SWORD || prevCell.kindCode === 4));
 
       // 1) 직전 칸이 경유 칸이었던 경우:
@@ -1184,11 +1189,11 @@
     const actualHpDamage = Math.min(initialHp, hpDamage);
     cell.enemy.hitPoints = initialHp - actualHpDamage;
 
-    // 32번 변환 상태 전환 (직접/공통 공격 첫 치명타) [I0] E32, [D3, 교정 17.4]
+    // 32번 변환 상태 전환 (직접/공통 공격 첫 치명타) [I0] E32, [D3, 교정 17.4, 교정 24.1]
     if (cell.enemy.enemyKind === 32 && cell.enemy.shellState === 0 && cell.enemy.hitPoints < 1) {
       cell.enemy.shellState = 1;
       cell.enemy.hitPoints = 1;
-      cell.enemy.recoveryLimit = 1;
+      // [교정 24.1] 기존 recoveryLimit를 유지해 4번 적 부상 치유·축복 후보에 포함될 수 있게 한다.
       cell.enemy.strike = 0;
       cell.enemy.guard = 0;
       cell.enemy.poisonSteps = [0, 0, 0];
@@ -1269,17 +1274,6 @@
         cell.enemy.poisonSteps[0] += poisonPower;
         cell.enemy.poisonSteps[1] += poisonPower;
         cell.enemy.poisonSteps[2] += poisonPower;
-        if (
-          damageType === DAMAGE_TYPE_BLOCKED &&
-          session.tick === 0 &&
-          Array.isArray(session.hero.flaws) &&
-          session.hero.flaws.includes(0) &&
-          session.hero.piercing === 50 &&
-          cell.enemy.hitPoints === 8 &&
-          cell.enemy.guard === 4
-        ) {
-          cell.enemy._legacyPiece2Test7SkipTurnEndPoison = true;
-        }
       }
 
       // 2) 종족 5면 직접공격 생존자마다 정수 1~100이 11 미만일 때 동결
@@ -1936,7 +1930,8 @@
           session.hero.shield = Math.max(0, prevShield - absorbed);
           shieldLoss = prevShield - session.hero.shield;
         } else {
-          // 확률 손상: 막은 점수 각각 정수 0~100이 방패손상값보다 작으면 현재방패 1 손상
+          // 확률 손상: 막은 점수 각각 정수 0~100이 방패손상값보다 작으면 현재방패 1 손상 [교정 23.1]
+          // 장비 합산 단계(recalculateHeroStats)에서 강화 감소분이 이미 반영된 방패손상 확률을 한 번 더 빼지 않고 그대로 쓴다.
           let odds = session.hero.shieldDamageOdds != null ? session.hero.shieldDamageOdds : 50;
           let durabilityBoost = 0;
           if (Array.isArray(session.gear)) {
@@ -1946,7 +1941,10 @@
               }
             }
           }
-          odds = Math.max(5, odds - durabilityBoost);
+          const appliedBoost14 = (session.hero.gearAppliedBoosts && session.hero.gearAppliedBoosts[14]) || 0;
+          if (durabilityBoost > appliedBoost14 && odds === Math.max(5, 50 - appliedBoost14)) {
+            odds = Math.max(5, 50 - durabilityBoost);
+          }
 
           for (let i = 0; i < absorbed; i++) {
             if (session.hero.shield <= 0) break;
@@ -2437,7 +2435,94 @@
   }
 
   /**
-   * 낙하 및 보충 [F2, F8, 교정 18.3, 교정 19.3, 교정 19.5]
+   * 보충/재추첨 단일 칸 종류 추첨 및 변형·적 생성 공통 규칙 [교정 19.3, 19.5, 교정 24.4]
+   */
+  function drawRefillCellCode(session, options = {}) {
+    const rng = session ? session.rng : null;
+    const roomReplaceMode = (options && options.roomReplaceMode) || null;
+    const isCoinForceSuppressed = Boolean(
+      roomReplaceMode ||
+      (options && options.suppressCoinForce) ||
+      (session && session.suppressCoinForce) ||
+      (session && session.hero && session.hero.activeNow && session.hero.activeNow.suppressCoinForce)
+    );
+
+    let code = drawInt(rng, 0, 4, 'cellKind');
+
+    // 1) 방교체·억제 플래그가 없을 때만 스킬 24 코인 강제
+    if (!isCoinForceSuppressed && session && session.hero && session.hero.activeNow && (session.hero.activeNow.allCoin || session.hero.activeNow.skill24)) {
+      code = 2;
+    }
+
+    // 2) 100턴 승급 시점 적 강제 [교정 19.3]
+    if (isTurn100PromotionTiming(session)) {
+      session.promotionLeft = 0;
+      code = 1;
+    }
+
+    // 3) 방교체의 금지 종류 재추첨 [교정 18.3, 19.3, 19.5]
+    if (roomReplaceMode === 'normal19') {
+      let tries = 0;
+      while (code === 1 && tries < 16) {
+        code = drawInt(rng, 0, 4, 'cellKind');
+        tries++;
+      }
+      if (code === 1) code = 4;
+    } else if (roomReplaceMode === 'mortal19') {
+      let tries = 0;
+      while (code === 4 && tries < 16) {
+        code = drawInt(rng, 0, 4, 'cellKind');
+        tries++;
+      }
+      if (code === 4) code = 0;
+    }
+
+    return code;
+  }
+
+  function populateRefillCell(session, targetCell, options = {}) {
+    if (!session || !targetCell) return { spawnedPromotedSpecial: false, isEnemy31: false };
+    const rng = session.rng;
+    const perks = (session.hero && session.hero.perks) || [];
+    const flaws = (session.hero && session.hero.flaws) || [];
+    const code = drawRefillCellCode(session, options);
+
+    morphCellKind(targetCell, code);
+    if (options.skipRetaliation !== false) {
+      targetCell.skipRetaliation = true; // 새 보충 칸 반격 제외 표식 [E1]
+    }
+    if (options.markAbilityUsed) {
+      targetCell.abilityUsed = true;
+    }
+
+    let spawnedPromotedSpecial = false;
+    let isEnemy31 = false;
+
+    // [C2] 변형 칸 생성
+    if (targetCell.kind === KIND_POTION && perks.includes(1)) {
+      const roll = drawInt(rng, 1, 100, 'potionForm');
+      if (roll < 6) targetCell.potionForm = 'charge';
+    } else if (targetCell.kind === KIND_SWORD && perks.includes(6)) {
+      const roll = drawInt(rng, 1, 100, 'arrow');
+      if (roll < 6) targetCell.arrow = true;
+    } else if (targetCell.kind === KIND_SHIELD && flaws.includes(7)) {
+      const roll = drawInt(rng, 1, 100, 'broken');
+      if (roll < 4) targetCell.broken = true;
+    } else if (targetCell.kind === KIND_ENEMY) {
+      targetCell.enemy = createEnemyData(session);
+      if (targetCell.enemy && targetCell.enemy.enemyKind > 0) {
+        spawnedPromotedSpecial = true;
+        if (targetCell.enemy.enemyKind === 31) {
+          isEnemy31 = true;
+        }
+      }
+    }
+
+    return { spawnedPromotedSpecial, isEnemy31 };
+  }
+
+  /**
+   * 낙하 및 보충 [F2, F8, 교정 18.3, 교정 19.3, 교정 19.5, 교정 24.4]
    * 열 안 생존 칸 상대 순서를 보존하며 아래 빈자리로 내리고 위쪽 빈자리를 보충한다.
    * 임시 순회순서: x0→5, 각 열 아래→위.
    */
@@ -2446,17 +2531,9 @@
 
     const BOARD_W = BOARD_WIDTH || 6;
     const BOARD_H = BOARD_HEIGHT || 6;
-    const perks = (session.hero && session.hero.perks) || [];
-    const flaws = (session.hero && session.hero.flaws) || [];
-    const rng = session.rng;
     const roomReplaceMode = (options && options.roomReplaceMode) || null;
     const markAbilityUsed = Boolean(options && options.markAbilityUsed);
-    const isCoinForceSuppressed = Boolean(
-      roomReplaceMode ||
-      (options && options.suppressCoinForce) ||
-      session.suppressCoinForce ||
-      (session.hero && session.hero.activeNow && session.hero.activeNow.suppressCoinForce)
-    );
+    const suppressCoinForce = Boolean(options && options.suppressCoinForce);
 
     const nextCells = [];
     let spawnedPromotedSpecial = false;
@@ -2494,63 +2571,17 @@
       }
 
       // 3) 위쪽 빈자리(y = 0 .. emptyCount - 1)를 보충 (임시 순회: 아래 emptyCount - 1부터 0까지)
-      // [교정 19.3, 19.5] 무작위 보충의 우선순위:
-      // 1) 종류 추첨 뒤 방교체·억제 플래그가 없을 때만 스킬 24 코인 강제
-      // 2) 100턴 승급 시점 적 강제 (대기 0 설정)
-      // 3) 방교체의 금지 종류 재추첨
       for (let y = emptyCount - 1; y >= 0; y--) {
-        let code = drawInt(rng, 0, 4, 'cellKind');
-
-        // 1) 방교체·억제 플래그가 없을 때만 스킬 24 코인 강제
-        if (!isCoinForceSuppressed && session.hero && session.hero.activeNow && (session.hero.activeNow.allCoin || session.hero.activeNow.skill24)) {
-          code = 2;
-        }
-
-        // 2) 100턴 승급 시점 적 강제 [교정 19.3]
-        if (isTurn100PromotionTiming(session)) {
-          session.promotionLeft = 0;
-          code = 1;
-        }
-
-        // 3) 방교체의 금지 종류 재추첨 [교정 18.3, 19.3, 19.5]
-        if (roomReplaceMode === 'normal19') {
-          let tries = 0;
-          while (code === 1 && tries < 16) {
-            code = drawInt(rng, 0, 4, 'cellKind');
-            tries++;
-          }
-          if (code === 1) code = 4;
-        } else if (roomReplaceMode === 'mortal19') {
-          let tries = 0;
-          while (code === 4 && tries < 16) {
-            code = drawInt(rng, 0, 4, 'cellKind');
-            tries++;
-          }
-          if (code === 4) code = 0;
-        }
-
         const cellKey = `c_${x}_${y}_${session.tick}_${Math.random().toString(36).slice(2, 7)}`;
-        const newCell = createCell(x, y, code, cellKey);
-        newCell.skipRetaliation = true; // 새 보충 칸 반격 제외 표식 [E1]
-        if (markAbilityUsed) {
-          newCell.abilityUsed = true;
-        }
-
-        // [C2] 변형 칸 생성
-        if (newCell.kind === KIND_POTION && perks.includes(1)) {
-          const roll = drawInt(rng, 1, 100, 'potionForm');
-          if (roll < 6) newCell.potionForm = 'charge';
-        } else if (newCell.kind === KIND_SWORD && perks.includes(6)) {
-          const roll = drawInt(rng, 1, 100, 'arrow');
-          if (roll < 6) newCell.arrow = true;
-        } else if (newCell.kind === KIND_SHIELD && flaws.includes(7)) {
-          const roll = drawInt(rng, 1, 100, 'broken');
-          if (roll < 4) newCell.broken = true;
-        } else if (newCell.kind === KIND_ENEMY) {
-          newCell.enemy = createEnemyData(session);
-          if (newCell.enemy && newCell.enemy.enemyKind > 0) {
-            spawnedPromotedSpecial = true;
-          }
+        const newCell = createCell(x, y, 0, cellKey);
+        const popRes = populateRefillCell(session, newCell, {
+          roomReplaceMode,
+          suppressCoinForce,
+          markAbilityUsed,
+          skipRetaliation: true
+        });
+        if (popRes.spawnedPromotedSpecial) {
+          spawnedPromotedSpecial = true;
         }
 
         if (isFirstDrop) {
@@ -2603,7 +2634,7 @@
               if (cell.enemy.enemyKind === 32 && cell.enemy.shellState === 0) {
                 cell.enemy.shellState = 1;
                 cell.enemy.hitPoints = 1;
-                cell.enemy.recoveryLimit = 1;
+                // [교정 24.1] 기존 recoveryLimit를 유지한다.
                 cell.enemy.strike = 0;
                 cell.enemy.guard = 0;
                 cell.enemy.poisonSteps = [0, 0, 0];
@@ -2652,15 +2683,10 @@
     checkHeroSurvival(session);
     if (session.phase === 'end') return;
 
-    // 9단계: 적 독 3단계 [F6, 교정 17.4]
+    // 9단계: 적 독 3단계 [F6, 교정 17.4, 교정 23.2]
     const poisonBatch = createCollectionBatch();
     for (const cell of session.cells) {
       if (!cell || cell.erased || !cell.enemy || cell.enemy.hitPoints <= 0) continue;
-
-      if (cell.enemy._legacyPiece2Test7SkipTurnEndPoison) {
-        delete cell.enemy._legacyPiece2Test7SkipTurnEndPoison;
-        continue;
-      }
 
       if (Array.isArray(cell.enemy.poisonSteps)) {
         const dmg = cell.enemy.poisonSteps[0] || 0;
@@ -2795,13 +2821,11 @@
             cell.erased = true;
           }
         } else if (eKind === 4) {
-          // E04 / 4 (돕기): 자신 제외 다친 적 중 무작위 최대 2명 현재체력을 회복기준까지 채움.
-          // 다친 적이 전혀 없으면 다른 적 최대 2명 공격+1.
-          // 임시 후보: 제거 예정·변환상태는 제외.
+          // E04 / 4 (돕기): 제거 예정이 아닌 적 전체에서 자신만 빼고 다친 적 최대 2명 치유, 다친 적이 없으면 다른 적 최대 2명 공격+1 [교정 24.1].
           const otherEnemies = [];
           for (const c of session.cells) {
             if (!c || c.erased || c === cell) continue;
-            if ((c.kind === KIND_ENEMY || c.kindCode === 1) && c.enemy && c.enemy.hitPoints > 0 && c.enemy.shellState !== 1) {
+            if ((c.kind === KIND_ENEMY || c.kindCode === 1) && c.enemy && c.enemy.hitPoints > 0) {
               otherEnemies.push(c);
             }
           }
@@ -2872,22 +2896,21 @@
         } else if (eKind === 9) {
           // E09 / 9 (독침): 반격이 체력에 닿으면 이번 9번 공격합과 기존 독 중 큰 값으로 플레이어독 갱신. 장비 독은 면역.
         } else if (eKind === 10) {
-          // E10 / 10 (터짐): 초기5→실행마다−1. 0이면 주변8칸 범위 수집을 먼저 실행하되 자기 특수 보상은 0이고, 이어서 플레이어 현재체력 정수절반, 최소1 [I0 E10, 교정 17.7].
+          // E10 / 10 (터짐): 초기5→실행마다−1. 0이면 주변8칸 범위 수집을 먼저 실행하되 자기 특수 보상은 0이고, 수집·연쇄가 끝난 뒤의 현재체력 정수절반, 최소1 [I0 E10, 교정 17.7, 교정 24.2].
           cell.enemy.countLeft = Math.max(0, (cell.enemy.countLeft || 5) - 1);
           if (cell.enemy.countLeft === 0) {
             cell.erased = true;
             cell.enemy.hitPoints = 0;
-            const lifeBeforeExplosion = session.hero.life || 0;
             const explosionBatch = createCollectionBatch();
             explosionBatch.processedCells.add(cell);
             explosionBatch.processedCells.add(cell.cellKey || cell);
             triggerEnemy10Explosion(session, cell, explosionBatch);
-            session.hero.life = Math.max(1, Math.floor(lifeBeforeExplosion / 2));
+            session.hero.life = Math.max(1, Math.floor((session.hero.life || 0) / 2));
             checkHeroSurvival(session);
           }
         } else if (eKind === 11) {
-          // E11 / 11 (칼바꾸기): 일반·화살·마법·파손을 포함한 모든 미제거 칼 중 1개를 무작위로 적 변환 [I0 E11, 교정 18.2].
-          // 화살 칼 제외 조건은 없다. 칼을 적으로 바꿀 때는 칼 속성을 지우고 현 턴·난이도 적을 만든다.
+          // E11 / 11 (칼바꾸기): 일반·화살·마법·파손을 포함한 모든 미제거 칼 중 1개를 무작위로 적 변환 [I0 E11, 교정 18.2, 교정 24.3].
+          // 지정 변환에서는 31번 적 생성 처리를 부르지 않는다(변환 뒤 체력 1 등 생성 스탯만 반영).
           const swordCandidates = [];
           for (const c of session.cells) {
             if (!c || c.erased) continue;
@@ -2904,9 +2927,6 @@
               t.magicBlade = false;
               t.broken = false;
               t.enemy = createEnemyData(session);
-              if (t.enemy && t.enemy.enemyKind === 31) {
-                handleEnemy31Spawn(session, t);
-              }
               t.skipRetaliation = false;
               t.abilityUsed = true;
             }
@@ -3000,8 +3020,7 @@
           // E17 / 17 (따라막기): 생성 및 매 능력 때 방어를 플레이어 현재방패로 설정 [I0 E17].
           cell.enemy.guard = (session.hero && session.hero.shield != null) ? session.hero.shield : (cell.enemy.guard || 0);
         } else if (eKind === 18) {
-          // E18 / 18 (둘바꾸기): 제거예정 아닌 일반칸 최대 2개를 무작위 공통 재추첨 [I0 E18].
-          // 특수 적 제외, 종류뿐 아니라 모든 특수속성 초기화·생성 규칙 적용.
+          // E18 / 18 (둘바꾸기): 제거예정 아닌 일반칸 최대 2개를 일반 보충과 동일한 규칙으로 재추첨 [I0 E18, 교정 24.4].
           const normalCells = [];
           for (const c of session.cells) {
             if (!c || c.erased) continue;
@@ -3011,26 +3030,25 @@
           }
           if (normalCells.length > 0) {
             const targets = pickRandomUpToN(session.rng, normalCells, 2, 'enemy18Target');
-            const perks = (session.hero && session.hero.perks) || [];
-            const flaws = (session.hero && session.hero.flaws) || [];
+            let spawnedPromotedSpecial18 = false;
+            const spawned31Cells = [];
             for (const t of targets) {
-              let code = drawInt(session.rng, 0, 4, 'cellKind');
-              if (session.hero && session.hero.activeNow && (session.hero.activeNow.allCoin || session.hero.activeNow.skill24)) {
-                code = 2;
+              const popRes = populateRefillCell(session, t, {
+                markAbilityUsed: true,
+                skipRetaliation: true
+              });
+              if (popRes.spawnedPromotedSpecial) {
+                spawnedPromotedSpecial18 = true;
               }
-              morphCellKind(t, code);
-              if (t.kind === KIND_POTION && perks.includes(1)) {
-                const roll = drawInt(session.rng, 1, 100, 'potionForm');
-                if (roll < 6) t.potionForm = 'charge';
-              } else if (t.kind === KIND_SWORD && perks.includes(6)) {
-                const roll = drawInt(session.rng, 1, 100, 'arrow');
-                if (roll < 6) t.arrow = true;
-              } else if (t.kind === KIND_SHIELD && flaws.includes(7)) {
-                const roll = drawInt(session.rng, 1, 100, 'broken');
-                if (roll < 4) t.broken = true;
-              } else if (t.kind === KIND_ENEMY) {
-                t.enemy = createEnemyData(session);
+              if (popRes.isEnemy31) {
+                spawned31Cells.push(t);
               }
+            }
+            if (spawnedPromotedSpecial18) {
+              checkSpecialCountAchievement41(session);
+            }
+            for (const c31 of spawned31Cells) {
+              handleEnemy31Spawn(session, c31);
             }
           }
         } else if (eKind === 19) {
@@ -3097,18 +3115,8 @@
             }
           }
         } else if (eKind === 24) {
-          // E24 / 24 (적끌기): 제거 예정이 아닌 주변8칸 비적과 거리1 초과의 적을 비복원으로 한 쌍씩 추첨해 교환 [I0 E24, 교정 18.4].
-          // 주변 다리·직업보상 칸도 비적이므로 주변 후보에 포함한다.
-          const isSpecialBridgeCell = (c) => Boolean(
-            c && (
-              c.bridgeForm === 'bridge' ||
-              c.bridgeForm === 'reward' ||
-              c.bridgeForm === 'class_reward' ||
-              c.kind === 'bridge' ||
-              c.kind === 'reward' ||
-              c.kind === 'class_reward'
-            )
-          );
+          // E24 / 24 (적끌기): 제거 예정이 아닌 주변8칸 비적과 거리1 초과의 적을 비복원으로 한 쌍씩 추첨해 교환 [I0 E24, 교정 24.5].
+          // 적인지 여부는 bridgeForm 예외 없이 칸 종류(kind/kindCode)로만 판단한다.
           const nearNonEnemies = [];
           for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
@@ -3118,7 +3126,7 @@
               if (nx >= 0 && nx < BOARD_WIDTH && ny >= 0 && ny < BOARD_HEIGHT) {
                 const nCell = getCell(session, nx, ny);
                 if (nCell && !nCell.erased) {
-                  const isEnemy = !isSpecialBridgeCell(nCell) && (nCell.kind === KIND_ENEMY || nCell.kindCode === 1);
+                  const isEnemy = (nCell.kind === KIND_ENEMY || nCell.kindCode === 1);
                   if (!isEnemy) {
                     nearNonEnemies.push(nCell);
                   }
@@ -3131,7 +3139,7 @@
           for (const c of session.cells) {
             if (!c || c.erased || c === cell) continue;
             const dist = Math.max(Math.abs(c.x - cell.x), Math.abs(c.y - cell.y));
-            if (dist > 1 && !isSpecialBridgeCell(c) && (c.kind === KIND_ENEMY || c.kindCode === 1) && c.enemy && c.enemy.hitPoints > 0) {
+            if (dist > 1 && (c.kind === KIND_ENEMY || c.kindCode === 1) && c.enemy && c.enemy.hitPoints > 0) {
               farEnemies.push(c);
             }
           }
@@ -3151,18 +3159,8 @@
             fC.y = ty;
           }
         } else if (eKind === 25) {
-          // E25 / 25 (장비끌기): 주변8칸 중 칼·방패 아닌 모든 미제거 칸(다리·직업보상 포함)과 거리1 초과의 미제거 칼·방패를 비복원 쌍 교환 [I0 E25, 교정 18.5].
-          // 선택한 쌍을 후보에서 빼며 한쪽 집합이 빌 때까지 반복한다. 먼 칼·방패에는 화살·파손도 포함.
-          const isSpecialBridgeCell25 = (c) => Boolean(
-            c && (
-              c.bridgeForm === 'bridge' ||
-              c.bridgeForm === 'reward' ||
-              c.bridgeForm === 'class_reward' ||
-              c.kind === 'bridge' ||
-              c.kind === 'reward' ||
-              c.kind === 'class_reward'
-            )
-          );
+          // E25 / 25 (장비끌기): 주변8칸 중 칼·방패 아닌 모든 미제거 칸과 거리1 초과의 미제거 칼·방패를 비복원 쌍 교환 [I0 E25, 교정 24.5].
+          // 칼·방패 여부는 bridgeForm 예외 없이 칸 종류(kind/kindCode)로만 판단한다.
           const nearNonEquip = [];
           for (let dx = -1; dx <= 1; dx++) {
             for (let dy = -1; dy <= 1; dy++) {
@@ -3172,9 +3170,7 @@
               if (nx >= 0 && nx < BOARD_WIDTH && ny >= 0 && ny < BOARD_HEIGHT) {
                 const nCell = getCell(session, nx, ny);
                 if (nCell && !nCell.erased) {
-                  const isEquip = !isSpecialBridgeCell25(nCell) && (
-                    nCell.kind === KIND_SWORD || nCell.kindCode === 4 || nCell.kind === KIND_SHIELD || nCell.kindCode === 3
-                  );
+                  const isEquip = (nCell.kind === KIND_SWORD || nCell.kindCode === 4 || nCell.kind === KIND_SHIELD || nCell.kindCode === 3);
                   if (!isEquip) {
                     nearNonEquip.push(nCell);
                   }
@@ -3187,7 +3183,7 @@
           for (const c of session.cells) {
             if (!c || c.erased || c === cell) continue;
             const dist = Math.max(Math.abs(c.x - cell.x), Math.abs(c.y - cell.y));
-            if (dist > 1 && !isSpecialBridgeCell25(c)) {
+            if (dist > 1) {
               const isEquip = (c.kind === KIND_SWORD || c.kindCode === 4 || c.kind === KIND_SHIELD || c.kindCode === 3);
               if (isEquip) {
                 farEquip.push(c);
@@ -3235,7 +3231,7 @@
         } else if (eKind === 27) {
           // E27 / 27 (위로만): determineDamageType에서 처리. 턴능력은 없음.
         } else if (eKind === 28) {
-          // E28 / 28 (깎기): 초기5, 능력마다−1, 0이면 장비 먼저 무작위 선택 → 그 장비 양수능력 하나 무작위 선택 → 기존 감소량 표만큼 빼고 0 하한 적용 → 카운트5 [I0 E28, 교정 18.6].
+          // E28 / 28 (깎기): 초기5, 능력마다−1, 0이면 장비 먼저 무작위 선택 → 그 장비 양수능력 하나 무작위 선택 → 기존 감소량 표만큼 빼고 0 하한 적용 → 전체 능력 재합산 1회 → 카운트5 [I0 E28, 교정 18.6, 교정 24.6].
           // 모든 능력을 1씩만 빼지 않는다. 양수 능력이 없으면 아무것도 깎지 않으며 강화 게이지도 건드리지 않는다.
           cell.enemy.countLeft = Math.max(0, (cell.enemy.countLeft || 5) - 1);
           if (cell.enemy.countLeft === 0) {
@@ -3250,53 +3246,25 @@
                 const statCandidates = [];
                 const handledKeys = new Set(['slot', 'ownLook', 'id', 'key', 'name', 'type', 'boosts']);
 
-                // 능력 번호 0~19와 동의어 프로퍼티 매핑 (번호 순서 유지)
+                // 능력 번호 0~19와 동의어 프로퍼티 매핑 (재합산은 targetStat 적용 후 recalculateHeroStats 1회로 일괄 처리 [교정 24.6])
                 const boostSynonyms = {
-                  0: {
-                    keys: ['attack', 'weaponAttack', 'bladeStrike', 'strike', 'weapon_attack', '무기공격'],
-                    syncHero: (hero, v) => { if (hero) hero.bladeStrike = v; }
-                  },
-                  1: {
-                    keys: ['baseStrike', 'baseAttack', '기본공격'],
-                    syncHero: (hero, v) => { if (hero) hero.baseStrike = v; }
-                  },
-                  10: {
-                    keys: ['life', 'hp', 'maxHp', 'lifeCap', 'maxLife', '체력'],
-                    syncHero: (hero, v) => {
-                      if (hero) {
-                        hero.lifeCap = Math.max(1, v);
-                        if (hero.life > hero.lifeCap) hero.life = hero.lifeCap;
-                      }
-                    }
-                  },
-                  11: {
-                    keys: ['armor', 'guard', 'defense', 'shield', 'shieldCap', 'maxShield', '방어', '갑옷'],
-                    syncHero: (hero, v) => {
-                      if (hero) {
-                        hero.shieldCap = Math.max(0, v);
-                        if (hero.shield > hero.shieldCap) hero.shield = hero.shieldCap;
-                      }
-                    }
-                  },
-                  16: {
-                    keys: ['repairPower', 'repair', '방패복구', '복구'],
-                    syncHero: (hero, v) => { if (hero) hero.repairPower = Math.max(0, v); }
-                  },
-                  17: {
-                    keys: ['potionPower', 'healPower', 'heal', '물약회복', '회복'],
-                    syncHero: (hero, v) => { if (hero) hero.potionPower = Math.max(0, v); }
-                  }
+                  0: ['attack', 'weaponAttack', 'bladeStrike', 'strike', 'weapon_attack', '무기공격'],
+                  1: ['baseStrike', 'baseAttack', '기본공격'],
+                  10: ['life', 'hp', 'maxHp', 'lifeCap', 'maxLife', '체력'],
+                  11: ['armor', 'guard', 'defense', 'shield', 'shieldCap', 'maxShield', '방어', '갑옷'],
+                  16: ['repairPower', 'repair', '방패복구', '복구'],
+                  17: ['potionPower', 'healPower', 'heal', '물약회복', '회복']
                 };
 
                 const maxBoostLen = Array.isArray(chosenGear.boosts) ? Math.max(20, chosenGear.boosts.length) : 20;
                 for (let b = 0; b < maxBoostLen; b++) {
-                  const syn = boostSynonyms[b];
+                  const synKeys = boostSynonyms[b];
                   let hasPositive = false;
                   if (Array.isArray(chosenGear.boosts) && chosenGear.boosts[b] > 0) {
                     hasPositive = true;
                   }
-                  if (syn && Array.isArray(syn.keys)) {
-                    for (const k of syn.keys) {
+                  if (Array.isArray(synKeys)) {
+                    for (const k of synKeys) {
                       handledKeys.add(k);
                       if (typeof chosenGear[k] === 'number' && chosenGear[k] > 0) {
                         hasPositive = true;
@@ -3312,8 +3280,8 @@
                         const dec = getUpgradeDecrease(session, boostIdx);
                         let finalVal = 0;
                         let actualDec = 0;
-                        if (syn && Array.isArray(syn.keys)) {
-                          for (const k of syn.keys) {
+                        if (Array.isArray(synKeys)) {
+                          for (const k of synKeys) {
                             if (typeof chosenGear[k] === 'number' && chosenGear[k] > 0) {
                               const prev = chosenGear[k];
                               chosenGear[k] = Math.max(0, prev - dec);
@@ -3326,10 +3294,12 @@
                           const prevB = chosenGear.boosts[boostIdx];
                           chosenGear.boosts[boostIdx] = Math.max(0, prevB - dec);
                           actualDec += (prevB - chosenGear.boosts[boostIdx]);
-                          if (finalVal === 0) finalVal = chosenGear.boosts[boostIdx];
-                        }
-                        if (syn && syn.syncHero) {
-                          syn.syncHero(session.hero, finalVal);
+                          finalVal = chosenGear.boosts[boostIdx];
+                        } else if (actualDec > 0) {
+                          if (!Array.isArray(chosenGear.boosts)) {
+                            chosenGear.boosts = new Array(20).fill(0);
+                          }
+                          chosenGear.boosts[boostIdx] = finalVal;
                         }
                         if (actualDec > 0) {
                           emitAchievementProgress(session, 39, 100);
@@ -3361,6 +3331,7 @@
                   const targetStat = statCandidates[statIdx];
                   if (targetStat && typeof targetStat.apply === 'function') {
                     targetStat.apply();
+                    recalculateHeroStats(session);
                   }
                 }
               }
@@ -3415,7 +3386,10 @@
     if (!hasEnemy15 && Array.isArray(session.actions)) {
       for (const action of session.actions) {
         if (!action || action.oneUse || action.cooldown === -1) continue;
-        const wait = action.effectiveWait != null ? action.effectiveWait : (action.baseWait || action.cooldown || 10);
+        const wait = action.effectiveWait != null
+          ? action.effectiveWait
+          : (action.baseWait != null ? action.baseWait : (action.cooldown != null ? action.cooldown : 10));
+        if (wait < 0) continue;
         action.charge = Math.min(wait, (action.charge || 0) + 1);
       }
     }
@@ -3740,7 +3714,7 @@
             wait -= 1;
           }
           wait -= 4;
-          existing.effectiveWait = Math.max(1, wait);
+          existing.effectiveWait = wait;
         }
         existing.grade = 5;
         return { success: true, upgraded: true, action: existing };
@@ -3748,7 +3722,7 @@
 
       if (existing.grade < 10) {
         existing.grade += 1;
-        if (!isOneUse && existing.effectiveWait > 1) {
+        if (!isOneUse) {
           existing.effectiveWait -= 1;
         }
       }
@@ -3768,11 +3742,11 @@
     if (isTurn100) {
       grade = 5;
       if (!isOneUse) {
-        effectiveWait = Math.max(1, effectiveWait - 4);
+        effectiveWait = effectiveWait - 4;
       }
     }
 
-    // [교정 20.6] 능력 5 양수 보유 표식이 있는 상태의 신규 장착도 필요량 -1 반영
+    // [교정 20.6, 교정 23.5] 능력 5 양수 보유 표식이 있는 상태의 신규 장착도 필요량 -1 반영 (하한 1 제한 없음)
     const hasGear5 = Boolean(
       session.hero.hasCooldownReduction ||
       (Array.isArray(session.gear) && session.gear.some(g => g && Array.isArray(g.boosts) && g.boosts[5] > 0))
@@ -3781,16 +3755,12 @@
       session.hero.hasCooldownReduction = true;
     }
     if (!isOneUse && hasGear5) {
-      if (effectiveWait > 1) {
-        effectiveWait -= 1;
-      }
+      effectiveWait -= 1;
     }
 
-    // 네 번째 슬롯(index 3) 퍽 3의 -1은 별도로 적용 [G7, 교정 20.6]
+    // 네 번째 슬롯(index 3) 퍽 3의 -1은 별도로 적용 [G7, 교정 20.6, 교정 23.5]
     if (!isOneUse && slotIndex === 3 && session.hero.perks && session.hero.perks.includes(3)) {
-      if (effectiveWait > 1) {
-        effectiveWait -= 1;
-      }
+      effectiveWait -= 1;
     }
 
     const newAction = {
@@ -3846,15 +3816,31 @@
         }
       }
     } else {
-      let customPool = null;
-      if (session && session.profile && Array.isArray(session.profile.classes)) {
-        const cEntry = session.profile.classes.find(item => item && item.id === classId);
-        if (cEntry && Array.isArray(cEntry.skillPool)) {
-          customPool = cEntry.skillPool;
+      const cDef = CLASS_DEFINITIONS[classId] || CLASS_DEFINITIONS[0];
+      const prof = (session && session.profile) || null;
+      const cEntry = (prof && Array.isArray(prof.classes))
+        ? prof.classes.find(item => item && item.id === classId)
+        : null;
+      const swapSetup = (options && Array.isArray(options.skillSwaps))
+        ? options.skillSwaps
+        : ((session && Array.isArray(session.skillSwaps))
+          ? session.skillSwaps
+          : (cEntry && Array.isArray(cEntry.skillSwaps) ? cEntry.skillSwaps : null));
+      const base = (cEntry && Array.isArray(cEntry.skillPool) && cEntry.skillPool.length > 0)
+        ? [...cEntry.skillPool]
+        : [...cDef.skillPool];
+      if (swapSetup && swapSetup.length > 0) {
+        const growth = (cEntry && cEntry.growth != null) ? cEntry.growth : 10;
+        const growthSource = prof || (session && session.classGrowths) || null;
+        const validatedSwaps = validateSkillSwapSetup(growth, swapSetup, null, growthSource);
+        for (let i = 1; i < Math.min(20, base.length); i++) {
+          const rep = validatedSwaps[i];
+          if (rep != null && isSkillUnlocked(rep, growthSource) && !base.includes(rep)) {
+            base[i] = rep;
+          }
         }
       }
-      const cDef = CLASS_DEFINITIONS[classId] || CLASS_DEFINITIONS[0];
-      rawSkillPool = customPool ? [...customPool] : [...cDef.skillPool];
+      rawSkillPool = base;
     }
 
     // 이미 장착·등급·슬롯 조건으로 유효 스킬 후보 필터링 [교정 20.2]
@@ -4064,8 +4050,19 @@
       return false;
     }
 
-    if (boostId === 5 && options.cooldownAllowed === false) {
-      return false;
+    if (boostId === 5) {
+      if (options.cooldownAllowed === false) {
+        return false;
+      }
+      const hasBoost5 = Boolean(
+        (options.currentBoosts && options.currentBoosts[5] > 0) ||
+        hero.hasCooldownReduction ||
+        (hero.gearAppliedBoosts && hero.gearAppliedBoosts[5] > 0) ||
+        (Array.isArray(session.gear) && session.gear.some(g => g && Array.isArray(g.boosts) && g.boosts[5] > 0))
+      );
+      if (hasBoost5) {
+        return false;
+      }
     }
 
     if (boostId === 15) {
@@ -4200,9 +4197,7 @@
       if (Array.isArray(session.actions)) {
         session.actions.forEach(a => {
           if (a && !a.oneUse && a.actionKey !== 33 && a.baseWait !== -1) {
-            if (a.effectiveWait > 1) {
-              a.effectiveWait -= 1;
-            }
+            a.effectiveWait -= 1;
             if (a.charge != null && a.charge > a.effectiveWait) {
               a.charge = a.effectiveWait; // 충전은 새 필요량 상한
             }
@@ -4355,10 +4350,10 @@
         }
       }
 
-      // 별도로 실수 0.5 미만이면 1개 추가, 점수모드는 항상 1개 추가
+      // 별도로 실수 0.5 미만이면 1개 추가, 점수모드는 항상 1개 추가 [교정 20.3, 교정 23.4]
       if (mode === 'score' || drawFloat(rng, 'accSecond') < 0.50) {
         const extraCandidates = GEAR_UPGRADE_CANDIDATES[4].filter(b =>
-          isUpgradeAllowed(session, b, { cooldownAllowed: true })
+          isUpgradeAllowed(session, b, { cooldownAllowed: boosts[5] === 0, currentBoosts: boosts })
         );
         if (extraCandidates.length > 0) {
           const pIdx2 = drawInt(rng, 0, extraCandidates.length - 1, 'accNewBoost2');
@@ -5659,9 +5654,12 @@
       name: '적무장해제',
       baseWait: 25,
       hasTarget: (session) => {
-        // [교정 19.6] 스킬 14는 일반 적뿐 아니라 특수 적도 칼로 지정변환한다.
+        // [교정 24.7] 스킬 14는 특수 번호가 0인 일반 적만 칼로 바꾼다.
         return Boolean(session && session.cells && session.cells.some(c =>
-          !c.erased && (c.kind === KIND_ENEMY || c.kindCode === 1) && (!c.enemy || c.enemy.hitPoints > 0)
+          !c.erased &&
+          (c.kind === KIND_ENEMY || c.kindCode === 1) &&
+          (!c.enemy || !c.enemy.enemyKind || c.enemy.enemyKind === 0) &&
+          (!c.enemy || c.enemy.hitPoints > 0)
         ));
       }
     },
@@ -5915,9 +5913,13 @@
     }
 
     const action = found.action;
-    const wait = action.effectiveWait != null ? action.effectiveWait : (action.baseWait || SKILL_BASE_COOLDOWNS[action.actionKey] || 15);
-    if (!action.oneUse && (action.charge || 0) < wait) {
-      return { canUse: false, reason: 'not_charged', charge: action.charge, needed: wait };
+    const wait = action.effectiveWait != null
+      ? action.effectiveWait
+      : (action.baseWait != null ? action.baseWait : (SKILL_BASE_COOLDOWNS[action.actionKey] != null ? SKILL_BASE_COOLDOWNS[action.actionKey] : 15));
+    const charge = action.charge != null ? action.charge : 0;
+    const isReady = Boolean(action.oneUse || wait < 0 || charge >= wait);
+    if (!isReady) {
+      return { canUse: false, reason: 'not_charged', charge, needed: wait };
     }
 
     const def = SKILL_DEFINITIONS[action.actionKey];
@@ -6160,14 +6162,18 @@
         const rowY = drawInt(session.rng, 0, 5, 'sweepRow');
         session.hero.activeNow = session.hero.activeNow || {};
         session.hero.activeNow.skill11Used = true;
+        let normalEnemyCount = 0;
         for (let x = 0; x < BOARD_WIDTH; x++) {
           const c = getCell(session, x, rowY);
           if (!c || c.erased) continue;
           if (c.enemy && c.enemy.enemyKind > 0) continue; // 특수적 제외
+          if ((c.kind === KIND_ENEMY || c.kindCode === 1) && (!c.enemy || !c.enemy.enemyKind || c.enemy.enemyKind === 0)) {
+            normalEnemyCount++;
+          }
           cellsToCollect.push(c);
         }
-        if (cellsToCollect.length === 6) {
-          // A60: 가로수집 실제 6칸
+        if (normalEnemyCount === 6) {
+          // A60: 가로수집에서 일반 적 6마리 수집 [교정 25.3]
           emitAchievementProgress(session, 60, 100);
         }
       }
@@ -6229,20 +6235,15 @@
     }
 
     if (actionKey === 14) {
-      // S14 / 14 (적무장해제): 일반 적뿐 아니라 특수 적도 칼로 지정변환, 처치가 아니므로 특수 보상을 지급하지 않음 [K0 S14, 교정 19.6]
-      // 단, 조각 19의 '고칠 옛 시험' 목록에 포함되지 않은 조각 10의 5단위 묶음 시험(13·14·15 동시 장착 후 13 직후 실행) 호환 분기
-      const isLegacyPiece10Bundle = Boolean(
-        Array.isArray(session.actions) &&
-        session.actions.length === 3 &&
-        session.actions[0] && session.actions[0].actionKey === 13 && session.actions[0].charge === 0 &&
-        session.actions[1] && session.actions[1].actionKey === 14 &&
-        session.actions[2] && session.actions[2].actionKey === 15
-      );
+      // S14 / 14 (적무장해제): 특수 번호가 0인 일반 적만 칼로 지정변환, 특수 적은 유지 [K0 S14, 교정 24.7]
       let count = 0;
       for (const c of session.cells) {
         if (!c || c.erased) continue;
-        if ((c.kind === KIND_ENEMY || c.kindCode === 1) && (!c.enemy || c.enemy.hitPoints > 0)) {
-          if (isLegacyPiece10Bundle && c.enemy && c.enemy.enemyKind > 0) continue;
+        if (
+          (c.kind === KIND_ENEMY || c.kindCode === 1) &&
+          (!c.enemy || !c.enemy.enemyKind || c.enemy.enemyKind === 0) &&
+          (!c.enemy || c.enemy.hitPoints > 0)
+        ) {
           morphCellKind(c, KIND_SWORD);
           count++;
         }
@@ -6670,34 +6671,53 @@
       return { success: true, actionKey, collectedCount: edgeCells.length };
     }
 
-    if (actionKey === 39) {
-      // S39 / 39 (잇는칸): 무작위좌표 최대 10회 시도, 특수적이면 재시도, 일반칸을 연결용 특수칸으로. 10회 모두 특수적이면 효과없이 종료 [K0 S39]
+    // [교정 24.8] 연결칸 생성 공통 helper: 무작위 좌표 최대 10회 시도, 특수 칸이면 재시도, 10회 모두 특수 칸이면 실패
+    const isSpecialCellForBridge = (c) => {
+      if (!c) return true;
+      if (c.enemy && c.enemy.enemyKind > 0) return true;
+      if (isRewardCell(c)) return true;
+      if (c.kind === KIND_BRIDGE || c.bridgeForm === 'bridge') return true;
+      return false;
+    };
+
+    const tryCreateBridgeCellRandom10 = (xTag, yTag) => {
       let attempts = 0;
       let converted = false;
       let targetCell = null;
 
       for (let i = 0; i < 10; i++) {
         attempts++;
-        const rx = drawInt(session.rng, 0, 5, 'skill39X');
-        const ry = drawInt(session.rng, 0, 5, 'skill39Y');
+        const rx = drawInt(session.rng, 0, 5, xTag);
+        const ry = drawInt(session.rng, 0, 5, yTag);
         const c = getCell(session, rx, ry);
         if (c && !c.erased) {
-          const isSpecialEnemy = (c.enemy && c.enemy.enemyKind > 0);
-          if (isSpecialEnemy) {
-            continue; // 특수적이면 재시도
+          if (isSpecialCellForBridge(c)) {
+            continue; // 특수 칸이면 재시도
           }
-          c.bridgeForm = 'bridge';
+          morphCellKind(c, KIND_BRIDGE);
           converted = true;
           targetCell = c;
           break;
         }
       }
 
-      return { success: true, actionKey, attempts, converted, targetCell };
+      return { attempts, converted, targetCell };
+    };
+
+    if (actionKey === 39) {
+      // S39 / 39 (잇는칸): 무작위좌표 최대 10회 시도, 특수 칸이면 재시도, 일반칸을 초기화된 연결칸('bridge')으로 변환. 10회 모두 특수 칸이면 효과없이 종료 [K0 S39, 교정 24.8]
+      const bridgeRes = tryCreateBridgeCellRandom10('skill39X', 'skill39Y');
+      return {
+        success: true,
+        actionKey,
+        attempts: bridgeRes.attempts,
+        converted: bridgeRes.converted,
+        targetCell: bridgeRes.targetCell
+      };
     }
 
     if (actionKey === 40) {
-      // S40 / 40 (윗부분쓸기): y0~2의 코인·방패만 공통수집·낙하. 이번턴 41도 사용했으면 수집뒤 연결용칸 생성 [K0 S40, 교정 17.6]
+      // S40 / 40 (윗부분쓸기): y0~2의 코인·방패만 공통수집·낙하. 이번턴 41도 사용했으면 수집뒤 10회 좌표 추첨으로 연결칸 생성 [K0 S40, 교정 17.6, 교정 24.8]
       const has41 = Boolean(session.hero && session.hero.activeNow && session.hero.activeNow.skill41Used);
       session.hero.activeNow = session.hero.activeNow || {};
       session.hero.activeNow.skill40Used = true;
@@ -6718,22 +6738,20 @@
       applyDropAndRefill(session, false);
 
       let bridgeCreated = false;
+      let bridgeAttempts = 0;
+      let bridgeCell = null;
       if (has41) {
-        const normalCandidates = session.cells.filter(c => !c.erased && (!c.enemy || c.enemy.enemyKind === 0));
-        if (normalCandidates.length > 0) {
-          const picked = pickRandomUpToN(session.rng, normalCandidates, 1, 'comboBridgeTarget');
-          if (picked.length > 0 && picked[0]) {
-            picked[0].bridgeForm = 'bridge';
-            bridgeCreated = true;
-          }
-        }
+        const bridgeRes = tryCreateBridgeCellRandom10('comboBridgeX', 'comboBridgeY');
+        bridgeCreated = bridgeRes.converted;
+        bridgeAttempts = bridgeRes.attempts;
+        bridgeCell = bridgeRes.targetCell;
       }
 
-      return { success: true, actionKey, collectedCount: collected.length, bridgeCreated };
+      return { success: true, actionKey, collectedCount: collected.length, bridgeCreated, bridgeAttempts, bridgeCell };
     }
 
     if (actionKey === 41) {
-      // S41 / 41 (아랫부분쓸기): y3~5의 물약·방패만 공통수집·낙하. 이번턴 40도 사용했으면 수집뒤 연결용칸 생성 [K0 S41, 교정 17.6]
+      // S41 / 41 (아랫부분쓸기): y3~5의 물약·방패만 공통수집·낙하. 이번턴 40도 사용했으면 수집뒤 10회 좌표 추첨으로 연결칸 생성 [K0 S41, 교정 17.6, 교정 24.8]
       const has40 = Boolean(session.hero && session.hero.activeNow && session.hero.activeNow.skill40Used);
       session.hero.activeNow = session.hero.activeNow || {};
       session.hero.activeNow.skill41Used = true;
@@ -6754,18 +6772,16 @@
       applyDropAndRefill(session, false);
 
       let bridgeCreated = false;
+      let bridgeAttempts = 0;
+      let bridgeCell = null;
       if (has40) {
-        const normalCandidates = session.cells.filter(c => !c.erased && (!c.enemy || c.enemy.enemyKind === 0));
-        if (normalCandidates.length > 0) {
-          const picked = pickRandomUpToN(session.rng, normalCandidates, 1, 'comboBridgeTarget');
-          if (picked.length > 0 && picked[0]) {
-            picked[0].bridgeForm = 'bridge';
-            bridgeCreated = true;
-          }
-        }
+        const bridgeRes = tryCreateBridgeCellRandom10('comboBridgeX', 'comboBridgeY');
+        bridgeCreated = bridgeRes.converted;
+        bridgeAttempts = bridgeRes.attempts;
+        bridgeCell = bridgeRes.targetCell;
       }
 
-      return { success: true, actionKey, collectedCount: collected.length, bridgeCreated };
+      return { success: true, actionKey, collectedCount: collected.length, bridgeCreated, bridgeAttempts, bridgeCell };
     }
 
     return { success: false, reason: 'unsupported_skill', actionKey };
@@ -7049,7 +7065,8 @@
     } catch (err) {
       return null;
     }
-    if (!obj || typeof obj !== 'object') return null;
+    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return null;
+    if (!Array.isArray(obj.cells) || !obj.hero || typeof obj.hero !== 'object' || Array.isArray(obj.hero)) return null;
 
     // 칸 복원 및 누락 필드 이주
     const cells = Array.isArray(obj.cells) ? obj.cells.map(c => {
@@ -7211,6 +7228,7 @@
       _emittedOnce: obj._emittedOnce ? { ...obj._emittedOnce } : {},
       turnContext: obj.turnContext || null,
       resumeTurnData: obj.resumeTurnData || null,
+      profile: (options && options.profile) || null,
       randomState: obj.randomState || null,
       events: [],
       provisional: Array.isArray(obj.provisional) ? [...obj.provisional] : [...PROVISIONAL_ITEMS],
@@ -8199,6 +8217,17 @@
    * - 기본 직업이거나 현재 직업이 만렙(>=10)이면 미해제 직업 무작위 해제를 먼저 시도하고,
    *   미해제가 없으면 현재 직업 성장을 시도하며, 둘 다 불가면 변화 없이 소모한다.
    */
+  function syncProfileClassMetadata(prof, cls) {
+    if (!prof || !cls) return;
+    if (Array.isArray(prof.unlockedClasses) && cls.unlocked && cls.key && !prof.unlockedClasses.includes(cls.key)) {
+      prof.unlockedClasses.push(cls.key);
+    }
+    if (prof.classProgress && typeof prof.classProgress === 'object' && cls.key) {
+      prof.classProgress[cls.key] = prof.classProgress[cls.key] || { level: 1, exp: 0, games: 0, wins: 0, highScore: 0 };
+      prof.classProgress[cls.key].level = cls.growth;
+    }
+  }
+
   function collectClassReward(session, profile = null, rewardCell = null) {
     if (!session || !session.hero) return { type: 'none' };
     if (rewardCell && rewardCell._rewardCollectedOnce) {
@@ -8225,6 +8254,7 @@
       const choice = drawInt(session.rng, 0, 1, 'classRewardChoice');
       if (choice === 1) {
         curClass.growth = Math.min(10, curGrowth + 1);
+        syncProfileClassMetadata(prof, curClass);
         checkAchievements(session, prof);
         return { type: 'growth', classId: currentClassId, newGrowth: curClass.growth };
       } else {
@@ -8233,10 +8263,12 @@
           const pickedClass = unreleasedClasses[pickIdx] || unreleasedClasses[0];
           pickedClass.unlocked = true;
           pickedClass.growth = 1;
+          syncProfileClassMetadata(prof, pickedClass);
           checkAchievements(session, prof);
           return { type: 'unlock', classId: pickedClass.id, classKey: pickedClass.key, newGrowth: 1 };
         }
         curClass.growth = Math.min(10, curGrowth + 1);
+        syncProfileClassMetadata(prof, curClass);
         checkAchievements(session, prof);
         return { type: 'growth', classId: currentClassId, newGrowth: curClass.growth };
       }
@@ -8248,12 +8280,14 @@
       const pickedClass = unreleasedClasses[pickIdx] || unreleasedClasses[0];
       pickedClass.unlocked = true;
       pickedClass.growth = 1;
+      syncProfileClassMetadata(prof, pickedClass);
       checkAchievements(session, prof);
       return { type: 'unlock', classId: pickedClass.id, classKey: pickedClass.key, newGrowth: 1 };
     }
 
     if (canGrowCurrent) {
       curClass.growth = Math.min(10, curGrowth + 1);
+      syncProfileClassMetadata(prof, curClass);
       checkAchievements(session, prof);
       return { type: 'growth', classId: currentClassId, newGrowth: curClass.growth };
     }
@@ -8281,6 +8315,7 @@
     createCell,
     morphCellKind,
     createRNG,
+    createSeededRng: createRNG,
     BOARD_WIDTH,
     BOARD_HEIGHT,
     BOARD_CELL_COUNT,
@@ -8289,6 +8324,7 @@
     KIND_COIN,
     KIND_SHIELD,
     KIND_SWORD,
+    KIND_BRIDGE,
     // 조각 2 공격 및 피해 관련 함수 및 상수 노출
     DAMAGE_TYPE_NORMAL,
     DAMAGE_TYPE_VERTICAL,

@@ -756,20 +756,59 @@
     if (typeof options.classId === 'number') {
       classKey = options.classId;
     } else if (typeof options.classId === 'string') {
-      classKey = CLASS_ID_TO_KEY[options.classId] != null ? CLASS_ID_TO_KEY[options.classId] : 0;
+      const resolvedCls = resolveClassKeyId(options.classId);
+      classKey = resolvedCls ? resolvedCls.id : (CLASS_ID_TO_KEY[options.classId] != null ? CLASS_ID_TO_KEY[options.classId] : 0);
     }
+    const classIdStr = CLASS_KEY_TO_ID[classKey] || 'adventurer';
 
     const rng = options.rng || (options.seed != null ? createRNG(options.seed) : createRNG());
 
+    // [교정 25.1] 저장 프로필(또는 전달된 프로필)을 같은 객체로 세션에 연결한다.
+    const profile = (options.profile && typeof options.profile === 'object')
+      ? normalizeProfileInPlace(options.profile)
+      : loadProfile();
+
+    if (options.unlockData && typeof options.unlockData === 'object' && !options.profile) {
+      mergeUnlockDataIntoProfile(profile, options.unlockData);
+    }
+
+    const cEntry = Array.isArray(profile.classes)
+      ? profile.classes.find(c => c && (c.id === classKey || c.key === classIdStr))
+      : null;
+
     let perks = options.perks;
     let flaws = options.flaws;
-    let raceKey = options.raceId != null ? options.raceId : options.raceKey;
+    if (perks == null && cEntry && Array.isArray(cEntry.perks)) {
+      perks = [...cEntry.perks];
+    }
+    if (flaws == null && cEntry && Array.isArray(cEntry.flaws)) {
+      flaws = [...cEntry.flaws];
+    }
+
+    let raceKey = options.raceId != null
+      ? options.raceId
+      : (options.raceKey != null ? options.raceKey : (cEntry && cEntry.race != null ? cEntry.race : undefined));
+
+    let growth = options.growth;
+    if (growth == null && cEntry && cEntry.growth != null && (options.profile || cEntry.unlocked || classKey === 0)) {
+      growth = cEntry.growth;
+    }
+
+    const skillSwaps = Array.isArray(options.skillSwaps)
+      ? [...options.skillSwaps]
+      : (cEntry && Array.isArray(cEntry.skillSwaps) ? [...cEntry.skillSwaps] : undefined);
+
+    const skillPool = Array.isArray(options.skillPool) ? [...options.skillPool] : undefined;
 
     const session = RC.makeSession({
       classKey,
       raceKey,
+      growth,
       perks,
       flaws,
+      skillSwaps,
+      skillPool,
+      profile,
       difficulty: options.difficulty != null ? options.difficulty : 1,
       mode: options.mode || 'normal',
       rng
@@ -968,6 +1007,11 @@
     const prevLife = (session.hero && session.hero.life) || 0;
     const prevUpgrade = (session.hero && session.hero.upgrade) || 0;
 
+    if (!session.profile && gameStateOrSession && gameStateOrSession._session) {
+      session.profile = loadProfile();
+    }
+
+    const prevEventLen = Array.isArray(session.events) ? session.events.length : 0;
     const res = RC.settlePath(session, path, { rng });
     if (!res || !res.success) {
       return {
@@ -979,6 +1023,19 @@
         expResult: { killedSpecialCount: 0, didLevelUp: false, gainedExp: 0 },
         resourceResult: null
       };
+    }
+
+    // [교정 25.1, 25.2] 직업 보상 수집 또는 업적 진행 시 연결된 프로필/해금 정보 동기화 저장
+    const newEvents = Array.isArray(session.events) ? session.events.slice(prevEventLen) : [];
+    const shouldSaveProf = Boolean(
+      session.profile && (
+        (res.rewardResult && res.rewardResult.type !== 'none') ||
+        newEvents.some(e => e && (e.type === 'save_profile' || e.type === 'achievement_progress'))
+      )
+    );
+    if (shouldSaveProf) {
+      saveProfile(session.profile);
+      saveUnlockData(buildUnlockDataFromProfile(session.profile));
     }
 
     const newGameState = sessionToGameState(session);
@@ -1068,7 +1125,8 @@
       enemyAttackSummary,
       counterResult,
       expResult,
-      resourceResult
+      resourceResult,
+      rewardResult: res.rewardResult || null
     };
   }
 
@@ -1100,7 +1158,12 @@
       return { applied: false, success: false, reason: 'no_rule_core', gameState };
     }
 
+    const prevEventLen = Array.isArray(session.events) ? session.events.length : 0;
     const res = RC.triggerAction(session, slotIndex, options);
+    const newEvents = Array.isArray(session.events) ? session.events.slice(prevEventLen) : [];
+    if (res && res.success && session.profile && newEvents.some(e => e && (e.type === 'achievement_progress' || e.type === 'save_profile'))) {
+      saveProfile(session.profile);
+    }
     const newGameState = sessionToGameState(session);
 
     return {
@@ -1287,10 +1350,444 @@
   // ==========================================
 
   const STORAGE_KEY_RUN = 'goblin_raid_v1_run';
-  const STORAGE_KEY_LEGACY_RUN = 'goblin_raid_v1';
   const STORAGE_KEY_PROFILE = 'goblin_raid_v1_profile';
   const STORAGE_KEY_UNLOCKS = 'goblin_raid_v1_unlocks';
   const STORAGE_KEY_SCORES = 'goblin_raid_v1_scores';
+
+  // 옛 사이트 저장 이름 (최고 기록·이어하기·프로필·해금) [교정 25.4]
+  const LEGACY_STORAGE_KEY_SCORES = 'goblin_raid_v1';
+  const LEGACY_STORAGE_KEY_RUN = 'goblin_raid_run_v1';
+  const LEGACY_STORAGE_KEY_PROFILE = 'goblin_raid_profile_v1';
+  const LEGACY_STORAGE_KEY_UNLOCKS = 'goblin_raid_unlocks_v1';
+
+  let isMigratingLegacy = false;
+
+  function safeGetStorageItem(key) {
+    try {
+      return storage.getItem(key);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function safeSetStorageItem(key, value) {
+    try {
+      storage.setItem(key, typeof value === 'string' ? value : JSON.stringify(value));
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function safeParseJson(raw) {
+    if (!raw || typeof raw !== 'string') return null;
+    try {
+      return JSON.parse(raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  const LEGACY_CLASS_ALIASES = {
+    wizard: 5,
+    sorcerer: 5,
+    cleric: 3,
+    thief: 6,
+    knight: 7,
+    fighter: 8,
+    archer: 1,
+    berserker: 4,
+    looter: 2,
+    ninja: 9
+  };
+
+  function resolveClassKeyId(idOrKey) {
+    if (typeof idOrKey === 'number' && idOrKey >= 0 && idOrKey < CLASS_IDS.length) {
+      return { id: idOrKey, key: CLASS_IDS[idOrKey] };
+    }
+    if (typeof idOrKey === 'string') {
+      if (CLASS_ID_TO_KEY[idOrKey] != null) {
+        return { id: CLASS_ID_TO_KEY[idOrKey], key: idOrKey };
+      }
+      if (LEGACY_CLASS_ALIASES[idOrKey] != null) {
+        const aliasId = LEGACY_CLASS_ALIASES[idOrKey];
+        return { id: aliasId, key: CLASS_IDS[aliasId], alias: idOrKey };
+      }
+      const num = Number(idOrKey);
+      if (Number.isInteger(num) && num >= 0 && num < CLASS_IDS.length) {
+        return { id: num, key: CLASS_IDS[num] };
+      }
+    }
+    return null;
+  }
+
+  function emptyHighScoreBuckets() {
+    return {
+      normal_0: [],
+      normal_1: [],
+      normal_2: [],
+      normal_3: [],
+      '100turns': [],
+      separate_score: []
+    };
+  }
+
+  function resolveScoreBucketKey(entryOrCategory) {
+    if (entryOrCategory && typeof entryOrCategory === 'object') {
+      const cat = entryOrCategory.category;
+      const diff = entryOrCategory.difficulty;
+      const mode = entryOrCategory.mode;
+      if (mode === 'turn100' || cat === '100turns' || cat === 'turn100') return '100turns';
+      if (mode === 'score' || cat === 'separate_score' || cat === 'score') return 'separate_score';
+      if (typeof cat === 'string' && (cat.startsWith('normal_') || cat === '100turns' || cat === 'separate_score')) return cat;
+      if (cat != null && !Number.isNaN(Number(cat))) {
+        return `normal_${Math.max(0, Math.min(3, Math.floor(Number(cat))))}`;
+      }
+      if (diff != null && !Number.isNaN(Number(diff))) {
+        return `normal_${Math.max(0, Math.min(3, Math.floor(Number(diff))))}`;
+      }
+      return 'normal_1';
+    }
+    if (entryOrCategory == null) return 'normal_1';
+    if (typeof entryOrCategory === 'number') {
+      return `normal_${Math.max(0, Math.min(3, Math.floor(entryOrCategory)))}`;
+    }
+    const str = String(entryOrCategory);
+    if (str === 'turn100' || str === '100turns') return '100turns';
+    if (str === 'score' || str === 'separate_score') return 'separate_score';
+    if (str.startsWith('normal_')) return str;
+    return 'normal_1';
+  }
+
+  function mergeScoresIntoBuckets(buckets, source, fallbackCat = null) {
+    if (!buckets || !source) return;
+    if (Array.isArray(source)) {
+      for (const item of source) {
+        if (!item || typeof item !== 'object') continue;
+        const cat = fallbackCat || resolveScoreBucketKey(item);
+        const list = Array.isArray(buckets[cat]) ? buckets[cat] : (buckets[cat] = []);
+        const score = typeof item.score === 'number' ? item.score : 0;
+        const turn = typeof item.turn === 'number' ? item.turn : 0;
+        const kills = typeof item.kills === 'number' ? item.kills : 0;
+        const classId = item.classId != null ? item.classId : 'adventurer';
+        const className = item.className || (CLASSES[classId] ? CLASSES[classId].name : '모험가');
+        const date = item.date || '';
+        const dup = list.some(e =>
+          e &&
+          (e.score || 0) === score &&
+          (e.turn || 0) === turn &&
+          (e.kills || 0) === kills &&
+          String(e.classId || '') === String(classId) &&
+          String(e.date || '') === String(date)
+        );
+        if (!dup) {
+          list.push({
+            score,
+            turn,
+            kills,
+            classId,
+            className,
+            ...(date ? { date } : {}),
+            ...(item.category != null ? { category: item.category } : {}),
+            ...(item.difficulty != null ? { difficulty: item.difficulty } : {}),
+            ...(item.mode != null ? { mode: item.mode } : {})
+          });
+        }
+      }
+    } else if (typeof source === 'object') {
+      for (const k of Object.keys(source)) {
+        if (Array.isArray(source[k])) {
+          mergeScoresIntoBuckets(buckets, source[k], resolveScoreBucketKey(k));
+        }
+      }
+    }
+    for (const key of Object.keys(buckets)) {
+      if (Array.isArray(buckets[key])) {
+        buckets[key].sort((a, b) => (b.score || 0) - (a.score || 0));
+        if (buckets[key].length > 10) buckets[key].length = 10;
+      }
+    }
+  }
+
+  function applyLegacyFieldsToProfile(target, source) {
+    if (!target || !source || typeof source !== 'object') return;
+    if (typeof source.specialKills === 'number') {
+      target.specialKillsTotal = Math.max(target.specialKillsTotal || 0, source.specialKills);
+    }
+    if (typeof source.specialKillsTotal === 'number') {
+      target.specialKillsTotal = Math.max(target.specialKillsTotal || 0, source.specialKillsTotal);
+    }
+    if (Array.isArray(source.classes)) {
+      for (const srcCls of source.classes) {
+        if (!srcCls || typeof srcCls !== 'object') continue;
+        const resolved = resolveClassKeyId(srcCls.id != null ? srcCls.id : srcCls.key);
+        if (!resolved) continue;
+        const dst = target.classes[resolved.id];
+        if (!dst) continue;
+        if (srcCls.unlocked) dst.unlocked = true;
+        if (typeof srcCls.growth === 'number') dst.growth = Math.max(dst.growth || 0, Math.min(10, srcCls.growth));
+        if (typeof srcCls.race === 'number') dst.race = srcCls.race;
+        if (Array.isArray(srcCls.perks)) dst.perks = srcCls.perks.slice(0, 4);
+        if (Array.isArray(srcCls.flaws)) dst.flaws = srcCls.flaws.slice(0, 4);
+        if (Array.isArray(srcCls.skillPool) && srcCls.skillPool.length > 0) dst.skillPool = [...srcCls.skillPool];
+        if (Array.isArray(srcCls.skillSwaps)) dst.skillSwaps = [...srcCls.skillSwaps];
+      }
+    }
+    if (Array.isArray(source.unlockedClasses)) {
+      for (const item of source.unlockedClasses) {
+        if (typeof item === 'string' && item) {
+          target.legacyUnlockedClassKeys = target.legacyUnlockedClassKeys || [];
+          if (!target.legacyUnlockedClassKeys.includes(item)) {
+            target.legacyUnlockedClassKeys.push(item);
+          }
+        }
+        const resolved = resolveClassKeyId(item);
+        if (!resolved) continue;
+        const dst = target.classes[resolved.id];
+        if (dst) {
+          dst.unlocked = true;
+          dst.growth = Math.max(1, dst.growth || 0);
+        }
+      }
+    }
+    if (source.classGrowths && typeof source.classGrowths === 'object') {
+      for (const k of Object.keys(source.classGrowths)) {
+        const resolved = resolveClassKeyId(k);
+        const g = source.classGrowths[k];
+        if (!resolved || typeof g !== 'number') continue;
+        const dst = target.classes[resolved.id];
+        if (dst && g > 0) {
+          dst.unlocked = true;
+          dst.growth = Math.max(dst.growth || 0, Math.min(10, g));
+        }
+      }
+    }
+    if (source.classProgress && typeof source.classProgress === 'object') {
+      for (const k of Object.keys(source.classProgress)) {
+        const resolved = resolveClassKeyId(k);
+        const prog = source.classProgress[k];
+        if (!resolved || !prog || typeof prog !== 'object') continue;
+        const dst = target.classes[resolved.id];
+        const lvl = prog.growth != null ? prog.growth : prog.level;
+        if (dst && typeof lvl === 'number' && lvl > 0) {
+          dst.unlocked = true;
+          dst.growth = Math.max(dst.growth || 0, Math.min(10, lvl));
+        }
+      }
+    }
+    if (source.classPerkSettings && typeof source.classPerkSettings === 'object') {
+      for (const k of Object.keys(source.classPerkSettings)) {
+        const resolved = resolveClassKeyId(k);
+        const setting = source.classPerkSettings[k];
+        if (!resolved || resolved.id === 0 || !setting || typeof setting !== 'object') continue;
+        const dst = target.classes[resolved.id];
+        if (dst) {
+          if (Array.isArray(setting.perks)) {
+            const pArr = [null, null, null, null];
+            for (let i = 0; i < Math.min(4, setting.perks.length); i++) pArr[i] = setting.perks[i] != null ? setting.perks[i] : null;
+            if (pArr[0] == null && dst.perks && dst.perks[0] != null) pArr[0] = dst.perks[0];
+            dst.perks = pArr;
+          }
+          if (Array.isArray(setting.flaws)) {
+            const fArr = [null, null, null, null];
+            for (let i = 0; i < Math.min(4, setting.flaws.length); i++) fArr[i] = setting.flaws[i] != null ? setting.flaws[i] : null;
+            if (fArr[0] == null && dst.flaws && dst.flaws[0] != null) fArr[0] = dst.flaws[0];
+            dst.flaws = fArr;
+          }
+        }
+      }
+    }
+    if (source.classRaceSettings && typeof source.classRaceSettings === 'object') {
+      for (const k of Object.keys(source.classRaceSettings)) {
+        const resolved = resolveClassKeyId(k);
+        const rId = source.classRaceSettings[k];
+        if (!resolved || typeof rId !== 'number') continue;
+        const dst = target.classes[resolved.id];
+        if (dst) dst.race = rId;
+      }
+    }
+    if (Array.isArray(source.achievements)) {
+      for (const item of source.achievements) {
+        if (item && typeof item === 'object' && typeof item.id === 'number') {
+          const dstAch = target.achievements.find(a => a && a.id === item.id);
+          if (dstAch) {
+            if (typeof item.progress === 'number') dstAch.progress = Math.max(dstAch.progress || 0, item.progress);
+            if (item.unlocked && !dstAch.unverified) dstAch.unlocked = true;
+          }
+        } else if (typeof item === 'string') {
+          target.legacyAchievements = target.legacyAchievements || [];
+          if (!target.legacyAchievements.includes(item)) target.legacyAchievements.push(item);
+        }
+      }
+    }
+    if (source.highScores) {
+      mergeScoresIntoBuckets(target.highScores, source.highScores);
+    }
+  }
+
+  function normalizeProfileInPlace(prof) {
+    if (!prof || typeof prof !== 'object') return createDefaultProfile();
+    const def = createDefaultProfile();
+    if (prof.version == null) prof.version = 1;
+
+    const hadClasses = Array.isArray(prof.classes) && prof.classes.length >= 10;
+    if (!Array.isArray(prof.classes)) {
+      prof.classes = def.classes.map(c => ({ ...c, perks: [...c.perks], flaws: [...c.flaws], skillPool: [...c.skillPool] }));
+    } else {
+      const normalizedClasses = [];
+      for (let i = 0; i < def.classes.length; i++) {
+        const d = def.classes[i];
+        const existing = prof.classes.find(c => c && (c.id === i || c.key === d.key));
+        if (existing && typeof existing === 'object') {
+          existing.id = i;
+          if (!existing.key) existing.key = d.key;
+          if (!existing.name) existing.name = d.name;
+          if (existing.unlocked == null) existing.unlocked = d.unlocked;
+          if (existing.growth == null) existing.growth = d.growth;
+          if (existing.race == null) existing.race = d.race;
+          if (!Array.isArray(existing.perks)) existing.perks = [...d.perks];
+          if (!Array.isArray(existing.flaws)) existing.flaws = [...d.flaws];
+          if (!Array.isArray(existing.skillPool) || existing.skillPool.length === 0) existing.skillPool = [...d.skillPool];
+          normalizedClasses.push(existing);
+        } else {
+          normalizedClasses.push({ ...d, perks: [...d.perks], flaws: [...d.flaws], skillPool: [...d.skillPool] });
+        }
+      }
+      prof.classes = normalizedClasses;
+    }
+
+    if (!Array.isArray(prof.achievements) || prof.achievements.length < def.achievements.length) {
+      const existingAchs = Array.isArray(prof.achievements) ? prof.achievements : [];
+      const mergedAchs = def.achievements.map(da => {
+        const found = existingAchs.find(a => a && typeof a === 'object' && a.id === da.id);
+        return found ? found : { ...da };
+      });
+      prof.achievements = mergedAchs;
+    }
+
+    const baseBuckets = emptyHighScoreBuckets();
+    if (prof.highScores) {
+      mergeScoresIntoBuckets(baseBuckets, prof.highScores);
+    }
+    prof.highScores = baseBuckets;
+
+    if (typeof prof.specialKillsTotal !== 'number') {
+      prof.specialKillsTotal = typeof prof.specialKills === 'number' ? prof.specialKills : 0;
+    }
+
+    if (!hadClasses) {
+      applyLegacyFieldsToProfile(prof, prof);
+    }
+    return prof;
+  }
+
+  function buildUnlockDataFromProfile(prof) {
+    const unlockedClasses = [];
+    const classGrowths = {};
+    if (prof && Array.isArray(prof.classes)) {
+      for (const c of prof.classes) {
+        if (!c || !c.key) continue;
+        if (c.unlocked || c.id === 0) {
+          if (!unlockedClasses.includes(c.key)) unlockedClasses.push(c.key);
+        }
+        if ((c.growth || 0) > 0 || c.id === 0) {
+          classGrowths[c.key] = c.growth != null ? c.growth : (c.id === 0 ? 1 : 0);
+        }
+      }
+    }
+    if (prof && Array.isArray(prof.legacyUnlockedClassKeys)) {
+      for (const rawKey of prof.legacyUnlockedClassKeys) {
+        if (typeof rawKey === 'string' && rawKey && !unlockedClasses.includes(rawKey)) {
+          unlockedClasses.push(rawKey);
+        }
+      }
+    }
+    if (!unlockedClasses.includes('adventurer')) unlockedClasses.unshift('adventurer');
+    if (classGrowths.adventurer == null) classGrowths.adventurer = 1;
+    return {
+      unlockedClasses,
+      classGrowths,
+      specialKills: (prof && typeof prof.specialKillsTotal === 'number') ? prof.specialKillsTotal : 0
+    };
+  }
+
+  /**
+   * [교정 25.4] 옛 사이트 저장 기록(goblin_raid_v1 / goblin_raid_profile_v1 / goblin_raid_unlocks_v1)을
+   * 새 JSON 저장 이름(goblin_raid_v1_scores / goblin_raid_v1_profile / goblin_raid_v1_unlocks)으로 옮겨 쓰고
+   * 옛 값은 지우지 않는다. 옛 이어하기(goblin_raid_run_v1)는 형식이 달라 버린다.
+   */
+  function migrateLegacyStorageIfNeeded() {
+    if (isMigratingLegacy) return;
+    isMigratingLegacy = true;
+    try {
+      const hasNewProfile = Boolean(safeGetStorageItem(STORAGE_KEY_PROFILE));
+      const hasNewUnlocks = Boolean(safeGetStorageItem(STORAGE_KEY_UNLOCKS));
+      const hasNewScores = Boolean(safeGetStorageItem(STORAGE_KEY_SCORES));
+
+      const rawLegScores = safeGetStorageItem(LEGACY_STORAGE_KEY_SCORES);
+      const rawLegProfile = safeGetStorageItem(LEGACY_STORAGE_KEY_PROFILE);
+      const rawLegUnlocks = safeGetStorageItem(LEGACY_STORAGE_KEY_UNLOCKS);
+
+      const legScoresParsed = safeParseJson(rawLegScores);
+      const legProfileParsed = safeParseJson(rawLegProfile);
+      const legUnlocksParsed = safeParseJson(rawLegUnlocks);
+
+      const hasValidLegScores = Array.isArray(legScoresParsed) && legScoresParsed.length > 0;
+      const hasValidLegProfile = Boolean(legProfileParsed && typeof legProfileParsed === 'object' && !Array.isArray(legProfileParsed));
+      const hasValidLegUnlocks = Boolean(legUnlocksParsed && typeof legUnlocksParsed === 'object' && !Array.isArray(legUnlocksParsed));
+
+      if (!hasNewProfile && (hasValidLegProfile || hasValidLegUnlocks || hasValidLegScores)) {
+        const prof = createDefaultProfile();
+        if (hasValidLegProfile) applyLegacyFieldsToProfile(prof, legProfileParsed);
+        if (hasValidLegUnlocks) applyLegacyFieldsToProfile(prof, legUnlocksParsed);
+        if (hasValidLegScores) mergeScoresIntoBuckets(prof.highScores, legScoresParsed);
+        normalizeProfileInPlace(prof);
+        safeSetStorageItem(STORAGE_KEY_PROFILE, prof);
+      }
+
+      if (!hasNewScores && (hasValidLegScores || (hasValidLegProfile && legProfileParsed.highScores))) {
+        const scoreBuckets = emptyHighScoreBuckets();
+        if (hasValidLegScores) mergeScoresIntoBuckets(scoreBuckets, legScoresParsed);
+        if (hasValidLegProfile && legProfileParsed.highScores) {
+          mergeScoresIntoBuckets(scoreBuckets, legProfileParsed.highScores);
+        }
+        safeSetStorageItem(STORAGE_KEY_SCORES, scoreBuckets);
+
+        if (hasNewProfile && hasValidLegScores) {
+          const curProf = safeParseJson(safeGetStorageItem(STORAGE_KEY_PROFILE));
+          if (curProf && typeof curProf === 'object' && !Array.isArray(curProf)) {
+            normalizeProfileInPlace(curProf);
+            mergeScoresIntoBuckets(curProf.highScores, legScoresParsed);
+            safeSetStorageItem(STORAGE_KEY_PROFILE, curProf);
+          }
+        }
+      }
+
+      if (!hasNewUnlocks && (hasValidLegUnlocks || hasValidLegProfile)) {
+        const tempProf = createDefaultProfile();
+        if (hasValidLegProfile) applyLegacyFieldsToProfile(tempProf, legProfileParsed);
+        if (hasValidLegUnlocks) applyLegacyFieldsToProfile(tempProf, legUnlocksParsed);
+        const migratedUnlocks = buildUnlockDataFromProfile(tempProf);
+        if (hasValidLegUnlocks && typeof legUnlocksParsed.specialKills === 'number') {
+          migratedUnlocks.specialKills = Math.max(migratedUnlocks.specialKills || 0, legUnlocksParsed.specialKills);
+        }
+        safeSetStorageItem(STORAGE_KEY_UNLOCKS, migratedUnlocks);
+      }
+    } catch (_) {
+      // 마이그레이션 실패 시 새 게임 진행을 막지 않음
+    } finally {
+      isMigratingLegacy = false;
+    }
+  }
+
+  function isValidPackedRunPayload(raw) {
+    const parsed = safeParseJson(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return false;
+    if (!Array.isArray(parsed.cells) || !parsed.hero || typeof parsed.hero !== 'object' || Array.isArray(parsed.hero)) {
+      return false;
+    }
+    return true;
+  }
 
   function saveRunState(gameState) {
     const session = gameState && gameState._session;
@@ -1301,7 +1798,6 @@
     try {
       const packed = RC.packSession(session);
       storage.setItem(STORAGE_KEY_RUN, packed);
-      storage.setItem(STORAGE_KEY_LEGACY_RUN, packed); // 레거시 호환
       return true;
     } catch (_) {
       return false;
@@ -1310,12 +1806,12 @@
 
   function loadRunState() {
     try {
-      const raw = storage.getItem(STORAGE_KEY_RUN) || storage.getItem(STORAGE_KEY_LEGACY_RUN);
-      if (!raw) return null;
+      const raw = storage.getItem(STORAGE_KEY_RUN);
+      if (!raw || !isValidPackedRunPayload(raw)) return null;
       const RC = getRC();
       if (!RC || typeof RC.unpackSession !== 'function') return null;
 
-      const session = RC.unpackSession(raw);
+      const session = RC.unpackSession(raw, { profile: loadProfile() });
       if (!session) return null;
       return sessionToGameState(session);
     } catch (_) {
@@ -1326,7 +1822,6 @@
   function clearRunState() {
     try {
       storage.removeItem(STORAGE_KEY_RUN);
-      storage.removeItem(STORAGE_KEY_LEGACY_RUN);
       return true;
     } catch (_) {
       return false;
@@ -1335,8 +1830,9 @@
 
   function hasSavedRun() {
     try {
-      const raw = storage.getItem(STORAGE_KEY_RUN) || storage.getItem(STORAGE_KEY_LEGACY_RUN);
-      return Boolean(raw && raw.trim().length > 0);
+      const raw = storage.getItem(STORAGE_KEY_RUN);
+      if (!raw) return false;
+      return isValidPackedRunPayload(raw);
     } catch (_) {
       return false;
     }
@@ -1351,13 +1847,18 @@
       version: 1,
       classes: CLASS_IDS.map((k, i) => ({ id: i, key: k, unlocked: i === 0, growth: i === 0 ? 1 : 0 })),
       achievements: [],
-      highScores: { normal_0: [], normal_1: [], normal_2: [], normal_3: [], '100turns': [], separate_score: [] }
+      highScores: emptyHighScoreBuckets()
     };
   }
 
   function saveProfile(profile) {
     try {
+      if (!profile || typeof profile !== 'object') return false;
+      normalizeProfileInPlace(profile);
       storage.setItem(STORAGE_KEY_PROFILE, JSON.stringify(profile));
+      if (profile.highScores && typeof profile.highScores === 'object') {
+        safeSetStorageItem(STORAGE_KEY_SCORES, profile.highScores);
+      }
       return true;
     } catch (_) {
       return false;
@@ -1366,17 +1867,27 @@
 
   function loadProfile() {
     try {
+      migrateLegacyStorageIfNeeded();
       const raw = storage.getItem(STORAGE_KEY_PROFILE);
       if (raw) {
         const obj = JSON.parse(raw);
-        if (obj && typeof obj === 'object') return obj;
+        if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+          return normalizeProfileInPlace(obj);
+        }
       }
     } catch (_) {}
     return createDefaultProfile();
   }
 
+  function mergeUnlockDataIntoProfile(profile, unlockData) {
+    if (!profile || !unlockData || typeof unlockData !== 'object') return;
+    normalizeProfileInPlace(profile);
+    applyLegacyFieldsToProfile(profile, unlockData);
+  }
+
   function saveUnlockData(unlockData) {
     try {
+      if (!unlockData || typeof unlockData !== 'object') return false;
       storage.setItem(STORAGE_KEY_UNLOCKS, JSON.stringify(unlockData));
       return true;
     } catch (_) {
@@ -1386,10 +1897,24 @@
 
   function loadUnlockData() {
     try {
+      migrateLegacyStorageIfNeeded();
       const raw = storage.getItem(STORAGE_KEY_UNLOCKS);
       if (raw) {
         const obj = JSON.parse(raw);
-        if (obj && typeof obj === 'object') return obj;
+        if (obj && typeof obj === 'object' && !Array.isArray(obj)) {
+          const unlockedClasses = Array.isArray(obj.unlockedClasses) ? [...obj.unlockedClasses] : ['adventurer'];
+          if (!unlockedClasses.includes('adventurer')) unlockedClasses.unshift('adventurer');
+          const classGrowths = (obj.classGrowths && typeof obj.classGrowths === 'object') ? { ...obj.classGrowths } : { adventurer: 1 };
+          for (const key of unlockedClasses) {
+            const resolved = resolveClassKeyId(key);
+            if (resolved && !classGrowths[resolved.key]) classGrowths[resolved.key] = 1;
+          }
+          return {
+            unlockedClasses,
+            classGrowths,
+            ...(typeof obj.specialKills === 'number' ? { specialKills: obj.specialKills } : {})
+          };
+        }
       }
     } catch (_) {}
     return {
@@ -1400,15 +1925,24 @@
 
   function saveHighScore(categoryOrDiff, scoreRecord) {
     try {
+      migrateLegacyStorageIfNeeded();
+      let actualCat = categoryOrDiff;
+      let actualRec = scoreRecord;
+      if (categoryOrDiff && typeof categoryOrDiff === 'object' && (scoreRecord == null || typeof scoreRecord !== 'object')) {
+        actualRec = categoryOrDiff;
+        actualCat = actualRec.category != null ? actualRec.category : (actualRec.difficulty != null ? actualRec.difficulty : 1);
+      }
+      if (!actualRec || typeof actualRec !== 'object') return false;
+
       const profile = loadProfile();
       const RC = getRC();
       if (RC && typeof RC.addHighScore === 'function') {
-        RC.addHighScore(profile, categoryOrDiff, scoreRecord);
+        RC.addHighScore(profile, actualCat, actualRec);
       } else {
-        if (!profile.highScores) profile.highScores = {};
-        const cat = typeof categoryOrDiff === 'number' ? `normal_${categoryOrDiff}` : categoryOrDiff;
+        if (!profile.highScores) profile.highScores = emptyHighScoreBuckets();
+        const cat = resolveScoreBucketKey(actualCat);
         const list = profile.highScores[cat] || (profile.highScores[cat] = []);
-        list.push(scoreRecord);
+        list.push(actualRec);
         list.sort((a, b) => (b.score || 0) - (a.score || 0));
         if (list.length > 10) list.length = 10;
       }
@@ -1419,14 +1953,26 @@
     }
   }
 
-  function loadHighScores(categoryOrDiff = 1) {
+  function loadHighScores(categoryOrDiff = 1, limit = null) {
     try {
-      const profile = loadProfile();
-      if (!profile || !profile.highScores) return [];
-      let cat = typeof categoryOrDiff === 'number' ? `normal_${categoryOrDiff}` : categoryOrDiff;
-      if (cat === 'turn100') cat = '100turns';
-      if (cat === 'score') cat = 'separate_score';
-      return profile.highScores[cat] || profile.highScores['normal_1'] || [];
+      migrateLegacyStorageIfNeeded();
+      const cat = resolveScoreBucketKey(categoryOrDiff);
+      let list = null;
+      const rawScores = safeGetStorageItem(STORAGE_KEY_SCORES);
+      const parsedScores = safeParseJson(rawScores);
+      if (parsedScores && typeof parsedScores === 'object' && !Array.isArray(parsedScores) && Array.isArray(parsedScores[cat])) {
+        list = parsedScores[cat];
+      } else {
+        const profile = loadProfile();
+        if (profile && profile.highScores && Array.isArray(profile.highScores[cat])) {
+          list = profile.highScores[cat];
+        }
+      }
+      if (!Array.isArray(list)) return [];
+      if (typeof limit === 'number' && limit > 0) {
+        return list.slice(0, limit);
+      }
+      return list;
     } catch (_) {
       return [];
     }
@@ -1434,9 +1980,15 @@
 
   function updateProfileWithGameResult(profile, result = {}) {
     try {
-      const prof = profile || loadProfile();
+      const prof = profile ? normalizeProfileInPlace(profile) : loadProfile();
       if (result && result.score != null) {
-        saveHighScore(result.difficulty != null ? result.difficulty : 1, result);
+        const cat = result.category != null ? result.category : (result.difficulty != null ? result.difficulty : 1);
+        const RC = getRC();
+        if (RC && typeof RC.addHighScore === 'function') {
+          RC.addHighScore(prof, cat, result);
+        } else {
+          mergeScoresIntoBuckets(prof.highScores, [result], resolveScoreBucketKey(cat));
+        }
       }
       const RC = getRC();
       if (RC && typeof RC.checkAchievements === 'function') {
@@ -1545,10 +2097,16 @@
   }
 
   function isClassUnlocked(classId, unlockData = null) {
-    const cKey = typeof classId === 'string' ? (CLASS_ID_TO_KEY[classId] != null ? CLASS_ID_TO_KEY[classId] : 0) : classId;
+    const resolved = resolveClassKeyId(classId);
+    const cKey = resolved ? resolved.id : (typeof classId === 'number' ? classId : 0);
     if (cKey === 0) return true;
     if (unlockData && Array.isArray(unlockData.unlockedClasses)) {
-      return unlockData.unlockedClasses.includes(classId) || unlockData.unlockedClasses.includes(cKey);
+      if (unlockData.unlockedClasses.includes(classId) || unlockData.unlockedClasses.includes(cKey)) return true;
+      if (resolved && unlockData.unlockedClasses.includes(resolved.key)) return true;
+      return unlockData.unlockedClasses.some(item => {
+        const r = resolveClassKeyId(item);
+        return Boolean(r && r.id === cKey);
+      });
     }
     return false;
   }
@@ -1610,6 +2168,7 @@
     clearRunState,
     createGameState,
     createRNG,
+    createSeededRng: createRNG,
     exportProfileCode,
     getLevelupOptions,
     getPerkSlotCount,
