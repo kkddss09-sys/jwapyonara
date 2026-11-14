@@ -46,6 +46,7 @@
   const BOARD_WIDTH = 6;
   const BOARD_HEIGHT = 6;
   const MAX_PERK_SLOTS = 4;
+  let lastActiveGameState = null;
 
   // 조각 29: 난이도 4단계 이름 목록 및 변환 헬퍼 [추가 29.1, 29.2]
   const DIFFICULTY_NAMES = ['쉬움', '보통', '어려움', '지옥'];
@@ -738,7 +739,7 @@
       ? session.difficulty
       : 1;
 
-    return {
+    const state = {
       board,
       player,
       turn: session.tick || 0,
@@ -747,9 +748,12 @@
       difficulty,
       difficultyName: getDifficultyName(difficulty),
       isGameOver: session.phase === 'end' || (hero.life != null && hero.life <= 0),
+      phase: session.phase || 'input',
       pendingChoice,
       _session: session
     };
+    lastActiveGameState = state;
+    return state;
   }
 
   // ==========================================
@@ -1211,11 +1215,35 @@
   }
 
   /**
-   * getLevelupOptions [O2]
+   * [교정 33.1] 내부 헬퍼: gameState 또는 fallback에서 세션을 얻고 비정상 대기 메뉴를 청소
+   */
+  function resolveSessionForChoice(gameState) {
+    let session = gameState && gameState._session ? gameState._session : gameState;
+    if (!session && lastActiveGameState) {
+      session = lastActiveGameState._session || lastActiveGameState;
+    }
+    if (!session || !Array.isArray(session.waitingChoices)) return null;
+    const RC = getRC();
+    if (RC && typeof RC.cleanWaitingChoices === 'function') {
+      RC.cleanWaitingChoices(session);
+    } else {
+      session.waitingChoices = session.waitingChoices.filter(c => c && Array.isArray(c.cards) && c.cards.length > 0);
+      if (session.waitingChoices.length === 0 && session.phase === 'choice') {
+        session.phase = 'input';
+      }
+    }
+    if (session.waitingChoices.length === 0 && session.phase === 'choice') {
+      session.phase = 'input';
+    }
+    return session;
+  }
+
+  /**
+   * getLevelupOptions [O2, 교정 33.1]
    * 이미 생성된 대기 메뉴 후보를 반환하며 그릴 때마다 다시 추첨하지 않는다.
    */
   function getLevelupOptions(gameState) {
-    const session = gameState && gameState._session;
+    const session = resolveSessionForChoice(gameState);
     if (!session || !Array.isArray(session.waitingChoices)) return [];
     const choice = session.waitingChoices.find(c => c && c.type === 'levelup');
     if (!choice || !Array.isArray(choice.cards)) return [];
@@ -1224,19 +1252,23 @@
       type: c.type,
       name: c.name || (c.type === 'stat' ? `스탯 ${c.statId}` : `스킬 ${c.actionKey}`),
       actionKey: c.actionKey,
-      statId: c.statId
+      statId: c.statId,
+      desc: c.desc || (c.type === 'stat' ? '능력치 증가' : '스킬 습득/강화')
     }));
   }
 
   /**
-   * chooseLevelupReward [O2, O4]
+   * chooseLevelupReward [O2, O4, 교정 33.1]
    * HTML의 한 번 선택 레벨업은 G6의 두 선택을 연결층에서 차례로 저장한다.
    * 각 선택 후 남은 후보와 pendingChoice를 반환하고 두 번째에만 메뉴를 닫는다.
    * 메뉴 큐가 남으면 즉시 다음 메뉴를 표시한다.
    * 턴 처리가 아직 남았으면 선택 뒤 그 위치부터 계속하고 반격·보상을 중복 실행하지 않는다.
    */
   function chooseLevelupReward(gameState, optionId) {
-    const session = gameState && gameState._session;
+    let session = gameState && gameState._session ? gameState._session : gameState;
+    if (!session && lastActiveGameState) {
+      session = lastActiveGameState._session || lastActiveGameState;
+    }
     if (!session || !Array.isArray(session.waitingChoices)) {
       return { applied: false, gameState };
     }
@@ -1268,6 +1300,10 @@
       }
     }
 
+    if (session.waitingChoices.length === 0) {
+      session.phase = 'input';
+    }
+
     const newGameState = sessionToGameState(session);
     return {
       applied: true,
@@ -1277,10 +1313,10 @@
   }
 
   /**
-   * getShopOptions [O2]
+   * getShopOptions [O2, 교정 33.1]
    */
   function getShopOptions(gameState) {
-    const session = gameState && gameState._session;
+    const session = resolveSessionForChoice(gameState);
     if (!session || !Array.isArray(session.waitingChoices)) return [];
     const choice = session.waitingChoices.find(c => c && c.type === 'shop');
     if (!choice || !Array.isArray(choice.cards)) return [];
@@ -1290,15 +1326,19 @@
       name: c.name,
       slot: c.slot,
       gear: c.gear,
-      actionKey: c.actionKey
+      actionKey: c.actionKey,
+      desc: c.desc || (c.type === 'skill' ? '새 스킬 습득 또는 교체' : `장비 ${c.slot != null ? c.slot : ''}`)
     }));
   }
 
   /**
-   * chooseShopItem [O2]
+   * chooseShopItem [O2, 교정 33.2]
    */
   function chooseShopItem(gameState, optionId) {
-    const session = gameState && gameState._session;
+    let session = gameState && gameState._session ? gameState._session : gameState;
+    if (!session && lastActiveGameState) {
+      session = lastActiveGameState._session || lastActiveGameState;
+    }
     if (!session || !Array.isArray(session.waitingChoices)) {
       return { applied: false, gameState };
     }
@@ -1320,6 +1360,10 @@
       }
     }
 
+    if (session.waitingChoices.length === 0) {
+      session.phase = 'input';
+    }
+
     const newGameState = sessionToGameState(session);
     return {
       applied: true,
@@ -1329,10 +1373,10 @@
   }
 
   /**
-   * getUpgradeOptions [O2]
+   * getUpgradeOptions [O2, 교정 33.1]
    */
   function getUpgradeOptions(gameState) {
-    const session = gameState && gameState._session;
+    const session = resolveSessionForChoice(gameState);
     if (!session || !Array.isArray(session.waitingChoices)) return [];
     const choice = session.waitingChoices.find(c => c && c.type === 'upgrade');
     if (!choice || !Array.isArray(choice.cards)) return [];
@@ -1342,15 +1386,19 @@
       name: c.name,
       slot: c.slot,
       boostId: c.boostId,
-      increaseAmount: c.increaseAmount
+      increaseAmount: c.increaseAmount,
+      desc: c.desc || `능력치 +${c.increaseAmount || 1}`
     }));
   }
 
   /**
-   * chooseUpgrade [O2]
+   * chooseUpgrade [O2, 교정 33.2]
    */
   function chooseUpgrade(gameState, optionId) {
-    const session = gameState && gameState._session;
+    let session = gameState && gameState._session ? gameState._session : gameState;
+    if (!session && lastActiveGameState) {
+      session = lastActiveGameState._session || lastActiveGameState;
+    }
     if (!session || !Array.isArray(session.waitingChoices)) {
       return { applied: false, gameState };
     }
@@ -1370,6 +1418,10 @@
       if (session.waitingChoices.length === 0) {
         session.phase = 'input';
       }
+    }
+
+    if (session.waitingChoices.length === 0) {
+      session.phase = 'input';
     }
 
     const newGameState = sessionToGameState(session);
@@ -1521,6 +1573,43 @@
     return 'normal_1';
   }
 
+  // [교정 30.5] 10개 초과 시 순위 안에 들 때만 마지막 자리를 새 기록으로 교체해 정렬 유지
+  function insertHighScoreRecordLimited(list, record) {
+    if (!Array.isArray(list) || !record || typeof record !== 'object') return list;
+    const newScore = record.score != null ? record.score : 0;
+    if (list.length >= 10) {
+      list.sort((a, b) => (b && b.score != null ? b.score : 0) - (a && a.score != null ? a.score : 0));
+      if (list.length > 10) {
+        list.length = 10;
+      }
+      const lastRecord = list[list.length - 1];
+      const lastScore = (lastRecord && lastRecord.score != null) ? lastRecord.score : 0;
+      if (newScore <= lastScore) {
+        return list;
+      }
+      list[list.length - 1] = record;
+      for (let i = list.length - 1; i > 0; i--) {
+        const curScore = (list[i] && list[i].score != null) ? list[i].score : 0;
+        const prevScore = (list[i - 1] && list[i - 1].score != null) ? list[i - 1].score : 0;
+        if (prevScore < curScore) {
+          const tmp = list[i - 1];
+          list[i - 1] = list[i];
+          list[i] = tmp;
+        } else {
+          break;
+        }
+      }
+      return list;
+    }
+    const insertIdx = list.findIndex(r => (r && r.score != null ? r.score : 0) < newScore);
+    if (insertIdx === -1) {
+      list.push(record);
+    } else {
+      list.splice(insertIdx, 0, record);
+    }
+    return list;
+  }
+
   function mergeScoresIntoBuckets(buckets, source, fallbackCat = null) {
     if (!buckets || !source) return;
     if (Array.isArray(source)) {
@@ -1543,7 +1632,7 @@
           String(e.date || '') === String(date)
         );
         if (!dup) {
-          list.push({
+          insertHighScoreRecordLimited(list, {
             score,
             turn,
             kills,
@@ -2004,9 +2093,7 @@
         if (!profile.highScores) profile.highScores = emptyHighScoreBuckets();
         const cat = resolveScoreBucketKey(actualCat);
         const list = profile.highScores[cat] || (profile.highScores[cat] = []);
-        list.push(actualRec);
-        list.sort((a, b) => (b.score || 0) - (a.score || 0));
-        if (list.length > 10) list.length = 10;
+        insertHighScoreRecordLimited(list, actualRec);
       }
       saveProfile(profile);
       return true;

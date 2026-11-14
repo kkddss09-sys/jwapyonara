@@ -1916,10 +1916,10 @@
       renderLevelupChoices(pending.options || GR.getLevelupOptions(gameState, rng));
       modalLevelup.classList.add('show');
     } else if (pending.type === 'upgrade') {
-      renderUpgradeChoices(pending.options || GR.getUpgradeOptions());
+      renderUpgradeChoices(pending.options || GR.getUpgradeOptions(gameState));
       modalUpgrade.classList.add('show');
     } else if (pending.type === 'shop') {
-      renderShopChoices(pending.options || GR.getShopOptions());
+      renderShopChoices(pending.options || GR.getShopOptions(gameState));
       modalShop.classList.add('show');
     }
   }
