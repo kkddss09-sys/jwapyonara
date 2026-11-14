@@ -440,7 +440,7 @@
       key: 'sauren',
       name: '늪 고블린',
       bonusName: '보물 탐색',
-      bonusDesc: '상점 장비/선택지의 보너스 기회가 2배로 증가합니다.',
+      bonusDesc: '상점에서 장비 대신 스킬이 보일 확률이 2배가 됩니다.',
       mortalEnemyId: 13,
       mortalEnemyName: '도둑괴물',
       mortalEnemyDesc: '골드를 훔칠 때 자신의 공격력의 2배만큼 플레이어에게 직접 체력 피해를 줍니다.',
@@ -509,7 +509,7 @@
       bonusDesc: '특수 적을 처치할 때마다 장착한 스킬 중 1개의 쿨다운이 즉시 완전히 충전됩니다.',
       mortalEnemyId: 19,
       mortalEnemyName: '불안정괴물',
-      mortalEnemyDesc: '매 턴 종료 시 판의 다른 칸과 무작위로 위치를 바꾸며 순간이동합니다.',
+      mortalEnemyDesc: '카운트가 끝나면 적이 있고 칼이 없는 새 방으로 판이 통째로 바뀝니다.',
       icon: '🎭'
     }
   ];
