@@ -951,6 +951,7 @@
       <div class="header-btns">
         <button class="btn-icon" id="btn-save-code-modal" title="기록 저장 코드">💾 저장 코드</button>
         <button class="btn-icon" id="btn-achievements-modal" style="color:#ffd54a; border-color:#e5a82a;" title="업적과 도전과제">🏆 <span id="hdr-ach-count">0/10</span></button>
+        <button class="btn-icon" id="btn-rank-modal" style="color:#ffd54a; border-color:#e5a82a;" title="모드별 순위 1~10위">🥇 순위</button>
         <button class="btn-icon" id="btn-guide" title="도움말">❓ 도움말</button>
         <button class="btn-icon" id="btn-race-modal" style="color:#55d777; border-color:#2f9e57;">🧬 <span id="hdr-race-name">평원</span></button>
         <button class="btn-icon" id="btn-class-modal" style="color:var(--gold); border-color:var(--gold);">👤 <span id="hdr-class-name">모험가</span></button>
@@ -1097,6 +1098,22 @@
         </table>
       </div>
       <button class="btn-action" id="btn-go-restart" style="background:#d7263d; color:#fff; border-color:#ff6b7e; width:100%; padding:10px; font-size:14px;">다시 도전하기</button>
+    </div>
+
+    <!-- 모드별 순위 모달 -->
+    <div class="modal-overlay" id="modal-rank">
+      <div class="modal-title" style="color:#ffe27a;">🥇 모드별 순위 (1~10위)</div>
+      <div id="rank-tabs" style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:8px;"></div>
+      <div style="width:100%; text-align:left; background:#120e18; border:1px solid #3a3042; border-radius:8px; padding:6px 10px;">
+        <table class="scores-table">
+          <thead>
+            <tr><th>순위</th><th>직업</th><th>턴</th><th>처치</th><th>점수</th></tr>
+          </thead>
+          <tbody id="rank-tbody"></tbody>
+        </table>
+      </div>
+      <div style="font-size:11px; color:var(--sub); margin-top:6px;">이 기기(브라우저)에 저장된 내 기록입니다.</div>
+      <button class="btn-action" id="btn-close-rank-modal" style="margin-top:8px; width:100%; flex:0 0 auto; padding:10px;">닫기</button>
     </div>
 
     <!-- 도움말 모달 -->
@@ -2310,6 +2327,48 @@
     updateContinueButton();
     modalGameover.classList.add('show');
   }
+
+  const RANK_MODES = [
+    { key: 0, label: '쉬움' }, { key: 1, label: '보통' }, { key: 2, label: '어려움' },
+    { key: 3, label: '지옥' }, { key: '100turns', label: '100턴' }, { key: 'separate_score', label: '별도 점수' }
+  ];
+  let rankModeIdx = 1;
+  function renderRankModal() {
+    const tabs = document.getElementById('rank-tabs');
+    const tbody = document.getElementById('rank-tbody');
+    tabs.innerHTML = '';
+    RANK_MODES.forEach((m, i) => {
+      const b = document.createElement('button');
+      b.className = 'btn-icon';
+      b.textContent = m.label;
+      if (i === rankModeIdx) { b.style.color = '#15131a'; b.style.background = '#ffd54a'; b.style.borderColor = '#e5a82a'; }
+      b.addEventListener('click', () => { rankModeIdx = i; renderRankModal(); });
+      tabs.appendChild(b);
+    });
+    let list = [];
+    try { list = GR.loadHighScores(RANK_MODES[rankModeIdx].key, 10) || []; } catch (_) { list = []; }
+    tbody.innerHTML = '';
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="color:var(--sub);">아직 기록이 없어요.</td></tr>';
+      return;
+    }
+    list.slice(0, 10).forEach((e, i) => {
+      const tr = document.createElement('tr');
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1);
+      tr.innerHTML = `<td>${medal}</td><td>${e.className || '모험가'}</td><td>${e.turn != null ? e.turn : 0}턴</td><td>${e.kills != null ? e.kills : 0}마리</td><td style="color:var(--gold); font-weight:800;">${(e.score || 0).toLocaleString()}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  (function () {
+    const mr = document.getElementById('modal-rank');
+    document.getElementById('btn-rank-modal').addEventListener('click', () => {
+      const d = (gameState && gameState.difficulty != null) ? gameState.difficulty : selectedDifficulty;
+      rankModeIdx = Math.max(0, RANK_MODES.findIndex(m => m.key === d));
+      renderRankModal();
+      mr.classList.add('show');
+    });
+    document.getElementById('btn-close-rank-modal').addEventListener('click', () => mr.classList.remove('show'));
+  })();
 
   function renderHighScores(scores) {
     scoresTbody.innerHTML = '';
