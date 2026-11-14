@@ -1109,16 +1109,31 @@
     <!-- 모드별 순위 모달 -->
     <div class="modal-overlay" id="modal-rank">
       <div class="modal-title" style="color:#ffe27a;">🥇 모드별 순위 (1~10위)</div>
-      <div id="rank-tabs" style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:8px;"></div>
-      <div style="width:100%; text-align:left; background:#120e18; border:1px solid #3a3042; border-radius:8px; padding:6px 10px;">
+      <div id="rank-tabs" style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:6px;"></div>
+      <div id="rank-views" style="display:flex; gap:6px; justify-content:center; margin-bottom:8px;"></div>
+      <div id="rank-local" style="width:100%; text-align:left; background:#120e18; border:1px solid #3a3042; border-radius:8px; padding:6px 10px;">
         <table class="scores-table">
           <thead>
             <tr><th>순위</th><th>직업</th><th>턴</th><th>처치</th><th>점수</th></tr>
           </thead>
           <tbody id="rank-tbody"></tbody>
         </table>
+        <div style="font-size:11px; color:var(--sub); margin-top:6px;">이 기기(브라우저)에 저장된 내 기록입니다.</div>
       </div>
-      <div style="font-size:11px; color:var(--sub); margin-top:6px;">이 기기(브라우저)에 저장된 내 기록입니다.</div>
+      <div id="rank-server" style="width:100%; text-align:left; background:#120e18; border:1px solid #3a3042; border-radius:8px; padding:6px 10px; display:none;">
+        <table class="scores-table">
+          <thead>
+            <tr><th>순위</th><th>닉네임</th><th>점수</th></tr>
+          </thead>
+          <tbody id="rank-srv-tbody"></tbody>
+        </table>
+        <div style="display:flex; gap:6px; margin-top:8px;">
+          <input id="rank-nick" type="text" maxlength="8" placeholder="닉네임 (한글·영문·숫자 2~8자)" autocomplete="off" style="flex:1; min-width:0; padding:8px; border-radius:8px; border:1px solid #3a3042; background:#1f1b26; color:#fff; font-size:13px;">
+          <button class="btn-icon" id="rank-submit" style="color:#15131a; background:#ffd54a; border-color:#e5a82a; flex:0 0 auto; padding:6px 10px;">내 최고 점수 올리기</button>
+        </div>
+        <div id="rank-msg" style="font-size:11px; color:var(--sub); margin-top:6px; min-height:14px;"></div>
+        <div style="font-size:10px; color:var(--sub); margin-top:4px;">닉네임과 점수만 올라갑니다. 이름·전화번호 같은 개인정보는 적지 마세요. 점수는 재미로 보는 참고용이라 조작될 수 있고, 이상한 닉네임은 지울 수 있습니다.</div>
+      </div>
       <button class="btn-action" id="btn-close-rank-modal" style="margin-top:8px; width:100%; flex:0 0 auto; padding:10px;">닫기</button>
     </div>
 
@@ -2366,8 +2381,53 @@
     { key: 3, label: '지옥' }, { key: '100turns', label: '100턴' }, { key: 'separate_score', label: '별도 점수' }
   ];
   let rankModeIdx = 1;
+  const RANK_API = (function () {
+    let base = 'https://jwapyonara-rank.kkddss09.workers.dev';
+    try { if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) && localStorage.getItem('zw_rank_api')) base = localStorage.getItem('zw_rank_api'); } catch (_) {}
+    return base.replace(/\/$/, '');
+  })();
+  const RANK_SERVER_IDS = ['goblin-raid-easy', 'goblin-raid-normal', 'goblin-raid-hard', 'goblin-raid-hell'];
+  let rankView = 'server';
+  function bestLocalScore(key) {
+    try { const l = GR.loadHighScores(key, 10) || []; return l.reduce((m, e) => Math.max(m, Number(e && e.score) || 0), 0); } catch (_) { return 0; }
+  }
+  function escHtml(t) { return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  function renderRankServer(modeKey) {
+    const tbody = document.getElementById('rank-srv-tbody');
+    const msg = document.getElementById('rank-msg');
+    const nick = document.getElementById('rank-nick');
+    const sub = document.getElementById('rank-submit');
+    try { if (!nick.value) nick.value = localStorage.getItem('zw_nick') || ''; } catch (_) {}
+    const id = RANK_SERVER_IDS[modeKey];
+    if (id == null) { tbody.innerHTML = '<tr><td colspan="3" style="color:var(--sub);">이 모드는 전체 순위가 아직 없어요.</td></tr>'; sub.disabled = true; return; }
+    sub.disabled = false;
+    tbody.innerHTML = '<tr><td colspan="3" style="color:var(--sub);">불러오는 중…</td></tr>';
+    fetch(RANK_API + '/api/rank?game=' + id).then(r => r.json()).then(d => {
+      if (!d || !Array.isArray(d.top)) throw new Error('bad');
+      if (!d.top.length) { tbody.innerHTML = '<tr><td colspan="3" style="color:var(--sub);">아직 기록이 없어요. 첫 기록을 올려 보세요!</td></tr>'; return; }
+      tbody.innerHTML = d.top.slice(0, 10).map((e, i) => {
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1);
+        return `<tr><td>${medal}</td><td>${escHtml(e.name)}</td><td style="color:var(--gold); font-weight:800;">${Number(e.score).toLocaleString()}</td></tr>`;
+      }).join('');
+    }).catch(() => { tbody.innerHTML = '<tr><td colspan="3" style="color:var(--sub);">전체 순위를 불러오지 못했어요. 잠시 뒤에 다시 해 보세요.</td></tr>'; });
+    sub.onclick = () => {
+      const name = (nick.value || '').trim();
+      const score = bestLocalScore(modeKey);
+      if (!score) { msg.textContent = '이 난이도의 내 기록이 아직 없어요. 한 판 하고 와 주세요.'; return; }
+      if (!/^[가-힣A-Za-z0-9_]{2,8}$/.test(name)) { msg.textContent = '닉네임은 한글·영문·숫자·밑줄 2~8자로 적어 주세요.'; return; }
+      sub.disabled = true; msg.textContent = '올리는 중…';
+      fetch(RANK_API + '/api/rank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: id, name, score }) })
+        .then(r => r.json().then(j => ({ ok: r.ok, j })))
+        .then(({ ok, j }) => {
+          if (ok && j && j.ok) { try { localStorage.setItem('zw_nick', name); } catch (_) {} msg.textContent = `올렸어요! 현재 ${j.rank}위 (${Number(j.score).toLocaleString()}점)`; renderRankServer(modeKey); }
+          else msg.textContent = (j && j.error) || '올리지 못했어요.';
+        }).catch(() => { msg.textContent = '올리지 못했어요. 잠시 뒤에 다시 해 주세요.'; })
+        .then(() => { sub.disabled = false; });
+    };
+  }
   function renderRankModal() {
     const tabs = document.getElementById('rank-tabs');
+    const views = document.getElementById('rank-views');
     const tbody = document.getElementById('rank-tbody');
     tabs.innerHTML = '';
     RANK_MODES.forEach((m, i) => {
@@ -2383,8 +2443,21 @@
       b.addEventListener('click', () => { rankModeIdx = i; renderRankModal(); });
       tabs.appendChild(b);
     });
+    views.innerHTML = '';
+    [['server', '🌐 전체 순위'], ['local', '📱 내 기록']].forEach(([v, label]) => {
+      const b = document.createElement('button');
+      b.className = 'btn-icon';
+      b.textContent = label;
+      if (v === rankView) { b.style.color = '#15131a'; b.style.background = '#9ce6ff'; b.style.borderColor = '#5ab4d6'; }
+      b.addEventListener('click', () => { rankView = v; renderRankModal(); });
+      views.appendChild(b);
+    });
+    document.getElementById('rank-local').style.display = rankView === 'local' ? '' : 'none';
+    document.getElementById('rank-server').style.display = rankView === 'server' ? '' : 'none';
+    const modeKey = RANK_MODES[rankModeIdx].key;
+    if (rankView === 'server') renderRankServer(modeKey);
     let list = [];
-    try { list = GR.loadHighScores(RANK_MODES[rankModeIdx].key, 10) || []; } catch (_) { list = []; }
+    try { list = GR.loadHighScores(modeKey, 10) || []; } catch (_) { list = []; }
     tbody.innerHTML = '';
     if (!list.length) {
       tbody.innerHTML = '<tr><td colspan="5" style="color:var(--sub);">아직 기록이 없어요.</td></tr>';
