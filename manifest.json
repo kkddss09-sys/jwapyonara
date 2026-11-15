@@ -1,10 +1,10 @@
 {
   "name": "좌표나라",
   "short_name": "좌표나라",
-  "description": "대출·청약·차익·전월세 등 집 볼 때 필요한 계산을 가입 없이 바로.",
+  "description": "휴대폰·부동산 무료 계산기와 게임 모음, 가입 없이 바로.",
   "lang": "ko",
   "id": "./?app=realestate",
-  "start_url": "./realestate/index.html?app=realestate",
+  "start_url": "./index.html?app=main",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
