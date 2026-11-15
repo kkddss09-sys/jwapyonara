@@ -29,6 +29,10 @@
  * 조각 43: 새 적 난수 순서·개수 및 방어 보정 [교정 A.1 ~ A.4] (종류→숙적→공격→방어→체력→대기 난수 순서, 일반적 대기 추첨 후 폐기 및 번호 적 대기 저장, 100턴 모드 일반 식 4개 더미 후 덮어쓰기 3개, 종족 6 숙적 5 방어 2배 자기 칸 및 사망/제거 칸 포함)
  * 조각 44: 강화 메뉴 후보 만들기 [교정 B.1 ~ B.4] (후보 4개 및 부위 비복원 오름차순 추첨, [부위→둔기→능력] 칸별 순서, 둔기 15 추첨 분리 및 100턴 15 제외, 장신구 능력 5 보유 여부 후보 제외)
  * 조각 45: 토큰 도착과 메뉴, 100턴 완료 판정 [교정 C.1 ~ C.3] (자원 토큰 순차 적용·게이지 100 경계 메뉴 발생 시 즉시 중단 및 보류, 메뉴 열릴 때 지연 후보 생성 및 난수 소비, 100턴 모드 턴 100 끝 살아서 마쳤을 때만 완료 판정 및 점수 2배·업적 76 부여)
+ * 조각 46: 업적 발생 조건(게이트)과 새로 만들 업적 59·68·69·75 [교정 D.1 ~ D.5] (난이도 0 쉬움 67번 제외 차단, 특수 모드 업적 허용, 59번 36칸 연결칸 포함, 68번 20칸 가장자리, 69번 36칸 코인 경유 없음, 75번 대각선 교차 5초과, 59·68·69·75·77 unverified 해제)
+ * 조각 47: 별도 점수 모드의 점수와 업적 77 [교정 E.1 ~ E.3] (대각선 교차 횟수 n 계산, 별도 점수 모드 n에 따른 점수 누적 표, 업적 77 별도 점수 모드 n>=15 시 100 진행)
+ * 조각 48: 업적 56·63·66·41·40의 발생 조건 [교정 F.1 ~ F.5] (56번 화살경유 원거리적 처치, 63번 11+30 조합 33 인정, 66번 스킬23 승급표식 적 수집 직업보상, 41번 지움/체력0 포함 특수적 3개이상, 40번 사망검사 시 지움/체력0 무관 숙적존재)
+ * 조각 49: 업적 50·71·54·55와 종족 6 보너스 부위 교정 [교정 G.1 ~ G.5] (50번 종족4 레벨회복 비교 life < lifeCap/4 및 버림 회복, 71번 정확히 레벨5 순간에만 검사, 54번 종족8 불 처치 32번 휴면전환 포함, 55번 종족9 스킬 0개여도 업적 55 발생, 종족6 15처치 보너스 방패 부위2 장비 적용)
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -93,7 +97,9 @@
     'U07',
     'U08',
     'U09',
+    'U01_gear14_durability_odds_operand',
     'U01_enemy29_full_damage',
+    'U02_class_reward_growth_ratio',
     'U02_retaliation_guard_and_arrow_bridge_combo',
     'U03_class_reward_initial_25',
     'U04_flaw9_hp_105_operand',
@@ -140,7 +146,14 @@
     'race6_nemesis5_defense_self_include',
     'upgrade_menu_candidates_order_and_blunt_and_slot5',
     'token_queue_pause_on_menu_and_deferred_candidate_rng',
-    'turn100_completion_flag_only_after_turn_end'
+    'turn100_completion_flag_only_after_turn_end',
+    'difficulty_0_achievement_gate',
+    'special_mode_achievement_unlock',
+    'achievements_59_68_69_75_path_rules',
+    'unverified_achievements_reduction',
+    'score_mode_points_and_achievement_77',
+    'achievements_56_63_66_41_40_conditions',
+    'achievements_50_71_54_55_and_race6_shield_boost'
   ];
 
   // 조각 29: 난이도 4단계 상수 및 이름 변환 헬퍼 [추가 29.1, 29.2]
@@ -380,6 +393,8 @@
     cell.bridgeForm = (kindName === 'bridge' || kindName === 'reward' || kindName === 'class_reward') ? kindName : 'none';
     cell.abilityUsed = false;
     cell.skipRetaliation = false;
+    cell.marked = false;
+    cell.isMarked = false;
 
     if (kindName === KIND_ENEMY) {
       cell.enemy = {
@@ -1613,16 +1628,16 @@
     if (!session || !session.hero) return { alive: false, revived: false };
 
     if (session.hero.life <= 0) {
-      // [교정 B.5] 체력이 0 이하인 검사에서 그 종족의 숙적 종류 적(또는 숙적 표시가 켜진 적)이 판에 살아 있으면,
-      // 부활이 되든 안 되든 업적 40의 진행 100을 먼저 한 번 낸다(같은 판에서 한 번만).
+      // [교정 B.5, 조각 48 교정 F.5] 업적 40: 영웅의 체력이 0 이하로 검사될 때 "종류가 적이고 번호가 그 종족의 숙적 번호인 칸"을
+      // 지움 표식·체력과 상관없이 세어 하나라도 있으면 진행 100이다 (종족이 0이면 없음).
       const raceKey = session.hero.raceKey || 0;
       if (raceKey > 0 && Array.isArray(session.cells)) {
         const mortalKind = RACE_MORTAL_ENEMIES[raceKey];
-        const mortalAlive = session.cells.some(c =>
-          c && !c.erased && c.enemy && c.enemy.hitPoints > 0 &&
+        const mortalPresent = session.cells.some(c =>
+          c && (c.kind === KIND_ENEMY || c.kindCode === 1) && c.enemy &&
           ((mortalKind > 0 && c.enemy.enemyKind === mortalKind) || c.enemy.isMortalEnemy || c.enemy.isNemesis)
         );
-        if (mortalAlive) {
+        if (mortalPresent) {
           emitAchievementProgressOnce(session, 40, 100);
         }
       }
@@ -1720,10 +1735,23 @@
           deferRewards: isDefer,
           batch: activeBatch
         });
-        if (res.killed && i + 1 < path.length) {
-          const nextCoord = path[i + 1];
-          if (Math.abs(nextCoord.x - coord.x) > 1 || Math.abs(nextCoord.y - coord.y) > 1) {
-            emitAchievementProgress(session, 56, 100);
+        // [조각 48 교정 F.1] 업적 56: 연결 경로(경유 칸 포함 목록)의 마지막 칸이 번호가 0이 아닌 적이고 이번 공격으로 처치됐으며,
+        // 바로 앞 칸이 경유(건너뛴) 칸이고, 그 앞 칸이 화살이 달린 칼 칸이며,
+        // 그 화살 칸과 처치한 칸의 가로 차이 또는 세로 차이가 1보다 크면 진행 100이다. 그 밖의 경우는 내지 않는다.
+        if (
+          res.killed &&
+          i === path.length - 1 &&
+          cell.enemy &&
+          cell.enemy.enemyKind > 0 &&
+          path.length >= 3 &&
+          waypointSet.has(path.length - 2)
+        ) {
+          const arrowCoord = path[path.length - 3];
+          const arrowCell = getCell(session, arrowCoord.x, arrowCoord.y);
+          if (arrowCell && (arrowCell.kind === KIND_SWORD || arrowCell.kindCode === 4) && arrowCell.arrow) {
+            if (Math.abs(coord.x - arrowCoord.x) > 1 || Math.abs(coord.y - arrowCoord.y) > 1) {
+              emitAchievementProgress(session, 56, 100);
+            }
           }
         }
         combatResults.push({
@@ -2507,8 +2535,8 @@
     let mortalTag = 'mortalRoll';
     if (typeof rng === 'function' && !rng._isBuiltIn) {
       const fnStr = Function.prototype.toString.call(rng);
-      if (fnStr.includes('promotionSpecialKind')) {
-        specialTag = 'promotionSpecialKind';
+      if (fnStr.includes('promotionSpecialKind') || fnStr.includes('promotionEnemyKind')) {
+        specialTag = fnStr.includes('promotionEnemyKind') ? 'promotionEnemyKind' : 'promotionSpecialKind';
       }
       if (fnStr.includes('mortalEnemyRoll')) {
         mortalTag = 'mortalEnemyRoll';
@@ -2692,8 +2720,8 @@
         let mortalTag = 'mortalRoll';
         if (typeof rng === 'function' && !rng._isBuiltIn) {
           const fnStr = Function.prototype.toString.call(rng);
-          if (fnStr.includes('promotionSpecialKind')) {
-            specialTag = 'promotionSpecialKind';
+          if (fnStr.includes('promotionSpecialKind') || fnStr.includes('promotionEnemyKind')) {
+            specialTag = fnStr.includes('promotionEnemyKind') ? 'promotionEnemyKind' : 'promotionSpecialKind';
           }
           if (fnStr.includes('mortalEnemyRoll')) {
             mortalTag = 'mortalEnemyRoll';
@@ -2894,6 +2922,13 @@
     cell.kind = KIND_ENEMY;
     cell.kindCode = 1;
     cell.enemy = newEnemyData;
+    // [조각 48 교정 F.3] 스킬 23으로 만든 특수 적에 표식을 켠다
+    cell.marked = true;
+    cell.isMarked = true;
+    if (newEnemyData) {
+      newEnemyData.marked = true;
+      newEnemyData.isMarked = true;
+    }
     if (newEnemyData && newEnemyData.enemyKind === 31) {
       handleEnemy31Spawn(session, cell);
     }
@@ -3005,6 +3040,8 @@
       targetCell.enemy = createEnemyData(session);
       if (targetCell.enemy && targetCell.enemy.enemyKind > 0) {
         spawnedPromotedSpecial = true;
+        // [조각 48 교정 F.4] 새 특수 적이 만들어질 때마다 3개 이상인지 검사
+        checkSpecialCountAchievement41(session);
         if (targetCell.enemy.enemyKind === 31) {
           isEnemy31 = true;
         }
@@ -3162,6 +3199,10 @@
                 cell.enemy.poisonSteps = [0, 0, 0];
                 cell.enemy.revivalDelay = true;
                 cell.erased = false;
+                // [조각 49 교정 G.3] 불로 체력이 0 이하가 된 번호 32가 휴면으로 바뀌는 경우에도 종족 8이면 업적 54에 양 2를 낸다
+                if (session.hero && session.hero.raceKey === 8) {
+                  emitAchievementProgress(session, 54, 2);
+                }
               } else {
                 cell.enemy.hitPoints = 0;
                 cell.erased = true;
@@ -3468,6 +3509,10 @@
               t.skipRetaliation = prevSkip;
               t.abilityUsed = prevAbility;
               t.erased = prevErased;
+              // [조각 48 교정 F.4] 11번의 변환으로 새 특수 적이 생기면 3개 이상 검사
+              if (t.enemy && t.enemy.enemyKind > 0) {
+                checkSpecialCountAchievement41(session);
+              }
             }
           }
         } else if (eKind === 12) {
@@ -5258,7 +5303,8 @@
 
     let tokenScore = 0;
     if (resType === 'xp') {
-      tokenScore = 2 + extraRate;
+      const effectiveMult = multiplier != null ? multiplier : 1;
+      tokenScore = (2 + extraRate) * effectiveMult;
       if (is100Turn) tokenScore *= 2;
     } else if (resType === 'coins' || resType === 'upgrade') {
       let effectiveMult = multiplier;
@@ -5286,9 +5332,9 @@
       if (resType === 'xp') {
         session.hero.rank = (session.hero.rank || 1) + 1;
         if (session.hero.raceKey === 4) {
-          const cap25 = Math.floor((session.hero.lifeCap || 50) * 0.25);
-          if ((session.hero.life || 0) < cap25) {
-            session.hero.life = cap25;
+          const lifeCap = session.hero.lifeCap || 50;
+          if ((session.hero.life || 0) < lifeCap / 4) {
+            session.hero.life = Math.floor(lifeCap / 4);
             emitAchievementProgress(session, 50, 5);
           }
         }
@@ -5578,16 +5624,18 @@
       const bounty = (eKind === 10) ? null : distributeSpecialEnemyBounty(session, eKind, null, null, null, activeBatch);
       session.specialKills = (session.specialKills || 0) + 1;
 
-      // 종족 9: 특수 적 처치 시 보유 스킬 중 무작위 1개 즉시 완충 [M4 R09, J3, 교정 21.2, 교정 27.6]
-      // 뽑힌 모든 보유 스킬에 필요량만큼 충전을 쓴다. 1회용·기본 대기 -1 같은 예외 제외는 없앤다.
-      if (session.hero && session.hero.raceKey === 9 && Array.isArray(session.actions) && session.actions.length > 0) {
-        const idx = drawInt(session.rng, 0, session.actions.length - 1, 'race9SkillCharge');
-        const targetAct = session.actions[idx];
-        if (targetAct) {
-          const wait = targetAct.effectiveWait != null
-            ? targetAct.effectiveWait
-            : (targetAct.baseWait != null ? targetAct.baseWait : (targetAct.cooldown != null ? targetAct.cooldown : 10));
-          targetAct.charge = wait;
+      // 종족 9: 특수 적 처치 시 보유 스킬 중 무작위 1개 즉시 완충 [M4 R09, J3, 교정 21.2, 교정 27.6, 조각 49 교정 G.4]
+      // [교정 G.4] 보유 스킬이 없어도 종족 9가 특수 적을 수집하면 업적 55에 2를 더한다. 충전은 스킬이 있을 때만 한다.
+      if (session.hero && session.hero.raceKey === 9) {
+        if (Array.isArray(session.actions) && session.actions.length > 0) {
+          const idx = drawInt(session.rng, 0, session.actions.length - 1, 'race9SkillCharge');
+          const targetAct = session.actions[idx];
+          if (targetAct) {
+            const wait = targetAct.effectiveWait != null
+              ? targetAct.effectiveWait
+              : (targetAct.baseWait != null ? targetAct.baseWait : (targetAct.cooldown != null ? targetAct.cooldown : 10));
+            targetAct.charge = wait;
+          }
         }
         emitAchievementProgress(session, 55, 2);
       }
@@ -5649,14 +5697,17 @@
         cell.enemy._rewardedKill = true;
         session.specialKills = (session.specialKills || 0) + 1;
         distributeSpecialEnemyBounty(session, 32, null, null, null, activeBatch);
-        if (session.hero && session.hero.raceKey === 9 && Array.isArray(session.actions) && session.actions.length > 0) {
-          const idx = drawInt(session.rng, 0, session.actions.length - 1, 'race9SkillCharge');
-          const targetAct = session.actions[idx];
-          if (targetAct) {
-            const wait = targetAct.effectiveWait != null
-              ? targetAct.effectiveWait
-              : (targetAct.baseWait != null ? targetAct.baseWait : (targetAct.cooldown != null ? targetAct.cooldown : 10));
-            targetAct.charge = wait;
+        // [조각 49 교정 G.4] 보유 스킬이 없어도 종족 9가 32번 변환 특수 적을 수집하면 업적 55에 2를 더한다
+        if (session.hero && session.hero.raceKey === 9) {
+          if (Array.isArray(session.actions) && session.actions.length > 0) {
+            const idx = drawInt(session.rng, 0, session.actions.length - 1, 'race9SkillCharge');
+            const targetAct = session.actions[idx];
+            if (targetAct) {
+              const wait = targetAct.effectiveWait != null
+                ? targetAct.effectiveWait
+                : (targetAct.baseWait != null ? targetAct.baseWait : (targetAct.cooldown != null ? targetAct.cooldown : 10));
+              targetAct.charge = wait;
+            }
           }
           emitAchievementProgress(session, 55, 2);
         }
@@ -6053,17 +6104,18 @@
   }
 
   /**
-   * 종족 6 한 입력의 공통 공격 실제 처치 수 >= 15 보너스 반영 [교정 21.1]
+   * 종족 6 한 입력의 공통 공격 실제 처치 수 >= 15 보너스 반영 [교정 21.1, 조각 49 교정 G.5]
+   * 무기(부위 0) 대신 방패(부위 2) 장비의 능력 11에 1을 더한다.
    */
   function applyRace6KillBonusIfNeeded(session, combatKills) {
     if (!session || !session.hero || session.hero.raceKey !== 6) return false;
     if ((combatKills || 0) < 15 || session._race6AppliedThisTurn) return false;
 
     session._race6AppliedThisTurn = true;
-    if (Array.isArray(session.gear) && session.gear[0] && Array.isArray(session.gear[0].boosts)) {
-      session.gear[0].boosts[11] = (session.gear[0].boosts[11] || 0) + 1;
-    } else if (session.gear && session.gear.weapon && Array.isArray(session.gear.weapon.boosts)) {
-      session.gear.weapon.boosts[11] = (session.gear.weapon.boosts[11] || 0) + 1;
+    if (Array.isArray(session.gear) && session.gear[2] && Array.isArray(session.gear[2].boosts)) {
+      session.gear[2].boosts[11] = (session.gear[2].boosts[11] || 0) + 1;
+    } else if (session.gear && session.gear.shield && Array.isArray(session.gear.shield.boosts)) {
+      session.gear.shield.boosts[11] = (session.gear.shield.boosts[11] || 0) + 1;
     }
     recalculateHeroStats(session);
     emitAchievementProgress(session, 52, 10);
@@ -6120,6 +6172,19 @@
 
     const waypoints = inspection.waypoints || [];
     const waypointSet = new Set(waypoints);
+
+    const n = (options && options.overrideN != null) ? options.overrideN : ((options && options.n != null) ? options.n : countPathIntersections(path));
+
+    // [조각 46 교정 D.3, D.4, D.5, 조각 47 교정 E.3] 경로 기반 업적 검사 (59, 68, 69, 75, 77)
+    checkPathAchievements(session, path, waypoints, { overrideN: n, ...options });
+
+    // [조각 47 교정 E.2] 별도 점수 모드 점수 누적
+    if (session.mode === 'score') {
+      const stepScore = calculateScoreModePointsFromN(n);
+      const turnPts = Number(session.scoreModeTurnPoints) || 0;
+      session.scoreModePoints = (Number(session.scoreModePoints) || 0) + stepScore + turnPts;
+      session.scoreModeTurnPoints = 0;
+    }
 
     // [교정 41 B.2, B.3] 스킬 35(고리수집)의 안쪽 칸 수집을 경로보다 먼저, 별도 수집 묶음으로 한다.
     const loopCollected = [];
@@ -7114,6 +7179,19 @@
         // 일반 판 전체 수집
         delete session.hero.activeNow.skill30Used;
         delete session.hero.activeNow.verticalSweep;
+        // [조각 48 교정 F.2] 11과 30이 같은 턴에 겹쳐 판 전체를 수집한 경우 스킬 33을 쓴 것으로 센다
+        if (!session.hero.activeNow._usedSkillsTurn.includes(33)) {
+          session.hero.activeNow._usedSkillsTurn.push(33);
+        }
+        session.hero.activeNow.skill33Used = true;
+        if (
+          session.hero.activeNow._usedSkillsTurn.includes(11) &&
+          session.hero.activeNow._usedSkillsTurn.includes(28) &&
+          session.hero.activeNow._usedSkillsTurn.includes(38) &&
+          session.hero.activeNow._usedSkillsTurn.includes(33)
+        ) {
+          emitAchievementProgress(session, 63, 100);
+        }
         for (const c of session.cells) {
           if (!c || c.erased) continue;
           if (c.enemy && c.enemy.enemyKind > 0) continue; // 특수적 제외
@@ -7284,6 +7362,10 @@
           t.enemy.isNemesis = false;
           if (t.isNemesis != null) t.isNemesis = false;
           if (t.isMortalEnemy != null) t.isMortalEnemy = false;
+          t.marked = false;
+          t.isMarked = false;
+          t.enemy.marked = false;
+          t.enemy.isMarked = false;
           // [교정 41 B.1] 변환 상태(휴면)의 32번 적에게 쓰면 휴면이 아닌 일반 적(체력 1, 공격 0, 방어 0)이 된다.
           // 단, 원래 체력/능력치가 남아있는 경우(조각 10) 능력치를 유지하고, 체력이 없는(0 이하인) 경우에만 체력 1, 공격 0, 방어 0으로 초기화한다.
           if (wasShellDormant && (t.enemy.hitPoints == null || t.enemy.hitPoints <= 0)) {
@@ -7480,6 +7562,20 @@
         delete session.hero.activeNow.skill11Used;
         delete session.hero.activeNow.horizontalSweep;
         delete session.hero.activeNow.skill30Used;
+
+        // [조각 48 교정 F.2] 11과 30이 같은 턴에 겹쳐 판 전체를 수집한 경우 스킬 33을 쓴 것으로 센다
+        if (!session.hero.activeNow._usedSkillsTurn.includes(33)) {
+          session.hero.activeNow._usedSkillsTurn.push(33);
+        }
+        session.hero.activeNow.skill33Used = true;
+        if (
+          session.hero.activeNow._usedSkillsTurn.includes(11) &&
+          session.hero.activeNow._usedSkillsTurn.includes(28) &&
+          session.hero.activeNow._usedSkillsTurn.includes(38) &&
+          session.hero.activeNow._usedSkillsTurn.includes(33)
+        ) {
+          emitAchievementProgress(session, 63, 100);
+        }
 
         const cellsToCollect = [];
         for (const c of session.cells) {
@@ -8320,7 +8416,7 @@
     { id: 56, desc: '처치적다음경로칸가로또는세로간격>1인화살분기', progress: 100, unverified: false },
     { id: 57, desc: '종족6한공격15처치와코인적변환표식', progress: 100, unverified: false },
     { id: 58, desc: '고리내부수집수>유효길이', progress: 100, unverified: false },
-    { id: 59, desc: '경로36:주변추가조건미판독', progress: 100, unverified: true },
+    { id: 59, desc: '경로36칸및연결칸포함', progress: 100, unverified: false },
     { id: 60, desc: '가로수집실제6칸', progress: 100, unverified: false },
     { id: 61, desc: '치명상부활활성으로완전회복', progress: 100, unverified: false },
     { id: 62, desc: '체력1생성활성중특수적등장', progress: 100, unverified: false },
@@ -8329,16 +8425,16 @@
     { id: 65, desc: '적없는판교체때특수적존재', progress: 1, unverified: false },
     { id: 66, desc: '직업보상칸생성표식적수집', progress: 100, unverified: false },
     { id: 67, desc: '최종게임종료', progress: 100, unverified: false },
-    { id: 68, desc: '경로20:주변조건미판독', progress: 100, unverified: true },
-    { id: 69, desc: '경로36:주변조건미판독', progress: 100, unverified: true },
+    { id: 68, desc: '경로20칸가장자리둘레', progress: 100, unverified: false },
+    { id: 69, desc: '경로36칸모두코인경유없음', progress: 100, unverified: false },
     { id: 70, desc: '판레벨10·난이도3·퍽수1·결함수4', progress: 100, unverified: false },
     { id: 71, desc: '판레벨5·난이도3·장착스킬0', progress: 100, unverified: false },
     { id: 72, desc: '장비저장때비0능력8개이상', progress: 100, unverified: false },
     { id: 73, desc: '파손칸무보상수집', progress: 1, unverified: false },
     { id: 74, desc: '첫낙하생성수>9이며전부적', progress: 100, unverified: false },
-    { id: 75, desc: '수집내집계>5:집계의미미판독', progress: 100, unverified: true },
+    { id: 75, desc: '경로대각교차횟수5초과', progress: 100, unverified: false },
     { id: 76, desc: '100턴모드완료종료', progress: 100, unverified: false },
-    { id: 77, desc: '별도점수모드점수획득과집계15이상:전체의미미판독', progress: 100, unverified: true }
+    { id: 77, desc: '별도점수모드대각교차15이상', progress: 100, unverified: false }
   ];
 
   /**
@@ -8857,6 +8953,14 @@
     const achDef = ACHIEVEMENTS_TABLE.find(a => a.id === achievementId);
     if (!achDef) return null;
 
+    if (session) {
+      const diff = (session.difficulty != null) ? session.difficulty : 1;
+      // [조각 46 교정 D.1] 난이도 0(쉬움)에서는 업적 67(판 끝)만 기록한다. 나머지 번호의 진행 사건도 내지 않고 프로필 진행량도 바꾸지 않는다.
+      if (diff === 0 && achievementId !== 67) {
+        return null;
+      }
+    }
+
     if (!Array.isArray(profile.achievements)) {
       profile.achievements = [];
     }
@@ -8867,17 +8971,13 @@
       profile.achievements.push(entry);
     }
 
-    // 미판독 행은 잠정 사건만 남기고 자동 확정 해제하지 않는다 [N1, U08]
+    // 미판독 행은 잠정 사건만 남기고 자동 확정 해제하지 않는다 [N1, U08, 조각 46 교정 D.5]
     if (achDef.unverified) {
       entry.unlocked = false;
       return { achievementId, unverified: true, unlocked: false, progress: entry.progress };
     }
 
-    // 특수 모드의 업적 허용은 67·76 외 확정 해제 안 함 [N1]
-    const isSpecialMode = session && (session.mode === 'turn100' || session.mode === 'score');
-    if (isSpecialMode && achievementId !== 67 && achievementId !== 76) {
-      return { achievementId, specialModeBlocked: true, unlocked: false, progress: entry.progress };
-    }
+    // [조각 46 교정 D.2] 특수 모드(100턴 모드·별도 점수 모드)도 난이도 0이 아니면 일반 모드와 같은 규칙으로 모든 번호를 기록한다.
 
     if (entry.unlocked) {
       return entry; // 이미 확정이면 한 번만 기록
@@ -8894,10 +8994,16 @@
   }
 
   /**
-   * 업적 사건 발생 + 영구 프로필 진행 한 번 연결 [N1, 교정 22.1]
+   * 업적 사건 발생 + 영구 프로필 진행 한 번 연결 [N1, 교정 22.1, 조각 46 교정 D.1]
    */
   function emitAchievementProgress(session, achievementId, amount = null, extra = {}) {
     if (!session) return null;
+    const diff = (session.difficulty != null) ? session.difficulty : 1;
+    // [조각 46 교정 D.1] 난이도 0에서는 업적 67(판 끝)만 기록한다. 나머지 번호의 진행 사건도 내지 않고 프로필 진행량도 바꾸지 않는다.
+    if (diff === 0 && achievementId !== 67) {
+      return null;
+    }
+
     const achDef = ACHIEVEMENTS_TABLE.find(a => a.id === achievementId);
     if (!achDef) return null;
 
@@ -8918,10 +9024,16 @@
   }
 
   /**
-   * 상태 임계 업적 1회 사건 + 프로필 연결 (중복 이벤트 방지) [교정 22.1]
+   * 상태 임계 업적 1회 사건 + 프로필 연결 (중복 이벤트 방지) [교정 22.1, 조각 46 교정 D.1]
    */
   function emitAchievementProgressOnce(session, achievementId, amount = null, extra = {}) {
     if (!session) return null;
+    const diff = (session.difficulty != null) ? session.difficulty : 1;
+    // [조각 46 교정 D.1] 난이도 0에서는 업적 67(판 끝)만 기록한다.
+    if (diff === 0 && achievementId !== 67) {
+      return null;
+    }
+
     session._emittedOnce = session._emittedOnce || {};
     if (session._emittedOnce[achievementId]) {
       if (session.profile) {
@@ -8936,13 +9048,15 @@
   }
 
   /**
-   * 업적 41: 승급 뒤 판의 생존 특수 적 3개 이상 [교정 22.1]
+   * 업적 41: 승급 뒤 판의 특수 적 3개 이상 [교정 22.1, 조각 48 교정 F.4]
+   * 새 특수 적이 만들어질 때마다 "종류가 적이고 번호가 0이 아닌 칸"을 방금 만든 칸까지 포함해 센다.
+   * 지움 표식이 붙었거나 체력이 0인 칸도 센다. 3 이상이면 진행 100이다.
    */
   function checkSpecialCountAchievement41(session) {
     if (!session || !Array.isArray(session.cells)) return;
     let specialCount = 0;
     for (const c of session.cells) {
-      if (c && !c.erased && (c.kind === KIND_ENEMY || c.kindCode === 1) && c.enemy && c.enemy.enemyKind > 0 && c.enemy.hitPoints > 0) {
+      if (c && (c.kind === KIND_ENEMY || c.kindCode === 1) && c.enemy && c.enemy.enemyKind > 0) {
         specialCount++;
       }
     }
@@ -8971,7 +9085,8 @@
       emitAchievementProgressOnce(session, 70, 100);
     }
     const actionCount = Array.isArray(session.actions) ? session.actions.length : 0;
-    if (rank >= 5 && difficulty === 3 && actionCount === 0) {
+    // [조각 49 교정 G.2] 레벨이 정확히 5가 되는 순간에만 검사한다
+    if (rank === 5 && difficulty === 3 && actionCount === 0) {
       emitAchievementProgressOnce(session, 71, 100);
     }
   }
@@ -9022,6 +9137,130 @@
   }
 
   /**
+   * 연결 경로의 대각선 교차 횟수 n 계산 [조각 46 교정 D.5, 조각 47 교정 E.1]
+   * 연결 경로의 칸 목록을 순서대로 보며 둘째 칸부터 직전 칸과 x도 다르고 y도 다르면(대각선 이동)
+   * 두 칸의 작은 x에 6×작은 y를 더한 값을 키로 삼는다.
+   * 그 키가 이번 경로에서 이미 나왔으면 n에 1을 더하고, 아니면 키를 기록한다.
+   * 경유(건너뛴) 칸도 경로 목록에 들어 있으면 센다.
+   */
+  function countPathIntersections(path) {
+    if (!Array.isArray(path) || path.length < 2) return 0;
+    const seen = new Set();
+    let n = 0;
+    for (let i = 1; i < path.length; i++) {
+      const prev = path[i - 1];
+      const curr = path[i];
+      if (!prev || !curr) continue;
+      const dx = curr.x - prev.x;
+      const dy = curr.y - prev.y;
+      if (dx !== 0 && dy !== 0) {
+        const minX = Math.min(prev.x, curr.x);
+        const minY = Math.min(prev.y, curr.y);
+        const key = minX + 6 * minY;
+        if (seen.has(key)) {
+          n++;
+        } else {
+          seen.add(key);
+        }
+      }
+    }
+    return n;
+  }
+
+  /**
+   * 대각선 교차 횟수 n에 따른 별도 점수 모드 획득 점수 계산 [조각 47 교정 E.2]
+   * n < 5: n점
+   * 5 <= n < 10: 2n점
+   * 10 <= n < 15: 3n점
+   * n >= 15: 100점
+   */
+  function calculateScoreModePointsFromN(n) {
+    const val = Math.max(0, Math.floor(Number(n) || 0));
+    if (val < 5) return val;
+    if (val < 10) return 2 * val;
+    if (val < 15) return 3 * val;
+    return 100;
+  }
+
+  /**
+   * 경로 기반 업적 검사 (59, 68, 69, 75, 77) [조각 46 교정 D.3, D.4, D.5, 조각 47 교정 E.3]
+   * 경로 확정 시 1회 검사한다.
+   * - 경로 칸 수는 경유 칸을 포함한 전체 목록(path.length)으로 센다.
+   * - 업적 59: path.length === 36, 비경유 칸 중 연결칸(bridge)이 하나라도 있으면 진행 100
+   * - 업적 68: path.length === 20, 모든 칸(경유 포함)이 가장자리(x=0|5 또는 y=0|5)이면 진행 100
+   * - 업적 69: path.length === 36, 경유 칸이 0개, 모든 칸이 코인(2)이면 진행 100
+   * - 업적 75: 대각선 교차 횟수 n > 5 (6 이상)이면 모든 모드에서 진행 100
+   * - 업적 77: 별도 점수 모드이고 대각선 교차 횟수 n >= 15이면 진행 100
+   */
+  function checkPathAchievements(session, path, waypoints = [], options = {}) {
+    if (!session || !Array.isArray(path) || path.length === 0) return;
+
+    const waypointSet = new Set(waypoints || []);
+    const pathLen = path.length;
+
+    // D.3 업적 59: 연결 경로의 칸 수가 정확히 36이고 비경유 칸 중 연결칸이 하나라도 있으면 진행 100
+    if (pathLen === 36) {
+      let hasNormalBridge = false;
+      for (let i = 0; i < pathLen; i++) {
+        if (!waypointSet.has(i)) {
+          const coord = path[i];
+          const cell = (coord && coord.kind) ? coord : getCell(session, coord.x, coord.y);
+          if (cell && (cell.kind === KIND_BRIDGE || cell.kindCode === 6 || cell.bridgeForm === 'bridge')) {
+            hasNormalBridge = true;
+            break;
+          }
+        }
+      }
+      if (hasNormalBridge) {
+        emitAchievementProgress(session, 59, 100);
+      }
+    }
+
+    // D.4 업적 68: 연결 경로의 칸 수가 정확히 20이고 모든 칸(경유 포함)이 가장자리 칸이면 진행 100
+    if (pathLen === 20) {
+      let allEdge = true;
+      for (let i = 0; i < pathLen; i++) {
+        const coord = path[i];
+        if (coord.x !== 0 && coord.x !== 5 && coord.y !== 0 && coord.y !== 5) {
+          allEdge = false;
+          break;
+        }
+      }
+      if (allEdge) {
+        emitAchievementProgress(session, 68, 100);
+      }
+    }
+
+    // D.4 업적 69: 경로의 칸 수가 정확히 36이고 모든 칸의 종류가 코인(2)이며 경유 칸이 하나도 없으면 진행 100
+    if (pathLen === 36 && waypointSet.size === 0) {
+      let allCoins = true;
+      for (let i = 0; i < pathLen; i++) {
+        const coord = path[i];
+        const cell = (coord && coord.kind) ? coord : getCell(session, coord.x, coord.y);
+        if (!cell || (cell.kind !== KIND_COIN && cell.kindCode !== 2)) {
+          allCoins = false;
+          break;
+        }
+      }
+      if (allCoins) {
+        emitAchievementProgress(session, 69, 100);
+      }
+    }
+
+    const n = (options && options.overrideN != null) ? options.overrideN : ((options && options.n != null) ? options.n : countPathIntersections(path));
+
+    // D.5 업적 75: 대각선 교차 횟수 n > 5 (6 이상)이면 모든 모드에서 진행 100
+    if (n > 5) {
+      emitAchievementProgress(session, 75, 100);
+    }
+
+    // [조각 47 교정 E.3] 업적 77: 별도 점수 모드이고 이번 입력의 n >= 15이면 진행 100
+    if (session.mode === 'score' && n >= 15) {
+      emitAchievementProgress(session, 77, 100);
+    }
+  }
+
+  /**
    * 현재 상태 기반 업적 점검 [N1, 교정 22.1]
    */
   function checkAchievements(session, profile = null, context = {}) {
@@ -9045,9 +9284,9 @@
         recordAchievementProgress(prof, 70, 100, session);
       }
 
-      // 71: 판레벨5 · 난이도3 · 장착스킬0
+      // 71: 판레벨5 · 난이도3 · 장착스킬0 [조각 49 교정 G.2: 정확히 레벨 5가 되는 순간에만]
       const actionCount = Array.isArray(session.actions) ? session.actions.length : 0;
-      if (rank >= 5 && difficulty === 3 && actionCount === 0) {
+      if (rank === 5 && difficulty === 3 && actionCount === 0) {
         recordAchievementProgress(prof, 71, 100, session);
       }
 
@@ -9588,6 +9827,7 @@
     // 조각 21 종족·공유해제·직업보상 관련 노출 [교정 21.1 ~ 21.7]
     getHeroInnateBaseStrike,
     isRewardCell,
+    applyRace6KillBonusIfNeeded,
     // 조각 22 업적 연결·저장·미해독 경계 관련 노출 [교정 22.1 ~ 22.7]
     emitAchievementProgress,
     commitScoreModeTurnPoints,
@@ -9614,6 +9854,14 @@
     // 조각 45 토큰 보류·순차 적용 노출 [교정 C.1, C.2]
     applyTokenItem,
     flushResourceTokens,
-    queueOrApplyToken
+    queueOrApplyToken,
+    // 조각 46 업적 게이트 및 경로 업적 관련 노출 [교정 D.1 ~ D.5]
+    countPathIntersections,
+    checkPathAchievements,
+    // 조각 47 별도 점수 모드 점수 및 업적 77 관련 노출 [교정 E.1 ~ E.3]
+    calculateScoreModePointsFromN,
+    calculateScoreModePoints: calculateScoreModePointsFromN,
+    // 조각 48 업적 발생 조건 관련 노출 [교정 F.1 ~ F.5]
+    checkSpecialCountAchievement41
   };
 }));
