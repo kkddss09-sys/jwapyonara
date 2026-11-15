@@ -745,6 +745,8 @@
     color: var(--gold);
     border: 1px solid rgba(229, 168, 42, 0.4);
     font-weight: 700;
+    white-space: nowrap;
+    flex: 0 0 auto;
   }
 
   /* ── 직업 선택 화면 (시안 D) ── */
@@ -1007,6 +1009,7 @@
 
     <!-- 액티브 스킬 슬롯 4칸 -->
     <div class="skills-slot-row" id="skills-slots"></div>
+    <div style="text-align:right; margin:2px 2px 0;"><button class="btn-icon" id="btn-skill-help">❓ 내 스킬 설명</button></div>
 
     <!-- 체인 상태 정보 바 -->
     <div class="chain-info-bar">
@@ -1154,6 +1157,24 @@
         <div style="font-size:11px; color:var(--sub);">줄을 이을 때, 공격·피해, 레벨업, 메뉴 선택, 게임 오버에 짧은 효과음이 납니다. 설정은 이 기기에 저장됩니다. 배경 음악은 없습니다.</div>
       </div>
       <button class="btn-action" id="btn-close-sound-modal" style="margin-top:8px; width:100%; flex:0 0 auto; padding:10px;">닫기</button>
+    </div>
+
+    <!-- 보스(특수 적) 설명 모달 -->
+    <div class="modal-overlay" id="modal-boss">
+      <div class="modal-title" id="boss-title" style="color:#ff9c9c;">👹 특수 적</div>
+      <div style="width:100%; background:#120e18; border:1px solid #3a3042; border-radius:8px; padding:12px; text-align:left; display:flex; flex-direction:column; gap:10px;">
+        <div id="boss-text" style="font-size:14px; line-height:1.5;"></div>
+        <div id="boss-stats" style="font-size:12px; color:var(--sub);"></div>
+        <div style="font-size:11px; color:var(--sub);">머리 위 숫자(카운트)가 있는 적은 0이 되기 전에 처치하는 것이 좋아요.</div>
+      </div>
+      <button class="btn-action" id="btn-close-boss" style="margin-top:8px; width:100%; flex:0 0 auto; padding:10px;">닫기</button>
+    </div>
+
+    <!-- 내 스킬 설명 모달 -->
+    <div class="modal-overlay" id="modal-skillhelp">
+      <div class="modal-title" style="color:#9ce6ff;">❓ 내 스킬 설명</div>
+      <div id="skillhelp-list" style="width:100%; display:flex; flex-direction:column; gap:8px;"></div>
+      <button class="btn-action" id="btn-close-skillhelp" style="margin-top:8px; width:100%; flex:0 0 auto; padding:10px;">닫기</button>
     </div>
 
     <!-- 도움말 모달 -->
@@ -1598,6 +1619,42 @@
     document.addEventListener('click', (e) => { try { if (e.target.closest && e.target.closest('.choice-card')) sfx.play('menu'); } catch (_) {} }, true);
   })();
 
+  // ── 보스(특수 적)·내 스킬 설명 창 ──
+  function showBossInfo(tile) {
+    const info = GR.getEnemyInfo ? GR.getEnemyInfo(tile.specialId) : null;
+    if (!info) return;
+    document.getElementById('boss-title').textContent = `👹 ${info.name}`;
+    document.getElementById('boss-text').textContent = info.text;
+    const bits = [`체력 ${tile.hp}${tile.maxHp ? '/' + tile.maxHp : ''}`, `공격 ${tile.atk}`, `방어 ${tile.armor}`];
+    if (tile.countdown > 0) bits.push(`카운트 ${tile.countdown}`);
+    document.getElementById('boss-stats').textContent = '지금 상태: ' + bits.join(' · ');
+    document.getElementById('modal-boss').classList.add('show');
+  }
+  (function () {
+    const mb = document.getElementById('modal-boss');
+    document.getElementById('btn-close-boss').addEventListener('click', () => mb.classList.remove('show'));
+    const ms = document.getElementById('modal-skillhelp');
+    const list = document.getElementById('skillhelp-list');
+    document.getElementById('btn-skill-help').addEventListener('click', () => {
+      list.innerHTML = '';
+      const skills = (gameState && gameState.player && gameState.player.skills) || [];
+      const have = skills.filter(Boolean);
+      if (!have.length) {
+        list.innerHTML = '<div style="color:var(--sub); font-size:13px;">아직 스킬이 없어요. 레벨업이나 상점에서 스킬을 얻을 수 있어요.</div>';
+      }
+      have.forEach(sk => {
+        const info = GR.getSkillInfo ? GR.getSkillInfo(sk.actionKey != null ? sk.actionKey : sk.id) : null;
+        const wait = info ? info.wait : '';
+        const card = document.createElement('div');
+        card.style.cssText = 'background:#120e18; border:1px solid #3a3042; border-radius:8px; padding:8px 10px; text-align:left;';
+        card.innerHTML = `<b>${escHtml(sk.icon || '⚔️')} ${escHtml(sk.name)}</b><div style="font-size:13px; margin-top:3px; line-height:1.45;">${escHtml(info ? info.text : (sk.desc || ''))}</div><div style="font-size:11px; color:var(--sub); margin-top:3px;">${escHtml(wait)}${sk.currentCooldown > 0 ? ' · 지금은 ' + sk.currentCooldown + '턴 더 기다려야 해요' : ''}</div>`;
+        list.appendChild(card);
+      });
+      ms.classList.add('show');
+    });
+    document.getElementById('btn-close-skillhelp').addEventListener('click', () => ms.classList.remove('show'));
+  })();
+
   let lastReshuffleCount = null;
   function notifyReshuffleIfAny() {
     try {
@@ -1916,6 +1973,19 @@
     if (!isDragging || gameState.isGameOver || gameState.pendingChoice || isAnimating) return;
     isDragging = false;
 
+    // 줄을 잇지 않고 특수 적 한 칸만 눌렀으면 그 적의 설명을 보여 준다
+    if (currentPath.length === 1) {
+      try {
+        const t0 = gameState.board[currentPath[0].y][currentPath[0].x];
+        if (t0 && t0.specialId) {
+          currentPath = [];
+          updateSelectionUI();
+          showBossInfo(t0);
+          return;
+        }
+      } catch (_) {}
+    }
+
     if (GR.isValidChain(gameState.board, currentPath)) {
       isAnimating = true;
       const turnRes = GR.resolveTurn(gameState, currentPath, rng);
@@ -2146,7 +2216,7 @@
         const res = GR.chooseShopItem(gameState, opt.id);
         if (res.applied) {
           gameState = res.gameState;
-          logBox.innerHTML = opt.type === 'skill' ? `🪙 상점 두루마리 <strong>${opt.name}</strong> 효과를 한 번 썼어요!` : `🪙 상점에서 <strong>${opt.name}</strong>을(를) 얻었어요!`;
+          logBox.innerHTML = opt.type === 'skill' ? `🪙 상점 두루마리 <strong>${opt.name}</strong> 효과를 한 번 썼어요!` : `🪙 상점에서 <strong>${opt.name}</strong> 완료! 장비가 좋아졌어요.`;
           renderBoard();
         }
       });
