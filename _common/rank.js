@@ -41,7 +41,6 @@
   sec.className = 'wrap zw-rank';
   sec.innerHTML = '<h2>🏆 순위표 <small>' + esc(cfg.label) + '</small></h2>'
     + '<div class="rk-tabs"></div>'
-    + '<div class="rk-tabs rk-per"><button type="button" data-p="all" class="on">전체</button><button type="button" data-p="today">오늘</button><button type="button" data-p="yesterday">어제</button></div>'
     + '<ol class="rk-list"><li class="rk-wait">불러오는 중…</li></ol>'
     + '<div class="rk-mine"></div>'
     + '<div class="rk-form"><input class="rk-name" type="text" maxlength="8" placeholder="닉네임 (한글·영문·숫자 2~8자)" aria-label="닉네임" autocomplete="off">'
@@ -52,7 +51,6 @@
   if (more) more.parentNode.insertBefore(sec, more); else document.body.insertBefore(sec, document.querySelector('.zw-foot'));
 
   var $ = function (s) { return sec.querySelector(s); };
-  var per = 'all', perEl = $('.rk-per');
   var list = $('.rk-list'), mine = $('.rk-mine'), nameEl = $('.rk-name'), go = $('.rk-go'), msg = $('.rk-msg'), tabs = $('.rk-tabs');
   nameEl.value = lsGet('zw_nick') || '';
 
@@ -125,14 +123,6 @@
   } else tabs.style.display = 'none';
   if (variants) ZW.rankVariant = function () { return ZW.rankPick || 0; };
 
-  // 전체 / 오늘 / 어제(한국 시간 기준, 3일 지난 기록은 서버가 지운다) — 2026-11-15 사용자 요청
-  perEl.addEventListener('click', function (e) {
-    var b = e.target.closest('button'); if (!b) return;
-    per = b.getAttribute('data-p');
-    Array.prototype.forEach.call(perEl.children, function (x) { x.className = (x === b) ? 'on' : ''; });
-    load(true);
-  });
-
   function myBest() {
     var raw = lsGet(current().key), v = parseInt(raw, 10);
     if (!isFinite(v) && raw) { try { v = Number(JSON.parse(raw).moves); } catch (e) { v = NaN; } }   // 짝 맞추기는 {moves, sec}로 저장한다
@@ -153,11 +143,9 @@
 
   function load(fresh) {
     var cur = current();
-    var mode = per;
-    fetch(API.replace(/\/$/, '') + '/api/rank?game=' + encodeURIComponent(cur.id) + (mode !== 'all' ? '&day=' + mode : '') + (fresh ? '&t=' + Date.now() : '')).then(function (r) { return r.json(); }).then(function (d) {
-      if (mode !== per) return;   // 그 사이 다른 탭으로 바뀌었으면 늦게 온 답은 버린다
-      if (mode === 'all') paintTop(d.top);   // 제목 옆 1~3등은 전체 순위만
-      if (!d.top || !d.top.length) { list.innerHTML = '<li class="rk-wait">' + (mode === 'all' ? '아직 기록이 없어요. 첫 번째가 되어 보세요!' : (mode === 'today' ? '오늘 올라온 기록이 아직 없어요. 첫 번째가 되어 보세요!' : '어제 올라온 기록이 없어요.')) + '</li>'; return; }
+    fetch(API.replace(/\/$/, '') + '/api/rank?game=' + encodeURIComponent(cur.id) + (fresh ? '&t=' + Date.now() : '')).then(function (r) { return r.json(); }).then(function (d) {
+      paintTop(d.top);
+      if (!d.top || !d.top.length) { list.innerHTML = '<li class="rk-wait">아직 기록이 없어요. 첫 번째가 되어 보세요!</li>'; return; }
       list.innerHTML = d.top.map(function (t, i) { return '<li><span class="n">' + (i + 1) + '</span><span class="nm">' + esc(t.name) + '</span><b>' + fmt(t.score) + '</b>' + delBtn(t.name) + '</li>'; }).join('');
     }).catch(function () { list.innerHTML = '<li class="rk-wait">순위표를 불러오지 못했어요. 잠시 뒤에 다시 열어 주세요.</li>'; });
   }
@@ -170,7 +158,7 @@
     fetch(API.replace(/\/$/, '') + '/api/rank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: cur.id, name: nick, score: b }) })
       .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
       .then(function (x) {
-        if (x.ok) { lsSet('zw_nick', nick); lsSet(sentKey(), String(b)); msg.textContent = '올렸어요! 지금 전체 ' + x.d.rank + '등입니다.' + (x.d.dayRank ? ' (오늘 ' + x.d.dayRank + '등)' : ''); load(true); }
+        if (x.ok) { lsSet('zw_nick', nick); lsSet(sentKey(), String(b)); msg.textContent = '올렸어요! 지금 ' + x.d.rank + '등입니다.'; load(true); }
         else msg.textContent = (x.d && x.d.error) || '올리지 못했어요.';
         paint();
       }).catch(function () { msg.textContent = '연결이 안 돼요. 잠시 뒤에 다시 해 주세요.'; paint(); });

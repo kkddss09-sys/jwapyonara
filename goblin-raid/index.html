@@ -2567,7 +2567,8 @@
     try { const l = GR.loadHighScores(key, 10) || []; return l.reduce((m, e) => Math.max(m, Number(e && e.score) || 0), 0); } catch (_) { return 0; }
   }
   function escHtml(t) { return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-  function renderRankServer(modeKey) {
+  function renderRankServer(modeKey, period) {
+    period = period || 'all';
     const tbody = document.getElementById('rank-srv-tbody');
     const msg = document.getElementById('rank-msg');
     const nick = document.getElementById('rank-nick');
@@ -2577,9 +2578,9 @@
     if (id == null) { tbody.innerHTML = '<tr><td colspan="3" style="color:var(--sub);">이 모드는 전체 순위가 아직 없어요.</td></tr>'; sub.disabled = true; return; }
     sub.disabled = false;
     tbody.innerHTML = '<tr><td colspan="3" style="color:var(--sub);">불러오는 중…</td></tr>';
-    fetch(RANK_API + '/api/rank?game=' + id).then(r => r.json()).then(d => {
+    fetch(RANK_API + '/api/rank?game=' + id + (period !== 'all' ? '&day=' + period : '')).then(r => r.json()).then(d => {
       if (!d || !Array.isArray(d.top)) throw new Error('bad');
-      if (!d.top.length) { tbody.innerHTML = '<tr><td colspan="3" style="color:var(--sub);">아직 기록이 없어요. 첫 기록을 올려 보세요!</td></tr>'; return; }
+      if (!d.top.length) { tbody.innerHTML = '<tr><td colspan="3" style="color:var(--sub);">' + (period === 'today' ? '오늘 올라온 기록이 아직 없어요. 첫 기록을 올려 보세요!' : period === 'yesterday' ? '어제 올라온 기록이 없어요.' : '아직 기록이 없어요. 첫 기록을 올려 보세요!') + '</td></tr>'; return; }
       tbody.innerHTML = d.top.slice(0, 10).map((e, i) => {
         const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1);
         return `<tr><td>${medal}</td><td>${escHtml(e.name)}</td><td style="color:var(--gold); font-weight:800;">${Number(e.score).toLocaleString()}</td></tr>`;
@@ -2594,7 +2595,7 @@
       fetch(RANK_API + '/api/rank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: id, name, score }) })
         .then(r => r.json().then(j => ({ ok: r.ok, j })))
         .then(({ ok, j }) => {
-          if (ok && j && j.ok) { try { localStorage.setItem('zw_nick', name); } catch (_) {} msg.textContent = `올렸어요! 현재 ${j.rank}위 (${Number(j.score).toLocaleString()}점)`; renderRankServer(modeKey); }
+          if (ok && j && j.ok) { try { localStorage.setItem('zw_nick', name); } catch (_) {} msg.textContent = `올렸어요! 전체 ${j.rank}위 (${Number(j.score).toLocaleString()}점)` + (j.dayRank ? ` · 오늘 ${j.dayRank}위` : ''); renderRankServer(modeKey, period); }
           else msg.textContent = (j && j.error) || '올리지 못했어요.';
         }).catch(() => { msg.textContent = '올리지 못했어요. 잠시 뒤에 다시 해 주세요.'; })
         .then(() => { sub.disabled = false; });
@@ -2619,7 +2620,7 @@
       tabs.appendChild(b);
     });
     views.innerHTML = '';
-    [['server', '🌐 전체 순위'], ['local', '📱 내 기록']].forEach(([v, label]) => {
+    [['server', '🌐 전체 순위'], ['today', '🌞 오늘'], ['yesterday', '🌙 어제'], ['local', '📱 내 기록']].forEach(([v, label]) => {
       const b = document.createElement('button');
       b.className = 'btn-icon';
       b.textContent = label;
@@ -2628,9 +2629,10 @@
       views.appendChild(b);
     });
     document.getElementById('rank-local').style.display = rankView === 'local' ? '' : 'none';
-    document.getElementById('rank-server').style.display = rankView === 'server' ? '' : 'none';
+    document.getElementById('rank-server').style.display = (rankView === 'server' || rankView === 'today' || rankView === 'yesterday') ? '' : 'none';
     const modeKey = RANK_MODES[rankModeIdx].key;
-    if (rankView === 'server') renderRankServer(modeKey);
+    if (rankView === 'server') renderRankServer(modeKey, 'all');
+    else if (rankView === 'today' || rankView === 'yesterday') renderRankServer(modeKey, rankView);
     let list = [];
     try { list = GR.loadHighScores(modeKey, 10) || []; } catch (_) { list = []; }
     tbody.innerHTML = '';
