@@ -576,6 +576,40 @@
   ];
 
   // ── 초보자용 설명 (스킬·보스). 화면의 카드와 설명 창이 이 글을 그대로 보여 준다 ──
+  // 강화 메뉴 카드 = 장비에 붙은 능력 20가지 중 하나를 올리는 것. 번호마다 실제로 무엇이 오르는지 쉬운 말로 적는다.
+  const BOOST_HELP = {
+    0: ['무기 공격력', '칼로 공격할 때 피해가 늘어요.'],
+    1: ['기본 공격력', '장비 없이도 들어가는 기본 공격이 세져요.'],
+    2: ['흡혈', '공격으로 준 피해의 일부만큼 내 체력이 회복돼요.'],
+    3: ['독 공격', '공격한 적에게 독이 걸려 체력이 더 깎여요.'],
+    4: ['관통', '적의 방어를 일부 무시하고 피해를 줘요.'],
+    5: ['스킬 대기 단축', '내 모든 스킬의 대기 시간이 1턴 줄어요.'],
+    6: ['경험치 추가', '경험치를 얻는 양이 늘어요.'],
+    7: ['코인 추가', '코인을 얻는 양이 늘어요.'],
+    8: ['공격 + 경험치 보너스', '기본 공격이 올라가고, 경험치 보너스가 터질 확률이 5%p 늘어요.'],
+    9: ['회복 + 코인 보너스', '물약 회복량이 올라가고, 코인 보너스가 터질 확률이 5%p 늘어요.'],
+    10: ['최대 체력', '최대 체력이 10 늘어나고, 지금 체력도 10 회복돼요.'],
+    11: ['최대 방패', '최대 방패가 1 늘어나고, 방패도 1 채워져요.'],
+    12: ['가시', '적이 나를 공격하면 그 적도 피해를 입어요.'],
+    13: ['강화 게이지 추가', '방패로 강화 게이지가 차는 양이 늘어요.'],
+    14: ['방패 손상 감소', '적의 반격에 방패가 깨질 확률이 줄어요.'],
+    15: ['반격 약화', '적이 반격한 뒤 그 적의 공격력이 깎여요.'],
+    16: ['방패 복구', '방패를 모을 때 복구되는 양이 늘어요.'],
+    17: ['턴 회복', '매 턴 체력이 조금씩 자동으로 회복돼요.'],
+    18: ['복구 + 방패 보너스', '방패 복구량이 올라가고, 방패 보너스가 터질 확률이 5%p 늘어요.'],
+    19: ['체력 성장 + 물약 보너스', '체력 성장이 올라가고, 물약 보너스가 터질 확률이 5%p 늘어요.']
+  };
+  function boostTitle(boostId, amount) {
+    const b = BOOST_HELP[boostId];
+    if (!b) return `${slotNameKo(0)} 강화`;
+    const unitless = [5, 8, 9, 18, 19];
+    if (unitless.includes(boostId) || !amount) return b[0];
+    if (boostId === 2 || boostId === 4) return `${b[0]} +${amount}%`;
+    if (boostId === 6 || boostId === 7 || boostId === 13) return `${b[0]} +${amount * 25}%`;
+    if (boostId === 14) return `${b[0]} ${amount}%p`;
+    return `${b[0]} +${amount}`;
+  }
+
   // 상점 장비 카드 = 지금 끼고 있는 그 칸 장비의 강화판 (새 장비로 갈아끼우는 것이 아님)
   const GEAR_UPGRADE_HELP = [
     '무기를 강화해요. 무기 공격력이 +1 올라요. 붙어 있는 다른 능력이 가끔 줄고, 그만큼 공격력이 더 올라요.',
@@ -1384,7 +1418,13 @@
       actionKey: c.actionKey,
       statId: c.statId,
       desc: (c.actionKey != null && getSkillInfo(c.actionKey))
-        ? getSkillInfo(c.actionKey, Array.isArray(session.actions) && session.actions.some(a => a.actionKey === c.actionKey)).full
+        ? ((owned) => {
+            const inf = getSkillInfo(c.actionKey, !!owned);
+            if (owned && inf && owned.effectiveWait != null && owned.effectiveWait > 0) {
+              return `${inf.text} (이미 가진 스킬이에요. 고르면 다시 쓰는 시간이 ${owned.effectiveWait}턴에서 ${owned.effectiveWait - 1}턴으로 줄어요)`;
+            }
+            return inf.full;
+          })(Array.isArray(session.actions) ? session.actions.find(a => a && a.actionKey === c.actionKey) : null)
         : (c.desc || (c.type === 'stat' ? '고르면 능력치가 올라요. 게임이 끝날 때까지 유지돼요.' : '스킬 습득/강화'))
     }));
   }
@@ -1521,11 +1561,11 @@
     return choice.cards.map((c, idx) => ({
       id: idx,
       type: c.type,
-      name: `${slotNameKo(c.slot)} 강화`,
+      name: boostTitle(c.boostId, c.increaseAmount),
       slot: c.slot,
       boostId: c.boostId,
       increaseAmount: c.increaseAmount,
-      desc: c.desc || `능력치 +${c.increaseAmount || 1}`
+      desc: c.desc || (BOOST_HELP[c.boostId] ? `${slotNameKo(c.slot)}에 붙은 능력을 올려요. ${BOOST_HELP[c.boostId][1]}` : `능력치 +${c.increaseAmount || 1}`)
     }));
   }
 

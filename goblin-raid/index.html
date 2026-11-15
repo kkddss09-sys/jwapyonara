@@ -227,6 +227,7 @@
     font-size: 1rem;
     line-height: 1;
   }
+  .skill-cell-wait { font-size: 9px; color: #b9b0a2; line-height: 1; margin-top: 1px; }
   .skill-cell-name {
     font-size: 9.5px;
     font-weight: 700;
@@ -1521,6 +1522,7 @@
         slot.innerHTML = `
           <span class="skill-cell-icon">${sk.icon || '⚔️'}</span>
           <span class="skill-cell-name">${sk.name}</span>
+          <span class="skill-cell-wait">${sk.oneUse || sk.cooldown < 0 ? '1회용' : '⏱ ' + sk.cooldown + '턴'}</span>
           ${!isReady ? `<span class="skill-cell-badge">${sk.currentCooldown || (GR.canUseSkill(gameState.player, i, gameState) ? '' : '✕')}</span>` : ''}
         `;
         if (isReady && !gameState.isGameOver && !gameState.pendingChoice && !isAnimating) {
@@ -2189,10 +2191,15 @@
         <button class="choice-card-btn">강화</button>
       `;
       card.addEventListener('click', () => {
+        const prevPlayer = gameState.player ? { ...gameState.player } : null;
         const res = GR.chooseUpgrade(gameState, opt.id);
         if (res.applied) {
           gameState = res.gameState;
-          logBox.innerHTML = `✨ <strong>${opt.name}</strong> 완료! (${opt.desc})`;
+          const pb = (prevPlayer || {}), pa = gameState.player || {};
+          const changes = [];
+          if (pb.maxHp != null && pa.maxHp !== pb.maxHp) changes.push(`체력 ${pb.hp}→${pa.hp} (최대 ${pb.maxHp}→${pa.maxHp})`);
+          if (pb.maxArmor != null && pa.maxArmor !== pb.maxArmor) changes.push(`방패 ${pb.armor}→${pa.armor} (최대 ${pb.maxArmor}→${pa.maxArmor})`);
+          logBox.innerHTML = `✨ <strong>${opt.name}</strong> 완료!${changes.length ? ' ' + changes.join(' · ') : ''}`;
           renderBoard();
         }
       });
