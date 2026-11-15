@@ -1405,6 +1405,24 @@
    * getLevelupOptions [O2, 교정 33.1]
    * 이미 생성된 대기 메뉴 후보를 반환하며 그릴 때마다 다시 추첨하지 않는다.
    */
+  // 레벨업 카드 중 '새 스킬'을 지금 더 고를 수 있는지: 빈 칸 수 - 이미 고른 새 스킬 수 가 1 이상이어야 한다.
+  function levelupSlotsBlocked(session, choice, cardIdx) {
+    try {
+      const card = choice.cards && choice.cards[cardIdx];
+      if (!card || card.type !== 'skill' || card.actionKey == null) return false;
+      const actions = Array.isArray(session.actions) ? session.actions : [];
+      if (actions.some(a => a && a.actionKey === card.actionKey)) return false;   // 이미 가진 스킬 강화는 칸이 필요 없다
+      const picks = Array.isArray(choice.picks) ? choice.picks : [];
+      if (picks.includes(cardIdx)) return false;
+      let pickedNew = 0;
+      picks.forEach(i => {
+        const c = choice.cards[i];
+        if (c && c.type === 'skill' && c.actionKey != null && !actions.some(a => a && a.actionKey === c.actionKey)) pickedNew++;
+      });
+      return (4 - actions.length) - pickedNew <= 0;
+    } catch (_) { return false; }
+  }
+
   function getLevelupOptions(gameState) {
     const session = resolveSessionForChoice(gameState);
     if (!session || !Array.isArray(session.waitingChoices)) return [];
@@ -1417,7 +1435,8 @@
       icon: (c.actionKey != null && getSkillInfo(c.actionKey)) ? getSkillInfo(c.actionKey).icon : undefined,
       actionKey: c.actionKey,
       statId: c.statId,
-      desc: (c.actionKey != null && getSkillInfo(c.actionKey))
+      blocked: levelupSlotsBlocked(session, choice, idx),
+      desc: levelupSlotsBlocked(session, choice, idx) ? '스킬 칸 4개가 이미 가득 차서 이 스킬은 고를 수 없어요. 다른 카드를 골라 주세요.' : (c.actionKey != null && getSkillInfo(c.actionKey))
         ? ((owned) => {
             const inf = getSkillInfo(c.actionKey, !!owned);
             if (owned && inf && owned.effectiveWait != null && owned.effectiveWait > 0) {
@@ -1453,6 +1472,9 @@
     if (!Array.isArray(choice.picks)) choice.picks = [];
 
     const optIndex = (typeof optionId === 'number') ? optionId : 0;
+    if (levelupSlotsBlocked(session, choice, optIndex)) {
+      return { applied: false, success: false, reason: 'slots_full', gameState };
+    }
     if (!choice.picks.includes(optIndex)) {
       choice.picks.push(optIndex);
     }

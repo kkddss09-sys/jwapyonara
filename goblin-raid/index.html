@@ -2154,16 +2154,18 @@
       const card = document.createElement('div');
       card.className = 'choice-card';
       const isPicked = picked.includes(opt.id);
-      if (isPicked) card.style.opacity = '0.45';
+      const isBlocked = !!opt.blocked && !isPicked;
+      if (isPicked || isBlocked) card.style.opacity = '0.45';
       card.innerHTML = `
         <div class="choice-card-left">
           <b>${opt.icon || '⭐'} ${opt.name}</b>
           <small>${opt.desc}</small>
         </div>
-        <button class="choice-card-btn">${isPicked ? '✔ 선택함' : '선택'}</button>
+        <button class="choice-card-btn">${isPicked ? '✔ 선택함' : (isBlocked ? '불가' : '선택')}</button>
       `;
       card.addEventListener('click', () => {
         if (isPicked) return;
+        if (isBlocked) { logBox.innerHTML = '⚠️ 스킬 칸 4개가 가득 차서 이 스킬은 고를 수 없어요. 다른 카드를 골라 주세요.'; return; }
         const res = GR.chooseLevelupReward(gameState, opt.id);
         if (res.applied) {
           gameState = res.gameState;
