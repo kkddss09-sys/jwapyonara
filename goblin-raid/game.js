@@ -849,6 +849,7 @@
     const state = {
       board,
       player,
+      hero,
       turn: session.tick || 0,
       kills: session.killLedger || 0,
       score: currentScore,
@@ -922,6 +923,27 @@
     }
     if (flaws == null && cEntry && Array.isArray(cEntry.flaws)) {
       flaws = [...cEntry.flaws];
+    }
+
+    // [교정 C.2] 게임 시작 경로에서 직업이 모험가(0)이면 입력된 퍽·결함을 모두 무시
+    if (classKey === 0) {
+      perks = [null, null, null, null];
+      flaws = [null, null, null, null];
+    } else if (RC && typeof RC.validatePerkFlawSetup === 'function') {
+      // 비기본 직업은 퍽·결함 정리를 반드시 적용하고 그 결과를 씀 [교정 C.1, C.2]
+      const cleanGrowth = options.growth != null ? options.growth : (cEntry && cEntry.growth != null ? cEntry.growth : 10);
+      let pArr = Array.isArray(perks) ? [...perks] : [null, null, null, null];
+      let fArr = Array.isArray(flaws) ? [...flaws] : [null, null, null, null];
+      while (pArr.length < 4) pArr.push(null);
+      while (fArr.length < 4) fArr.push(null);
+      const cDef = (RC.CLASS_DEFINITIONS && RC.CLASS_DEFINITIONS[classKey]) || null;
+      if (cDef) {
+        pArr[0] = cDef.fixedPerk;
+        fArr[0] = cDef.fixedFlaw;
+      }
+      const cleaned = RC.validatePerkFlawSetup(classKey, cleanGrowth, pArr, fArr);
+      perks = cleaned.perks;
+      flaws = cleaned.flaws;
     }
 
     let raceKey = options.raceId != null
@@ -1915,9 +1937,22 @@
           if (!Array.isArray(existing.perks)) existing.perks = [...d.perks];
           if (!Array.isArray(existing.flaws)) existing.flaws = [...d.flaws];
           if (!Array.isArray(existing.skillPool) || existing.skillPool.length === 0) existing.skillPool = [...d.skillPool];
+          const RC = getRC();
+          if (RC && typeof RC.validatePerkFlawSetup === 'function') {
+            const vRes = RC.validatePerkFlawSetup(i, existing.growth != null ? existing.growth : 1, existing.perks, existing.flaws);
+            existing.perks = [...vRes.perks];
+            existing.flaws = [...vRes.flaws];
+          }
           normalizedClasses.push(existing);
         } else {
-          normalizedClasses.push({ ...d, perks: [...d.perks], flaws: [...d.flaws], skillPool: [...d.skillPool] });
+          const newEntry = { ...d, perks: [...d.perks], flaws: [...d.flaws], skillPool: [...d.skillPool] };
+          const RC = getRC();
+          if (RC && typeof RC.validatePerkFlawSetup === 'function') {
+            const vRes = RC.validatePerkFlawSetup(i, newEntry.growth != null ? newEntry.growth : 1, newEntry.perks, newEntry.flaws);
+            newEntry.perks = [...vRes.perks];
+            newEntry.flaws = [...vRes.flaws];
+          }
+          normalizedClasses.push(newEntry);
         }
       }
       prof.classes = normalizedClasses;
@@ -2337,14 +2372,33 @@
     return cKey !== 0; // 모험가(0)는 꾸미기 불가 [M2]
   }
 
-  function canConfirmPerkFlawSetup(classId, perks, flaws) {
+  function canConfirmPerkFlawSetup(classId, perks, flaws, growth = 10) {
     const RC = getRC();
     const cKey = typeof classId === 'string' ? (CLASS_ID_TO_KEY[classId] != null ? CLASS_ID_TO_KEY[classId] : 0) : classId;
     if (RC && typeof RC.validatePerkFlawSetup === 'function') {
-      const res = RC.validatePerkFlawSetup(cKey, 10, perks, flaws);
+      const g = (growth != null && typeof growth === 'number') ? growth : 10;
+      const res = RC.validatePerkFlawSetup(cKey, g, perks, flaws);
       return Boolean(res && res.valid);
     }
     return true;
+  }
+
+  function isPerkChoiceDisabled(classId, slotIndex, perkId, currentPerks) {
+    const RC = getRC();
+    const cKey = typeof classId === 'string' ? (CLASS_ID_TO_KEY[classId] != null ? CLASS_ID_TO_KEY[classId] : 0) : classId;
+    if (RC && typeof RC.isPerkChoiceDisabled === 'function') {
+      return RC.isPerkChoiceDisabled(cKey, slotIndex, perkId, currentPerks);
+    }
+    return false;
+  }
+
+  function isFlawChoiceDisabled(classId, slotIndex, flawId, currentFlaws) {
+    const RC = getRC();
+    const cKey = typeof classId === 'string' ? (CLASS_ID_TO_KEY[classId] != null ? CLASS_ID_TO_KEY[classId] : 0) : classId;
+    if (RC && typeof RC.isFlawChoiceDisabled === 'function') {
+      return RC.isFlawChoiceDisabled(cKey, slotIndex, flawId, currentFlaws);
+    }
+    return false;
   }
 
   function canChangeRace(classId, unlockData = null) {
@@ -2438,6 +2492,10 @@
     exportProfileCode,
     getLevelupOptions,
     getPerkSlotCount,
+    canCustomizePerks,
+    canConfirmPerkFlawSetup,
+    isPerkChoiceDisabled,
+    isFlawChoiceDisabled,
     getShopOptions,
     getEnemyInfo,
     getSkillInfo,

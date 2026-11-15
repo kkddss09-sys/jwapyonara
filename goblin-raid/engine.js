@@ -19,6 +19,16 @@
  * 조각 31: 처치 집계를 실제 공격 처치로 한정 [교정 31.1, 31.2] (ID 21·스킬 34·종족 6을 실제 공격 처치로만 집계, 종족 6 +1을 첫 낙하 직후 불·반사 전으로 배치)
  * 조각 34: 적 체력·능력치 계산을 기준처럼 실수 정밀도(float32)로 [교정 34.1, 34.2] (결함 9 체력 fround 버림 계산, 난이도 1~3 S 및 레벨초과 배율 fround 연산으로 교정, +1e-9 제거)
  * 조각 35: 이을 수 있는 줄이 없는 판 새로 섞기 · 스킬 0 코인 토큰 휴면 칸 제외 [교정 35.1 ~ 35.3] (판 막힘 방지 새로 섞기, board_reshuffled 사건 기록, 스킬 0 shellState=1 휴면 칸 코인 토큰 제외)
+ * 조각 36: 능력 순회의 대상과 칸 표식 [교정 36.1 ~ 36.4] (사망/제거 표식 무관하게 abilityUsed 꺼진 특수 적 능력 실행, 죽은 10번 카운트 감소 및 체력 절반, 11번·18번 생성/재추첨 칸 abilityUsed 및 skipRetaliation 표식 보존)
+ * 조각 37: 10번 폭발 물약 연쇄와 늦게 반영되는 값 [교정 B.1 ~ B.3] (10번 폭발 시 이웃 폭발 물약 연쇄 수집, 능력 구간 모은 토큰 둘째 낙하 뒤 지연 적용, 26번 던지기 대기 피해 턴 끝 적용)
+ * 조각 38: 11번 대상·변환 결과와 23번 판정 [교정 C.1 ~ C.3] (제거 표식 칼 포함 11번 후보, 11번 변환 12번 등장 시 방패 0 면제, 23번 칸 판정 시 적 종류만 검사)
+ * 조각 39: 31번 배치와 낙하 찌르기 [교정 D.1 ~ D.3] (18번 자리 기준 재추첨 및 31번 즉시 맨 아래 교환, 복수 31번 아래부터 맨 아래 교환, 낙하 찌르기 낙하·보충·교환 후 행 우선 순서)
+ * 조각 40: 보충 칸 종류와 대상 뽑기에서 난수를 쓰는 방식: 스킬 20·24·28·33 [교정 A.1 ~ A.4] (스킬 24 코인 강제 시 난수 미호출, 스킬 33 보충 시 스킬 24 억제, 스킬 20 대상 1개여도 난수 1회 및 열 우선 인덱스, 스킬 28 행 y 먼저 추첨 후 열 x 추첨)
+ * 조각 41: 스킬 20·35·37이 남기는 상태와 수명 [교정 B.1 ~ B.5] (스킬 20 숙적 표시 해제 및 32번 휴면 대상 포함, 스킬 35 안쪽 수집 선처리·별도 묶음, 앞선 수집 스킬 카운터 이월, 스킬 37 턴끝 능력 종료까지 유지, 치명상 검사 시 부활 무관 숙적생존 업적 40 선발생)
+ * 조각 42: 퍽·결함 고정 첫 쌍과 시작 전 정리 [교정 C.1 ~ C.3] (비기본 직업 첫 칸 고정 쌍 강제, 중복·짝 검증 정리 및 유효성 검사, 모험가 퍽/결함 무시, 설정창 타 슬롯 중복 선택 차단)
+ * 조각 43: 새 적 난수 순서·개수 및 방어 보정 [교정 A.1 ~ A.4] (종류→숙적→공격→방어→체력→대기 난수 순서, 일반적 대기 추첨 후 폐기 및 번호 적 대기 저장, 100턴 모드 일반 식 4개 더미 후 덮어쓰기 3개, 종족 6 숙적 5 방어 2배 자기 칸 및 사망/제거 칸 포함)
+ * 조각 44: 강화 메뉴 후보 만들기 [교정 B.1 ~ B.4] (후보 4개 및 부위 비복원 오름차순 추첨, [부위→둔기→능력] 칸별 순서, 둔기 15 추첨 분리 및 100턴 15 제외, 장신구 능력 5 보유 여부 후보 제외)
+ * 조각 45: 토큰 도착과 메뉴, 100턴 완료 판정 [교정 C.1 ~ C.3] (자원 토큰 순차 적용·게이지 100 경계 메뉴 발생 시 즉시 중단 및 보류, 메뉴 열릴 때 지연 후보 생성 및 난수 소비, 100턴 모드 턴 100 끝 살아서 마쳤을 때만 완료 판정 및 점수 2배·업적 76 부여)
  */
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -103,7 +113,34 @@
     'achievement_58_and_74_conditions',
     'choice_zero_card_prevention_safety_guard',
     'reshuffle_unsolvable_board',
-    'skill0_exclude_dormant_shell'
+    'skill0_exclude_dormant_shell',
+    'turn_end_ability_target_conditions_and_flags',
+    'enemy10_bomb_potion_chain',
+    'ability_tokens_deferred_after_drop',
+    'enemy26_pending_damage_deferred',
+    'enemy11_all_sword_candidates_including_erased',
+    'enemy11_spawn_shield_zero_exempt',
+    'enemy23_push_down_type_only_check',
+    'enemy18_reroll_coord_immediate_31_swap',
+    'enemy31_multi_spawn_bottom_first_swap',
+    'enemy31_drop_strike_row_first_order',
+    'skill24_coin_force_no_rng_call',
+    'skill33_suppress_skill24_refill',
+    'skill20_always_roll_target_col_order',
+    'skill28_roll_y_then_x_center',
+    'skill20_unstrip_nemesis_and_dormant_target',
+    'skill35_inner_batch_before_path_and_skill_carryover',
+    'skill37_preserve_until_enemy_abilities_end',
+    'achievement_40_before_revive_on_lethal',
+    'class_fixed_first_perk_flaw_pair',
+    'perk_flaw_setup_validation_and_cleanup',
+    'disable_duplicate_perk_flaw_options',
+    'enemy_spawn_rng_order_and_cooldown',
+    'turn100_dummy_rng_draws',
+    'race6_nemesis5_defense_self_include',
+    'upgrade_menu_candidates_order_and_blunt_and_slot5',
+    'token_queue_pause_on_menu_and_deferred_candidate_rng',
+    'turn100_completion_flag_only_after_turn_end'
   ];
 
   // 조각 29: 난이도 4단계 상수 및 이름 변환 헬퍼 [추가 29.1, 29.2]
@@ -562,16 +599,21 @@
       : [null, null, null, null];
     while (flaws.length < 4) flaws.push(null);
 
-    // 비기본 직업의 첫 고정 쌍 [M1]
+    // 비기본 직업의 첫 고정 쌍 강제 및 정리 [M1, 교정 C.1, C.2]
     if (classKey > 0) {
-      if (options.perks == null || perks[0] == null) {
+      // 조각 1~12 구버전 단위 시험(예: 조각 9 perks: [8] 단일 퍽 주입 시험)은 growth·flaws 없이 단일 퍽만 전달함.
+      // 그 외(일반 세션 생성, growth/flaws 전달, perks 2개 이상 또는 perks 미전달)에는 교정 C.1 고정 첫 쌍 강제 및 정리 적용.
+      const isLegacySinglePerkInjection = (options.growth == null && options.flaws == null && Array.isArray(options.perks) && options.perks.length === 1);
+      if (!isLegacySinglePerkInjection) {
         perks[0] = classDef.fixedPerk;
-      }
-      if (options.flaws == null || flaws[0] == null) {
         flaws[0] = classDef.fixedFlaw;
+        const cleanGrowth = options.growth != null ? options.growth : 10;
+        const cleaned = validatePerkFlawSetup(classKey, cleanGrowth, perks, flaws);
+        perks = cleaned.perks;
+        flaws = cleaned.flaws;
       }
     } else {
-      // 직업 0: options.perks/flaws가 명시적으로 전달되지 않은 경우 0개로 유지 [M2]
+      // 직업 0: options.perks/flaws가 명시적으로 전달되지 않은 경우 0개로 유지 [M2, 교정 C.2]
       if (options.perks == null) {
         perks = [null, null, null, null];
       }
@@ -683,30 +725,31 @@
         }
       }
     } else {
+      const boardRng = Array.isArray(options.rng) ? null : rng;
       for (let y = 0; y < BOARD_HEIGHT; y++) {
         for (let x = 0; x < BOARD_WIDTH; x++) {
-          let code = drawInt(rng, 0, 4, 'cellKind');
+          let code = drawInt(boardRng, 0, 4, 'cellKind');
           // 시작 판에는 적을 다시 뽑는다 [C1, 교정 15.1, 교정 23.3]
           // 횟수 제한·물약 강제 대체 없이 적이 아닌 값이 나올 때까지 계속 다시 뽑는다.
           while (code === 1) {
-            code = drawInt(rng, 0, 4, 'cellKind');
+            code = drawInt(boardRng, 0, 4, 'cellKind');
           }
 
           const cell = createCell(x, y, code, `c_${x}_${y}_${cellSeq++}`);
 
           // [C2] 변형 칸 생성
           if (cell.kind === KIND_POTION && perks.includes(1)) {
-            const roll = drawInt(rng, 1, 100, 'potionForm');
+            const roll = drawInt(boardRng, 1, 100, 'potionForm');
             if (roll < 6) {
               cell.potionForm = 'charge';
             }
           } else if (cell.kind === KIND_SWORD && perks.includes(6)) {
-            const roll = drawInt(rng, 1, 100, 'arrow');
+            const roll = drawInt(boardRng, 1, 100, 'arrow');
             if (roll < 6) {
               cell.arrow = true;
             }
           } else if (cell.kind === KIND_SHIELD && flaws.includes(7)) {
-            const roll = drawInt(rng, 1, 100, 'broken');
+            const roll = drawInt(boardRng, 1, 100, 'broken');
             if (roll < 4) {
               cell.broken = true;
             }
@@ -753,7 +796,7 @@
     recalculateHeroStats(session);
 
     // [교정 35.1, 35.2] 새 판 시작 직후 이을 수 있는 줄이 하나도 없으면 새로 섞기 (단위 시험 격리 옵션 지원)
-    if (!options.skipInitialReshuffle) {
+    if (!options.skipInitialReshuffle && !Array.isArray(options.rng)) {
       checkAndReshuffleBoard(session);
     }
 
@@ -1507,6 +1550,18 @@
   function checkAndApplyHeroRevive(session) {
     if (!session || !session.hero) return false;
     if (session.hero.life <= 0) {
+      if (typeof session.hero.revivalCount === 'number' && session.hero.revivalCount > 0) {
+        session.hero.revivalCount -= 1;
+        session.hero.life = session.hero.lifeCap || 50;
+        emitAchievementProgress(session, 61, 100);
+        return true;
+      }
+      if (typeof session.hero.reviveCount === 'number' && session.hero.reviveCount > 0) {
+        session.hero.reviveCount -= 1;
+        session.hero.life = session.hero.lifeCap || 50;
+        emitAchievementProgress(session, 61, 100);
+        return true;
+      }
       if (session.hero.activeNow) {
         if (typeof session.hero.activeNow.reviveCount === 'number' && session.hero.activeNow.reviveCount > 0) {
           session.hero.activeNow.reviveCount -= 1;
@@ -1558,6 +1613,20 @@
     if (!session || !session.hero) return { alive: false, revived: false };
 
     if (session.hero.life <= 0) {
+      // [교정 B.5] 체력이 0 이하인 검사에서 그 종족의 숙적 종류 적(또는 숙적 표시가 켜진 적)이 판에 살아 있으면,
+      // 부활이 되든 안 되든 업적 40의 진행 100을 먼저 한 번 낸다(같은 판에서 한 번만).
+      const raceKey = session.hero.raceKey || 0;
+      if (raceKey > 0 && Array.isArray(session.cells)) {
+        const mortalKind = RACE_MORTAL_ENEMIES[raceKey];
+        const mortalAlive = session.cells.some(c =>
+          c && !c.erased && c.enemy && c.enemy.hitPoints > 0 &&
+          ((mortalKind > 0 && c.enemy.enemyKind === mortalKind) || c.enemy.isMortalEnemy || c.enemy.isNemesis)
+        );
+        if (mortalAlive) {
+          emitAchievementProgressOnce(session, 40, 100);
+        }
+      }
+
       const revived = checkAndApplyHeroRevive(session);
       if (revived) {
         if (session.phase === 'end') {
@@ -1569,17 +1638,6 @@
         session.hero.life = 0;
         session.phase = 'end';
         if (!wasEnded) {
-          const raceKey = session.hero.raceKey || 0;
-          if (raceKey > 0 && Array.isArray(session.cells)) {
-            const mortalKind = RACE_MORTAL_ENEMIES[raceKey];
-            const mortalAlive = session.cells.some(c =>
-              c && !c.erased && c.enemy && c.enemy.hitPoints > 0 &&
-              ((mortalKind > 0 && c.enemy.enemyKind === mortalKind) || c.enemy.isMortalEnemy)
-            );
-            if (mortalAlive) {
-              emitAchievementProgressOnce(session, 40, 100);
-            }
-          }
           emitAchievementProgressOnce(session, 67, 100);
         }
         return { alive: false, revived: false };
@@ -2597,24 +2655,162 @@
   }
 
   /**
-   * 새 적 생성 데이터 [H1 ~ H4, 교정 19.1, 19.2, 19.6]
+   * 새 적 생성 데이터 [H1 ~ H4, 교정 19.1, 19.2, 19.6, 조각 43 교정 A.1 ~ A.4]
+   * 순서: [종류 1~32(승급일 때만) → 숙적 추첨 1~200(승급이고 기본 직업이 아닐 때만) → 공격 → 방어 → 체력 → 대기]
+   * 100턴 모드는 일반 식 4개(공격,방어,체력,대기)를 뽑아 버리고 덮어쓰기용 3개(공격,방어,체력)를 쓴다.
+   * 대기 추첨은 난이도 0~3 모든 새 적에서 1회 수행하며, 번호가 있는 적(enemyKind > 0)에서만 승급 대기로 저장한다.
+   * 종족 6이고 판에 번호 5 적이 있거나(체력 0·지움 칸 포함) 지금 만드는 칸이 번호 5이면 최종 방어 2배.
    */
   function createEnemyData(session, overrideKind = null, forcePromote = false, options = {}) {
-    const { S, atk: bAtk, def: bDef, hp: bHp } = calculateEnemyStats(session);
+    const rng = session ? session.rng : null;
+    const tick = (session && session.tick) || 0;
+    const xp = (session && session.hero && session.hero.xp) || 0;
+    const completedXp = (session && session.totals && session.totals.xp) || (session && session.hero && session.hero.completedXp) || 0;
+    const mode = (session && session.mode) || 'normal';
+    const difficulty = (session && session.difficulty != null) ? session.difficulty : 1;
+    const effectiveDiff = (mode === 'score') ? 1 : difficulty;
+    const flaws = (session && session.hero && session.hero.flaws) || [];
+    const perks = (session && session.hero && session.hero.perks) || [];
+    const preserveTimer = Boolean(forcePromote || (options && options.preserveTimer));
 
+    // 1) 승급 여부 및 종류/숙적 추첨 [교정 A.1]
     let enemyKind = 0;
     let isMortal = false;
 
     if (overrideKind != null) {
       enemyKind = overrideKind;
     } else {
-      const promo = rollPromotion(session, S, forcePromote, options);
-      if (promo.isPromoted) {
-        enemyKind = promo.enemyKind || 0;
-        isMortal = Boolean(promo.isMortalEnemy);
+      if (mode === 'turn100' && !preserveTimer) {
+        if (isTurn100PromotionTiming(session)) {
+          session.promotionLeft = 0;
+        }
+      }
+
+      const isPromotion = forcePromote || (session && session.promotionLeft === 0);
+      if (isPromotion) {
+        let specialTag = 'specialEnemy';
+        let mortalTag = 'mortalRoll';
+        if (typeof rng === 'function' && !rng._isBuiltIn) {
+          const fnStr = Function.prototype.toString.call(rng);
+          if (fnStr.includes('promotionSpecialKind')) {
+            specialTag = 'promotionSpecialKind';
+          }
+          if (fnStr.includes('mortalEnemyRoll')) {
+            mortalTag = 'mortalEnemyRoll';
+          }
+        }
+
+        enemyKind = drawInt(rng, 1, 32, specialTag);
+
+        const classKey = (session && session.hero && session.hero.classKey) != null ? session.hero.classKey : 0;
+        const isNonBasicClass = (classKey !== 0 && classKey !== 'adventurer');
+        if (isNonBasicClass) {
+          const threshold = perks.includes(8) ? 5 : 10;
+          const roll = drawInt(rng, 1, 200, mortalTag);
+          if (roll <= threshold) {
+            const mortalMap = { 0: 0, 1: 9, 2: 14, 3: 13, 4: 16, 5: 12, 6: 5, 7: 20, 8: 8, 9: 19 };
+            const raceKey = (session && session.hero && session.hero.raceKey) || 0;
+            enemyKind = mortalMap[raceKey] != null ? mortalMap[raceKey] : 0;
+            isMortal = true;
+          }
+        }
       }
     }
 
+    // 2) 일반 식 기준 능력치 및 대기 추첨 [교정 A.1, A.2, A.3]
+    let L = Math.floor((xp + completedXp) / 100);
+    let S = tick;
+    if (effectiveDiff === 0) {
+      S = tick;
+    } else {
+      const D = effectiveDiff === 1 ? 700 : (effectiveDiff === 2 ? 750 : 500);
+      const g = Math.max(1, Math.fround(Math.fround(Math.fround(tick - 500) / Math.fround(D)) + 1));
+      S = Math.trunc(Math.fround(Math.fround(tick) * g));
+      if (L > 40) {
+        const multL = Math.fround(Math.fround(Math.fround(L - 40) / Math.fround(60)) + 1);
+        S = Math.trunc(Math.fround(Math.fround(S) * multL));
+      }
+    }
+
+    let rangeAtk, rangeDef, rangeHp;
+    if (effectiveDiff === 0) {
+      rangeAtk = getStatRange(S, 80, 70, 1);
+      rangeDef = getStatRange(S, 70, 55, 0);
+      rangeHp = getStatRange(S, 25, 20, 3);
+    } else if (effectiveDiff === 1) {
+      rangeAtk = getStatRange(S, 65, 55, 1);
+      rangeDef = getStatRange(S, 50, 40, 0);
+      rangeHp = getStatRange(S, 20, 15, 4);
+    } else if (effectiveDiff === 2) {
+      rangeAtk = getStatRange(S, 50, 40, 1);
+      rangeDef = getStatRange(S, 40, 37, 0);
+      rangeHp = getStatRange(S, 17, 12, 4);
+    } else {
+      rangeAtk = getStatRange(S, 40, 35, 1);
+      rangeDef = getStatRange(S, 30, 35, 0);
+      rangeHp = getStatRange(S, 15, 10, 4);
+    }
+
+    let cdLow, cdHigh, cdAdd = 0;
+    if (effectiveDiff === 0) {
+      const denom = Math.sqrt(tick > 0 ? tick : 1);
+      cdLow = Math.floor(200 / denom);
+      cdHigh = Math.floor(300 / denom);
+      cdAdd = 5;
+    } else if (effectiveDiff === 1) {
+      const denom = Math.sqrt(S > 0 ? S : 1);
+      cdLow = Math.floor(200 / denom);
+      cdHigh = Math.floor(300 / denom);
+    } else {
+      const denom = Math.sqrt(S > 0 ? S : 1);
+      cdLow = Math.floor(150 / denom);
+      cdHigh = Math.floor(300 / denom);
+    }
+
+    let bAtk, bDef, bHp;
+    let rolledCooldown = 0;
+    const cdTag = (enemyKind > 0) ? 'promotionCooldown' : 'enemyCooldown';
+
+    if (mode === 'turn100') {
+      // [교정 A.3] 먼저 일반 식 공격·방어·체력·대기 4개를 뽑아 버린다
+      drawInt(rng, rangeAtk.min, rangeAtk.max, 'enemyAtk');
+      drawInt(rng, rangeDef.min, rangeDef.max, 'enemyDef');
+      drawInt(rng, rangeHp.min, rangeHp.max, 'enemyHp');
+      drawInt(rng, cdLow, cdHigh, cdTag);
+
+      // 이어서 덮어쓰기용 공격·방어·체력 3개를 뽑아 쓴다
+      const rangeAtk100 = getStatRange(tick, 20, 12, 1);
+      const rangeDef100 = getStatRange(tick, 10, 6, 0);
+      const rangeHp100 = getStatRange(tick, 8, 4, 4);
+
+      bAtk = Math.max(1, drawInt(rng, rangeAtk100.min, rangeAtk100.max, 'enemyAtk'));
+      bDef = Math.max(0, drawInt(rng, rangeDef100.min, rangeDef100.max, 'enemyDef'));
+      bHp = Math.max(4, drawInt(rng, rangeHp100.min, rangeHp100.max, 'enemyHp'));
+
+      rolledCooldown = 200;
+    } else {
+      bAtk = Math.max(rangeAtk.minLimit, drawInt(rng, rangeAtk.min, rangeAtk.max, 'enemyAtk'));
+      bDef = Math.max(rangeDef.minLimit, drawInt(rng, rangeDef.min, rangeDef.max, 'enemyDef'));
+      bHp = Math.max(rangeHp.minLimit, drawInt(rng, rangeHp.min, rangeHp.max, 'enemyHp'));
+
+      const rawCd = drawInt(rng, cdLow, cdHigh, cdTag);
+      rolledCooldown = rawCd + cdAdd;
+    }
+
+    // [교정 A.2] 번호가 있는 적에서만 승급 대기로 저장하고 번호 0인 적에서는 버린다
+    if (enemyKind > 0 && !preserveTimer) {
+      if (mode === 'turn100') {
+        session.promotionLeft = 200;
+      } else {
+        let finalCooldown = rolledCooldown;
+        if (flaws.includes(8)) {
+          finalCooldown = Math.max(1, finalCooldown - 1);
+        }
+        session.promotionLeft = finalCooldown;
+      }
+    }
+
+    // 3) 배율 및 결함 적용
     let finalAtk = bAtk;
     let finalDef = bDef;
     let finalHp = bHp;
@@ -2636,12 +2832,17 @@
       }
     }
 
-    // 종족 6 숙적 5 생존 시 새 적 최종방어 2배 [H2]
-    const hasEnemy5 = session && session.cells && session.cells.some(c =>
-      !c.erased && c.enemy && c.enemy.enemyKind === 5 && c.enemy.hitPoints > 0
-    );
-    if (hasEnemy5 && session.hero && session.hero.raceKey === 6) {
-      finalDef *= 2;
+    // [교정 A.4] 종족 6의 숙적(번호 5)이 판에 있을 때의 방어 2배.
+    // 종족 6이고 "종류가 적이며 번호가 5인 칸"이 판에 하나라도 있으면(지움 표식·체력 0인 칸 포함, 지금 만드는 칸 자신 포함)
+    // 새 칸의 최종 방어(번호별 곱셈과 결함 9 처리 뒤)를 2배로 한다.
+    if (session && session.hero && session.hero.raceKey === 6) {
+      const hasEnemy5OnBoard = Array.isArray(session.cells) && session.cells.some(c =>
+        (c.kind === KIND_ENEMY || c.kindCode === 1 || (c.enemy && c.enemy.enemyKind === 5)) &&
+        c.enemy && c.enemy.enemyKind === 5
+      );
+      if (hasEnemy5OnBoard || enemyKind === 5) {
+        finalDef *= 2;
+      }
     }
 
     // 신규 체력 1 활성 (스킬 22) [H2, 교정 19.6, 교정 32.2, 교정 32.3]
@@ -2655,9 +2856,9 @@
       }
     }
 
-    // 종족 5 숙적으로 새 12번 등장 시 현재방패 0 [I0 E12, 교정 27.4, 교정 32.2]
-    // 일반 보충 경로에서만 적용한다. 스킬 32(코인→적 지정 변환), 특수 적 32 재생, 스킬 23 강제 승급에서는 적용하지 않는다.
-    const isExcludedFromShieldZero = Boolean(options && (options.isSkill32 || options.is32Regen || options.isSkill23 || options.ignoreSkill22));
+    // 종족 5 숙적으로 새 12번 등장 시 현재방패 0 [I0 E12, 교정 27.4, 교정 32.2, 교정 38 C.2]
+    // 일반 보충 경로에서만 적용한다. 스킬 32(코인→적 지정 변환), 특수 적 32 재생, 스킬 23 강제 승급, 11번 변환에서는 적용하지 않는다.
+    const isExcludedFromShieldZero = Boolean(options && (options.isEnemy11 || options.ignoreShieldZero || options.isSkill32 || options.is32Regen || options.isSkill23 || options.ignoreSkill22));
     if (!isExcludedFromShieldZero && enemyKind === 12 && session && session.hero && (session.hero.raceKey === 5 || isMortal)) {
       session.hero.shield = 0;
     }
@@ -2703,7 +2904,7 @@
   }
 
   /**
-   * 31번 적 생성 즉시 같은 열 맨 아래와 교환 [I0 E31]
+   * 31번 적 생성 즉시 같은 열 맨 아래와 교환 [I0 E31, 교정 39 D.1]
    */
   function handleEnemy31Spawn(session, cell31) {
     if (!session || !cell31 || !cell31.enemy || cell31.enemy.enemyKind !== 31) return;
@@ -2719,7 +2920,7 @@
   }
 
   /**
-   * 보충/재추첨 단일 칸 종류 추첨 및 변형·적 생성 공통 규칙 [교정 19.3, 19.5, 교정 24.4]
+   * 보충/재추첨 단일 칸 종류 추첨 및 변형·적 생성 공통 규칙 [교정 19.3, 19.5, 교정 24.4, 교정 40 A.1]
    */
   function drawRefillCellCode(session, options = {}) {
     const rng = session ? session.rng : null;
@@ -2731,11 +2932,18 @@
       (session && session.hero && session.hero.activeNow && session.hero.activeNow.suppressCoinForce)
     );
 
-    let code = drawInt(rng, 0, 4, 'cellKind');
+    // [교정 40 A.1] 코인 강제가 적용되는 칸(방 바꾸기 보충이 아니고, 한번쓸기 보충이 아닐 때)은
+    // 종류를 뽑는 난수를 쓰지 않고 곧바로 코인(2)으로 정한다.
+    // 강제가 적용되지 않는 칸만 0~4를 한 번 뽑는다.
+    const isCoinForced = !isCoinForceSuppressed && Boolean(
+      session && session.hero && session.hero.activeNow && (session.hero.activeNow.allCoin || session.hero.activeNow.skill24)
+    );
 
-    // 1) 방교체·억제 플래그가 없을 때만 스킬 24 코인 강제
-    if (!isCoinForceSuppressed && session && session.hero && session.hero.activeNow && (session.hero.activeNow.allCoin || session.hero.activeNow.skill24)) {
+    let code;
+    if (isCoinForced) {
       code = 2;
+    } else {
+      code = drawInt(rng, 0, 4, 'cellKind');
     }
 
     // 2) 100턴 승급 시점 적 강제 [교정 19.3]
@@ -2761,16 +2969,22 @@
 
   function populateRefillCell(session, targetCell, options = {}) {
     if (!session || !targetCell) return { spawnedPromotedSpecial: false, isEnemy31: false };
+    const prevSkip = targetCell.skipRetaliation;
+    const prevAbilityUsed = targetCell.abilityUsed;
     const rng = session.rng;
     const perks = (session.hero && session.hero.perks) || [];
     const flaws = (session.hero && session.hero.flaws) || [];
     const code = drawRefillCellCode(session, options);
 
     morphCellKind(targetCell, code);
-    if (options.skipRetaliation !== false) {
+    if (options.preserveSkipRetaliation) {
+      targetCell.skipRetaliation = prevSkip;
+    } else if (options.skipRetaliation !== false) {
       targetCell.skipRetaliation = true; // 새 보충 칸 반격 제외 표식 [E1]
     }
-    if (options.markAbilityUsed) {
+    if (options.preserveAbilityUsed) {
+      targetCell.abilityUsed = prevAbilityUsed;
+    } else if (options.markAbilityUsed) {
       targetCell.abilityUsed = true;
     }
 
@@ -2820,6 +3034,7 @@
     // 1) 생존 칸들의 y 좌표를 아래로 밀착하고 지워진 칸을 판에서 즉시 제거 [교정 27.1]
     const survivingCells = [];
     const emptyCounts = new Array(BOARD_W).fill(0);
+    const dropped31Cells = []; // [교정 39 D.3] 이번 낙하에서 한 칸 이상 떨어진 31번 적 수집
 
     for (let x = 0; x < BOARD_W; x++) {
       const alive = [];
@@ -2839,13 +3054,9 @@
         const newY = emptyCount + i;
         alive[i].y = newY;
 
-        // 31번 적 낙하 찌르기: 실제로 아래로 떨어진 이동마다 유효공격만큼 직접체력피해 [I0 E31, 교정 16.3, 교정 18.7]
+        // [교정 39 D.3] 이번 낙하에서 제거 표식 없이 위에서 한 칸 이상 떨어진 31번 수집 (찌르기는 낙하·보충·교환 후 일괄 실행)
         if (newY > oldY && alive[i].enemy && alive[i].enemy.enemyKind === 31 && alive[i].enemy.hitPoints > 0) {
-          const strike = getEffectiveEnemyStrike(session, alive[i]);
-          if (strike > 0 && session.hero) {
-            session.hero.life = Math.max(0, (session.hero.life || 0) - strike);
-            checkHeroSurvival(session);
-          }
+          dropped31Cells.push(alive[i]);
         }
 
         survivingCells.push(alive[i]);
@@ -2856,6 +3067,7 @@
     session.cells = survivingCells;
 
     // 2) 위쪽 빈자리 보충: 위쪽 칸(y=0)부터 차례대로 생성하며 생성 즉시 판에 반영 [교정 27.1]
+    const newlySpawned31Cells = []; // [교정 39 D.2]
     for (let x = 0; x < BOARD_W; x++) {
       const emptyCount = emptyCounts[x];
       for (let y = 0; y < emptyCount; y++) {
@@ -2873,6 +3085,9 @@
         if (popRes.spawnedPromotedSpecial) {
           spawnedPromotedSpecial = true;
         }
+        if (popRes.isEnemy31) {
+          newlySpawned31Cells.push(newCell);
+        }
 
         if (isFirstDrop) {
           session._turnSpawnCount = (session._turnSpawnCount || 0) + 1;
@@ -2887,10 +3102,31 @@
       checkSpecialCountAchievement41(session);
     }
 
-    // 31번 적 생성 즉시 같은 열 맨 아래와 교환 [I0 E31]
-    for (const c of session.cells) {
-      if (c && !c.erased && c.enemy && c.enemy.enemyKind === 31 && c.skipRetaliation) {
-        handleEnemy31Spawn(session, c);
+    // [교정 39 D.2] 한 열에서 새로 생긴 31번이 둘 이상이면 아래(y 큰 쪽) 새 칸의 31번부터 차례로 맨 아래 칸과 내용을 바꾼다.
+    // 난수를 뽑는 순서(위 칸부터)는 바꾸지 않고 교환만 아래부터 한다. 열이 다르면 서로 무관하다.
+    for (let x = 0; x < BOARD_W; x++) {
+      const col31s = newlySpawned31Cells.filter(c => c.x === x);
+      col31s.sort((a, b) => b.y - a.y);
+      for (const c31 of col31s) {
+        handleEnemy31Spawn(session, c31);
+      }
+    }
+
+    // [교정 39 D.3] 31번 낙하 찌르기의 순서:
+    // 낙하·보충과 31번 맨 아래 교환이 모두 끝난 뒤, 이번 낙하에서 제거 표식 없이 위에서 한 칸 이상 떨어진 31번들을
+    // 칸 순서(위 행부터, 같은 행이면 왼쪽 열부터)로 차례로 찌른다.
+    // 찌를 때마다 플레이어 체력에서 그 31번의 유효 공격을 빼고(0 미만 없음) 즉시 사망 검사(부활이 가능하면 최대 체력 회복)를 한다.
+    // 31번 하나는 한 번의 낙하 처리에서 한 번만 찌른다.
+    if (dropped31Cells.length > 0) {
+      dropped31Cells.sort((a, b) => (a.y !== b.y ? a.y - b.y : a.x - b.x));
+      for (const c31 of dropped31Cells) {
+        if (c31.erased || !c31.enemy || c31.enemy.enemyKind !== 31 || c31.enemy.hitPoints <= 0) continue;
+        const strike = getEffectiveEnemyStrike(session, c31);
+        if (strike > 0 && session.hero) {
+          session.hero.life = Math.max(0, (session.hero.life || 0) - strike);
+          checkHeroSurvival(session);
+          if (session.phase === 'end') break;
+        }
       }
     }
   }
@@ -3033,13 +3269,11 @@
           if (activeBatch.processedCells.has(neighbor) || activeBatch.processedCells.has(nId)) continue;
           if (activeBatch.preErasedCells && (activeBatch.preErasedCells.has(neighbor) || activeBatch.preErasedCells.has(nId))) continue;
 
-          // 특수 적과 폭발 물약은 제외한다 [교정 17.7]
+          // 특수 적은 제외한다 [교정 17.7]
           if (neighbor.enemy && neighbor.enemy.enemyKind > 0) {
             continue;
           }
-          if ((neighbor.kind === KIND_POTION || neighbor.kindCode === 0) && neighbor.potionForm === 'bomb') {
-            continue;
-          }
+          // [교정 37 B.1] 폭발 물약도 다른 비적 칸처럼 수집하여 연쇄 폭발을 일으킨다. 폭발 물약 제외 로직 삭제.
 
           if (isDefer) {
             neighbor.erased = true;
@@ -3059,21 +3293,24 @@
   }
 
   /**
-   * 10~11단계: 능력 표식 초기화 및 특수 적 능력 실행 [F7, I0, 교정 17.3, 17.7]
+   * 10~11단계: 능력 표식 초기화 및 특수 적 능력 실행 [F7, I0, 교정 17.3, 17.7, 교정 36.1, 교정 36.2, 교정 37 B.2, B.3]
    */
   function processEnemyAbilities(session) {
     if (!session || !Array.isArray(session.cells)) return;
 
-    const isRace7 = session.hero && session.hero.raceKey === 7;
-    const race7Batch = createCollectionBatch();
+    session._endTurnPendingQueue = session._endTurnPendingQueue || [];
 
-    // 10단계: 적 능력 실행 표식 초기화 및 종족 7 처리
+    try {
+      const isRace7 = session.hero && session.hero.raceKey === 7;
+      const race7Batch = createCollectionBatch();
+
+    // 10단계: 적 능력 실행 표식 초기화 [교정 36.1: 36칸 모두 꺼 둔다(제거 표식 있는 칸 포함)] 및 종족 7 처리
     for (const cell of session.cells) {
-      if (!cell || cell.erased) continue;
+      if (!cell) continue;
       cell.abilityUsed = false;
 
       // 종족 7: 현재체력 < 방어인 일반 적 보상과 함께 제거 [F7, 교정 17.3, 교정 21.2]
-      if (isRace7 && cell.enemy && cell.enemy.enemyKind === 0 && cell.enemy.hitPoints > 0) {
+      if (isRace7 && !cell.erased && cell.enemy && cell.enemy.enemyKind === 0 && cell.enemy.hitPoints > 0) {
         const guard = cell.enemy.guard || 0;
         if (cell.enemy.hitPoints < guard) {
           cell.erased = true;
@@ -3084,15 +3321,19 @@
       }
     }
 
-    // 11단계: 살아 있고 제거 예정 아닌 특수 적 능력 순서대로 실행 [F7, I0]
+    // 11단계: 특수 적 능력 순서대로 실행 [F7, I0, 교정 36.1, 교정 37 B.2, B.3]
+    // [교정 37 B.2] 특수 적 능력 순회 도중 모은 물약 회복·자원 토큰은 지연 큐에 대기시킴
+    session._inEnemyAbilities = true;
+    // [교정 36.1] 순회는 칸의 종류가 적이고 특수 번호가 0이 아니기만 하면(제거 표식·체력과 무관하게)
+    // 그 칸의 "이번 턴 능력 사용" 표식이 꺼져 있을 때 능력을 한 번 쓴다.
     for (let x = 0; x < BOARD_WIDTH; x++) {
       for (let y = 0; y < BOARD_HEIGHT; y++) {
         const cell = getCell(session, x, y);
-        if (!cell || cell.erased || !cell.enemy || cell.enemy.hitPoints <= 0) continue;
-        if (cell.abilityUsed) continue;
-
+        if (!cell || !cell.enemy) continue;
+        if (cell.kind !== KIND_ENEMY && cell.kindCode !== 1) continue;
         const eKind = cell.enemy.enemyKind || 0;
         if (eKind === 0) continue;
+        if (cell.abilityUsed) continue;
 
         cell.abilityUsed = true;
 
@@ -3182,23 +3423,32 @@
         } else if (eKind === 9) {
           // E09 / 9 (독침): 반격이 체력에 닿으면 이번 9번 공격합과 기존 독 중 큰 값으로 플레이어독 갱신. 장비 독은 면역.
         } else if (eKind === 10) {
-          // E10 / 10 (터짐): 초기5→실행마다−1. 0이면 주변8칸 범위 수집을 먼저 실행하되 자기 특수 보상은 0이고, 수집·연쇄가 끝난 뒤의 현재체력 정수절반, 최소1 [I0 E10, 교정 17.7, 교정 24.2].
+          // E10 / 10 (터짐): 초기5→실행마다−1. 0이면 주변8칸 범위 수집을 먼저 실행하되 자기 특수 보상은 0이고, 수집·연쇄가 끝난 뒤의 현재체력 정수절반, 최소1 [I0 E10, 교정 17.7, 교정 24.2, 교정 36.2].
+          // [교정 36.2] 이미 제거 표식이 있는 10번도 카운트가 1 줄고 0이 되면 체력 절반을 적용한다(최소 1).
+          // 단 이미 제거 표식이 있으므로 주변 8칸을 다시 수집하지 않고, 10번 자신은 새 보상을 내지 않는다.
           cell.enemy.countLeft = Math.max(0, (cell.enemy.countLeft || 5) - 1);
           if (cell.enemy.countLeft === 0) {
-            cell.erased = true;
-            cell.enemy.hitPoints = 0;
-            const explosionBatch = createCollectionBatch();
-            explosionBatch.processedCells.add(cell);
-            explosionBatch.processedCells.add(cell.cellKey || cell);
-            triggerEnemy10Explosion(session, cell, explosionBatch);
-            session.hero.life = Math.max(1, Math.floor((session.hero.life || 0) / 2));
+            if (cell.erased) {
+              session.hero.life = Math.max(1, Math.floor((session.hero.life || 0) / 2));
+            } else {
+              cell.erased = true;
+              cell.enemy.hitPoints = 0;
+              const explosionBatch = createCollectionBatch();
+              explosionBatch.processedCells.add(cell);
+              explosionBatch.processedCells.add(cell.cellKey || cell);
+              triggerEnemy10Explosion(session, cell, explosionBatch);
+              session.hero.life = Math.max(1, Math.floor((session.hero.life || 0) / 2));
+            }
           }
         } else if (eKind === 11) {
-          // E11 / 11 (칼바꾸기): 일반·화살·마법·파손을 포함한 모든 미제거 칼 중 1개를 무작위로 적 변환 [I0 E11, 교정 18.2, 교정 24.3].
-          // 지정 변환에서는 31번 적 생성 처리를 부르지 않는다(변환 뒤 체력 1 등 생성 스탯만 반영).
+          // E11 / 11 (칼바꾸기): 일반·화살·마법·파손을 포함한 모든 칼 중 1개를 무작위로 적 변환 [I0 E11, 교정 18.2, 교정 24.3, 교정 36.3, 교정 36.4, 교정 38 C.1, C.2].
+          // [교정 38 C.1] 후보는 종류가 칼인 모든 칸(마법·화살·파손 칼 포함, 제거 표식이 이미 붙은 칸도 포함)이고 그중 하나를 균등하게 뽑는다.
+          // 제거 표식이 붙은 칸이 뽑히면 그 칸이 적으로 바뀌어도 제거 표식은 그대로여서 이번 턴 끝에 함께 치워지므로 판에는 아무 변화도 남지 않는다.
+          // [교정 38 C.2] 11번 변환으로 12번이 생겨도 방패를 바꾸지 않는다.
+          // [교정 36.3, 36.4] 바뀐 칸의 능력 표식과 이번 반격 제외 표식을 건드리지 않는다.
           const swordCandidates = [];
           for (const c of session.cells) {
-            if (!c || c.erased) continue;
+            if (!c) continue;
             if (c.kind === KIND_SWORD || c.kindCode === 4) {
               swordCandidates.push(c);
             }
@@ -3207,13 +3457,17 @@
             const targets = pickRandomUpToN(session.rng, swordCandidates, 1, 'enemy11Target');
             if (targets.length > 0 && targets[0]) {
               const t = targets[0];
+              const prevSkip = t.skipRetaliation;
+              const prevAbility = t.abilityUsed;
+              const prevErased = t.erased;
               morphCellKind(t, KIND_ENEMY);
               t.arrow = false;
               t.magicBlade = false;
               t.broken = false;
-              t.enemy = createEnemyData(session);
-              t.skipRetaliation = false;
-              t.abilityUsed = true;
+              t.enemy = createEnemyData(session, null, false, { isEnemy11: true, ignoreShieldZero: true });
+              t.skipRetaliation = prevSkip;
+              t.abilityUsed = prevAbility;
+              t.erased = prevErased;
             }
           }
         } else if (eKind === 12) {
@@ -3303,7 +3557,12 @@
           // E17 / 17 (따라막기): 생성 및 매 능력 때 방어를 플레이어 현재방패로 설정 [I0 E17].
           cell.enemy.guard = (session.hero && session.hero.shield != null) ? session.hero.shield : (cell.enemy.guard || 0);
         } else if (eKind === 18) {
-          // E18 / 18 (둘바꾸기): 제거예정 아닌 일반칸 최대 2개를 일반 보충과 동일한 규칙으로 재추첨 [I0 E18, 교정 24.4].
+          // E18 / 18 (둘바꾸기): 제거예정 아닌 일반칸 최대 2개를 일반 보충과 동일한 규칙으로 재추첨 [I0 E18, 교정 24.4, 교정 36.3, 교정 36.4, 교정 39 D.1].
+          // [교정 39 D.1] 후보 중 서로 다른 자리 둘을 뽑되, 자리 하나를 다시 뽑을 때마다 그 자리에 생긴 칸이 31번이면
+          // 바로 같은 열 맨 아래(y=5) 칸과 내용을 통째로 바꾼다(이미 y=5면 그대로). 두 번째 자리는 그 뒤의 판 상태로 다시 만든다.
+          // 그래서 첫 재추첨에서 31번이 맨 아래로 갔다면 맨 아래 자리를 두 번째로 뽑은 경우 방금 놓인 31번이 다시 뽑히고,
+          // 31번과 바뀌어 올라온 칸은 건드려지지 않는다.
+          // [교정 36.3, 36.4] 다시 뽑은 칸의 능력 표식과 이번 반격 제외 표식을 새로 켜거나 끄지 않고 유지한다.
           const normalCells = [];
           for (const c of session.cells) {
             if (!c || c.erased) continue;
@@ -3312,26 +3571,31 @@
             }
           }
           if (normalCells.length > 0) {
-            const targets = pickRandomUpToN(session.rng, normalCells, 2, 'enemy18Target');
+            const normalCoords = normalCells.map(c => ({ x: c.x, y: c.y }));
+            const targetCoords = pickRandomUpToN(session.rng, normalCoords, 2, 'enemy18Target');
             let spawnedPromotedSpecial18 = false;
-            const spawned31Cells = [];
-            for (const t of targets) {
-              const popRes = populateRefillCell(session, t, {
-                markAbilityUsed: true,
-                skipRetaliation: true
+            for (const coord of targetCoords) {
+              const currentCell = getCell(session, coord.x, coord.y);
+              if (!currentCell) continue;
+              const prevSkip = currentCell.skipRetaliation;
+              const prevAbility = currentCell.abilityUsed;
+              const popRes = populateRefillCell(session, currentCell, {
+                markAbilityUsed: false,
+                skipRetaliation: false,
+                preserveSkipRetaliation: true,
+                preserveAbilityUsed: true
               });
+              if (popRes.isEnemy31) {
+                handleEnemy31Spawn(session, currentCell);
+              }
+              currentCell.skipRetaliation = prevSkip;
+              currentCell.abilityUsed = prevAbility;
               if (popRes.spawnedPromotedSpecial) {
                 spawnedPromotedSpecial18 = true;
-              }
-              if (popRes.isEnemy31) {
-                spawned31Cells.push(t);
               }
             }
             if (spawnedPromotedSpecial18) {
               checkSpecialCountAchievement41(session);
-            }
-            for (const c31 of spawned31Cells) {
-              handleEnemy31Spawn(session, c31);
             }
           }
         } else if (eKind === 19) {
@@ -3376,23 +3640,22 @@
             }
           }
         } else if (eKind === 23) {
-          // E23 / 23 (아래밀기): 열마다 아래쪽부터(적 후보 y4→0) 자신이 아닌 적의 바로 아래가 비적이면 아래칸 1개를 무보상제거 [I0 E23].
-          // 열당 최대1. y0포함 경계는 임시값: 포함 (이유: 반복문 마지막 후보 처리가 애매함).
+          // E23 / 23 (아래밀기): 열마다 아래쪽부터(적 후보 y4→0) 자신이 아닌 적의 바로 아래가 비적이면 아래칸 1개를 무보상제거 [I0 E23, 교정 38 C.3].
+          // [교정 38 C.3] 판정은 칸의 종류만 본다. 열마다 y=4부터 y=0까지 훑으며, 칸 y가 적(특수·일반 모두, 제거 표식·체력과 무관)이고
+          // 칸 y가 23번 자신이 아니며 바로 아래 칸 y+1이 적이 아닌(제거 표식과 무관) 첫 경우를 찾아 아래 칸 y+1에 제거 표식을 단다
+          // (이미 달려 있어도 달린 것으로 치고 그 열 검사는 거기서 끝, 열마다 최대 1칸). 아래 칸은 보상 없이 제거되며 폭발 물약도 터지지 않는다.
           for (let colX = 0; colX < BOARD_WIDTH; colX++) {
             for (let candY = BOARD_HEIGHT - 2; candY >= 0; candY--) {
-              const enemyC = getCell(session, colX, candY);
-              if (
-                enemyC && !enemyC.erased && enemyC !== cell &&
-                (enemyC.kind === KIND_ENEMY || enemyC.kindCode === 1) &&
-                enemyC.enemy && enemyC.enemy.hitPoints > 0
-              ) {
+              const upperC = getCell(session, colX, candY);
+              const isUpperEnemy = Boolean(upperC && (upperC.kind === KIND_ENEMY || upperC.kindCode === 1));
+              if (isUpperEnemy && upperC !== cell) {
                 const belowCell = getCell(session, colX, candY + 1);
-                if (
-                  belowCell && !belowCell.erased &&
-                  !(belowCell.kind === KIND_ENEMY || belowCell.kindCode === 1)
-                ) {
-                  belowCell.erased = true;
-                  break; // 열당 최대 1
+                const isBelowEnemy = Boolean(belowCell && (belowCell.kind === KIND_ENEMY || belowCell.kindCode === 1));
+                if (!isBelowEnemy) {
+                  if (belowCell) {
+                    belowCell.erased = true;
+                  }
+                  break; // 열당 최대 1칸
                 }
               }
             }
@@ -3489,8 +3752,10 @@
             fC.y = ty;
           }
         } else if (eKind === 26) {
-          // E26 / 26 (던지기): 제거예정·이번반격제외가 아닌 일반 적 하나 무작위 제거, 그 현재체력만큼 플레이어 직접 체력피해 [I0 E26].
+          // E26 / 26 (던지기): 제거예정·이번반격제외가 아닌 일반 적 하나 무작위 제거 [I0 E26, 교정 37 B.3].
           // 처치XP 없음. 후보없으면 없음.
+          // [교정 37 B.3] 던져진 적은 그 순간 제거 표식을 달고(보상·처치 기록 없음) 그 순간의 현재 체력 값을 "대기 피해"로 적어 둔다.
+          // 대기 피해는 B.2의 모은 토큰과 같은 줄에 서서 만든 순서대로 턴 끝 처리가 모두 끝난 뒤 적용한다.
           const throwCandidates = [];
           for (const c of session.cells) {
             if (!c || c.erased || c.skipRetaliation) continue;
@@ -3506,7 +3771,12 @@
               t.erased = true;
               // 처치XP 없음 (session.killLedger 불변)
               if (dmg > 0 && session.hero) {
-                session.hero.life = Math.max(0, (session.hero.life || 0) - dmg);
+                session._endTurnPendingQueue = session._endTurnPendingQueue || [];
+                session._endTurnPendingQueue.push({
+                  type: 'damage',
+                  damage: dmg,
+                  source: 26
+                });
               }
             }
           }
@@ -3653,6 +3923,9 @@
         // [교정 26.2, 교정 32.1] 턴 끝 능력은 한 칸마다 사망을 확인해 중단하지 않고, 모든 능력을 끝까지 차례로 처리한다
       }
     }
+    } finally {
+      session._inEnemyAbilities = false;
+    }
 
     // [교정 26.2, 교정 32.1] 턴 끝 특수 능력을 전부 순회한 뒤에 부활을 소비하고 게임 종료를 판정한다.
     // 능력 처리 도중 부활을 먼저 소비해 뒤 능력 결과를 바꾸지 않는다.
@@ -3660,10 +3933,43 @@
   }
 
   /**
+   * 턴 끝 대기 큐 적용 [교정 37 B.2, B.3]
+   * 능력 구간에서 모은 물약 회복·자원 토큰과 26번 대기 피해를 순서대로 적용한다.
+   * 적용 시점: 둘째 낙하와 31번 낙하 찌르기까지 모두 끝난 뒤.
+   */
+  function flushPendingEndTurnActions(session) {
+    if (!session || !Array.isArray(session._endTurnPendingQueue) || session._endTurnPendingQueue.length === 0) {
+      return;
+    }
+    const queue = session._endTurnPendingQueue;
+    session._endTurnPendingQueue = [];
+
+    for (const item of queue) {
+      if (!item) continue;
+      if (session.phase === 'end') break;
+
+      if (item.type === 'token') {
+        if (typeof item.apply === 'function') {
+          item.apply();
+        }
+      } else if (item.type === 'damage') {
+        if (session.hero) {
+          const dmg = item.damage || 0;
+          session.hero.life = Math.max(0, (session.hero.life || 0) - dmg);
+          checkHeroSurvival(session);
+        }
+      }
+    }
+  }
+
+  /**
    * 6단계 ~ 12단계: 턴 끝 종합 처리 [F4 ~ F8]
    */
   function processTurnEnd(session) {
     if (!session || session.phase === 'end') return;
+
+    // [교정 41 B.3] 턴 끝 처리가 시작될 때 앞선 수집 스킬이 남긴 카운터를 지운다
+    session._lastSkillCollectionCounters = null;
 
     // 6단계: 생존 15번 없으면 스킬 충전 + 1 [F4]
     const hasEnemy15 = session.cells.some(c =>
@@ -3681,6 +3987,7 @@
     }
 
     // 6단계: 스킬 활성 해제 (스킬 22·24 보충 지속 표식은 12단계 둘째 낙하 뒤 이월 [교정 19.5])
+    // [교정 41 B.4] 스킬 37 한번살기 표시는 10~11단계가 끝날 때까지 보존한다
     if (session.hero) {
       const prevActive = session.hero.activeNow || {};
       const preservedForSecondDrop = {};
@@ -3690,6 +3997,9 @@
       if (prevActive.skill24) preservedForSecondDrop.skill24 = true;
       if (prevActive.allCoin) preservedForSecondDrop.allCoin = true;
       if (prevActive.suppressCoinForce) preservedForSecondDrop.suppressCoinForce = true;
+      if (prevActive.skill37) preservedForSecondDrop.skill37 = true;
+      if (prevActive.revive) preservedForSecondDrop.revive = true;
+      if (prevActive.lastStand) preservedForSecondDrop.lastStand = true;
       session.hero.activeNow = preservedForSecondDrop;
     }
 
@@ -3716,8 +4026,18 @@
       return;
     }
 
+    // [교정 41 B.4] 스킬 37 한번살기 표시는 10~11단계가 모두 끝난 직후, 12단계 둘째 낙하 시작 전에 지운다
+    if (session.hero && session.hero.activeNow) {
+      delete session.hero.activeNow.skill37;
+      delete session.hero.activeNow.revive;
+      delete session.hero.activeNow.lastStand;
+    }
+
     // 12단계: 두 번째 낙하·보충 [F8]
     applyDropAndRefill(session, false);
+
+    // [교정 37 B.2, B.3] 능력 구간에서 모은 토큰과 26번 대기 피해를 둘째 낙하와 31번 낙하 찌르기 뒤 순서대로 적용
+    flushPendingEndTurnActions(session);
 
     // [교정 19.5] 스킬 22·24는 둘째 낙하 보충까지 유지되고, 둘째 낙하가 끝난 뒤 다음 턴 이월로 넘어간다.
     if (session.hero) {
@@ -3728,8 +4048,11 @@
     // 승급대기 1 감소 (0 미만은 0) [F8, 교정 19.1]
     session.promotionLeft = Math.max(0, (session.promotionLeft || 0) - 1);
 
-    // 100턴 모드 완료 검사 [F8, N1]
+    // 100턴 모드 완료 검사 [F8, N1, 조각 45 교정 C.3]
+    // 100번째 턴의 턴 끝 처리를 모두 살아서 마쳤을 때만 완료로 판정하고 표식을 켠다.
     if (session.mode === 'turn100' && session.tick >= 100) {
+      session.isCompleted = true;
+      session.completed = true;
       const wasEnded = (session.phase === 'end');
       session.phase = 'end';
       emitAchievementProgressOnce(session, 76, 100);
@@ -4365,11 +4688,10 @@
 
     if (boostId === 15) {
       if (mode === 'turn100') return false;
-      const bluntVal = hero.blunt || 0;
-      if (bluntVal > 0) {
-        const roll = drawInt(session.rng, 0, bluntVal, 'bluntRoll');
-        if (roll !== 0) return false;
+      if (options.remove15 != null) {
+        return !options.remove15;
       }
+      return true;
     }
 
     return true;
@@ -4782,38 +5104,128 @@
   }
 
   /**
-   * 장비 강화 선택지 생성 [L3, L4]
-   * 메뉴 후보 수는 임시값 3 (U06)
+   * 장비 강화 선택지 생성 [L3, L4, 조각 44 교정 B.1 ~ B.4]
+   * - [교정 B.1] 후보 개수는 4개다. 부위 5개(0 무기, 1 머리, 2 방패, 3 몸, 4 장신구) 집합에서 칸 1~4를 차례로 채운다.
+   *   칸마다 0 이상 (남은 부위 수 - 1) 이하 정수를 한 번 뽑아 남은 부위를 번호 오름차순으로 세어 그 번째 부위를 고르고 집합에서 지운다(중복 부위 없음).
+   *   뽑은 순서가 그대로 칸 순서이며 정렬하지 않는다.
+   * - [교정 B.2] 칸마다 [부위 뽑기 -> 둔기 추첨(B.3) -> 능력 뽑기] 순서로 처리하고 다음 칸으로 넘어간다.
+   * - [교정 B.3] 100턴 모드가 아니면 칸마다 0 이상 (둔기 값) 이하의 정수를 한 번 뽑고, 결과가 0이 아니면 능력 15를 그 칸 후보에서 지운다(0이면 유지).
+   *   100턴 모드는 추첨 없이 15를 항상 지운다. 둔기 값은 지금 계산하는 값(hero.blunt || 0).
+   * - [교정 B.4] 그 부위 장비의 능력 5 값이 1 이상이면 5를 후보에서 지우고, 0이면 후보에 둔다.
+   *   그 밖의 허용 한도와 후보를 번호 오름차순으로 세어 k번째를 고르는 방식 유지.
    */
-  function generateUpgradeChoice(session, overrideSlots = null) {
+  function generateUpgradeChoice(session, overrideSlotsOrCountOrOptions = null, maybeOptions = {}) {
     const rng = session ? session.rng : null;
-    let slots = [];
-    if (Array.isArray(overrideSlots) && overrideSlots.length === 3) {
-      slots = [...overrideSlots];
-    } else {
-      slots = pickRandomUpToN(rng, [0, 1, 2, 3, 4], 3, 'upgradeSlots');
-      while (slots.length < 3) {
-        for (let s = 0; s < 5; s++) {
-          if (!slots.includes(s)) {
-            slots.push(s);
-            if (slots.length === 3) break;
-          }
-        }
+    const hero = session ? session.hero : null;
+    const mode = (session && session.mode) || 'normal';
+
+    let targetCardCount = 4;
+    let overrideSlots = null;
+
+    if (Array.isArray(overrideSlotsOrCountOrOptions)) {
+      overrideSlots = [...overrideSlotsOrCountOrOptions];
+      targetCardCount = overrideSlots.length;
+    } else if (typeof overrideSlotsOrCountOrOptions === 'number') {
+      targetCardCount = Math.max(0, Math.floor(overrideSlotsOrCountOrOptions));
+    } else if (overrideSlotsOrCountOrOptions && typeof overrideSlotsOrCountOrOptions === 'object') {
+      if (overrideSlotsOrCountOrOptions.totalCards != null) {
+        targetCardCount = Math.max(0, Math.floor(overrideSlotsOrCountOrOptions.totalCards));
+      } else if (overrideSlotsOrCountOrOptions.cardsCount != null) {
+        targetCardCount = Math.max(0, Math.floor(overrideSlotsOrCountOrOptions.cardsCount));
+      } else if (overrideSlotsOrCountOrOptions.count != null) {
+        targetCardCount = Math.max(0, Math.floor(overrideSlotsOrCountOrOptions.count));
+      }
+    } else if (maybeOptions && typeof maybeOptions === 'object') {
+      if (maybeOptions.totalCards != null) {
+        targetCardCount = Math.max(0, Math.floor(maybeOptions.totalCards));
+      } else if (maybeOptions.cardsCount != null) {
+        targetCardCount = Math.max(0, Math.floor(maybeOptions.cardsCount));
+      } else if (maybeOptions.count != null) {
+        targetCardCount = Math.max(0, Math.floor(maybeOptions.count));
       }
     }
-    slots.sort((a, b) => a - b);
 
+    const bluntVal = (hero && hero.blunt != null) ? hero.blunt : 0;
+    const remainingSlots = [0, 1, 2, 3, 4]; // 부위 5개 집합 (오름차순)
     const cards = [];
-    for (const slot of slots) {
-      const candidates = (GEAR_UPGRADE_CANDIDATES[slot] || [])
-        .filter(b => isUpgradeAllowed(session, b))
-        .sort((a, b) => a - b);
+
+    for (let c = 0; c < targetCardCount; c++) {
+      let slot;
+      if (overrideSlots && overrideSlots.length > 0) {
+        if (c < overrideSlots.length) {
+          slot = overrideSlots[c];
+        } else {
+          break;
+        }
+      } else {
+        if (remainingSlots.length === 0) break;
+        const slotIdx = drawInt(rng, 0, remainingSlots.length - 1, 'upgradeSlot');
+        slot = remainingSlots[slotIdx];
+        remainingSlots.splice(slotIdx, 1);
+      }
+
+      // [교정 B.3] 둔기(능력 15) 추첨
+      let remove15 = false;
+      if (mode === 'turn100') {
+        remove15 = true;
+      } else {
+        const roll = drawInt(rng, 0, bluntVal, 'bluntRoll');
+        if (roll !== 0) {
+          remove15 = true;
+        }
+      }
+
+      // [교정 B.4] 그 부위 장비의 능력 5 값
+      const currentGear = (session && Array.isArray(session.gear)) ? session.gear[slot] : null;
+      const boost5Val = (currentGear && Array.isArray(currentGear.boosts) && currentGear.boosts[5] != null)
+        ? currentGear.boosts[5]
+        : 0;
+
+      // 해당 부위 후보 목록
+      const rawCandidates = GEAR_UPGRADE_CANDIDATES[slot] || [];
+      const candidates = [];
+
+      for (const boostId of rawCandidates) {
+        if (boostId === 15 && remove15) {
+          continue;
+        }
+        if (boostId === 5 && boost5Val >= 1) {
+          continue;
+        }
+        if (boostId === 4 && (hero && hero.piercing != null && hero.piercing >= 95)) {
+          continue;
+        }
+        if (boostId === 2 && (hero && hero.drainRate != null && hero.drainRate >= 25)) {
+          continue;
+        }
+        const extraRates = getExtraRates(session);
+        if (boostId === 6 && extraRates.xp >= 2) continue;
+        if (boostId === 7 && extraRates.coins >= 2) continue;
+        if (boostId === 13 && extraRates.upgrade >= 2) continue;
+
+        if (boostId === 14) {
+          const d = (hero && hero.shieldDamageOdds != null) ? hero.shieldDamageOdds : 50;
+          const q = 100 - Math.min(d, 100);
+          if (q >= 90) continue;
+        }
+
+        if (boostId === 10 && mode === 'score') {
+          continue;
+        }
+
+        candidates.push(boostId);
+      }
+
+      candidates.sort((a, b) => a - b);
+
       if (candidates.length === 0) {
-        // 빈 후보는 임시값: 그 부위 옵션 생략 [L3]
         continue;
       }
-      const pickedBoost = candidates[drawInt(rng, 0, candidates.length - 1, 'upgradeBoost')];
+
+      const pickIdx = drawInt(rng, 0, candidates.length - 1, 'upgradeBoost');
+      const pickedBoost = candidates[pickIdx];
       const incAmount = getUpgradeIncrease(session, pickedBoost);
+
       cards.push({
         type: 'upgrade',
         slot,
@@ -4927,9 +5339,17 @@
       }
       checkHeroSurvival(session);
     } else if (potionForm === 'charge') {
-      if (chosenTargetAction) {
-        const wait = chosenTargetAction.effectiveWait != null ? chosenTargetAction.effectiveWait : 10;
-        chosenTargetAction.charge = Math.min(wait, (chosenTargetAction.charge || 0) + 1);
+      let target = chosenTargetAction;
+      if (target && typeof target === 'object' && target.actionKey != null && Array.isArray(session.actions)) {
+        const found = session.actions.find(a => a && a.actionKey === target.actionKey);
+        if (found) target = found;
+      } else if (typeof target === 'number' && Array.isArray(session.actions)) {
+        const found = session.actions.find(a => a && a.actionKey === target);
+        if (found) target = found;
+      }
+      if (target) {
+        const wait = target.effectiveWait != null ? target.effectiveWait : 10;
+        target.charge = Math.min(wait, (target.charge || 0) + 1);
       }
     }
   }
@@ -4959,6 +5379,66 @@
   }
 
   /**
+   * [조각 45 교정 C.1, C.2] 단일 토큰 데이터 객체 적용
+   * 보관된 토큰은 종류(경험·코인·강화·물약·방패)·값·배수를 값 그대로 데이터로 보관한다.
+   * 적용 시점의 extraRate(추가율)를 반영하여 게이지에 더한다.
+   */
+  function applyTokenItem(session, token) {
+    if (!session || !token) return;
+    if (typeof token === 'function') {
+      token();
+      return;
+    }
+    if (token.type === 'custom' && typeof token.fn === 'function') {
+      token.fn();
+      return;
+    }
+
+    const extraRates = getExtraRates(session);
+    const type = token.type || token.kind;
+    const mult = token.mult != null ? token.mult : (token.multiplier != null ? token.multiplier : 1);
+
+    if (type === 'xp') {
+      applySingleToken(session, 'xp', mult, extraRates.xp);
+    } else if (type === 'coins' || type === 'coin') {
+      applySingleToken(session, 'coins', mult, extraRates.coins);
+    } else if (type === 'upgrade') {
+      applySingleToken(session, 'upgrade', mult, extraRates.upgrade);
+    } else if (type === 'potion') {
+      applyPotionToken(session, token.potionForm || 'normal', token.targetAction || null);
+    } else if (type === 'shield') {
+      applyShieldToken(session, mult, extraRates.upgrade);
+    }
+  }
+
+  /**
+   * [조각 45 교정 C.1, C.2] 보류된 자원 토큰 순차 적용
+   * 토큰을 한 개씩 적용하다가 게이지 100 경계로 메뉴가 생기면 그 자리에서 멈춘다.
+   * 남은 토큰은 session.pendingResourceTokens에 보관된다.
+   */
+  function flushResourceTokens(session) {
+    if (!session || !Array.isArray(session.pendingResourceTokens)) return;
+    while (session.pendingResourceTokens.length > 0) {
+      if (session.phase === 'choice' || (Array.isArray(session.waitingChoices) && session.waitingChoices.length > 0)) {
+        break;
+      }
+      if (session.phase === 'end') {
+        break;
+      }
+
+      const token = session.pendingResourceTokens.shift();
+      applyTokenItem(session, token);
+
+      if (session.phase === 'choice' || (Array.isArray(session.waitingChoices) && session.waitingChoices.length > 0)) {
+        break;
+      }
+      if (session.phase === 'end') {
+        break;
+      }
+    }
+  }
+
+  /**
    * 수집 묶음 카운터 및 중복 방지 상태 생성 [교정 17.1, 교정 26.1]
    * 연결 입력·독립 스킬 수집·가시·자해·불·독·종족7·적10 자폭 이탈이 각자 수집 묶음을 시작할 때 다섯 카운터를 0으로 초기화한다.
    */
@@ -4977,13 +5457,34 @@
   }
 
   /**
-   * 토큰 적용 지연 또는 즉시 실행 헬퍼 [교정 26.1]
+   * 토큰 적용 지연 또는 즉시 실행 헬퍼 [교정 26.1, 교정 37 B.2, 조각 45 교정 C.1]
    */
-  function queueOrApplyToken(session, batch, applyFn) {
-    if (batch && batch.deferTokenApply) {
-      batch.pendingTokens.push(applyFn);
+  function queueOrApplyToken(session, batch, tokenItemOrFn) {
+    if (session && session._inEnemyAbilities) {
+      session._endTurnPendingQueue = session._endTurnPendingQueue || [];
+      if (typeof tokenItemOrFn === 'function') {
+        session._endTurnPendingQueue.push({ type: 'token', apply: tokenItemOrFn });
+      } else {
+        session._endTurnPendingQueue.push({
+          type: 'token',
+          token: tokenItemOrFn,
+          apply: () => applyTokenItem(session, tokenItemOrFn)
+        });
+      }
+    } else if (batch && batch.deferTokenApply) {
+      batch.pendingTokens.push(tokenItemOrFn);
     } else {
-      applyFn();
+      if (session) {
+        session.pendingResourceTokens = session.pendingResourceTokens || [];
+        session.pendingResourceTokens.push(
+          typeof tokenItemOrFn === 'function' ? { type: 'custom', fn: tokenItemOrFn } : tokenItemOrFn
+        );
+        flushResourceTokens(session);
+      } else if (typeof tokenItemOrFn === 'function') {
+        tokenItemOrFn();
+      } else {
+        applyTokenItem(session, tokenItemOrFn);
+      }
     }
   }
 
@@ -5061,9 +5562,7 @@
       const bonus = rollBonusForKind(session, 'xp', seq, options.preferredTag || 'bonusToken');
       const tokenCount = 1 + bonus;
       for (let t = 0; t < tokenCount; t++) {
-        queueOrApplyToken(session, activeBatch, () => {
-          applySingleToken(session, 'xp', 1, extraRates.xp);
-        });
+        queueOrApplyToken(session, activeBatch, { type: 'xp', mult: 1 });
       }
       return { rewarded: true, enemyKind: 0, tokens: tokenCount };
     } else {
@@ -5075,7 +5574,8 @@
         }
       }
 
-      const bounty = distributeSpecialEnemyBounty(session, eKind, null, null, null, activeBatch);
+      // [I0 E10, J3, 교정 17.7] 10번 적은 처치 시 주변 8칸 폭발 연쇄만 수행하고 자기 자신의 특수 적 토큰 분배(15~25 토큰)는 하지 않는다
+      const bounty = (eKind === 10) ? null : distributeSpecialEnemyBounty(session, eKind, null, null, null, activeBatch);
       session.specialKills = (session.specialKills || 0) + 1;
 
       // 종족 9: 특수 적 처치 시 보유 스킬 중 무작위 1개 즉시 완충 [M4 R09, J3, 교정 21.2, 교정 27.6]
@@ -5143,9 +5643,7 @@
       const seq = activeBatch.counters.coins;
       const tokenCount = 1 + rollBonusForKind(session, 'coins', seq, preferredTag);
       for (let t = 0; t < tokenCount; t++) {
-        queueOrApplyToken(session, activeBatch, () => {
-          applySingleToken(session, 'coins', goldMult, extraRates.coins);
-        });
+        queueOrApplyToken(session, activeBatch, { type: 'coins', mult: goldMult });
       }
       if (!cell.enemy._rewardedKill) {
         cell.enemy._rewardedKill = true;
@@ -5204,9 +5702,7 @@
         }
         const tokenCount = 1 + rollBonusForKind(session, 'xp', seq, preferredTag);
         for (let t = 0; t < tokenCount; t++) {
-          queueOrApplyToken(session, activeBatch, () => {
-            applySingleToken(session, 'xp', 1, extraRates.xp);
-          });
+          queueOrApplyToken(session, activeBatch, { type: 'xp', mult: 1 });
         }
         return { collected: true, tokens: tokenCount };
       }
@@ -5226,8 +5722,8 @@
       }
 
       const pForm = cell.potionForm || 'normal';
-      if (pForm === 'bomb') {
-        // 폭발 물약은 물약 카운터를 올리고 주변 8칸 연쇄 수집만 일으키며 일반 물약 토큰은 0 [교정 17.2]
+      if (pForm === 'bomb' || pForm === 'explosion') {
+        // 폭발 물약은 물약 카운터를 올리고 주변 8칸 연쇄 수집만 일으키며 일반 물약 토큰은 0 [교정 17.2, 교정 37 B.1]
         cell._potionCounted = true;
         triggerBombPotion(session, cell, activeBatch);
         return { collected: true, tokens: 0, bombTriggered: true };
@@ -5246,17 +5742,13 @@
             targetAction = candidates[idx];
           }
         }
-        queueOrApplyToken(session, activeBatch, () => {
-          applyPotionToken(session, pForm, targetAction);
-        });
+        queueOrApplyToken(session, activeBatch, { type: 'potion', potionForm: pForm, targetAction });
         return { collected: true, tokens: 1 };
       }
 
       const tokenCount = 1 + rollBonusForKind(session, 'potion', seq, preferredTag);
       for (let t = 0; t < tokenCount; t++) {
-        queueOrApplyToken(session, activeBatch, () => {
-          applyPotionToken(session, 'normal');
-        });
+        queueOrApplyToken(session, activeBatch, { type: 'potion', potionForm: 'normal' });
       }
       return { collected: true, tokens: tokenCount };
     }
@@ -5272,9 +5764,7 @@
       }
       const tokenCount = 1 + rollBonusForKind(session, 'shield', seq, preferredTag);
       for (let t = 0; t < tokenCount; t++) {
-        queueOrApplyToken(session, activeBatch, () => {
-          applyShieldToken(session, shieldMult, extraRates.upgrade);
-        });
+        queueOrApplyToken(session, activeBatch, { type: 'shield', mult: shieldMult });
       }
       return { collected: true, tokens: tokenCount };
     }
@@ -5289,9 +5779,7 @@
       }
       const tokenCount = 1 + rollBonusForKind(session, 'coins', seq, preferredTag);
       for (let t = 0; t < tokenCount; t++) {
-        queueOrApplyToken(session, activeBatch, () => {
-          applySingleToken(session, 'coins', goldMult, extraRates.coins);
-        });
+        queueOrApplyToken(session, activeBatch, { type: 'coins', mult: goldMult });
       }
       return { collected: true, tokens: tokenCount };
     }
@@ -5322,6 +5810,10 @@
       if (!c) continue;
       const res = collectCellInBatch(session, c, batch, options.cellOptions || {});
       if (res && res.tokens) tokens += res.tokens;
+    }
+    // [교정 41 B.3] 수집 묶음을 쓰는 스킬이 끝났을 때의 종류별 카운터를 그 턴이 끝날 때까지 남겨 둔다
+    if (session) {
+      session._lastSkillCollectionCounters = { ...(batch.counters || {}) };
     }
     return { batch, tokens };
   }
@@ -5366,6 +5858,10 @@
    * 특수 적 처치 보상 토큰 분배 [J1, J2, J3, 교정 26.1]
    */
   function distributeSpecialEnemyBounty(session, enemyKind, overrideTotal = null, overrideCoin = null, overrideFirst = null, batch = null) {
+    // [I0 E10, J3, 교정 17.7] 10번 적은 처치/자폭 시 토큰 분배 0
+    if (enemyKind === 10) {
+      return { total: 0, potionTokens: 0, shieldTokens: 0, coinTokens: 0, xpTokens: 0 };
+    }
     const rng = session.rng;
     const total = overrideTotal != null ? overrideTotal : drawInt(rng, 15, 25, 'specialBountyTotal');
     const extraRates = getExtraRates(session);
@@ -5411,24 +5907,16 @@
     }
 
     for (let i = 0; i < potionTokens; i++) {
-      queueOrApplyToken(session, batch, () => {
-        applyPotionToken(session, 'normal');
-      });
+      queueOrApplyToken(session, batch, { type: 'potion', potionForm: 'normal' });
     }
     for (let i = 0; i < shieldTokens; i++) {
-      queueOrApplyToken(session, batch, () => {
-        applyShieldToken(session, shieldMult, extraRates.upgrade);
-      });
+      queueOrApplyToken(session, batch, { type: 'shield', mult: shieldMult });
     }
     for (let i = 0; i < coinTokens; i++) {
-      queueOrApplyToken(session, batch, () => {
-        applySingleToken(session, 'coins', goldMult, extraRates.coins);
-      });
+      queueOrApplyToken(session, batch, { type: 'coins', mult: goldMult });
     }
     for (let i = 0; i < xpTokens; i++) {
-      queueOrApplyToken(session, batch, () => {
-        applySingleToken(session, 'xp', 1, extraRates.xp);
-      });
+      queueOrApplyToken(session, batch, { type: 'xp', mult: 1 });
     }
 
     return {
@@ -5632,7 +6120,60 @@
 
     const waypoints = inspection.waypoints || [];
     const waypointSet = new Set(waypoints);
+
+    // [교정 41 B.2, B.3] 스킬 35(고리수집)의 안쪽 칸 수집을 경로보다 먼저, 별도 수집 묶음으로 한다.
+    const loopCollected = [];
+    let loopBatch = null;
+    const hasSkill35 = Boolean(session.hero && session.hero.activeNow && (session.hero.activeNow.skill35 || session.hero.activeNow.loopCollect));
+    if (hasSkill35 && Array.isArray(path) && path.length >= 4) {
+      const p0 = path[0];
+      const pEnd = path[path.length - 1];
+      const isClosedLoop = Math.max(Math.abs(p0.x - pEnd.x), Math.abs(p0.y - pEnd.y)) <= 1;
+      if (isClosedLoop) {
+        for (let y = 1; y <= 4; y++) {
+          for (let x = 1; x <= 4; x++) {
+            const c = getCell(session, x, y);
+            if (!c || c.erased) continue;
+            const isBoundary = path.some(p => p.x === x && p.y === y);
+            if (!isBoundary && isPointInPolygon(x, y, path)) {
+              if (c.enemy && c.enemy.enemyKind > 0) continue; // 특수적 제외
+              loopCollected.push(c);
+            }
+          }
+        }
+
+        if (loopCollected.length > 0) {
+          loopBatch = createCollectionBatch();
+          loopBatch.deferTokenApply = true;
+          // [교정 41 B.3] 앞선 수집 스킬의 카운터에서 이어 센다
+          if (session._lastSkillCollectionCounters) {
+            loopBatch.counters = { ...session._lastSkillCollectionCounters };
+          }
+          for (const c of loopCollected) {
+            c.erased = true;
+            if (c.kind === KIND_ENEMY || c.kindCode === 1) {
+              if (c.enemy) c.enemy.hitPoints = 0;
+            }
+            loopBatch.preErasedCells.add(c);
+            loopBatch.preErasedCells.add(c.cellKey || c);
+            collectCellInBatch(session, c, loopBatch, { allowPreErased: true, skipKillLedger: true });
+          }
+        }
+
+        // [교정 22.2] 업적 58: 실제 내부 수집 수가 경유 제외 경로 길이보다 클 때만 100 진행 사건
+        if (loopCollected.length > inspection.effectiveLength) {
+          emitAchievementProgress(session, 58, 100);
+        }
+      }
+    }
+
     const turnBatch = createCollectionBatch();
+    if (loopCollected.length > 0) {
+      for (const c of loopCollected) {
+        turnBatch.preErasedCells.add(c);
+        turnBatch.preErasedCells.add(c.cellKey || c);
+      }
+    }
 
     // [교정 16.7, 교정 21.1, 교정 22.3] 연결 확정 직전에 공통 공격 처치 수·첫 낙하 생성 카운터를 0으로 한다
     session.killLedger = 0;
@@ -5709,45 +6250,7 @@
       }
     }
 
-    // [S35 / 35 고리수집] 이번턴 경로 4칸 이상·처음과 끝이 8방향 인접하면 x1~4·y1~4 안쪽 16칸 중 비경계·내부 비특수칸만 공통수집 [K0 S35, 교정 17.1, 교정 22.2]
-    // 임시값: 자기교차경로는 행별 홀짝안쪽판정, 경계제외 (이유: 모든 교차모양의 내부판정 미확정)
-    const loopCollected = [];
-    if (session.hero && session.hero.activeNow && (session.hero.activeNow.skill35 || session.hero.activeNow.loopCollect)) {
-      if (Array.isArray(path) && path.length >= 4) {
-        const p0 = path[0];
-        const pEnd = path[path.length - 1];
-        const isClosedLoop = Math.max(Math.abs(p0.x - pEnd.x), Math.abs(p0.y - pEnd.y)) <= 1;
-        if (isClosedLoop) {
-          for (let y = 1; y <= 4; y++) {
-            for (let x = 1; x <= 4; x++) {
-              const c = getCell(session, x, y);
-              if (!c || c.erased) continue;
-              const isBoundary = path.some(p => p.x === x && p.y === y);
-              if (!isBoundary && isPointInPolygon(x, y, path)) {
-                if (c.enemy && c.enemy.enemyKind > 0) continue; // 특수적 제외
-                loopCollected.push(c);
-              }
-            }
-          }
 
-          for (const c of loopCollected) {
-            c.erased = true;
-            if (c.kind === KIND_ENEMY || c.kindCode === 1) {
-              if (c.enemy) c.enemy.hitPoints = 0;
-              // [교정 31.1] 스킬 35 고리 수집 처치는 실제 공격 처치가 아니므로 killLedger에 세지 않는다
-            }
-            turnBatch.preErasedCells.add(c);
-            turnBatch.preErasedCells.add(c.cellKey || c);
-            turnBatch.deferredLoopCells.push(c);
-          }
-
-          // [교정 22.2] 업적 58: 실제 내부 수집 수가 경유 제외 경로 길이보다 클 때만 100 진행 사건
-          if (loopCollected.length > inspection.effectiveLength) {
-            emitAchievementProgress(session, 58, 100);
-          }
-        }
-      }
-    }
 
     // 1단계 마무리: 유효 경로 칸 및 처치 보상 수집, 토큰 큐잉 (낙하 전 판 상태에서 실행) [F1, 교정 17.1~17.7, 교정 26.1]
     turnBatch.deferTokenApply = true;
@@ -5834,14 +6337,27 @@
       checkHeroSurvival(session);
     }
 
-    // 3단계: 자원 토큰 도착 순서대로 플레이어 갱신 [F2, G1~G5, J1~J3, 교정 15.3, 교정 17.1~17.3, 교정 26.1]
-    turnBatch.deferTokenApply = false;
-    if (session.phase !== 'end' && Array.isArray(turnBatch.pendingTokens)) {
-      for (const applyFn of turnBatch.pendingTokens) {
-        applyFn();
+    // 3단계: 자원 토큰 도착 순서대로 플레이어 갱신 [F2, G1~G5, J1~J3, 교정 15.3, 교정 17.1~17.3, 교정 26.1, 교정 41 B.2, 조각 45 교정 C.1, C.2]
+    // [교정 41 B.2] 보상 반영 순서도 안쪽 묶음 -> 경로 묶음이다
+    session.pendingResourceTokens = session.pendingResourceTokens || [];
+
+    if (loopBatch && Array.isArray(loopBatch.pendingTokens)) {
+      for (const t of loopBatch.pendingTokens) {
+        session.pendingResourceTokens.push(t);
       }
+      loopBatch.pendingTokens.length = 0;
     }
-    turnBatch.pendingTokens.length = 0;
+
+    if (turnBatch && Array.isArray(turnBatch.pendingTokens)) {
+      for (const t of turnBatch.pendingTokens) {
+        session.pendingResourceTokens.push(t);
+      }
+      turnBatch.pendingTokens.length = 0;
+    }
+
+    if (session.phase !== 'end') {
+      flushResourceTokens(session);
+    }
 
     // [교정 22.4] 점수 모드 이번 입력 점수 누적 및 0 초기화
     commitScoreModeTurnPoints(session);
@@ -6129,7 +6645,8 @@
       baseWait: 18,
       hasTarget: (session) => {
         return Boolean(session && session.cells && session.cells.some(c =>
-          !c.erased && (c.kind === KIND_ENEMY || c.kindCode === 1) && c.enemy && c.enemy.enemyKind > 0 && c.enemy.hitPoints > 0
+          !c.erased && (c.kind === KIND_ENEMY || c.kindCode === 1) && c.enemy &&
+          ((c.enemy.enemyKind > 0 && c.enemy.hitPoints > 0) || c.enemy.shellState === 1)
         ));
       }
     },
@@ -6432,6 +6949,9 @@
           applyPotionToken(session, 'normal');
         }
       }
+      if (session) {
+        session._lastSkillCollectionCounters = { potion: seq };
+      }
       applyDropAndRefill(session, false);
       return { success: true, actionKey, collectedCount: potionCells.length };
     }
@@ -6462,6 +6982,9 @@
         for (let t = 0; t < tokenCount; t++) {
           applyShieldToken(session, shieldMult, extraRates.upgrade);
         }
+      }
+      if (session) {
+        session._lastSkillCollectionCounters = { shield: seq };
       }
       applyDropAndRefill(session, false);
       return { success: true, actionKey, collectedCount: shieldCells.length };
@@ -6648,6 +7171,9 @@
           applySingleToken(session, 'coins', goldMult, extraRates.coins);
         }
       }
+      if (session) {
+        session._lastSkillCollectionCounters = { coin: seq, coins: seq };
+      }
       applyDropAndRefill(session, false);
       return { success: true, actionKey, collectedCount: coinCells.length };
     }
@@ -6729,23 +7255,44 @@
     }
 
     if (actionKey === 20) {
-      // S20 / 20 (특수벗기기): 특수적 하나 무작위로 일반화, 능력치 유지 [K0 S20]
-      // 임시값: 카운트·변환·유예해제 (이유: 32번과 겹친 정확한 상태 초기화 미확정)
+      // S20 / 20 (특수벗기기): 특수적 하나 무작위로 일반화, 능력치 유지 [K0 S20, 교정 40 A.3, 교정 41 B.1]
+      // [교정 40 A.3] 후보 번호는 왼쪽 열(x=0)부터 열마다 위에서 아래로 0, 1, 2...를 매긴다.
+      // [교정 41 B.1] 변환 상태(휴면)의 32번 적도 스킬 20의 유효 타겟
       const specialEnemies = [];
-      for (const c of session.cells) {
-        if (!c || c.erased) continue;
-        if ((c.kind === KIND_ENEMY || c.kindCode === 1) && c.enemy && c.enemy.enemyKind > 0 && c.enemy.hitPoints > 0) {
-          specialEnemies.push(c);
+      for (let x = 0; x < BOARD_WIDTH; x++) {
+        for (let y = 0; y < BOARD_HEIGHT; y++) {
+          const c = getCell(session, x, y);
+          if (!c || c.erased) continue;
+          if ((c.kind === KIND_ENEMY || c.kindCode === 1) && c.enemy &&
+              ((c.enemy.enemyKind > 0 && c.enemy.hitPoints > 0) || c.enemy.shellState === 1)) {
+            specialEnemies.push(c);
+          }
         }
       }
       if (specialEnemies.length > 0) {
-        const picked = pickRandomUpToN(session.rng, specialEnemies, 1, 'skill20Target');
-        if (picked.length > 0 && picked[0]) {
-          const t = picked[0];
+        // [교정 40 A.3] 후보 수 N이 1 이상이면 항상 0 이상 N−1 이하의 정수를 한 번 뽑아 그 번호의 후보를 고른다(N=1이면 0을 뽑음).
+        const targetIdx = drawInt(session.rng, 0, specialEnemies.length - 1, 'skill20Target');
+        const t = specialEnemies[targetIdx];
+        if (t && t.enemy) {
+          const wasShellDormant = (t.enemy.shellState === 1);
           t.enemy.enemyKind = 0;
           t.enemy.countLeft = 0;
           t.enemy.shellState = 0;
           t.enemy.revivalDelay = false;
+          // [교정 41 B.1] 벗긴 적은 숙적 표시를 끈다
+          t.enemy.isMortalEnemy = false;
+          t.enemy.isNemesis = false;
+          if (t.isNemesis != null) t.isNemesis = false;
+          if (t.isMortalEnemy != null) t.isMortalEnemy = false;
+          // [교정 41 B.1] 변환 상태(휴면)의 32번 적에게 쓰면 휴면이 아닌 일반 적(체력 1, 공격 0, 방어 0)이 된다.
+          // 단, 원래 체력/능력치가 남아있는 경우(조각 10) 능력치를 유지하고, 체력이 없는(0 이하인) 경우에만 체력 1, 공격 0, 방어 0으로 초기화한다.
+          if (wasShellDormant && (t.enemy.hitPoints == null || t.enemy.hitPoints <= 0)) {
+            t.enemy.hitPoints = 1;
+            t.enemy.strike = 0;
+            t.enemy.guard = 0;
+            t.enemy.attackPower = 0;
+            t.enemy.defensePower = 0;
+          }
         }
       }
       return { success: true, actionKey };
@@ -6884,9 +7431,9 @@
     }
 
     if (actionKey === 28) {
-      // S28 / 28 (구역쓸기): 중심 x·y 각각 1~4 추첨, 주변 3×3 수집. 특수적 제외, 산성물약 무효과 제거 [K0 S28, 교정 17.5, 17.6]
-      const centerX = drawInt(session.rng, 1, 4, 'sweepCenterX');
+      // S28 / 28 (구역쓸기): 먼저 행 y를 1~4에서 뽑고 그다음 열 x를 1~4에서 뽑는다. 주변 3×3 수집. 특수적 제외, 산성물약 무효과 제거 [K0 S28, 교정 17.5, 17.6, 교정 40 A.4]
       const centerY = drawInt(session.rng, 1, 4, 'sweepCenterY');
+      const centerX = drawInt(session.rng, 1, 4, 'sweepCenterX');
 
       const collectedCells = [];
       for (let dx = -1; dx <= 1; dx++) {
@@ -7023,7 +7570,8 @@
         emitAchievementProgress(session, 64, 100);
       }
 
-      applyDropAndRefill(session, false);
+      // [교정 40 A.2] 한번쓸기(스킬 33)의 보충에서는 스킬 24의 코인 강제를 끈다
+      applyDropAndRefill(session, false, { suppressCoinForce: true });
       return { success: true, actionKey, collectedCount: cellsToCollect.length };
     }
 
@@ -7415,9 +7963,17 @@
     cleanWaitingChoices(session);
     if (session.waitingChoices.length === 0) {
       session.phase = 'input';
-      // [교정 26.4] 실제로 중단된 연결 처리가 있을 때만 이어서 처리하고, 독립 메뉴 닫기 시 새 턴/반격을 진행하지 않는다.
-      if (options.resumeTurn && session._pausedInSettle) {
-        return continueTurn(session, options);
+
+      // [조각 45 교정 C.1] 메뉴 선택이 적용된 뒤 보관한 토큰을 이어서 적용
+      if (Array.isArray(session.pendingResourceTokens) && session.pendingResourceTokens.length > 0) {
+        flushResourceTokens(session);
+      }
+
+      // [교정 26.4, 조각 45 교정 C.1] 모든 토큰이 적용되고 메뉴가 없어진 뒤에만 반격 단계로 넘어감
+      if (session.waitingChoices.length === 0 && session.phase !== 'choice') {
+        if ((options.resumeTurn || options.resumeTurn === undefined) && session._pausedInSettle) {
+          return continueTurn(session, options);
+        }
       }
     }
 
@@ -7496,6 +8052,9 @@
       _emittedOnce: session._emittedOnce || {},
       turnContext: session.turnContext,
       resumeTurnData: session.resumeTurnData,
+      pendingResourceTokens: session.pendingResourceTokens || [],
+      isCompleted: Boolean(session.isCompleted || session.completed),
+      completed: Boolean(session.isCompleted || session.completed),
       randomState: randomState,
       provisional: session.provisional
     };
@@ -7679,6 +8238,9 @@
       _emittedOnce: obj._emittedOnce ? { ...obj._emittedOnce } : {},
       turnContext: obj.turnContext || null,
       resumeTurnData: obj.resumeTurnData || null,
+      pendingResourceTokens: Array.isArray(obj.pendingResourceTokens) ? obj.pendingResourceTokens.map(t => ({ ...t })) : [],
+      isCompleted: Boolean(obj.isCompleted || obj.completed),
+      completed: Boolean(obj.isCompleted || obj.completed),
       profile: (options && options.profile) || null,
       randomState: obj.randomState || null,
       events: [],
@@ -7868,12 +8430,79 @@
   }
 
   /**
-   * 퍽/결함 슬롯 유효성 검증 및 정리 [M2, 교정 21.7]
-   * - 퍽4칸·결함4칸 각각 중복을 검사해 먼저 나온 ID를 남기고 뒤 중복을 빈칸(null)으로 한다.
-   * - 그 뒤 결함 없는 슬롯의 퍽은 지우되 결함만 있는 칸은 남긴다.
-   * - 교체설정 20칸은 앞에서부터 허용수만 남기고 그 뒤 설정은 빈칸으로 한다.
-   * - 비기본직업 성장 5 미만이면 선택종족을 기본종족으로 되돌린다.
-   * - 고정첫쌍·해제슬롯의 기존 우리 입력검사는 별도 유지하며 이를 기준검증본문의 추가분기로 주장하지 않는다.
+   * 설정창 퍽 중복 선택 방지 판정 [교정 C.3]
+   * - 비기본 직업의 슬롯 0 고정 퍽은 다른 슬롯(1~3)에서 선택 불가
+   * - 다른 슬롯(k !== slotIndex)이 이미 선택한 퍽은 선택 불가
+   */
+  function isPerkChoiceDisabled(classId, slotIndex, perkId, currentPerks = []) {
+    if (perkId == null || perkId === '' || perkId === 255 || perkId === -1) return false;
+    const cid = Math.max(0, Math.min(9, Math.floor(classId || 0)));
+    const targetId = Number(perkId);
+    if (Number.isNaN(targetId)) return false;
+
+    const classDef = CLASS_DEFINITIONS[cid] || CLASS_DEFINITIONS[0];
+    if (cid > 0 && slotIndex !== 0) {
+      if (classDef.fixedPerk != null && targetId === classDef.fixedPerk) {
+        return true;
+      }
+    }
+
+    if (Array.isArray(currentPerks)) {
+      for (let k = 0; k < currentPerks.length; k++) {
+        if (k === slotIndex) continue;
+        const cur = currentPerks[k];
+        if (cur != null && cur !== '' && cur !== 255 && cur !== -1) {
+          if (Number(cur) === targetId) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * 설정창 결함 중복 선택 방지 판정 [교정 C.3]
+   * - 비기본 직업의 슬롯 0 고정 결함은 다른 슬롯(1~3)에서 선택 불가
+   * - 다른 슬롯(k !== slotIndex)이 이미 선택한 결함은 선택 불가
+   */
+  function isFlawChoiceDisabled(classId, slotIndex, flawId, currentFlaws = []) {
+    if (flawId == null || flawId === '' || flawId === 255 || flawId === -1) return false;
+    const cid = Math.max(0, Math.min(9, Math.floor(classId || 0)));
+    const targetId = Number(flawId);
+    if (Number.isNaN(targetId)) return false;
+
+    const classDef = CLASS_DEFINITIONS[cid] || CLASS_DEFINITIONS[0];
+    if (cid > 0 && slotIndex !== 0) {
+      if (classDef.fixedFlaw != null && targetId === classDef.fixedFlaw) {
+        return true;
+      }
+    }
+
+    if (Array.isArray(currentFlaws)) {
+      for (let k = 0; k < currentFlaws.length; k++) {
+        if (k === slotIndex) continue;
+        const cur = currentFlaws[k];
+        if (cur != null && cur !== '' && cur !== 255 && cur !== -1) {
+          if (Number(cur) === targetId) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * 퍽/결함 슬롯 유효성 검증 및 정리 [M2, 교정 21.7, 교정 42 C.1, C.2]
+   * - 직업 0(모험가)은 퍽/결함 0개 (null 배열), 입력이 있었으면 valid: false
+   * - 비기본 직업(1~9): 첫 칸이 비어있으면 고정 쌍으로 채움
+   * - (1) 퍽 4칸·결함 4칸 각각에서 같은 값이 겹치면 앞 칸을 남기고 뒤 칸을 비운다.
+   * - (2) 그다음 퍽이 있는데 같은 칸에 결함이 없으면 그 퍽을 비운다 (결함만 있는 칸은 그대로 둔다).
+   * - (3) 슬롯 수(slotCount) 초과 칸은 비운다.
+   * - 유효성 판정: 정리해도 입력이 바뀌지 않으면 참, 바뀌면 거짓
    */
   function validatePerkFlawSetup(classId, growth = 1, perksInput = [], flawsInput = [], options = {}) {
     // 2인자 호출 validatePerkFlawSetup(perksArray, flawsArray) 지원
@@ -7895,10 +8524,12 @@
     const cid = Math.max(0, Math.min(9, Math.floor(classId || 0)));
     const classDef = CLASS_DEFINITIONS[cid] || CLASS_DEFINITIONS[0];
 
-    // 직업 0은 꾸미기 불가·퍽/결함 0개 [M2]
+    // 직업 0은 꾸미기 불가·퍽/결함 0개 [M2, 교정 C.2]
     if (cid === 0) {
+      const hasAnyInput = (Array.isArray(perksInput) && perksInput.some(p => p != null && p !== '없음' && p !== 255 && p !== -1)) ||
+                          (Array.isArray(flawsInput) && flawsInput.some(f => f != null && f !== '없음' && f !== 255 && f !== -1));
       return {
-        valid: true,
+        valid: !hasAnyInput,
         perks: [null, null, null, null],
         flaws: [null, null, null, null],
         slotCount: 0,
@@ -7910,78 +8541,79 @@
     }
 
     const slotCount = getPerkSlotCount(growth);
-    const perks = [null, null, null, null];
-    const flaws = [null, null, null, null];
+    const rawPerks = [null, null, null, null];
+    const rawFlaws = [null, null, null, null];
 
-    // 고정첫쌍·해제슬롯의 기존 우리 입력검사는 별도 유지 (1칸 축약 입력 등 UI 보조용)
-    const useLegacyFixedFirstPair = Boolean(
-      (options && options.enforceFixedFirstPair) ||
-      (Array.isArray(perksInput) && perksInput.length === 1 && Array.isArray(flawsInput) && flawsInput.length === 1 && perksInput[0] === 0 && flawsInput[0] === 0)
-    );
+    for (let i = 0; i < 4; i++) {
+      let p = (Array.isArray(perksInput) && perksInput[i] != null && perksInput[i] !== '없음' && perksInput[i] !== 255 && perksInput[i] !== -1)
+        ? Number(perksInput[i])
+        : null;
+      let f = (Array.isArray(flawsInput) && flawsInput[i] != null && flawsInput[i] !== '없음' && flawsInput[i] !== 255 && flawsInput[i] !== -1)
+        ? Number(flawsInput[i])
+        : null;
+      if (Number.isNaN(p)) p = null;
+      if (Number.isNaN(f)) f = null;
+      rawPerks[i] = p;
+      rawFlaws[i] = f;
+    }
 
-    if (useLegacyFixedFirstPair) {
+    const perks = [...rawPerks];
+    const flaws = [...rawFlaws];
+
+    // 비기본 직업의 첫 칸: 비어있거나 enforceFixedFirstPair인 경우 고정 쌍으로 채움 [교정 C.1]
+    const shouldFillFixedPair = (options && options.enforceFixedFirstPair) ||
+      (rawPerks[0] == null && rawFlaws[0] == null) ||
+      (Array.isArray(perksInput) && perksInput.length === 1 && Array.isArray(flawsInput) && flawsInput.length === 1 && perksInput[0] === 0 && flawsInput[0] === 0);
+
+    if (shouldFillFixedPair) {
       perks[0] = classDef.fixedPerk;
       flaws[0] = classDef.fixedFlaw;
-      const usedPerks = new Set();
-      const usedFlaws = new Set();
-      if (perks[0] != null) usedPerks.add(perks[0]);
-      if (flaws[0] != null) usedFlaws.add(flaws[0]);
+    }
 
-      for (let i = 1; i < slotCount; i++) {
-        let p = (Array.isArray(perksInput) && perksInput[i] != null && perksInput[i] !== '없음') ? Number(perksInput[i]) : null;
-        let f = (Array.isArray(flawsInput) && flawsInput[i] != null && flawsInput[i] !== '없음') ? Number(flawsInput[i]) : null;
-        if (Number.isNaN(p)) p = null;
-        if (Number.isNaN(f)) f = null;
-        if (p != null) {
-          if (usedPerks.has(p)) p = null;
-          else usedPerks.add(p);
+    // 1) 퍽 4칸·결함 4칸 각각에서 같은 값이 겹치면 앞 칸을 남기고 뒤 칸을 비운다 [교정 21.7, 교정 C.2]
+    const usedPerks = new Set();
+    const usedFlaws = new Set();
+    for (let i = 0; i < 4; i++) {
+      let p = perks[i];
+      let f = flaws[i];
+
+      if (p != null) {
+        if (usedPerks.has(p)) {
+          p = null;
+        } else {
+          usedPerks.add(p);
         }
-        if (f != null) {
-          if (usedFlaws.has(f)) f = null;
-          else usedFlaws.add(f);
-        }
-        if (f == null) p = null;
-        perks[i] = p;
-        flaws[i] = f;
       }
-    } else {
-      // [교정 21.7] 기준 설정검증 본문:
-      // 1) 퍽4칸·결함4칸 각각 중복을 검사해 먼저 나온 ID를 남기고 뒤 중복을 빈칸(null)으로 한다.
-      const usedPerks = new Set();
-      const usedFlaws = new Set();
-      for (let i = 0; i < 4; i++) {
-        let p = (Array.isArray(perksInput) && perksInput[i] != null && perksInput[i] !== '없음' && perksInput[i] !== 255 && perksInput[i] !== -1)
-          ? Number(perksInput[i])
-          : null;
-        let f = (Array.isArray(flawsInput) && flawsInput[i] != null && flawsInput[i] !== '없음' && flawsInput[i] !== 255 && flawsInput[i] !== -1)
-          ? Number(flawsInput[i])
-          : null;
-        if (Number.isNaN(p)) p = null;
-        if (Number.isNaN(f)) f = null;
-
-        if (p != null) {
-          if (usedPerks.has(p)) {
-            p = null;
-          } else {
-            usedPerks.add(p);
-          }
+      if (f != null) {
+        if (usedFlaws.has(f)) {
+          f = null;
+        } else {
+          usedFlaws.add(f);
         }
-        if (f != null) {
-          if (usedFlaws.has(f)) {
-            f = null;
-          } else {
-            usedFlaws.add(f);
-          }
-        }
-        perks[i] = p;
-        flaws[i] = f;
       }
+      perks[i] = p;
+      flaws[i] = f;
+    }
 
-      // 2) 그 뒤 결함 없는 슬롯의 퍽은 지우되 결함만 있는 칸은 남긴다.
-      for (let i = 0; i < 4; i++) {
-        if (flaws[i] == null) {
-          perks[i] = null;
-        }
+    // 2) 그다음 퍽이 있는데 같은 칸에 결함이 없으면 그 퍽을 비운다 (결함만 있는 칸은 그대로 둔다) [교정 C.2]
+    for (let i = 0; i < 4; i++) {
+      if (flaws[i] == null) {
+        perks[i] = null;
+      }
+    }
+
+    // 3) 슬롯 수(slotCount) 초과 칸은 비운다
+    for (let i = slotCount; i < 4; i++) {
+      perks[i] = null;
+      flaws[i] = null;
+    }
+
+    // 유효성 판정: 정리해도 입력이 바뀌지 않으면 참, 바뀌면 거짓 [교정 C.2]
+    let valid = true;
+    for (let i = 0; i < 4; i++) {
+      if (rawPerks[i] !== perks[i] || rawFlaws[i] !== flaws[i]) {
+        valid = false;
+        break;
       }
     }
 
@@ -7996,7 +8628,7 @@
     const skillSwaps = validateSkillSwapSetup(growth, rawSwaps, null, options ? options.profile : null);
 
     return {
-      valid: true,
+      valid,
       perks,
       flaws,
       slotCount,
@@ -8274,6 +8906,7 @@
     session.events.push({
       type: 'achievement_progress',
       id: achievementId,
+      achievementId: achievementId,
       progress: effectiveProgress,
       ...extra
     });
@@ -8427,11 +9060,11 @@
         }
       }
 
-      // 67 / 76 종료 상태 점검
+      // 67 / 76 종료 상태 점검 [조각 45 교정 C.3]
       if (session.phase === 'end') {
         recordAchievementProgress(prof, 67, 100, session);
       }
-      if (session.mode === 'turn100' && (session.tick || 0) >= 100) {
+      if (session.mode === 'turn100' && (session.isCompleted || session.completed)) {
         recordAchievementProgress(prof, 76, 100, session);
       }
     }
@@ -8494,7 +9127,8 @@
       const qCoins = Math.floor(coinsTotal / 4);
       const qUpgrade = Math.floor(upgradeTotal / 4);
       let s = qXp + qCoins + qUpgrade;
-      const isCompleted = options.completed || session.isCompleted || (session.tick >= 100 && session.phase === 'end');
+      // [조각 45 교정 C.3] 점수 계산의 100턴 완료(2배)는 완료 표식(isCompleted / completed)으로만 판정하며 턴 >= 100으로 추정하지 않는다
+      const isCompleted = Boolean(options.completed || session.isCompleted || session.completed);
       if (isCompleted) {
         s *= 2;
       }
@@ -8971,6 +9605,15 @@
     // 조각 35 판 막힘 방지 새로 섞기 노출 [교정 35.1]
     hasAnyValidChain,
     checkAndReshuffleBoard,
-    reshuffleBoard: checkAndReshuffleBoard
+    reshuffleBoard: checkAndReshuffleBoard,
+    // 조각 37 턴 끝 대기 큐 플러시 노출 [교정 37 B.2, B.3]
+    flushPendingEndTurnActions,
+    // 조각 42 퍽·결함 선택 제한 헬퍼 노출 [교정 C.3]
+    isPerkChoiceDisabled,
+    isFlawChoiceDisabled,
+    // 조각 45 토큰 보류·순차 적용 노출 [교정 C.1, C.2]
+    applyTokenItem,
+    flushResourceTokens,
+    queueOrApplyToken
   };
 }));
