@@ -2128,15 +2128,17 @@
       return;
     }
 
+    // 지금 차례인 선택창 하나만 열고 나머지는 닫는다(겹쳐서 버튼이 안 눌리던 문제 방지)
+    modalLevelup.classList.toggle('show', pending.type === 'levelup');
+    modalUpgrade.classList.toggle('show', pending.type === 'upgrade');
+    modalShop.classList.toggle('show', pending.type === 'shop');
+
     if (pending.type === 'levelup') {
       renderLevelupChoices(pending.options || GR.getLevelupOptions(gameState, rng));
-      modalLevelup.classList.add('show');
     } else if (pending.type === 'upgrade') {
       renderUpgradeChoices(pending.options || GR.getUpgradeOptions(gameState));
-      modalUpgrade.classList.add('show');
     } else if (pending.type === 'shop') {
       renderShopChoices(pending.options || GR.getShopOptions(gameState));
-      modalShop.classList.add('show');
     }
   }
 
