@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>휴대폰 출시일 시계 — 갤럭시 S27·아이폰 18·폴드9 예상 시기 | 좌표나라</title>
+<meta name="description" content="해외 주요 IT 매체 보도와 유출을 바탕으로 정리한 최신 스마트폰 예상 출시일과 정보. 가입 없이 무료.">
+<link rel="canonical" href="https://jwapyonara.com/release-watch/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="휴대폰 출시일 시계 — 갤럭시 S27·아이폰 18·폴드9 예상 시기 | 좌표나라">
+<meta property="og:description" content="해외 주요 IT 매체 보도와 유출을 바탕으로 정리한 최신 스마트폰 예상 출시일과 정보.">
+<meta property="og:url" content="https://jwapyonara.com/release-watch/">
+<meta property="og:site_name" content="좌표나라">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "휴대폰 출시일 시계",
+  "url": "https://jwapyonara.com/release-watch/",
+  "description": "해외 주요 IT 매체 보도와 유출을 바탕으로 정리한 최신 스마트폰 예상 출시 시기와 D-day 안내.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "All"
+}
+</script>
+<link rel="stylesheet" href="../_common/common.css">
+<style>
+.rw-cards { display: grid; gap: 14px; margin-bottom: 14px; }
+.rw-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px; box-sizing: border-box; word-break: keep-all; }
+.rw-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.rw-model { font-size: 19px; font-weight: 800; color: var(--ink); margin: 0; line-height: 1.35; letter-spacing: -0.01em; }
+.badge { display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; white-space: nowrap; flex-shrink: 0; line-height: 1.4; }
+.badge.rumor { background: var(--fill); color: var(--sub); border: 1px solid var(--line); }
+.badge.leak { background: #fff8e6; color: #b45309; border: 1px solid rgba(180, 83, 9, 0.25); }
+.badge.official { background: var(--okbg); color: var(--ok); border: 1px solid rgba(18, 128, 92, 0.25); }
+[data-theme="dark"] .badge.leak { background: #382405; color: #fcd34d; border-color: #78350f; }
+[data-theme="dark"] .badge.rumor { background: #2c2c2e; color: #a1a1aa; border-color: #3f3f46; }
+.rw-expected-box { background: var(--fill); border-radius: 12px; padding: 12px 14px; margin: 12px 0; }
+.rw-expected-lbl { font-size: 13px; color: var(--sub); margin-bottom: 2px; }
+.rw-expected-val { font-size: 18px; font-weight: 800; color: var(--red); }
+.rw-meta { margin: 12px 0 0; display: grid; gap: 6px; font-size: 14px; }
+.rw-meta div { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; border-top: 1px solid var(--line); padding-top: 6px; }
+.rw-meta dt { color: var(--sub); font-size: 13px; flex-shrink: 0; }
+.rw-meta dd { margin: 0; font-weight: 600; text-align: right; color: var(--ink); word-break: break-word; }
+.rw-note { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); font-size: 14px; color: var(--sub); line-height: 1.55; }
+.rw-filter-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.rw-filter-btn { font: inherit; font-size: 14px; font-weight: 700; border: 1.5px solid var(--line); background: var(--card); color: var(--sub); border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+.rw-filter-btn.on { background: var(--panel); border-color: var(--panel); color: #fff; }
+</style>
+<script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
+</head>
+<body>
+<main class="wrap">
+  <div class="crumb"><a href="../phone/index.html">휴대폰</a> <span>›</span> <b>출시일 시계</b></div>
+  <h1>휴대폰<br>출시일 시계</h1>
+  <p class="lead">해외 주요 매체와 유출 정보로 확인된 차세대 스마트폰 예상 출시 시기입니다.</p>
+
+  <section class="result" aria-live="polite">
+    <div class="verdict" id="nextReleaseTitle">다음 출시까지 <em>공식 발표 전</em></div>
+    <div class="sub" id="nextReleaseSub">현재 등록된 기종은 해외 보도 및 유출 단계이며, 공식 확정 시 D-day가 표시됩니다.</div>
+  </section>
+
+  <div class="rw-filter-bar" role="group" aria-label="상태 필터">
+    <button type="button" class="rw-filter-btn on" data-status="all">전체 기종</button>
+    <button type="button" class="rw-filter-btn" data-status="유출">유출</button>
+    <button type="button" class="rw-filter-btn" data-status="소문">소문</button>
+    <button type="button" class="rw-filter-btn" data-status="공식">공식</button>
+  </div>
+
+  <section id="cardsList" class="rw-cards" aria-label="기종별 출시 시기 카드"></section>
+
+  <p class="note">※ 제조사 부품 수급 및 개발 일정에 따라 실제 출시 시기는 달라질 수 있습니다. 국내 출시 일정 및 출고가는 공식 발표 시점에 확정됩니다.</p>
+
+  <a class="cta" data-zw="kakao" href="#">사전예약 시세가 나오면 카톡방에 먼저<small>실시간 알림과 시세표를 가장 빠르게 받아보세요</small></a>
+
+  <div class="ad" id="ad1"></div>
+
+  <details open>
+    <summary>어떻게 정리했나요?</summary>
+    <ul>
+      <li><b>근거 대조:</b> GSMArena, SamMobile, PhoneArena, 9to5Mac 등 공신력 있는 해외 IT 전문 매체의 실제 보도와 유출된 CAD·실물 더미 자료를 기준으로 대조했습니다.</li>
+      <li><b>상태 배지:</b> 제조사의 정식 공개는 <b>공식</b>, 더미·부품·CAD 기반 보도는 <b>유출</b>, 팁스터 및 업계 전망은 <b>소문</b>으로 구분해 신뢰도를 투명하게 표시합니다.</li>
+      <li><b>출시일 시계:</b> 제조사 공식 발표가 확인된 기종이 생기면 맨 위 상단에 출시일까지 남은 날(D-day)이 자동으로 계산되어 표시됩니다.</li>
+      <li><b>엄격한 원칙:</b> 근거 없는 추측이나 지어낸 날짜는 등록하지 않으며, 쇼츠 영상 및 해외 보도가 갱신될 때마다 최신 정보로 관리합니다.</li>
+    </ul>
+  </details>
+
+  <section class="card guide">
+    <h2>새 폰 기다릴 때 알아둘 점</h2>
+    <h3>소문과 유출은 어떻게 다른가요?</h3>
+    <p>소문(루머)은 팁스터나 업계 관계자의 전언을 바탕으로 한 예상 단계입니다. 유출은 케이스 제작용 알루미늄 더미나 CAD 설계 도면, 실제 부품 사진 등이 공개된 경우로 형태적 신뢰도가 상대적으로 높습니다.</p>
+    <h3>한국 출시는 언제 알 수 있나요?</h3>
+    <p>글로벌 언팩 또는 애플 스페셜 이벤트 등 제조사의 공식 발표 행사에서 1차 출시국 포함 여부와 사전예약 일정이 확정됩니다. 공식 발표 전의 한국 출시 소문은 확정이 아니므로 주의가 필요합니다.</p>
+  </section>
+</main>
+
+<script src="calc.js"></script>
+<script src="../_common/common.js"></script>
+<script>
+(function () {
+  var FALLBACK_DATA = [
+    {
+      "model": "갤럭시 S27 시리즈",
+      "expected": "2027년 1분기 예상",
+      "source": "Sammy Fans, GSMArena",
+      "sourceDate": "2026-11-02",
+      "status": "유출",
+      "updated": "2026-11-11",
+      "note": "실물 알루미늄 더미 3종(울트라·프로·플러스) 유출 및 2027년 1분기 정식 출시 예상 보도. 상단 가로형 카메라 섬 재설계, 한국 출시는 미발표."
+    },
+    {
+      "model": "아이폰 18 기본형",
+      "expected": "2027년 봄 예상",
+      "source": "SamMobile, Notebookcheck",
+      "sourceDate": "2026-11-12",
+      "status": "소문",
+      "updated": "2026-11-13",
+      "note": "신형 3층 적층 카메라 센서 공급 물량 비축을 위해 기본형 출시가 2027년 봄으로 분리 연기되었다는 보도."
+    },
+    {
+      "model": "아이폰 18 프로",
+      "expected": "2026년 가을(올해 먼저 출시)",
+      "source": "SamMobile, Notebookcheck",
+      "sourceDate": "2026-11-12",
+      "status": "소문",
+      "updated": "2026-11-13",
+      "note": "기본형 출시가 내년 봄으로 밀리고 프로 모델만 먼저 출시된다는 해외 보도."
+    },
+    {
+      "model": "갤럭시 Z 폴드9 플러스 (가칭)",
+      "expected": "2027년 목표",
+      "source": "GSMArena, Gizchina",
+      "sourceDate": "2026-11-12",
+      "status": "소문",
+      "updated": "2026-11-12",
+      "note": "삼성디스플레이 신형 와이드 폴더블 OLED 패널 개발 연계, 2027년 출시를 목표로 개발 중이라는 소문."
+    },
+    {
+      "model": "아이폰 듀오 2 플러스 (가칭)",
+      "expected": "2027년 목표",
+      "source": "GSMArena, Gizchina",
+      "sourceDate": "2026-11-12",
+      "status": "소문",
+      "updated": "2026-11-12",
+      "note": "화면을 더 키운 차기 대화면 와이드 폴더블 모델 개발 소문. 공식 발표 전 단계."
+    },
+    {
+      "model": "갤럭시 Z 슬라이드 (가칭)",
+      "expected": "2027년 (소문)",
+      "source": "Gizchina, Sammy Fans",
+      "sourceDate": "2026-11-09",
+      "status": "소문",
+      "updated": "2026-11-09",
+      "note": "미국 특허(US 2026/0333595 A1) 기반 세로 확장형 슬라이더블 구조. 이름과 2027년 출시는 언론 해석이며 삼성 공식 확정 아님."
+    },
+    {
+      "model": "비보 와이드 소형 접는 폰 (가칭)",
+      "expected": "2027년 초 예상",
+      "source": "PhoneArena",
+      "sourceDate": "2026-11-07",
+      "status": "소문",
+      "updated": "2026-11-08",
+      "note": "안쪽 화면 6.5인치 미만 소형 와이드 접는 폰 개발 소문. 출시일·자세한 사양 미공식."
+    }
+  ];
+
+  var allData = FALLBACK_DATA;
+  var currentFilter = 'all';
+
+  var cardsList = document.getElementById('cardsList');
+  var nextReleaseTitle = document.getElementById('nextReleaseTitle');
+  var nextReleaseSub = document.getElementById('nextReleaseSub');
+  var filterBtns = document.querySelectorAll('.rw-filter-btn');
+
+  function getBadgeClass(status) {
+    if (status === '공식') return 'official';
+    if (status === '유출') return 'leak';
+    return 'rumor';
+  }
+
+  function render(items) {
+    var summary = typeof getNextReleaseSummary === 'function'
+      ? getNextReleaseSummary(items)
+      : { found: false, title: '다음 출시까지', badge: '공식 발표 전', sub: '현재 등록된 기종은 해외 보도 및 유출 단계이며, 공식 확정 시 D-day가 표시됩니다.' };
+
+    if (summary.found) {
+      nextReleaseTitle.innerHTML = summary.title + ' <em>' + summary.badge + '</em>';
+      nextReleaseSub.textContent = summary.sub;
+    } else {
+      nextReleaseTitle.innerHTML = '다음 출시까지 <em>' + summary.badge + '</em>';
+      nextReleaseSub.textContent = summary.sub;
+    }
+
+    var filtered = items;
+    if (currentFilter !== 'all') {
+      filtered = items.filter(function (it) { return it.status === currentFilter; });
+    }
+
+    if (filtered.length === 0) {
+      cardsList.innerHTML = '<div class="empty" style="display:block;">해당 상태의 기종이 없습니다.</div>';
+      return;
+    }
+
+    var html = '';
+    for (var i = 0; i < filtered.length; i++) {
+      var it = filtered[i];
+      var badgeCls = getBadgeClass(it.status);
+      html += '<article class="rw-card">'
+        + '<div class="rw-head">'
+        + '  <h2 class="rw-model">' + it.model + '</h2>'
+        + '  <span class="badge ' + badgeCls + '">' + it.status + '</span>'
+        + '</div>'
+        + '<div class="rw-expected-box">'
+        + '  <div class="rw-expected-lbl">보도된 예상 출시 시기</div>'
+        + '  <div class="rw-expected-val">' + it.expected + '</div>'
+        + '</div>'
+        + '<dl class="rw-meta">'
+        + '  <div><dt>근거 매체</dt><dd>' + it.source + '</dd></div>'
+        + '  <div><dt>보도 일자</dt><dd>' + it.sourceDate + '</dd></div>'
+        + '  <div><dt>마지막 갱신일</dt><dd>' + it.updated + '</dd></div>'
+        + '</dl>'
+        + (it.note ? '<div class="rw-note">' + it.note + '</div>' : '')
+        + '</article>';
+    }
+    cardsList.innerHTML = html;
+  }
+
+  for (var b = 0; b < filterBtns.length; b++) {
+    filterBtns[b].addEventListener('click', function () {
+      for (var j = 0; j < filterBtns.length; j++) filterBtns[j].classList.remove('on');
+      this.classList.add('on');
+      currentFilter = this.getAttribute('data-status');
+      render(allData);
+    });
+  }
+
+  // data.json 우선 로드, 실패 시 fallback 사용
+  if (typeof fetch === 'function') {
+    fetch('data.json')
+      .then(function (res) {
+        if (!res.ok) throw new Error('data.json load failed');
+        return res.json();
+      })
+      .then(function (json) {
+        if (Array.isArray(json) && json.length > 0) {
+          allData = json;
+        }
+        render(allData);
+      })
+      .catch(function () {
+        render(allData);
+      });
+  } else {
+    render(allData);
+  }
+})();
+</script>
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 휴대폰 도구"><h2>다른 휴대폰 도구</h2><h3><a href="/phone/">📱 휴대폰 전체 보기</a> <small>살 때 비교, 바꾸기 전 확인표, 성지가 처음이라면</small></h3><ul><li><a href="/jagupje-seongji/">자급제 vs 성지 비교</a> — 2년 동안 어느 쪽이 덜 드는지</li><li><a href="/monthly-phone/">한 달 납부액 계산기</a> — 기기 할부와 요금을 합쳐서</li><li><a href="/plan-diff/">요금제 바꾸면 얼마 차이</a> — 한 달과 약정 기간으로 보면</li><li><a href="/storage/">저장 공간 계산기</a> — 사진과 영상으로 필요한 용량</li><li><a href="/per-day/">폰값, 하루로 치면</a> — 오래 쓸수록 얼마나 싸지는지</li><li><a href="/upgrade-test/">지금 폰, 바꿀 때가 됐나</a> — 해당하는 것을 누르면 결과가</li><li><a href="/switch-checklist/">폰 바꾸기 전 할 일</a> — 백업부터 옮기기까지 하나씩</li><li><a href="/sell-checklist/">중고폰 팔기 전 확인표</a> — 넘기기 전에 꼭 할 것</li><li><a href="/contract-end/">약정 끝나는 날</a> — 언제 바꿔도 되는지</li><li><a href="/repair-or-new/">수리할까, 새로 살까</a> — 한 달로 나눠 보면 어느 쪽이 덜 드는지</li><li><a href="/phone-insurance/">휴대폰 보험, 들까 말까</a> — 낸 보험료와 고칠 때 드는 돈을 견주면</li><li><a href="/screen-inch/">화면 크기, 인치를 센티로</a> — 지금 폰과 새 폰 화면 견주기</li><li><a href="/hogang-test/">좌표나라 휴대폰구매 체크리스트</a> — 살 때 얼마나 준비됐는지</li><li><a href="/ask-ai/">AI에게 물어볼 말 만들기</a> — 견적·요금제·아파트·전세 질문 글을 대신 짜 줌</li><li><a href="/story-first-visit/">성지 처음 가는 날</a> — 가상의 이야기로 보는 방문 순서</li></ul></nav><!--/zw-static-links-->
+</body>
+</html>

@@ -1327,7 +1327,7 @@
       slot: c.slot,
       gear: c.gear,
       actionKey: c.actionKey,
-      desc: c.desc || (c.type === 'skill' ? '새 스킬 습득 또는 교체' : `${slotNameKo(c.slot)} 칸의 장비를 새 장비로 바꿉니다`)
+      desc: c.desc || (c.type === 'skill' ? '한 번 쓰는 스킬 효과(두루마리)' : `${slotNameKo(c.slot)} 칸의 장비를 새 장비로 바꿉니다`)
     }));
   }
 

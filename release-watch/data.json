@@ -1,0 +1,65 @@
+[
+  {
+    "model": "갤럭시 S27 시리즈",
+    "expected": "2027년 1분기 예상",
+    "source": "Sammy Fans, GSMArena",
+    "sourceDate": "2026-11-02",
+    "status": "유출",
+    "updated": "2026-11-11",
+    "note": "실물 알루미늄 더미 3종(울트라·프로·플러스) 유출 및 2027년 1분기 정식 출시 예상 보도. 상단 가로형 카메라 섬 재설계, 한국 출시는 미발표."
+  },
+  {
+    "model": "아이폰 18 기본형",
+    "expected": "2027년 봄 예상",
+    "source": "SamMobile, Notebookcheck",
+    "sourceDate": "2026-11-12",
+    "status": "소문",
+    "updated": "2026-11-13",
+    "note": "신형 3층 적층 카메라 센서 공급 물량 비축을 위해 기본형 출시가 2027년 봄으로 분리 연기되었다는 보도."
+  },
+  {
+    "model": "아이폰 18 프로",
+    "expected": "2026년 가을(올해 먼저 출시)",
+    "source": "SamMobile, Notebookcheck",
+    "sourceDate": "2026-11-12",
+    "status": "소문",
+    "updated": "2026-11-13",
+    "note": "기본형 출시가 내년 봄으로 밀리고 프로 모델만 먼저 출시된다는 해외 보도."
+  },
+  {
+    "model": "갤럭시 Z 폴드9 플러스 (가칭)",
+    "expected": "2027년 목표",
+    "source": "GSMArena, Gizchina",
+    "sourceDate": "2026-11-12",
+    "status": "소문",
+    "updated": "2026-11-12",
+    "note": "삼성디스플레이 신형 와이드 폴더블 OLED 패널 개발 연계, 2027년 출시를 목표로 개발 중이라는 소문."
+  },
+  {
+    "model": "아이폰 듀오 2 플러스 (가칭)",
+    "expected": "2027년 목표",
+    "source": "GSMArena, Gizchina",
+    "sourceDate": "2026-11-12",
+    "status": "소문",
+    "updated": "2026-11-12",
+    "note": "화면을 더 키운 차기 대화면 와이드 폴더블 모델 개발 소문. 공식 발표 전 단계."
+  },
+  {
+    "model": "갤럭시 Z 슬라이드 (가칭)",
+    "expected": "2027년 (소문)",
+    "source": "Gizchina, Sammy Fans",
+    "sourceDate": "2026-11-09",
+    "status": "소문",
+    "updated": "2026-11-09",
+    "note": "미국 특허(US 2026/0333595 A1) 기반 세로 확장형 슬라이더블 구조. 이름과 2027년 출시는 언론 해석이며 삼성 공식 확정 아님."
+  },
+  {
+    "model": "비보 와이드 소형 접는 폰 (가칭)",
+    "expected": "2027년 초 예상",
+    "source": "PhoneArena",
+    "sourceDate": "2026-11-07",
+    "status": "소문",
+    "updated": "2026-11-08",
+    "note": "안쪽 화면 6.5인치 미만 소형 와이드 접는 폰 개발 소문. 출시일·자세한 사양 미공식."
+  }
+]

@@ -2053,7 +2053,7 @@
         const res = GR.chooseShopItem(gameState, opt.id);
         if (res.applied) {
           gameState = res.gameState;
-          logBox.innerHTML = `🪙 상점에서 <strong>${opt.name}</strong> 획득! (${opt.desc})`;
+          logBox.innerHTML = opt.type === 'skill' ? `🪙 상점 두루마리 <strong>${opt.name}</strong> 효과를 한 번 썼어요!` : `🪙 상점에서 <strong>${opt.name}</strong>을(를) 얻었어요!`;
           renderBoard();
         }
       });
