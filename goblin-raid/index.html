@@ -1979,7 +1979,7 @@
     if (currentPath.length === 1) {
       try {
         const t0 = gameState.board[currentPath[0].y][currentPath[0].x];
-        if (t0 && t0.specialId) {
+        if (t0 && t0.specialId && !t0.isPhylactery && t0.type !== 'phylactery') {
           currentPath = [];
           updateSelectionUI();
           showBossInfo(t0);
