@@ -1636,11 +1636,11 @@
   // [N3, O5] 저장 / 프로필 / 기록 관리 API
   // ==========================================
 
-  const STORAGE_KEY_RUN = 'coord_explorer_v1_run';
-  const STORAGE_KEY_PROFILE = 'coord_explorer_v1_profile';
-  const STORAGE_KEY_UNLOCKS = 'coord_explorer_v1_unlocks';
-  const STORAGE_KEY_SCORES = 'coord_explorer_v1_scores';
-  const STORAGE_KEY_DIFFICULTY = 'coord_explorer_v1_difficulty'; // 조각 29: 난이도 선택값 저장 키 [추가 29.4]
+  const STORAGE_KEY_RUN = 'goblin_raid_v1_run';
+  const STORAGE_KEY_PROFILE = 'goblin_raid_v1_profile';
+  const STORAGE_KEY_UNLOCKS = 'goblin_raid_v1_unlocks';
+  const STORAGE_KEY_SCORES = 'goblin_raid_v1_scores';
+  const STORAGE_KEY_DIFFICULTY = 'goblin_raid_v1_difficulty'; // 조각 29: 난이도 선택값 저장 키 [추가 29.4]
 
   function saveSelectedDifficulty(difficulty) {
     try {
@@ -1669,10 +1669,10 @@
   }
 
   // 옛 사이트 저장 이름 (최고 기록·이어하기·프로필·해금) [교정 25.4]
-  const LEGACY_STORAGE_KEY_SCORES = 'coord_explorer_v1';
-  const LEGACY_STORAGE_KEY_RUN = 'coord_explorer_run_v1';
-  const LEGACY_STORAGE_KEY_PROFILE = 'coord_explorer_profile_v1';
-  const LEGACY_STORAGE_KEY_UNLOCKS = 'coord_explorer_unlocks_v1';
+  const LEGACY_STORAGE_KEY_SCORES = 'goblin_raid_v1';
+  const LEGACY_STORAGE_KEY_RUN = 'goblin_raid_run_v1';
+  const LEGACY_STORAGE_KEY_PROFILE = 'goblin_raid_profile_v1';
+  const LEGACY_STORAGE_KEY_UNLOCKS = 'goblin_raid_unlocks_v1';
 
   let isMigratingLegacy = false;
 
@@ -2076,9 +2076,9 @@
   }
 
   /**
-   * [교정 25.4] 옛 사이트 저장 기록(coord_explorer_v1 / coord_explorer_profile_v1 / coord_explorer_unlocks_v1)을
-   * 새 JSON 저장 이름(coord_explorer_v1_scores / coord_explorer_v1_profile / coord_explorer_v1_unlocks)으로 옮겨 쓰고
-   * 옛 값은 지우지 않는다. 옛 이어하기(coord_explorer_run_v1)는 형식이 달라 버린다.
+   * [교정 25.4] 옛 사이트 저장 기록(goblin_raid_v1 / goblin_raid_profile_v1 / goblin_raid_unlocks_v1)을
+   * 새 JSON 저장 이름(goblin_raid_v1_scores / goblin_raid_v1_profile / goblin_raid_v1_unlocks)으로 옮겨 쓰고
+   * 옛 값은 지우지 않는다. 옛 이어하기(goblin_raid_run_v1)는 형식이 달라 버린다.
    */
   function migrateLegacyStorageIfNeeded() {
     if (isMigratingLegacy) return;

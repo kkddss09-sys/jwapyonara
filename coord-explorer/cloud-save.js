@@ -8,7 +8,7 @@
  */
 (function () {
   'use strict';
-  var PFX = 'coord_explorer';          // 게임마다 다름 (goblin_raid / coord_explorer)
+  var PFX = 'goblin_raid';          // 게임마다 다름 (goblin_raid / goblin_raid)
   var USE_HEADER = true;               // true: 맨 위 단추 줄(#cloud-slot)에 단추를 넣는다 / false: 왼쪽 아래 떠 있는 단추
   var SB_URL = 'https://houqpzuwbdmzhkdruxmo.supabase.co';
   var SB_KEY = 'sb_publishable_9GjdOgkxZZquoKwhePNSUw_LaWdckts'; // 공개용 키(게시판 config.js와 같음)
