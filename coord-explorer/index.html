@@ -1174,11 +1174,11 @@
         </table>
         <div style="display:flex; gap:6px; margin-top:8px;">
           <input id="rank-nick" type="text" maxlength="8" placeholder="닉네임 (한글·영문·숫자 2~8자)" autocomplete="off" style="flex:1; min-width:0; padding:8px; border-radius:8px; border:1px solid #3a3042; background:#1f1b26; color:#fff; font-size:13px;">
-          <button class="btn-icon" id="rank-submit" style="color:#15131a; background:#ffd54a; border-color:#e5a82a; flex:0 0 auto; padding:6px 10px;">내 최고 점수 올리기</button>
+          <button class="btn-icon" id="rank-submit" style="color:#15131a; background:#ffd54a; border-color:#e5a82a; flex:0 0 auto; padding:6px 10px;">오늘 낸 최고 점수 올리기</button>
         </div>
         <div id="rank-msg" style="font-size:11px; color:var(--sub); margin-top:6px; min-height:14px;"></div>
         <div style="font-size:10px; color:var(--sub); margin-top:4px;">닉네임과 점수만 올라갑니다. 이름·전화번호 같은 개인정보는 적지 마세요. 점수는 재미로 보는 참고용이라 조작될 수 있고, 이상한 닉네임은 지울 수 있습니다.</div>
-        <div style="font-size:10px; color:var(--sub); margin-top:4px;">🌞 오늘 · 🌙 어제 순위는 매일 오후 3시에 바뀌고, 3일이 지난 기록은 지워집니다.</div>
+        <div style="font-size:10px; color:var(--sub); margin-top:4px;">🌞 오늘 · 🌙 어제 순위는 매일 오후 3시에 바뀌고, 3일이 지난 기록은 지워집니다. 오늘 순위에는 그날(오후 3시 이후) 한 판으로 낸 점수만 올라갑니다.</div>
       </div>
       <button class="btn-action" id="btn-close-rank-modal" style="margin-top:8px; width:100%; flex:0 0 auto; padding:10px;">닫기</button>
     </div>
@@ -2752,6 +2752,7 @@
         difficulty: runDiff,
         difficultyName: (typeof GR.getDifficultyName === 'function') ? GR.getDifficultyName(runDiff) : '보통'
       });
+      recordDailyBest(runDiff, gameState.score);
       GR.updateProfileWithGameResult(null, {
         turn: gameState.turn,
         kills: gameState.kills,
@@ -2779,6 +2780,26 @@
   })();
   const RANK_SERVER_IDS = ['goblin-raid-easy', 'goblin-raid-normal', 'goblin-raid-hard', 'goblin-raid-hell'];
   let rankView = 'server';
+  // 오늘 순위용: 한국 시간 오후 3시에 하루가 바뀐다(서버 kstDay와 같은 계산). 그날 낸 점수만 따로 기억한다.
+  const DAILY_KEY = 'goblin_raid_daily_best_v1';
+  function rankDayKey(t) { return new Date(t - 6 * 3600 * 1000).toISOString().slice(0, 10); }
+  function recordDailyBest(diff, score) {
+    try {
+      score = Number(score) || 0; if (score <= 0) return;
+      const day = rankDayKey(Date.now());
+      let o = {}; try { o = JSON.parse(localStorage.getItem(DAILY_KEY) || '{}') || {}; } catch (_) { o = {}; }
+      const cur = o[diff];
+      if (!cur || cur.day !== day || score > (Number(cur.score) || 0)) o[diff] = { day, score };
+      localStorage.setItem(DAILY_KEY, JSON.stringify(o));
+    } catch (_) {}
+  }
+  function todayBestScore(diff) {
+    try {
+      const o = JSON.parse(localStorage.getItem(DAILY_KEY) || '{}') || {};
+      const cur = o[diff];
+      return (cur && cur.day === rankDayKey(Date.now())) ? (Number(cur.score) || 0) : 0;
+    } catch (_) { return 0; }
+  }
   function bestLocalScore(key) {
     try { const l = GR.loadHighScores(key, 10) || []; return l.reduce((m, e) => Math.max(m, Number(e && e.score) || 0), 0); } catch (_) { return 0; }
   }
@@ -2804,8 +2825,8 @@
     }).catch(() => { tbody.innerHTML = '<tr><td colspan="3" style="color:var(--sub);">전체 순위를 불러오지 못했어요. 잠시 뒤에 다시 해 보세요.</td></tr>'; });
     sub.onclick = () => {
       const name = (nick.value || '').trim();
-      const score = bestLocalScore(modeKey);
-      if (!score) { msg.textContent = '이 난이도의 내 기록이 아직 없어요. 한 판 하고 와 주세요.'; return; }
+      const score = todayBestScore(modeKey);
+      if (!score) { msg.textContent = '오늘(오후 3시 이후) 이 난이도로 낸 점수가 아직 없어요. 한 판 하고 와 주세요.'; return; }
       if (!/^[가-힣A-Za-z0-9_]{2,8}$/.test(name)) { msg.textContent = '닉네임은 한글·영문·숫자·밑줄 2~8자로 적어 주세요.'; return; }
       sub.disabled = true; msg.textContent = '올리는 중…';
       fetch(RANK_API + '/api/rank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: id, name, score }) })
@@ -3108,6 +3129,10 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-17-f', date: '2026-11-17', title: '오늘 순위는 오늘 낸 점수만', items: [
+      '🌞 오늘 순위에는 그날(오후 3시 이후) 한 판으로 낸 점수만 올라가요. 매일 한 판씩 도전해 보세요!',
+      '단추 이름이 「오늘 낸 최고 점수 올리기」로 바뀌었어요. 전체·어제 순위는 그대로예요.'
+    ] },
     { id: '2026-11-17-e', date: '2026-11-17', title: '로그인 창 닫기가 쉬워졌어요', items: [
       '☁ 로그인·저장 창에 ✕ 닫기 단추가 생겼어요. 창 바깥을 눌러도, "지금 저장"을 눌러도 닫혀요.'
     ] },
