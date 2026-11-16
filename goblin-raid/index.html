@@ -965,6 +965,23 @@
     z-index: 4;
   }
 </style>
+<script>
+// 방문 수 세기(구글 애널리틱스 4, 2026-11-17). 사이트의 다른 쪽과 같은 측정 ID를 쓴다. 게임 점수·기록은 보내지 않고 "방문"만 센다.
+// jwapyonara.com에서 열렸을 때만 센다(내 컴퓨터에서 열거나 시험할 때는 세지 않는다).
+(function () {
+  try {
+    var GA_ID = 'G-444W8XPZ1Z', h = location.hostname;
+    if (h !== 'jwapyonara.com' && h !== 'www.jwapyonara.com') return;
+    var s = document.createElement('script'); s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(GA_ID);
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag('js', new Date());
+    window.gtag('config', GA_ID);
+  } catch (e) {}
+})();
+</script>
 </head>
 <body>
 <main>
