@@ -705,6 +705,13 @@
     text-align: center;
   }
   .modal-overlay.show { display: flex; }
+  #modal-class, #modal-race, #modal-perk-flaw {
+    overflow-y: auto;
+    justify-content: flex-start;
+    padding: 12px 10px;
+    gap: 6px;
+    box-sizing: border-box;
+  }
   @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
 
   .modal-title {
@@ -843,10 +850,128 @@
     width: 100%;
     margin: 8px 0;
   }
+  /* 직업·종족·특성 공통 탭 줄 */
+  .setup-tabs-bar {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    margin: 2px 0 6px 0;
+  }
+  .setup-tab-btn {
+    flex: 1;
+    min-width: 0;
+    padding: 7px 4px;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 1px solid #3a3042;
+    background: #191422;
+    color: var(--sub);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .setup-tab-btn:active {
+    transform: scale(0.97);
+  }
+  .setup-tab-btn.active {
+    border: 1.5px solid var(--gold);
+    color: var(--gold);
+    background: rgba(229, 168, 42, 0.14);
+  }
+
+  /* 종족 카드 두 줄 박스 */
+  .race-box-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin: 4px 0;
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .race-box-row {
+    background: #100d16;
+    border: 1px solid #3a3042;
+    border-radius: 6px;
+    padding: 3px 5px;
+    font-size: 10px;
+    line-height: 1.35;
+    word-break: keep-all;
+  }
+  .race-box-bonus {
+    color: #ffe27a;
+    border-color: rgba(229, 168, 42, 0.35);
+  }
+  .race-box-enemy {
+    color: #ff9ca8;
+    border-color: rgba(215, 38, 61, 0.35);
+  }
+
+  /* 조각 11: 퍽과 결함 설정 UI */
+  .pf-summary-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 4px 0 6px 0;
+  }
+  .pf-summary-box {
+    border-radius: 8px;
+    padding: 6px 8px;
+    text-align: left;
+    background: #14101b;
+    min-height: 48px;
+    box-sizing: border-box;
+  }
+  .pf-box-perk {
+    border: 1px solid #3b7de0;
+  }
+  .pf-box-flaw {
+    border: 1px solid #d7263d;
+  }
+  .pf-summary-title {
+    font-size: 11px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    padding-bottom: 2px;
+  }
+  .pf-box-perk .pf-summary-title {
+    color: #9ce6ff;
+    border-bottom: 1px solid rgba(59, 125, 224, 0.25);
+  }
+  .pf-box-flaw .pf-summary-title {
+    color: #ff9ca8;
+    border-bottom: 1px solid rgba(215, 38, 61, 0.25);
+  }
+  .pf-summary-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .pf-summary-item {
+    font-size: 10px;
+    line-height: 1.3;
+    color: var(--ink);
+    word-break: keep-all;
+  }
+  .pf-summary-item.empty {
+    color: #776e82;
+  }
+
+  .perk-flaw-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    margin: 4px 0 8px 0;
+  }
   .perk-slot-pair {
     display: flex;
     gap: 6px;
-    align-items: center;
+    align-items: flex-start;
     background: #181420;
     border: 1px solid #3a3042;
     border-radius: 8px;
@@ -861,9 +986,18 @@
     font-weight: 800;
     color: var(--sub);
     width: 38px;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+  .slot-field {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
   }
   .perk-select {
-    flex: 1;
+    width: 100%;
     min-width: 0;
     max-width: 100%;
     text-overflow: ellipsis;
@@ -874,9 +1008,10 @@
     padding: 5px 6px;
     font-size: 11px;
     outline: none;
+    box-sizing: border-box;
   }
   .flaw-select {
-    flex: 1;
+    width: 100%;
     min-width: 0;
     max-width: 100%;
     text-overflow: ellipsis;
@@ -887,6 +1022,21 @@
     padding: 5px 6px;
     font-size: 11px;
     outline: none;
+    box-sizing: border-box;
+  }
+  .slot-desc {
+    font-size: 9.5px;
+    line-height: 1.25;
+    min-height: 12px;
+    padding: 1px 2px;
+    word-break: keep-all;
+    text-align: left;
+  }
+  .perk-desc-line {
+    color: #9ce6ff;
+  }
+  .flaw-desc-line {
+    color: #ff9ca8;
   }
   .slot-pair-alert {
     font-size: 11px;
@@ -1124,6 +1274,7 @@
     <!-- 직업 선택 모달 (10종) -->
     <div class="modal-overlay" id="modal-class">
       <div class="modal-title" style="color:#ffe27a;">🛡️ 직업 선택 (10종)</div>
+      <div class="setup-tabs-bar" id="setup-tabs-class"></div>
       <div class="modal-desc">특수 적을 처치하면 🏺 보상 칸이 남아요. 그 칸을 혼자 눌러 모으면 새 직업이 열려요. (쉬움 난이도 제외, 자세한 건 📖 사용 설명서)</div>
       <div class="cls-grid" id="class-grid-list"></div>
       <button class="btn-action" id="btn-close-class-modal" style="margin-top:6px; width:100%;">닫기</button>
@@ -1328,7 +1479,18 @@
     <!-- 퍽과 결함 직업 설정 모달 (조각 11) -->
     <div class="modal-overlay" id="modal-perk-flaw">
       <div class="modal-title" style="color:#3b7de0;" id="pf-modal-title">⚙️ 직업 설정: 칼잡이</div>
+      <div class="setup-tabs-bar" id="setup-tabs-perk-flaw"></div>
       <div class="modal-desc" id="pf-modal-desc">파랑 퍽과 빨강 결함을 각 슬롯에 짝으로 맞춰 장착하세요.</div>
+      <div class="pf-summary-wrap">
+        <div class="pf-summary-box pf-box-perk">
+          <div class="pf-summary-title">장착한 퍽</div>
+          <div class="pf-summary-list" id="pf-perk-summary-list"></div>
+        </div>
+        <div class="pf-summary-box pf-box-flaw">
+          <div class="pf-summary-title">장착한 결함</div>
+          <div class="pf-summary-list" id="pf-flaw-summary-list"></div>
+        </div>
+      </div>
       <div class="perk-flaw-slots" id="perk-flaw-slots-container"></div>
       <div class="slot-pair-alert" id="pf-status-msg"></div>
       <div style="display:flex; gap:6px; width:100%;">
@@ -1340,6 +1502,7 @@
     <!-- 종족 선택 모달 (10종) (조각 12) -->
     <div class="modal-overlay" id="modal-race">
       <div class="modal-title" style="color:#55d777;">🧬 종족 선택 (10종)</div>
+      <div class="setup-tabs-bar" id="setup-tabs-race"></div>
       <div class="modal-desc">직업 레벨 5 달성 시 종족 변경이 가능합니다. (고유 보너스 & 숙적)</div>
       <div class="cls-grid" id="race-grid-list"></div>
       <button class="btn-action" id="btn-close-race-modal" style="margin-top:6px; width:100%;">닫기</button>
@@ -2449,9 +2612,57 @@
   }
 
   /**
+   * 직업·종족·특성 모달 공통 탭 바 렌더링
+   */
+  function renderSetupTabs(activeKey) {
+    const targetId = activeKey === 'class' ? 'setup-tabs-class' : (activeKey === 'race' ? 'setup-tabs-race' : 'setup-tabs-perk-flaw');
+    const container = document.getElementById(targetId);
+    if (!container) return;
+
+    container.innerHTML = `
+      <button type="button" class="setup-tab-btn ${activeKey === 'class' ? 'active' : ''}" data-tab="class">👤 직업</button>
+      <button type="button" class="setup-tab-btn ${activeKey === 'race' ? 'active' : ''}" data-tab="race">🧬 종족</button>
+      <button type="button" class="setup-tab-btn ${activeKey === 'perk-flaw' ? 'active' : ''}" data-tab="perk-flaw">⚙️ 특성</button>
+    `;
+
+    container.querySelectorAll('.setup-tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const tab = btn.dataset.tab;
+        if (tab === activeKey) return;
+
+        if (tab === 'class') {
+          modalClass.classList.remove('show');
+          modalRace.classList.remove('show');
+          modalPerkFlaw.classList.remove('show');
+          renderClassModal();
+          modalClass.classList.add('show');
+        } else if (tab === 'race') {
+          modalClass.classList.remove('show');
+          modalRace.classList.remove('show');
+          modalPerkFlaw.classList.remove('show');
+          renderRaceModal();
+          modalRace.classList.add('show');
+        } else if (tab === 'perk-flaw') {
+          const pfTargetClass = modalPerkFlaw.classList.contains('show') ? settingClassId : currentClassId;
+          if (!GR.canCustomizePerks(pfTargetClass)) {
+            logBox.innerHTML = '이 직업은 특성을 바꿀 수 없어요';
+            return;
+          }
+          modalClass.classList.remove('show');
+          modalRace.classList.remove('show');
+          modalPerkFlaw.classList.remove('show');
+          openPerkFlawModal(pfTargetClass);
+        }
+      });
+    });
+  }
+
+  /**
    * 직업 선택 모달 (시안 D 반영)
    */
   function renderClassModal() {
+    renderSetupTabs('class');
     classGridList.innerHTML = '';
     unlockData = GR.loadUnlockData();
 
@@ -2490,6 +2701,7 @@
    */
   function openPerkFlawModal(classId) {
     settingClassId = classId;
+    renderSetupTabs('perk-flaw');
     const cDef = GR.CLASSES[classId] || GR.CLASSES.adventurer;
     pfModalTitle.textContent = `⚙️ 직업 설정: ${cDef.name}`;
 
@@ -2517,29 +2729,66 @@
       let perkOptionsHtml = `<option value="">-- 퍽 선택 안 함 --</option>`;
       GR.PERKS_DATA.forEach(p => {
         const isSel = String(savedPerkId) === String(p.id) ? 'selected' : '';
-        perkOptionsHtml += `<option value="${p.id}" ${isSel}>${p.icon} ${p.name} (${p.desc})</option>`;
+        perkOptionsHtml += `<option value="${p.id}" ${isSel}>${p.icon} ${p.name}</option>`;
       });
 
       let flawOptionsHtml = `<option value="">-- 결함 선택 안 함 --</option>`;
       GR.FLAWS_DATA.forEach(f => {
         const isSel = String(savedFlawId) === String(f.id) ? 'selected' : '';
-        flawOptionsHtml += `<option value="${f.id}" ${isSel}>${f.icon} ${f.name} (${f.desc})</option>`;
+        flawOptionsHtml += `<option value="${f.id}" ${isSel}>${f.icon} ${f.name}</option>`;
       });
 
       row.innerHTML = `
         <span class="slot-label">${isLocked ? '🔒 슬롯' : `슬롯 ${i + 1}`}</span>
-        <select class="perk-select" data-slot="${i}" ${isLocked ? 'disabled' : ''}>
-          ${isLocked ? '<option>🔒 미해제</option>' : perkOptionsHtml}
-        </select>
-        <select class="flaw-select" data-slot="${i}" ${isLocked ? 'disabled' : ''}>
-          ${isLocked ? '<option>🔒 미해제</option>' : flawOptionsHtml}
-        </select>
+        <div class="slot-field">
+          <select class="perk-select" data-slot="${i}" ${isLocked ? 'disabled' : ''}>
+            ${isLocked ? '<option>🔒 미해제</option>' : perkOptionsHtml}
+          </select>
+          <div class="slot-desc perk-desc-line" data-slot="${i}"></div>
+        </div>
+        <div class="slot-field">
+          <select class="flaw-select" data-slot="${i}" ${isLocked ? 'disabled' : ''}>
+            ${isLocked ? '<option>🔒 미해제</option>' : flawOptionsHtml}
+          </select>
+          <div class="slot-desc flaw-desc-line" data-slot="${i}"></div>
+        </div>
       `;
 
       perkFlawSlotsContainer.appendChild(row);
     }
 
+    function updatePerkFlawBoxes() {
+      const perkBoxList = document.getElementById('pf-perk-summary-list');
+      const flawBoxList = document.getElementById('pf-flaw-summary-list');
+      const perkSelects = perkFlawSlotsContainer.querySelectorAll('.perk-select');
+      const flawSelects = perkFlawSlotsContainer.querySelectorAll('.flaw-select');
+      const perkDescs = perkFlawSlotsContainer.querySelectorAll('.perk-desc-line');
+      const flawDescs = perkFlawSlotsContainer.querySelectorAll('.flaw-desc-line');
+
+      let perkBoxHtml = '';
+      let flawBoxHtml = '';
+
+      for (let i = 0; i < slotCount; i++) {
+        const pVal = perkSelects[i] && perkSelects[i].value !== '' ? Number(perkSelects[i].value) : null;
+        const fVal = flawSelects[i] && flawSelects[i].value !== '' ? Number(flawSelects[i].value) : null;
+
+        const pObj = (pVal != null) ? GR.PERKS_DATA.find(p => p.id === pVal) : null;
+        const fObj = (fVal != null) ? GR.FLAWS_DATA.find(f => f.id === fVal) : null;
+
+        perkBoxHtml += `<div class="pf-summary-item ${pObj ? '' : 'empty'}">${pObj ? `${pObj.icon} ${pObj.desc}` : '— 비어 있음'}</div>`;
+        flawBoxHtml += `<div class="pf-summary-item ${fObj ? '' : 'empty'}">${fObj ? `${fObj.icon} ${fObj.desc}` : '— 비어 있음'}</div>`;
+
+        if (perkDescs[i]) perkDescs[i].textContent = pObj ? pObj.desc : '';
+        if (flawDescs[i]) flawDescs[i].textContent = fObj ? fObj.desc : '';
+      }
+
+      if (perkBoxList) perkBoxList.innerHTML = perkBoxHtml;
+      if (flawBoxList) flawBoxList.innerHTML = flawBoxHtml;
+    }
+
     function checkValidity() {
+      updatePerkFlawBoxes();
+
       const perkSelects = perkFlawSlotsContainer.querySelectorAll('.perk-select');
       const flawSelects = perkFlawSlotsContainer.querySelectorAll('.flaw-select');
       const currentPerks = [];
@@ -2654,6 +2903,7 @@
    */
   function renderRaceModal() {
     if (!raceGridList) return;
+    renderSetupTabs('race');
     raceGridList.innerHTML = '';
     const prof = GR.loadProfile();
     const classProg = (prof.classProgress && prof.classProgress[currentClassId]) || { level: 1 };
@@ -2679,11 +2929,12 @@
       }
 
       card.innerHTML = `
-        <div style="font-size:32px; line-height:1.2;">${rDef.icon || '🧬'}</div>
-        <b>${rDef.name}</b>
-        <small style="color:var(--gold); font-weight:700;">${rDef.bonusName}</small>
-        <small>${rDef.bonusDesc}</small>
-        <small style="color:#ff6b7e;">숙적: #${rDef.mortalEnemyId} ${rDef.mortalEnemyDesc}</small>
+        <div style="font-size:28px; line-height:1.2;">${rDef.icon || '🧬'}</div>
+        <b style="font-size:13px;">${rDef.name}</b>
+        <div class="race-box-wrap">
+          <div class="race-box-row race-box-bonus">✨ 보너스: ${rDef.bonusName} — ${rDef.bonusDesc}</div>
+          <div class="race-box-row race-box-enemy">☠ 숙적: ${rDef.mortalEnemyDesc}</div>
+        </div>
         <small style="margin-top:2px; color:${isSelected ? 'var(--gold)' : '#aaa'};">${isSelected ? '✓ 현재 장착 중' : statusText}</small>
       `;
 
@@ -3134,6 +3385,11 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-17-h', date: '2026-11-17', title: '직업·종족·특성 화면이 깔끔해졌어요', items: [
+      '직업·종족·특성(퍽·결함) 창 맨 위에 [직업][종족][특성] 탭이 생겨서 창을 바로 오갈 수 있어요.',
+      '종족 카드는 ✨ 보너스와 ☠ 숙적을 두 줄 박스로 나눠 보여 줘요.',
+      '특성 창 위쪽에 파란 "장착한 퍽"과 빨간 "장착한 결함" 박스가 생겼고, 선택하면 한 줄 설명이 바로 보여요.'
+    ] },
     { id: '2026-11-17-g', date: '2026-11-17', title: '종족이 새 판에 제대로 적용돼요', items: [
       '새 판을 시작할 때 고른 종족이 정확히 들어가도록 고쳤어요. (예전에는 종족 번호가 잘못 넘어가 종족 보너스가 안 걸릴 수 있었어요)',
       '저장한 판을 이어 할 때도 종족 값이 이상하면 직업 기본 종족으로 바로잡아요.',
