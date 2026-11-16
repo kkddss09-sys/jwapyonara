@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256">
+<title>마법사 (고블린 레이드 직업 아이콘)</title>
+<defs><radialGradient id="gBg" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#2a2233"/><stop offset=".8" stop-color="#14101a"/></radialGradient>
+<filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#b36cff" flood-opacity=".9"/></filter></defs>
+<rect width="100" height="100" rx="22" fill="url(#gBg)"/>
+<rect x="1.5" y="1.5" width="97" height="97" rx="21" fill="none" stroke="#5b4a2e" stroke-width="3"/>
+<rect x="4" y="4" width="92" height="92" rx="19" fill="none" stroke="#1b1420" stroke-width="2"/>
+<g transform="translate(14 14) scale(.72)" filter="url(#glow)"><path d="M50 8 L72 70 H28 Z" fill="#7a3bd1" stroke="#0b0810" stroke-width="3" stroke-linejoin="round"/><rect x="18" y="68" width="64" height="10" rx="5" fill="#9b5de5" stroke="#0b0810" stroke-width="3"/><circle cx="50" cy="40" r="6" fill="#ffe27a"/></g>
+</svg>

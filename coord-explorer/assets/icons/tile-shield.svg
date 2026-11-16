@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256">
+<title>방패 (고블린 레이드 시안 D)</title>
+<defs>
+<linearGradient id="gMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f7fb"/><stop offset=".5" stop-color="#a9b6c7"/><stop offset="1" stop-color="#5d6b80"/></linearGradient>
+<linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a8"/><stop offset=".5" stop-color="#e5a82a"/><stop offset="1" stop-color="#8f5d0b"/></linearGradient>
+<radialGradient id="gBg" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#2a2233"/><stop offset=".8" stop-color="#14101a"/></radialGradient>
+<filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#4f86e6" flood-opacity=".9"/></filter>
+</defs>
+<rect width="100" height="100" rx="22" fill="url(#gBg)"/>
+<rect x="1.5" y="1.5" width="97" height="97" rx="21" fill="none" stroke="#5b4a2e" stroke-width="3"/>
+<rect x="4" y="4" width="92" height="92" rx="19" fill="none" stroke="#1b1420" stroke-width="2"/>
+<g transform="translate(8 8) scale(.84)" filter="url(#glow)">
+<path fill="url(#gMetal)" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M50 6 L88 18 V46 C88 72 72 86 50 95 C28 86 12 72 12 46 V18 Z"/><path fill="#3a4558" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M50 6 L88 18 V46 C88 72 72 86 50 95 Z"/><path fill="#ffffff" fill-opacity=".55" d="M50 20 L75 28 V46 C75 63 64 73 50 80 C36 73 25 63 25 46 V28 Z"/><path fill="url(#gGold)" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M50 28 L55.5 43 H70 L58.5 51.5 L63 66 L50 57.5 L37 66 L41.5 51.5 L30 43 H44.5 Z"/>
+</g>
+</svg>
