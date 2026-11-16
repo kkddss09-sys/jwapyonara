@@ -41,7 +41,7 @@
   }
   function applyMain(m) {
     backupLocal();
-    function put(key, v, isJson) { if (v == null) lsDel(key); else lsSet(key, isJson ? JSON.stringify(v) : String(v)); }
+    function put(key, v, isJson) { if (v == null) return; /* 서버에 없는 항목은 이 기기 기록을 지우지 않는다 */ lsSet(key, isJson ? JSON.stringify(v) : String(v)); }
     put(K.profile, m.profile, true); put(K.unlocks, m.unlocks, true); put(K.scores, m.scores, true);
     put(K.diff, m.difficulty, false); put(K.last, m.lastClass, false);
   }
@@ -196,9 +196,11 @@
   function logout() { if (!sb) return; sb.auth.signOut().then(function () { session = null; conflict = null; render(); say('로그아웃했어요. 이 기기의 기록은 그대로 있어요.'); }); }
 
   /* ---------- 서버 읽기·쓰기 ---------- */
+  function validMain(d) { return !!(d && d.v === 2 && (d.profile || d.unlocks)); }
+  function validRun(d) { return !!(d && d.v === 2 && typeof d.run === 'string' && d.run.length > 10); }
   function fetchRow(game, cb) {
     sb.from('game_saves').select('data,updated_at').eq('game', game).maybeSingle()
-      .then(function (r) { if (r.error) cb(false); else cb(true, r.data ? r.data.data : null, r.data ? r.data.updated_at : null); })
+      .then(function (r) { if (r.error) { cb(false); return; } var d = r.data ? r.data.data : null; var okFmt = game === GAME_RUN ? validRun(d) : validMain(d); cb(true, okFmt ? d : null, okFmt && r.data ? r.data.updated_at : null); })
       .catch(function () { cb(false); });
   }
   function upsertRow(game, data, cb) {
