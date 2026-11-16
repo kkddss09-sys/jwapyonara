@@ -104,6 +104,7 @@
       '#cs-panel.open{display:block}#cs-panel small{color:#aab;display:block;margin-top:6px;font-size:12px;white-space:pre-line}' +
       '#cs-panel button{font:700 14px system-ui,sans-serif;margin:8px 6px 0 0;padding:10px 13px;border-radius:8px;border:1px solid rgba(255,255,255,.3);background:#2b2f45;color:#fff;cursor:pointer}' +
       '#cs-panel button.pri{background:#2f7d4a;border-color:#6fd18a}#cs-panel button.warn{background:#6a2b2b;border-color:#e08a8a}' +
+      '#cs-panel button#cs-x{position:absolute;top:8px;right:8px;margin:0;padding:4px 10px;font-size:12px;background:#3a3f5c}#cs-panel .cs-head{padding-right:74px}' +
       '#cs-toast{position:fixed;left:50%;bottom:70px;transform:translateX(-50%);z-index:10000;background:rgba(20,22,32,.95);color:#fff;border:1px solid #6fd18a;border-radius:999px;padding:10px 18px;font:700 14px system-ui,sans-serif;display:none;max-width:92vw;text-align:center}';
     document.head.appendChild(st);
 
@@ -122,13 +123,23 @@
       elFloat.addEventListener('click', togglePanel); document.body.appendChild(elFloat);
       elLogin = elFloat; panel = document.createElement('div'); panel.id = 'cs-panel'; panel.style.bottom = '70px';
     }
-    statusEl = document.createElement('div'); infoEl = document.createElement('div'); actionsEl = document.createElement('div');
-    panel.appendChild(statusEl); panel.appendChild(infoEl); panel.appendChild(actionsEl); document.body.appendChild(panel);
+    statusEl = document.createElement('div'); statusEl.className = 'cs-head'; infoEl = document.createElement('div'); actionsEl = document.createElement('div');
+    var xb = document.createElement('button'); xb.type = 'button'; xb.id = 'cs-x'; xb.textContent = '✕ 닫기'; xb.addEventListener('click', closePanel);
+    panel.appendChild(xb); panel.appendChild(statusEl); panel.appendChild(infoEl); panel.appendChild(actionsEl); document.body.appendChild(panel);
+    // 창 바깥을 누르거나 Esc를 눌러도 닫힌다 (로그인·중간 저장 단추는 따로 동작하므로 제외)
+    document.addEventListener('pointerdown', function (e) {
+      if (!panel.classList.contains('open')) return;
+      var t = e.target;
+      if (panel.contains(t) || (elLogin && elLogin.contains(t)) || (elSave && elSave.contains(t))) return;
+      closePanel();
+    }, true);
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePanel(); });
     toastEl = document.createElement('div'); toastEl.id = 'cs-toast'; document.body.appendChild(toastEl);
     render();
   }
   var toastTimer = null;
   function toast(msg) { if (!toastEl) return; toastEl.textContent = msg; toastEl.style.display = 'block'; clearTimeout(toastTimer); toastTimer = setTimeout(function () { toastEl.style.display = 'none'; }, 3000); }
+  function closePanel() { if (panel) panel.classList.remove('open'); }
   function openPanel() {
     if (USE_HEADER && elSave) { var r = elSave.getBoundingClientRect(); panel.style.top = Math.round(r.bottom + 8) + 'px'; }
     panel.classList.add('open');
@@ -158,7 +169,7 @@
     }
     if (conflict) return;
     say('☁ 로그인됨 — 기록과 판 진행이 서버에 자동으로 보관돼요.', '창을 닫거나 10초쯤 쉬면 자동으로 저장하고, "💾 중간 저장"을 누르면 바로 저장해요.\n다른 폰에서 같은 계정으로 로그인하면 이어 할 수 있어요.');
-    mkBtn('지금 저장', 'pri', function () { manualSave(); });
+    mkBtn('지금 저장', 'pri', function () { closePanel(); manualSave(); });
     mkBtn('서버에서 불러오기', '', function () { pullAsk(); });
     mkBtn('로그아웃', '', logout);
     mkBtn('서버 기록 지우기', 'warn', wipe);
@@ -214,7 +225,7 @@
   function pushMain(manual, cb) {
     if (!sb || !session || conflict) { if (cb) cb(false); return; }
     var m = readMain(), sig = mainSig();
-    if (!m.profile && !m.unlocks && !m.scores) { if (manual) toast('저장할 기록이 아직 없어요. 한 판 해 보세요.'); if (cb) cb(true); return; }
+    if (!m.profile && !m.unlocks && !m.scores) { if (cb) cb(true, true); return; }
     var data = { v: 2, profile: m.profile, unlocks: m.unlocks, scores: m.scores, difficulty: m.difficulty, lastClass: m.lastClass, savedAt: new Date().toISOString() };
     if (JSON.stringify(data).length > 48000) { say('기록이 너무 커서 서버에 올리지 못했어요.'); if (cb) cb(false); return; }
     upsertRow(GAME, data, function (ok) { if (ok) mainSeen = sig; if (cb) cb(ok); });
@@ -222,7 +233,7 @@
   function pushRun(manual, cb) {
     if (!sb || !session || conflict) { if (cb) cb(false); return; }
     var run = lsGet(K.run), sig = run || '';
-    if (!run) { if (runPushed) { deleteRow(GAME_RUN, function (ok) { if (ok) { runPushed = false; runSeen = ''; } if (cb) cb(ok); }); } else { runSeen = ''; if (cb) cb(true); } return; }
+    if (!run) { if (runPushed) { deleteRow(GAME_RUN, function (ok) { if (ok) { runPushed = false; runSeen = ''; } if (cb) cb(ok); }); } else { runSeen = ''; if (cb) cb(true, true); } return; }
     if (run.length > 45000) { say('판 진행 기록이 너무 커서 서버에 올리지 못했어요.'); if (cb) cb(false); return; }
     upsertRow(GAME_RUN, { v: 2, run: run, savedAt: new Date().toISOString() }, function (ok) { if (ok) { runSeen = sig; runPushed = true; } if (cb) cb(ok); });
   }
@@ -232,8 +243,8 @@
       render(); openPanel(); return;
     }
     if (conflict) { showConflict(); return; }
-    var done = 0, bad = 0;
-    function fin(ok) { done++; if (!ok) bad++; if (done === 2) { if (bad) toast('서버 저장에 실패한 부분이 있어요. 잠시 뒤 다시 눌러 주세요.'); else toast('☁ ' + hhmm() + ' 서버에 저장했어요 (기록 + 판 진행)'); } }
+    var done = 0, bad = 0, empty = 0;
+    function fin(ok, isEmpty) { done++; if (!ok) bad++; if (isEmpty) empty++; if (done === 2) { if (bad) toast('서버 저장에 실패한 부분이 있어요. 잠시 뒤 다시 눌러 주세요.'); else if (empty === 2) toast('저장할 기록이 아직 없어요. 한 판 해 보세요.'); else toast('☁ ' + hhmm() + ' 서버에 저장했어요' + (empty ? '' : ' (기록 + 판 진행)')); } }
     pushMain(true, fin); pushRun(true, fin);
   }
 
