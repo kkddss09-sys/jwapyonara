@@ -38,6 +38,33 @@
     return '직업 ' + n + '개 해제 · 최고 ' + best + ' · ' + ts;
   }
 
+
+  /* ---------- 앱 안 브라우저(카톡·네이버·인스타 등) 감지 → 바깥 브라우저로 보내기 ---------- */
+  var UA = (navigator.userAgent || '');
+  var IS_KAKAO = /KAKAOTALK/i.test(UA);
+  var IS_INAPP = IS_KAKAO || /NAVER\(inapp|Instagram|FBAN|FBAV|FB_IAB|\bLine\/|DaumApps|Whale\/.*Mobile.*inapp|; wv\)/i.test(UA);
+  var IS_ANDROID = /Android/i.test(UA);
+  var IS_IOS = /iPhone|iPad|iPod/i.test(UA);
+  function go(u) { if (typeof window.__csGo === 'function') window.__csGo(u); else window.location.href = u; }
+  function returnUrl() { return location.origin + location.pathname + '?cs_login=1'; }
+  function copyText(t, done) {
+    function fallback() { try { window.prompt('이 주소를 길게 눌러 복사한 뒤 크롬(또는 사파리)에 붙여 넣으세요', t); } catch (_) {} done(false); }
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(t).then(function () { done(true); }, fallback); return; } } catch (_) {}
+    fallback();
+  }
+  function openOutside() {
+    var url = returnUrl();
+    if (IS_KAKAO) go('kakaotalk://web/openExternal?url=' + encodeURIComponent(url));
+    else if (IS_ANDROID) go('intent://' + url.replace(/^https?:\/\//, '') + '#Intent;scheme=https;package=com.android.chrome;end');
+    // 아이폰의 카톡 밖 앱은 바깥 브라우저를 강제로 열 수 없다 → 아래 안내만 보여 준다
+    actionsEl.textContent = '';
+    say(IS_IOS && !IS_KAKAO ? '이 앱 안에서는 구글 로그인이 불편해요. 아래 주소를 복사해서 사파리에 붙여 넣어 주세요.' : '크롬(기본 브라우저)으로 여는 중이에요. 열리지 않으면 아래 주소 복사를 눌러 주세요.',
+        '그 브라우저에서 구글 계정만 고르면 로그인이 이어져요. 게임 기록은 서버에 보관되니 사라지지 않아요.');
+    var b = mkBtn('주소 복사', 'pri', function () { copyText(url, function (ok) { b.textContent = ok ? '복사했어요 ✓' : '주소 복사'; }); });
+    mkBtn('닫기', '', function () { render(); });
+    panel.classList.add('open');
+  }
+
   /* ---------- 화면 ---------- */
   function build() {
     var st = document.createElement('style');
@@ -79,7 +106,7 @@
       btn.textContent = '☁ 로그인하고 기록 보관';
       btn.className = '';
       say('로그인하면 직업·종족 기록이 서버에 보관돼요.', '게임은 로그인 없이도 그대로 할 수 있어요. 받는 정보: 이메일·이름(구글 계정), 게임 기록. 자세한 내용은 개인정보처리방침에 있어요.');
-      mkBtn('구글로 로그인', 'pri', login);
+      mkBtn(IS_INAPP ? '구글로 로그인 (브라우저로 열기)' : '구글로 로그인', 'pri', login);
       var a = document.createElement('a'); a.href = '/privacy/'; a.target = '_blank'; a.rel = 'noopener'; a.textContent = '개인정보처리방침'; a.style.cssText = 'color:#9cf;font-size:12px;margin-left:4px';
       actionsEl.appendChild(a);
       return;
@@ -109,6 +136,7 @@
     document.head.appendChild(s);
   }
   function login() {
+    if (IS_INAPP) { openOutside(); return; }
     ensureSdk(function (ok) {
       if (!ok) return;
       sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } })
@@ -199,8 +227,11 @@
 
   function start() {
     build(); watch();
+    var auto = /[?&]cs_login=1(&|$)/.test(location.search);
+    if (auto) { try { history.replaceState(null, '', location.pathname + location.hash); } catch (_) {} }
     // 로그인 흔적(저장된 토큰이나 로그인 돌아오는 주소)이 있을 때만 SDK를 미리 불러온다
     var back = /[?&#](code|access_token)=/.test(location.search + location.hash);
+    if (auto && !IS_INAPP && !lsGet(TOKEN_KEY)) { setTimeout(login, 300); return; } // 바깥 브라우저로 넘어온 경우: 바로 구글 로그인 시작
     if (!lsGet(TOKEN_KEY) && !back) return;
     ensureSdk(function (ok) {
       if (!ok) return;
