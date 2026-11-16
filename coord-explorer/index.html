@@ -963,24 +963,10 @@
   }
 
   .perk-flaw-slots {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-    margin: 4px 0 8px 0;
+    display: none;
   }
   .perk-slot-pair {
-    display: flex;
-    gap: 6px;
-    align-items: flex-start;
-    background: #181420;
-    border: 1px solid #3a3042;
-    border-radius: 8px;
-    padding: 6px 8px;
-  }
-  .perk-slot-pair.locked {
-    opacity: 0.45;
-    background: #110e16;
+    display: none;
   }
   .slot-label {
     font-size: 10px;
@@ -1045,6 +1031,314 @@
     color: #ff4757;
     text-align: center;
     font-weight: 700;
+  }
+
+  /* 3) 슬롯 칩 줄 */
+  .pf-slot-chips {
+    display: flex;
+    gap: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 2px 0 6px 0;
+  }
+  .pf-slot-chip {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 2px;
+    background: #14101b;
+    border: 1px solid #3a3042;
+    border-radius: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.15s, background 0.15s;
+    box-sizing: border-box;
+  }
+  .pf-slot-chip:hover:not(.locked) {
+    background: #1e1828;
+  }
+  .pf-slot-chip.selected {
+    border: 2px solid #ffd54a;
+    background: #241d30;
+    box-shadow: 0 0 6px rgba(255, 213, 74, 0.3);
+  }
+  .pf-slot-chip.locked {
+    opacity: 0.45;
+    background: #0f0c14;
+    border: 1px dashed #2d2636;
+    cursor: not-allowed;
+  }
+  .pf-chip-label {
+    font-size: 10.5px;
+    font-weight: 800;
+    color: var(--ink);
+    margin-bottom: 2px;
+    white-space: nowrap;
+  }
+  .pf-slot-chip.selected .pf-chip-label {
+    color: #ffd54a;
+  }
+  .pf-chip-icons {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 12px;
+    line-height: 1;
+  }
+  .pf-chip-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+  .pf-chip-icon.perk-slot {
+    background: rgba(59, 125, 224, 0.2);
+    color: #9ce6ff;
+  }
+  .pf-chip-icon.flaw-slot {
+    background: rgba(215, 38, 61, 0.2);
+    color: #ff9ca8;
+  }
+  .pf-chip-icon.empty {
+    color: #6d6478;
+    font-weight: 700;
+  }
+
+  /* 4) 가운데 설명 패널 */
+  .pf-detail-panel {
+    width: 100%;
+    box-sizing: border-box;
+    background: #14101b;
+    border: 1px solid #3a3042;
+    border-radius: 8px;
+    padding: 8px 10px;
+    margin: 2px 0 6px 0;
+    min-height: 84px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .pf-detail-empty {
+    text-align: center;
+    color: #8a8296;
+    font-size: 12px;
+    padding: 6px 0;
+  }
+  .pf-detail-empty .empty-icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+  }
+  .pf-detail-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .pf-detail-top {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .pf-detail-icon {
+    font-size: 36px;
+    line-height: 40px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    background: #1a1524;
+    border-radius: 8px;
+  }
+  .pf-detail-perk .pf-detail-icon {
+    border: 1px solid #3b7de0;
+  }
+  .pf-detail-flaw .pf-detail-icon {
+    border: 1px solid #d7263d;
+  }
+  .pf-detail-meta {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .pf-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .pf-badge-perk {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    background: #3b7de0;
+    color: #fff;
+  }
+  .pf-badge-flaw {
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    background: #d7263d;
+    color: #fff;
+  }
+  .pf-detail-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+  .pf-detail-desc {
+    font-size: 11px;
+    line-height: 1.35;
+    color: #d1c8de;
+    word-break: keep-all;
+  }
+  .pf-detail-action-btn {
+    width: 100%;
+    padding: 7px 10px;
+    font-size: 12px;
+    font-weight: 800;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform 0.08s, opacity 0.15s;
+    box-sizing: border-box;
+  }
+  .pf-detail-action-btn:active {
+    transform: scale(0.98);
+  }
+  .pf-detail-action-btn.btn-equip-perk {
+    background: #3b7de0;
+    color: #fff;
+    border-color: #7db2ff;
+  }
+  .pf-detail-action-btn.btn-equip-flaw {
+    background: #d7263d;
+    color: #fff;
+    border-color: #ff7d90;
+  }
+  .pf-detail-action-btn.btn-unequip {
+    background: #2a1c22;
+    color: #ff9ca8;
+    border: 1px solid #d7263d;
+  }
+
+  /* 5) 맨 아래 격자 2개 */
+  .pf-grids-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 2px 0 6px 0;
+  }
+  .pf-grid-section {
+    border-radius: 8px;
+    padding: 6px 8px;
+    background: #14101b;
+    box-sizing: border-box;
+    text-align: left;
+  }
+  .pf-grid-perk-sec {
+    border: 1px solid #3b7de0;
+  }
+  .pf-grid-flaw-sec {
+    border: 1px solid #d7263d;
+  }
+  .pf-grid-title {
+    font-size: 11px;
+    font-weight: 800;
+    margin-bottom: 5px;
+  }
+  .pf-color-perk {
+    color: #9ce6ff;
+  }
+  .pf-color-flaw {
+    color: #ff9ca8;
+  }
+  .pf-icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+    gap: 6px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .pf-grid-cell {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    min-height: 44px;
+    background: #1c1726;
+    border: 1px solid #3a3042;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    user-select: none;
+    box-sizing: border-box;
+    transition: transform 0.08s, border-color 0.15s, background 0.15s;
+  }
+  .pf-grid-cell:hover {
+    background: #261f33;
+  }
+  .pf-grid-cell:active {
+    transform: scale(0.94);
+  }
+  .pf-grid-perk-sec .pf-grid-cell.selected {
+    border: 2px solid #ffd54a;
+    background: #242238;
+    box-shadow: 0 0 6px rgba(255, 213, 74, 0.4);
+  }
+  .pf-grid-flaw-sec .pf-grid-cell.selected {
+    border: 2px solid #ffd54a;
+    background: #2b1f28;
+    box-shadow: 0 0 6px rgba(255, 213, 74, 0.4);
+  }
+  .pf-grid-cell.equipped {
+    border-color: #55d777;
+  }
+  .pf-cell-check {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #55d777;
+    color: #0c0910;
+    font-size: 10px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+
+  /* 취소/확정 버튼 sticky */
+  .pf-actions-bar {
+    position: sticky;
+    bottom: 0;
+    background: #0c0910;
+    padding: 6px 0 2px 0;
+    z-index: 10;
+    margin-top: auto;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   /* 조각 13: 업적 카드 스타일 */
@@ -1492,9 +1786,21 @@
           <div class="pf-summary-list" id="pf-flaw-summary-list"></div>
         </div>
       </div>
+      <div class="pf-slot-chips" id="pf-slot-chips"></div>
+      <div class="pf-detail-panel" id="pf-detail"></div>
+      <div class="pf-grids-wrap" id="pf-grids-wrap">
+        <div class="pf-grid-section pf-grid-perk-sec">
+          <div class="pf-grid-title pf-color-perk">🔷 퍽</div>
+          <div class="pf-icon-grid" id="pf-perks-grid"></div>
+        </div>
+        <div class="pf-grid-section pf-grid-flaw-sec">
+          <div class="pf-grid-title pf-color-flaw">🔺 결함</div>
+          <div class="pf-icon-grid" id="pf-flaws-grid"></div>
+        </div>
+      </div>
       <div class="perk-flaw-slots" id="perk-flaw-slots-container"></div>
       <div class="slot-pair-alert" id="pf-status-msg"></div>
-      <div style="display:flex; gap:6px; width:100%;">
+      <div class="pf-actions-bar" style="display:flex; gap:6px; width:100%;">
         <button class="btn-action" id="btn-cancel-perk-flaw" style="flex:1;">취소</button>
         <button class="btn-action" id="btn-confirm-perk-flaw" style="flex:1; background:#3b7de0; color:#fff; border-color:#7db2ff;">확정 및 시작</button>
       </div>
@@ -2709,7 +3015,7 @@
     const prof = GR.loadProfile();
     const classProg = (prof.classProgress && prof.classProgress[classId]) || { level: 1 };
     const savedSetting = (prof.classPerkSettings && prof.classPerkSettings[classId]) || { perks: [], flaws: [] };
-    const slotCount = GR.getPerkSlotCount(classId, classProg.level);
+    const slotCount = GR.getPerkSlotCount(classProg.level);
 
     pfModalDesc.textContent = `파랑 퍽과 빨강 결함을 각 슬롯에 짝으로 맞춰 장착하세요 (사용 가능 슬롯: ${slotCount}쌍).`;
     pfStatusMsg.textContent = '';
@@ -2719,6 +3025,7 @@
       const isLocked = (i >= slotCount);
       const row = document.createElement('div');
       row.className = `perk-slot-pair ${isLocked ? 'locked' : ''}`;
+      row.style.display = 'none';
 
       const savedPerkId = (savedSetting.perks && savedSetting.perks[i] != null && savedSetting.perks[i] !== 255)
         ? savedSetting.perks[i]
@@ -2727,16 +3034,16 @@
         ? savedSetting.flaws[i]
         : '';
 
-      let perkOptionsHtml = `<option value="">-- 퍽 선택 안 함 --</option>`;
+      let perkOptionsHtml = `<option value="">선택 안 함</option>`;
       GR.PERKS_DATA.forEach(p => {
         const isSel = String(savedPerkId) === String(p.id) ? 'selected' : '';
-        perkOptionsHtml += `<option value="${p.id}" ${isSel}>${p.icon} ${p.name}</option>`;
+        perkOptionsHtml += `<option value="${p.id}" ${isSel}>${p.name}</option>`;
       });
 
-      let flawOptionsHtml = `<option value="">-- 결함 선택 안 함 --</option>`;
+      let flawOptionsHtml = `<option value="">선택 안 함</option>`;
       GR.FLAWS_DATA.forEach(f => {
         const isSel = String(savedFlawId) === String(f.id) ? 'selected' : '';
-        flawOptionsHtml += `<option value="${f.id}" ${isSel}>${f.icon} ${f.name}</option>`;
+        flawOptionsHtml += `<option value="${f.id}" ${isSel}>${f.name}</option>`;
       });
 
       row.innerHTML = `
@@ -2756,6 +3063,157 @@
       `;
 
       perkFlawSlotsContainer.appendChild(row);
+    }
+
+    let selectedSlotIndex = 0;
+    let selectedItem = null;
+
+    const slotChipsContainer = document.getElementById('pf-slot-chips');
+    const detailPanel = document.getElementById('pf-detail');
+    const perksGrid = document.getElementById('pf-perks-grid');
+    const flawsGrid = document.getElementById('pf-flaws-grid');
+
+    function renderSlotChips() {
+      if (!slotChipsContainer) return;
+      slotChipsContainer.innerHTML = '';
+      const perkSelects = perkFlawSlotsContainer.querySelectorAll('.perk-select');
+      const flawSelects = perkFlawSlotsContainer.querySelectorAll('.flaw-select');
+
+      for (let i = 0; i < GR.MAX_PERK_SLOTS; i++) {
+        const isLocked = (i >= slotCount);
+        const chip = document.createElement('div');
+        chip.className = `pf-slot-chip ${isLocked ? 'locked' : ''} ${(!isLocked && i === selectedSlotIndex) ? 'selected' : ''}`;
+
+        if (isLocked) {
+          chip.innerHTML = `
+            <div class="pf-chip-label">🔒 슬롯 ${i + 1}</div>
+            <div class="pf-chip-icons"><span class="pf-chip-icon empty">🔒</span></div>
+          `;
+        } else {
+          const pVal = perkSelects[i] && perkSelects[i].value !== '' ? Number(perkSelects[i].value) : null;
+          const fVal = flawSelects[i] && flawSelects[i].value !== '' ? Number(flawSelects[i].value) : null;
+          const pObj = (pVal != null) ? GR.PERKS_DATA.find(p => p.id === pVal) : null;
+          const fObj = (fVal != null) ? GR.FLAWS_DATA.find(f => f.id === fVal) : null;
+
+          const pIconHtml = pObj ? `<span class="pf-chip-icon perk-slot">${pObj.icon}</span>` : `<span class="pf-chip-icon perk-slot empty">＋</span>`;
+          const fIconHtml = fObj ? `<span class="pf-chip-icon flaw-slot">${fObj.icon}</span>` : `<span class="pf-chip-icon flaw-slot empty">＋</span>`;
+
+          chip.innerHTML = `
+            <div class="pf-chip-label">슬롯 ${i + 1}</div>
+            <div class="pf-chip-icons">${pIconHtml}${fIconHtml}</div>
+          `;
+
+          chip.addEventListener('click', () => {
+            selectedSlotIndex = i;
+            renderSlotChips();
+            renderDetailPanel();
+          });
+        }
+        slotChipsContainer.appendChild(chip);
+      }
+    }
+
+    function renderDetailPanel() {
+      if (!detailPanel) return;
+      if (!selectedItem) {
+        detailPanel.innerHTML = `
+          <div class="pf-detail-empty">
+            <div class="empty-icon">👇</div>
+            <div>아래 아이콘을 눌러 보세요</div>
+          </div>
+        `;
+        return;
+      }
+
+      const { type, item } = selectedItem;
+      const isPerk = (type === 'perk');
+      const badgeText = isPerk ? '퍽' : '결함';
+      const badgeClass = isPerk ? 'pf-badge-perk' : 'pf-badge-flaw';
+
+      const perkSelects = perkFlawSlotsContainer.querySelectorAll('.perk-select');
+      const flawSelects = perkFlawSlotsContainer.querySelectorAll('.flaw-select');
+      const targetSelect = isPerk ? perkSelects[selectedSlotIndex] : flawSelects[selectedSlotIndex];
+
+      const isEquippedInCurSlot = targetSelect && targetSelect.value === String(item.id);
+
+      detailPanel.innerHTML = `
+        <div class="pf-detail-card ${isPerk ? 'pf-detail-perk' : 'pf-detail-flaw'}">
+          <div class="pf-detail-top">
+            <div class="pf-detail-icon">${item.icon}</div>
+            <div class="pf-detail-meta">
+              <div class="pf-detail-header">
+                <span class="${badgeClass}">${badgeText}</span>
+                <span class="pf-detail-name">${item.name}</span>
+              </div>
+              <div class="pf-detail-desc">${item.desc}</div>
+            </div>
+          </div>
+          <button type="button" class="pf-detail-action-btn ${isEquippedInCurSlot ? 'btn-unequip' : (isPerk ? 'btn-equip-perk' : 'btn-equip-flaw')}" id="btn-pf-equip-action">
+            ${isEquippedInCurSlot ? '장착 해제' : `슬롯 ${selectedSlotIndex + 1}에 장착`}
+          </button>
+        </div>
+      `;
+
+      const actionBtn = detailPanel.querySelector('#btn-pf-equip-action');
+      if (actionBtn && targetSelect) {
+        actionBtn.addEventListener('click', () => {
+          if (isEquippedInCurSlot) {
+            targetSelect.value = '';
+          } else {
+            targetSelect.value = String(item.id);
+          }
+          targetSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+      }
+    }
+
+    function renderGrids() {
+      if (!perksGrid || !flawsGrid) return;
+      perksGrid.innerHTML = '';
+      flawsGrid.innerHTML = '';
+
+      const perkSelects = perkFlawSlotsContainer.querySelectorAll('.perk-select');
+      const flawSelects = perkFlawSlotsContainer.querySelectorAll('.flaw-select');
+
+      function makeCell(type, item) {
+        const isPerk = (type === 'perk');
+        const selects = isPerk ? perkSelects : flawSelects;
+        let isEquippedAnywhere = false;
+        for (let i = 0; i < slotCount; i++) {
+          if (selects[i] && selects[i].value === String(item.id)) {
+            isEquippedAnywhere = true;
+            break;
+          }
+        }
+        const isSelected = selectedItem && selectedItem.type === type && selectedItem.item.id === item.id;
+
+        const cell = document.createElement('div');
+        cell.className = `pf-grid-cell ${isSelected ? 'selected' : ''} ${isEquippedAnywhere ? 'equipped' : ''}`;
+        cell.title = item.name;
+        cell.setAttribute('aria-label', item.name);
+        cell.setAttribute('role', 'button');
+        cell.tabIndex = 0;
+
+        cell.innerHTML = `
+          <span class="pf-cell-icon">${item.icon}</span>
+          ${isEquippedAnywhere ? '<span class="pf-cell-check">✓</span>' : ''}
+        `;
+
+        cell.addEventListener('click', () => {
+          selectedItem = { type, item };
+          renderDetailPanel();
+          renderGrids();
+        });
+        return cell;
+      }
+
+      GR.PERKS_DATA.forEach(p => {
+        perksGrid.appendChild(makeCell('perk', p));
+      });
+
+      GR.FLAWS_DATA.forEach(f => {
+        flawsGrid.appendChild(makeCell('flaw', f));
+      });
     }
 
     function updatePerkFlawBoxes() {
@@ -2789,6 +3247,9 @@
 
     function checkValidity() {
       updatePerkFlawBoxes();
+      renderSlotChips();
+      renderDetailPanel();
+      renderGrids();
 
       const perkSelects = perkFlawSlotsContainer.querySelectorAll('.perk-select');
       const flawSelects = perkFlawSlotsContainer.querySelectorAll('.flaw-select');
@@ -2858,7 +3319,7 @@
     btnConfirmPerkFlaw.addEventListener('click', () => {
       const prof = GR.loadProfile();
       const classProg = (prof.classProgress && prof.classProgress[settingClassId]) || { level: 1 };
-      const slotCount = GR.getPerkSlotCount(settingClassId, classProg.level);
+      const slotCount = GR.getPerkSlotCount(classProg.level);
 
       const perkSelects = perkFlawSlotsContainer.querySelectorAll('.perk-select');
       const flawSelects = perkFlawSlotsContainer.querySelectorAll('.flaw-select');
@@ -3386,6 +3847,12 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-17-i', date: '2026-11-17', title: '특성 고르기가 아이콘 방식으로 바뀌었어요', items: [
+      '특성 창 맨 아래에 퍽(파랑)과 결함(빨강) 아이콘이 가지런히 놓였어요. 장착한 아이콘에는 ✓ 표시가 붙어요.',
+      '아이콘을 누르면 가운데에 이름과 자세한 설명이 나오고, [슬롯에 장착] 단추로 장착하거나 [장착 해제]로 뺄 수 있어요.',
+      '퍽과 결함을 한 쌍으로 맞춰야 한다는 규칙은 그대로예요.',
+      '직업 레벨이 오르면 특성 슬롯이 늘어나요 (Lv.3부터 2쌍, Lv.7부터 3쌍, Lv.9부터 4쌍). 예전에는 항상 1쌍으로만 보이던 문제를 고쳤어요.'
+    ] },
     { id: '2026-11-17-h', date: '2026-11-17', title: '직업·종족·특성 화면이 깔끔해졌어요', items: [
       '직업·종족·특성(퍽·결함) 창 맨 위에 [직업][종족][특성] 탭이 생겨서 창을 바로 오갈 수 있어요.',
       '종족 카드는 ✨ 보너스와 ☠ 숙적을 두 줄 박스로 나눠 보여 줘요.',
