@@ -2464,11 +2464,17 @@
   }
 
   function canChangeRace(classId, unlockData = null) {
+    if (typeof unlockData === 'number') {
+      const cKey = typeof classId === 'string' ? (CLASS_ID_TO_KEY[classId] != null ? CLASS_ID_TO_KEY[classId] : 0) : classId;
+      if (cKey === 0) return false;
+      return unlockData >= 5;
+    }
     const cKey = typeof classId === 'string' ? (CLASS_ID_TO_KEY[classId] != null ? CLASS_ID_TO_KEY[classId] : 0) : classId;
     if (cKey === 0) return false;
     let growth = 1;
     if (unlockData && unlockData.classGrowths) {
-      growth = unlockData.classGrowths[classId] || unlockData.classGrowths[cKey] || 1;
+      const strKey = typeof classId === 'number' ? CLASS_KEY_TO_ID[classId] : classId;
+      growth = unlockData.classGrowths[classId] || unlockData.classGrowths[cKey] || (strKey ? unlockData.classGrowths[strKey] : 1) || 1;
     }
     return growth >= 5;
   }
@@ -2497,7 +2503,10 @@
     if (rId === 0) return true;
     const RC = getRC();
     if (RC && typeof RC.isRaceUnlocked === 'function') {
-      return RC.isRaceUnlocked(rId, unlockData ? unlockData.classGrowths : null);
+      const unlockParam = (unlockData && unlockData.classes)
+        ? unlockData
+        : (unlockData && unlockData.classGrowths ? unlockData.classGrowths : unlockData);
+      return RC.isRaceUnlocked(rId, unlockParam);
     }
     return false;
   }
@@ -2583,6 +2592,7 @@
     updateProfileWithGameResult,
     useSkill,
     validateRaceSelection,
+    buildUnlockDataFromProfile,
     cancelChain,
     // 조각 29 난이도 4단계 선택 관련 노출 [추가 29.1, 29.2, 29.4]
     DIFFICULTY_NAMES,

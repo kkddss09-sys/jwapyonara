@@ -599,7 +599,9 @@
     const phase = 'input'; // input, settle, choice, end
     const classKey = options.classKey != null ? options.classKey : 0;
     const classDef = CLASS_DEFINITIONS[classKey] || CLASS_DEFINITIONS[0];
-    let raceKey = options.raceKey != null ? options.raceKey : classDef.defaultRace;
+    let raceKey = (typeof options.raceKey === 'number' && Number.isInteger(options.raceKey) && options.raceKey >= 0 && options.raceKey <= 9)
+      ? options.raceKey
+      : classDef.defaultRace;
     if (classKey > 0 && options.growth != null && options.growth < 5) {
       raceKey = classDef.defaultRace;
     }
@@ -8256,6 +8258,10 @@
     if (!hero.activeNext) hero.activeNext = {};
     if (!Array.isArray(hero.perks)) hero.perks = [];
     if (!Array.isArray(hero.flaws)) hero.flaws = [];
+    if (typeof hero.raceKey !== 'number' || !Number.isInteger(hero.raceKey) || hero.raceKey < 0 || hero.raceKey > 9) {
+      const cDef = CLASS_DEFINITIONS[hero.classKey] || CLASS_DEFINITIONS[0];
+      hero.raceKey = (cDef && cDef.defaultRace != null) ? cDef.defaultRace : 0;
+    }
 
     // 난수 공급자 복원 [교정 22.6]
     let rng = options.rng || null;

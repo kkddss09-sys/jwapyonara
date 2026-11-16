@@ -2658,7 +2658,7 @@
     const prof = GR.loadProfile();
     const classProg = (prof.classProgress && prof.classProgress[currentClassId]) || { level: 1 };
     const classLevel = classProg.level || 1;
-    const canChange = GR.canChangeRace(classLevel);
+    const canChange = GR.canChangeRace(currentClassId, classLevel);
     const currentRaceId = (gameState.player && gameState.player.raceId != null)
       ? gameState.player.raceId
       : (prof.classRaceSettings && prof.classRaceSettings[currentClassId] != null
@@ -2949,8 +2949,13 @@
     const savedRaceId = (prof.classRaceSettings && prof.classRaceSettings[currentClassId] != null)
       ? prof.classRaceSettings[currentClassId]
       : undefined;
-    const raceVal = GR.validateRaceSelection(currentClassId, savedRaceId, classProg.level);
-    const currentRaceId = (raceVal && typeof raceVal === 'object' && raceVal.raceId != null) ? raceVal.raceId : raceVal;
+    const unlockInfo = (typeof GR.buildUnlockDataFromProfile === 'function')
+      ? GR.buildUnlockDataFromProfile(prof)
+      : (unlockData || { classGrowths: {} });
+    const isRaceValid = (savedRaceId != null && typeof GR.validateRaceSelection === 'function')
+      ? GR.validateRaceSelection(currentClassId, savedRaceId, unlockInfo)
+      : false;
+    const currentRaceId = isRaceValid ? savedRaceId : undefined;
 
     const runDifficulty = (customOptions.difficulty != null) ? customOptions.difficulty : selectedDifficulty;
 
@@ -2966,7 +2971,8 @@
     });
     modalGameover.classList.remove('show');
     const cDef = GR.CLASSES[currentClassId] || GR.CLASSES.adventurer;
-    const rDef = (GR.RACES_DATA && GR.RACES_DATA.find(r => r.id === currentRaceId)) || (GR.RACES_DATA && GR.RACES_DATA[0]);
+    const activeRaceId = (gameState.player && gameState.player.raceId != null) ? gameState.player.raceId : currentRaceId;
+    const rDef = (GR.RACES_DATA && GR.RACES_DATA.find(r => r.id === activeRaceId)) || (GR.RACES_DATA && GR.RACES_DATA[0]);
     const diffLabel = (typeof GR.getDifficultyName === 'function') ? GR.getDifficultyName(runDifficulty) : '보통';
     const activePerksCount = (gameState.player?.activePerks || []).length;
     const activeFlawsCount = (gameState.player?.activeFlaws || []).length;
@@ -3128,6 +3134,11 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-17-g', date: '2026-11-17', title: '종족이 새 판에 제대로 적용돼요', items: [
+      '새 판을 시작할 때 고른 종족이 정확히 들어가도록 고쳤어요. (예전에는 종족 번호가 잘못 넘어가 종족 보너스가 안 걸릴 수 있었어요)',
+      '저장한 판을 이어 할 때도 종족 값이 이상하면 직업 기본 종족으로 바로잡아요.',
+      '종족 바꾸기 창에서 직업 Lv.5 조건을 직업별로 정확히 계산하도록 고쳤어요.'
+    ] },
     { id: '2026-11-17-f', date: '2026-11-17', title: '오늘 순위는 오늘 낸 점수만', items: [
       '🌞 오늘 순위에는 그날(오후 3시 이후) 한 판으로 낸 점수만 올라가요. 매일 한 판씩 도전해 보세요!',
       '단추 이름이 「오늘 낸 최고 점수 올리기」로 바뀌었어요. 전체·어제 순위는 그대로예요.'
