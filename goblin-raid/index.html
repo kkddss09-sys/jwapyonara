@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>좌표 탐험대 — 선 이어 고블린 무리와 싸우는 무료 퍼즐 게임 | 좌표나라</title>
-<meta name="description" content="칼·방패·물약·코인을 선으로 이어 몰려오는 고블린을 물리치는 무료 퍼즐 게임. 가입 없이 폰에서 바로. 기록은 내 기기에 저장되고, 구글 로그인하면 서버에도 보관해요.">
+<title>좌표 탐험대 — 선 이어 가짜 좌표 상인단과 싸우는 무료 퍼즐 게임 | 좌표나라</title>
+<meta name="description" content="칼·방패·물약·코인을 선으로 이어 가짜 좌표를 파는 고블린 상인단을 물리치는 무료 퍼즐 게임. 가입 없이 폰에서 바로. 기록은 내 기기에 저장되고, 구글 로그인하면 서버에도 보관해요.">
 <link rel="canonical" href="https://jwapyonara.com/goblin-raid/">
 <meta property="og:title" content="좌표 탐험대 — 무료 퍼즐 게임">
-<meta property="og:description" content="선을 이어 칼·방패·물약·코인을 모으고 고블린을 물리치세요. 가입 없이 바로 시작.">
+<meta property="og:description" content="선을 이어 칼·방패·물약·코인을 모으고 가짜 좌표 상인단을 물리치세요. 가입 없이 바로 시작.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://jwapyonara.com/goblin-raid/">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"좌표 탐험대","url":"https://jwapyonara.com/goblin-raid/","description":"선을 이어 고블린 무리와 싸우는 무료 퍼즐 게임","inLanguage":"ko","applicationCategory":"Game","operatingSystem":"Web"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"좌표 탐험대","url":"https://jwapyonara.com/goblin-raid/","description":"선을 이어 가짜 좌표 상인단과 싸우는 무료 퍼즐 게임","inLanguage":"ko","applicationCategory":"Game","operatingSystem":"Web"}</script>
 <style>
   :root {
     --bg: #15131a;
@@ -585,6 +585,20 @@
     display: flex;
     gap: 6px;
   }
+
+  /* 닫기 단추는 절반 크기(폭 50%·높이 절반) — 2026-11-17 */
+  .modal-overlay button.btn-action[id^="btn-close-"] { width: 50% !important; margin-left: auto !important; margin-right: auto !important; padding: 5px 8px !important; font-size: 12px !important; flex: 0 0 auto !important; display: block; }
+  .guide-box { max-height: 62vh; overflow-y: auto; text-align: left; }
+  .guide-box details { background: #1a1522; border: 1px solid #3a3042; border-radius: 8px; padding: 6px 10px; margin: 6px 0; }
+  .guide-box summary { cursor: pointer; font-weight: 800; color: #ffe27a; font-size: 13px; }
+  .guide-box p, .guide-box li { font-size: 12.5px; line-height: 1.6; margin: 5px 0; }
+  .guide-box ul { padding-left: 18px; margin: 4px 0; }
+  .guide-box .soon { color: #ffb86b; font-weight: 700; }
+  #patch-new { display: none; background: #ff5a5a; color: #fff; border-radius: 999px; font-size: 10px; padding: 1px 6px; margin-left: 4px; vertical-align: middle; }
+  .patch-box { width: 100%; max-height: 60vh; overflow-y: auto; text-align: left; }
+  .patch-item { background: #1a1522; border: 1px solid #3a3042; border-radius: 8px; padding: 8px 10px; margin: 6px 0; }
+  .patch-item h4 { margin: 0 0 4px; font-size: 13px; color: #ffe27a; }
+  .patch-item ul { margin: 0; padding-left: 18px; } .patch-item li { font-size: 12.5px; line-height: 1.6; }
   .btn-action {
     flex: 1;
     padding: 7px;
@@ -964,13 +978,15 @@
         <span>⚔️ 좌표 탐험대</span>
       </div>
       <div class="header-btns">
-        <button class="btn-icon" id="btn-save-code-modal" title="기록 저장 코드">💾 저장 코드</button>
-        <button class="btn-icon" id="btn-achievements-modal" style="color:#ffd54a; border-color:#e5a82a;" title="업적과 도전과제">🏆 <span id="hdr-ach-count">0/10</span></button>
+        <span id="cloud-slot" style="display:contents"></span>
+        <button class="btn-icon" id="btn-save-code-modal" title="기록 저장 코드" style="display:none">💾 저장 코드</button>
+        <button class="btn-icon" id="btn-achievements-modal" style="color:#ffd54a; border-color:#e5a82a;" title="업적과 도전과제">🏆 <span id="hdr-ach-count">0/3</span></button>
         <button class="btn-icon" id="btn-rank-modal" style="color:#ffd54a; border-color:#e5a82a;" title="모드별 순위 1~10위">🥇 순위</button>
         <button class="btn-icon" id="btn-sound-modal" title="음향 설정">🔊 음향</button>
-        <button class="btn-icon" id="btn-guide" title="도움말">❓ 도움말</button>
+        <button class="btn-icon" id="btn-patch" title="바뀐 점 보기">🆕 패치<span id="patch-new">NEW</span></button>
+        <button class="btn-icon" id="btn-guide" title="사용 설명서">📖 사용 설명서</button>
         <button class="btn-icon" id="btn-race-modal" style="color:#55d777; border-color:#2f9e57;">🧬 <span id="hdr-race-name">평원</span></button>
-        <button class="btn-icon" id="btn-class-modal" style="color:var(--gold); border-color:var(--gold);">👤 <span id="hdr-class-name">모험가</span></button>
+        <button class="btn-icon" id="btn-class-modal" style="color:var(--gold); border-color:var(--gold);">👤 <span id="hdr-class-name">길잡이</span></button>
       </div>
     </div>
 
@@ -1091,7 +1107,7 @@
     <!-- 직업 선택 모달 (10종) -->
     <div class="modal-overlay" id="modal-class">
       <div class="modal-title" style="color:#ffe27a;">🛡️ 직업 선택 (10종)</div>
-      <div class="modal-desc">특수 적을 처치하면 새로운 직업이 해제됩니다.</div>
+      <div class="modal-desc">특수 적을 처치하면 🏺 보상 칸이 남아요. 그 칸을 혼자 눌러 모으면 새 직업이 열려요. (쉬움 난이도 제외, 자세한 건 📖 사용 설명서)</div>
       <div class="cls-grid" id="class-grid-list"></div>
       <button class="btn-action" id="btn-close-class-modal" style="margin-top:6px; width:100%;">닫기</button>
     </div>
@@ -1100,7 +1116,7 @@
     <div class="modal-overlay" id="modal-gameover">
       <div class="modal-title" style="color:#d7263d;">💀 게임 오버 💀</div>
       <div class="go-box">
-        <div class="go-row"><span>직업</span><b id="go-class-name">모험가</b></div>
+        <div class="go-row"><span>직업</span><b id="go-class-name">길잡이</b></div>
         <div class="go-row"><span>생존 턴 수</span><b id="go-val-turn">0턴</b></div>
         <div class="go-row"><span>처치한 적</span><b id="go-val-kills">0마리</b></div>
         <div class="go-row"><span>최종 점수</span><b id="go-val-score" style="color:var(--gold);">0점</b></div>
@@ -1187,14 +1203,85 @@
 
     <!-- 도움말 모달 -->
     <div class="modal-overlay" id="modal-guide">
-      <div class="modal-title" style="color:#ffe27a;">📖 한 판 가이드</div>
+      <div class="modal-title" style="color:#ffe27a;">📖 사용 설명서</div>
       <div class="guide-box">
-        <p>1. <b>선 잇기</b>: 8방향(상하좌우·대각선)으로 같은 칸을 3개 이상 잇습니다. 직전 칸으로 되돌리면 취소됩니다.</p>
-        <p>2. <b>칼과 적</b>: 칼 줄에는 적을 함께 이어 공격합니다. 각 적에게 100%씩 피해가 들어가며, 체력이 0이 되면 처치됩니다.</p>
-        <p>3. <b>턴 종료와 반격</b>: 손을 뗄 때마다 한 턴이 끝납니다. 살아남은 모든 적이 플레이어를 공격하며, 방패가 먼저 흡수한 뒤 체력이 깎입니다.</p>
-        <p>4. <b>자원 활용</b>: 방패 초과분은 강화 게이지로 누적되며, 골드가 차면 상점이 열리고, 경험치가 차면 레벨업 특성을 선택합니다.</p>
+        <details open><summary>1. 이 게임은 뭐예요?</summary>
+          <p>폐허가 된 거대 쇼핑몰을 차지한 <b>고블린 상인단</b>이 가짜 좌표 지도를 팔며 탐험대를 속입니다. 칸을 선으로 이어 상인단을 물리치고 점수를 올리세요. 체력이 0이 되면 게임이 끝나고, 점수는 순위표에 올릴 수 있어요.</p>
+        </details>
+        <details open><summary>2. 이렇게 해요 (선 잇기)</summary>
+          <ul>
+            <li>같은 칸을 손가락으로 쭉 이어요. <b>상하좌우·대각선 8방향</b>, <b>3개 이상</b>이어야 해요.</li>
+            <li>잘못 이었으면 <b>직전 칸으로 되돌아가면</b> 취소돼요.</li>
+            <li><b>손을 떼면 1턴</b>이 끝나요. 이어진 칸은 사라지고 새 칸이 채워져요.</li>
+          </ul>
+        </details>
+        <details><summary>3. 칸이 하는 일 (칼·방패·물약·코인)</summary>
+          <ul>
+            <li><b>칼</b>: 칼 줄에 <b>적을 함께 이으면</b> 그 적들을 공격해요. 체력이 0이 되면 처치돼요.</li>
+            <li><b>방패</b>: 모으면 방패가 올라가 적의 반격을 먼저 막아 줘요. 넘치는 만큼은 강화 게이지가 차요.</li>
+            <li><b>물약</b>: 모으면 체력이 회복돼요.</li>
+            <li><b>코인</b>: 모으면 골드가 쌓이고, 골드가 차면 상점이 열려요.</li>
+          </ul>
+        </details>
+        <details><summary>4. 체력과 반격</summary>
+          <p>턴이 끝나면 <b>살아 있는 적이 모두 반격</b>해요. 피해는 방패가 먼저 받고, 방패가 없으면 체력이 깎여요. 그래서 적을 많이 잡을수록, 방패가 두꺼울수록 안전해요.</p>
+        </details>
+        <details><summary>5. 레벨·스킬·상점</summary>
+          <ul>
+            <li>적을 잡으면 <b>경험치</b>가 차고, 가득 차면 <b>레벨업</b> 선택이 나와요.</li>
+            <li><b>스킬</b>은 아래 칸에 있고, 충전(대기 턴)이 다 차면 눌러서 써요. 아래 "❓ 내 스킬 설명" 단추에서 스킬 뜻을 볼 수 있어요.</li>
+            <li><b>상점</b>은 코인이 차면 열려요. 장비와 스킬을 고를 수 있어요.</li>
+            <li><b>강화</b>: 방패 초과분으로 게이지가 차면 장비 능력을 올릴 수 있어요.</li>
+          </ul>
+        </details>
+        <details><summary>6. 난이도·순위</summary>
+          <p><b>쉬움 · 보통 · 어려움 · 지옥</b> 네 단계가 있고, 순위표는 난이도마다 따로예요. 🥇 순위 단추에서 내 기록과 전체 순위를 볼 수 있어요.</p>
+        </details>
+        <details><summary>7. 직업·종족·스킬 해금 조건</summary>
+          <p>처음에는 <b>길잡이</b>(평원 탐험단)만 쓸 수 있고, 나머지는 🔒예요.</p>
+          <ul>
+            <li><b>직업 해금</b>: <b>특수 적</b>(보통 적보다 강한 적)을 처치하면 그 자리에 <b>🏺 직업 보상 칸</b>이 남아요. 그 칸을 <b>다른 칸과 잇지 말고 혼자 한 번 눌러</b> 모으면, 잠긴 직업이 하나 <b>랜덤으로</b> 열려요.</li>
+            <li>길잡이가 아닌 직업으로 할 때는 <b>반반 확률</b>로 "지금 직업 레벨 +1" 또는 "새 직업 해금"이 나와요.</li>
+            <li>보상 칸은 <b>한 판에 최대 3번</b>까지 나오고, 다음 보상까지는 특수 적을 20~30마리쯤 더 잡아야 해요.</li>
+            <li class="soon">⚠ <b>쉬움 난이도에서는 직업 보상이 나오지 않아요.</b> 새 직업을 열려면 보통 이상으로 하세요.</li>
+            <li><b>직업 레벨</b>: 새로 열린 직업은 레벨 1이고 최대 10까지 올라요.</li>
+            <li><b>종족 변경</b>: 지금 고른 직업이 <b>레벨 5 이상</b>이면 종족을 바꿀 수 있어요. 그리고 고르려는 종족과 <b>짝인 직업이 레벨 5 이상</b>이어야 그 종족이 열려요.</li>
+          </ul>
+          <p><b>종족 ↔ 짝 직업</b></p>
+          <ul>
+            <li>숲 탐험단 ↔ 정찰병 · 땅굴 탐험단 ↔ 칼잡이 · 늪 탐험단 ↔ 도적</li>
+            <li>뿔 탐험단 ↔ 치유사 · 덩치 탐험단 ↔ 돌격대 · 꼬마 탐험단 ↔ 도굴꾼</li>
+            <li>늑대 탐험단 ↔ 암행병 · 용혈 탐험단 ↔ 호위병 · 변신 탐험단 ↔ 해독가</li>
+          </ul>
+          <p><b>직업 고유 스킬</b>: 그 직업이 <b>레벨 10</b>이 되어야 스킬 후보에 나와요. (일반 스킬은 처음부터 나와요)</p>
+          <ul>
+            <li>정찰병: 칼을 전부 화살로 · 도굴꾼: 코인을 적으로 바꾸기 · 치유사: 판 전체 한 번에 쓸기(1회용)</li>
+            <li>돌격대: 처치한 적만큼 회복 · 해독가: 고리 모양으로 안쪽 수집 · 도적: 코인 옆 적 전부 처치</li>
+            <li>호위병: 죽을 때 한 번 부활 · 칼잡이: 판 가장자리 쓸기 · 암행병: 연결 칸 만들기</li>
+          </ul>
+        </details>
+        <details><summary>8. 업적</summary>
+          <ul><li>첫 가짜 좌표 지도 얻음: 특수 적을 처음 처치</li><li>베테랑 탐험대장: 어떤 직업이든 레벨 10</li><li>가짜 좌표 대장과의 결전: 숙적을 만나 처치</li></ul>
+        </details>
+        <details><summary>9. 저장과 로그인</summary>
+          <ul>
+            <li>하던 판은 <b>턴마다 이 브라우저에 자동 저장</b>돼요. 다시 열면 <b>▶ 이어하기</b> 단추가 나와요(게임 오버가 되면 지워져요).</li>
+            <li>맨 위 <b>☁ 로그인</b>(구글)을 하면 기록과 하던 판이 <b>서버에 보관</b>돼요. 다른 폰에서도 같은 계정으로 이어 할 수 있어요.</li>
+            <li><b>💾 중간 저장</b>을 누르면 지금 바로 서버에 올려요. 로그인 전에 누르면 로그인 안내가 나와요.</li>
+            <li>브라우저 데이터를 지우거나 다른 기기로 옮기면 로그인하지 않은 기록은 사라질 수 있어요.</li>
+          </ul>
+        </details>
+        <p style="font-size:11px; color:var(--sub);">새로 바뀐 점은 맨 위 <b>🆕 패치</b> 단추에서 볼 수 있어요.</p>
       </div>
-      <button class="btn-action" id="btn-close-guide" style="width:100%;">확인했습니다</button>
+      <button class="btn-action" id="btn-close-guide">확인했습니다</button>
+    </div>
+
+    <!-- 패치 소식 -->
+    <div class="modal-overlay" id="modal-patch">
+      <div class="modal-title" style="color:#ffe27a;">🆕 패치 소식</div>
+      <div class="modal-desc">게임이 바뀐 내용을 날짜별로 알려 드려요.</div>
+      <div class="patch-box" id="patch-list"></div>
+      <button class="btn-action" id="btn-close-patch">닫기</button>
     </div>
 
     <!-- 저장 코드 관리 모달 (조각 10) -->
@@ -1223,7 +1310,7 @@
 
     <!-- 퍽과 결함 직업 설정 모달 (조각 11) -->
     <div class="modal-overlay" id="modal-perk-flaw">
-      <div class="modal-title" style="color:#3b7de0;" id="pf-modal-title">⚙️ 직업 설정: 전사</div>
+      <div class="modal-title" style="color:#3b7de0;" id="pf-modal-title">⚙️ 직업 설정: 칼잡이</div>
       <div class="modal-desc" id="pf-modal-desc">파랑 퍽과 빨강 결함을 각 슬롯에 짝으로 맞춰 장착하세요.</div>
       <div class="perk-flaw-slots" id="perk-flaw-slots-container"></div>
       <div class="slot-pair-alert" id="pf-status-msg"></div>
@@ -1244,7 +1331,7 @@
     <!-- 업적 모달 (조각 13) -->
     <div class="modal-overlay" id="modal-achievements">
       <div class="modal-title" style="color:#ffd54a;">🏆 도전 과제와 업적</div>
-      <div class="modal-desc" id="ach-summary-text">달성한 업적: 0 / 10</div>
+      <div class="modal-desc" id="ach-summary-text">달성한 업적: 0 / 3</div>
       <div class="ach-list-container" id="achievements-list" style="width:100%; max-height:360px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:4px 2px;"></div>
       <button class="btn-action" id="btn-close-achievements" style="width:100%; margin-top:4px;">닫기</button>
     </div>
@@ -1252,6 +1339,27 @@
   </div>
 </main>
 
+<script>
+// 옛 직업 이름으로 저장된 "내 기록"의 이름을 새 이름으로 한 번만 바꾼다. 바꾸기 전 기록은 goblin_raid_v1_backup_names_1117_* 칸에 그대로 남는다.
+(function () {
+  try {
+    var FLAG = 'goblin_raid_names_migrated_1117';
+    if (localStorage.getItem(FLAG)) return;
+    var NAMES = { '모험가': '길잡이', '레인저': '정찰병', '약탈자': '도굴꾼', '사제': '치유사', '바바리안': '돌격대', '마법사': '해독가', '성기사': '호위병', '전사': '칼잡이', '암살자': '암행병' };
+    function walk(o) {
+      if (Array.isArray(o)) return o.map(walk);
+      if (o && typeof o === 'object') { var r = {}; var meta = (typeof o.key === 'string' && o.id != null && typeof o.name === 'string'); for (var k in o) { r[k] = ((k === 'className' || (k === 'name' && meta)) && typeof o[k] === 'string' && NAMES[o[k]]) ? NAMES[o[k]] : walk(o[k]); } return r; }
+      return o;
+    }
+    ['scores', 'profile'].forEach(function (k) {
+      var key = 'goblin_raid_v1_' + k, s = localStorage.getItem(key); if (!s) return;
+      var out = JSON.stringify(walk(JSON.parse(s)));
+      if (out !== s) { localStorage.setItem('goblin_raid_v1_backup_names_1117_' + k, s); localStorage.setItem(key, out); }
+    });
+    localStorage.setItem(FLAG, String(Date.now()));
+  } catch (_) {}
+})();
+</script>
 <script src="game.js"></script>
 <script src="cloud-save.js"></script>
 <script>
@@ -1352,6 +1460,7 @@
 
   // 조각 13: 업적 모달 DOM
   const btnAchievementsModal = document.getElementById('btn-achievements-modal');
+  const VISIBLE_ACH_IDS = ['ach_special_kill_1', 'ach_class_level_10', 'ach_secret_nemesis']; // 원작과 조건이 맞는 3개만 보여 준다(내부 판정·저장은 그대로)
   const hdrAchCount = document.getElementById('hdr-ach-count');
   const modalAchievements = document.getElementById('modal-achievements');
   const achievementsList = document.getElementById('achievements-list');
@@ -1427,7 +1536,7 @@
     const currentRaceId = (p && p.raceId != null) ? p.raceId : 0;
     const rDef = (GR.RACES_DATA && GR.RACES_DATA.find(r => r.id === currentRaceId)) || (GR.RACES_DATA && GR.RACES_DATA[0]);
     if (hdrRaceName && rDef) {
-      hdrRaceName.textContent = rDef.name.replace(' 고블린', '');
+      hdrRaceName.textContent = rDef.name.replace(' 탐험단', '');
     }
     valTurn.textContent = gameState.turn;
     valLevel.textContent = p.level || 1;
@@ -1477,9 +1586,9 @@
 
     // 조각 13: 헤더 업적 달성 수치 갱신
     const currentProf = GR.loadProfile();
-    const curAchCount = (currentProf && Array.isArray(currentProf.achievements)) ? currentProf.achievements.length : 0;
+    const curAchCount = currentProf ? VISIBLE_ACH_IDS.filter(id => GR.isAchievementUnlocked(currentProf, id)).length : 0;
     if (hdrAchCount) {
-      hdrAchCount.textContent = `${curAchCount}/${GR.ACHIEVEMENTS_DATA ? GR.ACHIEVEMENTS_DATA.length : 10}`;
+      hdrAchCount.textContent = `${curAchCount}/${VISIBLE_ACH_IDS.length}`;
     }
 
     if (gameState.isGameOver) {
@@ -2271,6 +2380,7 @@
             openPerkFlawModal(cid);
           } else {
             currentClassId = cid;
+            try { localStorage.setItem('goblin_raid_v1_lastclass', cid); } catch (_) {}
             startNewGame({ perks: [], flaws: [] });
           }
         });
@@ -2425,6 +2535,7 @@
       GR.saveProfile(prof);
 
       currentClassId = settingClassId;
+      try { localStorage.setItem('goblin_raid_v1_lastclass', settingClassId); } catch (_) {}
       modalPerkFlaw.classList.remove('show');
       startNewGame({ perks: chosenPerks, flaws: chosenFlaws });
     });
@@ -2651,7 +2762,7 @@
     list.slice(0, 10).forEach((e, i) => {
       const tr = document.createElement('tr');
       const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1);
-      tr.innerHTML = `<td>${medal}</td><td>${e.className || '모험가'}</td><td>${e.turn != null ? e.turn : 0}턴</td><td>${e.kills != null ? e.kills : 0}마리</td><td style="color:var(--gold); font-weight:800;">${(e.score || 0).toLocaleString()}</td>`;
+      tr.innerHTML = `<td>${medal}</td><td>${e.className || '길잡이'}</td><td>${e.turn != null ? e.turn : 0}턴</td><td>${e.kills != null ? e.kills : 0}마리</td><td style="color:var(--gold); font-weight:800;">${(e.score || 0).toLocaleString()}</td>`;
       tbody.appendChild(tr);
     });
   }
@@ -2680,7 +2791,7 @@
       const diffName = (typeof GR.getDifficultyName === 'function') ? GR.getDifficultyName(diffVal) : '보통';
       tr.innerHTML = `
         <td>#${idx + 1}</td>
-        <td>${entry.className || '모험가'}</td>
+        <td>${entry.className || '길잡이'}</td>
         <td style="color:var(--gold); font-size:10px; font-weight:700;">${diffName}</td>
         <td>${entry.turn}턴</td>
         <td>${entry.kills}마리</td>
@@ -2700,7 +2811,7 @@
     scoreSavedThisRun = false;
     isAnimating = false;
     currentPath = [];
-    GR.clearRunState(); // 새 게임 시작 시 이전 판 진행 삭제
+    if (!customOptions.keepRun) GR.clearRunState(); // 새 게임 시작 시 이전 판 진행 삭제 (keepRun: 화면을 열 때 마지막 직업을 복원하는 경우는 지우지 않는다)
 
     let perks = customOptions.perks;
     let flaws = customOptions.flaws;
@@ -2843,7 +2954,7 @@
     if (!achievementsList) return;
     achievementsList.innerHTML = '';
     const prof = GR.loadProfile();
-    const achievements = GR.ACHIEVEMENTS_DATA || [];
+    const achievements = (GR.ACHIEVEMENTS_DATA || []).filter(a => VISIBLE_ACH_IDS.includes(a.id));
     let unlockedCount = 0;
 
     achievements.forEach(ach => {
@@ -2897,9 +3008,66 @@
     });
   }
 
+
+  // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
+  const PATCH_NOTES = [
+    { id: '2026-11-17-c', date: '2026-11-17', title: '새 기능이 이 주소로 합쳐졌어요', items: [
+      '이름이 「좌표 탐험대」로 바뀌었고, 직업·종족(탐험단)·스킬·업적 이름도 새로 정리했어요.',
+      '맨 위에 ☁ 로그인 · 💾 중간 저장 단추가 생겼어요. 로그인하면 기록과 하던 판이 서버에 보관돼서 다른 폰에서도 이어 할 수 있어요.',
+      '📖 사용 설명서(직업·종족·스킬 해금 조건 포함)와 🆕 패치 소식 창이 생겼어요.',
+      '닫기 단추를 절반 크기로 줄였고, 마지막으로 고른 직업을 기억해요.',
+      '업적은 원작과 맞는 3개만 보여 줘요. (🏆 78/10으로 보이던 숫자 오류도 고쳤어요)',
+      '지금까지의 기록(직업 해제·종족·점수)과 순위는 그대로 이어져요. 예전 기록의 직업 이름만 새 이름으로 보여요.'
+    ] },
+    { id: '2026-11-17-b', date: '2026-11-17', title: '저장·설명서 정리', items: [
+      '맨 위에 큰 ☁ 로그인 · 💾 중간 저장 단추를 넣었어요. (💾 저장 코드 단추는 숨겼어요)',
+      '로그인하면 기록뿐 아니라 하던 판(이어하기)도 서버에 보관돼서 다른 폰에서 이어 할 수 있어요.',
+      '마지막으로 고른 직업을 기억해서 다시 열어도 그 직업으로 시작해요.',
+      '닫기 단추를 절반 크기로 줄였어요.',
+      '📖 사용 설명서를 처음부터 새로 썼어요. (해금 조건 포함)',
+      '🆕 패치 소식 창을 만들었어요.'
+    ] },
+    { id: '2026-11-17-a', date: '2026-11-17', title: '좌표 탐험대로 이름이 바뀌었어요', items: [
+      '게임 이름이 「좌표 탐험대」가 되고, 고블린은 가짜 좌표를 파는 상인단이 되었어요.',
+      '직업·종족(탐험단)·스킬 이름을 알아보기 쉽게 바꿨어요.',
+      '업적은 원작과 맞는 3개만 보여 줘요.'
+    ] }
+  ];
+  const PATCH_SEEN_KEY = 'goblin_raid_patch_seen';
+  const btnPatch = document.getElementById('btn-patch');
+  const modalPatch = document.getElementById('modal-patch');
+  const patchList = document.getElementById('patch-list');
+  const patchNew = document.getElementById('patch-new');
+  function patchSeen() { try { return localStorage.getItem(PATCH_SEEN_KEY); } catch (_) { return null; } }
+  function renderPatchNotes() {
+    patchList.innerHTML = '';
+    PATCH_NOTES.forEach(n => {
+      const d = document.createElement('div'); d.className = 'patch-item';
+      const t = document.createElement('h4'); t.textContent = `${n.date} · ${n.title}`; d.appendChild(t);
+      const ul = document.createElement('ul'); n.items.forEach(x => { const li = document.createElement('li'); li.textContent = x; ul.appendChild(li); }); d.appendChild(ul);
+      patchList.appendChild(d);
+    });
+  }
+  if (patchNew && PATCH_NOTES[0] && patchSeen() !== PATCH_NOTES[0].id) patchNew.style.display = 'inline-block';
+  if (btnPatch) btnPatch.addEventListener('click', () => {
+    renderPatchNotes(); modalPatch.classList.add('show');
+    try { localStorage.setItem(PATCH_SEEN_KEY, PATCH_NOTES[0].id); } catch (_) {}
+    if (patchNew) patchNew.style.display = 'none';
+  });
+  document.getElementById('btn-close-patch').addEventListener('click', () => modalPatch.classList.remove('show'));
+
   // 도움말 모달
   btnGuide.addEventListener('click', () => { modalGuide.classList.add('show'); });
   btnCloseGuide.addEventListener('click', () => { modalGuide.classList.remove('show'); });
+
+  // 마지막으로 고른 직업 복원 (해제된 직업일 때만, 이어하기 판은 그대로 둔다)
+  try {
+    const lastCls = localStorage.getItem('goblin_raid_v1_lastclass');
+    if (lastCls && lastCls !== 'adventurer' && GR.CLASSES[lastCls] && GR.isClassUnlocked(lastCls, GR.loadUnlockData())) {
+      currentClassId = lastCls;
+      startNewGame({ keepRun: true });
+    }
+  } catch (_) {}
 
   // 초기 시작
   updateDifficultyButtonsUI();
@@ -2908,6 +3076,6 @@
   renderBoard();
 })();
 </script>
-<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/peg-jump/">페그 솔리테어</a> — 구슬을 뛰어넘어 하나만 남기기</li><li><a href="/tangram-seven/">칠교</a> — 일곱 조각으로 모양 맞추기</li><li><a href="/nonogram/">네모 로직</a> — 숫자 힌트로 숨은 그림 찾기</li><li><a href="/sum-fill/">숫자 합 맞추기</a> — 가로세로 합에 맞게 숫자 채우기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li><li><a href="/coord-explorer/">좌표 탐험대 새 버전 (시험 중)</a> — 선을 이어 가짜 좌표 상인단과 싸우기</li></ul></nav><!--/zw-static-links-->
+<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/peg-jump/">페그 솔리테어</a> — 구슬을 뛰어넘어 하나만 남기기</li><li><a href="/tangram-seven/">칠교</a> — 일곱 조각으로 모양 맞추기</li><li><a href="/nonogram/">네모 로직</a> — 숫자 힌트로 숨은 그림 찾기</li><li><a href="/sum-fill/">숫자 합 맞추기</a> — 가로세로 합에 맞게 숫자 채우기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li></ul></nav><!--/zw-static-links-->
 </body>
 </html>

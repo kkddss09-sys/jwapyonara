@@ -423,7 +423,7 @@
     {
       id: 0,
       key: 'adventurer',
-      name: '모험가',
+      name: '길잡이',
       defaultRace: 0,
       fixedPerk: null,
       fixedFlaw: null,
@@ -435,7 +435,7 @@
     {
       id: 1,
       key: 'ranger',
-      name: '레인저',
+      name: '정찰병',
       defaultRace: 1,
       fixedPerk: 6,
       fixedFlaw: 6,
@@ -447,7 +447,7 @@
     {
       id: 2,
       key: 'raider',
-      name: '약탈자',
+      name: '도굴꾼',
       defaultRace: 6,
       fixedPerk: 2,
       fixedFlaw: 2,
@@ -459,7 +459,7 @@
     {
       id: 3,
       key: 'priest',
-      name: '사제',
+      name: '치유사',
       defaultRace: 4,
       fixedPerk: 5,
       fixedFlaw: 5,
@@ -471,7 +471,7 @@
     {
       id: 4,
       key: 'barbarian',
-      name: '바바리안',
+      name: '돌격대',
       defaultRace: 5,
       fixedPerk: 4,
       fixedFlaw: 4,
@@ -483,7 +483,7 @@
     {
       id: 5,
       key: 'mage',
-      name: '마법사',
+      name: '해독가',
       defaultRace: 9,
       fixedPerk: 1,
       fixedFlaw: 1,
@@ -507,7 +507,7 @@
     {
       id: 7,
       key: 'paladin',
-      name: '성기사',
+      name: '호위병',
       defaultRace: 8,
       fixedPerk: 8,
       fixedFlaw: 8,
@@ -519,7 +519,7 @@
     {
       id: 8,
       key: 'warrior',
-      name: '전사',
+      name: '칼잡이',
       defaultRace: 2,
       fixedPerk: 9,
       fixedFlaw: 9,
@@ -531,7 +531,7 @@
     {
       id: 9,
       key: 'assassin',
-      name: '암살자',
+      name: '암행병',
       defaultRace: 7,
       fixedPerk: 3,
       fixedFlaw: 3,
@@ -547,16 +547,16 @@
 
   // 종족 10종 정의 (R00 ~ R09) [M4]
   const RACE_DEFINITIONS = [
-    { id: 0, key: 'human', name: '평원 고블린', mortalEnemyId: 0, defaultClassId: 0 },
-    { id: 1, key: 'elf', name: '숲 고블린', mortalEnemyId: 9, defaultClassId: 1 },
-    { id: 2, key: 'dwarf', name: '땅굴 고블린', mortalEnemyId: 14, defaultClassId: 8 },
-    { id: 3, key: 'sauren', name: '늪 고블린', mortalEnemyId: 13, defaultClassId: 6 },
-    { id: 4, key: 'faun', name: '뿔 고블린', mortalEnemyId: 16, defaultClassId: 3 },
-    { id: 5, key: 'orc', name: '덩치 고블린', mortalEnemyId: 12, defaultClassId: 4 },
-    { id: 6, key: 'halfling', name: '꼬마 고블린', mortalEnemyId: 5, defaultClassId: 2 },
-    { id: 7, key: 'werewolf', name: '늑대 고블린', mortalEnemyId: 20, defaultClassId: 9 },
-    { id: 8, key: 'dragonkin', name: '용혈 고블린', mortalEnemyId: 8, defaultClassId: 7 },
-    { id: 9, key: 'changeling', name: '변신 고블린', mortalEnemyId: 19, defaultClassId: 5 }
+    { id: 0, key: 'human', name: '평원 탐험단', mortalEnemyId: 0, defaultClassId: 0 },
+    { id: 1, key: 'elf', name: '숲 탐험단', mortalEnemyId: 9, defaultClassId: 1 },
+    { id: 2, key: 'dwarf', name: '땅굴 탐험단', mortalEnemyId: 14, defaultClassId: 8 },
+    { id: 3, key: 'sauren', name: '늪 탐험단', mortalEnemyId: 13, defaultClassId: 6 },
+    { id: 4, key: 'faun', name: '뿔 탐험단', mortalEnemyId: 16, defaultClassId: 3 },
+    { id: 5, key: 'orc', name: '덩치 탐험단', mortalEnemyId: 12, defaultClassId: 4 },
+    { id: 6, key: 'halfling', name: '꼬마 탐험단', mortalEnemyId: 5, defaultClassId: 2 },
+    { id: 7, key: 'werewolf', name: '늑대 탐험단', mortalEnemyId: 20, defaultClassId: 9 },
+    { id: 8, key: 'dragonkin', name: '용혈 탐험단', mortalEnemyId: 8, defaultClassId: 7 },
+    { id: 9, key: 'changeling', name: '변신 탐험단', mortalEnemyId: 19, defaultClassId: 5 }
   ];
 
   // 퍽 10종 정의 (P00 ~ P09) [M3]
