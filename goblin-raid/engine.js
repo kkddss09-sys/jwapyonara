@@ -790,6 +790,7 @@
       promotionLeft: (mode === 'turn100') ? 200 : (flaws.includes(8) ? 49 : 50),
       path: [],
       killLedger: 0,
+      killTotal: 0,   // 한 판에서 지금까지 처치한 적 전체 수(2026-11-17, 화면·순위 표시용 통계. killLedger는 턴마다 비워지는 임시 장부라 따로 둔다)
       totals: { xp: 0, coins: 0, upgrade: 0 },
       fractions: { xp: 0, coins: 0, upgrade: 0 },
       classRewardCounter: options.classRewardCounter != null ? Math.min(30, options.classRewardCounter) : 0,
@@ -5595,6 +5596,7 @@
     activeBatch.processedCells.add(cell);
     activeBatch.processedCells.add(cellId);
     cell.enemy._rewardedKill = true;
+    session.killTotal = (session.killTotal || 0) + 1;   // 적 한 마리당 정확히 한 번(위의 _rewardedKill 검사가 중복을 막는다)
     cell.erased = true;
     cell.enemy.hitPoints = 0;
     if (Array.isArray(activeBatch.killedEnemyCells)) {
@@ -8138,6 +8140,7 @@
       promotionLeft: session.promotionLeft,
       path: session.path,
       killLedger: session.killLedger,
+      killTotal: session.killTotal || 0,
       totals: session.totals,
       fractions: session.fractions,
       classRewardCounter: session.classRewardCounter,
@@ -8328,6 +8331,7 @@
       promotionLeft: obj.promotionLeft != null ? obj.promotionLeft : 50,
       path: Array.isArray(obj.path) ? [...obj.path] : [],
       killLedger: obj.killLedger || 0,
+      killTotal: obj.killTotal || 0,   // 옛 저장(이 값이 없던 판)은 이어하기 때부터 0에서 센다
       totals: obj.totals ? { ...obj.totals } : { xp: 0, coins: 0, upgrade: 0 },
       fractions: obj.fractions ? { ...obj.fractions } : { xp: 0, coins: 0, upgrade: 0 },
       classRewardCounter: obj.classRewardCounter != null ? Math.min(30, obj.classRewardCounter) : 0,

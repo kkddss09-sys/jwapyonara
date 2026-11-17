@@ -885,7 +885,7 @@
       player,
       hero,
       turn: session.tick || 0,
-      kills: session.killLedger || 0,
+      kills: session.killTotal || 0,   // 지금까지 처치한 적 전체 수(2026-11-17: 예전에는 턴마다 비워지는 임시 장부 killLedger를 보여 줘서 거의 0이었다)
       score: currentScore,
       difficulty,
       difficultyName: getDifficultyName(difficulty),
