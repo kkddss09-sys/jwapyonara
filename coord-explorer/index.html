@@ -1660,7 +1660,7 @@
       <div id="rank-server" style="width:100%; text-align:left; background:#120e18; border:1px solid #3a3042; border-radius:8px; padding:6px 10px; display:none;">
         <table class="scores-table">
           <thead>
-            <tr><th>순위</th><th>닉네임</th><th>점수</th></tr>
+            <tr><th>순위</th><th>닉네임</th><th>턴</th><th>처치</th><th>점수</th></tr>
           </thead>
           <tbody id="rank-srv-tbody"></tbody>
         </table>
@@ -1669,7 +1669,7 @@
           <button class="btn-icon" id="rank-submit" style="color:#15131a; background:#ffd54a; border-color:#e5a82a; flex:0 0 auto; padding:6px 10px;">오늘 낸 최고 점수 올리기</button>
         </div>
         <div id="rank-msg" style="font-size:11px; color:var(--sub); margin-top:6px; min-height:14px;"></div>
-        <div style="font-size:10px; color:var(--sub); margin-top:4px;">닉네임과 점수만 올라갑니다. 이름·전화번호 같은 개인정보는 적지 마세요. 점수는 재미로 보는 참고용이라 조작될 수 있고, 이상한 닉네임은 지울 수 있습니다.</div>
+        <div style="font-size:10px; color:var(--sub); margin-top:4px;">닉네임·점수·턴 수·처치 수만 올라갑니다. 이름·전화번호 같은 개인정보는 적지 마세요. 점수는 재미로 보는 참고용이라 조작될 수 있고, 이상한 닉네임은 지울 수 있습니다.</div>
         <div style="font-size:10px; color:var(--sub); margin-top:4px;">🌞 오늘 · 🌙 어제 순위는 매일 오후 3시에 바뀌고, 3일이 지난 기록은 지워집니다. 오늘 순위에는 그날(오후 3시 이후) 한 판으로 낸 점수만 올라갑니다.</div>
       </div>
       <button class="btn-action" id="btn-close-rank-modal" style="margin-top:8px; width:100%; flex:0 0 auto; padding:10px;">닫기</button>
@@ -1780,6 +1780,7 @@
             <li><b>🌞 오늘 순위</b>: 매일 <b>오후 3시(15시)</b>에 하루가 바뀌며 초기화돼요! 오늘 순위에는 그날(오후 3시 이후) 플레이해서 낸 점수만 올라가요. (서버에는 오늘을 포함해 최근 3일치 오늘 기록만 남아요)</li>
             <li><b>🌐 전체 순위</b>: 날짜와 상관없이 역대 모든 플레이어의 누적 최고 점수가 모여 있는 명예의 전당이에요.</li>
             <li><b>점수 올리는 법</b>: 닉네임(2~8자)을 입력하고 <b>[오늘 낸 최고 점수 올리기]</b> 단추를 누르면 서버로 전송돼요. (쉬움 난이도도 점수를 올릴 수 있지만, 오늘 플레이한 점수가 있어야 해요)</li>
+            <li><b>순위표에 보이는 것</b>: 닉네임·<b>턴</b>(몇 턴 버텼는지)·<b>처치</b>(몇 마리 잡았는지)·점수예요. 턴과 처치는 그 점수를 낸 판의 기록이에요. 이 기능이 생기기 전에 올린 기록은 턴·처치가 <b>-</b>로 보여요.</li>
           </ul>
         </details>
 
@@ -3659,7 +3660,7 @@
         difficulty: runDiff,
         difficultyName: (typeof GR.getDifficultyName === 'function') ? GR.getDifficultyName(runDiff) : '보통'
       });
-      recordDailyBest(runDiff, gameState.score);
+      recordDailyBest(runDiff, gameState.score, gameState.turn, gameState.kills);
       GR.updateProfileWithGameResult(null, {
         turn: gameState.turn,
         kills: gameState.kills,
@@ -3690,15 +3691,22 @@
   // 오늘 순위용: 한국 시간 오후 3시에 하루가 바뀐다(서버 kstDay와 같은 계산). 그날 낸 점수만 따로 기억한다.
   const DAILY_KEY = 'goblin_raid_daily_best_v1';
   function rankDayKey(t) { return new Date(t - 6 * 3600 * 1000).toISOString().slice(0, 10); }
-  function recordDailyBest(diff, score) {
+  function recordDailyBest(diff, score, turn, kills) {
     try {
       score = Number(score) || 0; if (score <= 0) return;
       const day = rankDayKey(Date.now());
       let o = {}; try { o = JSON.parse(localStorage.getItem(DAILY_KEY) || '{}') || {}; } catch (_) { o = {}; }
       const cur = o[diff];
-      if (!cur || cur.day !== day || score > (Number(cur.score) || 0)) o[diff] = { day, score };
+      if (!cur || cur.day !== day || score > (Number(cur.score) || 0)) o[diff] = { day, score, turn: Math.max(0, Math.floor(Number(turn) || 0)), kills: Math.max(0, Math.floor(Number(kills) || 0)) };
       localStorage.setItem(DAILY_KEY, JSON.stringify(o));
     } catch (_) {}
+  }
+  function todayBestRec(diff) {
+    try {
+      const o = JSON.parse(localStorage.getItem(DAILY_KEY) || '{}') || {};
+      const cur = o[diff];
+      return (cur && cur.day === rankDayKey(Date.now())) ? cur : null;
+    } catch (_) { return null; }
   }
   function todayBestScore(diff) {
     try {
@@ -3719,24 +3727,27 @@
     const sub = document.getElementById('rank-submit');
     try { if (!nick.value) nick.value = localStorage.getItem('zw_nick') || ''; } catch (_) {}
     const id = RANK_SERVER_IDS[modeKey];
-    if (id == null) { tbody.innerHTML = '<tr><td colspan="3" style="color:var(--sub);">이 모드는 전체 순위가 아직 없어요.</td></tr>'; sub.disabled = true; return; }
+    if (id == null) { tbody.innerHTML = '<tr><td colspan="5" style="color:var(--sub);">이 모드는 전체 순위가 아직 없어요.</td></tr>'; sub.disabled = true; return; }
     sub.disabled = false;
-    tbody.innerHTML = '<tr><td colspan="3" style="color:var(--sub);">불러오는 중…</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="5" style="color:var(--sub);">불러오는 중…</td></tr>';
     fetch(RANK_API + '/api/rank?game=' + id + (period !== 'all' ? '&day=' + period : '')).then(r => r.json()).then(d => {
       if (!d || !Array.isArray(d.top)) throw new Error('bad');
-      if (!d.top.length) { tbody.innerHTML = '<tr><td colspan="3" style="color:var(--sub);">' + (period === 'today' ? '오늘 올라온 기록이 아직 없어요. 첫 기록을 올려 보세요!' : period === 'yesterday' ? '어제 올라온 기록이 없어요.' : '아직 기록이 없어요. 첫 기록을 올려 보세요!') + '</td></tr>'; return; }
+      if (!d.top.length) { tbody.innerHTML = '<tr><td colspan="5" style="color:var(--sub);">' + (period === 'today' ? '오늘 올라온 기록이 아직 없어요. 첫 기록을 올려 보세요!' : period === 'yesterday' ? '어제 올라온 기록이 없어요.' : '아직 기록이 없어요. 첫 기록을 올려 보세요!') + '</td></tr>'; return; }
       tbody.innerHTML = d.top.slice(0, 10).map((e, i) => {
         const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '#' + (i + 1);
-        return `<tr><td>${medal}</td><td>${escHtml(e.name)}</td><td style="color:var(--gold); font-weight:800;">${Number(e.score).toLocaleString()}</td></tr>`;
+        const tn = (e.turns != null) ? Number(e.turns).toLocaleString() : '-';
+        const kl = (e.kills != null) ? Number(e.kills).toLocaleString() : '-';
+        return `<tr><td>${medal}</td><td>${escHtml(e.name)}</td><td>${tn}</td><td>${kl}</td><td style="color:var(--gold); font-weight:800;">${Number(e.score).toLocaleString()}</td></tr>`;
       }).join('');
-    }).catch(() => { tbody.innerHTML = '<tr><td colspan="3" style="color:var(--sub);">전체 순위를 불러오지 못했어요. 잠시 뒤에 다시 해 보세요.</td></tr>'; });
+    }).catch(() => { tbody.innerHTML = '<tr><td colspan="5" style="color:var(--sub);">전체 순위를 불러오지 못했어요. 잠시 뒤에 다시 해 보세요.</td></tr>'; });
     sub.onclick = () => {
       const name = (nick.value || '').trim();
-      const score = todayBestScore(modeKey);
+      const rec = todayBestRec(modeKey);
+      const score = rec ? (Number(rec.score) || 0) : 0;
       if (!score) { msg.textContent = '오늘(오후 3시 이후) 이 난이도로 낸 점수가 아직 없어요. 한 판 하고 와 주세요.'; return; }
       if (!/^[가-힣A-Za-z0-9_]{2,8}$/.test(name)) { msg.textContent = '닉네임은 한글·영문·숫자·밑줄 2~8자로 적어 주세요.'; return; }
       sub.disabled = true; msg.textContent = '올리는 중…';
-      fetch(RANK_API + '/api/rank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: id, name, score }) })
+      fetch(RANK_API + '/api/rank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ game: id, name, score, turns: rec && rec.turn != null ? rec.turn : undefined, kills: rec && rec.kills != null ? rec.kills : undefined }) })
         .then(r => r.json().then(j => ({ ok: r.ok, j })))
         .then(({ ok, j }) => {
           if (ok && j && j.ok) { try { localStorage.setItem('zw_nick', name); } catch (_) {} msg.textContent = `올렸어요! 전체 ${j.rank}위 (${Number(j.score).toLocaleString()}점)` + (j.dayRank ? ` · 오늘 ${j.dayRank}위` : ''); renderRankServer(modeKey, period); }
@@ -4042,6 +4053,11 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-17-k', date: '2026-11-17', title: '순위표에 턴과 처치가 같이 보여요', items: [
+      '모드별 순위(전체·오늘·어제)에 점수와 함께 그 판의 턴 수와 처치 수가 나와요.',
+      '이제부터 [오늘 낸 최고 점수 올리기]를 누르면 점수를 낸 판의 턴·처치도 같이 올라가요. 이전에 올린 기록은 턴·처치가 -로 보여요.',
+      '올라가는 정보는 닉네임·점수·턴·처치뿐이고, 개인정보는 올라가지 않아요.'
+    ] },
     { id: '2026-11-17-j', date: '2026-11-17', title: '창이 더 크게 보이고, 설명서가 자세해졌어요', items: [
       '직업 창에서 10종이 한 화면에 보이고, 종족 창도 더 많은 카드가 보여요. 닫기 단추는 창 맨 아래에 있어요.',
       '특성 창의 [취소]·[확정 및 시작] 단추가 안내 글 바로 아래에 보여요. 처음 열 때는 빨간 경고 대신 회색 안내만 나와요.',
