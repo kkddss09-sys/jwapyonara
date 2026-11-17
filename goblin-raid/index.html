@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d0a12">
+<link rel="apple-touch-icon" href="assets/app/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="좌표 탐험대">
 <title>좌표 탐험대 — 선 이어 가짜 좌표 상인단과 싸우는 무료 퍼즐 게임 | 좌표나라</title>
 <meta name="description" content="칼·방패·물약·코인을 선으로 이어 가짜 좌표를 파는 고블린 상인단을 물리치는 무료 퍼즐 게임. 가입 없이 폰에서 바로. 기록은 내 기기에 저장되고, 구글 로그인하면 서버에도 보관해요.">
 <link rel="canonical" href="https://jwapyonara.com/goblin-raid/">
@@ -1511,6 +1516,50 @@
   .game-menu-cloud { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
   .game-menu-close { width: 100%; min-height: 36px; flex: 0 0 auto; }
   #cs-panel { top: 12px !important; max-height: calc(100dvh - 24px); overflow-y: auto; }
+  .phone:has(#modal-start-menu.show) { min-height: 740px; }
+  #modal-start-menu { z-index: 80; background: #0d0a12; overflow-y: auto; justify-content: safe center; padding: 12px; text-align: left; }
+  #modal-start-menu [hidden] { display: none !important; }
+  .start-menu-inner { width: 100%; max-width: 350px; margin: auto; }
+  .start-menu-title { font-size: 24px; font-weight: 900; text-align: center; }
+  .start-menu-desc { color: #b9b0a2; font-size: 12px; text-align: center; margin: 1px 0 10px; }
+  .start-save { display: flex; gap: 8px; align-items: center; padding: 8px 10px; margin-bottom: 9px; border: 1px solid #3a3042; border-radius: 12px; background: #14101a; }
+  .start-save.on { border-color: #3fb86a; }
+  .start-save.on b { color: #55d777; }
+  .start-save-text { min-width: 0; flex: 1; }
+  .start-save b { display: block; font-size: 12px; line-height: 1.35; }
+  .start-save small { display: block; color: #b9b0a2; font-size: 10px; line-height: 1.3; margin-top: 2px; }
+  #btn-start-login { flex: 0 0 92px; padding: 5px 2px; font-size: 11px; min-height: 40px; border-radius: 9px; }
+  .start-menu-buttons { display: flex; flex-direction: column; gap: 6px; width: min(100%, 290px); margin: 0 auto; }
+  .start-menu-buttons button { width: 100%; min-height: 40px; border-radius: 10px; padding: 6px 8px; font-size: 13px; font-weight: 800; line-height: 1.2; }
+  .start-menu-buttons button small { display: block; font-size: 10px; font-weight: 500; margin-top: 2px; }
+  .start-menu-buttons .start-green { background: #173b25; border-color: #3fb86a; color: #55d777; }
+  .start-menu-buttons .start-gold { background: #3a2c0e; border-color: #e5a82a; color: #ffe27a; }
+  .start-menu-buttons .start-install { background: linear-gradient(#2a3f7a,#1d2c57); border-color: #6aa8ff; color: #cfe3ff; min-height: 52px; font-size: 15px; }
+  .start-menu-buttons .start-install small { color: #aac4f0; }
+  .start-menu-row { display: flex; gap: 6px; }
+  .start-menu-row button { flex: 1; min-width: 0; font-size: 11px; }
+  .start-newbie { background: #14101a; border: 1px solid #3a3042; border-radius: 12px; padding: 7px 10px; margin-top: 9px; font-size: 11.5px; }
+  .start-newbie b { color: #ffe27a; }
+  .has-inapp .start-newbie { display: none; }
+  .start-newbie ul { list-style: none; margin-top: 4px; }
+  .start-newbie li { margin-top: 2px; }
+  .start-menu-link { display: block; color: #b9b0a2; text-align: center; font-size: 11px; margin-top: 8px; }
+  .inapp-card { background: #3a2c0e; border: 1.5px solid #e5a82a; border-radius: 14px; padding: 10px; margin-bottom: 9px; }
+  .inapp-card h3 { color: #ffe27a; font-size: 14px; line-height: 1.35; }
+  .inapp-card p { font-size: 11.5px; line-height: 1.45; margin: 4px 0 7px; }
+  .inapp-card button { width: 100%; min-height: 40px; border-radius: 9px; margin-top: 5px; font-size: 12px; }
+  .inapp-card .inapp-address { display: block; color: #b9b0a2; font-size: 10px; margin-top: 6px; }
+  #modal-install-guide { z-index: 90; justify-content: flex-end; overflow-y: auto; background: rgba(9,7,13,.72); padding: 0; }
+  .install-guide-sheet { width: 100%; background: #14101a; border-top: 2px solid #e5a82a; border-radius: 18px; padding: 15px; text-align: left; }
+  .install-guide-sheet h3 { color: #ffe27a; font-size: 16px; margin-bottom: 6px; }
+  .install-guide-sheet p { font-size: 12px; margin-bottom: 9px; }
+  .install-guide-item { background: #191421; border: 1px solid #3a3042; border-radius: 10px; padding: 8px 10px; margin-bottom: 7px; font-size: 11.5px; }
+  .install-guide-item b, .install-guide-item small { display: block; }
+  .install-guide-item small { color: #b9b0a2; font-size: 11px; }
+  .install-guide-item.ios-first { border-color: #e5a82a; }
+  .install-guide-items { display: flex; flex-direction: column; }
+  .install-guide-item.ios-first { order: -1; }
+  .install-guide-sheet button { width: 100%; min-height: 40px; border-radius: 9px; }
 </style>
 <script>
 // 방문 수 세기(구글 애널리틱스 4, 2026-11-17). 사이트의 다른 쪽과 같은 측정 ID를 쓴다. 게임 점수·기록은 보내지 않고 "방문"만 센다.
@@ -1631,7 +1680,52 @@
         <button class="btn-icon" id="btn-guide" title="사용 설명서">📖 사용 설명서</button>
         <button class="btn-icon" id="btn-skill-help">❓ 내 스킬 설명</button>
       </div>
+      <button type="button" class="btn-action game-menu-close" id="btn-go-start-menu" data-keep-open>🏠 시작 메뉴로 (저장돼요)</button>
       <button type="button" class="btn-action game-menu-close" id="btn-close-game-menu" data-keep-open>닫기</button>
+    </div>
+
+    <div class="modal-overlay start-menu show" id="modal-start-menu">
+      <div class="start-menu-inner">
+        <div class="inapp-card" id="start-inapp-card" hidden>
+          <h3>⚠️ 바로가기와 게임 저장이 안 될 수 있어요</h3>
+          <p>크롬이나 사파리에서 열면 바로가기(앱 설치)와 기록 저장이 잘 돼요. 아래 단추로 옮겨 주세요. 그냥 이대로 해도 게임은 할 수 있어요.</p>
+          <button type="button" id="btn-start-chrome">🌐 크롬으로 열기</button>
+          <button type="button" id="btn-start-external">🧭 사파리 · 기본 브라우저로 열기</button>
+          <button type="button" id="btn-start-copy">🔗 주소 복사</button>
+          <small class="inapp-address">주소: jwapyonara.com/goblin-raid/</small>
+        </div>
+        <div class="start-menu-title">⚔️ 좌표 탐험대</div>
+        <div class="start-menu-desc">선을 이어 상인단과 싸우는 퍼즐</div>
+        <div class="start-save" id="start-save-status">
+          <div class="start-save-text"><b id="start-save-title">☁ 구글 로그인하면 기록이 서버에 보관돼요 (선택)</b><small id="start-save-sub">같은 폰·같은 브라우저에서는 한 번만 로그인하면 돼요</small></div>
+          <button type="button" id="btn-start-login">구글 로그인</button>
+        </div>
+        <div class="start-menu-buttons">
+          <button type="button" class="start-green" id="btn-start-continue" hidden>▶ 이어하기</button>
+          <button type="button" class="start-gold" id="btn-start-quick">⚡ 빠른 시작<small id="start-quick-note" hidden>새 판을 시작해요</small></button>
+          <button type="button" id="btn-start-choose">🎯 직업·종족·난이도 고르기<small>난이도는 ⏸ 메뉴에서 바꿔요</small></button>
+          <button type="button" class="start-install" id="btn-start-install">📲 앱으로 설치<small>홈 화면에 올려 두면 앱처럼 열려요</small></button>
+          <div class="start-menu-row"><button type="button" id="btn-start-rank">🥇 순위</button><button type="button" id="btn-start-achievements">🏆 내 기록·업적</button></div>
+          <div class="start-menu-row"><button type="button" id="btn-start-guide">📖 사용 설명서</button><button type="button" id="btn-start-patch">🆕 패치 소식</button></div>
+          <div class="start-menu-row"><button type="button" id="btn-start-sound">🔊 음향</button><button type="button" id="btn-start-scroll-lock">🔒 스크롤 고정</button></div>
+        </div>
+        <div class="start-newbie"><b>처음 오셨나요?</b><ul><li>🎮 가입 없이 바로 시작돼요</li><li>☁ 기록을 지키려면 구글 로그인을 한 번만 하세요</li><li>📲 앱으로 설치하면 아이콘 한 번에 열려요</li></ul></div>
+        <a class="start-menu-link" href="/">좌표나라 홈</a>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-install-guide">
+      <div class="install-guide-sheet">
+        <h3>📲 앱으로 설치하기</h3>
+        <p>스토어 앱이 아니라 홈 화면 바로가기 앱이에요. 무료이고 용량도 거의 안 차지해요.</p>
+        <div class="install-guide-items">
+          <div class="install-guide-item" id="install-android"><b>안드로이드(크롬)</b><small>브라우저 메뉴(⋮) → ‘앱 설치’ 또는 ‘홈 화면에 추가’</small></div>
+          <div class="install-guide-item" id="install-ios"><b>아이폰(사파리)</b><small>화면 아래 공유 단추(네모+위쪽 화살표) → ‘홈 화면에 추가’</small></div>
+          <div class="install-guide-item"><b>앱 안에서 열었다면</b><small>크롬·사파리로 열면 설치가 잘 돼요</small></div>
+          <div class="install-guide-item"><b>아이폰 앱은 기록 창고가 따로예요</b><small>앱에서 구글 로그인을 한 번 더 하면 기록이 이어져요</small></div>
+        </div>
+        <button type="button" id="btn-close-install-guide">닫기</button>
+      </div>
     </div>
 
     <!-- ── 모달들 ── -->
@@ -1803,6 +1897,11 @@
           </ul>
         </details>
 
+        <details open><summary>2-1. 시작 메뉴</summary>
+          <p>처음 열면 시작 메뉴가 나와요. 저장된 판이 있으면 <b>[▶ 이어하기]</b>로 돌아가고, <b>[⚡ 빠른 시작]</b>은 바로 게임을 시작해요. 진행 중에 빠른 시작을 누르면 새 판을 시작해요.</p>
+          <p><b>[🎯 직업·종족·난이도 고르기]</b>는 직업 창을 열어요. 창 위쪽에서 직업·종족·특성을 고를 수 있고, 난이도는 게임 화면의 <b>[⏸ 메뉴] → [난이도 변경]</b>에서 바꿔요. 게임 중에는 <b>[⏸ 메뉴] → [🏠 시작 메뉴로]</b>로 돌아올 수 있어요.</p>
+        </details>
+
         <details><summary>3. 선 잇는 방법</summary>
           <ul>
             <li>같은 종류의 칸을 <b>상·하·좌·우·대각선(8방향)</b>으로 <b>3개 이상</b> 이을 수 있어요.</li>
@@ -1966,6 +2065,7 @@
 
         <details><summary>15. 저장과 로그인</summary>
           <ul>
+            <li>시작 메뉴 맨 위 줄에서 구글 로그인을 하고 저장 상태를 볼 수 있어요.</li>
             <li><b>자동 저장</b>: 게임을 진행하는 동안 매 턴마다 브라우저에 판이 자동 저장돼요. 창을 닫아도 다시 접속하면 <b>[⏸ 메뉴] 안의 [▶ 이어하기]</b> 단추로 계속할 수 있어요 (게임 오버 시 초기화).</li>
             <li><b>☁ 클라우드 로그인 (구글)</b>: [⏸ 메뉴] 안의 로그인 단추로 구글 계정에 연동해 두면, 내 해금 상태와 진행 중인 판이 서버에 안전하게 보관돼요. 스마트폰을 바꾸거나 PC에서 접속해도 그대로 이어할 수 있어요.</li>
             <li><b>💾 중간 저장</b>: 플레이 도중 지금 상태를 즉시 서버에 올려두고 싶을 때 사용해요.</li>
@@ -1973,7 +2073,17 @@
           </ul>
         </details>
 
+        <details><summary>앱으로 설치하기</summary>
+          <p>스토어 앱이 아니라 홈 화면 바로가기 앱이에요. 안드로이드 크롬은 브라우저 메뉴(⋮)에서 <b>[앱 설치]</b> 또는 <b>[홈 화면에 추가]</b>를 눌러요. 아이폰 사파리는 화면 아래 공유 단추(네모+위쪽 화살표)에서 <b>[홈 화면에 추가]</b>를 눌러요.</p>
+          <p>아이폰에서는 앱과 사파리의 저장 공간이 따로예요. 앱에서 구글 로그인을 한 번 더 하면 기록이 이어져요.</p>
+        </details>
+
+        <details><summary>앱 안에서 열었을 때</summary>
+          <p>바로가기와 게임 저장이 안 될 수 있어요. 크롬이나 사파리에서 열면 잘 돼요. 시작 메뉴의 주소 복사 단추를 이용할 수도 있어요.</p>
+        </details>
+
         <details><summary>16. 자주 묻는 질문 (FAQ)</summary>
+          <p><b>Q. 바로가기를 어떻게 만들어요?</b><br>시작 메뉴의 <b>[📲 앱으로 설치]</b>를 누르세요. 안내에 따라 크롬이나 사파리에서 홈 화면에 추가하면 돼요.</p>
           <p><b>Q1. 특수 적을 잡았는데 🏺 보상 칸이 안 나와요!</b><br>
           혹시 난이도가 <b>쉬움</b>인가요? 쉬움 난이도에서는 직업 보상이 나오지 않아요. '보통' 이상으로 플레이해 주세요. 보통 이상이면 첫 특수 적을 처치할 때 첫 보상 칸이 나오고, 그다음은 특수 적을 20~30마리 더 잡아야 나와요 (한 판 최대 3번). 직업 레벨이 이미 10이고 모든 직업이 열려 있으면 보상은 변화 없이 사라져요.</p>
 
@@ -2481,7 +2591,8 @@
       const saved = GR.loadRunState();
       if (saved) {
         btnContinueGame.style.display = 'block';
-        btnContinueGame.textContent = `▶ 이어하기 (${saved.turn}턴)`;
+        const savedDiff = (typeof GR.getDifficultyName === 'function') ? GR.getDifficultyName(saved.difficulty != null ? saved.difficulty : 1) : '보통';
+        btnContinueGame.textContent = `▶ 이어하기 (${saved.turn}턴 · ${savedDiff})`;
         return;
       }
     }
@@ -4319,6 +4430,12 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-17-r', date: '2026-11-17', title: '시작 메뉴와 앱 설치가 생겼어요', items: [
+      '게임을 열면 먼저 시작 메뉴가 나와요. [▶ 이어하기] · [⚡ 빠른 시작] · [🎯 직업·종족·난이도 고르기]와 순위·기록·설명서·패치 소식·음향이 한곳에 있어요. 게임 중에는 [⏸ 메뉴] → [🏠 시작 메뉴로]로 돌아와요.',
+      '시작 메뉴 맨 위에서 구글 로그인을 하고 저장 상태를 볼 수 있어요. 같은 폰·같은 브라우저에서는 한 번만 로그인하면 돼요.',
+      '[📲 앱으로 설치]를 누르면 홈 화면에 아이콘을 올려 앱처럼 열 수 있어요. 안드로이드는 한 번에, 아이폰은 사파리 공유 단추로 해요.',
+      '다른 앱 안에서 열어서 바로가기나 저장이 안 될 수 있을 때는 [크롬으로 열기] · [사파리로 열기] · [주소 복사] 안내가 맨 위에 나와요.'
+    ] },
     { id: '2026-11-17-q', date: '2026-11-17', title: '화면이 한 화면에 쏙 들어와요 · ⏸ 메뉴', items: [
       '위쪽에 여러 줄이던 단추와 아래쪽 단추 줄을 왼쪽 위 [⏸ 메뉴] 하나로 모았어요. 이어하기·새 게임·직업·종족·난이도 변경·순위·업적·로그인·중간 저장·음향·패치·설명서·내 스킬 설명이 모두 그 안에 있어요.',
       '위쪽은 한 줄(메뉴 · 턴 · 난이도 · 처치 · 점수)이 되어서 폰 한 화면 안에 판과 스킬 칸이 다 보여요.',
@@ -4382,7 +4499,7 @@
     ] },
     { id: '2026-11-17-c', date: '2026-11-17', title: '새 기능이 이 주소로 합쳐졌어요', items: [
       '이름이 「좌표 탐험대」로 바뀌었고, 직업·종족(탐험단)·스킬·업적 이름도 새로 정리했어요.',
-      '맨 위에 ☁ 로그인 · 💾 중간 저장 단추가 생겼어요. 로그인하면 기록과 하던 판이 서버에 보관돼서 다른 폰에서도 이어 할 수 있어요.',
+      '☁ 로그인 · 💾 중간 저장 단추가 생겼어요. 로그인하면 기록과 하던 판이 서버에 보관돼서 다른 폰에서도 이어 할 수 있어요.',
       '📖 사용 설명서(직업·종족·스킬 해금 조건 포함)와 🆕 패치 소식 창이 생겼어요.',
       '닫기 단추를 절반 크기로 줄였고, 마지막으로 고른 직업을 기억해요.',
       '업적은 원작과 맞는 3개만 보여 줘요. (🏆 78/10으로 보이던 숫자 오류도 고쳤어요)',
@@ -4443,6 +4560,134 @@
   updateContinueButton();
   updateHUD();
   renderBoard();
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+  const start = document.getElementById('modal-start-menu');
+  const installGuide = document.getElementById('modal-install-guide');
+  const cloudSlot = document.getElementById('cloud-slot');
+  const oldContinue = document.getElementById('btn-continue-game');
+  const newContinue = document.getElementById('btn-start-continue');
+  const quickNote = document.getElementById('start-quick-note');
+  const installButton = document.getElementById('btn-start-install');
+  const ua = navigator.userAgent || '';
+  const inApp = /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|DaumApps|; wv\)/i.test(ua);
+  const android = /Android/i.test(ua);
+  const ios = /iPhone|iPad/i.test(ua);
+  const kakao = /KAKAOTALK/i.test(ua);
+  const pageUrl = location.origin + location.pathname;
+  const standalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || !!navigator.standalone;
+  let installPrompt = null;
+
+  function syncSave() {
+    const login = document.getElementById('cs-login');
+    const label = login ? login.textContent.trim() : '';
+    const loggedOut = !label || label === '☁ 로그인' || label.includes('로그인');
+    const status = document.getElementById('start-save-status');
+    status.classList.toggle('on', !loggedOut);
+    document.getElementById('start-save-title').textContent = loggedOut
+      ? '☁ 구글 로그인하면 기록이 서버에 보관돼요 (선택)' : label;
+    document.getElementById('start-save-sub').textContent = loggedOut
+      ? '같은 폰·같은 브라우저에서는 한 번만 로그인하면 돼요'
+      : label.includes('선택') ? '아래 ⏸ 메뉴 → ☁ 로그인에서 기록을 골라 주세요'
+      : '구글 계정에 기록이 안전하게 보관돼요';
+    document.getElementById('btn-start-login').textContent = '구글 로그인';
+  }
+  new MutationObserver(syncSave).observe(cloudSlot, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class'] });
+  syncSave();
+
+  function syncRun() {
+    const visible = oldContinue.style.display !== 'none';
+    newContinue.hidden = !visible;
+    if (visible) newContinue.textContent = oldContinue.textContent;
+    const turn = Number(document.getElementById('val-turn').textContent) || 0;
+    // 하던 판이 있으면(이어하기가 보이면) 새로 시작할 때 사라진다는 것을 알린다. 턴 0에서는 첫 수를 두는 순간부터 하던 판이 새 판으로 바뀐다.
+    if (turn > 0) { quickNote.textContent = '새 판을 시작해요 · 지금 판은 사라져요'; quickNote.hidden = false; }
+    else if (visible) { quickNote.textContent = '새 판으로 시작해요 · 첫 수를 두면 하던 판은 사라져요'; quickNote.hidden = false; }
+    else quickNote.hidden = true;
+  }
+  new MutationObserver(syncRun).observe(oldContinue, { attributes: true, attributeFilter: ['style'], childList: true, characterData: true, subtree: true });
+  new MutationObserver(syncRun).observe(document.getElementById('val-turn'), { childList: true, characterData: true, subtree: true });
+  syncRun();
+  document.getElementById('btn-go-start-menu').addEventListener('click', () => {
+    document.getElementById('modal-game-menu').classList.remove('show');
+    syncRun(); syncSave(); start.classList.add('show');
+  });
+  document.getElementById('btn-start-login').addEventListener('click', () => {
+    const login = document.getElementById('cs-login');
+    if (login) login.click();
+  });
+  function openOld(startId, oldId) {
+    document.getElementById(startId).addEventListener('click', () => {
+      start.classList.remove('show');
+      setTimeout(() => document.getElementById(oldId).click(), 0);
+    });
+  }
+  openOld('btn-start-continue', 'btn-continue-game');
+  openOld('btn-start-choose', 'btn-open-classes');
+  openOld('btn-start-rank', 'btn-rank-modal');
+  openOld('btn-start-achievements', 'btn-achievements-modal');
+  openOld('btn-start-guide', 'btn-guide');
+  openOld('btn-start-patch', 'btn-patch');
+  openOld('btn-start-sound', 'btn-sound-modal');
+  openOld('btn-start-scroll-lock', 'btn-scroll-lock');
+  document.getElementById('btn-start-quick').addEventListener('click', () => {
+    const turn = Number(document.getElementById('val-turn').textContent) || 0;
+    start.classList.remove('show');
+    if (turn > 0) document.getElementById('btn-restart-game').click();
+  });
+  const scrollButton = document.getElementById('btn-start-scroll-lock');
+  if (!window.matchMedia || !matchMedia('(pointer: coarse)').matches) scrollButton.style.display = 'none';
+
+  function chromeUrl() { return 'intent://' + location.host + location.pathname + '#Intent;scheme=https;package=com.android.chrome;end'; }
+  function externalUrl() { return 'kakaotalk://web/openExternal?url=' + encodeURIComponent(pageUrl); }
+  if (inApp) {
+    document.getElementById('start-inapp-card').hidden = false;
+    document.getElementById('modal-start-menu').classList.add('has-inapp');   // 안내 카드가 자리를 차지하니 "처음 오셨나요?" 카드는 숨겨 한 화면에 맞춘다
+    document.getElementById('btn-start-chrome').hidden = !android;
+    document.getElementById('btn-start-external').hidden = !kakao;
+    document.getElementById('btn-start-chrome').addEventListener('click', () => { location.href = chromeUrl(); });
+    document.getElementById('btn-start-external').addEventListener('click', () => { location.href = externalUrl(); });
+    document.getElementById('btn-start-copy').addEventListener('click', async (event) => {
+      try {
+        await navigator.clipboard.writeText(pageUrl);
+        event.currentTarget.textContent = '복사했어요';
+        setTimeout(() => { event.currentTarget.textContent = '🔗 주소 복사'; }, 2000);
+      } catch (_) { window.prompt('주소를 복사해 주세요', pageUrl); }
+    });
+    if ((kakao || android) && new URLSearchParams(location.search).get('ext') === '1') {
+      try {
+        if (!sessionStorage.getItem('zw-start-ext-attempted')) {
+          sessionStorage.setItem('zw-start-ext-attempted', '1');
+          if (kakao) location.href = externalUrl();
+          else if (android) location.href = chromeUrl();
+        }
+      } catch (_) {}
+    }
+  }
+
+  if (ios && !standalone()) document.getElementById('install-ios').classList.add('ios-first');
+  if (standalone()) installButton.hidden = true;
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault(); installPrompt = event;
+  });
+  window.addEventListener('appinstalled', () => { installPrompt = null; installButton.hidden = true; });
+  installButton.addEventListener('click', async () => {
+    if (standalone()) { installButton.hidden = true; return; }
+    if (installPrompt) {
+      const event = installPrompt; installPrompt = null;
+      try { await event.prompt(); await event.userChoice; } catch (_) {}
+      installButton.hidden = true;
+    } else installGuide.classList.add('show');
+  });
+  document.getElementById('btn-close-install-guide').addEventListener('click', () => installGuide.classList.remove('show'));
+
+  try {
+    if ('serviceWorker' in navigator && /^https?:/.test(location.protocol))
+      navigator.serviceWorker.register('sw.js').catch(function () {});
+  } catch (_) {}
 })();
 </script>
 <!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/peg-jump/">페그 솔리테어</a> — 구슬을 뛰어넘어 하나만 남기기</li><li><a href="/tangram-seven/">칠교</a> — 일곱 조각으로 모양 맞추기</li><li><a href="/nonogram/">네모 로직</a> — 숫자 힌트로 숨은 그림 찾기</li><li><a href="/sum-fill/">숫자 합 맞추기</a> — 가로세로 합에 맞게 숫자 채우기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li></ul></nav><!--/zw-static-links-->
