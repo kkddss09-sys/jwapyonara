@@ -119,6 +119,9 @@
     color: #b9b0a2;
     font-weight: 600;
     margin-bottom: 2px;
+    flex-wrap: wrap;
+    gap: 2px 8px;
+    align-items: center;
   }
   .turn-hud b {
     color: var(--gold);
@@ -690,6 +693,10 @@
     color: #ff6b7e;
     box-shadow: 0 0 10px rgba(215, 38, 61, 0.4);
   }
+  .diff-card { flex: none; width: 100%; height: auto; min-height: 56px; flex-direction: column; align-items: flex-start; justify-content: center; gap: 2px; padding: 8px 12px; text-align: left; }
+  .diff-card b { font-size: 15px; }
+  .diff-card small { font-size: 11.5px; font-weight: 500; color: #b9b0a2; line-height: 1.4; }
+  .diff-card.selected small { color: #e8e0f0; }
   .diff-notice-text {
     font-size: 11px;
     color: #ffd54a;
@@ -1525,7 +1532,7 @@
 
     <!-- 턴/처치/점수 HUD -->
     <div class="turn-hud">
-      <span>턴 <b id="val-turn">1</b> · Lv.<b id="val-level">1</b> <span class="badge-diff-tag" id="hud-diff-badge">보통</span></span>
+      <span>턴 <b id="val-turn">1</b> · Lv.<b id="val-level">1</b> <span class="badge-diff-tag" id="hud-diff-badge">보통</span> <button type="button" class="btn-icon" id="btn-diff-open">난이도 변경</button></span>
       <span>처치 <b id="val-kills">0</b> · 점수 <b id="val-score">0</b></span>
     </div>
 
@@ -1594,18 +1601,6 @@
       ⚔️ 칼 줄에 적을 붙여 100% 피해를 입히세요!
     </div>
 
-    <!-- 조각 29: 난이도 4단계 선택 단추 (쉬움·보통·어려움·지옥) [추가 29.3, 29.4] -->
-    <div class="diff-container" style="width:100%; display:flex; flex-direction:column; gap:4px; margin-bottom:4px;">
-      <div class="diff-select-group" id="diff-buttons-group">
-        <button type="button" class="btn-diff-choice" data-diff="0">쉬움</button>
-        <button type="button" class="btn-diff-choice selected" data-diff="1">보통</button>
-        <button type="button" class="btn-diff-choice" data-diff="2">어려움</button>
-        <button type="button" class="btn-diff-choice" data-diff="3">지옥</button>
-      </div>
-      <div class="diff-notice-text" id="diff-resume-notice" style="display:none;">
-        ※ 이어하기 중인 판은 기존 난이도로 진행되며, 단추 선택은 새 게임에만 적용됩니다.
-      </div>
-    </div>
 
     <!-- 하단 액션 버튼 -->
     <div class="bottom-actions">
@@ -1728,6 +1723,24 @@
       <button class="btn-action" id="btn-close-boss" style="margin-top:8px; width:100%; flex:0 0 auto; padding:10px;">닫기</button>
     </div>
 
+    <!-- 난이도 변경 창 (2026-11-17): 위쪽 [난이도 변경] 단추로 연다 -->
+    <div class="modal-overlay" id="modal-difficulty">
+      <div class="modal-title" style="color:#ffe27a;">⚙️ 난이도 변경</div>
+      <button class="btn-icon" id="btn-close-diff-x" style="position:absolute; top:10px; right:10px;" aria-label="닫기">✕</button>
+      <div class="modal-desc">난이도를 고르세요. 순위는 난이도마다 따로예요.</div>
+      <div id="diff-card-list" style="width:100%; display:flex; flex-direction:column; gap:8px;">
+        <button type="button" class="btn-diff-choice diff-card" data-diff="0"><b>쉬움</b><small>편하게 연습해요. 새 직업을 여는 보상 칸은 나오지 않아요.</small></button>
+        <button type="button" class="btn-diff-choice diff-card" data-diff="1"><b>보통</b><small>기본 난이도예요. 처음에는 여기서 시작해 보세요.</small></button>
+        <button type="button" class="btn-diff-choice diff-card" data-diff="2"><b>어려움</b><small>적이 더 강해져요. 높은 점수에 도전해 보세요.</small></button>
+        <button type="button" class="btn-diff-choice diff-card" data-diff="3"><b>지옥</b><small>가장 어려워요.</small></button>
+      </div>
+      <div class="diff-notice-text" id="diff-resume-notice" style="display:none;">
+        ※ 이어하기 중인 판은 기존 난이도로 진행되며, 선택은 새 게임에만 적용됩니다.
+      </div>
+      <div id="diff-modal-msg" style="font-size:12px; color:var(--gold); min-height:18px; text-align:center;"></div>
+      <button class="btn-action" id="btn-close-diff" style="width:100%; padding:10px;">닫기</button>
+    </div>
+
     <!-- 상태창 (2026-11-17) -->
     <div class="modal-overlay" id="modal-status">
       <div class="modal-title" style="color:#9ce6ff;">📊 상태</div>
@@ -1758,7 +1771,7 @@
         <details open><summary>2. 가장 먼저 해 볼 것 (첫 판 따라하기 5단계)</summary>
           <p>어떻게 시작할지 막막하다면 아래 5단계만 그대로 따라 해 보세요!</p>
           <ul>
-            <li><b>1단계: 난이도 고르기</b> — 아래쪽 난이도 단추에서 <b>[보통]</b>을 골라 보세요. (쉬움 난이도는 새 직업을 여는 보상이 나오지 않아요!)</li>
+            <li><b>1단계: 난이도 고르기</b> — 판 위쪽 <b>[난이도 변경]</b> 단추를 눌러 <b>[보통]</b>을 골라 보세요. (쉬움 난이도는 새 직업을 여는 보상이 나오지 않아요!)</li>
             <li><b>2단계: 선 잇기</b> — 같은 모양의 칸(예: 칼 3개)을 손가락이나 마우스로 꾹 누른 채 <b>3개 이상</b> 쭉 이어 보세요.</li>
             <li><b>3단계: 칼로 적 공격</b> — 칼 줄을 이으면서 바로 옆에 붙어 있는 <b>적(몬스터)까지 함께 연결</b>하면 적을 칼로 공격할 수 있어요.</li>
             <li><b>4단계: 방패와 물약 챙기기</b> — 턴이 끝날 때마다 살아남은 적들이 나를 공격해요. <b>방패</b>를 모아 방어구를 두르고, 깎인 피는 <b>물약</b>으로 채우세요.</li>
@@ -1812,6 +1825,7 @@
 
         <details><summary>7. 난이도 4가지와 순위</summary>
           <p><b>쉬움 · 보통 · 어려움 · 지옥</b> 4가지 난이도가 있으며, 난이도마다 순위표가 완전히 따로 나뉘어 있어요.</p>
+          <p>난이도는 판 위쪽 <b>[난이도 변경]</b> 단추로 바꿔요. 아직 한 수도 두기 전(턴 0)에 고르면 바로 그 난이도로 새 판이 시작되고, 판을 하는 도중에 고르면 지금 판은 그대로 두고 <b>다음 새 게임부터</b> 적용돼요.</p>
           <ul>
             <li><b>🥇 순위 단추</b>: 헤더의 순위 단추를 누르면 내 기기 기록과 서버 전체 순위를 볼 수 있어요.</li>
             <li><b>🌞 오늘 순위</b>: 매일 <b>오후 3시(15시)</b>에 하루가 바뀌며 초기화돼요! 오늘 순위에는 그날(오후 3시 이후) 플레이해서 낸 점수만 올라가요. (서버에는 오늘을 포함해 최근 3일치 오늘 기록만 남아요)</li>
@@ -2280,6 +2294,8 @@
   }
 
   const diffChoiceButtons = document.querySelectorAll('.btn-diff-choice');
+  const modalDifficulty = document.getElementById('modal-difficulty');
+  const diffModalMsg = document.getElementById('diff-modal-msg');
   diffChoiceButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const d = parseInt(btn.dataset.diff, 10);
@@ -2291,9 +2307,30 @@
           }
         } catch (_) {}
         updateDifficultyButtonsUI();
+        const nm = (typeof GR.getDifficultyName === 'function') ? GR.getDifficultyName(d) : '';
+        // 아직 한 수도 두지 않았으면(턴 0) 고른 난이도로 바로 새 판을 시작한다. 저장된 진행 판(이어하기)은 지우지 않는다.
+        if (gameState && !gameState.isGameOver && (gameState.turn || 0) === 0) {
+          startNewGame({ keepRun: true });
+          if (diffModalMsg) diffModalMsg.textContent = nm + ' 난이도로 새 판을 준비했어요.';
+          setTimeout(() => { if (modalDifficulty) modalDifficulty.classList.remove('show'); }, 450);
+        } else if (diffModalMsg) {
+          diffModalMsg.textContent = nm + ' 난이도를 골랐어요. 지금 판은 그대로 이어가고, 다음 새 게임부터 적용돼요.';
+        }
       }
     });
   });
+  (function () {
+    const openBtn = document.getElementById('btn-diff-open');
+    if (!openBtn || !modalDifficulty) return;
+    openBtn.addEventListener('click', () => {
+      updateDifficultyButtonsUI();
+      if (diffModalMsg) diffModalMsg.textContent = '';
+      modalDifficulty.classList.add('show');
+    });
+    const close = () => modalDifficulty.classList.remove('show');
+    document.getElementById('btn-close-diff').addEventListener('click', close);
+    document.getElementById('btn-close-diff-x').addEventListener('click', close);
+  })();
 
   // 상태 변수
   let currentSeed = Date.now();
@@ -4239,6 +4276,11 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-17-o', date: '2026-11-17', title: '난이도를 위쪽 [난이도 변경] 창에서 골라요', items: [
+      '판 위쪽 [보통] 표시 옆에 [난이도 변경] 단추가 생겼어요. 누르면 쉬움·보통·어려움·지옥을 설명과 함께 고를 수 있어요.',
+      '아직 한 수도 두기 전이면 고른 난이도로 바로 새 판이 시작되고, 하던 판이면 다음 새 게임부터 적용돼요.',
+      '아래쪽에 있던 난이도 단추 줄은 없앴어요. 화면이 조금 짧아졌고, 전에 골라 둔 난이도는 그대로 이어져요.'
+    ] },
     { id: '2026-11-17-n', date: '2026-11-17', title: '🔒 스크롤 고정 단추가 생겼어요 (폰·태블릿)', items: [
       '판을 세로로 움직일 때 화면이 같이 오르내려서 불편했던 점을 위해, "📊 상태" 옆에 [🔒 스크롤 고정] 단추를 넣었어요. 누르면 지금 화면 위치에서 고정되고, 다시 누르면 풀려요.',
       '직업·상태·설명서 같은 창을 열면 자동으로 풀렸다가 닫으면 다시 고정돼요. 마우스로 하는 컴퓨터에서는 이 단추가 보이지 않아요.'
