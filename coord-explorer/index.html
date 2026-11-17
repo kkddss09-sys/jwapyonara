@@ -256,6 +256,11 @@
     border: 1px solid #000;
   }
 
+  /* 스크롤 고정 단추(2026-11-17): 손가락 터치 기기에서만 보인다. 마우스만 있는 컴퓨터에서는 숨겨 아무 영향이 없다 */
+  #btn-scroll-lock { display: none; }
+  @media (pointer: coarse) { #btn-scroll-lock { display: inline-block; } }
+  #btn-scroll-lock.on { border-color: var(--gold); color: #ffe27a; background: #2b2410; }
+
   /* 상태창 (2026-11-17) */
   #modal-status { overflow: hidden; justify-content: flex-start; padding: 12px 10px; gap: 6px; box-sizing: border-box; }
   .status-body { display: flex; gap: 8px; width: 100%; flex: 1 1 auto; min-height: 0; overflow-y: auto; text-align: left; align-items: flex-start; }
@@ -1560,7 +1565,7 @@
 
     <!-- 액티브 스킬 슬롯 4칸 -->
     <div class="skills-slot-row" id="skills-slots"></div>
-    <div style="display:flex; justify-content:flex-end; gap:6px; margin:2px 2px 0;"><button class="btn-icon" id="btn-status">📊 상태</button><button class="btn-icon" id="btn-skill-help">❓ 내 스킬 설명</button></div>
+    <div style="display:flex; justify-content:flex-end; gap:6px; margin:2px 2px 0;"><button class="btn-icon" id="btn-scroll-lock" aria-pressed="false">🔒 스크롤 고정</button><button class="btn-icon" id="btn-status">📊 상태</button><button class="btn-icon" id="btn-skill-help">❓ 내 스킬 설명</button></div>
 
     <!-- 체인 상태 정보 바 -->
     <div class="chain-info-bar">
@@ -1798,6 +1803,7 @@
             <li><b>🎉 레벨업</b>: 적을 처치해 경험치(EXP)를 100% 모으면 레벨업 창이 떠요. 카드 <b>4장</b>이 나와요(스킬 카드는 최대 2장, 나머지는 능력치 상승). 그중 <b>2개</b>를 골라요.</li>
             <li><b>⚡ 스킬</b>: 보드 아래쪽 스킬 칸에 들어가요. 턴이 지나 대기 턴(쿨다운)이 다 차면 눌러서 쓸 수 있어요. 아래쪽 <b>"❓ 내 스킬 설명"</b> 단추를 누르면 내 스킬들의 효과를 자세히 읽어볼 수 있어요.</li>
             <li><b>⏱ 스킬 대기 턴 보는 법</b>: 스킬 칸에 <b>"⏱ 14턴 · 3턴 남음"</b>처럼 나와요. 앞의 14턴은 그 스킬의 <b>전체 대기 턴</b>이고, 뒤는 <b>지금 몇 턴 더 기다려야 쓸 수 있는지</b>예요. 다 차면 <b>"준비 완료!"</b>로 바뀌고 칸이 노랗게 빛나요. 1회용 스킬은 <b>"1회용 · 준비 완료"</b>로 나오고, 한 번 쓰면 사라져요. 스킬 대기 단축 같은 효과는 이미 반영된 턴이에요. 쓸 대상이 없으면 <b>"사용 불가"</b>로 나와요.</li>
+            <li><b>🔒 스크롤 고정 단추</b>(폰·태블릿에서만 보여요): 누르면 지금 화면 위치에서 화면이 고정돼서, 판을 세로로 움직여도 화면이 같이 오르내리지 않아요. 판과 스킬 칸이 함께 보이는 위치로 먼저 내린 뒤에 누르세요. 다시 누르면(<b>🔓 스크롤 풀기</b>) 풀려요. 직업·상태·설명서 같은 창을 열면 자동으로 풀렸다가 닫으면 다시 고정돼요. 켜 둔 상태는 그 폰의 브라우저에만 기억돼요.</li>
             <li><b>📊 상태 단추</b>: <b>"❓ 내 스킬 설명"</b> 옆에 있어요. 누르면 지금 내 능력치가 표로 나와요(기본 공격력·최대 체력·관통력·내구도·보너스 확률·체력 재생 등). 값이 <b>초록</b>이면 기본보다 높고 <b>빨강</b>이면 낮은 거예요. 왼쪽 그림(직업·종족·장비 5칸)을 누르면 설명이 나와요.</li>
             <li><b>🪙 상점</b>: 코인을 100% 모으면 떠돌이 상인이 나타나요. 강력한 장비나 유용한 스킬 중 1개를 골라 탐험대를 강화하세요.</li>
             <li><b>🛡️ 강화</b>: 방패 칸이 이미 가득 찬 상태에서 방패를 더 모으면 강화 게이지가 올라가요. 100%가 되면 강화 효과를 고르는 창이 떠요. (일부 특수 적이 판에 있으면 방패 칸이 가득 차지 않아도 게이지만 오를 수 있어요.)</li>
@@ -2563,6 +2569,48 @@
       ms.classList.add('show');
     });
     document.getElementById('btn-close-skillhelp').addEventListener('click', () => ms.classList.remove('show'));
+  })();
+
+  // ── 스크롤 고정 (2026-11-17): 켜면 지금 화면 위치에 페이지를 붙들어 판을 만질 때 화면이 같이 움직이지 않게 한다 ──
+  // 직업·상태·설명서 같은 창이 열려 있는 동안에는 자동으로 풀리고(창 안 닫기 단추를 누를 수 있게), 닫으면 다시 고정한다.
+  // 켠 상태는 이 브라우저에만 기억한다(다른 기기·컴퓨터로 전달되지 않는다). 기본은 꺼짐.
+  (function () {
+    const KEY = 'goblin_raid_scroll_lock_v1';
+    const btn = document.getElementById('btn-scroll-lock');
+    if (!btn) return;
+    let want = false, applied = false, savedY = 0;
+    try { want = localStorage.getItem(KEY) === '1'; } catch (_) {}
+    const anyModal = () => !!document.querySelector('.modal-overlay.show');
+    function apply() {
+      if (applied) return;
+      savedY = window.pageYOffset || document.documentElement.scrollTop || 0;
+      const st = document.body.style;
+      st.position = 'fixed'; st.top = (-savedY) + 'px'; st.left = '0'; st.right = '0'; st.width = '100%';
+      document.documentElement.style.overscrollBehavior = 'none';
+      applied = true;
+    }
+    function release() {
+      if (!applied) return;
+      const st = document.body.style;
+      st.position = ''; st.top = ''; st.left = ''; st.right = ''; st.width = '';
+      document.documentElement.style.overscrollBehavior = '';
+      window.scrollTo(0, savedY);
+      applied = false;
+    }
+    function sync() {
+      if (want && !anyModal()) apply(); else release();
+      btn.classList.toggle('on', want);
+      btn.setAttribute('aria-pressed', want ? 'true' : 'false');
+      btn.textContent = want ? '🔓 스크롤 풀기' : '🔒 스크롤 고정';
+    }
+    btn.addEventListener('click', () => {
+      want = !want;
+      try { localStorage.setItem(KEY, want ? '1' : '0'); } catch (_) {}
+      sync();
+    });
+    const mo = new MutationObserver(sync);
+    document.querySelectorAll('.modal-overlay').forEach(o => mo.observe(o, { attributes: true, attributeFilter: ['class'] }));
+    sync();
   })();
 
   // ── 상태창 (2026-11-17): 게임 안의 값을 그대로 읽어 보여 준다(엔진은 건드리지 않는다) ──
@@ -4191,6 +4239,10 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-17-n', date: '2026-11-17', title: '🔒 스크롤 고정 단추가 생겼어요 (폰·태블릿)', items: [
+      '판을 세로로 움직일 때 화면이 같이 오르내려서 불편했던 점을 위해, "📊 상태" 옆에 [🔒 스크롤 고정] 단추를 넣었어요. 누르면 지금 화면 위치에서 고정되고, 다시 누르면 풀려요.',
+      '직업·상태·설명서 같은 창을 열면 자동으로 풀렸다가 닫으면 다시 고정돼요. 마우스로 하는 컴퓨터에서는 이 단추가 보이지 않아요.'
+    ] },
     { id: '2026-11-17-m', date: '2026-11-17', title: '📊 상태창이 생기고, 스킬 대기 턴이 정확해졌어요', items: [
       '"❓ 내 스킬 설명" 옆에 [📊 상태] 단추가 생겼어요. 내 능력치 28가지를 표로 보고, 직업·종족·장비 그림을 누르면 설명이 나와요.',
       '스킬 칸에 "⏱ 14턴 · 3턴 남음"처럼 전체 대기 턴과 남은 턴이 같이 나와요. 다 차면 "준비 완료!"로 바뀌어요.',
