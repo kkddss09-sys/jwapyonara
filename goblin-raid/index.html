@@ -387,15 +387,94 @@
 
   /* 상태 이상 */
   .cell.frozen {
-    border: 2px solid #70a1ff !important;
-    opacity: 0.75;
+    border: 2px solid #74b9ff !important;
+    box-shadow: inset 0 0 0 100px rgba(116, 185, 255, 0.28), 0 0 8px rgba(116, 185, 255, 0.55);
+  }
+  .cell.frozen img {
+    filter: saturate(0.55) brightness(1.1);
+  }
+  .cell.frozen::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 7px;
+    background: linear-gradient(135deg, rgba(170, 230, 255, 0.6), rgba(70, 150, 255, 0.3));
+    pointer-events: none;
+    z-index: 2;
   }
   .cell.frozen::after {
-    content: "❄️";
+    content: "❄ 얼음";
     position: absolute;
-    top: 2px;
-    right: 2px;
-    font-size: 11px;
+    top: 1px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 70%;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 9.5px;
+    font-weight: 900;
+    line-height: 1.15;
+    padding: 1px 4px;
+    border-radius: 5px;
+    background: #1454a6;
+    color: #fff;
+    border: 1px solid #9ce6ff;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .cell.broken {
+    border: 1.5px dashed #6b6375 !important;
+  }
+  .cell.broken img {
+    filter: grayscale(0.6) brightness(0.7);
+  }
+  .cell.broken::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 7px;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56'><path d='M12 6 L24 20 L17 30 L32 40 L25 52 M43 10 L31 24 L39 33 L27 46' stroke='%23110d17' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/><path d='M12 6 L24 20 L17 30 L32 40 L25 52 M43 10 L31 24 L39 33 L27 46' stroke='%23e6dce8' stroke-opacity='0.65' stroke-width='1.1' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-size: 100% 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .cell.broken::after {
+    content: "💥 부서짐";
+    position: absolute;
+    top: 1px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 70%;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 9.5px;
+    font-weight: 900;
+    line-height: 1.15;
+    padding: 1px 3px;
+    border-radius: 5px;
+    background: #3d3846;
+    color: #fff;
+    border: 1px solid #8a8296;
+    pointer-events: none;
+    z-index: 4;
+  }
+  .cell.arrow::after {
+    content: "➶ 화살";
+    position: absolute;
+    top: 1px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 70%;
+    white-space: nowrap;
+    overflow: hidden;
+    font-size: 9.5px;
+    font-weight: 900;
+    line-height: 1.15;
+    padding: 1px 4px;
+    border-radius: 5px;
+    background: #1f6b3b;
+    color: #fff;
+    border: 1px solid #6fd18a;
     pointer-events: none;
     z-index: 4;
   }
@@ -3117,7 +3196,17 @@
   function updateSelectionUI() {
     const cells = boardGrid.querySelectorAll('.cell');
     cells.forEach(c => {
-      c.className = 'cell';
+      c.classList.remove(
+        'selected',
+        'selected-attack',
+        'selected-sword',
+        'selected-shield',
+        'selected-potion',
+        'selected-coin',
+        'selected-enemy',
+        'selected-phylactery',
+        'selected-wild'
+      );
       const oldX = c.querySelector('.kill-x');
       if (oldX) oldX.remove();
     });
@@ -3312,10 +3401,43 @@
     const pos = getTilePosFromEvent(e);
     if (!pos) return;
 
-    const nextPath = GR.stepChain(gameState.board, currentPath, pos);
-    if (nextPath !== currentPath) {
-      if (nextPath.length > currentPath.length) sfx.tick(nextPath.length);
-      currentPath = nextPath;
+    let workingPath = currentPath;
+    if (workingPath.length > 0) {
+      const last = workingPath[workingPath.length - 1];
+      const dx = pos.x - last.x;
+      const dy = pos.y - last.y;
+      const adx = Math.abs(dx);
+      const ady = Math.abs(dy);
+      if ((adx >= 2 || ady >= 2) && (dx === 0 || dy === 0 || adx === ady)) {
+        const steps = Math.max(adx, ady);
+        const sx = Math.sign(dx);
+        const sy = Math.sign(dy);
+        for (let s = 1; s < steps; s++) {
+          const mid = { x: last.x + sx * s, y: last.y + sy * s };
+          const prevLen = workingPath.length;
+          const stepped = GR.stepChain(gameState.board, workingPath, mid);
+          if (stepped.length <= prevLen) {
+            if (workingPath !== currentPath) {
+              currentPath = workingPath;
+              updateSelectionUI();
+            }
+            if (e.cancelable) e.preventDefault();
+            return;
+          }
+          sfx.tick(stepped.length);
+          workingPath = stepped;
+        }
+      }
+    }
+
+    const prevLen = workingPath.length;
+    const nextPath = GR.stepChain(gameState.board, workingPath, pos);
+    if (nextPath !== workingPath) {
+      if (nextPath.length > prevLen) sfx.tick(nextPath.length);
+      workingPath = nextPath;
+    }
+    if (workingPath !== currentPath) {
+      currentPath = workingPath;
       updateSelectionUI();
     }
     if (e.cancelable) e.preventDefault();
@@ -3334,6 +3456,22 @@
           updateSelectionUI();
           showBossInfo(t0);
           return;
+        }
+        if (t0 && !t0.specialId && t0.type !== 'phylactery' && !t0.isPhylactery) {
+          if (t0.isFrozen) {
+            logBox.innerHTML = '❄ 얼음 칸이에요. 얼어 있는 동안은 줄에 넣을 수 없어요.';
+            currentPath = [];
+            updateSelectionUI();
+            if (e && e.cancelable) e.preventDefault();
+            return;
+          }
+          if (t0.isBroken) {
+            logBox.innerHTML = '💥 부서진 칸이에요. 줄에 이을 수는 있지만 얻는 게 없어요(칼은 공격력 0).';
+            currentPath = [];
+            updateSelectionUI();
+            if (e && e.cancelable) e.preventDefault();
+            return;
+          }
         }
       } catch (_) {}
     }
@@ -4552,6 +4690,11 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-18-w', date: '2026-11-18', title: '❄ 얼음·💥 부서진 칸이 눈에 보여요', items: [
+      '얼어붙은 칸은 파란 얼음빛과 "❄ 얼음" 딱지, 부서진 칸은 금 간 모양과 "💥 부서짐" 딱지로 보여요. 줄을 끌어도 사라지지 않아요.',
+      '얼음 칸은 줄에 넣을 수 없고, 부서진 칸은 이을 수는 있지만 얻는 게 없어요(칼은 공격력 0). 한 번 톡 누르면 설명이 나와요.',
+      '손가락을 빠르게 쓸어서 칸을 건너뛰어도 사이의 칸이 자동으로 이어져요.'
+    ] },
     { id: '2026-11-17-v', date: '2026-11-17', title: '☠ 숙적 안내가 더 잘 보여요', items: [
       '숙적이 나타나면 위쪽에 "숙적이 나타났습니다! 클릭해서 확인하세요"가 크게 떠요. 숙적 칸을 누르면 사라져요.',
       '모든 숙적의 설명 창에 공략 한 줄이 생겼어요(독침·훔침·아래찌르기·수리막기·두꺼운막·되찾기·서리·방바꾸기·뛰기).'
