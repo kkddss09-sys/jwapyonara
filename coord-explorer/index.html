@@ -228,7 +228,8 @@
     font-size: 1rem;
     line-height: 1;
   }
-  .skill-cell-wait { font-size: 9px; color: #b9b0a2; line-height: 1; margin-top: 1px; }
+  .skill-cell-wait { font-size: 9px; color: #b9b0a2; line-height: 1.2; margin-top: 1px; text-align: center; white-space: normal; }
+  .skill-cell.ready .skill-cell-wait { color: #ffe27a; font-weight: 700; }
   .skill-cell-name {
     font-size: 9.5px;
     font-weight: 700;
@@ -254,6 +255,24 @@
     justify-content: center;
     border: 1px solid #000;
   }
+
+  /* 상태창 (2026-11-17) */
+  #modal-status { overflow: hidden; justify-content: flex-start; padding: 12px 10px; gap: 6px; box-sizing: border-box; }
+  .status-body { display: flex; gap: 8px; width: 100%; flex: 1 1 auto; min-height: 0; overflow-y: auto; text-align: left; align-items: flex-start; }
+  .st-left { flex: 0 0 96px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .st-icon { position: relative; background: #191421; border: 1px solid #3a3042; border-radius: 8px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; padding: 0; color: #fff; }
+  .st-icon img { width: 30px; height: 30px; }
+  .st-icon.sel { border-color: var(--gold); box-shadow: 0 0 6px rgba(229,168,42,.5); }
+  .st-icon .st-lv { position: absolute; top: 1px; right: 3px; font-size: 10px; font-weight: 900; color: #ffe27a; }
+  .st-right { flex: 1 1 auto; min-width: 0; background: #120e18; border: 1px solid #3a3042; border-radius: 8px; padding: 4px 8px; }
+  .st-row { display: flex; justify-content: space-between; gap: 6px; font-size: 12px; line-height: 1.55; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .st-row:last-child { border-bottom: 0; }
+  .st-row span:first-child { color: #cfc6d8; }
+  .st-row b { color: #fff; white-space: nowrap; }
+  .st-row b.up { color: #55d777; }
+  .st-row b.down { color: #ff6b6b; }
+  .st-tip { width: 100%; box-sizing: border-box; background: #14101a; border: 1px solid #5a4a72; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; line-height: 1.6; text-align: left; flex: 0 0 auto; max-height: 34%; overflow-y: auto; }
+  .st-tip b { color: #ffe27a; }
 
   /* 체인 안내 바 */
   .chain-info-bar {
@@ -1541,7 +1560,7 @@
 
     <!-- 액티브 스킬 슬롯 4칸 -->
     <div class="skills-slot-row" id="skills-slots"></div>
-    <div style="text-align:right; margin:2px 2px 0;"><button class="btn-icon" id="btn-skill-help">❓ 내 스킬 설명</button></div>
+    <div style="display:flex; justify-content:flex-end; gap:6px; margin:2px 2px 0;"><button class="btn-icon" id="btn-status">📊 상태</button><button class="btn-icon" id="btn-skill-help">❓ 내 스킬 설명</button></div>
 
     <!-- 체인 상태 정보 바 -->
     <div class="chain-info-bar">
@@ -1704,6 +1723,16 @@
       <button class="btn-action" id="btn-close-boss" style="margin-top:8px; width:100%; flex:0 0 auto; padding:10px;">닫기</button>
     </div>
 
+    <!-- 상태창 (2026-11-17) -->
+    <div class="modal-overlay" id="modal-status">
+      <div class="modal-title" style="color:#9ce6ff;">📊 상태</div>
+      <div class="modal-desc">왼쪽 그림을 누르면 설명이 나와요. 초록은 기본보다 높고, 빨강은 기본보다 낮은 값이에요.</div>
+      <button class="btn-icon" id="btn-close-status-x" style="position:absolute; top:10px; right:10px;" aria-label="닫기">✕</button>
+      <div class="st-tip" id="status-tip" style="display:none;"></div>
+      <div class="status-body" id="status-body"></div>
+      <button class="btn-action" id="btn-close-status" style="width:100%; flex:0 0 auto; padding:10px;">닫기</button>
+    </div>
+
     <!-- 내 스킬 설명 모달 -->
     <div class="modal-overlay" id="modal-skillhelp">
       <div class="modal-title" style="color:#9ce6ff;">❓ 내 스킬 설명</div>
@@ -1768,6 +1797,8 @@
           <ul>
             <li><b>🎉 레벨업</b>: 적을 처치해 경험치(EXP)를 100% 모으면 레벨업 창이 떠요. 카드 <b>4장</b>이 나와요(스킬 카드는 최대 2장, 나머지는 능력치 상승). 그중 <b>2개</b>를 골라요.</li>
             <li><b>⚡ 스킬</b>: 보드 아래쪽 스킬 칸에 들어가요. 턴이 지나 대기 턴(쿨다운)이 다 차면 눌러서 쓸 수 있어요. 아래쪽 <b>"❓ 내 스킬 설명"</b> 단추를 누르면 내 스킬들의 효과를 자세히 읽어볼 수 있어요.</li>
+            <li><b>⏱ 스킬 대기 턴 보는 법</b>: 스킬 칸에 <b>"⏱ 14턴 · 3턴 남음"</b>처럼 나와요. 앞의 14턴은 그 스킬의 <b>전체 대기 턴</b>이고, 뒤는 <b>지금 몇 턴 더 기다려야 쓸 수 있는지</b>예요. 다 차면 <b>"준비 완료!"</b>로 바뀌고 칸이 노랗게 빛나요. 1회용 스킬은 <b>"1회용 · 준비 완료"</b>로 나오고, 한 번 쓰면 사라져요. 스킬 대기 단축 같은 효과는 이미 반영된 턴이에요. 쓸 대상이 없으면 <b>"사용 불가"</b>로 나와요.</li>
+            <li><b>📊 상태 단추</b>: <b>"❓ 내 스킬 설명"</b> 옆에 있어요. 누르면 지금 내 능력치가 표로 나와요(기본 공격력·최대 체력·관통력·내구도·보너스 확률·체력 재생 등). 값이 <b>초록</b>이면 기본보다 높고 <b>빨강</b>이면 낮은 거예요. 왼쪽 그림(직업·종족·장비 5칸)을 누르면 설명이 나와요.</li>
             <li><b>🪙 상점</b>: 코인을 100% 모으면 떠돌이 상인이 나타나요. 강력한 장비나 유용한 스킬 중 1개를 골라 탐험대를 강화하세요.</li>
             <li><b>🛡️ 강화</b>: 방패 칸이 이미 가득 찬 상태에서 방패를 더 모으면 강화 게이지가 올라가요. 100%가 되면 강화 효과를 고르는 창이 떠요. (일부 특수 적이 판에 있으면 방패 칸이 가득 차지 않아도 게이지만 오를 수 있어요.)</li>
           </ul>
@@ -2374,6 +2405,14 @@
   /**
    * 액티브 스킬 UI
    */
+  // 스킬 대기 표시(2026-11-17): 전체 대기 턴과 남은 턴을 같이 보여 준다. 엔진이 매 턴 계산하는 값을 그대로 쓴다.
+  function skillWaitLine(sk, ready) {
+    const left = Math.max(0, Number(sk.currentCooldown) || 0);
+    if (sk.oneUse || sk.cooldown < 0) return ready ? '1회용 · 준비 완료' : '1회용 · 사용 불가';
+    if (ready) return '⏱ ' + sk.cooldown + '턴 · 준비 완료!';
+    if (left > 0) return '⏱ ' + sk.cooldown + '턴 · ' + left + '턴 남음';
+    return '⏱ ' + sk.cooldown + '턴 · 사용 불가';
+  }
   function renderSkillsUI() {
     skillsSlots.innerHTML = '';
     const skills = gameState.player.skills || [];
@@ -2391,7 +2430,7 @@
         slot.innerHTML = `
           <span class="skill-cell-icon">${sk.icon || '⚔️'}</span>
           <span class="skill-cell-name">${sk.name}</span>
-          <span class="skill-cell-wait">${sk.oneUse || sk.cooldown < 0 ? '1회용' : '⏱ ' + sk.cooldown + '턴'}</span>
+          <span class="skill-cell-wait">${skillWaitLine(sk, isReady)}</span>
           ${!isReady ? `<span class="skill-cell-badge">${sk.currentCooldown || (GR.canUseSkill(gameState.player, i, gameState) ? '' : '✕')}</span>` : ''}
         `;
         if (isReady && !gameState.isGameOver && !gameState.pendingChoice && !isAnimating) {
@@ -2518,12 +2557,106 @@
         const wait = info ? info.wait : '';
         const card = document.createElement('div');
         card.style.cssText = 'background:#120e18; border:1px solid #3a3042; border-radius:8px; padding:8px 10px; text-align:left;';
-        card.innerHTML = `<b>${escHtml(sk.icon || '⚔️')} ${escHtml(sk.name)}</b><div style="font-size:13px; margin-top:3px; line-height:1.45;">${escHtml(info ? info.text : (sk.desc || ''))}</div><div style="font-size:11px; color:var(--sub); margin-top:3px;">${escHtml(wait)}${sk.currentCooldown > 0 ? ' · 지금은 ' + sk.currentCooldown + '턴 더 기다려야 해요' : ''}</div>`;
+        card.innerHTML = `<b>${escHtml(sk.icon || '⚔️')} ${escHtml(sk.name)}</b><div style="font-size:13px; margin-top:3px; line-height:1.45;">${escHtml(info ? info.text : (sk.desc || ''))}</div><div style="font-size:11px; color:var(--sub); margin-top:3px;">${escHtml(wait)}${(sk.oneUse || sk.cooldown < 0) ? ' · 1회용 · ' + (GR.canUseSkill(gameState.player, skills.indexOf(sk), gameState) ? '지금 쓸 수 있어요' : '지금은 쓸 수 없어요') : ' · 대기 ' + sk.cooldown + '턴 중 ' + (sk.currentCooldown > 0 ? sk.currentCooldown + '턴 남음' : '준비 완료')}</div>`;
         list.appendChild(card);
       });
       ms.classList.add('show');
     });
     document.getElementById('btn-close-skillhelp').addEventListener('click', () => ms.classList.remove('show'));
+  })();
+
+  // ── 상태창 (2026-11-17): 게임 안의 값을 그대로 읽어 보여 준다(엔진은 건드리지 않는다) ──
+  (function () {
+    const ms = document.getElementById('modal-status');
+    const body = document.getElementById('status-body');
+    const tip = document.getElementById('status-tip');
+    const GEAR_ICON = ['⚔️', '⛑️', '🛡️', '🥋', '💍'];
+    const GEAR_NAME = ['탐험가의 칼', '탐험가의 투구', '탐험가의 방패', '탐험가의 갑옷', '탐험가의 반지'];
+    const num = (v, d) => { const n = Number(v); return Number.isFinite(n) ? n : (d || 0); };
+    const trim = (n) => String(Math.round(n * 100) / 100);
+    function row(label, text, val, base) {
+      const cls = (val == null || base == null) ? '' : (val > base ? 'up' : (val < base ? 'down' : ''));
+      return `<div class="st-row"><span>${label}</span><b class="${cls}">${text}</b></div>`;
+    }
+    function lookup(list, x) { const id = (x && typeof x === 'object') ? x.id : x; return (list || []).find(o => o && o.id === id); }
+    function showTip(html, btn) {
+      body.querySelectorAll('.st-icon').forEach(b => b.classList.toggle('sel', b === btn));
+      tip.innerHTML = html; tip.style.display = 'block';
+    }
+    function render() {
+      tip.style.display = 'none';
+      const se = gameState && gameState._session;
+      const hero = se && se.hero;
+      if (!hero) { body.innerHTML = '<div style="color:var(--sub); font-size:13px;">게임을 시작하면 볼 수 있어요.</div>'; return; }
+      const p = gameState.player || {};
+      const g = hero.growths || [1, 1, 1, 1];
+      const bo = hero.bonusOdds || {};
+      const ex = hero.extraRates || {};
+      const diffName = (typeof GR.getDifficultyName === 'function') ? GR.getDifficultyName(se.difficulty != null ? se.difficulty : 1) : '';
+      const dur = 100 - num(hero.shieldDamageOdds, 50);
+      const cd = hero.hasCooldownReduction ? 1 : 0;
+      const rows = [
+        row('난이도', diffName),
+        row('점수', num(gameState.score).toLocaleString()),
+        row('레벨', num(hero.rank, 1)),
+        row('공격 성장', num(g[0], 1), num(g[0], 1), 1),
+        row('물약 성장', num(g[1], 1), num(g[1], 1), 1),
+        row('방패 회복 성장', num(g[2], 1), num(g[2], 1), 1),
+        row('체력 성장', num(g[3], 1), num(g[3], 1), 1),
+        row('기본 공격력', num(hero.baseStrike), num(hero.baseStrike), 3),
+        row('무기 공격력', num(hero.bladeStrike), num(hero.bladeStrike), 2),
+        row('최대 체력', num(hero.lifeCap), num(hero.lifeCap), 50),
+        row('최대 방어력', num(hero.shieldCap), num(hero.shieldCap), 4),
+        row('내구도', dur + '%', dur, 50),
+        row('관통력', num(hero.piercing, 50) + '%', num(hero.piercing, 50), 50),
+        row('물약 회복량', num(hero.potionPower, 1), num(hero.potionPower, 1), 1),
+        row('보너스 금화', num(bo.coins, 20) + '%', num(bo.coins, 20), 20),
+        row('보너스 물약', num(bo.potion, 20) + '%', num(bo.potion, 20), 20),
+        row('방패당 방어구 회복량', num(hero.repairPower, 1), num(hero.repairPower, 1), 1),
+        row('보너스 방패', num(bo.shield, 20) + '%', num(bo.shield, 20), 20),
+        row('보너스 경험치', num(bo.xp, 20) + '%', num(bo.xp, 20), 20),
+        row('적 공격력 감소', num(hero.blunt), num(hero.blunt), 0),
+        row('골드 획득량', trim(1 + num(ex.coins)), 1 + num(ex.coins), 1),
+        row('아이템 업그레이드 포인트', trim(1 + num(ex.upgrade)), 1 + num(ex.upgrade), 1),
+        row('경험치 획득량', trim(1 + num(ex.xp)), 1 + num(ex.xp), 1),
+        row('공격 시 체력 회복', num(hero.drainRate) + '%', num(hero.drainRate), 0),
+        row('독 데미지 (3턴)', num(hero.poisonPower), num(hero.poisonPower), 0),
+        row('체력 재생', num(hero.regen), num(hero.regen), 0),
+        row('피해 반사', num(hero.thorns), num(hero.thorns), 0),
+        row('스킬 재사용 시간 감소', cd ? '-1턴' : '0', cd, 0)
+      ].join('');
+      // 왼쪽 그림: 직업 · 종족 · 장비 5칸
+      const cDef = GR.CLASSES[p.classId] || GR.CLASSES.adventurer;
+      const rDef = (GR.RACES_DATA || []).find(r => r.id === (p.raceId || 0)) || (GR.RACES_DATA || [])[0] || {};
+      const left = [];
+      left.push(`<button type="button" class="st-icon" data-k="class"><img src="${cDef.iconSvg}" alt="" onerror="this.style.display='none'"><span class="st-lv">${num(hero.rank, 1)}</span></button>`);
+      left.push(`<button type="button" class="st-icon" data-k="race">${rDef.icon || '🧬'}</button>`);
+      for (let i = 0; i < 5; i++) left.push(`<button type="button" class="st-icon" data-k="gear${i}">${GEAR_ICON[i]}</button>`);
+      body.innerHTML = `<div class="st-left">${left.join('')}</div><div class="st-right">${rows}</div>`;
+      body.querySelectorAll('.st-icon').forEach(btn => btn.addEventListener('click', () => {
+        const k = btn.dataset.k;
+        if (k === 'class') {
+          const perks = (hero.perks || []).filter(x => x != null).map(x => lookup(GR.PERKS_DATA, x)).filter(Boolean);
+          const flaws = (hero.flaws || []).filter(x => x != null).map(x => lookup(GR.FLAWS_DATA, x)).filter(Boolean);
+          const sk = (p.skills || []).filter(Boolean).map(x => `${escHtml(x.icon || '')} ${escHtml(x.name)}`).join(' · ') || '없음';
+          showTip(`<b>${escHtml(cDef.name)}</b> (${escHtml(cDef.title || '')})<br>${escHtml(cDef.unlockDesc || cDef.desc || '')}<br>` +
+            `🔷 퍽: ${perks.length ? perks.map(x => escHtml(x.icon + ' ' + x.name)).join(', ') : '없음'}<br>` +
+            `🔺 결함: ${flaws.length ? flaws.map(x => escHtml(x.icon + ' ' + x.name)).join(', ') : '없음'}<br>` +
+            `⚡ 스킬: ${sk}`, btn);
+        } else if (k === 'race') {
+          showTip(`<b>${escHtml(rDef.icon || '')} ${escHtml(rDef.name || '종족')}</b><br>✨ 보너스: ${escHtml(rDef.bonusName || '')} — ${escHtml(rDef.bonusDesc || '')}<br>☠ 숙적: ${escHtml(rDef.mortalEnemyDesc || '')}`, btn);
+        } else {
+          const i = Number(k.replace('gear', ''));
+          const gear = (se.gear || [])[i];
+          const lines = [];
+          if (gear && Array.isArray(gear.boosts)) gear.boosts.forEach((amt, id) => { if (amt) lines.push(escHtml(GR.boostTitle(id, amt))); });
+          showTip(`<b>${GEAR_ICON[i]} ${GEAR_NAME[i]}</b> (${escHtml(GR.slotNameKo(i))})<br>${lines.length ? lines.join('<br>') : '붙은 능력이 없어요.'}`, btn);
+        }
+      }));
+    }
+    document.getElementById('btn-status').addEventListener('click', () => { render(); ms.classList.add('show'); });
+    document.getElementById('btn-close-status').addEventListener('click', () => ms.classList.remove('show'));
+    document.getElementById('btn-close-status-x').addEventListener('click', () => ms.classList.remove('show'));
   })();
 
   let lastReshuffleCount = null;
@@ -4058,6 +4191,11 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-17-m', date: '2026-11-17', title: '📊 상태창이 생기고, 스킬 대기 턴이 정확해졌어요', items: [
+      '"❓ 내 스킬 설명" 옆에 [📊 상태] 단추가 생겼어요. 내 능력치 28가지를 표로 보고, 직업·종족·장비 그림을 누르면 설명이 나와요.',
+      '스킬 칸에 "⏱ 14턴 · 3턴 남음"처럼 전체 대기 턴과 남은 턴이 같이 나와요. 다 차면 "준비 완료!"로 바뀌어요.',
+      '돌격대·해독가·도적 등 일부 스킬(34번 이후)의 이름과 그림이 한 칸씩 밀려 보이던 문제를 고쳤어요. 스킬이 하는 일은 그대로이고 표시만 바로잡았어요.'
+    ] },
     { id: '2026-11-17-l', date: '2026-11-17', title: '점수를 올릴 때 직업·종족·스킬도 같이 저장돼요', items: [
       '[오늘 낸 최고 점수 올리기]를 누르면 그 점수를 낸 판의 직업·종족·스킬이 서버에 함께 기록돼요. 순위표에는 보이지 않아요.',
       '매일 오후 3시 5분에 어제 순위가 서버에 영구 보관되고, 전체 순위도 하루 한 번 사본이 남아 문제가 생기면 되돌릴 수 있어요.',

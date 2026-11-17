@@ -824,7 +824,7 @@
         const action = session.actions[i];
         if (action) {
           const aKey = action.actionKey;
-          const defSkill = SKILLS_DATA[aKey] || { name: `스킬 ${aKey}`, desc: '', icon: '⚔️' };
+          const defSkill = SKILLS_DATA.find(x => x && x.id === aKey) || { name: `스킬 ${aKey}`, desc: '', icon: '⚔️' };   // 번호로 찾는다(배열 순서로 찾으면 33번이 두 줄이라 34번 이후가 한 칸씩 밀렸다, 2026-11-17)
           const curCooldown = Math.max(0, (action.effectiveWait != null ? action.effectiveWait : 10) - (action.charge || 0));
           playerSkills.push({
             id: aKey,
@@ -2570,6 +2570,8 @@
     getShopOptions,
     getEnemyInfo,
     getSkillInfo,
+    boostTitle,
+    slotNameKo,
     getSpecialEnemySvg,
     getUpgradeOptions,
     hasSavedRun,
