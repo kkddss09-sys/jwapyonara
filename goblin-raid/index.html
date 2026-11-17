@@ -42,11 +42,12 @@
     color: var(--ink);
     font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: 8px 10px 40px;
+    padding: 8px 10px;
     overflow-x: hidden;
     touch-action: pan-y;
   }
@@ -69,6 +70,9 @@
   .phone {
     width: 100%;
     max-width: 380px;
+    /* 폰 화면을 꽉 채운다(2026-11-17). 큰 화면에서는 너무 길어지지 않게 940px까지만 */
+    min-height: calc(100vh - 16px);
+    min-height: min(calc(100dvh - 16px), 940px);
     background: #0d0a12;
     border-radius: 22px;
     padding: 12px;
@@ -598,6 +602,7 @@
 
   /* 안내 로그 박스 */
   .log-box {
+    margin-top: auto;   /* 남는 세로 공간은 이 줄 위로 보내서 안내 줄이 틀 바닥에 붙게 한다 */
     background: #15101c;
     border: 1px dashed #3a3042;
     border-radius: 8px;
@@ -1516,7 +1521,8 @@
   .game-menu-cloud { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
   .game-menu-close { width: 100%; min-height: 36px; flex: 0 0 auto; }
   #cs-panel { top: 12px !important; max-height: calc(100dvh - 24px); overflow-y: auto; }
-  .phone:has(#modal-start-menu.show) { min-height: 740px; }
+  /* 시작 메뉴가 열려 있을 때도 화면을 꽉 채운다(단, 메뉴 내용이 들어갈 740px 아래로는 줄이지 않는다) */
+  .phone:has(#modal-start-menu.show) { min-height: max(740px, min(calc(100dvh - 16px), 940px)); }
   #modal-start-menu { z-index: 80; background: #0d0a12; overflow-y: auto; justify-content: safe center; padding: 12px; text-align: left; }
   #modal-start-menu [hidden] { display: none !important; }
   #modal-new-game { z-index: 81; background: #0d0a12; justify-content: safe center; overflow-y: auto; padding: 12px; text-align: left; }
@@ -1568,7 +1574,8 @@
   .has-inapp .start-newbie { display: none; }
   .start-newbie ul { list-style: none; margin-top: 4px; }
   .start-newbie li { margin-top: 2px; }
-  .start-menu-link { display: block; color: #b9b0a2; text-align: center; font-size: 11px; margin-top: 8px; }
+  .start-menu-link { display: block; color: #b9b0a2; text-align: center; font-size: 11px; }
+  .start-menu-links { display: flex; justify-content: center; gap: 18px; margin-top: 8px; }
   .inapp-card { background: #3a2c0e; border: 1.5px solid #e5a82a; border-radius: 14px; padding: 10px; margin-bottom: 9px; }
   .inapp-card h3 { color: #ffe27a; font-size: 14px; line-height: 1.35; }
   .inapp-card p { font-size: 11.5px; line-height: 1.45; margin: 4px 0 7px; }
@@ -1735,7 +1742,7 @@
           <div class="start-menu-row"><button type="button" id="btn-start-sound">🔊 음향</button><button type="button" id="btn-start-scroll-lock">🔒 스크롤 고정</button></div>
         </div>
         <div class="start-newbie"><b>처음 오셨나요?</b><ul><li>🎮 가입 없이 바로 시작돼요</li><li>☁ 기록을 지키려면 구글 로그인을 한 번만 하세요</li><li>📲 앱으로 설치하면 아이콘 한 번에 열려요</li></ul></div>
-        <a class="start-menu-link" href="/">좌표나라 홈</a>
+        <div class="start-menu-links"><a class="start-menu-link" href="/games/">🎮 다른 게임 보기</a><a class="start-menu-link" href="/">좌표나라 홈</a></div>
       </div>
     </div>
 
@@ -4488,6 +4495,10 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-17-t', date: '2026-11-17', title: '화면이 꽉 차게 보여요', items: [
+      '게임 화면이 폰 화면을 꽉 채우고, 그 아래에 붙던 "다른 게임 도구" 목록을 없앴어요. 안내 줄은 화면 맨 아래에 있어요.',
+      '다른 게임이 궁금하면 시작 메뉴 맨 아래의 [🎮 다른 게임 보기]를 눌러 보세요.'
+    ] },
     { id: '2026-11-17-s', date: '2026-11-17', title: '🎮 새 게임 설정 화면이 생겼어요', items: [
       '시작 메뉴의 [🎮 새 게임]을 누르면 이름·난이도·직업을 한 화면에서 골라요. 직업은 아이콘 10칸(잠긴 직업은 🔒, 숫자는 직업 레벨)이고, 고르기만 해서는 시작되지 않아요.',
       '종족·특성 줄의 [편집]에서 종족과 특성을 바꿀 수 있고, 닫거나 취소하면 이 화면으로 돌아와요. 마지막에 [던전 입장]을 누르면 새 판이 시작돼요.',
@@ -4873,6 +4884,5 @@
   } catch (_) {}
 })();
 </script>
-<!--zw-static-links--><style>.zw-all{max-width:720px;margin:28px auto 0;padding:0 16px 24px;font-size:14px;line-height:1.7}.zw-all h2{font-size:17px;margin:0 0 8px}.zw-all h3{font-size:15px;margin:14px 0 4px}.zw-all ul{margin:0;padding-left:18px}.zw-all li{margin:2px 0}.zw-all a{color:inherit}.zw-all small{opacity:.7}</style><nav class="zw-all" aria-label="비슷한 게임 도구"><h2>다른 게임 도구</h2><h3><a href="/games/">🎮 게임 전체 보기</a> <small>지뢰찾기·숫자 합치기·뱀 게임 등 짧게 한 판</small></h3><ul><li><a href="/minesweeper/">지뢰찾기</a> — 깃발 꽂고 지뢰 피하기</li><li><a href="/find-different/">다른 도형 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/block-fit/">블록 줄 지우기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/color-flood/">색깔 물들이기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/maze-escape/">미로 찾기</a> — 가입 없이 즐기는 무료 게임 · 점수는 화면에만 표시</li><li><a href="/omok/">오목</a> — 컴퓨터와 오목 한 판</li><li><a href="/mahjong-match/">마작 짝 맞추기</a> — 같은 패 짝지어 없애기</li><li><a href="/peg-jump/">페그 솔리테어</a> — 구슬을 뛰어넘어 하나만 남기기</li><li><a href="/tangram-seven/">칠교</a> — 일곱 조각으로 모양 맞추기</li><li><a href="/nonogram/">네모 로직</a> — 숫자 힌트로 숨은 그림 찾기</li><li><a href="/sum-fill/">숫자 합 맞추기</a> — 가로세로 합에 맞게 숫자 채우기</li><li><a href="/merge-numbers/">숫자 합치기</a> — 같은 숫자를 밀어서 합치기</li><li><a href="/memory-match/">휴대폰 짝 맞추기</a> — 같은 그림 두 장 찾기</li><li><a href="/slide-puzzle/">숫자 밀기 퍼즐</a> — 1부터 순서대로 맞추기</li><li><a href="/lights-out/">불 끄기 퍼즐</a> — 눌러서 모든 불 끄기</li></ul></nav><!--/zw-static-links-->
 </body>
 </html>
