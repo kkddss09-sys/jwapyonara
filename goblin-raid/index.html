@@ -478,6 +478,10 @@
     pointer-events: none;
     z-index: 4;
   }
+  /* 도감 안의 작은 칸에서는 딱지를 기호만 보여 줘 글자가 잘리지 않게 한다 */
+  #modal-codex .cell.frozen::after { content: "❄"; padding: 0 3px; }
+  #modal-codex .cell.broken::after { content: "💥"; padding: 0 3px; }
+  #modal-codex .cell.arrow::after { content: "➶"; padding: 0 3px; }
   .cell.burning {
     border: 2px solid #ff4757 !important;
     box-shadow: 0 0 10px rgba(255, 71, 87, 0.8);
@@ -1678,6 +1682,24 @@
   .install-guide-items { display: flex; flex-direction: column; }
   .install-guide-item.ios-first { order: -1; }
   .install-guide-sheet button { width: 100%; min-height: 40px; border-radius: 9px; }
+
+  /* ── 도감 (2026-11-18) ── */
+  #modal-codex { overflow: hidden; height: 100%; max-height: 700px; justify-content: flex-start; padding: 12px 10px; gap: 6px; box-sizing: border-box; }
+  .codex-tabs { display: flex; gap: 6px; width: 100%; flex: 0 0 auto; border-bottom: 1px solid var(--line); }
+  .codex-tab-btn { flex: 1; min-height: 34px; padding: 6px 4px; font-size: 13px; font-weight: 600; color: var(--sub); background: transparent; border: none; border-bottom: 2.5px solid transparent; border-radius: 0; cursor: pointer; }
+  .codex-tab-btn.active { color: var(--gold); font-weight: 900; border-bottom-color: var(--gold); }
+  .codex-grid { flex: 1 1 auto; min-height: 0; overflow-y: auto; width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; padding: 4px 2px; align-content: start; }
+  .codex-cell { position: relative; background: #191421; border: 1.5px solid #3a3042; border-radius: 10px; padding: 5px 3px 4px; min-height: 68px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; color: var(--ink); }
+  .codex-cell.sel { border-color: var(--gold); box-shadow: 0 0 8px rgba(229, 168, 42, 0.45); background: #241d30; }
+  .codex-cell-preview { position: relative; width: 42px; height: 42px; flex: 0 0 42px; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+  .codex-cell-preview .cell { width: 42px; height: 42px; aspect-ratio: 1; pointer-events: none; cursor: default; }
+  .codex-cell-name { font-size: 11px; font-weight: 700; line-height: 1.2; text-align: center; color: #fff; word-break: keep-all; width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  .codex-num-badge { position: absolute; left: 3px; top: 3px; z-index: 5; min-width: 16px; height: 15px; padding: 0 3px; border-radius: 5px; background: #2e2a37; color: var(--gold); border: 1px solid var(--gold); font-size: 9.5px; font-weight: 900; line-height: 13px; text-align: center; pointer-events: none; }
+  #codex-detail { width: 100%; flex: 0 0 auto; max-height: 160px; overflow-y: auto; background: #14101b; border: 1px solid #3a3042; border-radius: 10px; padding: 8px 10px; text-align: left; font-size: 12.5px; line-height: 1.5; word-break: keep-all; }
+  #codex-detail b { color: var(--gold); font-size: 13.5px; display: block; margin-bottom: 3px; }
+  .codex-detail-mortal { color: #ff9ca8; margin-top: 4px; font-weight: 700; }
+  .codex-detail-tip { color: #ffe27a; margin-top: 3px; }
+  #codex-close { width: 50%; min-height: 34px; margin: 2px auto 0; padding: 6px 10px; font-size: 12.5px; flex: 0 0 auto; display: block; }
 </style>
 <script>
 // 방문 수 세기(구글 애널리틱스 4, 2026-11-17). 사이트의 다른 쪽과 같은 측정 ID를 쓴다. 게임 점수·기록은 보내지 않고 "방문"만 센다.
@@ -1796,6 +1818,7 @@
         <button class="btn-icon" id="btn-sound-modal" title="음향 설정">🔊 음향</button>
         <button class="btn-icon" id="btn-patch" title="바뀐 점 보기">🆕 패치<span id="patch-new">NEW</span></button>
         <button class="btn-icon" id="btn-guide" title="사용 설명서">📖 사용 설명서</button>
+        <button class="btn-icon" id="codex-open-game" title="도감">📚 도감</button>
         <button class="btn-icon" id="btn-skill-help">❓ 내 스킬 설명</button>
       </div>
       <button type="button" class="btn-action game-menu-close" id="btn-go-start-menu" data-keep-open>🏠 시작 메뉴로 (저장돼요)</button>
@@ -1824,7 +1847,7 @@
           <button type="button" id="btn-start-choose">🎮 새 게임<small>이름·난이도·직업을 고르고 시작해요</small></button>
           <button type="button" class="start-install" id="btn-start-install">📲 앱으로 설치<small>홈 화면에 올려 두면 앱처럼 열려요</small></button>
           <div class="start-menu-row"><button type="button" id="btn-start-rank">🥇 순위</button><button type="button" id="btn-start-achievements">🏆 내 기록·업적</button></div>
-          <div class="start-menu-row"><button type="button" id="btn-start-guide">📖 사용 설명서</button><button type="button" id="btn-start-patch">🆕 패치 소식</button></div>
+          <div class="start-menu-row"><button type="button" id="btn-start-guide">📖 사용 설명서</button><button type="button" id="codex-open-start">📚 도감</button><button type="button" id="btn-start-patch">🆕 패치 소식</button></div>
           <div class="start-menu-row"><button type="button" id="btn-start-sound">🔊 음향</button><button type="button" id="btn-start-scroll-lock">🔒 스크롤 고정</button></div>
         </div>
         <div class="start-newbie"><b>처음 오셨나요?</b><ul><li>🎮 가입 없이 바로 시작돼요</li><li>☁ 기록을 지키려면 구글 로그인을 한 번만 하세요</li><li>📲 앱으로 설치하면 아이콘 한 번에 열려요</li></ul></div>
@@ -2333,6 +2356,18 @@
       <div class="modal-desc" id="ach-summary-text">달성한 업적: 0 / 3</div>
       <div class="ach-list-container" id="achievements-list" style="width:100%; max-height:360px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; padding:4px 2px;"></div>
       <button class="btn-action" id="btn-close-achievements" style="width:100%; margin-top:4px;">닫기</button>
+    </div>
+
+    <!-- 도감 모달 (2026-11-18) -->
+    <div class="modal-overlay" id="modal-codex">
+      <div class="modal-title" style="color:#ffe27a;">📖 도감</div>
+      <div class="codex-tabs">
+        <button type="button" class="codex-tab-btn active" id="codex-tab-basic">기본</button>
+        <button type="button" class="codex-tab-btn" id="codex-tab-boss">특수 적</button>
+      </div>
+      <div class="codex-grid" id="codex-grid"></div>
+      <div id="codex-detail"></div>
+      <button type="button" class="btn-action" id="codex-close">닫기</button>
     </div>
 
   </div>
@@ -2867,6 +2902,17 @@
   })();
 
   // ── 보스(특수 적)·내 스킬 설명 창 ──
+  const MORTAL_TIPS = {
+    14: '이 적 바로 아래 칸에서 줄을 시작해 위로 곧게(같은 세로줄) 지나가야 피해가 들어가요.',
+    9: '이 적이 살아 있는 동안은 물약으로 독이 안 풀려요. 먼저 처치하세요.',
+    13: '판에 코인이 있으면 코인이 먼저 지워져요. 코인이 없으면 골드를 잃고 체력도 깎여요.',
+    16: '아래에 특수 적이 없으면 한 칸씩 내려오고, 맨 아래에서는 체력을 크게 깎아요.',
+    12: '새로 나타나면 내 방패가 0이 돼요. 나온 뒤 방패를 다시 모으세요.',
+    5: '이 적 칸이 판에 남아 있으면 새로 생기는 적의 방어가 2배예요.',
+    20: '적 공격에 체력을 잃으면 이 적이 한계를 넘어 회복해요.',
+    8: '이 적이 살아 있는 동안 내 기본 공격이 절반이에요(칼 공격은 그대로). 먼저 처치하세요.',
+    19: '카운트가 0이 되면 판이 통째로 바뀌어요. 그 전에 처치하세요.'
+  };
   function showBossInfo(tile) {
     const info = GR.getEnemyInfo ? GR.getEnemyInfo(tile.specialId) : null;
     if (!info) return;
@@ -2878,17 +2924,6 @@
     if (tile.isMortal) {
       more = '\n\n☠ 숙적이에요!';
       if (tile.mortalDesc) more += ' ' + tile.mortalDesc;
-      const MORTAL_TIPS = {
-        14: '이 적 바로 아래 칸에서 줄을 시작해 위로 곧게(같은 세로줄) 지나가야 피해가 들어가요.',
-        9: '이 적이 살아 있는 동안은 물약으로 독이 안 풀려요. 먼저 처치하세요.',
-        13: '판에 코인이 있으면 코인이 먼저 지워져요. 코인이 없으면 골드를 잃고 체력도 깎여요.',
-        16: '아래에 특수 적이 없으면 한 칸씩 내려오고, 맨 아래에서는 체력을 크게 깎아요.',
-        12: '새로 나타나면 내 방패가 0이 돼요. 나온 뒤 방패를 다시 모으세요.',
-        5: '이 적 칸이 판에 남아 있으면 새로 생기는 적의 방어가 2배예요.',
-        20: '적 공격에 체력을 잃으면 이 적이 한계를 넘어 회복해요.',
-        8: '이 적이 살아 있는 동안 내 기본 공격이 절반이에요(칼 공격은 그대로). 먼저 처치하세요.',
-        19: '카운트가 0이 되면 판이 통째로 바뀌어요. 그 전에 처치하세요.'
-      };
       if (MORTAL_TIPS[tile.specialId]) more += '\n👉 공략: ' + MORTAL_TIPS[tile.specialId];
     }
     bt.textContent = info.text + more;
@@ -2897,6 +2932,110 @@
     document.getElementById('boss-stats').textContent = '지금 상태: ' + bits.join(' · ');
     document.getElementById('modal-boss').classList.add('show');
   }
+  (function () {
+    const modalCodex = document.getElementById('modal-codex');
+    const tabBasic = document.getElementById('codex-tab-basic');
+    const tabBoss = document.getElementById('codex-tab-boss');
+    const grid = document.getElementById('codex-grid');
+    const detail = document.getElementById('codex-detail');
+    const btnClose = document.getElementById('codex-close');
+    const btnOpenGame = document.getElementById('codex-open-game');
+    if (!modalCodex || !grid || !detail) return;
+
+    const BASIC_ITEMS = [
+      { name: '칼', img: 'assets/icons/tile-sword.svg', cls: '', desc: '공격 칸이에요. 칼을 이으면서 적을 줄에 함께 포함시키면 내 공격력만큼 적에게 피해를 줘요. 적 체력이 0이 되면 처치돼요!' },
+      { name: '방패', img: 'assets/icons/tile-shield.svg', cls: '', desc: '방어 칸이에요. 모으면 방패 수치가 올라가 적의 반격을 먼저 막아 줘요. 방패 칸이 이미 가득 찬 상태에서 방패를 또 모으면 그만큼 강화 게이지가 올라가요.' },
+      { name: '동전', img: 'assets/icons/tile-coin.svg', cls: '', desc: '재화 칸이에요. 모으면 골드 게이지가 올라가고, 100%가 되면 장비와 스킬을 파는 떠돌이 상점이 열려요.' },
+      { name: '물약', img: 'assets/icons/tile-potion.svg', cls: '', desc: '회복 칸이에요. 모으면 잃었던 체력이 즉시 회복돼요.' },
+      { name: '얼음', img: 'assets/icons/tile-sword.svg', cls: 'frozen', desc: '❄ 얼어 있는 동안은 줄에 넣을 수 없어요.' },
+      { name: '부서짐', img: 'assets/icons/tile-sword.svg', cls: 'broken', desc: '💥 줄에 이을 수는 있지만 얻는 게 없어요(칼은 공격력 0).' },
+      { name: '불붙음', img: 'assets/icons/tile-sword.svg', cls: 'burning', desc: '' },
+      { name: '산성 물약', img: 'assets/icons/tile-potion.svg', cls: 'acid', desc: '' },
+      { name: '독', img: 'assets/icons/tile-potion.svg', cls: 'poisoned', desc: '' },
+      { name: '화살', img: 'assets/icons/tile-sword.svg', cls: 'arrow', desc: '일반 칼을 화살로 바꿔 화살로 공격할 수 있어요.' },
+      { name: '충전 물약', img: '', cls: '', desc: '' },
+      { name: '폭발 물약', img: '', cls: '', desc: '' },
+      { name: '마법칼', img: '', cls: '', desc: '' }
+    ];
+
+    let curTab = 'basic';
+    let curIdx = 0;
+
+    function getBossItems() {
+      const list = [];
+      const races = (GR && Array.isArray(GR.RACES_DATA)) ? GR.RACES_DATA : [];
+      for (let id = 1; id <= 32; id++) {
+        const info = (GR && GR.getEnemyInfo) ? GR.getEnemyInfo(id) : null;
+        const svg = (GR && GR.getSpecialEnemySvg) ? GR.getSpecialEnemySvg(id) : 'assets/icons/tile-enemy.svg';
+        const race = races.find(r => r && Number(r.mortalEnemyId) === id);
+        list.push({
+          id,
+          name: (info && info.name) ? info.name : ('특수 적 #' + id),
+          text: (info && info.text) ? info.text : '',
+          svg,
+          mortalRace: (race && race.name) ? race.name : '',
+          tip: MORTAL_TIPS[id] || ''
+        });
+      }
+      return list;
+    }
+
+    function renderDetail(item) {
+      if (!item) { detail.innerHTML = ''; return; }
+      if (curTab === 'basic') {
+        detail.innerHTML = `<b>${escHtml(item.name)}</b>` + (item.desc ? `<div>${escHtml(item.desc)}</div>` : '');
+      } else {
+        let html = `<b>#${item.id} ${escHtml(item.name)}</b>`;
+        if (item.text) html += `<div>${escHtml(item.text)}</div>`;
+        if (item.mortalRace) html += `<div class="codex-detail-mortal">☠ 숙적: ${escHtml(item.mortalRace)}</div>`;
+        if (item.tip) html += `<div class="codex-detail-tip">👉 공략: ${escHtml(item.tip)}</div>`;
+        detail.innerHTML = html;
+      }
+    }
+
+    function renderCodex() {
+      tabBasic.classList.toggle('active', curTab === 'basic');
+      tabBoss.classList.toggle('active', curTab === 'boss');
+      grid.innerHTML = '';
+      const items = curTab === 'basic' ? BASIC_ITEMS : getBossItems();
+      if (curIdx >= items.length) curIdx = 0;
+
+      items.forEach((item, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'codex-cell' + (idx === curIdx ? ' sel' : '');
+        if (curTab === 'basic') {
+          if (item.img) {
+            btn.innerHTML = `<div class="codex-cell-preview"><div class="cell ${item.cls}"><img src="${item.img}" alt="${escHtml(item.name)}"></div></div><div class="codex-cell-name">${escHtml(item.name)}</div>`;
+          } else {
+            btn.innerHTML = `<div class="codex-cell-name">${escHtml(item.name)}</div>`;
+          }
+        } else {
+          btn.innerHTML = `<span class="codex-num-badge">${item.id}</span><div class="codex-cell-preview"><div class="cell boss-glow"><img src="${item.svg}" alt="${escHtml(item.name)}"></div></div><div class="codex-cell-name">${escHtml(item.name)}</div>`;
+        }
+        btn.addEventListener('click', () => {
+          curIdx = idx;
+          grid.querySelectorAll('.codex-cell').forEach((c, i) => c.classList.toggle('sel', i === idx));
+          renderDetail(item);
+        });
+        grid.appendChild(btn);
+      });
+
+      renderDetail(items[curIdx]);
+    }
+
+    function openCodex() {
+      curTab = 'basic';
+      curIdx = 0;
+      renderCodex();
+      modalCodex.classList.add('show');
+    }
+
+    if (btnOpenGame) btnOpenGame.addEventListener('click', openCodex);
+    tabBasic.addEventListener('click', () => { curTab = 'basic'; curIdx = 0; grid.scrollTop = 0; renderCodex(); });
+    tabBoss.addEventListener('click', () => { curTab = 'boss'; curIdx = 0; grid.scrollTop = 0; renderCodex(); });
+    if (btnClose) btnClose.addEventListener('click', () => modalCodex.classList.remove('show'));
+  })();
   (function () {
     const mb = document.getElementById('modal-boss');
     document.getElementById('btn-close-boss').addEventListener('click', () => mb.classList.remove('show'));
@@ -4690,6 +4829,10 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-18-x', date: '2026-11-18', title: '📚 도감이 생겼어요', items: [
+      '시작 메뉴와 ⏸ 메뉴의 [📚 도감]에서 기본 칸(칼·방패·동전·물약)과 상태(얼음·부서짐·불·산성·독·화살 등), 특수 적 32종을 한 번에 볼 수 있어요.',
+      '특수 적을 누르면 능력 설명과, 어느 종족의 숙적인지·공략 한 줄이 나와요.'
+    ] },
     { id: '2026-11-18-w', date: '2026-11-18', title: '❄ 얼음·💥 부서진 칸이 눈에 보여요', items: [
       '얼어붙은 칸은 파란 얼음빛과 "❄ 얼음" 딱지, 부서진 칸은 금 간 모양과 "💥 부서짐" 딱지로 보여요. 줄을 끌어도 사라지지 않아요.',
       '얼음 칸은 줄에 넣을 수 없고, 부서진 칸은 이을 수는 있지만 얻는 게 없어요(칼은 공격력 0). 한 번 톡 누르면 설명이 나와요.',
@@ -5033,6 +5176,7 @@
   openOld('btn-start-rank', 'btn-rank-modal');
   openOld('btn-start-achievements', 'btn-achievements-modal');
   openOld('btn-start-guide', 'btn-guide');
+  openOld('codex-open-start', 'codex-open-game');
   openOld('btn-start-patch', 'btn-patch');
   openOld('btn-start-sound', 'btn-sound-modal');
   openOld('btn-start-scroll-lock', 'btn-scroll-lock');
