@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256">
+<title>화살</title>
+<defs>
+<linearGradient id="gMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f7fb"/><stop offset=".5" stop-color="#a9b6c7"/><stop offset="1" stop-color="#5d6b80"/></linearGradient>
+<linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a8"/><stop offset=".5" stop-color="#e5a82a"/><stop offset="1" stop-color="#8f5d0b"/></linearGradient>
+<linearGradient id="gWood" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d29556"/><stop offset=".5" stop-color="#9e622b"/><stop offset="1" stop-color="#613712"/></linearGradient>
+<radialGradient id="gBg" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#2a2233"/><stop offset=".8" stop-color="#14101a"/></radialGradient>
+<filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#55d777" flood-opacity=".9"/></filter>
+</defs>
+<rect width="100" height="100" rx="22" fill="url(#gBg)"/>
+<rect x="1.5" y="1.5" width="97" height="97" rx="21" fill="none" stroke="#5b4a2e" stroke-width="3"/>
+<rect x="4" y="4" width="92" height="92" rx="19" fill="none" stroke="#1b1420" stroke-width="2"/>
+<g transform="translate(8 8) scale(.84)" filter="url(#glow)">
+<g transform="translate(50 50) scale(1.12) rotate(45) translate(-50 -50)">
+<path fill="#e8364f" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M50 64 L32 76 L32 94 L50 84 Z"/>
+<path fill="#c4243b" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M50 64 L68 76 L68 94 L50 84 Z"/>
+<path fill="#ff8a9b" fill-opacity=".65" d="M36 78 L46 71 V81 L36 87 Z"/>
+<rect fill="url(#gWood)" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" x="45.5" y="24" width="9" height="62" rx="3"/>
+<rect fill="url(#gGold)" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" x="43" y="25" width="14" height="7" rx="2"/>
+<path fill="url(#gMetal)" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M50 2 L68 28 L55 24 L45 24 L32 28 Z"/>
+<path fill="#ffffff" fill-opacity=".6" d="M50 7 L40 24 L48 22 Z"/>
+</g>
+</g>
+</svg>

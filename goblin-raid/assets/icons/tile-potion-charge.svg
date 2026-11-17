@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256">
+<title>충전 물약</title>
+<defs>
+<linearGradient id="gMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f7fb"/><stop offset=".5" stop-color="#a9b6c7"/><stop offset="1" stop-color="#5d6b80"/></linearGradient>
+<linearGradient id="gGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff0a8"/><stop offset=".5" stop-color="#e5a82a"/><stop offset="1" stop-color="#8f5d0b"/></linearGradient>
+<linearGradient id="gLiquid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5cc8ff"/><stop offset=".5" stop-color="#2b7de9"/><stop offset="1" stop-color="#144499"/></linearGradient>
+<radialGradient id="gBg" cx=".5" cy=".4" r=".8"><stop offset="0" stop-color="#2a2233"/><stop offset=".8" stop-color="#14101a"/></radialGradient>
+<filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#4db8ff" flood-opacity=".95"/></filter>
+</defs>
+<rect width="100" height="100" rx="22" fill="url(#gBg)"/>
+<rect x="1.5" y="1.5" width="97" height="97" rx="21" fill="none" stroke="#5b4a2e" stroke-width="3"/>
+<rect x="4" y="4" width="92" height="92" rx="19" fill="none" stroke="#1b1420" stroke-width="2"/>
+<g transform="translate(8 8) scale(.84)" filter="url(#glow)">
+<rect fill="url(#gGold)" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" x="38" y="5" width="24" height="11" rx="4"/>
+<path fill="#eaf6ff" fill-opacity=".55" d="M41 16 H59 V33 H41 Z"/>
+<path fill="#eaf6ff" fill-opacity=".55" d="M41 30 H59 V38 C83 48 87 78 71 91 C60 98 40 98 29 91 C13 78 17 48 41 38 Z"/>
+<path fill="url(#gLiquid)" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M20 62 C34 55 66 69 80 60 C82 76 74 90 62 94 C54 97 46 97 38 94 C26 90 18 78 20 62 Z"/>
+<circle fill="#ffffff" fill-opacity=".5" cx="35" cy="82" r="3.5"/>
+<circle fill="#ffffff" fill-opacity=".5" cx="65" cy="80" r="2.8"/>
+<path fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".75" d="M29 53 C31 47 35 43 40 41"/>
+<path fill="#ffe24a" stroke="#0b0810" stroke-width="3" stroke-linejoin="round" d="M54 42 L36 66 H50 L44 88 L66 60 H52 Z"/>
+</g>
+</svg>

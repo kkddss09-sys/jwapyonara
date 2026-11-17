@@ -458,30 +458,9 @@
     pointer-events: none;
     z-index: 4;
   }
-  .cell.arrow::after {
-    content: "➶ 화살";
-    position: absolute;
-    top: 1px;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 70%;
-    white-space: nowrap;
-    overflow: hidden;
-    font-size: 9.5px;
-    font-weight: 900;
-    line-height: 1.15;
-    padding: 1px 4px;
-    border-radius: 5px;
-    background: #1f6b3b;
-    color: #fff;
-    border: 1px solid #6fd18a;
-    pointer-events: none;
-    z-index: 4;
-  }
   /* 도감 안의 작은 칸에서는 딱지를 기호만 보여 줘 글자가 잘리지 않게 한다 */
   #modal-codex .cell.frozen::after { content: "❄"; padding: 0 3px; }
   #modal-codex .cell.broken::after { content: "💥"; padding: 0 3px; }
-  #modal-codex .cell.arrow::after { content: "➶"; padding: 0 3px; }
   .cell.burning {
     border: 2px solid #ff4757 !important;
     box-shadow: 0 0 10px rgba(255, 71, 87, 0.8);
@@ -2952,10 +2931,10 @@
       { name: '불붙음', img: 'assets/icons/tile-sword.svg', cls: 'burning', desc: '' },
       { name: '산성 물약', img: 'assets/icons/tile-potion.svg', cls: 'acid', desc: '' },
       { name: '독', img: 'assets/icons/tile-potion.svg', cls: 'poisoned', desc: '' },
-      { name: '화살', img: 'assets/icons/tile-sword.svg', cls: 'arrow', desc: '일반 칼을 화살로 바꿔 화살로 공격할 수 있어요.' },
-      { name: '충전 물약', img: '', cls: '', desc: '' },
-      { name: '폭발 물약', img: '', cls: '', desc: '' },
-      { name: '마법칼', img: '', cls: '', desc: '' }
+      { name: '화살', img: 'assets/icons/tile-arrow.svg', cls: '', desc: '일반 칼을 화살로 바꿔 화살로 공격할 수 있어요.' },
+      { name: '충전 물약', img: 'assets/icons/tile-potion-charge.svg', cls: '', desc: '모으면 내 스킬 중 한 개의 대기 시간이 채워져요.' },
+      { name: '폭발 물약', img: 'assets/icons/tile-potion-bomb.svg', cls: '', desc: '모으면 주변 8칸이 함께 모아져요(연쇄).' },
+      { name: '마법칼', img: 'assets/icons/tile-sword-magic.svg', cls: '', desc: '이 칼 하나가 낸 공격이 5배가 돼요.' }
     ];
 
     let curTab = 'basic';
@@ -3270,6 +3249,13 @@
           }
         } else {
           svgPath = GR.TILE_SVGS[tile.type] || `assets/icons/tile-${tile.type}.svg`;
+          if (tile.type === 'sword') {
+            if (tile.isArrow) svgPath = 'assets/icons/tile-arrow.svg';
+            else if (tile.isMagicBlade) svgPath = 'assets/icons/tile-sword-magic.svg';
+          } else if (tile.type === 'potion') {
+            if (tile.isManaPotion) svgPath = 'assets/icons/tile-potion-charge.svg';
+            else if (tile.isBomb) svgPath = 'assets/icons/tile-potion-bomb.svg';
+          }
           fallbackEmoji = GR.TILE_ICONS[tile.type] || '❓';
         }
 
@@ -4829,6 +4815,10 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-18-y', date: '2026-11-18', title: '🎨 새 그림이 생겼어요', items: [
+      '화살은 화살 모양, 마법칼은 쌍칼, 충전 물약은 번개 물약, 폭발 물약은 폭탄 물약 그림으로 보여요.',
+      '특수 적 32종이 이제 모두 다른 그림이에요. 색과 머리 모양, 오른쪽 위 표시가 달라서 한눈에 구별돼요. 📚 도감에서 모아 볼 수 있어요.'
+    ] },
     { id: '2026-11-18-x', date: '2026-11-18', title: '📚 도감이 생겼어요', items: [
       '시작 메뉴와 ⏸ 메뉴의 [📚 도감]에서 기본 칸(칼·방패·동전·물약)과 상태(얼음·부서짐·불·산성·독·화살 등), 특수 적 32종을 한 번에 볼 수 있어요.',
       '특수 적을 누르면 능력 설명과, 어느 종족의 숙적인지·공략 한 줄이 나와요.'
