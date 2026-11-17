@@ -447,7 +447,7 @@
   .cell[data-mortal="1"] { outline: 2px solid #ff3b3b; outline-offset: -2px; animation: mortalPulse 1.2s ease-in-out infinite; }
   @keyframes mortalPulse { 0%,100% { box-shadow: 0 0 4px rgba(255,59,59,.5); } 50% { box-shadow: 0 0 14px rgba(255,59,59,1); } }
   .mortal-tag { position: absolute; right: 1px; top: 1px; z-index: 4; background: #ff3b3b; color: #fff; font-size: 9.5px; font-weight: 900; line-height: 1; padding: 2px 3px; border-radius: 5px; border: 1px solid #0b0810; pointer-events: none; }
-  .mortal-banner { position: absolute; left: 6px; right: 6px; top: 6px; z-index: 20; background: rgba(160,10,20,.96); color: #fff; font-size: 13px; font-weight: 800; line-height: 1.35; text-align: center; padding: 7px 8px; border-radius: 10px; border: 2px solid #ffd3d3; pointer-events: none; opacity: 0; transition: opacity .25s; }
+  .mortal-banner { position: absolute; left: 0; right: 0; top: -46px; z-index: 20; background: rgba(160,10,20,.96); color: #fff; font-size: 14px; font-weight: 900; line-height: 1.3; text-align: center; padding: 8px 6px; border-radius: 10px; border: 2px solid #ffd3d3; pointer-events: none; opacity: 0; transition: opacity .25s; }
   .mortal-banner.show { opacity: 1; }
 
   /* 적 스탯 뱃지 (시안 D 규칙) */
@@ -2792,13 +2792,25 @@
     const info = GR.getEnemyInfo ? GR.getEnemyInfo(tile.specialId) : null;
     if (!info) return;
     document.getElementById('boss-title').textContent = `👹 ${info.name}`;
+    if (tile.isMortal) { const mb0 = document.getElementById('mortal-banner'); if (mb0) mb0.classList.remove('show'); }
     const bt = document.getElementById('boss-text');
     bt.style.whiteSpace = 'pre-line';
     let more = '';
     if (tile.isMortal) {
       more = '\n\n☠ 숙적이에요!';
       if (tile.mortalDesc) more += ' ' + tile.mortalDesc;
-      if (tile.specialId === 14) more += '\n👉 공략: 이 적 바로 아래 칸에서 줄을 시작해 위로 곧게(같은 세로줄) 지나가야 피해가 들어가요.';
+      const MORTAL_TIPS = {
+        14: '이 적 바로 아래 칸에서 줄을 시작해 위로 곧게(같은 세로줄) 지나가야 피해가 들어가요.',
+        9: '이 적이 살아 있는 동안은 물약으로 독이 안 풀려요. 먼저 처치하세요.',
+        13: '판에 코인이 있으면 코인이 먼저 지워져요. 코인이 없으면 골드를 잃고 체력도 깎여요.',
+        16: '아래에 특수 적이 없으면 한 칸씩 내려오고, 맨 아래에서는 체력을 크게 깎아요.',
+        12: '새로 나타나면 내 방패가 0이 돼요. 나온 뒤 방패를 다시 모으세요.',
+        5: '이 적 칸이 판에 남아 있으면 새로 생기는 적의 방어가 2배예요.',
+        20: '적 공격에 체력을 잃으면 이 적이 한계를 넘어 회복해요.',
+        8: '이 적이 살아 있는 동안 내 기본 공격이 절반이에요(칼 공격은 그대로). 먼저 처치하세요.',
+        19: '카운트가 0이 되면 판이 통째로 바뀌어요. 그 전에 처치하세요.'
+      };
+      if (MORTAL_TIPS[tile.specialId]) more += '\n👉 공략: ' + MORTAL_TIPS[tile.specialId];
     }
     bt.textContent = info.text + more;
     const bits = [`체력 ${tile.hp}${tile.maxHp ? '/' + tile.maxHp : ''}`, `공격 ${tile.atk}`, `방어 ${tile.armor}`];
@@ -2987,10 +2999,10 @@
         const wrap = document.getElementById('board-wrap');
         let el = document.getElementById('mortal-banner');
         if (!el) { el = document.createElement('div'); el.id = 'mortal-banner'; el.className = 'mortal-banner'; wrap.appendChild(el); }
-        el.textContent = '☠ 숙적이 나왔어요! 빨간 ☠숙적 칸을 눌러서 공략법을 확인하세요';
+        el.textContent = '☠ 숙적이 나타났습니다! 클릭해서 확인하세요';
         el.classList.add('show');
         clearTimeout(mortalBannerTimer);
-        mortalBannerTimer = setTimeout(() => el.classList.remove('show'), 5000);
+        mortalBannerTimer = setTimeout(() => el.classList.remove('show'), 8000);
       }
       mortalSeen = has;
     } catch (_) {}
@@ -4540,6 +4552,10 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-17-v', date: '2026-11-17', title: '☠ 숙적 안내가 더 잘 보여요', items: [
+      '숙적이 나타나면 위쪽에 "숙적이 나타났습니다! 클릭해서 확인하세요"가 크게 떠요. 숙적 칸을 누르면 사라져요.',
+      '모든 숙적의 설명 창에 공략 한 줄이 생겼어요(독침·훔침·아래찌르기·수리막기·두꺼운막·되찾기·서리·방바꾸기·뛰기).'
+    ] },
     { id: '2026-11-17-u', date: '2026-11-17', title: '☠ 숙적이 눈에 확 띄어요', items: [
       '내 종족의 숙적이 판에 나오면 빨간 깜빡 테두리와 ☠숙적 딱지가 붙고, 위쪽에 "눌러 보세요" 안내가 잠깐 떠요.',
       '숙적 칸을 누르면 공략법이 나와요. 칼잡이(땅굴 탐험단)의 숙적 뛰기는 바로 아래 칸에서 위로 곧게 지나가는 줄에만 피해가 들어가요.'
