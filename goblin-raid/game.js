@@ -779,6 +779,11 @@
           const isRace1 = session.hero && session.hero.raceKey === 1;
           const enemyHasPoison = enemy && Array.isArray(enemy.poisonSteps) && enemy.poisonSteps.some(s => s > 0);
 
+          // 숙적 표시(2026-11-17): 지금 종족의 숙적 번호와 같은 적, 또는 엔진이 숙적으로 표시한 적
+          const heroRaceDef = session.hero ? RACES_DATA.find(r => r.id === session.hero.raceKey) : null;
+          const isMortalTile = Boolean(isEnemy && enemy && enemy.enemyKind > 0 &&
+            ((heroRaceDef && heroRaceDef.mortalEnemyId > 0 && heroRaceDef.mortalEnemyId === enemy.enemyKind) || enemy.isMortalEnemy));
+
           let tileType = c.kind;
           if (c.bridgeForm === 'reward') {
             tileType = 'phylactery';
@@ -795,6 +800,8 @@
             armor: isEnemy && enemy ? (enemy.guard || 0) : 0,
             atk: isEnemy && enemy ? (enemy.strike != null ? enemy.strike : 1) : 0,
             specialId: specialId,
+            isMortal: isMortalTile,
+            mortalDesc: isMortalTile && heroRaceDef ? heroRaceDef.mortalEnemyDesc : '',
             countdown: isEnemy && enemy ? (enemy.countLeft || 0) : 0,
             isFrozen: Boolean(c.frozen),
             isBurning: Boolean(c.firePower > 0),

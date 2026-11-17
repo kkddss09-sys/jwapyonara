@@ -443,6 +443,13 @@
     box-shadow: 0 0 10px rgba(229, 168, 42, 0.8) !important;
   }
 
+  /* 숙적 표시 (2026-11-17): 빨간 깜빡 테두리 + ☠ 숙적 딱지 */
+  .cell[data-mortal="1"] { outline: 2px solid #ff3b3b; outline-offset: -2px; animation: mortalPulse 1.2s ease-in-out infinite; }
+  @keyframes mortalPulse { 0%,100% { box-shadow: 0 0 4px rgba(255,59,59,.5); } 50% { box-shadow: 0 0 14px rgba(255,59,59,1); } }
+  .mortal-tag { position: absolute; right: 1px; top: 1px; z-index: 4; background: #ff3b3b; color: #fff; font-size: 9.5px; font-weight: 900; line-height: 1; padding: 2px 3px; border-radius: 5px; border: 1px solid #0b0810; pointer-events: none; }
+  .mortal-banner { position: absolute; left: 6px; right: 6px; top: 6px; z-index: 20; background: rgba(160,10,20,.96); color: #fff; font-size: 13px; font-weight: 800; line-height: 1.35; text-align: center; padding: 7px 8px; border-radius: 10px; border: 2px solid #ffd3d3; pointer-events: none; opacity: 0; transition: opacity .25s; }
+  .mortal-banner.show { opacity: 1; }
+
   /* 적 스탯 뱃지 (시안 D 규칙) */
   .st {
     position: absolute;
@@ -2053,6 +2060,8 @@
 
         <details><summary>11. 종족이란? 종족 변경 방법</summary>
           <p>탐험대원의 혈통으로, 저마다 고유한 <b>종족 보너스</b>와 치명적인 <b>숙적(약점 몬스터)</b>을 가지고 있어요.</p>
+          <p>☠ <b>숙적이 판에 나오면</b> 그 칸에 빨간 <b>☠숙적</b> 딱지가 붙고, 눌러 보면 공략법이 나와요.</p>
+          <p>⚔ <b>칼잡이</b>는 처음부터 <b>땅굴 탐험단</b>이고, 숙적은 <b>뛰기</b>예요. 뛰기는 일반 공격이 안 통하고, <b>그 적 바로 아래 칸에서 시작해 위로 곧게(같은 세로줄) 지나가는 줄(올려치기)</b>에만 피해가 들어가요. 종족은 직업 레벨 5부터 바꿀 수 있어요.</p>
           <p><b>종족 변경 조건 (2가지 모두 충족 필요)</b>:</p>
           <ul>
             <li>1) 현재 선택한 직업의 레벨이 <b>5 이상</b>이어야 해요. (<b>길잡이는 종족을 바꿀 수 없어요</b>.)</li>
@@ -2783,7 +2792,15 @@
     const info = GR.getEnemyInfo ? GR.getEnemyInfo(tile.specialId) : null;
     if (!info) return;
     document.getElementById('boss-title').textContent = `👹 ${info.name}`;
-    document.getElementById('boss-text').textContent = info.text;
+    const bt = document.getElementById('boss-text');
+    bt.style.whiteSpace = 'pre-line';
+    let more = '';
+    if (tile.isMortal) {
+      more = '\n\n☠ 숙적이에요!';
+      if (tile.mortalDesc) more += ' ' + tile.mortalDesc;
+      if (tile.specialId === 14) more += '\n👉 공략: 이 적 바로 아래 칸에서 줄을 시작해 위로 곧게(같은 세로줄) 지나가야 피해가 들어가요.';
+    }
+    bt.textContent = info.text + more;
     const bits = [`체력 ${tile.hp}${tile.maxHp ? '/' + tile.maxHp : ''}`, `공격 ${tile.atk}`, `방어 ${tile.armor}`];
     if (tile.countdown > 0) bits.push(`카운트 ${tile.countdown}`);
     document.getElementById('boss-stats').textContent = '지금 상태: ' + bits.join(' · ');
@@ -2962,10 +2979,28 @@
     } catch (_) {}
   }
 
+  // 숙적이 새로 나타나면 판 위에 잠깐 "눌러 보세요" 안내를 띄운다 (2026-11-17)
+  let mortalSeen = false, mortalBannerTimer = null;
+  function updateMortalBanner(has) {
+    try {
+      if (has && !mortalSeen) {
+        const wrap = document.getElementById('board-wrap');
+        let el = document.getElementById('mortal-banner');
+        if (!el) { el = document.createElement('div'); el.id = 'mortal-banner'; el.className = 'mortal-banner'; wrap.appendChild(el); }
+        el.textContent = '☠ 숙적이 나왔어요! 빨간 ☠숙적 칸을 눌러서 공략법을 확인하세요';
+        el.classList.add('show');
+        clearTimeout(mortalBannerTimer);
+        mortalBannerTimer = setTimeout(() => el.classList.remove('show'), 5000);
+      }
+      mortalSeen = has;
+    } catch (_) {}
+  }
+
   function renderBoard() {
     notifyReshuffleIfAny();
     boardGrid.innerHTML = '';
     const board = gameState.board;
+    let hasMortal = false;
 
     for (let y = 0; y < GR.BOARD_HEIGHT; y++) {
       for (let x = 0; x < GR.BOARD_WIDTH; x++) {
@@ -3046,10 +3081,20 @@
           }
         }
 
+        if (tile.type === 'enemy' && tile.isMortal) {
+          cell.dataset.mortal = '1';
+          const tag = document.createElement('span');
+          tag.className = 'mortal-tag';
+          tag.textContent = '☠숙적';
+          cell.appendChild(tag);
+          hasMortal = true;
+        }
+
         boardGrid.appendChild(cell);
       }
     }
 
+    updateMortalBanner(hasMortal);
     updateHUD();
     updateSelectionUI();
   }
@@ -4495,6 +4540,10 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-17-u', date: '2026-11-17', title: '☠ 숙적이 눈에 확 띄어요', items: [
+      '내 종족의 숙적이 판에 나오면 빨간 깜빡 테두리와 ☠숙적 딱지가 붙고, 위쪽에 "눌러 보세요" 안내가 잠깐 떠요.',
+      '숙적 칸을 누르면 공략법이 나와요. 칼잡이(땅굴 탐험단)의 숙적 뛰기는 바로 아래 칸에서 위로 곧게 지나가는 줄에만 피해가 들어가요.'
+    ] },
     { id: '2026-11-17-t', date: '2026-11-17', title: '화면이 꽉 차게 보여요', items: [
       '게임 화면이 폰 화면을 꽉 채우고, 그 아래에 붙던 "다른 게임 도구" 목록을 없앴어요. 안내 줄은 화면 맨 아래에 있어요.',
       '다른 게임이 궁금하면 시작 메뉴 맨 아래의 [🎮 다른 게임 보기]를 눌러 보세요.'
@@ -4683,6 +4732,7 @@
     const raceId = savedRace != null && GR.validateRaceSelection(ngClassId, savedRace, unlockInfo) ? savedRace : def.defaultRaceId;
     const race = GR.RACES_DATA.find(r => r.id === raceId);
     ngRacePerkRow.appendChild(ngIcon(race && race.icon, '', race && race.name));
+    if (race && race.mortalEnemyId > 0) ngClassNote.textContent += ' · ☠ 숙적: ' + ((GR.getEnemyInfo && GR.getEnemyInfo(race.mortalEnemyId)) ? GR.getEnemyInfo(race.mortalEnemyId).name : race.mortalEnemyName);
     const setting = prof.classPerkSettings && prof.classPerkSettings[ngClassId];
     const perks = setting && Array.isArray(setting.perks) ? setting.perks : [];
     const flaws = setting && Array.isArray(setting.flaws) ? setting.flaws : [];
