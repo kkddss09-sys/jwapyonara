@@ -588,10 +588,10 @@
 
   /* 닫기 단추는 절반 크기(폭 50%·높이 절반) — 2026-11-17 */
   .modal-overlay button.btn-action[id^="btn-close-"] { width: 50% !important; margin-left: auto !important; margin-right: auto !important; padding: 5px 8px !important; font-size: 12px !important; flex: 0 0 auto !important; display: block; }
-  .guide-box { max-height: 62vh; overflow-y: auto; text-align: left; }
+  .guide-box { max-height: 78vh; overflow-y: auto; text-align: left; font-size: 13px; line-height: 1.7; word-break: keep-all; box-sizing: border-box; }
   .guide-box details { background: #1a1522; border: 1px solid #3a3042; border-radius: 8px; padding: 6px 10px; margin: 6px 0; }
-  .guide-box summary { cursor: pointer; font-weight: 800; color: #ffe27a; font-size: 13px; }
-  .guide-box p, .guide-box li { font-size: 12.5px; line-height: 1.6; margin: 5px 0; }
+  .guide-box summary { cursor: pointer; font-weight: 800; color: #ffe27a; font-size: 13.5px; padding: 2px 0; }
+  .guide-box p, .guide-box li { font-size: 13px; line-height: 1.7; margin: 5px 0; }
   .guide-box ul { padding-left: 18px; margin: 4px 0; }
   .guide-box .soon { color: #ffb86b; font-weight: 700; }
   #patch-new { display: none; background: #ff5a5a; color: #fff; border-radius: 999px; font-size: 10px; padding: 1px 6px; margin-left: 4px; vertical-align: middle; }
@@ -706,11 +706,61 @@
   }
   .modal-overlay.show { display: flex; }
   #modal-class, #modal-race, #modal-perk-flaw {
-    overflow-y: auto;
+    overflow: hidden;
+    height: 100%;
     justify-content: flex-start;
     padding: 12px 10px;
     gap: 6px;
     box-sizing: border-box;
+  }
+  #modal-class > .modal-title,
+  #modal-class > .setup-tabs-bar,
+  #modal-class > .modal-desc,
+  #modal-race > .modal-title,
+  #modal-race > .setup-tabs-bar,
+  #modal-race > .modal-desc,
+  #modal-perk-flaw > .modal-title,
+  #modal-perk-flaw > .setup-tabs-bar,
+  #modal-perk-flaw > .modal-desc,
+  #modal-perk-flaw > .pf-summary-wrap,
+  #modal-perk-flaw > .pf-slot-chips,
+  #modal-perk-flaw > .pf-detail-panel {
+    flex-shrink: 0;
+  }
+  #modal-class .cls-grid,
+  #modal-race .cls-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    width: 100%;
+    padding: 4px 2px;
+  }
+  #modal-class #btn-close-class-modal,
+  #modal-race #btn-close-race-modal {
+    margin-top: auto !important;
+    flex-shrink: 0 !important;
+  }
+  #modal-perk-flaw .pf-grids-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    width: 100%;
+    margin: 2px 0 4px 0;
+    padding-right: 2px;
+  }
+  #modal-perk-flaw .slot-pair-alert {
+    flex-shrink: 0;
+    margin-top: auto;
+    min-height: 18px;
+    line-height: 18px;
+  }
+  #modal-perk-flaw .pf-actions-bar {
+    flex-shrink: 0;
+    position: static;
+    margin-top: 0;
+    padding: 2px 0 0 0;
+    width: 100%;
   }
   @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
 
@@ -1328,14 +1378,11 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
 
-  /* 취소/확정 버튼 sticky */
+  /* 취소/확정 버튼 바 */
   .pf-actions-bar {
-    position: sticky;
-    bottom: 0;
     background: #0c0910;
-    padding: 6px 0 2px 0;
+    padding: 4px 0 2px 0;
     z-index: 10;
-    margin-top: auto;
     width: 100%;
     box-sizing: border-box;
   }
@@ -1518,7 +1565,7 @@
 
     <!-- 로그 박스 -->
     <div class="log-box" id="log-box">
-      🛡️ 방패 초과분은 강화 게이지로 누적됩니다.<br>
+      🛡️ 방패 칸이 가득 찬 뒤 모은 방패는 강화 게이지로 쌓입니다.<br>
       ⚔️ 칼 줄에 적을 붙여 100% 피해를 입히세요!
     </div>
 
@@ -1668,72 +1715,209 @@
       <div class="modal-title" style="color:#ffe27a;">📖 사용 설명서</div>
       <div class="guide-box">
         <details open><summary>1. 이 게임은 뭐예요?</summary>
-          <p>폐허가 된 거대 쇼핑몰을 차지한 <b>고블린 상인단</b>이 가짜 좌표 지도를 팔며 탐험대를 속입니다. 칸을 선으로 이어 상인단을 물리치고 점수를 올리세요. 체력이 0이 되면 게임이 끝나고, 점수는 순위표에 올릴 수 있어요.</p>
+          <p>폐허가 된 거대 쇼핑몰을 점령한 <b>고블린 상인단</b>이 가짜 좌표 지도를 팔며 탐험대를 속이고 있어요!</p>
+          <p><b>목표</b>: 판 위의 칸들을 한 붓 그리기처럼 선으로 이어 고블린 상인단을 물리치고 점수를 최대한 높이 올리는 <b>퍼즐 생존 게임</b>이에요.</p>
+          <p>내 체력(HP)이 0이 되면 게임이 끝나고, 그때까지 세운 최고 점수는 순위표에 올려 다른 사람들과 겨룰 수 있어요.</p>
         </details>
-        <details open><summary>2. 이렇게 해요 (선 잇기)</summary>
+
+        <details open><summary>2. 가장 먼저 해 볼 것 (첫 판 따라하기 5단계)</summary>
+          <p>어떻게 시작할지 막막하다면 아래 5단계만 그대로 따라 해 보세요!</p>
           <ul>
-            <li>같은 칸을 손가락으로 쭉 이어요. <b>상하좌우·대각선 8방향</b>, <b>3개 이상</b>이어야 해요.</li>
-            <li>잘못 이었으면 <b>직전 칸으로 되돌아가면</b> 취소돼요.</li>
-            <li><b>손을 떼면 1턴</b>이 끝나요. 이어진 칸은 사라지고 새 칸이 채워져요.</li>
+            <li><b>1단계: 난이도 고르기</b> — 아래쪽 난이도 단추에서 <b>[보통]</b>을 골라 보세요. (쉬움 난이도는 새 직업을 여는 보상이 나오지 않아요!)</li>
+            <li><b>2단계: 선 잇기</b> — 같은 모양의 칸(예: 칼 3개)을 손가락이나 마우스로 꾹 누른 채 <b>3개 이상</b> 쭉 이어 보세요.</li>
+            <li><b>3단계: 칼로 적 공격</b> — 칼 줄을 이으면서 바로 옆에 붙어 있는 <b>적(몬스터)까지 함께 연결</b>하면 적을 칼로 공격할 수 있어요.</li>
+            <li><b>4단계: 방패와 물약 챙기기</b> — 턴이 끝날 때마다 살아남은 적들이 나를 공격해요. <b>방패</b>를 모아 방어구를 두르고, 깎인 피는 <b>물약</b>으로 채우세요.</li>
+            <li><b>5단계: 점수 올리고 이어하기</b> — 적을 잡고 오래 버틸수록 점수가 올라가요. 게임 도중 창을 닫아도 나중에 <b>[▶ 이어하기]</b>로 하던 판을 그대로 계속할 수 있어요.</li>
           </ul>
         </details>
-        <details><summary>3. 칸이 하는 일 (칼·방패·물약·코인)</summary>
+
+        <details><summary>3. 선 잇는 방법</summary>
           <ul>
-            <li><b>칼</b>: 칼 줄에 <b>적을 함께 이으면</b> 그 적들을 공격해요. 체력이 0이 되면 처치돼요.</li>
-            <li><b>방패</b>: 모으면 방패가 올라가 적의 반격을 먼저 막아 줘요. 넘치는 만큼은 강화 게이지가 차요.</li>
-            <li><b>물약</b>: 모으면 체력이 회복돼요.</li>
-            <li><b>코인</b>: 모으면 골드가 쌓이고, 골드가 차면 상점이 열려요.</li>
+            <li>같은 종류의 칸을 <b>상·하·좌·우·대각선(8방향)</b>으로 <b>3개 이상</b> 이을 수 있어요.</li>
+            <li><b>되돌리기</b>: 선을 잇다가 잘못 이었을 때는 손을 떼지 말고 <b>직전 칸으로 다시 돌아가면</b> 방금 그은 선이 취소돼요.</li>
+            <li><b>손을 떼면 1턴 끝</b>: 화면에서 손을 떼는 순간 1턴이 지나가며 이어진 칸들이 수집돼요. 비워진 자리에는 위에서 새로운 칸들이 스르륵 채워져요.</li>
           </ul>
         </details>
-        <details><summary>4. 체력과 반격</summary>
-          <p>턴이 끝나면 <b>살아 있는 적이 모두 반격</b>해요. 피해는 방패가 먼저 받고, 방패가 없으면 체력이 깎여요. 그래서 적을 많이 잡을수록, 방패가 두꺼울수록 안전해요.</p>
-        </details>
-        <details><summary>5. 레벨·스킬·상점</summary>
+
+        <details><summary>4. 칸의 종류와 하는 일</summary>
           <ul>
-            <li>적을 잡으면 <b>경험치</b>가 차고, 가득 차면 <b>레벨업</b> 선택이 나와요.</li>
-            <li><b>스킬</b>은 아래 칸에 있고, 충전(대기 턴)이 다 차면 눌러서 써요. 아래 "❓ 내 스킬 설명" 단추에서 스킬 뜻을 볼 수 있어요.</li>
-            <li><b>상점</b>은 코인이 차면 열려요. 장비와 스킬을 고를 수 있어요.</li>
-            <li><b>강화</b>: 방패 초과분으로 게이지가 차면 장비 능력을 올릴 수 있어요.</li>
+            <li>⚔️ <b>칼 (무기)</b>: 공격 칸이에요. 칼을 이으면서 <b>적을 줄에 함께 포함</b>시키면 내 공격력만큼 적에게 피해를 줘요. 적 체력이 0이 되면 처치돼요!</li>
+            <li>🛡️ <b>방패 (방어구)</b>: 방어 칸이에요. 모으면 방패 수치가 올라가 적의 반격을 먼저 막아 줘요.
+              <br><small>※ <b>방패 한도</b>: 방패는 직업마다 정해진 칸 수까지 채울 수 있어요. 처음에는 방패를 모으면 이 칸이 채워져요.</small>
+              <br><small>※ <b>강화 게이지</b>: 방패 칸이 <b>이미 가득 찬 상태</b>에서 방패를 또 모으면 그만큼 강화 게이지가 올라가요(방패가 가득 차지 않았다면 방패 칸이 먼저 채워져요). 100%가 되면 강화 효과를 고르는 창이 떠요.</small></li>
+            <li>🧪 <b>물약 (회복)</b>: 회복 칸이에요. 모으면 잃었던 체력이 즉시 회복돼요.</li>
+            <li>🪙 <b>코인 (골드)</b>: 재화 칸이에요. 모으면 골드 게이지가 올라가고, 100%가 되면 장비와 스킬을 파는 <b>떠돌이 상점</b>이 열려요.</li>
+            <li>👾 <b>적 (몬스터)</b>: 처치해야 할 적이에요. 칼 줄에 엮어 쓰러뜨리면 점수와 경험치를 얻어요.</li>
+            <li>🏺 <b>보상 칸 (직업 보상)</b>:
+              <br><small>※ <b>특수 적</b>: 일반 몬스터보다 훨씬 강하고 머리 위에 숫자(카운트)나 특별한 능력이 붙은 정예/보스 몬스터예요.</small>
+              <br>특수 적을 처치하면 그 자리에 <b>🏺 보상 칸</b>이 남아요. 이 칸을 <b>다른 칸과 잇지 말고 혼자 콕 눌러서</b> 모으면 새 직업이 열리거나 레벨이 올라요!</li>
           </ul>
         </details>
-        <details><summary>6. 난이도·순위</summary>
-          <p><b>쉬움 · 보통 · 어려움 · 지옥</b> 네 단계가 있고, 순위표는 난이도마다 따로예요. 🥇 순위 단추에서 내 기록과 전체 순위를 볼 수 있어요.</p>
-        </details>
-        <details><summary>7. 직업·종족·스킬 해금 조건</summary>
-          <p>처음에는 <b>길잡이</b>(평원 탐험단)만 쓸 수 있고, 나머지는 🔒예요.</p>
+
+        <details><summary>5. 체력·방패·반격</summary>
+          <p>손을 떼어 1턴이 끝나는 순간, <b>보드에 살아남아 있는 모든 적이 나를 반격</b>해요!</p>
           <ul>
-            <li><b>직업 해금</b>: <b>특수 적</b>(보통 적보다 강한 적)을 처치하면 그 자리에 <b>🏺 직업 보상 칸</b>이 남아요. 그 칸을 <b>다른 칸과 잇지 말고 혼자 한 번 눌러</b> 모으면, 잠긴 직업이 하나 <b>랜덤으로</b> 열려요.</li>
-            <li>길잡이가 아닌 직업으로 할 때는 <b>반반 확률</b>로 "지금 직업 레벨 +1" 또는 "새 직업 해금"이 나와요.</li>
-            <li>보상 칸은 <b>한 판에 최대 3번</b>까지 나오고, 다음 보상까지는 특수 적을 20~30마리쯤 더 잡아야 해요.</li>
-            <li class="soon">⚠ <b>쉬움 난이도에서는 직업 보상이 나오지 않아요.</b> 새 직업을 열려면 보통 이상으로 하세요.</li>
-            <li><b>직업 레벨</b>: 새로 열린 직업은 레벨 1이고 최대 10까지 올라요.</li>
-            <li><b>종족 변경</b>: 지금 고른 직업이 <b>레벨 5 이상</b>이면 종족을 바꿀 수 있어요. 그리고 고르려는 종족과 <b>짝인 직업이 레벨 5 이상</b>이어야 그 종족이 열려요.</li>
+            <li><b>방패가 먼저 맞아요</b>: 적의 반격 피해는 내 방패가 먼저 흡수해요.</li>
+            <li><b>방패가 다 깨지면 체력이 깎여요</b>: 방패가 0이 되면 남은 피해가 내 체력(HP)을 직접 깎아요.</li>
+            <li><b>왜 적을 빨리 잡아야 할까요?</b> 판에 적이 3~4마리만 쌓여도 매 턴 들어오는 반격 피해가 어마어마해져요. 위험한 적부터 칼로 빠르게 처치하는 것이 생존의 지름길이에요!</li>
           </ul>
-          <p><b>종족 ↔ 짝 직업</b></p>
+        </details>
+
+        <details><summary>6. 레벨업·스킬·상점·강화</summary>
           <ul>
+            <li><b>🎉 레벨업</b>: 적을 처치해 경험치(EXP)를 100% 모으면 레벨업 창이 떠요. 카드 <b>4장</b>이 나와요(스킬 카드는 최대 2장, 나머지는 능력치 상승). 그중 <b>2개</b>를 골라요.</li>
+            <li><b>⚡ 스킬</b>: 보드 아래쪽 스킬 칸에 들어가요. 턴이 지나 대기 턴(쿨다운)이 다 차면 눌러서 쓸 수 있어요. 아래쪽 <b>"❓ 내 스킬 설명"</b> 단추를 누르면 내 스킬들의 효과를 자세히 읽어볼 수 있어요.</li>
+            <li><b>🪙 상점</b>: 코인을 100% 모으면 떠돌이 상인이 나타나요. 강력한 장비나 유용한 스킬 중 1개를 골라 탐험대를 강화하세요.</li>
+            <li><b>🛡️ 강화</b>: 방패 칸이 이미 가득 찬 상태에서 방패를 더 모으면 강화 게이지가 올라가요. 100%가 되면 강화 효과를 고르는 창이 떠요. (일부 특수 적이 판에 있으면 방패 칸이 가득 차지 않아도 게이지만 오를 수 있어요.)</li>
+          </ul>
+        </details>
+
+        <details><summary>7. 난이도 4가지와 순위</summary>
+          <p><b>쉬움 · 보통 · 어려움 · 지옥</b> 4가지 난이도가 있으며, 난이도마다 순위표가 완전히 따로 나뉘어 있어요.</p>
+          <ul>
+            <li><b>🥇 순위 단추</b>: 헤더의 순위 단추를 누르면 내 기기 기록과 서버 전체 순위를 볼 수 있어요.</li>
+            <li><b>🌞 오늘 순위</b>: 매일 <b>오후 3시(15시)</b>에 하루가 바뀌며 초기화돼요! 오늘 순위에는 그날(오후 3시 이후) 플레이해서 낸 점수만 올라가요. (서버에는 오늘을 포함해 최근 3일치 오늘 기록만 남아요)</li>
+            <li><b>🌐 전체 순위</b>: 날짜와 상관없이 역대 모든 플레이어의 누적 최고 점수가 모여 있는 명예의 전당이에요.</li>
+            <li><b>점수 올리는 법</b>: 닉네임(2~8자)을 입력하고 <b>[오늘 낸 최고 점수 올리기]</b> 단추를 누르면 서버로 전송돼요. (쉬움 난이도도 점수를 올릴 수 있지만, 오늘 플레이한 점수가 있어야 해요)</li>
+          </ul>
+        </details>
+
+        <details><summary>8. 직업이란? 10종 소개</summary>
+          <p>직업마다 시작 체력·기본 공격력·방패 칸 수가 조금씩 달라요. (표시 숫자는 판을 시작할 때의 기본값이고, 시작 무기의 공격력 2가 기본 공격에 더해져요.) 길잡이를 뺀 모든 직업에는 그 직업만의 <b>고유 스킬</b>이 하나씩 있어요.</p>
+          <ul>
+            <li><b>1. 길잡이</b> (기본 직업): 처음부터 열려 있는 균형형이에요. 체력 50 · 기본 공격 3 · 방패 4. 고유 스킬은 없고, 종족도 바꿀 수 없어요.</li>
+            <li><b>2. 정찰병</b> (체력 50 · 공격 3 · 방패 3): 숲의 궁수예요. 고유 스킬은 판의 칼을 화살로 바꿔서 화살로 공격할 수 있게 해요.</li>
+            <li><b>3. 도굴꾼</b> (체력 50 · 공격 3 · 방패 4): 던전 도굴꾼이에요. 고유 스킬은 판의 코인을 적으로 바꿔요(변한 적 중에 특수 적이 생길 수도 있어요).</li>
+            <li><b>4. 치유사</b> (체력 50 · 공격 3 · 방패 4): 신성한 수호자예요. 고유 스킬은 특수 적을 뺀 판의 칸을 한 번에 모아요. 쓰면 사라지는 1회용이에요.</li>
+            <li><b>5. 돌격대</b> (체력 50 · 공격 4 · 방패 4): 기본 공격이 가장 높은 광전사예요. 고유 스킬은 이번 턴에 처치한 적들의 공격력을 모두 더한 만큼 체력을 회복해요.</li>
+            <li><b>6. 해독가</b> (체력 40 · 공격 3 · 방패 4): 체력이 가장 낮은 원소술사예요. 고유 스킬은 4칸 이상으로 고리를 만들면 안쪽 칸까지 한 번에 모아요(안쪽의 특수 적은 제외).</li>
+            <li><b>7. 도적</b> (체력 50 · 공격 3 · 방패 4): 그림자 약탈자예요. 고유 스킬은 코인 바로 옆에 있는 <b>일반 적</b>을 한꺼번에 처치해요(특수 적은 제외).</li>
+            <li><b>8. 호위병</b> (체력 50 · 공격 3 · 방패 4): 철벽의 기사예요. 고유 스킬을 쓴 그 턴에 치명상을 입으면 한 번 견디고 체력이 가득 차요.</li>
+            <li><b>9. 칼잡이</b> (체력 60 · 공격 3 · 방패 4): 체력이 가장 높은 강철의 검사예요. 고유 스킬은 판 가장자리 20칸을 모아요(특수 적은 제외).</li>
+            <li><b>10. 암행병</b> (체력 50 · 공격 3 · 방패 4): 죽음의 칼날이에요. 고유 스킬은 칸 하나를 어떤 칸과도 이어지는 연결 칸으로 바꿔요.</li>
+          </ul>
+        </details>
+
+        <details><summary>9. 새 직업 여는 방법 (상세)</summary>
+          <ul>
+            <li class="soon">⚠ <b>쉬움 난이도에서는 직업 보상이 나오지 않아요!</b> 새 직업을 열려면 반드시 보통 이상 난이도로 플레이하세요.</li>
+            <li><b>특수 적 처치</b>: 보통 이상 난이도에서 특수 적(정예/보스)을 쓰러뜨리면 그 자리에 <b>🏺 보상 칸</b>이 남아요.</li>
+            <li><b>혼자 콕 눌러서 수집</b>: 보상 칸은 다른 칼이나 방패와 함께 잇지 말고, <b>보상 칸 혼자 탭</b>해야 안전하게 수집돼요.</li>
+            <li><b>등장 주기</b>: 보통 이상 난이도에서는 <b>첫 특수 적을 처치할 때 바로</b> 첫 보상 칸이 생겨요. 그다음부터는 특수 적을 <b>20~30마리</b> 처치할 때마다 생기고, 한 판에서 <b>최대 3번</b>까지예요.</li>
+            <li><b>직업에 따른 보상 차이</b>:
+              <br>- <b>길잡이</b>로 모았을 때: 아직 잠겨 있는 직업 중 하나가 <b>무작위로 즉시 해금</b>돼요 (해금 시 Lv.1).
+              <br>- <b>다른 직업</b>으로 모았을 때: <b>50% 확률</b>로 "지금 직업 레벨 +1", <b>50% 확률</b>로 "새 직업 무작위 해금"이 나와요 (모든 직업이 열렸다면 현재 직업 레벨 +1).</li>
+          </ul>
+        </details>
+
+        <details><summary>10. 직업 레벨 올리는 방법과 최대 레벨</summary>
+          <ul>
+            <li>직업 레벨은 1부터 시작하며 <b>최대 레벨은 10</b>이에요.</li>
+            <li><b>올리는 방법</b>: 레벨을 올리고 싶은 직업을 선택해 게임을 시작한 뒤, 특수 적을 잡아 나오는 <b>🏺 보상 칸을 수집</b>하면 50% 확률로 직업 레벨이 +1 올라요.</li>
+            <li><b>레벨이 오르면 좋은 점</b>:
+              <br>① <b>특성 슬롯 해금</b>: 레벨에 따라 퍽·결함을 장착할 수 있는 슬롯이 최대 4쌍까지 늘어나요.
+              <br>② <b>종족 변경 자격</b>: 직업 레벨 5가 되면 종족을 바꿀 수 있는 자격이 생겨요.
+              <br>※ 직업 레벨이 이미 10이면 더 오르지 않아요. 그때는 아직 열리지 않은 직업이 있으면 그것부터 열려요. 모든 직업이 열려 있고 레벨도 10이면 보상은 아무 변화 없이 사라져요.</li>
+          </ul>
+        </details>
+
+        <details><summary>11. 종족이란? 종족 변경 방법</summary>
+          <p>탐험대원의 혈통으로, 저마다 고유한 <b>종족 보너스</b>와 치명적인 <b>숙적(약점 몬스터)</b>을 가지고 있어요.</p>
+          <p><b>종족 변경 조건 (2가지 모두 충족 필요)</b>:</p>
+          <ul>
+            <li>1) 현재 선택한 직업의 레벨이 <b>5 이상</b>이어야 해요. (<b>길잡이는 종족을 바꿀 수 없어요</b>.)</li>
+            <li>2) 변경하려는 종족과 <b>짝인 직업의 레벨도 5 이상</b>이어야 해당 종족이 열려요!</li>
+          </ul>
+          <p><b>종족 ↔ 짝 직업 안내</b></p>
+          <ul>
+            <li>평원 탐험단 (기본 종족) ↔ 길잡이</li>
             <li>숲 탐험단 ↔ 정찰병 · 땅굴 탐험단 ↔ 칼잡이 · 늪 탐험단 ↔ 도적</li>
             <li>뿔 탐험단 ↔ 치유사 · 덩치 탐험단 ↔ 돌격대 · 꼬마 탐험단 ↔ 도굴꾼</li>
             <li>늑대 탐험단 ↔ 암행병 · 용혈 탐험단 ↔ 호위병 · 변신 탐험단 ↔ 해독가</li>
           </ul>
-          <p><b>직업 고유 스킬</b>: 그 직업이 <b>레벨 10</b>이 되어야 스킬 후보에 나와요. (일반 스킬은 처음부터 나와요)</p>
+          <p>[예: '숲 탐험단'으로 바꾸고 싶다면, 내 직업도 Lv.5 이상이고 '정찰병' 직업도 Lv.5 이상이어야 해요.]</p>
+        </details>
+
+        <details><summary>12. 특성(퍽·결함)이란?</summary>
+          <p>게임 시작 전 나만의 전략을 짜는 직업 설정 시스템이에요.</p>
           <ul>
-            <li>정찰병: 칼을 전부 화살로 · 도굴꾼: 코인을 적으로 바꾸기 · 치유사: 판 전체 한 번에 쓸기(1회용)</li>
-            <li>돌격대: 처치한 적만큼 회복 · 해독가: 고리 모양으로 안쪽 수집 · 도적: 코인 옆 적 전부 처치</li>
-            <li>호위병: 죽을 때 한 번 부활 · 칼잡이: 판 가장자리 쓸기 · 암행병: 연결 칸 만들기</li>
+            <li>🔷 <b>퍽 (Perk)</b>: 탐험대원에게 이로운 <b>파란색 보너스 특성</b>이에요 (예: 최대 체력 +10, 시작 5턴 적 공격 무효 등).</li>
+            <li>🔺 <b>결함 (Flaw)</b>: 탐험대원이 감수해야 하는 <b>빨간색 페널티 특성</b>이에요 (예: 최대 체력 -10, 방패 깎임 등).</li>
+            <li>📦 <b>슬롯 (Slot)</b>: 특성을 장착할 수 있는 칸이에요.</li>
+          </ul>
+          <p><b>직업 레벨별 슬롯 개수</b></p>
+          <ul>
+            <li>직업 Lv.1 ~ 2: <b>1쌍</b> (1슬롯)</li>
+            <li>직업 Lv.3 ~ 6: <b>2쌍</b> (2슬롯)</li>
+            <li>직업 Lv.7 ~ 8: <b>3쌍</b> (3슬롯)</li>
+            <li>직업 Lv.9 ~ 10: <b>4쌍</b> (4슬롯, 최대)</li>
+          </ul>
+          <p><b>짝 장착 규칙과 이유</b></p>
+          <ul>
+            <li>퍽을 장착한 슬롯에는 <b>반드시 결함을 1개 짝지어 함께 장착</b>해야 해요.</li>
+            <li><b>왜 결함을 함께 질까요?</b> 강력한 보너스(퍽)를 얻는 대가로 페널티(결함)를 함께 짊어지게 하여, 게임의 긴장감과 전략적 균형을 맞추기 위해서예요.</li>
+            <li>동일한 퍽이나 결함을 중복해서 여러 칸에 장착할 수는 없어요.</li>
+          </ul>
+          <p><b>장착 방법</b>: 위쪽 슬롯 칩(1번, 2번 등)을 누르고, 아래 격자에서 아이콘을 누르면 가운데 패널에 상세 설명이 나와요. <b>[장착]</b> 단추를 눌러 슬롯을 채운 뒤, 맨 아래 <b>[확정 및 시작]</b>을 누르면 새 판이 시작돼요!</p>
+        </details>
+
+        <details><summary>13. 직업 고유 스킬</summary>
+          <p>길잡이를 뺀 직업은 그 직업만의 <b>고유 스킬</b>이 있어요. 직업 레벨과 상관없이, 그 직업으로 시작한 판에서 <b>판 레벨 2로 올라갈 때 나오는 레벨업 카드(4장 중 2개를 고름)에 고유 스킬이 들어 있어요</b>. 일반 스킬은 처음부터 나올 수 있어요. 스킬마다 특수 적이 영향을 받는지가 달라요.</p>
+          <ul>
+            <li><b>정찰병 (칼원거리화)</b>: 일반 칼을 화살로 바꿔 화살로 공격할 수 있어요. 특수 적 자체를 바꾸지는 않아요.</li>
+            <li><b>도굴꾼 (돈위험화)</b>: 판의 코인을 적으로 바꿔요. 바뀐 적 중에 특수 적이 나올 수도 있어요.</li>
+            <li><b>치유사 (한번쓸기)</b>: 특수 적을 뺀 판의 칸을 단번에 모아요. 한 번 쓰면 사라지는 1회용이에요.</li>
+            <li><b>돌격대 (처치회복)</b>: 이번 턴에 처치한 적들의 <b>공격력을 모두 더한 만큼</b> 체력을 회복해요(특수 적을 처치했다면 그 공격력도 포함).</li>
+            <li><b>해독가 (고리수집)</b>: 4칸 이상으로 고리를 만들면 안쪽 칸까지 모아요. 안쪽의 특수 적은 제외돼요.</li>
+            <li><b>도적 (돈곁정리)</b>: 코인 바로 옆에 있는 <b>일반 적</b>을 한꺼번에 처치해요. 특수 적은 제외돼요.</li>
+            <li><b>호위병 (한번살기)</b>: 스킬을 쓴 그 턴에 치명상을 입으면 한 번 견디고 체력이 가득 차요.</li>
+            <li><b>칼잡이 (가장자리쓸기)</b>: 판 가장자리 20칸을 모아요. 특수 적은 제외돼요.</li>
+            <li><b>암행병 (잇는칸)</b>: 칸 하나를 어떤 칸과도 이어지는 연결 칸으로 바꿔요(특수 적은 고르지 않아요).</li>
           </ul>
         </details>
-        <details><summary>8. 업적</summary>
-          <ul><li>첫 가짜 좌표 지도 얻음: 특수 적을 처음 처치</li><li>베테랑 탐험대장: 어떤 직업이든 레벨 10</li><li>가짜 좌표 대장과의 결전: 숙적을 만나 처치</li></ul>
-        </details>
-        <details><summary>9. 저장과 로그인</summary>
+
+        <details><summary>14. 업적</summary>
+          <p>게임을 플레이하며 달성할 수 있는 특별한 도전 과제예요. 헤더의 🏆 단추에서 진행도를 확인할 수 있어요.</p>
           <ul>
-            <li>하던 판은 <b>턴마다 이 브라우저에 자동 저장</b>돼요. 다시 열면 <b>▶ 이어하기</b> 단추가 나와요(게임 오버가 되면 지워져요).</li>
-            <li>맨 위 <b>☁ 로그인</b>(구글)을 하면 기록과 하던 판이 <b>서버에 보관</b>돼요. 다른 폰에서도 같은 계정으로 이어 할 수 있어요.</li>
-            <li><b>💾 중간 저장</b>을 누르면 지금 바로 서버에 올려요. 로그인 전에 누르면 로그인 안내가 나와요.</li>
-            <li>브라우저 데이터를 지우거나 다른 기기로 옮기면 로그인하지 않은 기록은 사라질 수 있어요.</li>
+            <li>💀 <b>첫 가짜 좌표 지도 얻음</b>: 특수 적을 처음으로 1마리 처치하세요.</li>
+            <li>👑 <b>베테랑 탐험대장</b>: 한 판에서 <b>판 레벨 10</b>에 도달하세요. (직업 레벨이 아니라 그 판에서 오른 레벨이에요.)</li>
+            <li>🔥 <b>가짜 좌표 대장과의 결전</b>: 평원 탐험단이 아닌 종족으로, <b>내 종족의 숙적이 판에 있는 상태에서 체력이 0 이하가 되면</b> 달성돼요.</li>
           </ul>
         </details>
-        <p style="font-size:11px; color:var(--sub);">새로 바뀐 점은 맨 위 <b>🆕 패치</b> 단추에서 볼 수 있어요.</p>
+
+        <details><summary>15. 저장과 로그인</summary>
+          <ul>
+            <li><b>자동 저장</b>: 게임을 진행하는 동안 매 턴마다 브라우저에 판이 자동 저장돼요. 창을 닫아도 다시 접속하면 <b>[▶ 이어하기]</b> 단추로 계속할 수 있어요 (게임 오버 시 초기화).</li>
+            <li><b>☁ 클라우드 로그인 (구글)</b>: 맨 위 로그인 단추로 구글 계정에 연동해 두면, 내 해금 상태와 진행 중인 판이 서버에 안전하게 보관돼요. 스마트폰을 바꾸거나 PC에서 접속해도 그대로 이어할 수 있어요.</li>
+            <li><b>💾 중간 저장</b>: 플레이 도중 지금 상태를 즉시 서버에 올려두고 싶을 때 사용해요.</li>
+            <li>주의: 로그인하지 않은 상태에서 브라우저 인터넷 사용 기록이나 캐시를 지우면 기기에 저장된 기록이 사라질 수 있어요.</li>
+          </ul>
+        </details>
+
+        <details><summary>16. 자주 묻는 질문 (FAQ)</summary>
+          <p><b>Q1. 특수 적을 잡았는데 🏺 보상 칸이 안 나와요!</b><br>
+          혹시 난이도가 <b>쉬움</b>인가요? 쉬움 난이도에서는 직업 보상이 나오지 않아요. '보통' 이상으로 플레이해 주세요. 보통 이상이면 첫 특수 적을 처치할 때 첫 보상 칸이 나오고, 그다음은 특수 적을 20~30마리 더 잡아야 나와요 (한 판 최대 3번). 직업 레벨이 이미 10이고 모든 직업이 열려 있으면 보상은 변화 없이 사라져요.</p>
+
+          <p><b>Q2. 종족 선택 창에서 종족들이 전부 🔒로 잠겨 있어요!</b><br>
+          종족을 바꾸려면 내 현재 직업 레벨이 5 이상이어야 하고, 바꾸려는 종족의 짝 직업 레벨도 5 이상이어야 열려요.</p>
+
+          <p><b>Q3. 쉬움 난이도에서는 점수를 순위에 못 올리나요?</b><br>
+          아니에요! 쉬움 난이도도 순위표에 점수를 올릴 수 있어요. 다만 오늘(오후 3시 이후) 쉬움 난이도로 게임을 마쳐 낸 최고 점수가 있어야 [오늘 낸 최고 점수 올리기]가 작동해요.</p>
+
+          <p><b>Q4. 다른 스마트폰이나 PC에서 기록을 이어 하려면 어떻게 하나요?</b><br>
+          맨 위 <b>☁ 로그인</b> 단추를 눌러 구글 계정으로 로그인해 두세요. 로그인하면 직업 해금·레벨·점수 기록과 하던 판이 서버에 보관되고, 다른 기기에서 같은 구글 계정으로 로그인하면 그 기록을 불러올 수 있어요. (양쪽 기기에 기록이 다 있을 때는 어느 쪽을 쓸지 안내가 나올 수 있어요.)</p>
+
+          <p><b>Q5. 어제 보였던 순위표 기록이 오늘 갑자기 비어 보여요!</b><br>
+          '오늘 순위'는 매일 <b>오후 3시(15시)</b>에 새롭게 리셋돼요! 어제의 기록은 '🌙 어제' 탭에서 확인할 수 있고, '🌞 오늘' 탭에는 오늘 오후 3시 이후에 새로 세운 기록들이 올라와요.</p>
+
+          <p><b>Q6. 직업 설정(특성) 창에서 [확정 및 시작] 단추가 안 눌려요!</b><br>
+          파란 퍽을 장착한 슬롯에는 반드시 빨간 결함도 짝으로 함께 채워야 해요. 짝이 맞지 않거나 중복된 특성이 있으면 게임을 시작할 수 없어요.</p>
+
+          <p><b>Q7. 🏺 보상 칸을 칼 줄로 같이 이었는데 보상이 안 들어왔어요!</b><br>
+          보상 칸은 다른 칸들과 선으로 이으면 안 돼요! 반드시 <b>보상 칸 혼자 손가락으로 콕 탭</b>해야 안전하게 수집돼요.</p>
+        </details>
+
+        <p style="font-size:11px; color:var(--sub); margin-top:8px;">새로 바뀐 점은 맨 위 <b>🆕 패치</b> 단추에서 볼 수 있어요.</p>
       </div>
       <button class="btn-action" id="btn-close-guide">확인했습니다</button>
     </div>
@@ -3066,6 +3250,7 @@
 
     let selectedSlotIndex = 0;
     let selectedItem = null;
+    let hasUserInteracted = false;
 
     const slotChipsContainer = document.getElementById('pf-slot-chips');
     const detailPanel = document.getElementById('pf-detail');
@@ -3264,36 +3449,43 @@
 
       const isValid = GR.canConfirmPerkFlawSetup(settingClassId, currentPerks, currentFlaws, classProg.level);
       if (!isValid) {
-        let hasMismatched = false;
-        let hasDuplicate = false;
-        const seenP = new Set();
-        const seenF = new Set();
-
-        for (let i = 0; i < slotCount; i++) {
-          const p = currentPerks[i];
-          const f = currentFlaws[i];
-          if (p != null && f == null) hasMismatched = true;
-          if (p != null) {
-            if (seenP.has(p)) hasDuplicate = true;
-            seenP.add(p);
-          }
-          if (f != null) {
-            if (seenF.has(f)) hasDuplicate = true;
-            seenF.add(f);
-          }
-        }
-
-        if (hasMismatched) {
-          pfStatusMsg.textContent = '⚠️ 퍽을 장착한 슬롯에는 반드시 결함을 함께 짝지어야 합니다!';
-        } else if (hasDuplicate) {
-          pfStatusMsg.textContent = '⚠️ 동일한 퍽 또는 결함을 중복 장착할 수 없습니다!';
+        if (!hasUserInteracted) {
+          pfStatusMsg.style.color = '#8a8296';
+          pfStatusMsg.textContent = '퍽(파랑)과 결함(빨강)을 짝으로 맞춰 칸을 채우세요.';
         } else {
-          pfStatusMsg.textContent = '⚠️ 유효하지 않은 퍽/결함 조합입니다.';
+          pfStatusMsg.style.color = '#ff4757';
+          let hasMismatched = false;
+          let hasDuplicate = false;
+          const seenP = new Set();
+          const seenF = new Set();
+
+          for (let i = 0; i < slotCount; i++) {
+            const p = currentPerks[i];
+            const f = currentFlaws[i];
+            if (p != null && f == null) hasMismatched = true;
+            if (p != null) {
+              if (seenP.has(p)) hasDuplicate = true;
+              seenP.add(p);
+            }
+            if (f != null) {
+              if (seenF.has(f)) hasDuplicate = true;
+              seenF.add(f);
+            }
+          }
+
+          if (hasMismatched) {
+            pfStatusMsg.textContent = '⚠️ 퍽을 장착한 슬롯에는 반드시 결함을 함께 짝지어야 합니다!';
+          } else if (hasDuplicate) {
+            pfStatusMsg.textContent = '⚠️ 동일한 퍽 또는 결함을 중복 장착할 수 없습니다!';
+          } else {
+            pfStatusMsg.textContent = '⚠️ 유효하지 않은 퍽/결함 조합입니다.';
+          }
         }
         btnConfirmPerkFlaw.disabled = true;
         btnConfirmPerkFlaw.style.opacity = '0.5';
       } else {
         pfStatusMsg.textContent = '';
+        pfStatusMsg.style.color = '';
         btnConfirmPerkFlaw.disabled = false;
         btnConfirmPerkFlaw.style.opacity = '1';
       }
@@ -3301,7 +3493,10 @@
     }
 
     perkFlawSlotsContainer.querySelectorAll('select').forEach(sel => {
-      sel.addEventListener('change', checkValidity);
+      sel.addEventListener('change', () => {
+        hasUserInteracted = true;
+        checkValidity();
+      });
     });
 
     checkValidity();
@@ -3846,6 +4041,11 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-17-j', date: '2026-11-17', title: '창이 더 크게 보이고, 설명서가 자세해졌어요', items: [
+      '직업 창에서 10종이 한 화면에 보이고, 종족 창도 더 많은 카드가 보여요. 닫기 단추는 창 맨 아래에 있어요.',
+      '특성 창의 [취소]·[확정 및 시작] 단추가 안내 글 바로 아래에 보여요. 처음 열 때는 빨간 경고 대신 회색 안내만 나와요.',
+      '📖 사용 설명서를 16개 항목으로 다시 썼어요. 직업·종족·특성 여는 방법, 레벨업 카드(4장 중 2개), 업적 조건, 자주 묻는 질문을 실제 게임 규칙대로 정리했어요.'
+    ] },
     { id: '2026-11-17-i', date: '2026-11-17', title: '특성 고르기가 아이콘 방식으로 바뀌었어요', items: [
       '특성 창 맨 아래에 퍽(파랑)과 결함(빨강) 아이콘이 가지런히 놓였어요. 장착한 아이콘에는 ✓ 표시가 붙어요.',
       '아이콘을 누르면 가운데에 이름과 자세한 설명이 나오고, [슬롯에 장착] 단추로 장착하거나 [장착 해제]로 뺄 수 있어요.',
