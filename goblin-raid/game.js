@@ -127,7 +127,7 @@
   SPECIAL_ENEMY_SVGS[10] = 'assets/icons/enemy-bomb.svg';
   SPECIAL_ENEMY_SVGS[11] = 'assets/icons/enemy-convert.svg';
   // 2026-11-18: 전용 그림이 없던 25종에 종마다 다른 그림을 연결한다
-  [1, 2, 5, 9, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32].forEach(n => {
+  [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32].forEach(n => {
     SPECIAL_ENEMY_SVGS[n] = 'assets/icons/enemy-special-' + String(n).padStart(2, '0') + '.svg';
   });
 

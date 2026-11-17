@@ -47,7 +47,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: 8px 10px;
+    padding: 8px 0;
     overflow-x: hidden;
     touch-action: pan-y;
   }
@@ -69,13 +69,13 @@
   /* ── 폰 화면 컨테이너 (시안 D) ── */
   .phone {
     width: 100%;
-    max-width: 380px;
+    max-width: 420px;
     /* 폰 화면을 꽉 채운다(2026-11-17). 큰 화면에서는 너무 길어지지 않게 940px까지만 */
     min-height: calc(100vh - 16px);
     min-height: min(calc(100dvh - 16px), 940px);
     background: #0d0a12;
     border-radius: 22px;
-    padding: 12px;
+    padding: 6px;
     border: 2px solid #3a3042;
     box-shadow: 0 10px 32px rgba(0, 0, 0, 0.7);
     display: flex;
@@ -334,7 +334,7 @@
     background: #09070d;
     border: 2px solid #3a3042;
     border-radius: 14px;
-    padding: 5px;
+    padding: 3px;
     touch-action: none;
     box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.8);
   }
@@ -342,7 +342,7 @@
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     grid-template-rows: repeat(6, 1fr);
-    gap: 4px;
+    gap: 3px;
     width: 100%;
     height: 100%;
   }
@@ -1573,7 +1573,7 @@
   }
 
   /* 한 화면 게임 HUD와 메뉴 */
-  .phone { gap: 5px; padding: 9px; }
+  .phone { gap: 5px; padding: 5px; }
   .turn-hud { flex-wrap: nowrap; gap: 4px; font-size: 10.5px; white-space: nowrap; margin: 0; }
   .turn-hud .badge-diff-tag { margin-left: 0; padding: 1px 3px; font-size: 9px; }
   .hud-spacer { flex: 1 1 auto; min-width: 0; }
@@ -4834,6 +4834,10 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-18-aa', date: '2026-11-18', title: '🔎 판이 더 크게, 특수 적 그림이 더 또렷하게', items: [
+      '폰 화면에서 6×6 판의 칸이 약 10% 커졌어요. (칸 수·규칙은 그대로예요)',
+      '특수 적 32종의 능력 상징이 투구 자리에 크게 올라가서 작은 칸에서도 한눈에 구별돼요. 📚 도감에서도 볼 수 있어요.'
+    ] },
     { id: '2026-11-18-z', date: '2026-11-18', title: '🧩 부서진 장비 그림과 순위 안내', items: [
       '부서진 칼·방패·화살이 따로 부서진 모양 그림으로 보여요. 📚 도감에도 있어요.',
       '순위 창과 사용 설명서에 "오후 3시에 하루가 바뀐다, 3시 전에 낸 점수는 3시 전에 올려 달라"는 안내가 생겼어요.',
