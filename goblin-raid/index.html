@@ -518,6 +518,13 @@
   .mortal-banner { position: absolute; left: 0; right: 0; top: -46px; z-index: 20; background: rgba(160,10,20,.96); color: #fff; font-size: 14px; font-weight: 900; line-height: 1.3; text-align: center; padding: 8px 6px; border-radius: 10px; border: 2px solid #ffd3d3; pointer-events: none; opacity: 0; transition: opacity .25s; }
   .mortal-banner.show { opacity: 1; }
 
+  /* 다시섬 변환 상태(2026-11-18): 어둡고 흐릿하게 + 코인줄 딱지 */
+  .cell.shell { outline: 2px dashed #8fd3ff; outline-offset: -2px; }
+  .cell.shell img { filter: grayscale(0.7) brightness(0.7); }
+  .cell.shell::after { content: "💤 코인줄"; position: absolute; top: 1px; left: 50%; transform: translateX(-50%); max-width: 80%; white-space: nowrap; overflow: hidden; font-size: 9px; font-weight: 900; line-height: 1.15; padding: 1px 3px; border-radius: 5px; background: #1b4d7a; color: #fff; border: 1px solid #8fd3ff; pointer-events: none; z-index: 4; }
+  .codex-detail-how { margin-top: 6px; color: #9be3ff; }
+  .codex-detail-caution { margin-top: 3px; color: #ffcf8a; }
+
   /* 적 스탯 뱃지 (시안 D 규칙) */
   .st {
     position: absolute;
@@ -2952,7 +2959,7 @@
     14: '이 적 바로 아래 칸에서 줄을 시작해 위로 곧게(같은 세로줄) 지나가야 피해가 들어가요.',
     9: '이 적이 살아 있는 동안은 물약으로 독이 안 풀려요. 먼저 처치하세요.',
     13: '판에 코인이 있으면 코인이 먼저 지워져요. 코인이 없으면 골드를 잃고 체력도 깎여요.',
-    16: '아래에 특수 적이 없으면 한 칸씩 내려오고, 맨 아래에서는 체력을 크게 깎아요.',
+    16: '맨 아래에서는 체력을 크게 깎아요. 맨 아래가 아니면 바로 아래 칸(특수 적 제외)을 지워 내려와요. 맨 아래에 닿기 전에 처치하세요.',
     12: '새로 나타나면 내 방패가 0이 돼요. 나온 뒤 방패를 다시 모으세요.',
     5: '이 적 칸이 판에 남아 있으면 새로 생기는 적의 방어가 2배예요.',
     20: '적 공격에 체력을 잃으면 이 적이 한계를 넘어 회복해요.',
@@ -2967,6 +2974,9 @@
     const bt = document.getElementById('boss-text');
     bt.style.whiteSpace = 'pre-line';
     let more = '';
+    if (tile.isShell) more += '\n\n💤 지금은 변환 상태예요! 칼로는 못 이어요. 동전 줄 사이에 넣어서 모으면 처치돼요. 두 번째 능력 때 다시 강해지니 서두르세요.';
+    if (info.how && !tile.isShell) more += '\n\n🎯 잡는 법: ' + info.how;
+    if (info.caution && !tile.isShell) more += '\n⚠ 조심: ' + info.caution;
     if (tile.isMortal) {
       more = '\n\n☠ 숙적이에요!';
       if (tile.mortalDesc) more += ' ' + tile.mortalDesc;
@@ -3020,6 +3030,8 @@
           id,
           name: (info && info.name) ? info.name : ('특수 적 #' + id),
           text: (info && info.text) ? info.text : '',
+          how: (info && info.how) ? info.how : '',
+          caution: (info && info.caution) ? info.caution : '',
           svg,
           mortalRace: (race && race.name) ? race.name : '',
           tip: MORTAL_TIPS[id] || ''
@@ -3035,6 +3047,8 @@
       } else {
         let html = `<b>#${item.id} ${escHtml(item.name)}</b>`;
         if (item.text) html += `<div>${escHtml(item.text)}</div>`;
+        if (item.how) html += `<div class="codex-detail-how">🎯 잡는 법: ${escHtml(item.how)}</div>`;
+        if (item.caution) html += `<div class="codex-detail-caution">⚠ 조심: ${escHtml(item.caution)}</div>`;
         if (item.mortalRace) html += `<div class="codex-detail-mortal">☠ 숙적: ${escHtml(item.mortalRace)}</div>`;
         if (item.tip) html += `<div class="codex-detail-tip">👉 공략: ${escHtml(item.tip)}</div>`;
         detail.innerHTML = html;
@@ -3375,6 +3389,9 @@
           }
         }
 
+        if (tile.type === 'enemy' && tile.isShell) {
+          cell.classList.add('shell');
+        }
         if (tile.type === 'enemy' && tile.isMortal) {
           cell.dataset.mortal = '1';
           const tag = document.createElement('span');
@@ -4893,6 +4910,11 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-18-ac', date: '2026-11-18', title: '🎯 특수 적마다 잡는 법이 나와요', items: [
+      '특수 적을 누르거나 📚 도감에서 보면 "🎯 잡는 법"과 "⚠ 조심" 두 줄이 나와요. 32종 모두 엔진으로 확인한 내용이에요.',
+      '다시섬이 변환 상태(체력 1)가 되면 어둡게 보이고 "💤 코인줄" 딱지가 붙어요. 칼로는 못 이어요. 동전 줄 사이에 넣어서 모으면 처치돼요.',
+      '틀리게 적혀 있던 설명 8곳(되비침·독침·훔침·아래찌르기·따라막기·둘바꾸기·아래밀기·다시섬)을 고쳤어요.'
+    ] },
     { id: '2026-11-18-ab', date: '2026-11-18', title: '🔠 위쪽 정보가 더 크게 보여요', items: [
       '메뉴 단추, 체력·방패 막대, XP·골드·강화, 스킬 칸, 안내 줄이 커져서 한눈에 읽기 쉬워요. 화면이 큰 폰에서만 커지고, 작은 폰은 그대로예요.'
     ] },
