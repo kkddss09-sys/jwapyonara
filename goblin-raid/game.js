@@ -520,7 +520,7 @@
 
   // 업적 78종 메타데이터 [N1]
   const ACHIEVEMENTS_DATA = [
-    { id: 'ach_special_kill_1', key: 'first_special_kill', index: 46, name: '첫 가짜 좌표 지도 얻음', desc: '특수 적을 1마리 처치하세요.', icon: '💀' },
+    { id: 'ach_special_kill_1', key: 'first_special_kill', index: 46, name: '첫 가짜 좌표 지도 얻음', desc: '특수 적을 누적 100마리 처치하세요. 판이 끝나도 기록이 이어져요.', icon: '💀' },
     { id: 'ach_special_kill_10', key: 'special_hunter_10', index: 46, name: '변종 학살자', desc: '특수 적을 누적 10마리 처치하세요.', icon: '⚔️' },
     { id: 'ach_class_level_5', key: 'class_level_5', index: 29, name: '고블린 숙련병', desc: '어떤 직업이든 직업 레벨 5를 달성하세요.', icon: '🎖️' },
     { id: 'ach_class_level_10', key: 'class_level_10', index: 30, name: '베테랑 탐험대장', desc: '어떤 직업이든 직업 레벨 10을 달성하세요.', icon: '👑' },
@@ -529,7 +529,7 @@
     { id: 'ach_chain_12_tiles', key: 'chain_12_tiles', index: 52, name: '전설의 일격', desc: '한 번에 12칸 이상의 체인을 연결하세요.', icon: '⚡' },
     { id: 'ach_reach_10000_score', key: 'reach_10000_score', index: 33, name: '만점 고블린', desc: '점수 10,000점 이상을 달성하세요.', icon: '🌟' },
     { id: 'ach_reach_50000_score', key: 'reach_50000_score', index: 33, name: '던전의 지배자', desc: '점수 50,000점 이상을 달성하세요.', icon: '💎' },
-    { id: 'ach_secret_nemesis', key: 'secret_nemesis', index: 40, name: '가짜 좌표 대장과의 결전', desc: '자신의 숙적 몬스터를 조우하여 처치하세요.', icon: '🔥' }
+    { id: 'ach_secret_nemesis', key: 'secret_nemesis', index: 40, name: '가짜 좌표 대장과의 결전', desc: '기본이 아닌 종족으로 플레이하다 쓰러질 때, 내 숙적이 판에 있으면 달성돼요.', icon: '🔥' }
   ];
 
   // 스킬 데이터 메타
@@ -2569,11 +2569,35 @@
     return prof;
   }
 
-  function isAchievementUnlocked(profile, achId) {
+  // 2026-11-19: 화면용 업적 이름(글자)과 엔진의 숫자 번호를 이어 준다. 엔진은 숫자(46·40·19~27)로만 기록하는데
+  // 화면이 글자로만 찾아서 3개 업적이 항상 잠금이었다. 규칙·저장 모양은 그대로, 읽는 쪽만 고쳤다.
+  const ACH_ENGINE_MAP = {
+    ach_special_kill_1: [46],
+    ach_secret_nemesis: [40],
+    ach_class_level_10: [19, 20, 21, 22, 23, 24, 25, 26, 27]
+  };
+  function getAchievementEntry(profile, achId) {
     const prof = profile || loadProfile();
-    if (!prof || !Array.isArray(prof.achievements)) return false;
+    if (!prof || !Array.isArray(prof.achievements)) return null;
+    const nums = ACH_ENGINE_MAP[achId];
+    if (nums) {
+      const hits = prof.achievements.filter(a => a && typeof a === 'object' && nums.includes(a.id));
+      let unlocked = hits.some(a => a.unlocked || a.progress >= 100);
+      let at = '';
+      hits.forEach(a => { if (a.unlockedAt && !at) at = a.unlockedAt; });
+      // 직업 레벨 10: 이미 직업 레벨 10이 된 손님은 기록 번호가 없어도 직업 목록으로 바로 인정한다
+      if (achId === 'ach_class_level_10' && Array.isArray(prof.classes) && prof.classes.some(c => c && c.growth >= 10)) unlocked = true;
+      const progress = unlocked ? 100 : hits.reduce((m, a) => Math.max(m, Number(a.progress) || 0), 0);
+      return { unlocked, progress, unlockedAt: at };
+    }
     const found = prof.achievements.find(a => (typeof a === 'string' ? (a === achId) : a && (a.id === achId || a.key === achId)));
-    return Boolean(found && (found.unlocked || found.progress >= 100));
+    if (!found) return null;
+    return { unlocked: Boolean(found.unlocked || found.progress >= 100), progress: Number(found.progress) || 0, unlockedAt: found.unlockedAt || '' };
+  }
+
+  function isAchievementUnlocked(profile, achId) {
+    const e = getAchievementEntry(profile, achId);
+    return Boolean(e && e.unlocked);
   }
 
   // ==========================================
@@ -2625,6 +2649,7 @@
     hasSavedRun,
     importProfileCode,
     isAchievementUnlocked,
+    getAchievementEntry,
     isAttackType,
     isClassUnlocked,
     isRaceUnlocked,

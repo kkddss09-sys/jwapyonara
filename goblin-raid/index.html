@@ -4862,8 +4862,9 @@
       if (isUnlocked) unlockedCount++;
 
       let unlockedDate = '';
-      if (isUnlocked && Array.isArray(prof.achievements)) {
-        const found = prof.achievements.find(a => (typeof a === 'string' ? (a === ach.id || a === ach.key) : a && (a.id === ach.id || a.key === ach.key || a.key === ach.id || a.id === ach.key)));
+      const entry = GR.getAchievementEntry ? GR.getAchievementEntry(prof, ach.id) : null;
+      if (isUnlocked && entry) {
+        const found = entry;
         if (found && found.unlockedAt) {
           try {
             unlockedDate = new Date(found.unlockedAt).toLocaleDateString('ko-KR');
@@ -4881,6 +4882,7 @@
             ${isUnlocked ? `<span class="ach-date">✓ ${unlockedDate || '달성'}</span>` : ''}
           </div>
           <div class="ach-desc">${ach.desc}</div>
+          ${(!isUnlocked && ach.id === 'ach_special_kill_1' && entry) ? `<div class="ach-desc" style="color:#9be3ff;">지금까지 ${Math.min(99, entry.progress)} / 100마리</div>` : ''}
         </div>
       `;
       achievementsList.appendChild(card);
@@ -4911,6 +4913,10 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-19-ad', date: '2026-11-19', title: '🏆 업적이 이제 제대로 열려요', items: [
+      '조건을 채워도 열리지 않던 업적 3개(첫 가짜 좌표 지도·베테랑 탐험대장·가짜 좌표 대장과의 결전)가 이제 달성 표시가 돼요. 이미 직업 레벨 10인 직업이 있으면 바로 열려 있어요.',
+      '업적 설명을 실제 조건에 맞게 고쳤어요. 첫 가짜 좌표 지도는 특수 적 누적 100마리(진행 숫자가 보여요), 대장과의 결전은 기본이 아닌 종족으로 쓰러질 때 숙적이 판에 있으면 달성돼요.'
+    ] },
     { id: '2026-11-18-ac', date: '2026-11-18', title: '🎯 특수 적마다 잡는 법이 나와요', items: [
       '특수 적을 누르거나 📚 도감에서 보면 "🎯 잡는 법"과 "⚠ 조심" 두 줄이 나와요. 32종 모두 엔진으로 확인한 내용이에요.',
       '다시섬이 변환 상태(체력 1)가 되면 어둡게 보이고 "💤 코인줄" 딱지가 붙어요. 칼로는 못 이어요. 동전 줄 사이에 넣어서 모으면 처치돼요.',
