@@ -940,6 +940,8 @@
       isGameOver: session.phase === 'end' || (hero.life != null && hero.life <= 0),
       phase: session.phase || 'input',
       pendingChoice,
+      scrolls: Array.isArray(session.scrolls) ? session.scrolls.map(v => ({ actionKey: v.actionKey })) : [],
+      scrollCount: Array.isArray(session.scrolls) ? session.scrolls.length : 0,
       _session: session
     };
     lastActiveGameState = state;
@@ -1568,9 +1570,9 @@
       name: c.type === 'skill' ? ((getSkillInfo(c.actionKey) && getSkillInfo(c.actionKey).name) || c.name) : `${slotNameKo(c.slot)} 강화`,
       icon: c.type === 'skill' && getSkillInfo(c.actionKey) ? getSkillInfo(c.actionKey).icon : undefined,
       slot: c.slot,
-      gear: c.gear,
+      gear: c.type === 'gear' ? c.gear : undefined,
       actionKey: c.actionKey,
-      desc: c.desc || (c.type === 'skill' ? (getSkillInfo(c.actionKey) ? getSkillInfo(c.actionKey).text + ' (상점 두루마리는 한 번만 쓰고 사라져요)' : '한 번 쓰는 스킬 효과(두루마리)') : (GEAR_UPGRADE_HELP[c.slot] || '지금 끼고 있는 장비를 강화해요.'))
+      desc: c.type === 'skill' ? ((getSkillInfo(c.actionKey) || {}).text || c.desc || '한 번 쓰는 스킬 효과') + ' (상점 두루마리: 사면 두루마리 칸(최대 3칸)에 보관돼요. 눌러서 쓰면 한 번 쓰이고 사라져요. 칸이 가득 차면 바로 쓰여요. 장비는 바뀌지 않아요)' : (c.desc || GEAR_UPGRADE_HELP[c.slot] || '지금 끼고 있는 장비를 강화해요.')
     }));
   }
 
@@ -1594,6 +1596,7 @@
     const optIndex = (typeof optionId === 'number') ? optionId : 0;
 
     const RC = getRC();
+    const prevEventLen = Array.isArray(session.events) ? session.events.length : 0;
     if (RC && typeof RC.answerChoice === 'function') {
       RC.answerChoice(session, choice.id, { choiceIndex: optIndex, resumeTurn: true });
     } else {
@@ -1607,12 +1610,41 @@
       session.phase = 'input';
     }
 
+    const newEvents = Array.isArray(session.events) ? session.events.slice(prevEventLen) : [];
+    const stored = newEvents.some(e => e && e.type === 'scroll_stored');
+    const usedNow = newEvents.some(e => e && e.type === 'scroll_used_full');
+    if (session.profile && newEvents.some(e => e && (e.type === 'achievement_progress' || e.type === 'save_profile'))) saveProfile(session.profile);
     const newGameState = sessionToGameState(session);
     return {
       applied: true,
       success: true,
+      stored,
+      usedNow,
       gameState: newGameState
     };
+  }
+
+  function getScrolls(gameState) {
+    const session = gameState && (gameState._session || gameState);
+    if (!session || !Array.isArray(session.scrolls)) return [];
+    return session.scrolls.map((v, index) => {
+      const info = getSkillInfo(v.actionKey) || {};
+      return { index, actionKey: v.actionKey, name: info.name || '스킬 ' + v.actionKey, icon: info.icon,
+        desc: (info.text || '') + ' (두루마리: 눌러서 쓰면 한 번 쓰이고 사라져요)' };
+    });
+  }
+
+  function useScroll(gameState, index) {
+    const session = gameState && gameState._session;
+    if (!session) return { applied: false, success: false, reason: 'no_session', gameState };
+    const RC = getRC();
+    if (!RC || typeof RC.useScroll !== 'function') return { applied: false, success: false, reason: 'no_rule_core', gameState };
+    const prevEventLen = Array.isArray(session.events) ? session.events.length : 0;
+    const res = RC.useScroll(session, index);
+    const newEvents = Array.isArray(session.events) ? session.events.slice(prevEventLen) : [];
+    if (res.success && session.profile && newEvents.some(e => e && (e.type === 'achievement_progress' || e.type === 'save_profile'))) saveProfile(session.profile);
+    return { applied: Boolean(res.success), success: Boolean(res.success), reason: res.reason,
+      gameState: sessionToGameState(session), effectResult: res.effectResult };
   }
 
   const SLOT_NAME_KO = ['무기', '머리', '방패', '몸통', '장신구'];
@@ -2626,6 +2658,9 @@
     checkAchievements,
     chooseLevelupReward,
     chooseShopItem,
+    getScrolls,
+    useScroll,
+    MAX_SCROLLS: 3,
     chooseUpgrade,
     clearRunState,
     createGameState,

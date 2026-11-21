@@ -590,6 +590,8 @@
   /**
    * 세션 생성 (makeSession)
    */
+  const MAX_SCROLLS = 3;
+
   function makeSession(options = {}) {
     const rng = options.rng || (options.seed != null ? createRNG(options.seed) : null);
     const difficulty = (typeof options.difficulty === 'number' && Number.isInteger(options.difficulty) && options.difficulty >= 0 && options.difficulty <= 3)
@@ -786,6 +788,7 @@
       hero,
       gear,
       actions,
+      scrolls: [],
       waitingChoices: [],
       promotionLeft: (mode === 'turn100') ? 200 : (flaws.includes(8) ? 49 : 50),
       path: [],
@@ -5126,7 +5129,6 @@
           cards.push({
             type: 'skill',
             slot,
-            gear: newGear,
             actionKey: pickedKey,
             name: (def && def.name) ? def.name : `스킬 ${pickedKey}`
           });
@@ -7872,6 +7874,25 @@
    * 즉시스킬은 그 효과·보상·낙하만 하고 일반턴을 추가로 끝내지 않는다.
    * 종족 8은 스킬 사용 뒤 무작위 일반적 1마리에 기본공격값 불을 붙인다.
    */
+  function useScroll(session, index, options = {}) {
+    if (!session || !session.hero) return { success: false, reason: 'no_session', session };
+    if (session.phase === 'end' || session.isCompleted || session.completed || session.hero.life <= 0) {
+      return { success: false, reason: 'game_over', session };
+    }
+    if (session.phase !== 'input') return { success: false, reason: 'invalid_phase', session };
+    if (Array.isArray(session.waitingChoices) && session.waitingChoices.length > 0) {
+      return { success: false, reason: 'choices_pending', session };
+    }
+    if (!Number.isInteger(index) || !Array.isArray(session.scrolls) || index < 0 || index >= session.scrolls.length) {
+      return { success: false, reason: 'invalid_index', session };
+    }
+    const [{ actionKey }] = session.scrolls.splice(index, 1);
+    const effectResult = executeSkillEffect(session, actionKey, options);
+    if (!Array.isArray(session.events)) session.events = [];
+    session.events.push({ type: 'scroll_used', actionKey }, { type: 'save_run' });
+    return { success: true, actionKey, effectResult, phase: session.phase, session };
+  }
+
   function triggerAction(session, actionIndexOrKey, options = {}) {
     const check = canTriggerAction(session, actionIndexOrKey);
     if (!check.canUse) {
@@ -8019,14 +8040,22 @@
 
       const card = choice.cards && choice.cards[cardIdx];
       if (card) {
-        if (card.gear && card.slot != null) {
+        if (card.type === 'gear' && card.gear && card.slot != null) {
           session.gear[card.slot] = card.gear;
           recalculateHeroStats(session);
           checkGearStatCountAchievement72(session);
         }
         if (card.type === 'skill') {
           if (card.actionKey != null) {
-            executeSkillEffect(session, card.actionKey, options);
+            if (!Array.isArray(session.scrolls)) session.scrolls = [];
+            if (!Array.isArray(session.events)) session.events = [];
+            if (session.scrolls.length < MAX_SCROLLS) {
+              session.scrolls.push({ actionKey: card.actionKey });
+              session.events.push({ type: 'scroll_stored', actionKey: card.actionKey });
+            } else {
+              executeSkillEffect(session, card.actionKey, options);
+              session.events.push({ type: 'scroll_used_full', actionKey: card.actionKey });
+            }
           }
           if (session.hero && session.hero.raceKey === 3) {
             emitAchievementProgress(session, 49, 2);
@@ -8135,6 +8164,7 @@
       hero: session.hero,
       gear: session.gear,
       actions: session.actions,
+      scrolls: session.scrolls || [],
       waitingChoices: session.waitingChoices,
       pendingChoice: session.pendingChoice,
       promotionLeft: session.promotionLeft,
@@ -8322,6 +8352,7 @@
       hero,
       gear,
       actions: Array.isArray(obj.actions) ? obj.actions.map(a => ({ ...a })) : [],
+      scrolls: Array.isArray(obj.scrolls) ? obj.scrolls.slice(0, MAX_SCROLLS).filter(v => v && v.actionKey != null).map(v => ({ actionKey: v.actionKey })) : [],
       waitingChoices: Array.isArray(obj.waitingChoices) ? obj.waitingChoices.map(c => ({
         ...c,
         ...(Array.isArray(c && c.cards) ? { cards: c.cards.map(card => ({ ...card })) } : {}),
@@ -9710,6 +9741,8 @@
     inspectPath,
     settlePath,
     triggerAction,
+    useScroll,
+    MAX_SCROLLS,
     answerChoice,
     packSession,
     unpackSession,

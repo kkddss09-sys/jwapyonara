@@ -267,6 +267,78 @@
     border: 1px solid #000;
   }
 
+  /* 보관된 스킬 두루마리 슬롯 (2026-11-21) */
+  .scroll-row {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .scroll-label {
+    flex: 0 0 auto;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #ffe27a;
+    white-space: nowrap;
+    line-height: 1;
+    padding: 0 2px;
+    user-select: none;
+  }
+  .scroll-cell {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 32px;
+    max-height: 36px;
+    background: #191421;
+    border: 1px solid #c99738;
+    border-radius: 6px;
+    padding: 2px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    position: relative;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .scroll-cell.selected {
+    border-color: #ffe27a;
+    box-shadow: 0 0 8px rgba(255, 226, 122, 0.7);
+    background: #2b2238;
+  }
+  .scroll-cell.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+  }
+  .scroll-cell.empty {
+    border-color: #3a3042;
+    border-style: dashed;
+    opacity: 0.35;
+    cursor: default;
+  }
+  .scroll-cell-icon {
+    font-size: 13px;
+    line-height: 1;
+    flex: 0 0 auto;
+  }
+  .scroll-cell-name {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+  .scroll-cell.empty .scroll-cell-name {
+    color: #8b8095;
+    font-weight: 400;
+  }
+
   /* 스크롤 고정 단추(2026-11-17): 손가락 터치 기기에서만 보인다. 마우스만 있는 컴퓨터에서는 숨겨 아무 영향이 없다 */
   #btn-scroll-lock { display: none; }
   @media (pointer: coarse) { #btn-scroll-lock { display: inline-block; } }
@@ -1592,6 +1664,7 @@
   .stat-buttons { display: flex; align-items: center; gap: 3px; margin-left: auto; }
   .stat-buttons .btn-icon { min-height: 32px; padding: 3px 5px; font-size: 10px; }
   .skills-slot-row { gap: 4px; }
+  .scroll-row { gap: 4px; }
   .chain-info-bar { min-height: 22px; }
   .log-box { min-height: 25px; max-height: 27px; padding: 3px 6px; overflow: hidden; font-size: 10px; line-height: 1.15; }
 
@@ -1823,6 +1896,7 @@
 
     <!-- 액티브 스킬 슬롯 4칸 -->
     <div class="skills-slot-row" id="skills-slots"></div>
+    <div class="scroll-row" id="scroll-slots"></div>
 
     <!-- 체인 상태 정보 바 -->
     <div class="chain-info-bar">
@@ -2156,7 +2230,8 @@
             <li><b>⏸ 메뉴 단추</b>: 화면 왼쪽 위에 있어요. 이어하기·새 게임·직업·종족·난이도 변경·순위·업적·로그인·중간 저장·음향·패치·사용 설명서·내 스킬 설명을 여기서 열 수 있어요.</li>
             <li><b>🔒 스크롤 고정 단추</b>(폰·태블릿에서만 보여요, 완력 줄 오른쪽 📊 상태 왼쪽): 누르면 지금 화면 위치에서 화면이 고정돼서, 판을 세로로 움직여도 화면이 같이 오르내리지 않아요. 판과 스킬 칸이 함께 보이는 위치로 먼저 내린 뒤에 누르세요. 다시 누르면(<b>🔓 스크롤 풀기</b>) 풀려요. 직업·상태·설명서 같은 창을 열면 자동으로 풀렸다가 닫으면 다시 고정돼요. 켜 둔 상태는 그 폰의 브라우저에만 기억돼요.</li>
             <li><b>📊 상태 단추</b>: 완력 줄 오른쪽에 있어요(<b>"❓ 내 스킬 설명"</b>은 [⏸ 메뉴] 안에 있어요). 상태 단추를 누르면 지금 내 능력치가 표로 나와요(기본 공격력·최대 체력·관통력·내구도·보너스 확률·체력 재생 등). 값이 <b>초록</b>이면 기본보다 높고 <b>빨강</b>이면 낮은 거예요. 왼쪽 그림(직업·종족·장비 5칸)을 누르면 설명이 나와요.</li>
-            <li><b>🪙 상점</b>: 코인을 100% 모으면 떠돌이 상인이 나타나요. 강력한 장비나 유용한 스킬 중 1개를 골라 탐험대를 강화하세요.</li>
+            <li><b>🪙 상점</b>: 코인을 100% 모으면 떠돌이 상인이 나타나요. 카드 3장 중 1개를 골라요. 장비 카드는 그 칸의 장비를 바꿔요.</li>
+            <li><b>📜 상점 두루마리</b>: 상점 카드 중 가끔 스킬 카드가 나와요. [구매]하면 두루마리 칸(최대 3칸, 스킬 칸 아래에 보여요)에 보관돼요. 칸을 눌러 쓰면 그 스킬 효과가 한 번 쓰이고 사라져요. 실수로 쓰지 않게 한 번 누르면 설명이 나오고, 같은 칸을 한 번 더 누르면 써요. 칸이 가득 차면 새로 산 두루마리는 바로 한 번 쓰여요. 장비는 바뀌지 않아요(장비는 장비 카드에서만 바뀌어요).</li>
             <li><b>🛡️ 강화</b>: 방패 칸이 이미 가득 찬 상태에서 방패를 더 모으면 강화 게이지가 올라가요. 100%가 되면 강화 효과를 고르는 창이 떠요. (일부 특수 적이 판에 있으면 방패 칸이 가득 차지 않아도 게이지만 오를 수 있어요.)</li>
           </ul>
         </details>
@@ -2589,6 +2664,7 @@
   const txtUp = document.getElementById('txt-up');
 
   const skillsSlots = document.getElementById('skills-slots');
+  const scrollSlots = document.getElementById('scroll-slots');
 
   // 모달들
   const modalLevelup = document.getElementById('modal-levelup');
@@ -2789,6 +2865,7 @@
     txtUp.textContent = `${p.shieldGauge || 0}%`;
 
     renderSkillsUI();
+    renderScrollsUI();
     checkModals();
     updateContinueButton();
 
@@ -2882,6 +2959,112 @@
       skillsSlots.appendChild(slot);
     }
   }
+
+  function renderUI() {
+    updateHUD();
+  }
+
+  /**
+   * 보관된 스킬 두루마리 UI (2026-11-21)
+   */
+  let selectedScrollIndex = null;
+
+  function renderScrollsUI() {
+    if (!scrollSlots) return;
+    if (!gameState || !gameState.player) {
+      scrollSlots.style.display = 'none';
+      scrollSlots.innerHTML = '';
+      selectedScrollIndex = null;
+      return;
+    }
+
+    const scrolls = (typeof GR.getScrolls === 'function') ? GR.getScrolls(gameState) : [];
+    if (!scrolls || scrolls.length === 0) {
+      scrollSlots.style.display = 'none';
+      scrollSlots.innerHTML = '';
+      selectedScrollIndex = null;
+      return;
+    }
+
+    if (selectedScrollIndex !== null && !scrolls.some(s => s.index === selectedScrollIndex)) {
+      selectedScrollIndex = null;
+    }
+
+    scrollSlots.style.display = 'flex';
+    scrollSlots.innerHTML = '';
+
+    const label = document.createElement('div');
+    label.className = 'scroll-label';
+    label.textContent = '📜 두루마리';
+    scrollSlots.appendChild(label);
+
+    const maxSlots = (GR && GR.MAX_SCROLLS) || 3;
+    const canUse = !gameState.isGameOver && !gameState.pendingChoice && !isAnimating;
+
+    for (let i = 0; i < maxSlots; i++) {
+      const cell = document.createElement('div');
+      const sc = scrolls.find(s => s.index === i);
+
+      if (!sc) {
+        cell.className = 'scroll-cell empty';
+        cell.innerHTML = '<span class="scroll-cell-name">빈 칸</span>';
+        cell.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (selectedScrollIndex !== null) {
+            selectedScrollIndex = null;
+            renderScrollsUI();
+          }
+        });
+      } else {
+        const isSelected = (selectedScrollIndex === i);
+        cell.className = 'scroll-cell' + (isSelected ? ' selected' : '') + (!canUse ? ' disabled' : '');
+        cell.title = sc.desc;
+        cell.innerHTML = `
+          <span class="scroll-cell-icon">${sc.icon || '📜'}</span>
+          <span class="scroll-cell-name">${sc.name}</span>
+        `;
+
+        if (canUse) {
+          cell.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (selectedScrollIndex !== i) {
+              selectedScrollIndex = i;
+              logBox.innerHTML = `📜 <strong>[${sc.name}]</strong>: ${sc.desc} — <span style="color:#ffe27a;font-weight:700;">한 번 더 누르면 사용</span>`;
+              renderScrollsUI();
+            } else {
+              selectedScrollIndex = null;
+              const res = GR.useScroll(gameState, i);
+              if (res && res.applied) {
+                sfx.play('skill');
+                gameState = res.gameState;
+                logBox.innerHTML = `📜 두루마리 사용! <strong>[${sc.name}]</strong> 효과가 한 번 쓰였어요.`;
+                renderBoard();
+                renderUI();
+                if (!gameState.isGameOver) {
+                  GR.saveRunState(gameState, null, currentSeed);
+                }
+              } else if (res && (res.reason === 'invalid_phase' || res.reason === 'choices_pending')) {
+                logBox.innerHTML = '⚠️ 지금은 두루마리를 쓸 수 없어요.';
+                renderScrollsUI();
+              } else {
+                logBox.innerHTML = '⚠️ 지금은 두루마리를 쓸 수 없어요.';
+                renderScrollsUI();
+              }
+            }
+          });
+        }
+      }
+      scrollSlots.appendChild(cell);
+    }
+  }
+
+  // 두루마리 줄 밖 클릭 시 선택 해제 (2026-11-21)
+  document.addEventListener('click', (e) => {
+    if (selectedScrollIndex !== null && !e.target.closest('#scroll-slots')) {
+      selectedScrollIndex = null;
+      renderScrollsUI();
+    }
+  });
 
   /**
    * 6x6 보드 렌더링
@@ -3936,8 +4119,20 @@
         const res = GR.chooseShopItem(gameState, opt.id);
         if (res.applied) {
           gameState = res.gameState;
-          logBox.innerHTML = opt.type === 'skill' ? `🪙 상점 두루마리 <strong>${opt.name}</strong> 효과를 한 번 썼어요!` : `🪙 상점에서 <strong>${opt.name}</strong> 완료! 장비가 좋아졌어요.`;
+          if (opt.type === 'skill') {
+            if (res.usedNow) {
+              logBox.innerHTML = `📜 두루마리 칸이 가득 차서 <strong>${opt.name}</strong> 효과를 바로 한 번 썼어요!`;
+            } else {
+              logBox.innerHTML = `📜 상점 두루마리 <strong>${opt.name}</strong> 보관 완료! 두루마리 칸을 눌러서 쓰면 한 번 쓰이고 사라져요.`;
+            }
+          } else {
+            logBox.innerHTML = `🪙 상점에서 <strong>${opt.name}</strong> 완료! 장비가 좋아졌어요.`;
+          }
           renderBoard();
+          renderUI();
+          if (!gameState.isGameOver) {
+            GR.saveRunState(gameState, null, currentSeed);
+          }
         }
       });
       shopChoices.appendChild(card);
@@ -4913,6 +5108,10 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-21-ae', date: '2026-11-21', title: '📜 상점 두루마리를 보관해 둘 수 있어요', items: [
+      '상점 스킬 두루마리를 사면 두루마리 칸(최대 3칸)에 보관돼요. 눌러서 쓰면 한 번 쓰이고 사라지고, 칸이 가득 차면 바로 쓰여요.',
+      '두루마리를 사도 장비는 바뀌지 않아요. 장비는 장비 카드에서만 바뀌어요.'
+    ] },
     { id: '2026-11-19-ad', date: '2026-11-19', title: '🏆 업적이 이제 제대로 열려요', items: [
       '조건을 채워도 열리지 않던 업적 3개(첫 가짜 좌표 지도·베테랑 탐험대장·가짜 좌표 대장과의 결전)가 이제 달성 표시가 돼요. 이미 직업 레벨 10인 직업이 있으면 바로 열려 있어요.',
       '업적 설명을 실제 조건에 맞게 고쳤어요. 첫 가짜 좌표 지도는 특수 적 누적 100마리(진행 숫자가 보여요), 대장과의 결전은 기본이 아닌 종족으로 쓰러질 때 숙적이 판에 있으면 달성돼요.'
