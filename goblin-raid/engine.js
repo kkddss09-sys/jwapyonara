@@ -1350,6 +1350,41 @@
     return baseStrike + swordContributions;
   }
 
+  /** 현재 판을 바꾸거나 난수를 뽑지 않는 연결 피해 미리보기. */
+  function previewChainDamage(session, path, waypoints = []) {
+    const totalAttack = calculateTotalAttack(session, path, waypoints);
+    const piercing = session && session.hero && session.hero.piercing != null ? session.hero.piercing : 50;
+    const preview = { totalAttack, piercing, pierceChancePct: Math.round(piercing / 101 * 1000) / 10, enemies: [] };
+    if (!session || !Array.isArray(path)) return preview;
+    const waypointSet = new Set(waypoints);
+    for (let index = 0; index < path.length; index++) {
+      if (waypointSet.has(index)) continue;
+      const { x, y } = path[index];
+      const cell = getCell(session, x, y);
+      if (!cell || (cell.kind !== KIND_ENEMY && cell.kindCode !== 1)) continue;
+      const damageType = determineDamageType(session, path, index, cell);
+      const enemy = cell.enemy;
+      const guard = Math.max(0, enemy && enemy.guard || 0);
+      const hp = Math.max(0, enemy && enemy.hitPoints || 0);
+      const skipped = damageType === DAMAGE_TYPE_NONCOMBAT || !enemy || cell.erased || hp <= 0 || enemy._rewardedKill;
+      const effectiveAttack = skipped || damageType === DAMAGE_TYPE_BLOCKED ? 0 :
+        totalAttack + (damageType === DAMAGE_TYPE_VERTICAL ? (session.hero.bladeStrike != null ? session.hero.bladeStrike : 2) : 0);
+      const damage = skipped ? 0 : Math.max(0, effectiveAttack - guard);
+      const actual = Math.min(hp, damage);
+      const transformed = !skipped && enemy.enemyKind === 32 && enemy.shellState === 0 && hp - actual < 1;
+      const killed = !skipped && !transformed && hp - actual < 1;
+      const pierceTries = skipped || killed || transformed ? 0 : Math.min(effectiveAttack, guard);
+      const pierceExpect = Math.round(pierceTries * piercing / 101 * 10) / 10;
+      const item = { x, y, index, damageType, effectiveAttack, guard, hp, damage, killed, transformed,
+        hpAfter: transformed ? 1 : killed ? 0 : hp - actual,
+        guardAfterIfSurvive: Math.round(Math.max(0, guard - pierceExpect) * 10) / 10,
+        pierceTries, pierceExpect };
+      if (skipped) item.skipped = true;
+      preview.enemies.push(item);
+    }
+    return preview;
+  }
+
   /**
    * 피해종류 판정 순서 [D2]
    * 비적과 32번 변환 상태는 비전투
@@ -9770,6 +9805,7 @@
     DAMAGE_TYPE_BLOCKED,
     DAMAGE_TYPE_NONCOMBAT,
     calculateTotalAttack,
+    previewChainDamage,
     determineDamageType,
     applyAttackToEnemy,
     executeCombatPath,

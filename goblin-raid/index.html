@@ -380,6 +380,11 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    font-size: 11.5px;
   }
   .chain-badge {
     font-size: 10px;
@@ -1650,6 +1655,50 @@
     pointer-events: none;
     z-index: 4;
   }
+  /* 연결 피해 미리보기 배지 (2026-11-22) */
+  /* 처치될 적은 큰 ✕가 가운데에 보이도록 배지를 위쪽으로 올린다 (Claude 보정 2026-11-22) */
+  .dmg-badge.is-kill { top: 3px; transform: translate(-50%, 0); }
+  .dmg-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    padding: 1px 3px;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1.15;
+    color: #fff;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 5;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+  }
+  .dmg-badge .dmg-val {
+    color: #ff6b6b;
+  }
+  .dmg-badge .dmg-kill {
+    color: #ff6b6b;
+  }
+  .dmg-badge .dmg-trans {
+    color: #ffe27a;
+  }
+  .dmg-badge .dmg-block {
+    color: #ff8e8e;
+  }
+  .dmg-badge .dmg-remain {
+    color: #55d777;
+  }
+  .dmg-badge .dmg-pierce {
+    color: #7cd4fd;
+    font-size: 8.5px;
+  }
 
   /* 한 화면 게임 HUD와 메뉴 */
   .phone { gap: 5px; padding: 5px; }
@@ -2194,6 +2243,7 @@
           <ul>
             <li>같은 종류의 칸을 <b>상·하·좌·우·대각선(8방향)</b>으로 <b>3개 이상</b> 이을 수 있어요.</li>
             <li><b>되돌리기</b>: 선을 잇다가 잘못 이었을 때는 손을 떼지 말고 <b>직전 칸으로 다시 돌아가면</b> 방금 그은 선이 취소돼요.</li>
+            <li>선을 그으면 위쪽에 총공격 숫자가 나와요(마법칼 5배·쌍칼 2배도 이미 계산돼요). 줄 안의 적마다 <b>−숫자</b>(들어가는 피해), 죽는 적은 <b>✕ 처치</b>, 살아남는 적은 <b>남는 체력</b>이 보여요. 관통은 살아남은 적의 방어를 확률로 깎아서 피해 숫자에는 넣지 않고, 🛡 −숫자로 평균만 보여 줘요(운에 따라 달라요).</li>
             <li><b>손을 떼면 1턴 끝</b>: 화면에서 손을 떼는 순간 1턴이 지나가며 이어진 칸들이 수집돼요. 비워진 자리에는 위에서 새로운 칸들이 스르륵 채워져요.</li>
           </ul>
         </details>
@@ -3613,6 +3663,8 @@
       );
       const oldX = c.querySelector('.kill-x');
       if (oldX) oldX.remove();
+      const oldDmg = c.querySelector('.dmg-badge');
+      if (oldDmg) oldDmg.remove();
     });
 
     if (currentPath.length === 0) {
@@ -3651,21 +3703,47 @@
     const len = currentPath.length;
     if (isAttack) {
       const atkInfo = GR.calculateAttack(gameState.board, currentPath, gameState.player);
-      chainInfoText.innerHTML = `<span>⚔️ 총공격: <strong>${atkInfo.totalAttack}</strong> (칼 ${atkInfo.swordCount} · 적 ${atkInfo.enemyCount})</span>`;
-      // 처치 예고 X: 체력 <= max(0, 총공격 - 방어) 인 줄 안의 적 위에 표시
-      currentPath.forEach(pos => {
-        const t = gameState.board[pos.y][pos.x];
-        if (!t || t.type !== 'enemy') return;
-        if (t.hp <= Math.max(0, atkInfo.totalAttack - (t.armor || 0))) {
-          const cell = boardGrid.querySelector(`[data-x="${pos.x}"][data-y="${pos.y}"]`);
-          if (cell) {
+      const prev = GR.previewChainDamage(gameState, currentPath);
+      const swordCount = atkInfo.swordCount;
+      const enemyCount = atkInfo.enemyCount;
+      const piercePct = Math.round(prev && prev.pierceChancePct != null ? prev.pierceChancePct : 0);
+      chainInfoText.innerHTML = `<span>⚔️ 총공격: <strong>${prev.totalAttack}</strong> (칼 ${swordCount} · 적 ${enemyCount}) · 관통 ${piercePct}%</span>`;
+
+      if (prev && Array.isArray(prev.enemies)) {
+        prev.enemies.forEach(en => {
+          if (en.skipped) return;
+          const cell = boardGrid.querySelector(`[data-x="${en.x}"][data-y="${en.y}"]`);
+          if (!cell) return;
+
+          if (en.killed) {
             const x = document.createElement('div');
             x.className = 'kill-x';
             x.textContent = '✕';
             cell.appendChild(x);
           }
-        }
-      });
+
+          const badge = document.createElement('div');
+          badge.className = 'dmg-badge' + (en.killed ? ' is-kill' : '');
+
+          const dmgStr = (en.damage === 0) ? '0 (막힘)' : `−${en.damage}`;
+
+          if (en.killed) {
+            badge.innerHTML = `<span class="dmg-val">−${en.damage}</span><span class="dmg-kill">처치</span>`;
+          } else if (en.transformed) {
+            badge.innerHTML = `<span class="dmg-val">−${en.damage}</span><span class="dmg-trans">💤 변환</span>`;
+          } else if (en.damageType === 'blocked') {
+            badge.innerHTML = `<span class="dmg-block">🚫 차단</span>`;
+          } else {
+            let html = `<span class="dmg-val">${dmgStr}</span><span class="dmg-remain">남 ${en.hpAfter}</span>`;
+            if (en.pierceTries > 0) {
+              html += `<span class="dmg-pierce">🛡 −${en.pierceExpect}</span>`;
+            }
+            badge.innerHTML = html;
+          }
+
+          cell.appendChild(badge);
+        });
+      }
     } else {
       const resCalc = GR.calculateResourceGain(firstTile.type, len);
       let label = '';
@@ -5108,6 +5186,11 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-22-af', date: '2026-11-22', title: '🔢 선을 그을 때 적마다 피해가 숫자로 보여요', items: [
+      '칼을 이으면 총공격이 마법칼 5배·쌍칼 2배·부서진 칼까지 정확하게 계산돼서 보여요. (전에는 이 계산이 빠져 있었어요)',
+      '줄 안의 적마다 들어가는 피해(−숫자), 죽는 적은 ✕ 처치, 살아남는 적은 남는 체력이 숫자로 나와요. 차단되는 적은 🚫 차단으로 보여요.',
+      '관통은 살아남은 적의 방어를 확률로 깎는 효과라서 피해 숫자와 따로 🛡 −숫자 평균으로 보여요.'
+    ] },
     { id: '2026-11-21-ae', date: '2026-11-21', title: '📜 상점 두루마리를 보관해 둘 수 있어요', items: [
       '상점 스킬 두루마리를 사면 두루마리 칸(최대 3칸)에 보관돼요. 눌러서 쓰면 한 번 쓰이고 사라지고, 칸이 가득 차면 바로 쓰여요.',
       '두루마리를 사도 장비는 바뀌지 않아요. 장비는 장비 카드에서만 바뀌어요.'

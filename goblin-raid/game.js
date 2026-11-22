@@ -1150,6 +1150,7 @@
   /**
    * calculateAttack [O2]
    * 판·경로·플레이어를 받아 totalAttack 등 미리보기 정보를 돌려준다.
+   * board 배열을 넘기면 엔진 세션이 없어 기본공격+칼 개수의 단순식으로 계산한다.
    */
   function calculateAttack(boardOrSession, path = [], player = {}) {
     const RC = getRC();
@@ -1192,6 +1193,15 @@
       swordCount,
       enemyCount
     };
+  }
+
+  function previewChainDamage(gameState, path = []) {
+    const RC = getRC();
+    if (RC && gameState && gameState._session) {
+      return RC.previewChainDamage(gameState._session, path);
+    }
+    const fallback = calculateAttack(gameState && gameState.board, path, gameState && gameState.player || {});
+    return { totalAttack: fallback.totalAttack, piercing: 50, pierceChancePct: 49.5, enemies: [] };
   }
 
   /**
@@ -2650,6 +2660,7 @@
     TILE_ICONS,
     TILE_SVGS,
     calculateAttack,
+    previewChainDamage,
     calculateResourceGain,
     canChangeRace,
     canConfirmPerkFlawSetup,
