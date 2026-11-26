@@ -1,0 +1,142 @@
+/* AI같이배워요 전용 스타일시트 (ai-learn.css) */
+/* 외부 CDN 0개, common.css 변수 및 390px 모바일 완벽 대응 */
+
+.al-wrap { max-width:720px; margin:0 auto; padding:16px 16px calc(var(--zw-tabbar-h, 58px) + 32px); }
+
+/* 상단 빵부스러기 */
+.al-breadcrumb { font-size:13px; color:var(--sub); margin-bottom:12px; }
+.al-breadcrumb a { color:inherit; text-decoration:none; }
+.al-breadcrumb a:hover { text-decoration:underline; }
+
+/* 머리말 */
+.al-header { margin-bottom:24px; }
+.al-header h1 { font-size:26px; font-weight:800; color:var(--ink); margin:0 0 8px; letter-spacing:-0.02em; }
+.al-lead { font-size:15px; color:var(--sub); line-height:1.5; margin:0; }
+
+/* 최상단 고정 입구 1장 카드 */
+.al-start-banner {
+  display:block;
+  background:linear-gradient(135deg, var(--soft) 0%, var(--card) 100%);
+  border:2px solid var(--red);
+  border-radius:16px;
+  padding:18px 20px;
+  text-decoration:none;
+  margin-bottom:24px;
+  box-shadow:var(--zw-shadow);
+  transition:transform 0.15s ease, box-shadow 0.15s ease;
+}
+.al-start-banner:hover { transform:translateY(-2px); }
+.al-start-badge { display:inline-block; font-size:12px; font-weight:700; color:#fff; background:var(--red); padding:3px 8px; border-radius:999px; margin-bottom:8px; }
+.al-start-title { font-size:18px; font-weight:800; color:var(--ink); margin:0 0 6px; }
+.al-start-desc { font-size:14px; color:var(--sub); margin:0; line-height:1.4; }
+
+/* 탭 바 */
+.al-tab-bar { display:flex; gap:8px; margin-bottom:18px; overflow-x:auto; padding-bottom:4px; }
+.al-chip {
+  font:inherit;
+  font-size:14px;
+  font-weight:600;
+  color:var(--sub);
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:7px 16px;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:all 0.15s ease;
+}
+.al-chip:hover { background:var(--fill); color:var(--ink); }
+.al-chip.on { background:var(--soft); color:var(--red); border-color:var(--red); font-weight:700; }
+
+/* 글 카드 목록 */
+.al-post-list { display:grid; gap:14px; margin-bottom:32px; }
+.al-post-card {
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  transition:transform 0.15s ease, border-color 0.15s ease;
+}
+.al-post-card:hover { border-color:var(--red); transform:translateY(-1px); }
+.al-post-link { display:block; padding:16px 18px; text-decoration:none; color:inherit; }
+.al-card-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+.al-badge { font-size:12px; font-weight:700; padding:2px 8px; border-radius:6px; }
+.al-badge-news { background:var(--soft); color:var(--red); }
+.al-badge-review { background:var(--okbg); color:var(--ok); }
+.al-card-date { font-size:13px; color:var(--sub); }
+.al-card-title { font-size:17px; font-weight:700; color:var(--ink); margin:0 0 6px; line-height:1.35; letter-spacing:-0.01em; }
+.al-card-summary { font-size:14px; color:var(--sub); margin:0 0 10px; line-height:1.45; }
+.al-card-foot { font-size:12px; color:var(--sub); text-align:right; }
+
+/* 준비 중 빈 카드 */
+.al-empty-card { background:var(--card); border:1px dashed var(--line); border-radius:14px; padding:28px 20px; text-align:center; }
+.al-empty-title { font-size:16px; font-weight:700; color:var(--ink); margin:0 0 6px; }
+.al-empty-desc { font-size:14px; color:var(--sub); margin:0; line-height:1.5; }
+
+/* 연결 도구 및 게시판 섹션 */
+.al-tools-section { margin-top:36px; padding-top:24px; border-top:1px solid var(--line); }
+.al-section-title { font-size:17px; font-weight:700; color:var(--ink); margin:0 0 14px; }
+.al-tool-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-bottom:24px; }
+.al-tool-card {
+  display:block;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:14px 16px;
+  text-decoration:none;
+  color:inherit;
+  transition:all 0.15s ease;
+}
+.al-tool-card:hover { border-color:var(--red); background:var(--fill); }
+.al-tool-name { font-size:14px; font-weight:700; color:var(--ink); margin:0 0 4px; }
+.al-tool-desc { font-size:12px; color:var(--sub); margin:0; }
+
+/* 상세 본문 및 글 레이아웃 */
+.al-post-header { margin-bottom:20px; border-bottom:1px solid var(--line); padding-bottom:16px; }
+.al-post-meta { display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:13px; color:var(--sub); margin-bottom:10px; }
+.al-summary-box { background:var(--fill); border-left:4px solid var(--red); border-radius:4px 8px 8px 4px; padding:12px 16px; font-size:14px; color:var(--ink); line-height:1.5; margin-bottom:24px; }
+
+/* 중간 카톡방 안내 줄 (연한 테두리 인라인 카드) */
+.al-kakao-mid {
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px 16px;
+  margin:28px 0;
+  text-align:center;
+}
+.al-kakao-mid a {
+  display:block;
+  font-size:14px;
+  font-weight:700;
+  color:var(--red);
+  text-decoration:none;
+}
+.al-kakao-mid a:hover { text-decoration:underline; }
+
+/* 복사 버튼 */
+.al-copy-box { background:var(--fill); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:12px 0; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.al-copy-text { font-family:monospace; font-size:14px; color:var(--ink); word-break:break-all; flex:1; }
+.al-copy-btn { font:inherit; font-size:12px; font-weight:700; color:#fff; background:var(--red); border:none; border-radius:6px; padding:6px 12px; cursor:pointer; white-space:nowrap; }
+
+/* 체크리스트 */
+.al-check-item { list-style:none; margin:8px 0; }
+.al-check-item label { display:flex; align-items:flex-start; gap:8px; cursor:pointer; font-size:15px; color:var(--ink); line-height:1.45; }
+.al-check-item input[type="checkbox"] { margin-top:3px; accent-color:var(--red); }
+
+/* 표 스타일 */
+.al-table { width:100%; border-collapse:collapse; margin:16px 0; font-size:14px; }
+.al-table th, .al-table td { border:1px solid var(--line); padding:8px 12px; text-align:left; }
+.al-table th { background:var(--fill); font-weight:700; color:var(--ink); }
+
+/* 하단 이전/다음 네비게이션 */
+.al-post-nav { display:flex; justify-content:space-between; gap:12px; margin:28px 0; font-size:14px; font-weight:600; flex-wrap:wrap; }
+.al-post-nav a { color:var(--red); text-decoration:none; }
+.al-post-nav a:hover { text-decoration:underline; }
+
+@media (max-width:480px) {
+  .al-header h1 { font-size:22px; }
+  .al-start-title { font-size:16px; }
+  .al-tool-grid { grid-template-columns:1fr; }
+  .al-post-nav { flex-direction:column; }
+}
