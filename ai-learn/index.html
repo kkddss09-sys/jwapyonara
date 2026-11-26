@@ -7,68 +7,432 @@
   <meta name="robots" content="noindex, nofollow">
   <link rel="stylesheet" href="../_common/common.css">
   <link rel="stylesheet" href="_ai-learn/ai-learn.css">
+  <script src="../_common/common.js" defer></script>
+  <style>
+    .draft-page {
+      --dp-bg: #0e131c;
+      --dp-card: #171d29;
+      --dp-card-hover: #1e2638;
+      --dp-ink: #eef2f8;
+      --dp-sub: #98a3b5;
+      --dp-line: #2a3344;
+      --dp-accent: #3d8bff;
+      --dp-accent-soft: rgba(61, 139, 255, 0.12);
+      --dp-panel: #2b3547;
+      --dp-fill: #1f2735;
+      --dp-fill2: #253042;
+      --dp-ok: #4ade80;
+      --dp-ok-soft: rgba(74, 222, 128, 0.12);
+      --dp-amber: #facc15;
+      --dp-amber-soft: rgba(250, 204, 21, 0.12);
+      --dp-radius: 14px;
+      background-color: var(--dp-bg);
+      color: var(--dp-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 20px 16px 50px;
+    }
+    .draft-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .draft-page .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-bottom: 16px;
+    }
+    .draft-page .nav-badge {
+      font-size: 12px;
+      background: var(--dp-fill);
+      border: 1px solid var(--dp-line);
+      color: var(--dp-accent);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .draft-page .page-header {
+      margin-bottom: 24px;
+    }
+    .draft-page .page-header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    .draft-page .page-header p {
+      font-size: 15px;
+      color: var(--dp-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+    .draft-page .guide-hero {
+      background: linear-gradient(145deg, #162032 0%, #171d29 100%);
+      border: 1px solid #324463;
+      border-radius: var(--dp-radius);
+      padding: 22px 20px;
+      margin-bottom: 24px;
+      display: block;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .draft-page a.guide-hero:hover {
+      border-color: var(--dp-accent);
+      transform: translateY(-1px);
+    }
+    .draft-page .guide-hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--dp-accent-soft);
+      color: var(--dp-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    .draft-page .guide-hero h2 {
+      font-size: 19px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      line-height: 1.35;
+    }
+    .draft-page .guide-hero p {
+      font-size: 14px;
+      color: var(--dp-sub);
+      line-height: 1.5;
+      margin: 0 0 14px;
+    }
+    .draft-page .guide-hero-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--dp-fill2);
+      border: 1px solid var(--dp-line);
+      color: var(--dp-ink);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .draft-page .status-dot {
+      width: 7px;
+      height: 7px;
+      background-color: var(--dp-amber);
+      border-radius: 50%;
+    }
+    .draft-page .category-section {
+      margin-bottom: 20px;
+    }
+    .draft-page .category-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dp-sub);
+      margin-bottom: 10px;
+    }
+    .draft-page .tab-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .draft-page .tab-pill {
+      background: var(--dp-card);
+      border: 1px solid var(--dp-line);
+      color: var(--dp-sub);
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: default;
+      user-select: none;
+    }
+    .draft-page .tab-pill.active {
+      background: var(--dp-accent);
+      color: #fff;
+      border-color: var(--dp-accent);
+      font-weight: 700;
+    }
+    .draft-page .posts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 600px) {
+      .draft-page .posts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .draft-page .post-card {
+      background: var(--dp-card);
+      border: 1px solid var(--dp-line);
+      border-radius: var(--dp-radius);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 180px;
+    }
+    .draft-page .post-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .draft-page .category-tag {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+    .draft-page .tag-safe {
+      background: var(--dp-amber-soft);
+      color: var(--dp-amber);
+      border: 1px solid rgba(250, 204, 21, 0.25);
+    }
+    .draft-page .tag-news {
+      background: var(--dp-accent-soft);
+      color: var(--dp-accent);
+      border: 1px solid rgba(61, 139, 255, 0.25);
+    }
+    .draft-page .tag-guide {
+      background: var(--dp-ok-soft);
+      color: var(--dp-ok);
+      border: 1px solid rgba(74, 222, 128, 0.25);
+    }
+    .draft-page .state-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--dp-sub);
+      background: var(--dp-fill);
+      padding: 2px 7px;
+      border-radius: 4px;
+      border: 1px solid var(--dp-line);
+    }
+    .draft-page .post-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--dp-ink);
+      line-height: 1.4;
+      margin: 0 0 8px;
+    }
+    .draft-page .post-card-desc {
+      font-size: 13px;
+      color: var(--dp-sub);
+      line-height: 1.5;
+      flex-grow: 1;
+      margin: 0 0 14px;
+    }
+    .draft-page .post-card-foot {
+      padding-top: 10px;
+      border-top: 1px solid var(--dp-fill2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--dp-sub);
+    }
+    .draft-page .status-text {
+      color: var(--dp-accent);
+      font-weight: 600;
+    }
+    .draft-page .tools-section {
+      background: var(--dp-fill);
+      border: 1px solid var(--dp-line);
+      border-radius: var(--dp-radius);
+      padding: 20px 18px;
+      margin-bottom: 24px;
+    }
+    .draft-page .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dp-ink);
+      margin: 0 0 14px;
+    }
+    .draft-page .tools-list {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    @media (max-width: 580px) {
+      .draft-page .tools-list {
+        grid-template-columns: 1fr;
+      }
+    }
+    .draft-page .tool-link-card {
+      background: var(--dp-card);
+      border: 1px solid var(--dp-line);
+      border-radius: 10px;
+      padding: 12px;
+      display: block;
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+    .draft-page .tool-link-card:hover {
+      border-color: var(--dp-accent);
+      background: var(--dp-card-hover);
+    }
+    .draft-page .tool-link-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--dp-ink);
+      margin-bottom: 4px;
+    }
+    .draft-page .tool-link-desc {
+      font-size: 12px;
+      color: var(--dp-sub);
+      line-height: 1.35;
+    }
+    .draft-page .community-box {
+      background: var(--dp-card);
+      border: 1px solid var(--dp-line);
+      border-radius: var(--dp-radius);
+      padding: 18px 20px;
+      text-align: center;
+    }
+    .draft-page .community-box h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dp-ink);
+      margin: 0 0 4px;
+    }
+    .draft-page .community-box p {
+      font-size: 13px;
+      color: var(--dp-sub);
+      line-height: 1.45;
+      margin: 0;
+    }
+  </style>
 </head>
 <body>
-  <div class="al-wrap">
-    <nav class="al-breadcrumb" aria-label="Breadcrumb">
-      <a href="../index.html">좌표나라</a> › <span>AI같이배워요</span>
-    </nav>
-
-    <header class="al-header">
-      <h1>AI같이배워요</h1>
-      <p class="al-lead">가입·결제 없이 무료로 읽는 왕초보 AI 길라잡이·소식·활용 예시</p>
-    </header>
-
-    <!-- 고정 배너: 초보자 입구 1장 -->
-    <a href="start/index.html" class="al-start-banner">
-      <span class="al-start-badge">🧭 처음이세요?</span>
-      <h2 class="al-start-title">왕초보 AI 시작 순서 (1장 정리)</h2>
-      <p class="al-start-desc">가입·결제 없이 안전하게 따라 하는 첫 말 걸기부터 폰에서 써보는 순서표 ›</p>
-    </a>
-
-    <!-- 글 목록 필터 탭 -->
-    <div class="al-tab-bar" role="tablist" aria-label="글 분류">
-      <button type="button" class="al-chip on" data-filter="all">전체</button>
-      <button type="button" class="al-chip" data-filter="news">소식</button>
-      <button type="button" class="al-chip" data-filter="review">활용 예시</button>
+  <main class="draft-page">
+    <div class="top-nav">
+      <span class="nav-badge">초보자 안내서</span>
     </div>
 
-    <!-- 최신 글 목록 -->
-    <section class="al-post-list" aria-label="글 목록">
-      
-        <div class="al-empty-card">
-          <p class="al-empty-title">첫 글을 준비하고 있어요</p>
-          <p class="al-empty-desc">왕초보를 위한 쉬운 AI 소식과 차근차근 따라 하는 활용 예시가 곧 올라옵니다. 먼저 위 <strong>&quot;처음이세요?&quot;</strong> 길라잡이를 읽어보세요!</p>
-        </div>
-        
-    </section>
+    <div class="page-header">
+      <h1>AI같이배워요</h1>
+      <p>가입이나 복잡한 절차 없이, 스마트폰에서 바로 읽고 따라 해보는 초보자 AI 길라잡이 공간입니다.</p>
+    </div>
 
-    <!-- 함께 쓰면 좋은 도구 및 게시판 단방향 연결 -->
-    <section class="al-tools-section">
-      <h3 class="al-section-title">함께 쓰면 좋은 AI 도구 · 게시판</h3>
-      <div class="al-tool-grid">
-        <a href="../ask-ai/index.html" class="al-tool-card">
-          <p class="al-tool-name">🤖 AI에게 물어볼 말 만들기</p>
-          <p class="al-tool-desc">휴대폰·부동산 맞춤 질문 프롬프트 무료 생성</p>
+    <!-- 고정 가이드 히어로 배너 (실제 존재하는 start/index.html 상대 경로 연결) -->
+    <a href="start/index.html" class="guide-hero">
+      <div class="guide-hero-tag">
+        🧭 시작 가이드
+      </div>
+      <h2>처음 써보는 분을 위한 안전한 시작 순서표</h2>
+      <p>어려운 전문 용어 없이 내 스마트폰에서 안전 수칙을 먼저 챙기고, 첫 질문을 편안하게 건네보는 단계별 길라잡이입니다.</p>
+      <div class="guide-hero-status">
+        <span>안내 보기 ›</span>
+      </div>
+    </a>
+
+    <!-- 카테고리 표시 (규칙 7: 동작 없는 단추 대신 span 표시용 글자) -->
+    <div class="category-section">
+      <div class="category-label">주제별 모아보기</div>
+      <div class="tab-pills" role="region" aria-label="주제 분류">
+        <span class="tab-pill active">전체 보기</span>
+        <span class="tab-pill">🛡️ 안전 수칙</span>
+        <span class="tab-pill">📱 모바일 소식</span>
+        <span class="tab-pill">💡 쉬운 활용법</span>
+      </div>
+    </div>
+
+    <!-- 2열 매거진 글 카드 그리드 (규칙 6: 지어낸 글 제목/소개 대신 준비 중 자리 표시) -->
+    <div class="posts-grid" aria-label="글 목록">
+      <article class="post-card">
+        <div>
+          <div class="post-card-head">
+            <span class="category-tag tag-safe">안전 수칙</span>
+            <span class="state-badge">준비 중</span>
+          </div>
+          <h2 class="post-card-title">글 준비 중</h2>
+          <p class="post-card-desc">글을 준비하고 있습니다.</p>
+        </div>
+        <div class="post-card-foot">
+          <span>좌표나라 길라잡이</span>
+          <span class="status-text">준비 중</span>
+        </div>
+      </article>
+
+      <article class="post-card">
+        <div>
+          <div class="post-card-head">
+            <span class="category-tag tag-news">모바일 소식</span>
+            <span class="state-badge">준비 중</span>
+          </div>
+          <h2 class="post-card-title">글 준비 중</h2>
+          <p class="post-card-desc">글을 준비하고 있습니다.</p>
+        </div>
+        <div class="post-card-foot">
+          <span>좌표나라 소식</span>
+          <span class="status-text">준비 중</span>
+        </div>
+      </article>
+
+      <article class="post-card">
+        <div>
+          <div class="post-card-head">
+            <span class="category-tag tag-guide">쉬운 활용법</span>
+            <span class="state-badge">준비 중</span>
+          </div>
+          <h2 class="post-card-title">글 준비 중</h2>
+          <p class="post-card-desc">글을 준비하고 있습니다.</p>
+        </div>
+        <div class="post-card-foot">
+          <span>좌표나라 활용 팁</span>
+          <span class="status-text">준비 중</span>
+        </div>
+      </article>
+
+      <article class="post-card">
+        <div>
+          <div class="post-card-head">
+            <span class="category-tag tag-guide">쉬운 활용법</span>
+            <span class="state-badge">준비 중</span>
+          </div>
+          <h2 class="post-card-title">글 준비 중</h2>
+          <p class="post-card-desc">글을 준비하고 있습니다.</p>
+        </div>
+        <div class="post-card-foot">
+          <span>좌표나라 활용 팁</span>
+          <span class="status-text">준비 중</span>
+        </div>
+      </article>
+    </div>
+
+    <!-- 함께 활용하는 관련 도구 안내 (규칙 5: 실제 존재하는 상대 경로만 연결) -->
+    <section class="tools-section">
+      <div class="section-title">함께 활용하는 무료 도구 모음</div>
+      <div class="tools-list">
+        <a href="../ask-ai/index.html" class="tool-link-card">
+          <div class="tool-link-title">🤖 질문 문장 만들기</div>
+          <div class="tool-link-desc">휴대폰·부동산 맞춤 질문 양식을 손쉽게 완성하는 도구</div>
         </a>
-        <a href="../board/cardnews/index.html?cat=AI학습" class="al-tool-card">
-          <p class="al-tool-name">📊 AI학습 카드뉴스</p>
-          <p class="al-tool-desc">핵심 정보를 그림 8장으로 빠르게 훑어보기</p>
+        <a href="../board/cardnews/index.html?cat=AI학습" class="tool-link-card">
+          <div class="tool-link-title">📊 핵심 요약 카드뉴스</div>
+          <div class="tool-link-desc">꼭 필요한 핵심 내용만 그림 카드 형식으로 훑어보기</div>
         </a>
-        <a href="../board/video/index.html?vcat=AI학습" class="al-tool-card">
-          <p class="al-tool-name">🎬 AI학습 쇼츠 영상</p>
-          <p class="al-tool-desc">30초 요약 영상으로 쉽게 이해하기</p>
+        <a href="../board/video/index.html?vcat=AI학습" class="tool-link-card">
+          <div class="tool-link-title">🎬 30초 요약 영상</div>
+          <div class="tool-link-desc">출퇴근길에 부담 없이 보는 짧고 명쾌한 영상 정리</div>
         </a>
       </div>
     </section>
 
-    <!-- 하단 카톡방 안내 줄 (위치 1) -->
+    <!-- 하단 커뮤니티 안내 (규칙 5, 6: 카톡방 주소 지어내지 않음, 가격 관련 문구 배제) -->
     <div style="margin-top:24px;">
-      <a class="cta" data-zw="kakao" href="#">궁금한 AI 사용법, 카톡방에서 같이 물어보세요<small>가입·결제 없이 무료로 질문하고 시세도 함께 확인해요</small></a>
+      <a class="cta" data-zw="kakao" href="#">궁금한 AI 사용법, 카톡방에서 같이 물어보세요<small>가입·결제 없이 무료로 질문해요</small></a>
     </div>
-  </div>
-
-  <script src="../_common/common.js"></script>
-  <script src="_ai-learn/ai-learn.js"></script>
+  </main>
 </body>
 </html>

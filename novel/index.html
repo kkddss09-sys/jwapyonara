@@ -7,17 +7,408 @@
   <meta name="robots" content="noindex, nofollow">
   <link rel="stylesheet" href="../_common/common.css">
   <link rel="stylesheet" href="_novel/novel.css">
+  <script src="../_common/common.js" defer></script>
+  <style>
+    .draft-page {
+      --dp-bg: #0e131c;
+      --dp-card: #171d29;
+      --dp-card-hover: #1e2638;
+      --dp-ink: #eef2f8;
+      --dp-sub: #98a3b5;
+      --dp-line: #2a3344;
+      --dp-accent: #3d8bff;
+      --dp-accent-soft: rgba(61, 139, 255, 0.12);
+      --dp-panel: #2b3547;
+      --dp-fill: #1f2735;
+      --dp-fill2: #253042;
+      --dp-purple: #a855f7;
+      --dp-purple-soft: rgba(168, 85, 247, 0.12);
+      --dp-emerald: #10b981;
+      --dp-emerald-soft: rgba(16, 185, 129, 0.12);
+      --dp-amber: #facc15;
+      --dp-amber-soft: rgba(250, 204, 21, 0.12);
+      --dp-radius: 14px;
+      background-color: var(--dp-bg);
+      color: var(--dp-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 20px 16px 50px;
+    }
+    .draft-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .draft-page .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      margin-bottom: 16px;
+    }
+    .draft-page .nav-badge {
+      font-size: 12px;
+      background: var(--dp-fill);
+      border: 1px solid var(--dp-line);
+      color: var(--dp-accent);
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .draft-page .page-header {
+      margin-bottom: 24px;
+    }
+    .draft-page .page-header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    .draft-page .page-header p {
+      font-size: 15px;
+      color: var(--dp-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+    .draft-page .genre-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .draft-page .genre-chip {
+      background: var(--dp-card);
+      border: 1px solid var(--dp-line);
+      color: var(--dp-sub);
+      padding: 7px 15px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: default;
+      user-select: none;
+    }
+    .draft-page .genre-chip.active {
+      background: var(--dp-accent);
+      color: #fff;
+      border-color: var(--dp-accent);
+      font-weight: 700;
+    }
+    .draft-page .hero-showcase {
+      background: linear-gradient(145deg, #161e2e 0%, #171d29 100%);
+      border: 1px solid #334461;
+      border-radius: var(--dp-radius);
+      padding: 22px 20px;
+      margin-bottom: 28px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    @media (max-width: 580px) {
+      .draft-page .hero-showcase {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+    .draft-page .cover-mockup {
+      width: 110px;
+      height: 150px;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, #243552 0%, #152238 100%);
+      border: 1px solid #3c547a;
+      border-radius: 8px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 10px;
+      position: relative;
+      border-left: 4px solid var(--dp-accent);
+    }
+    .draft-page .cover-top-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: #93c5fd;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .draft-page .cover-symbol {
+      align-self: center;
+      width: 36px;
+      height: 36px;
+      opacity: 0.8;
+      color: var(--dp-accent);
+    }
+    .draft-page .cover-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: #e2e8f0;
+      text-align: center;
+      line-height: 1.25;
+    }
+    .draft-page .hero-details {
+      flex: 1;
+      min-width: 0;
+    }
+    .draft-page .hero-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .draft-page .badge-primary {
+      background: var(--dp-accent-soft);
+      color: var(--dp-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    .draft-page .badge-state {
+      background: var(--dp-amber-soft);
+      color: var(--dp-amber);
+      border: 1px solid rgba(250, 204, 21, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    .draft-page .hero-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.35;
+      margin: 0 0 8px;
+    }
+    .draft-page .hero-desc {
+      font-size: 14px;
+      color: var(--dp-sub);
+      line-height: 1.5;
+      margin: 0 0 14px;
+    }
+    .draft-page .hero-subinfo {
+      font-size: 12px;
+      color: #94a3b8;
+      display: flex;
+      gap: 14px;
+    }
+    .draft-page .section-headline {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--dp-ink);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .draft-page .works-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 640px) {
+      .draft-page .works-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .draft-page .book-card {
+      background: var(--dp-card);
+      border: 1px solid var(--dp-line);
+      border-radius: var(--dp-radius);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 160px;
+    }
+    .draft-page .book-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .draft-page .genre-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+    }
+    .draft-page .genre-fantasy {
+      background: var(--dp-purple-soft);
+      color: var(--dp-purple);
+      border: 1px solid rgba(168, 85, 247, 0.25);
+    }
+    .draft-page .genre-mystery {
+      background: var(--dp-amber-soft);
+      color: var(--dp-amber);
+      border: 1px solid rgba(250, 204, 21, 0.25);
+    }
+    .draft-page .genre-drama {
+      background: var(--dp-emerald-soft);
+      color: var(--dp-emerald);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .draft-page .book-status {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--dp-sub);
+      background: var(--dp-fill);
+      border: 1px solid var(--dp-line);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .draft-page .book-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--dp-ink);
+      line-height: 1.4;
+      margin: 0 0 8px;
+    }
+    .draft-page .book-summary {
+      font-size: 13px;
+      color: var(--dp-sub);
+      line-height: 1.45;
+      margin: 0 0 16px;
+      flex-grow: 1;
+    }
+    .draft-page .book-footer {
+      border-top: 1px solid var(--dp-fill2);
+      padding-top: 10px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--dp-sub);
+    }
+    .draft-page .ready-notice {
+      color: var(--dp-accent);
+      font-weight: 600;
+    }
+    .draft-page .bottom-info-box {
+      background: var(--dp-card);
+      border: 1px solid var(--dp-line);
+      border-radius: var(--dp-radius);
+      padding: 18px 20px;
+      text-align: center;
+    }
+    .draft-page .bottom-info-box h3 {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--dp-ink);
+      margin: 0 0 4px;
+    }
+    .draft-page .bottom-info-box p {
+      font-size: 13px;
+      color: var(--dp-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+  </style>
 </head>
 <body>
-  <main class="wrap">
-    <h1>연재관</h1>
-    <p class="lead">좌표나라 오리지널 웹소설</p>
+  <main class="draft-page">
+    <div class="top-nav">
+      <span class="nav-badge">웹소설 서재</span>
+    </div>
 
-    <div class="nv-works-grid">
-      <div class="nv-empty-notice"><div class="nv-empty-icon">📖</div><h2 class="nv-empty-title">연재 준비 중</h2><p class="nv-empty-desc">새로운 오리지널 웹소설 연재를 준비하고 있습니다.<br>곧 찾아뵙겠습니다.</p></div>
+    <div class="page-header">
+      <h1>좌표나라 연재관</h1>
+      <p>가입이나 결제 절차 없이, 모바일과 PC에서 편안하고 깔끔하게 감상하는 오리지널 연재 서재 공간입니다.</p>
+    </div>
+
+    <!-- 장르 필터 (규칙 7: 동작 없는 단추 대신 span 표시용 글자) -->
+    <div class="genre-filter" role="region" aria-label="장르 분류">
+      <span class="genre-chip active">전체 장르</span>
+      <span class="genre-chip">판타지</span>
+      <span class="genre-chip">미스터리</span>
+      <span class="genre-chip">현대/드라마</span>
+      <span class="genre-chip">SF</span>
+    </div>
+
+    <!-- 대표 기획작 히어로 쇼케이스 (규칙 6: 미확정 정보 제거 및 연재 준비 중 자리 표시) -->
+    <section class="hero-showcase">
+      <div class="cover-mockup" aria-hidden="true">
+        <div class="cover-top-tag">연재관</div>
+        <svg class="cover-symbol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        <div class="cover-title">연재 준비</div>
+      </div>
+      <div class="hero-details">
+        <div class="hero-meta-row">
+                    <span class="badge-state">준비 중</span>
+        </div>
+        <h2 class="hero-title">오리지널 연재 준비 중</h2>
+        <p class="hero-desc">좌표나라 연재관은 준비 중입니다.</p>
+        <div class="hero-subinfo">
+          <span>연재 준비 중</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 연재 준비 작품 서재 그리드 (규칙 6: 작품 3개 제목·줄거리 제거 및 준비 중 자리 표시) -->
+    <div class="section-headline">
+      <span>작품 목록</span>
+      <span style="font-size:12px; color:var(--dp-sub); font-weight:normal;">준비 중</span>
+    </div>
+
+    <div class="works-grid" aria-label="작품 목록">
+      <article class="book-card">
+        <div>
+          <div class="book-card-header">
+            <span></span>
+            <span class="book-status">준비 중</span>
+          </div>
+          <h2 class="book-title">작품 준비 중</h2>
+          <p class="book-summary">작품 소개가 들어갈 자리입니다.</p>
+        </div>
+        <div class="book-footer">
+          <span>작품 자리</span>
+          <span class="ready-notice">준비 중</span>
+        </div>
+      </article>
+
+      <article class="book-card">
+        <div>
+          <div class="book-card-header">
+            <span></span>
+            <span class="book-status">준비 중</span>
+          </div>
+          <h2 class="book-title">작품 준비 중</h2>
+          <p class="book-summary">작품 소개가 들어갈 자리입니다.</p>
+        </div>
+        <div class="book-footer">
+          <span>작품 자리</span>
+          <span class="ready-notice">준비 중</span>
+        </div>
+      </article>
+
+      <article class="book-card">
+        <div>
+          <div class="book-card-header">
+            <span></span>
+            <span class="book-status">준비 중</span>
+          </div>
+          <h2 class="book-title">작품 준비 중</h2>
+          <p class="book-summary">작품 소개가 들어갈 자리입니다.</p>
+        </div>
+        <div class="book-footer">
+          <span>작품 자리</span>
+          <span class="ready-notice">준비 중</span>
+        </div>
+      </article>
+    </div>
+
+    <!-- 하단 알림 박스 (규칙 6: 미확정 문구 제거 및 준비 안내) -->
+    <div class="bottom-info-box">
+      <h3>연재관 준비 안내</h3>
+      <p>웹소설 연재관은 준비 중입니다.</p>
     </div>
   </main>
-
-  <script src="../_common/common.js"></script>
 </body>
 </html>
