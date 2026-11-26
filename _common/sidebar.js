@@ -114,7 +114,9 @@
             }).join('') + '</div></div>';
         }).join('') + '</div></section>';
     });
-    if (typeof BOARD_OPEN !== 'undefined' && BOARD_OPEN) html += '<div class="zw-kids" style="border:none;margin-left:0"><a class="t zw-hub" href="' + ROOT + 'board/index.html">💬 게시판 →</a></div>';
+    html += '<div class="zw-kids" style="border:none;margin-left:0"><a class="t zw-hub' + (here.indexOf(ROOT + 'ai-learn/') === 0 ? ' on' : '') + '" href="' + ROOT + 'ai-learn/index.html">🤖 AI같이배워요 →</a></div>';
+    html += '<div class="zw-kids" style="border:none;margin-left:0"><a class="t zw-hub' + (here.indexOf(ROOT + 'novel/') === 0 ? ' on' : '') + '" href="' + ROOT + 'novel/index.html">📖 연재관 →</a></div>';
+    if (typeof BOARD_OPEN !== 'undefined' && BOARD_OPEN) html += '<div class="zw-kids" style="border:none;margin-left:0"><a class="t zw-hub' + (here.indexOf(ROOT + 'board/') === 0 ? ' on' : '') + '" href="' + ROOT + 'board/index.html">💬 게시판 →</a></div>';
     body.innerHTML = html || '<p class="zw-none">아직 목록이 없어요.</p>';
   }
 

@@ -365,13 +365,17 @@ ZW.app = function (cfg) {
     return Boolean(c && CAT_PATH[c] && ((here && here[3] === c) || location.href.indexOf(ROOT + CAT_PATH[c] + '/') === 0));
   };
   var isBoardOn = location.href.indexOf(ROOT + 'board/') === 0 || location.pathname.indexOf('/board/') === 0;
+  var isAiLearnOn = location.href.indexOf(ROOT + 'ai-learn/') === 0 || location.pathname.indexOf('/ai-learn/') === 0;
+  var isNovelOn = location.href.indexOf(ROOT + 'novel/') === 0 || location.pathname.indexOf('/novel/') === 0;
   var isToolsGroupOn = NAV_TOOLS_GROUP.some(isCatOn);
-  var isHomeOn = !here && !isBoardOn && !CATS.some(isCatOn) && (cleanHref === home || cleanHref === ROOT || cleanHref + 'index.html' === home);
+  var isHomeOn = !here && !isBoardOn && !isAiLearnOn && !isNovelOn && !CATS.some(isCatOn) && (cleanHref === home || cleanHref === ROOT || cleanHref + 'index.html' === home);
 
   var head = document.createElement('header');
   head.className = 'zw-head';
   head.innerHTML = '<div class="in"><a class="zw-logo" href="' + home + '">좌표<b>나라</b></a><div class="zw-tools"><button type="button" class="zw-pwa" aria-haspopup="dialog">📲 좌표나라 바로가기</button><button type="button" class="zw-theme" role="switch" aria-checked="true" aria-label="다크 모드"><span class="lb">다크</span><span class="sw"></span></button></div><nav class="zw-nav" aria-label="주요 메뉴">'
     + NAV_MAIN.filter(function (c) { return CAT_PATH[c]; }).map(function (c) { return '<a href="' + ROOT + CAT_PATH[c] + '/index.html"' + (isCatOn(c) ? ' class="on"' : '') + '>' + c + '</a>'; }).join('')
+    + '<a href="' + ROOT + 'ai-learn/index.html"' + (isAiLearnOn ? ' class="on"' : '') + '>AI같이배워요</a>'
+    + '<a href="' + ROOT + 'novel/index.html"' + (isNovelOn ? ' class="on"' : '') + '>연재관</a>'
     + (BOARD_OPEN ? '<a href="' + ROOT + 'board/index.html"' + (isBoardOn ? ' class="on"' : '') + '>게시판</a>' : '')
     + (NAV_TOOLS_GROUP.length ? '<div class="zw-nav-more"><button type="button" class="zw-nav-btn' + (isToolsGroupOn ? ' on' : '') + '" aria-haspopup="true" aria-expanded="false">도구 <span class="zw-caret" aria-hidden="true">▾</span></button><div class="zw-nav-drop" role="menu" hidden>'
       + NAV_TOOLS_GROUP.filter(function (c) { return CAT_PATH[c]; }).map(function (c) { return '<a role="menuitem" href="' + ROOT + CAT_PATH[c] + '/index.html"' + (isCatOn(c) ? ' class="on"' : '') + '>' + c + '</a>'; }).join('')
@@ -471,6 +475,7 @@ ZW.app = function (cfg) {
   document.body.appendChild(foot);
 
   // 휴대폰 아래 고정 탭줄(폭 640px 이하)과 '더보기' 패널
+  var isMoreOn = isToolsGroupOn || isAiLearnOn || isNovelOn;
   var tabbar = document.createElement('nav');
   tabbar.className = 'zw-tabbar';
   tabbar.setAttribute('aria-label', '아래 고정 메뉴');
@@ -479,7 +484,7 @@ ZW.app = function (cfg) {
       return '<a href="' + ROOT + CAT_PATH[c] + '/index.html"' + (isCatOn(c) ? ' class="on" aria-current="page"' : '') + '><i aria-hidden="true">' + (CAT_ICON[c] || '📌') + '</i><span>' + c + '</span></a>';
     }).join('')
     + (BOARD_OPEN ? '<a href="' + ROOT + 'board/index.html"' + (isBoardOn ? ' class="on" aria-current="page"' : '') + '><i aria-hidden="true">💬</i><span>게시판</span></a>' : '')
-    + '<button type="button" class="zw-tab-more' + (isToolsGroupOn ? ' on' : '') + '" aria-haspopup="dialog" aria-expanded="false"><i aria-hidden="true">➕</i><span>더보기</span></button>';
+    + '<button type="button" class="zw-tab-more' + (isMoreOn ? ' on' : '') + '" aria-haspopup="dialog" aria-expanded="false"><i aria-hidden="true">➕</i><span>더보기</span></button>';
   document.body.appendChild(tabbar);
 
   var moreSheet = document.createElement('div');
@@ -488,6 +493,8 @@ ZW.app = function (cfg) {
   moreSheet.innerHTML = '<div class="zw-more-box" role="dialog" aria-modal="true" aria-labelledby="zwmt">'
     + '<div class="zw-more-top"><b id="zwmt">도구 더보기</b><button type="button" class="zw-more-close" aria-label="닫기">✕</button></div>'
     + '<div class="zw-more-grid">'
+    + '<a class="zw-more-item' + (isAiLearnOn ? ' on' : '') + '" href="' + ROOT + 'ai-learn/index.html"><b>🤖 AI같이배워요</b><span>초보자 AI 길라잡이·소식</span></a>'
+    + '<a class="zw-more-item' + (isNovelOn ? ' on' : '') + '" href="' + ROOT + 'novel/index.html"><b>📖 연재관</b><span>좌표나라 오리지널 웹소설</span></a>'
     + NAV_TOOLS_GROUP.filter(function (c) { return CAT_PATH[c]; }).map(function (c) {
       return '<a class="zw-more-item' + (isCatOn(c) ? ' on' : '') + '" href="' + ROOT + CAT_PATH[c] + '/index.html"><b>' + (CAT_ICON[c] ? CAT_ICON[c] + ' ' : '') + c + '</b><span>' + (CAT_DESC[c] || '') + '</span></a>';
     }).join('')
