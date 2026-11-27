@@ -173,6 +173,7 @@
   function draw() {
     var word = q.value.trim(), html = '', shown = 0;
     if (!word) {
+      html += '<a class="catcard" href="ai-learn/" style="margin-bottom:12px;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 12px;padding:14px 16px"><b style="font-size:18px;line-height:1.35">🤖 AI같이배워요</b><span style="flex:1 1 120px;min-width:0;word-break:keep-all">목표·질문·선택, 딱 3가지로 시작</span><small style="margin-left:auto">배우러 가기 ›</small></a>';
       html += '<div class="catgrid">' + catCard('휴대폰', true) + catCard('부동산', true) + '</div>';
       html += '<a class="catcard" href="goblin-raid/" style="margin-top:12px;flex-direction:row;align-items:center;gap:12px;padding:14px 16px"><b style="font-size:18px;white-space:nowrap">🛡️ 좌표 탐험대</b><span style="flex:1">선을 이어 고블린과 싸우는 무료 퍼즐 게임</span><small>하러 가기 ›</small></a>';
       html += '<div class="catgrid small">' + CATS.slice(2).map(function (c) { return catCard(c, false); }).join('') + '</div>';
