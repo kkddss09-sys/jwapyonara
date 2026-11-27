@@ -311,6 +311,98 @@
       line-height: 1.45;
       margin: 0;
     }
+    .draft-page .install-box {
+      background: var(--dp-card);
+      border: 1px solid var(--dp-line);
+      border-radius: var(--dp-radius);
+      padding: 18px 20px;
+      margin-bottom: 24px;
+    }
+    .draft-page .install-box-head {
+      margin-bottom: 14px;
+    }
+    .draft-page .install-box-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 4px;
+    }
+    .draft-page .install-box-desc {
+      font-size: 13px;
+      color: var(--dp-sub);
+      margin: 0;
+    }
+    .draft-page .install-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .draft-page .install-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--dp-fill);
+      border: 1px solid var(--dp-line);
+      border-radius: 10px;
+      flex-wrap: wrap;
+    }
+    .draft-page .install-row-name {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      min-width: 130px;
+    }
+    .draft-page .install-row-name strong {
+      font-size: 15px;
+      color: var(--dp-ink);
+    }
+    .draft-page .install-corp {
+      font-size: 12px;
+      color: var(--dp-sub);
+    }
+    .draft-page .install-row-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .draft-page .install-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 8px;
+      background: var(--dp-panel);
+      color: #fff;
+      border: 1px solid var(--dp-line);
+      transition: background 0.15s, border-color 0.15s;
+      text-decoration: none;
+    }
+    .draft-page .install-btn:hover {
+      background: var(--dp-accent);
+      border-color: var(--dp-accent);
+    }
+    .draft-page .install-guide-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dp-accent);
+      padding: 6px 6px;
+      text-decoration: none;
+    }
+    .draft-page .install-guide-link:hover {
+      text-decoration: underline;
+    }
+      .draft-page .ib-warn { border:4px solid #ffcc33; background:#3a2b05; border-radius:16px; padding:20px 14px; margin:0 0 20px; text-align:center; }
+    .draft-page .ib-warn-title { font-size:30px; font-weight:900; color:#ffd64d; margin:0 0 8px; }
+    .draft-page .ib-warn-text { font-size:19px; font-weight:800; color:#fff; margin:0 0 14px; word-break:keep-all; }
+    .draft-page .ib-warn-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .draft-page .ib-warn-card { background:#10141d; border:2px solid #ffcc33; border-radius:12px; padding:14px 6px; color:#fff; font-size:15px; }
+    .draft-page .ib-warn-card strong { display:block; font-size:26px; font-weight:900; color:#ffd64d; margin-top:6px; }
+    .draft-page .ib-warn-foot { font-size:16px; font-weight:800; color:#ff9d8a; margin:14px 0 0; word-break:keep-all; }
   </style>
 </head>
 <body>
@@ -329,12 +421,17 @@
       <div class="guide-hero-tag">
         🧭 시작 가이드
       </div>
-      <h2>처음 써보는 분을 위한 안전한 시작 순서표</h2>
-      <p>어려운 전문 용어 없이 내 스마트폰에서 안전 수칙을 먼저 챙기고, 첫 질문을 편안하게 건네보는 단계별 길라잡이입니다.</p>
+      <h2>시작 가이드</h2>
+      <p>프로그램 설치부터 다음 할 일 복사까지, 그림으로 따라 하기</p>
       <div class="guide-hero-status">
         <span>안내 보기 ›</span>
       </div>
     </a>
+
+    <!-- 위쪽 카톡방 단추 -->
+    <div class="zw-ai-kakao" style="margin:0 0 20px;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
 
     <!-- 카테고리 표시 (규칙 7: 동작 없는 단추 대신 span 표시용 글자) -->
     <div class="category-section">
@@ -431,7 +528,7 @@
 
     <!-- 하단 커뮤니티 안내 (규칙 5, 6: 카톡방 주소 지어내지 않음, 가격 관련 문구 배제) -->
     <div style="margin-top:24px;">
-      <a class="cta" data-zw="kakao" href="#">궁금한 AI 사용법, 카톡방에서 같이 물어보세요<small>가입·결제 없이 무료로 질문해요</small></a>
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요<small>가입·결제 없이 무료로 질문해요</small></a>
     </div>
   </main>
 </body>

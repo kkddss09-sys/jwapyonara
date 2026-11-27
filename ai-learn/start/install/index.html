@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>1단계 그림으로 보는 설치 — 좌표나라 AI같이배워요</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="../../../_common/common.css">
+  <link rel="stylesheet" href="../../_ai-learn/ai-learn.css">
+  <style>
+    /* 모든 스타일은 .sg-page 아래로만 제한 (전역 선택자 금지) */
+    .sg-page {
+      --sg-bg: #0e131c;
+      --sg-card: #171d29;
+      --sg-card-hover: #1e2638;
+      --sg-ink: #eef2f8;
+      --sg-sub: #98a3b5;
+      --sg-line: #2a3344;
+      --sg-accent: #3d8bff;
+      --sg-accent-soft: rgba(61, 139, 255, 0.12);
+      --sg-panel: #2b3547;
+      --sg-fill: #1f2735;
+      --sg-fill2: #253042;
+      --sg-ok: #4ade80;
+      --sg-ok-soft: rgba(74, 222, 128, 0.12);
+      --sg-amber: #facc15;
+      --sg-amber-soft: rgba(250, 204, 21, 0.12);
+      --sg-danger: #ff7a70;
+      --sg-radius: 14px;
+
+      background-color: var(--sg-bg);
+      color: var(--sg-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 16px 60px;
+      box-sizing: border-box;
+    }
+
+    .sg-page * {
+      box-sizing: border-box;
+    }
+
+    .sg-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* 빵부스러기 */
+    .sg-page .sg-breadcrumb {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* 상단 알림 배너 (모바일 주의) */
+    .sg-page .sg-mobile-notice {
+      background: var(--sg-amber-soft);
+      border: 1px solid var(--sg-amber);
+      color: var(--sg-ink);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .sg-page .sg-mobile-notice strong {
+      color: var(--sg-amber);
+    }
+
+    /* 머리말 */
+    .sg-page .sg-header {
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--sg-accent-soft);
+      color: var(--sg-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-header h1 {
+      font-size: 26px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .sg-page .sg-lead {
+      font-size: 15px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 빠른 바로가기 3개 */
+    .sg-page .sg-quick-nav {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .sg-page .sg-quick-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 12px 8px;
+      text-align: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .sg-page .sg-quick-btn:hover {
+      background: var(--sg-card-hover);
+      border-color: var(--sg-accent);
+    }
+    .sg-page .sg-quick-step {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      margin-bottom: 4px;
+    }
+    .sg-page .sg-quick-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sg-ink);
+    }
+
+    /* 컴퓨터 고르기 안내 */
+    .sg-page .sg-section {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 20px 18px;
+      margin-bottom: 28px;
+    }
+    .sg-page .sg-sec-title {
+      font-size: 19px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sg-page .sg-sec-desc {
+      font-size: 14px;
+      color: var(--sg-sub);
+      margin: 0 0 16px;
+      line-height: 1.5;
+    }
+
+    .sg-page .sg-os-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .sg-page .sg-os-card {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .sg-page .sg-os-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: var(--sg-panel);
+      color: #fff;
+    }
+    .sg-page .sg-os-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 6px;
+    }
+    .sg-page .sg-os-text {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    /* 프로그램 카드 묶음 */
+    .sg-page .sg-app-block {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 22px 18px;
+      margin-bottom: 28px;
+    }
+    .sg-page .sg-app-head {
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--sg-line);
+    }
+    .sg-page .sg-app-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .sg-page .sg-app-maker {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--sg-accent);
+      background: var(--sg-accent-soft);
+      padding: 2px 8px;
+      border-radius: 999px;
+    }
+    .sg-page .sg-app-lead {
+      font-size: 14px;
+      color: var(--sg-sub);
+      margin: 0;
+    }
+
+    /* 윈도우용 / 맥용 칸 */
+    .sg-page .sg-platform-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .sg-page .sg-platform-box:last-child {
+      margin-bottom: 0;
+    }
+    .sg-page .sg-platform-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .sg-page .sg-platform-badge {
+      font-size: 13px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: var(--sg-panel);
+      color: #fff;
+    }
+    .sg-page .sg-platform-req {
+      font-size: 12px;
+      color: var(--sg-sub);
+    }
+
+    /* 큰 다운로드 단추 */
+    .sg-page .sg-btn-download {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 50px;
+      padding: 12px 18px;
+      font-size: 15px;
+      font-weight: 800;
+      border-radius: 10px;
+      background: var(--sg-accent);
+      color: #fff;
+      text-decoration: none;
+      text-align: center;
+      margin-bottom: 10px;
+      transition: opacity 0.15s ease;
+    }
+    .sg-page .sg-btn-download:hover {
+      opacity: 0.9;
+    }
+    .sg-page .sg-sub-link {
+      display: block;
+      font-size: 12px;
+      color: var(--sg-sub);
+      text-align: center;
+      margin-bottom: 14px;
+      text-decoration: underline;
+    }
+
+    /* 화면 그림 */
+    .sg-page .sg-screen-wrap {
+      margin: 14px 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--sg-line);
+      background: #000;
+    }
+    .sg-page .sg-screen-img {
+      width: 100%;
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    .sg-page .sg-screen-caption {
+      font-size: 12px;
+      color: var(--sg-sub);
+      padding: 6px 10px;
+      background: var(--sg-fill2);
+      text-align: center;
+    }
+
+    /* 설치 순서 3~4단계 */
+    .sg-page .sg-steps-list {
+      margin: 14px 0 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sg-page .sg-step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--sg-ink);
+      line-height: 1.5;
+    }
+    .sg-page .sg-step-num {
+      flex: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      background: var(--sg-panel);
+      color: var(--sg-accent);
+      font-weight: 800;
+      font-size: 12px;
+      border-radius: 50%;
+      margin-top: 2px;
+    }
+    .sg-page .sg-fallback-note {
+      font-size: 12px;
+      color: var(--sg-sub);
+      margin-top: 8px;
+      padding: 6px 10px;
+      background: var(--sg-fill2);
+      border-radius: 6px;
+    }
+
+    /* 공통 안내 박스 */
+    .sg-page .sg-notice-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.5;
+    }
+
+    /* 다음 할 일 1·2·3·4 안내 */
+    .sg-page .sg-copy-container {
+      margin: 16px 0;
+    }
+    .sg-page .sg-prompt-textarea {
+      width: 100%;
+      height: 190px;
+      background: #090d14;
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: var(--sg-ink);
+      font-family: inherit;
+      font-size: 13px;
+      line-height: 1.6;
+      resize: vertical;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .sg-page .sg-btn-copy {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 50px;
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: 800;
+      border-radius: 10px;
+      background: var(--sg-ok);
+      color: #0b2214;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .sg-page .sg-btn-copy:hover {
+      background: #3ec974;
+    }
+    .sg-page .sg-btn-copy.copied {
+      background: #2563eb;
+      color: #fff;
+    }
+    .sg-page .sg-copy-msg {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sg-ok);
+      text-align: center;
+      margin-top: 8px;
+    }
+    .sg-page .sg-copy-fail-msg {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sg-danger);
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    /* 따라 하기 5단계 */
+    .sg-page .sg-five-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 18px 0;
+    }
+    .sg-page .sg-five-item {
+      display: flex;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .sg-page .sg-five-tag {
+      flex: none;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 2px 8px;
+      background: var(--sg-panel);
+      color: var(--sg-accent);
+      border-radius: 6px;
+      height: fit-content;
+    }
+
+    /* 말풍선 예시 */
+    .sg-page .sg-chat-example {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 18px 0;
+    }
+    .sg-page .sg-chat-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sg-sub);
+      background: var(--sg-panel);
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-bubble-row {
+      display: flex;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-bubble-row.me {
+      justify-content: flex-end;
+    }
+    .sg-page .sg-bubble-row.ai {
+      justify-content: flex-start;
+    }
+    .sg-page .sg-bubble {
+      max-width: 82%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .sg-page .sg-bubble-me {
+      background: var(--sg-accent);
+      color: #fff;
+      border-bottom-right-radius: 3px;
+    }
+    .sg-page .sg-bubble-ai {
+      background: var(--sg-fill2);
+      color: var(--sg-ink);
+      border-bottom-left-radius: 3px;
+      border: 1px solid var(--sg-line);
+    }
+    .sg-page .sg-bubble-title {
+      font-weight: 800;
+      margin-top: 6px;
+      color: var(--sg-ok);
+    }
+
+    /* 주의 알림 */
+    .sg-page .sg-caution-box {
+      background: var(--sg-amber-soft);
+      border: 1px solid rgba(250, 204, 21, 0.3);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: var(--sg-ink);
+      line-height: 1.5;
+      margin-top: 16px;
+    }
+
+    /* 화면 캡처 섹션 */
+    .sg-page .sg-capture-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .sg-page .sg-capture-card {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .sg-page .sg-key {
+      display: inline-block;
+      background: var(--sg-panel);
+      color: #fff;
+      border: 1px solid var(--sg-line);
+      border-radius: 5px;
+      padding: 2px 6px;
+      font-size: 12px;
+      font-weight: 700;
+      margin: 0 2px;
+    }
+
+    /* 하단 이동 줄 */
+    .sg-page .sg-bottom-nav {
+      margin-top: 32px;
+      padding-top: 16px;
+      border-top: 1px solid var(--sg-line);
+    }
+    .sg-page .sg-bottom-nav a {
+      font-size: 14px;
+      color: var(--sg-accent);
+      font-weight: 700;
+    }
+    .sg-page .sg-bottom-nav a:hover {
+      text-decoration: underline;
+    }
+
+    /* 카톡방 CTA */
+    .sg-page .sg-kakao-wrap {
+      margin-top: 24px;
+    }
+
+    /* 반응형 화면 */
+    @media (max-width: 480px) {
+      .sg-page .sg-quick-nav {
+        grid-template-columns: 1fr;
+      }
+      .sg-page .sg-os-grid {
+        grid-template-columns: 1fr;
+      }
+      .sg-page .sg-capture-grid {
+        grid-template-columns: 1fr;
+      }
+      .sg-page .sg-bubble {
+        max-width: 95%;
+      }
+    }
+      .sg-page .sg-warn { border:4px solid #ffcc33; background:#3a2b05; border-radius:16px; padding:20px 14px; margin:0 0 20px; text-align:center; }
+    .sg-page .sg-warn-title { font-size:30px; font-weight:900; color:#ffd64d; margin:0 0 8px; }
+    .sg-page .sg-warn-text { font-size:19px; font-weight:800; color:#fff; margin:0 0 14px; word-break:keep-all; }
+    .sg-page .sg-warn-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .sg-page .sg-warn-card { background:#10141d; border:2px solid #ffcc33; border-radius:12px; padding:14px 6px; color:#fff; font-size:15px; }
+    .sg-page .sg-warn-card strong { display:block; font-size:26px; font-weight:900; color:#ffd64d; margin-top:6px; }
+    .sg-page .sg-warn-foot { font-size:16px; font-weight:800; color:#ff9d8a; margin:14px 0 0; word-break:keep-all; }
+  </style>
+</head>
+<body>
+  <div class="sg-page">
+    <nav class="sg-breadcrumb">
+      <a href="../../../index.html">좌표나라</a> › <a href="../../index.html">AI같이배워요</a> › <a href="../index.html">시작 가이드</a> › <span>그림으로 보기</span>
+    </nav>
+    <div class="sg-header">
+      <h1>그림으로 보는 설치</h1>
+      <p class="sg-lead">빨간 테두리가 있는 곳을 누르면 돼요. 설치는 컴퓨터에서 하세요.</p>
+    </div>
+
+    <!-- 위쪽 카톡방 단추 -->
+    <div class="zw-ai-kakao" style="margin:0 0 20px;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+
+    <!-- 윈도우·맥 주의 -->
+    <div class="sg-warn" role="note">
+      <p class="sg-warn-title">⚠️ 꼭 확인하세요!</p>
+      <p class="sg-warn-text">내 컴퓨터에 맞는 단추를 눌러야 해요.</p>
+      <div class="sg-warn-grid">
+        <div class="sg-warn-card">윈도우 컴퓨터<strong>윈도우용</strong></div>
+        <div class="sg-warn-card">맥 컴퓨터<strong>맥용</strong></div>
+      </div>
+      <p class="sg-warn-foot">다른 것을 받으면 설치가 안 돼요.</p>
+    </div>
+
+    <!-- 2. 프로그램 내려받기 섹션 -->
+    <div id="sec-download">
+      <div style="margin-bottom: 16px;">
+        <h2 style="font-size:21px; font-weight:800; color:#fff; margin:0 0 6px;">📥 1단계: AI 프로그램 내려받기</h2>
+        <p style="font-size:14px; color:var(--sg-sub); margin:0;">아래 3가지 프로그램 중 마음에 드는 것을 골라 내 컴퓨터에 설치해 보세요.</p>
+      </div>
+
+      <!-- [프로그램 1] 안티그래비티 (구글) -->
+      <div class="sg-app-block" id="app-antigravity">
+        <div class="sg-app-head">
+          <div class="sg-app-title">
+            <span>1. 안티그래비티</span>
+            <span class="sg-app-maker">구글 (Google)</span>
+          </div>
+          <p class="sg-app-lead">구글의 강력한 최신 AI와 함께 다양한 작업을 돕는 똑똑한 도우미 프로그램입니다.</p>
+        </div>
+
+        <!-- 안티그래비티 윈도우용 -->
+        <div class="sg-platform-box">
+          <div class="sg-platform-header">
+            <span class="sg-platform-badge">윈도우용 (Windows)</span>
+            <span class="sg-platform-req">요구사항: Windows 10(64비트) 이상</span>
+          </div>
+          <a href="https://antigravity.google/download?os=windows" target="_blank" rel="noopener" class="sg-btn-download">
+            안티그래비티 홈페이지 열기 (윈도우용) ›
+          </a>
+          <div class="sg-screen-wrap">
+            <img src="../img/antigravity-win.png" alt="안티그래비티 윈도우 다운로드 화면" class="sg-screen-img">
+            <div class="sg-screen-caption">▲ 사이트에서 빨간 테두리 쳐진 <strong>"x64용 다운로드"</strong>를 누르세요.</div>
+          </div>
+          <ul class="sg-steps-list">
+            <li class="sg-step-item">
+              <span class="sg-step-num">1</span>
+              <div>위 파란 단추를 눌러 이동한 사이트에서 빨간 테두리의 <strong>"x64용 다운로드"</strong>를 눌러요. (대부분의 일반 PC용이며, 특수한 ARM 컴퓨터만 ARM64를 누릅니다)</div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">2</span>
+              <div>내려받은 설치 파일을 마우스로 두 번 눌러서 열어요.</div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">3</span>
+              <div>화면 안내를 따라 설치를 마쳐요. <span class="sg-fallback-note">화면이 다르면 화면 안내를 따르세요.</span></div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">4</span>
+              <div>설치된 안티그래비티 프로그램을 켜고 구글 계정으로 로그인해요.</div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 안티그래비티 맥용 -->
+        <div class="sg-platform-box">
+          <div class="sg-platform-header">
+            <span class="sg-platform-badge">맥용 (macOS)</span>
+            <span class="sg-platform-req">요구사항: macOS 13 이상</span>
+          </div>
+          <a href="https://antigravity.google/download?os=mac" target="_blank" rel="noopener" class="sg-btn-download">
+            안티그래비티 홈페이지 열기 (맥용) ›
+          </a>
+          <div class="sg-screen-wrap">
+            <img src="../img/antigravity-mac.png" alt="안티그래비티 맥 다운로드 화면" class="sg-screen-img">
+            <div class="sg-screen-caption">▲ 내 맥에 맞춰 <strong>Apple Silicon</strong>(M칩) 또는 <strong>Intel</strong>을 고르세요.</div>
+          </div>
+          <ul class="sg-steps-list">
+            <li class="sg-step-item">
+              <span class="sg-step-num">1</span>
+              <div>위 단추로 이동한 뒤, 내 맥 기종에 맞는 단추(M1·M2·M3 등은 <strong>Apple Silicon</strong>, 옛날 맥은 <strong>Intel</strong>. 왼쪽 위 사과 모양 → "이 Mac에 관하여"에서 확인해요)를 눌러 파일을 받아요.</div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">2</span>
+              <div>내려받은 .dmg 설치 파일을 두 번 눌러서 열어요.</div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">3</span>
+              <div>앱 그림을 "응용 프로그램(Applications)" 폴더로 끌어 놓은 뒤 응용 프로그램에서 열어요. <span class="sg-fallback-note">화면이 다르면 화면 안내를 따르세요.</span></div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">4</span>
+              <div>구글 계정으로 로그인해요.</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- [프로그램 2] 클로드 (Anthropic) -->
+      <div class="sg-app-block" id="app-claude">
+        <div class="sg-app-head">
+          <div class="sg-app-title">
+            <span>2. 클로드</span>
+            <span class="sg-app-maker">Anthropic</span>
+          </div>
+          <p class="sg-app-lead">글을 꼼꼼하게 읽고, 사람처럼 친절하고 정확하게 답변해 주는 AI 프로그램입니다.</p>
+        </div>
+
+        <!-- 클로드 윈도우용 -->
+        <div class="sg-platform-box">
+          <div class="sg-platform-header">
+            <span class="sg-platform-badge">윈도우용 (Windows)</span>
+          </div>
+          <a href="https://claude.com/ko/download" target="_blank" rel="noopener" class="sg-btn-download">
+            클로드 홈페이지 열기 (윈도우용) ›
+          </a>
+          <div class="sg-screen-wrap">
+            <img src="../img/claude-win.png" alt="클로드 윈도우 다운로드 화면" class="sg-screen-img">
+            <div class="sg-screen-caption">▲ 홈페이지에서 Windows 줄의 <strong>"다운로드"</strong>를 누르세요.</div>
+          </div>
+          <ul class="sg-steps-list">
+            <li class="sg-step-item">
+              <span class="sg-step-num">1</span>
+              <div>위 파란 단추로 홈페이지를 연 뒤, Windows 줄의 <strong>"다운로드"</strong>를 눌러요.</div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">2</span>
+              <div>내려받은 파일을 마우스로 두 번 눌러서 실행해요.</div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">3</span>
+              <div>화면 안내를 따라 설치를 마쳐요. <span class="sg-fallback-note">화면이 다르면 화면 안내를 따르세요.</span></div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">4</span>
+              <div>클로드를 열고 이메일이나 계정으로 로그인해요.</div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 클로드 맥용 -->
+        <div class="sg-platform-box">
+          <div class="sg-platform-header">
+            <span class="sg-platform-badge">맥용 (macOS)</span>
+          </div>
+          <a href="https://claude.com/ko/download" target="_blank" rel="noopener" class="sg-btn-download">
+            클로드 홈페이지 열기 (맥용) ›
+          </a>
+          <div class="sg-screen-wrap">
+            <img src="../img/claude-mac.png" alt="클로드 맥 다운로드 화면" class="sg-screen-img">
+            <div class="sg-screen-caption">▲ 홈페이지에서 <strong>"macOS용 다운로드"</strong>를 누르세요.</div>
+          </div>
+          <ul class="sg-steps-list">
+            <li class="sg-step-item">
+              <span class="sg-step-num">1</span>
+              <div>위 파란 단추로 홈페이지를 연 뒤, <strong>"macOS용 다운로드"</strong>를 눌러요.</div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">2</span>
+              <div>내려받은 .dmg 파일을 마우스로 두 번 열어요.</div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">3</span>
+              <div>앱 그림을 "응용 프로그램" 폴더로 끌어 놓은 뒤 응용 프로그램에서 열어요. <span class="sg-fallback-note">화면이 다르면 화면 안내를 따르세요.</span></div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">4</span>
+              <div>클로드를 열고 계정으로 로그인해요.</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- [프로그램 3] ChatGPT (OpenAI) -->
+      <div class="sg-app-block" id="app-chatgpt">
+        <div class="sg-app-head">
+          <div class="sg-app-title">
+            <span>3. ChatGPT</span>
+            <span class="sg-app-maker">OpenAI</span>
+          </div>
+          <p class="sg-app-lead">질문하면 대답해 주는 대화형 AI 도우미 프로그램입니다.</p>
+        </div>
+
+        <!-- ChatGPT 윈도우용 -->
+        <div class="sg-platform-box">
+          <div class="sg-platform-header">
+            <span class="sg-platform-badge">윈도우용 (Windows)</span>
+          </div>
+          <a href="https://chatgpt.com/ko-KR/download/" target="_blank" rel="noopener" class="sg-btn-download">
+            ChatGPT 홈페이지 열기 (윈도우용) ›
+          </a>
+          <div class="sg-screen-wrap">
+            <img src="../img/chatgpt-win.png" alt="ChatGPT 윈도우 다운로드 화면" class="sg-screen-img">
+            <div class="sg-screen-caption">▲ 홈페이지에서 빨간 테두리 쳐진 <strong>"Windows용 다운로드"</strong>를 누르세요.</div>
+          </div>
+          <ul class="sg-steps-list">
+            <li class="sg-step-item">
+              <span class="sg-step-num">1</span>
+              <div>위 파란 단추로 홈페이지를 연 뒤, <strong>"Windows용 다운로드"</strong>를 눌러요.</div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">2</span>
+              <div>내려받은 파일을 두 번 누르고 화면에서 설치를 시작해요.</div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">3</span>
+              <div>화면 안내를 따라 설치를 완료해요. <span class="sg-fallback-note">화면이 다르면 화면 안내를 따르세요.</span></div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">4</span>
+              <div>ChatGPT를 켜고 계정으로 로그인해요.</div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- ChatGPT 맥용 -->
+        <div class="sg-platform-box">
+          <div class="sg-platform-header">
+            <span class="sg-platform-badge">맥용 (macOS)</span>
+          </div>
+          <a href="https://chatgpt.com/ko-KR/download/" target="_blank" rel="noopener" class="sg-btn-download">
+            ChatGPT 홈페이지 열기 (맥용) ›
+          </a>
+          <div class="sg-screen-wrap">
+            <img src="../img/chatgpt-mac.png" alt="ChatGPT 맥 다운로드 화면" class="sg-screen-img">
+            <div class="sg-screen-caption">▲ 페이지에서 빨간 테두리 쳐진 <strong>"macOS용 다운로드"</strong>를 누르세요.</div>
+          </div>
+          <ul class="sg-steps-list">
+            <li class="sg-step-item">
+              <span class="sg-step-num">1</span>
+              <div>위 단추로 이동한 사이트에서 빨간 테두리의 <strong>"macOS용 다운로드"</strong>를 눌러요.</div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">2</span>
+              <div>내려받은 .dmg 파일을 마우스로 두 번 열어요.</div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">3</span>
+              <div>앱 그림을 "응용 프로그램" 폴더로 끌어 놓은 뒤 응용 프로그램에서 열어요. <span class="sg-fallback-note">화면이 다르면 화면 안내를 따르세요.</span></div>
+            </li>
+            <li class="sg-step-item">
+              <span class="sg-step-num">4</span>
+              <div>ChatGPT를 열고 계정으로 로그인해요.</div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 공통 보호자 및 계정 안내 -->
+      <div class="sg-notice-box">
+        💡 <strong>안내 말씀</strong><br>
+        • 로그인과 일부 기능의 조건은 각 회사 안내를 확인하세요.<br>
+        • 어린이는 보호자(어른)와 함께 설치하고, 각 서비스의 나이 제한을 확인하세요(클로드는 18세 이상만 쓸 수 있어요).
+      </div>
+    </div>
+
+    <div class="sg-kakao-wrap" style="margin:20px 0;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+    <div class="sg-bottom-nav">
+      <a href="../index.html">« 시작 가이드로 돌아가기</a>
+    </div>
+  </div>
+
+  <script src="../../../_common/common.js"></script>
+</body>
+</html>
