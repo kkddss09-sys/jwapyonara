@@ -4302,6 +4302,16 @@
     });
   }
 
+  function getClassGrowth(prof, cid) {
+    const item = (prof && Array.isArray(prof.classes))
+      ? prof.classes.find(c => c && (c.key === cid || c.id === cid))
+      : null;
+    if (item && typeof item.growth === 'number' && item.growth > 0) {
+      return item.growth;
+    }
+    return (cid === 'adventurer' || cid === 0) ? 1 : 0;
+  }
+
   /**
    * 조각 11: 퍽과 결함 직업 설정 모달
    */
@@ -4312,9 +4322,9 @@
     pfModalTitle.textContent = `⚙️ 직업 설정: ${cDef.name}`;
 
     const prof = GR.loadProfile();
-    const classProg = (prof.classProgress && prof.classProgress[classId]) || { level: 1 };
+    const classLevel = getClassGrowth(prof, classId);
     const savedSetting = (prof.classPerkSettings && prof.classPerkSettings[classId]) || { perks: [], flaws: [] };
-    const slotCount = GR.getPerkSlotCount(classProg.level);
+    const slotCount = GR.getPerkSlotCount(classLevel);
 
     pfModalDesc.textContent = `파랑 퍽과 빨강 결함을 각 슬롯에 짝으로 맞춰 장착하세요 (사용 가능 슬롯: ${slotCount}쌍).`;
     pfStatusMsg.textContent = '';
@@ -4563,7 +4573,7 @@
         currentFlaws.push(fVal);
       }
 
-      const isValid = GR.canConfirmPerkFlawSetup(settingClassId, currentPerks, currentFlaws, classProg.level);
+      const isValid = GR.canConfirmPerkFlawSetup(settingClassId, currentPerks, currentFlaws, classLevel);
       if (!isValid) {
         if (!hasUserInteracted) {
           pfStatusMsg.style.color = '#8a8296';
@@ -4630,8 +4640,8 @@
   if (btnConfirmPerkFlaw) {
     btnConfirmPerkFlaw.addEventListener('click', () => {
       const prof = GR.loadProfile();
-      const classProg = (prof.classProgress && prof.classProgress[settingClassId]) || { level: 1 };
-      const slotCount = GR.getPerkSlotCount(classProg.level);
+      const classLevel = getClassGrowth(prof, settingClassId);
+      const slotCount = GR.getPerkSlotCount(classLevel);
 
       const perkSelects = perkFlawSlotsContainer.querySelectorAll('.perk-select');
       const flawSelects = perkFlawSlotsContainer.querySelectorAll('.flaw-select');
@@ -4645,7 +4655,7 @@
         chosenFlaws.push(fVal);
       }
 
-      if (!GR.canConfirmPerkFlawSetup(settingClassId, chosenPerks, chosenFlaws, classProg.level)) {
+      if (!GR.canConfirmPerkFlawSetup(settingClassId, chosenPerks, chosenFlaws, classLevel)) {
         return;
       }
 
@@ -4681,13 +4691,15 @@
     raceGridList.innerHTML = '';
     const raceClassId = ngRaceTargetId || currentClassId;
     const prof = GR.loadProfile();
-    const classProg = (prof.classProgress && prof.classProgress[raceClassId]) || { level: 1 };
-    const classLevel = classProg.level || 1;
+    const classLevel = getClassGrowth(prof, raceClassId);
     const canChange = GR.canChangeRace(raceClassId, classLevel);
-    const currentRaceId = (!ngRaceTargetId && gameState.player && gameState.player.raceId != null)
-      ? gameState.player.raceId
-      : (prof.classRaceSettings && prof.classRaceSettings[raceClassId] != null
-        ? prof.classRaceSettings[raceClassId]
+    const savedRaceId = (prof.classRaceSettings && prof.classRaceSettings[raceClassId] != null)
+      ? prof.classRaceSettings[raceClassId]
+      : null;
+    const currentRaceId = (savedRaceId != null)
+      ? savedRaceId
+      : ((!ngRaceTargetId && gameState.player && gameState.player.raceId != null)
+        ? gameState.player.raceId
         : ((GR.CLASSES[raceClassId] && GR.CLASSES[raceClassId].defaultRaceId != null) ? GR.CLASSES[raceClassId].defaultRaceId : 0));
 
     GR.RACES_DATA.forEach(rDef => {
@@ -4710,28 +4722,21 @@
           <div class="race-box-row race-box-bonus">✨ 보너스: ${rDef.bonusName} — ${rDef.bonusDesc}</div>
           <div class="race-box-row race-box-enemy">☠ 숙적: ${rDef.mortalEnemyDesc}</div>
         </div>
-        <small style="margin-top:2px; color:${isSelected ? 'var(--gold)' : '#aaa'};">${isSelected ? '✓ 현재 장착 중' : statusText}</small>
+        <small style="margin-top:2px; color:${isSelected ? 'var(--gold)' : '#aaa'};">${isSelected ? '✓ 선택됨' : statusText}</small>
       `;
 
       if (canChange && isUnlocked) {
         card.addEventListener('click', () => {
-          if (!ngRaceTargetId && gameState.player) {
-            gameState.player.raceId = rDef.id;
-          }
           if (!prof.classRaceSettings) prof.classRaceSettings = {};
           prof.classRaceSettings[raceClassId] = rDef.id;
           GR.saveProfile(prof);
-          if (!ngRaceTargetId && GR.saveRunState && gameState) {
-            GR.saveRunState(gameState);
-          }
-          if (!ngRaceTargetId) updateHUD();
           modalRace.classList.remove('show');
           if (ngRaceTargetId) {
             ngRaceTargetId = null;
             renderNgClass();
             ngModal.classList.add('show');
           } else {
-            logBox.innerHTML = `종족을 [${rDef.name}] (보너스: ${rDef.bonusName})으로 변경했습니다.`;
+            logBox.innerHTML = `다음 새 게임부터 [${rDef.name}] 종족이 적용돼요. (보너스: ${rDef.bonusName})`;
           }
         });
       }
@@ -4983,7 +4988,6 @@
     let perks = customOptions.perks;
     let flaws = customOptions.flaws;
     const prof = GR.loadProfile();
-    const classProg = (prof.classProgress && prof.classProgress[currentClassId]) || { level: 1 };
 
     if (!perks || !flaws) {
       const savedSetting = (prof.classPerkSettings && prof.classPerkSettings[currentClassId]);
@@ -5186,6 +5190,11 @@
 
   // ── 패치 소식 (게임을 고칠 때마다 맨 위에 새 항목을 추가한다) ──
   const PATCH_NOTES = [
+    { id: '2026-11-28-ag', date: '2026-11-28', title: '🧬 직업 레벨이 종족·특성 화면에 제대로 반영돼요', items: [
+      '직업 레벨을 올렸는데 종족·특성 화면에서 Lv.1로 보이던 문제를 고쳤어요. 특성 슬롯은 직업 레벨 3에 2칸, 7에 3칸, 9에 4칸이 열려요.',
+      '종족은 지금 직업과 바꾸려는 종족의 짝 직업이 모두 레벨 5 이상이면 바꿀 수 있어요. 지금까지의 기록은 그대로예요.',
+      '판 도중에 고른 종족은 다음 새 게임부터 적용돼요.'
+    ] },
     { id: '2026-11-22-af', date: '2026-11-22', title: '🔢 선을 그을 때 적마다 피해가 숫자로 보여요', items: [
       '칼을 이으면 총공격이 마법칼 5배·쌍칼 2배·부서진 칼까지 정확하게 계산돼서 보여요. (전에는 이 계산이 빠져 있었어요)',
       '줄 안의 적마다 들어가는 피해(−숫자), 죽는 적은 ✕ 처치, 살아남는 적은 남는 체력이 숫자로 나와요. 차단되는 적은 🚫 차단으로 보여요.',
@@ -5390,9 +5399,7 @@
     GR.CLASS_IDS.forEach(cid => {
       const def = GR.CLASSES[cid];
       const unlocked = GR.isClassUnlocked(cid, unlocks);
-      const progress = prof.classProgress && prof.classProgress[cid];
-      const growth = unlocks.classGrowths && unlocks.classGrowths[cid];
-      const level = (progress && progress.level) || growth || (cid === 'adventurer' ? 1 : 0);
+      const level = getClassGrowth(prof, cid);
       const button = document.createElement('button');
       button.type = 'button';
       button.className = (cid === ngClassId ? 'selected ' : '') + (unlocked ? '' : 'locked');
