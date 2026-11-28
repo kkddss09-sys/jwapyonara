@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>갤럭시 휴대폰 갤럭시 AI 처음 쓰기 — 초보자 가이드 — 좌표나라 AI같이배워요</title>
+  <meta name="description" content="갤럭시 스마트폰에서 지원 기종과 업데이트 조건을 확인하고 실시간 통역, 서클 투 서치, 글쓰기 도움, 사진 편집 등 갤럭시 AI 기능을 처음 사용하는 방법 안내입니다.">
+  <link rel="canonical" href="https://jwapyonara.com/ai-learn/galaxy-ai/">
+  <meta property="og:title" content="갤럭시 휴대폰 갤럭시 AI 처음 쓰기 — 좌표나라 AI같이배워요">
+  <meta property="og:description" content="갤럭시 스마트폰에서 실시간 통역, 서클 투 서치, 글쓰기 도움, 사진 편집을 쉽게 쓰는 초보자 사용법입니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://jwapyonara.com/ai-learn/galaxy-ai/">
+  <link rel="stylesheet" href="../../_common/common.css">
+  <link rel="stylesheet" href="../_ai-learn/ai-learn.css">
+  <style>
+    /* 모든 스타일은 .sg-page 아래로 제한 */
+    .sg-page {
+      --sg-bg: #0e131c;
+      --sg-card: #171d29;
+      --sg-card-hover: #1e2638;
+      --sg-ink: #eef2f8;
+      --sg-sub: #98a3b5;
+      --sg-line: #2a3344;
+      --sg-accent: #3d8bff;
+      --sg-accent-soft: rgba(61, 139, 255, 0.12);
+      --sg-panel: #2b3547;
+      --sg-fill: #1f2735;
+      --sg-fill2: #253042;
+      --sg-ok: #4ade80;
+      --sg-ok-soft: rgba(74, 222, 128, 0.12);
+      --sg-amber: #facc15;
+      --sg-amber-soft: rgba(250, 204, 21, 0.12);
+      --sg-danger: #ff7a70;
+      --sg-radius: 14px;
+
+      background-color: var(--sg-bg);
+      color: var(--sg-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 16px 60px;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }
+
+    .sg-page * {
+      box-sizing: border-box;
+    }
+
+    .sg-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* 빵부스러기 */
+    .sg-page .sg-breadcrumb {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* 머리말 */
+    .sg-page .sg-header {
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--sg-accent-soft);
+      color: var(--sg-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-header h1 {
+      font-size: 25px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .sg-page .sg-lead {
+      font-size: 15px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 상단 카톡방 링크 */
+    .sg-page .zw-ai-kakao {
+      margin: 0 0 20px;
+    }
+    .sg-page .zw-ai-kakao a.cta {
+      display: block;
+      background: #fae100;
+      color: #371d1e;
+      text-align: center;
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* 3줄 요약 상자 */
+    .sg-page .sg-summary-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-left: 4px solid var(--sg-accent);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 28px;
+    }
+    .sg-page .sg-summary-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-summary-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-summary-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-summary-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 단계 구역 카드 */
+    .sg-page .sg-step-sec {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 20px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-step-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-step-num {
+      background: var(--sg-accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sg-page .sg-step-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+    }
+    .sg-page .sg-step-desc {
+      font-size: 14px;
+      color: var(--sg-sub);
+      margin: 0 0 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-step-desc p {
+      margin: 0 0 6px;
+    }
+    .sg-page .sg-step-desc p:last-child {
+      margin: 0;
+    }
+
+    /* 부탁 예시 상자 */
+    .sg-page .sg-prompt-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+    .sg-page .sg-prompt-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sg-page .sg-prompt-text {
+      background: var(--sg-panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .sg-page .sg-btn-copy {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--sg-card-hover);
+      color: #fff;
+      border: 1px solid var(--sg-line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .sg-page .sg-btn-copy:hover {
+      background: var(--sg-accent);
+      border-color: var(--sg-accent);
+    }
+    .sg-page .sg-btn-copy.copied {
+      background: var(--sg-ok);
+      border-color: var(--sg-ok);
+      color: #0b2212;
+    }
+
+    /* 주의사항 상자 */
+    .sg-page .sg-warn-box {
+      background: var(--sg-amber-soft);
+      border: 1px solid var(--sg-amber);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-warn-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--sg-amber);
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-warn-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-warn-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-warn-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 안드로이드 / 아이폰 비교 칸 */
+    .sg-page .sg-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-diff-card {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 16px 14px;
+    }
+    .sg-page .sg-diff-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: var(--sg-panel);
+      color: #fff;
+    }
+    .sg-page .sg-diff-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+    }
+    .sg-page .sg-diff-desc {
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* 공식 출처 및 확인일 안내 */
+    .sg-page .sg-source-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--sg-sub);
+    }
+    .sg-page .sg-source-box strong {
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-source-box a {
+      color: var(--sg-accent);
+      text-decoration: underline;
+    }
+
+    /* 하단 이동 링크 */
+    .sg-page .sg-bottom-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+      margin-top: 24px;
+    }
+    .sg-page .sg-link-btn {
+      display: block;
+      padding: 12px 16px;
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .sg-page .sg-link-btn:hover {
+      background: var(--sg-card-hover);
+      border-color: var(--sg-accent);
+    }
+
+    @media (max-width: 480px) {
+      .sg-page .sg-diff-grid {
+        grid-template-columns: 1fr;
+      }
+      .sg-page .sg-header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sg-page">
+    <!-- 빵부스러기 네비게이션 -->
+    <div class="sg-breadcrumb">
+      <a href="/">홈</a> &gt; <a href="../">AI같이배워요</a> &gt; <span>갤럭시 AI 처음 쓰기</span>
+    </div>
+
+    <!-- 머리말 -->
+    <header class="sg-header">
+      <span class="sg-tag">스마트폰 기초 가이드</span>
+      <h1>갤럭시 휴대폰 갤럭시 AI 처음 쓰기</h1>
+      <p class="sg-lead">지원 기종과 업데이트 조건을 확인하고, 통화 통역부터 동그라미 검색과 사진 편집까지 내 폰에서 바로 활용하는 초보자 안내입니다.</p>
+    </header>
+
+    <!-- 카톡방 안내 링크 -->
+    <div class="zw-ai-kakao">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+
+    <!-- 맨 위 3줄 요약 (data-shot="s0") -->
+    <section class="sg-summary-box" data-shot="s0">
+      <div class="sg-summary-title">📌 세 줄 요약</div>
+      <ul class="sg-summary-list">
+        <li><strong>지원 조건:</strong> 갤럭시 S26·S25·S24 같은 최신 기종과 일부 이전 기종에서 갤럭시 AI를 쓸 수 있습니다. 필요한 업데이트와 기능별 지원 여부는 내 기종에서 확인하세요.</li>
+        <li><strong>소통과 검색:</strong> 별도 앱 설치 없이 기본 전화 앱에서 통화 실시간 통역을 켜거나, 화면에서 궁금한 곳에 동그라미를 그려 서클 투 서치로 검색할 수 있습니다.</li>
+        <li><strong>글과 사진 도움:</strong> 삼성 키보드로 메시지 문장을 정중하게 다듬고, 갤러리 포토 어시스트로 기울어진 사진을 맞추는 편집 도움을 받을 수 있습니다.</li>
+      </ul>
+    </section>
+
+    <!-- 1단계: 지원 기종 확인 (data-shot="s1") -->
+    <section class="sg-step-sec" data-shot="s1">
+      <div class="sg-step-head">
+        <span class="sg-step-num">1</span>
+        <h2 class="sg-step-title">내 갤럭시 지원 기종과 One UI 버전 확인하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>갤럭시 AI 기능은 지원 모델과 최신 소프트웨어 버전이 갖추어져야 사용할 수 있습니다.</p>
+        <p>갤럭시 S26·S25·S24 같은 최신 기종과 일부 이전 기종에서 갤럭시 AI를 쓸 수 있습니다. 기능별 지원 여부와 필요한 업데이트는 내 기종에서 확인하세요.</p>
+        <p>기기 설정에서 소프트웨어 업데이트를 진행하고, 특정 AI 기능 사용을 위해 삼성 계정에 로그인해 둡니다(기기 모델이나 버전에 따라 세부 지원 기능은 다를 수 있어요).</p>
+      </div>
+      <!-- 부탁 예시 상자 1 (data-shot="p1") -->
+      <div class="sg-prompt-box" data-shot="p1">
+        <div class="sg-prompt-label">
+          <span>💡 업데이트 확인 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText1">삼성 갤럭시 휴대폰 설정에서 소프트웨어 버전을 확인하고, 최신 소프트웨어로 업데이트하는 순서를 초보자가 따라 하기 쉽게 단계별로 알려줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText1', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 2단계: 실시간 통역 통화와 마주보는 대면 통역 (data-shot="s2") -->
+    <section class="sg-step-sec" data-shot="s2">
+      <div class="sg-step-head">
+        <span class="sg-step-num">2</span>
+        <h2 class="sg-step-title">기본 전화 앱 실시간 통역과 대면 분할 화면</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>외국인과 통화할 때 별도의 앱을 다운받을 필요 없이 기본 전화 앱에서 통화 어시스트의 실시간 통역 통화 기능을 켤 수 있습니다.</p>
+        <p>실시간 통역은 온디바이스 AI를 기반으로 작동하여 클라우드 서버를 거치지 않아도 사용이 가능합니다.</p>
+        <p>마주보고 대화할 때는 통역 앱을 켜면 두 개의 언어가 분할 화면으로 위아래에 표시되어 상대방과 양쪽에서 화면을 보며 소통하는 데 도움을 받을 수 있습니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 2 (data-shot="p2") -->
+      <div class="sg-prompt-box" data-shot="p2">
+        <div class="sg-prompt-label">
+          <span>💡 여행 회화 연습 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText2">해외 식당에서 자리를 안내받거나 따뜻한 물을 부탁할 때 쓰는 정중한 기본 표현 세 가지만 한글 발음과 함께 쉽게 알려줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText2', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 3단계: 화면 어디서나 동그라미 그려 찾는 서클 투 서치 (data-shot="s3") -->
+    <section class="sg-step-sec" data-shot="s3">
+      <div class="sg-step-head">
+        <span class="sg-step-num">3</span>
+        <h2 class="sg-step-title">동그라미만 그려서 바로 찾는 서클 투 서치</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>다른 앱을 켜거나 인터넷 검색창에 글자를 일일이 입력할 필요가 없습니다.</p>
+        <p>사진이나 영상을 보던 중 화면 하단의 홈 버튼이나 내비게이션 바 핸들을 길게 누릅니다.</p>
+        <p>화면에서 궁금한 풍경이나 꽃, 물건 위에 손가락이나 펜으로 동그라미를 그리면 구글 검색 결과가 화면 아래에 나타납니다(기기 설정에 따라 사용 여부를 켤 수 있어요).</p>
+      </div>
+      <!-- 부탁 예시 상자 3 (data-shot="p3") -->
+      <div class="sg-prompt-box" data-shot="p3">
+        <div class="sg-prompt-label">
+          <span>💡 검색 요령 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText3">휴대폰 화면에서 사진 속 멋진 장소나 조명 소품을 검색할 때 원하는 정보를 더 깔끔하게 찾는 요령을 알려줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText3', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 4단계: 키보드 글쓰기 어시스트 (data-shot="s4") -->
+    <section class="sg-step-sec" data-shot="s4">
+      <div class="sg-step-head">
+        <span class="sg-step-num">4</span>
+        <h2 class="sg-step-title">삼성 키보드로 메시지 문장 다듬기와 번역</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>삼성 키보드에서 지원되는 채팅 어시스트 기능을 사용하면 번역과 메시지 톤 변경 도움을 받을 수 있습니다. 지원 언어는 기능·기종·업데이트에 따라 확인하세요.</p>
+        <p>문자나 메신저에서 문장을 작성한 뒤 AI 단추(화면 모습은 기기나 버전에 따라 다를 수 있어요)를 누르면 정중한 표현이나 공손한 어조를 제안받을 수 있습니다.</p>
+        <p>상황에 맞는 문장으로 다듬은 뒤에는 보내기 전에 직접 내용을 확인하고 전송하시면 됩니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 4 (data-shot="p4") -->
+      <div class="sg-prompt-box" data-shot="p4">
+        <div class="sg-prompt-label">
+          <span>💡 정중한 안부 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText4">오랜만에 연락드리는 모임 어르신께 계절 건강을 기원하며 정중하게 안부를 전하는 모바일 문자 문장을 작성해줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText4', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 5단계: 갤러리 포토 어시스트 사진 편집 (data-shot="s5") -->
+    <section class="sg-step-sec" data-shot="s5">
+      <div class="sg-step-head">
+        <span class="sg-step-num">5</span>
+        <h2 class="sg-step-title">갤러리 포토 어시스트로 기울어진 사진 편집하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>기본 갤러리 앱에서 사진 편집 도구를 열고 생성형 편집 단추(모양과 위치는 기기마다 다를 수 있어요)를 누릅니다.</p>
+        <p>사진 수평을 맞출 때 생기는 빈 모서리 공간을 채워주거나, 옮기고 싶은 대상을 길게 눌러 위치를 이동하거나 크기를 조절하는 데 도움을 줍니다.</p>
+        <p>포토 어시스트는 네트워크 연결 및 삼성 계정 로그인이 필요하며, AI 생성 이미지에는 워터마크가 표기됩니다(결과물의 정확성과 신뢰성은 보장되지 않아요).</p>
+      </div>
+      <!-- 부탁 예시 상자 5 (data-shot="p5") -->
+      <div class="sg-prompt-box" data-shot="p5">
+        <div class="sg-prompt-label">
+          <span>💡 사진 편집 질문 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText5">여행 중에 수평이 살짝 기운 풍경 사진을 갤러리에서 자연스럽게 바로잡고 여백을 다듬는 편집 방법을 설명해줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText5', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 주의사항 구역 (data-shot="warn") -->
+    <section class="sg-warn-box" data-shot="warn">
+      <div class="sg-warn-title">⚠️ 꼭 지켜야 할 안전 수칙과 확인 사항</div>
+      <ul class="sg-warn-list">
+        <li><strong>개인정보 및 금융 정보 입력 금지:</strong> 주민등록번호, 계좌번호, 비밀번호 등 민감한 개인정보는 텍스트나 사진으로 업로드하지 마세요. 클라우드 데이터 처리가 꺼려지신다면 설정의 '향상된 인텔리전스'에서 온라인 데이터 처리를 차단하는 옵션을 직접 켤 수 있습니다.</li>
+        <li><strong>AI 생성 결과 직접 재확인:</strong> AI가 생성한 통역, 번역, 문장 제안, 이미지 편집 결과물은 정확성과 신뢰성이 보장되지 않습니다. 중요한 일정이나 공적인 메시지는 보내기 전에 반드시 사용자가 직접 눈으로 확인하세요.</li>
+      </ul>
+    </section>
+
+    <!-- 안드로이드 / 아이폰 다른 점 구역 (data-shot="diff") -->
+    <section class="sg-step-sec" data-shot="diff">
+      <div class="sg-step-head">
+        <span class="sg-step-num">📱</span>
+        <h2 class="sg-step-title">갤럭시 스마트폰과 아이폰의 차이점</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>갤럭시 기기와 기본 앱에서 여러 AI 기능을 이용할 수 있습니다.</p>
+      </div>
+      <div class="sg-diff-grid">
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">삼성 갤럭시 (지원 모델)</span>
+          <div class="sg-diff-title">기본 시스템 앱 연동</div>
+          <p class="sg-diff-desc">기본 전화 앱의 온디바이스 실시간 통역, 삼성 키보드의 톤 변경, 홈 버튼 길게 누르는 서클 투 서치 등 폰 전체에 편리하게 연결되어 작동합니다.</p>
+        </div>
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">애플 아이폰</span>
+          <div class="sg-diff-title">지원 방식의 차이</div>
+          <p class="sg-diff-desc">기본 전화 실시간 통역이나 갤러리 생성형 편집 등 갤럭시 AI 핵심 기능은 갤럭시 환경에서 제공되며 아이폰에서는 동일하게 작동하지 않습니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 공식 안내 확인 링크와 확인일 -->
+    <div class="sg-source-box">
+      <p><strong>공식 확인 기준일:</strong> 2026년 11월 28일</p>
+      <p>이 가이드는 삼성전자 공식 발표 및 안내 문서를 직접 검증하여 작성되었습니다: 
+        <a href="https://www.samsung.com/sec/galaxy-ai/" target="_blank" rel="noopener">삼성전자 공식 갤럭시 AI 안내</a> · 
+        <a href="https://news.samsung.com/kr/%EA%B0%A4%EB%9F%AD%EC%8B%9C-s23%EC%97%90%EC%84%9C%EB%8F%84-%EA%B0%A4%EB%9F%AD%EC%8B%9C-ai-%EA%B8%B0%EB%8A%A5-%EC%93%B4%EB%8B%A4" target="_blank" rel="noopener">삼성전자 뉴스룸 공식 보도자료</a>
+      </p>
+    </div>
+
+    <!-- 하단 이동 링크 -->
+    <div class="sg-bottom-links">
+      <a class="sg-link-btn" href="../start/">« AI 컴퓨터 프로그램 시작 가이드 보러가기</a>
+      <a class="sg-link-btn" href="../gemini-start/">« 휴대폰 구글 제미나이 처음 쓰기 가이드 보러가기</a>
+      <a class="sg-link-btn" href="../">« AI같이배워요 전체 목록으로 돌아가기</a>
+    </div>
+
+    <!-- 하단 카톡방 링크 -->
+    <div class="zw-ai-kakao" style="margin-top:24px;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+  </div>
+
+  <script src="../../_common/common.js"></script>
+  <script src="../_ai-learn/ai-learn.js"></script>
+  <script>
+    function copyPrompt(elementId, btn) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      var text = el.innerText || el.textContent;
+      var origText = btn.innerHTML;
+
+      var showDone = function() {
+        btn.innerHTML = '✅ 복사 완료! 질문창에 붙여 넣으세요';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = origText;
+          btn.classList.remove('copied');
+        }, 2500);
+      };
+
+      var fallback = function() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          var ok = document.execCommand('copy');
+          if (ok) showDone();
+          else alert('글을 길게 눌러 직접 복사해 주세요.');
+        } catch (e) {
+          alert('글을 길게 눌러 직접 복사해 주세요.');
+        }
+        document.body.removeChild(ta);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showDone).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+  </script>
+</body>
+</html>
