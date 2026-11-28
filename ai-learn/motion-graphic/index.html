@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI로 움직이는 글자 영상 만들기 — 말로 시켜 웹 코드 만들고 녹화하기 — 좌표나라 AI같이배워요</title>
+  <meta name="description" content="복잡한 영상 편집 프로그램 없이, 인공지능에게 말로 시켜 움직이는 웹 글자(모션 그래픽)를 만들고 화면 녹화로 영상을 완성하는 초보자용 사용법 안내입니다.">
+  <link rel="canonical" href="https://jwapyonara.com/ai-learn/motion-graphic/">
+  <meta property="og:title" content="AI로 움직이는 글자 영상 만들기 — 좌표나라 AI같이배워요">
+  <meta property="og:description" content="인공지능에게 말로 부탁해 움직이는 웹 화면을 만들고 기본 화면 녹화로 영상을 완성하는 쉬운 방법입니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://jwapyonara.com/ai-learn/motion-graphic/">
+  <link rel="stylesheet" href="../../_common/common.css">
+  <link rel="stylesheet" href="../_ai-learn/ai-learn.css">
+  <style>
+    /* 모든 스타일은 .sg-page 아래로 제한 */
+    .sg-page {
+      --sg-bg: #0e131c;
+      --sg-card: #171d29;
+      --sg-card-hover: #1e2638;
+      --sg-ink: #eef2f8;
+      --sg-sub: #98a3b5;
+      --sg-line: #2a3344;
+      --sg-accent: #3d8bff;
+      --sg-accent-soft: rgba(61, 139, 255, 0.12);
+      --sg-panel: #2b3547;
+      --sg-fill: #1f2735;
+      --sg-fill2: #253042;
+      --sg-ok: #4ade80;
+      --sg-ok-soft: rgba(74, 222, 128, 0.12);
+      --sg-amber: #facc15;
+      --sg-amber-soft: rgba(250, 204, 21, 0.12);
+      --sg-danger: #ff7a70;
+      --sg-radius: 14px;
+
+      background-color: var(--sg-bg);
+      color: var(--sg-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 16px 60px;
+      box-sizing: border-box;
+    }
+
+    .sg-page * {
+      box-sizing: border-box;
+    }
+
+    .sg-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* 빵부스러기 */
+    .sg-page .sg-breadcrumb {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* 머리말 */
+    .sg-page .sg-header {
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--sg-accent-soft);
+      color: var(--sg-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-header h1 {
+      font-size: 25px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .sg-page .sg-lead {
+      font-size: 15px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 상단 카톡방 링크 */
+    .sg-page .zw-ai-kakao {
+      margin: 0 0 20px;
+    }
+    .sg-page .zw-ai-kakao a.cta {
+      display: block;
+      background: #fae100;
+      color: #371d1e;
+      text-align: center;
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* 3줄 요약 상자 */
+    .sg-page .sg-summary-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-left: 4px solid var(--sg-accent);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 28px;
+    }
+    .sg-page .sg-summary-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-summary-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-summary-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-summary-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 단계 구역 카드 */
+    .sg-page .sg-step-sec {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 20px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-step-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-step-num {
+      background: var(--sg-accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sg-page .sg-step-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+    }
+    .sg-page .sg-step-desc {
+      font-size: 14px;
+      color: var(--sg-sub);
+      margin: 0 0 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-step-desc p {
+      margin: 0 0 6px;
+    }
+    .sg-page .sg-step-desc p:last-child {
+      margin: 0;
+    }
+
+    /* 부탁 예시 상자 */
+    .sg-page .sg-prompt-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+    .sg-page .sg-prompt-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sg-page .sg-prompt-text {
+      background: var(--sg-panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .sg-page .sg-btn-copy {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--sg-card-hover);
+      color: #fff;
+      border: 1px solid var(--sg-line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .sg-page .sg-btn-copy:hover {
+      background: var(--sg-accent);
+      border-color: var(--sg-accent);
+    }
+    .sg-page .sg-btn-copy.copied {
+      background: var(--sg-ok);
+      border-color: var(--sg-ok);
+      color: #0b2212;
+    }
+
+    /* 주의사항 상자 */
+    .sg-page .sg-warn-box {
+      background: var(--sg-amber-soft);
+      border: 1px solid var(--sg-amber);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-warn-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--sg-amber);
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-warn-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-warn-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-warn-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 안드로이드 / 아이폰 비교 칸 */
+    .sg-page .sg-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-diff-card {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 16px 14px;
+    }
+    .sg-page .sg-diff-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: var(--sg-panel);
+      color: #fff;
+    }
+    .sg-page .sg-diff-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+    }
+    .sg-page .sg-diff-desc {
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* 공식 출처 및 확인일 안내 */
+    .sg-page .sg-source-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--sg-sub);
+    }
+    .sg-page .sg-source-box strong {
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-source-box a {
+      color: var(--sg-accent);
+      text-decoration: underline;
+    }
+
+    /* 하단 이동 링크 */
+    .sg-page .sg-bottom-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+      margin-top: 24px;
+    }
+    .sg-page .sg-link-btn {
+      display: block;
+      padding: 12px 16px;
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .sg-page .sg-link-btn:hover {
+      background: var(--sg-card-hover);
+      border-color: var(--sg-accent);
+    }
+
+    @media (max-width: 480px) {
+      .sg-page .sg-diff-grid {
+        grid-template-columns: 1fr;
+      }
+      .sg-page .sg-header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sg-page">
+    <!-- 빵부스러기 네비게이션 -->
+    <div class="sg-breadcrumb">
+      <a href="/">홈</a> &gt; <a href="../">AI같이배워요</a> &gt; <span>모션 그래픽 영상 만들기</span>
+    </div>
+
+    <!-- 머리말 -->
+    <header class="sg-header">
+      <span class="sg-tag">영상 제작 기초 가이드</span>
+      <h1>AI로 움직이는 글자 영상 만들기</h1>
+      <p class="sg-lead">어려운 전문 편집 도구 없이, 인공지능에게 말로 시켜 웹 코드를 만들고 화면 녹화로 글자 영상을 완성하는 초보자 방법입니다.</p>
+    </header>
+
+    <!-- 카톡방 안내 링크 -->
+    <div class="zw-ai-kakao">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+
+    <!-- 맨 위 3줄 요약 (data-shot="s0") -->
+    <section class="sg-summary-box" data-shot="s0">
+      <div class="sg-summary-title">📌 세 줄 요약</div>
+      <ul class="sg-summary-list">
+        <li><strong>말로 만드는 움직임:</strong> 클로드 같은 AI에게 만들고 싶은 글자와 움직임을 설명하면 웹 화면 코드를 작성해 줍니다.</li>
+        <li><strong>창에서 바로 확인:</strong> 클로드에 아티팩트를 요청해 미리보기를 열고 마음에 들 때까지 대화로 고칠 수 있습니다.</li>
+        <li><strong>기본 기능으로 녹화:</strong> 외부 프로그램 설치 없이 컴퓨터나 스마트폰에 내장된 화면 녹화 도구로 영상을 저장합니다.</li>
+      </ul>
+    </section>
+
+    <!-- 1단계: 말로 글자와 움직임 요청하기 (data-shot="s1") -->
+    <section class="sg-step-sec" data-shot="s1">
+      <div class="sg-step-head">
+        <span class="sg-step-num">1</span>
+        <h2 class="sg-step-title">원하는 글자와 움직임 말로 요청하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>인공지능 대화창에 접속하여 로그인한 뒤 새 대화를 시작합니다(아티팩트는 기본 및 유료 플랜에서 이용할 수 있어요).</p>
+        <p>영상에 넣을 글귀와 원하는 배경 색상, 글자가 나타나는 방식(천천히 커지기, 위로 떠오르기 등)을 설명합니다.</p>
+        <p>클로드에 '움직이는 웹 화면을 아티팩트로 만들어 보여줘'라고 요청하면 대화 옆 아티팩트 창에서 미리보기를 열 수 있습니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 1 (data-shot="p1") -->
+      <div class="sg-prompt-box" data-shot="p1">
+        <div class="sg-prompt-label">
+          <span>💡 첫 번째 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText1">어두운 남색 배경 중앙에 '오늘 하루도 수고하셨습니다'라는 노란색 큰 글자가 부드럽게 커지면서 나타나는 움직이는 웹 화면을 아티팩트로 만들어 미리보기로 보여줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText1', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 2단계: 옆 창에서 움직임 바로 확인하기 (data-shot="s2") -->
+    <section class="sg-step-sec" data-shot="s2">
+      <div class="sg-step-head">
+        <span class="sg-step-num">2</span>
+        <h2 class="sg-step-title">대화창 옆 별도 창에서 움직임 확인하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>클로드에 아티팩트로 만들어 보여달라고 요청한 뒤 생성된 아티팩트의 미리보기를 엽니다(화면 모습은 기기나 버전에 따라 다를 수 있어요).</p>
+        <p>별도의 프로그램을 설치하거나 복잡한 설정을 거치지 않아도 브라우저 안에서 글자가 움직이는 모습을 직접 볼 수 있습니다.</p>
+        <p>글자 크기나 배치, 움직이는 속도가 눈에 잘 들어오는지 꼼꼼하게 살펴봅니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 2 (data-shot="p2") -->
+      <div class="sg-prompt-box" data-shot="p2">
+        <div class="sg-prompt-label">
+          <span>💡 움직임 속도 조절 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText2">글자가 너무 빠르게 지나갑니다. 글자가 서서히 나타나는 시간을 3초로 천천히 늘려주고, 글자 아래에 작은 흰색 글씨로 '편안한 밤 되세요'를 추가해줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText2', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 3단계: 말로 편하게 수정하고 다듬기 (data-shot="s3") -->
+    <section class="sg-step-sec" data-shot="s3">
+      <div class="sg-step-head">
+        <span class="sg-step-num">3</span>
+        <h2 class="sg-step-title">마음에 들 때까지 대화로 고쳐보기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>원하는 디자인이 나올 때까지 코드를 직접 고칠 필요 없이 대화로 추가 요청을 남깁니다.</p>
+        <p>"글자 색을 흰색으로 바꿔줘", "배경에 은은한 별빛 효과를 넣어줘"처럼 편안하게 말씀하시면 됩니다.</p>
+        <p>수정 요청에 대한 생성이 끝나면 미리보기가 갱신되어 바뀐 결과를 바로 보여줍니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 3 (data-shot="p3") -->
+      <div class="sg-prompt-box" data-shot="p3">
+        <div class="sg-prompt-label">
+          <span>💡 디자인 변경 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText3">배경을 밤하늘처럼 짙은 남색으로 바꾸고, 글자가 나타난 뒤에 부드럽게 반짝이는 효과를 넣어줘. 스마트폰 화면 비율 세로형에 맞춰 구성해줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText3', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 4단계: 컴퓨터나 휴대폰 녹화 도구 켜기 (data-shot="s4") -->
+    <section class="sg-step-sec" data-shot="s4">
+      <div class="sg-step-head">
+        <span class="sg-step-num">4</span>
+        <h2 class="sg-step-title">기본 화면 녹화 기능 켜기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>외부 유료 생성 서비스를 쓰지 않고 운영체제에 내장된 기본 녹화 기능을 사용합니다.</p>
+        <p>윈도우는 기본 캡처 도구의 비디오 녹화 기능을 켜고, 맥은 스크린샷 기록 도구를 엽니다.</p>
+        <p>스마트폰은 상단 빠른 설정(안드로이드)이나 제어 센터(아이폰)에서 화면 녹화 버튼을 준비합니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 4 (data-shot="p4") -->
+      <div class="sg-prompt-box" data-shot="p4">
+        <div class="sg-prompt-label">
+          <span>💡 전체 화면 표시 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText4">화면을 녹화하기 전에 불필요한 테두리나 버튼을 숨기고, 움직이는 글자 부분만 화면 중앙에 꽉 차게 보이도록 깔끔하게 화면을 다듬어줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText4', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 5단계: 녹화 시작하고 동영상으로 저장하기 (data-shot="s5") -->
+    <section class="sg-step-sec" data-shot="s5">
+      <div class="sg-step-head">
+        <span class="sg-step-num">5</span>
+        <h2 class="sg-step-title">컴퓨터와 휴대전화 화면 녹화하고 저장하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>컴퓨터에서는 녹화 도구에서 녹화할 사각형 영역을 선택한 뒤 녹화 시작 버튼을 누릅니다.</p>
+        <p>휴대전화에서는 상단 빠른 설정이나 제어 센터에서 화면 녹화를 바로 시작합니다.</p>
+        <p>애니메이션이 시작되고 끝날 때까지 화면을 담은 뒤 정지 버튼을 누르고, 녹화 후 저장 위치와 파일 형식을 기기에서 확인합니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 5 (data-shot="p5") -->
+      <div class="sg-prompt-box" data-shot="p5">
+        <div class="sg-prompt-label">
+          <span>💡 반복 재생 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText5">애니메이션이 멈추지 않고 5초 주기로 계속 반복해서 움직이도록 반복 설정을 넣어줘. 처음과 끝이 자연스럽게 이어지게 다듬어줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText5', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 주의사항 구역 (data-shot="warn") -->
+    <section class="sg-warn-box" data-shot="warn">
+      <div class="sg-warn-title">⚠️ 꼭 지켜야 할 두 가지 안전 수칙</div>
+      <ul class="sg-warn-list">
+        <li><strong>기밀 및 개인정보 입력 금지:</strong> 검토자에게 공개되어서는 안 되는 정보나 머신러닝 학습 개선에 쓰이면 안 되는 기밀 정보는 입력하지 마세요. 주민등록번호, 계좌번호, 비밀번호, 집 주소, 가족 이름 등 민감한 개인정보는 프롬프트에 넣지 않습니다.</li>
+        <li><strong>생성형 AI 결과 비판적 검토:</strong> 생성형 AI 도구에서 얻는 대답이나 코드는 틀릴 수 있으므로 비판적으로 생각하고 사실 확인이 필요합니다. 화면 녹화 전 글자 표기나 움직임에 어색한 부분이 없는지 직접 확인하세요.</li>
+      </ul>
+    </section>
+
+    <!-- 기기별 화면 녹화 비교 구역 (data-shot="diff") -->
+    <section class="sg-step-sec" data-shot="diff">
+      <div class="sg-step-head">
+        <span class="sg-step-num">💻</span>
+        <h2 class="sg-step-title">운영체제별 기본 화면 녹화 도구 안내</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>사용하시는 기기 종류에 따라 기본 내장 녹화 도구를 여는 방법에 차이가 있습니다(기기·버전에 따라 다를 수 있어요). 녹화 후 저장 위치와 파일 형식은 기기에서 확인하세요.</p>
+      </div>
+      <div class="sg-diff-grid">
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">Windows PC (컴퓨터)</span>
+          <div class="sg-diff-title">캡처 도구 비디오 녹화</div>
+          <p class="sg-diff-desc">시작 메뉴에서 '캡처 도구'를 열고 비디오 녹화 모드를 선택한 뒤 녹화할 화면 사각형 영역을 선택하여 녹화합니다.</p>
+        </div>
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">Apple Mac (컴퓨터)</span>
+          <div class="sg-diff-title">스크린샷 / QuickTime</div>
+          <p class="sg-diff-desc">스크린샷 도구 또는 QuickTime Player를 실행하여 화면 전체 또는 선택 영역을 비디오로 기록합니다.</p>
+        </div>
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">삼성 갤럭시 / 안드로이드</span>
+          <div class="sg-diff-title">상단 빠른 설정 화면 녹화</div>
+          <p class="sg-diff-desc">화면 상단에서 아래로 두 번 스와이프하여 빠른 설정 창에서 '화면 녹화' 아이콘을 찾아 시작합니다.</p>
+        </div>
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">애플 아이폰 (iOS)</span>
+          <div class="sg-diff-title">제어 센터 화면 기록</div>
+          <p class="sg-diff-desc">제어 센터를 열고 둥근 모양의 '화면 기록' 단추를 탭하여 사운드와 함께 화면을 녹화합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 공식 안내 확인 링크와 확인일 -->
+    <div class="sg-source-box">
+      <p><strong>공식 확인 기준일:</strong> 2026년 11월 28일</p>
+      <p>이 가이드는 공식 지원 문서를 직접 검증하여 작성되었습니다: 
+        <a href="https://support.claude.com/ko/articles/17153992-what-are-artifacts-and-how-do-i-use-them" target="_blank" rel="noopener">Anthropic Claude 아티팩트 공식 안내</a>, 
+        <a href="https://support.microsoft.com/ko-kr/windows/%EC%BA%A1%EC%B2%98-%EB%8F%84%EA%B5%AC%EB%A5%BC-%EC%82%AC%EC%9A%A9%ED%95%98%EC%97%AC-%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7-%EC%BA%A1%EC%B2%98-00246869-1843-655f-f220-97299b865f6b" target="_blank" rel="noopener">Microsoft Windows 캡처 도구 안내</a>, 
+        <a href="https://support.apple.com/ko-kr/102618" target="_blank" rel="noopener">Apple Mac 화면 기록 안내</a>, 
+        <a href="https://support.apple.com/ko-kr/102653" target="_blank" rel="noopener">Apple iPhone 화면 기록 안내</a>, 
+        <a href="https://support.google.com/android/answer/9075928?hl=ko" target="_blank" rel="noopener">Google Android 화면 녹화 안내</a>
+      </p>
+    </div>
+
+    <!-- 하단 이동 링크 -->
+    <div class="sg-bottom-links">
+      <a class="sg-link-btn" href="../start/">« AI 컴퓨터 프로그램 시작 가이드 보러가기</a>
+      <a class="sg-link-btn" href="../">« AI같이배워요 전체 목록으로 돌아가기</a>
+    </div>
+
+    <!-- 하단 카톡방 링크 -->
+    <div class="zw-ai-kakao" style="margin-top:24px;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+  </div>
+
+  <script src="../../_common/common.js"></script>
+  <script src="../_ai-learn/ai-learn.js"></script>
+  <script>
+    function copyPrompt(elementId, btn) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      var text = el.innerText || el.textContent;
+      var origText = btn.innerHTML;
+
+      var showDone = function() {
+        btn.innerHTML = '✅ 복사 완료! AI 대화창에 붙여 넣으세요';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = origText;
+          btn.classList.remove('copied');
+        }, 2500);
+      };
+
+      var fallback = function() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          var ok = document.execCommand('copy');
+          if (ok) showDone();
+          else alert('글을 길게 눌러 직접 복사해 주세요.');
+        } catch (e) {
+          alert('글을 길게 눌러 직접 복사해 주세요.');
+        }
+        document.body.removeChild(ta);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showDone).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>인공지능 세 개를 한 팀으로 쓰기 — 클로드·챗GPT·제미나이 협업 초보자 가이드 — 좌표나라 AI같이배워요</title>
+  <meta name="description" content="클로드, 챗GPT, 구글 제미나이를 한 팀처럼 나누어 쓰는 초보자 협업 안내입니다. 초안 작성부터 검토, 다듬기까지 복사 붙여넣기로 쉽게 연결하고 공식 연결 도구 조건까지 확인하세요.">
+  <link rel="canonical" href="https://jwapyonara.com/ai-learn/ai-team/">
+  <meta property="og:title" content="인공지능 세 개를 한 팀으로 쓰기 — 좌표나라 AI같이배워요">
+  <meta property="og:description" content="클로드, 챗GPT, 구글 제미나이를 한 팀처럼 나누어 쓰는 초보자 협업 가이드입니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://jwapyonara.com/ai-learn/ai-team/">
+  <link rel="stylesheet" href="../../_common/common.css">
+  <link rel="stylesheet" href="../_ai-learn/ai-learn.css">
+  <style>
+    /* 모든 스타일은 .sg-page 아래로 제한 */
+    .sg-page {
+      --sg-bg: #0e131c;
+      --sg-card: #171d29;
+      --sg-card-hover: #1e2638;
+      --sg-ink: #eef2f8;
+      --sg-sub: #98a3b5;
+      --sg-line: #2a3344;
+      --sg-accent: #3d8bff;
+      --sg-accent-soft: rgba(61, 139, 255, 0.12);
+      --sg-panel: #2b3547;
+      --sg-fill: #1f2735;
+      --sg-fill2: #253042;
+      --sg-ok: #4ade80;
+      --sg-ok-soft: rgba(74, 222, 128, 0.12);
+      --sg-amber: #facc15;
+      --sg-amber-soft: rgba(250, 204, 21, 0.12);
+      --sg-danger: #ff7a70;
+      --sg-radius: 14px;
+
+      background-color: var(--sg-bg);
+      color: var(--sg-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 16px 60px;
+      box-sizing: border-box;
+    }
+
+    .sg-page * {
+      box-sizing: border-box;
+    }
+
+    .sg-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* 빵부스러기 */
+    .sg-page .sg-breadcrumb {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* 머리말 */
+    .sg-page .sg-header {
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--sg-accent-soft);
+      color: var(--sg-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-header h1 {
+      font-size: 25px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .sg-page .sg-lead {
+      font-size: 15px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 상단 카톡방 링크 */
+    .sg-page .zw-ai-kakao {
+      margin: 0 0 20px;
+    }
+    .sg-page .zw-ai-kakao a.cta {
+      display: block;
+      background: #fae100;
+      color: #371d1e;
+      text-align: center;
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* 3줄 요약 상자 */
+    .sg-page .sg-summary-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-left: 4px solid var(--sg-accent);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 28px;
+    }
+    .sg-page .sg-summary-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-summary-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-summary-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-summary-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 단계 구역 카드 */
+    .sg-page .sg-step-sec {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 20px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-step-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-step-num {
+      background: var(--sg-accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sg-page .sg-step-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+    }
+    .sg-page .sg-step-desc {
+      font-size: 14px;
+      color: var(--sg-sub);
+      margin: 0 0 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-step-desc p {
+      margin: 0 0 6px;
+    }
+    .sg-page .sg-step-desc p:last-child {
+      margin: 0;
+    }
+
+    /* 부탁 예시 상자 */
+    .sg-page .sg-prompt-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+    .sg-page .sg-prompt-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sg-page .sg-prompt-text {
+      background: var(--sg-panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .sg-page .sg-btn-copy {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--sg-card-hover);
+      color: #fff;
+      border: 1px solid var(--sg-line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .sg-page .sg-btn-copy:hover {
+      background: var(--sg-accent);
+      border-color: var(--sg-accent);
+    }
+    .sg-page .sg-btn-copy.copied {
+      background: var(--sg-ok);
+      border-color: var(--sg-ok);
+      color: #0b2212;
+    }
+
+    /* 주의사항 상자 */
+    .sg-page .sg-warn-box {
+      background: var(--sg-amber-soft);
+      border: 1px solid var(--sg-amber);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-warn-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--sg-amber);
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-warn-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-warn-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-warn-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 환경 비교 칸 (모바일 vs 컴퓨터) */
+    .sg-page .sg-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-diff-card {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 16px 14px;
+    }
+    .sg-page .sg-diff-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: var(--sg-panel);
+      color: #fff;
+    }
+    .sg-page .sg-diff-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+    }
+    .sg-page .sg-diff-desc {
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* 공식 출처 및 확인일 안내 */
+    .sg-page .sg-source-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--sg-sub);
+    }
+    .sg-page .sg-source-box strong {
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-source-box a {
+      color: var(--sg-accent);
+      text-decoration: underline;
+    }
+
+    /* 하단 이동 링크 */
+    .sg-page .sg-bottom-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+      margin-top: 24px;
+    }
+    .sg-page .sg-link-btn {
+      display: block;
+      padding: 12px 16px;
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .sg-page .sg-link-btn:hover {
+      background: var(--sg-card-hover);
+      border-color: var(--sg-accent);
+    }
+
+    @media (max-width: 480px) {
+      .sg-page .sg-diff-grid {
+        grid-template-columns: 1fr;
+      }
+      .sg-page .sg-header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sg-page">
+    <!-- 빵부스러기 네비게이션 -->
+    <div class="sg-breadcrumb">
+      <a href="/">홈</a> &gt; <a href="../">AI같이배워요</a> &gt; <span>인공지능 한 팀으로 쓰기</span>
+    </div>
+
+    <!-- 머리말 -->
+    <header class="sg-header">
+      <span class="sg-tag">협업 실전 가이드</span>
+      <h1>인공지능 세 개를 한 팀으로 쓰기</h1>
+      <p class="sg-lead">클로드, 챗GPT, 제미나이에게 한 가지 일을 단계별로 나누어 맡겨, 완성도 높은 결과를 얻는 가장 쉬운 방법입니다.</p>
+    </header>
+
+    <!-- 카톡방 안내 링크 -->
+    <div class="zw-ai-kakao">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 협업 질문, 카톡방에서 같이 나눠보세요</a>
+    </div>
+
+    <!-- 맨 위 3줄 요약 (data-shot="s0") -->
+    <section class="sg-summary-box" data-shot="s0">
+      <div class="sg-summary-title">📌 세 줄 요약</div>
+      <ul class="sg-summary-list">
+        <li><strong>역할 나누기:</strong> 한 AI에게 모든 일을 끝내라고 하지 않고, '초안 작성 → 다른 AI의 오류 검토 → 세 번째 AI의 문장 다듬기'로 나누어 결과의 품질을 높입니다.</li>
+        <li><strong>복사로 연결:</strong> 복잡한 설치 없이도 스마트폰 앱이나 컴퓨터 브라우저 탭 세 개를 띄워두고 복사·붙여넣기로 넘기면 초보자도 쉽게 이어갈 수 있습니다.</li>
+        <li><strong>공식 조건 확인:</strong> 컴퓨터에서 도구를 연결해 쓸 때는 각 사 공식 문서에 명시된 구독 또는 계정 요건, 비용 조건, 공통 규칙(AGENTS.md)을 확인하고 사용합니다.</li>
+      </ul>
+    </section>
+
+    <!-- 1단계: 초안 작성 (data-shot="s1") -->
+    <section class="sg-step-sec" data-shot="s1">
+      <div class="sg-step-head">
+        <span class="sg-step-num">1</span>
+        <h2 class="sg-step-title">1단계: 첫 번째 AI에게 초안 뼈대 부탁하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>인공지능 하나에게 처음부터 흠잡을 데 없는 글을 요구하면 엉뚱한 내용을 지어내거나 핵심이 빠지기 쉽습니다.</p>
+        <p>첫 단계에서는 구글 제미나이나 챗GPT 중 편한 도구를 열고, 글의 목적과 들어갈 핵심 항목만 전달해 뼈대 초안을 받습니다.</p>
+        <p>조금 거칠어도 괜찮으니 전체적인 구조와 흐름이 잡힌 초안 글을 먼저 확보하는 것이 목적입니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 1 (data-shot="p1") -->
+      <div class="sg-prompt-box" data-shot="p1">
+        <div class="sg-prompt-label">
+          <span>💡 1단계 초안 작성 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText1">아파트 동대표 회의에서 음식물 쓰레기 배출 시간 변경을 건의하려고 합니다. 취지와 배출 시간대 변경 이유, 주민 협조 요청이 포함된 건의문 초안을 세 단락으로 작성해줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText1', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 2단계: 오류 및 누락 검토 (data-shot="s2") -->
+    <section class="sg-step-sec" data-shot="s2">
+      <div class="sg-step-head">
+        <span class="sg-step-num">2</span>
+        <h2 class="sg-step-title">2단계: 두 번째 AI에게 냉정한 검토 맡기기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>자신이 쓴 글의 오타나 논리적 허점을 스스로 찾기 어렵듯, 인공지능도 자기가 만든 글의 실수를 다시 보지 못할 때가 많습니다.</p>
+        <p>1단계에서 나온 초안 글을 복사하여, 다른 인공지능(예: 챗GPT)의 대화창에 붙여 넣고 검토를 요청합니다.</p>
+        <p>논리적으로 어색한 부분, 빠진 설명, 사실과 다를 수 있는 표현을 세 가지만 짚어달라고 부탁합니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 2 (data-shot="p2") -->
+      <div class="sg-prompt-box" data-shot="p2">
+        <div class="sg-prompt-label">
+          <span>💡 2단계 오류 검토 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText2">아래는 아파트 주민 회의에 제출할 건의문 초안입니다. 당신은 꼼꼼한 서류 검토자 역할을 맡아, 설득력이 부족하거나 이웃 간 오해를 살 수 있는 표현, 빠진 내용을 세 가지만 냉정하게 지적해줘.
+
+[여기에 1단계에서 복사한 초안 붙여넣기]</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText2', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 3단계: 품격 있게 다듬기 (data-shot="s3") -->
+    <section class="sg-step-sec" data-shot="s3">
+      <div class="sg-step-head">
+        <span class="sg-step-num">3</span>
+        <h2 class="sg-step-title">3단계: 세 번째 AI로 정중하고 명확하게 다듬기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>이제 1단계의 초안과 2단계에서 지적받은 보완 사항을 함께 들고 세 번째 인공지능(예: 클로드)으로 갑니다.</p>
+        <p>지적된 문제를 고쳐 반영하면서, 읽는 사람의 눈높이에 맞춰 예의 바르고 깔끔한 문장으로 마무리해 달라고 요청합니다.</p>
+        <p>이렇게 세 AI를 거치면 혼자 작성할 때보다 논리가 탄탄하고 품격 있는 완성본을 얻는 데 도움을 받을 수 있습니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 3 (data-shot="p3") -->
+      <div class="sg-prompt-box" data-shot="p3">
+        <div class="sg-prompt-label">
+          <span>💡 3단계 문장 완성 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText3">아래 초안과 검토 의견을 바탕으로 최종 문서를 완성해줘. 검토 지적 사항을 자연스럽게 반영하고, 아파트 이웃들이 편안하고 정중하게 읽을 수 있도록 격식 있는 어조로 다듬어줘.
+
+[1단계 초안 글]
+[2단계 검토 의견]</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText3', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 4단계: 공식 연결 도구 조건 (data-shot="s4") -->
+    <section class="sg-step-sec" data-shot="s4">
+      <div class="sg-step-head">
+        <span class="sg-step-num">4</span>
+        <h2 class="sg-step-title">4단계: 컴퓨터 도구 연동 — 공식 계정 조건과 확인</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>복사·붙여넣기를 넘어 컴퓨터 환경에서 공식 도구를 연결하려면 제조사의 공식 안내를 먼저 확인해야 합니다.</p>
+        <p>앤스로픽의 에이전트 코딩 도구인 클로드 코드(Claude Code)는 코드베이스를 읽고 명령어를 실행할 수 있는 공식 도구입니다.</p>
+        <p>클로드 코드의 대부분 사용 환경에는 클로드 구독 또는 Anthropic Console 계정이 필요하며, 비용 조건은 시작 전에 확인하세요.</p>
+        <p>클로드 코드가 필요한 경우, 계정·비용·파일 접근 범위를 확인한 뒤 공식 설치 안내를 따르세요.</p>
+      </div>
+      <!-- 확인 안내 상자 4 (data-shot="p4") -->
+      <div class="sg-prompt-box" data-shot="p4">
+        <div class="sg-prompt-label">
+          <span>💡 클로드 코드 사용 전 공식 점검 사항</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText4">클로드 코드가 필요한 경우, 계정·비용·파일 접근 범위를 확인한 뒤 공식 설치 안내를 따르세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText4', this)">📋 이 점검 안내 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 5단계: 공통 규칙(AGENTS.md)과 연결 표준 (data-shot="s5") -->
+    <section class="sg-step-sec" data-shot="s5">
+      <div class="sg-step-head">
+        <span class="sg-step-num">5</span>
+        <h2 class="sg-step-title">5단계: 도구 연결 표준(MCP)과 공통 규칙(AGENTS.md)</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>여러 AI 도구를 한 컴퓨터 환경에서 쓸 때는 각 AI가 참고할 작업 지침을 정리해 두는 것이 좋습니다.</p>
+        <p>클로드 코드는 다른 코딩 에이전트를 위해 작성된 <strong>AGENTS.md</strong> 파일이 저장소에 있으면 이를 참고하도록 설정할 수 있습니다.</p>
+        <p>다만 규칙 파일 하나로 세 서비스의 작업 순서가 자동 조율되지는 않으므로, 세 AI가 같은 규칙을 따르는지는 각각 확인하세요.</p>
+        <p>또한 도구와 외부 데이터를 잇는 오픈 표준인 <strong>MCP(Model Context Protocol)</strong>를 통해 공식 규격에 맞게 도구를 연결할 수 있습니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 5 (data-shot="p5") -->
+      <div class="sg-prompt-box" data-shot="p5">
+        <div class="sg-prompt-label">
+          <span>💡 공통 규칙 파일(AGENTS.md) 참고 지침 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText5"># 협업 참고 지침
+- 권장 순서: 제미나이(초안) -> 챗GPT(검토) -> 클로드(다듬기)
+- 개별 확인: 세 AI가 같은 규칙을 따르는지 각각 사람이 직접 확인
+- 금지 사항: 개인정보 및 비밀번호 입력 금지, 공식 출처 재확인</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText5', this)">📋 이 규칙 예시 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 주의사항 구역 (data-shot="warn") -->
+    <section class="sg-warn-box" data-shot="warn">
+      <div class="sg-warn-title">⚠️ 인공지능 협업 시 꼭 지켜야 할 안전 수칙</div>
+      <ul class="sg-warn-list">
+        <li><strong>기밀 및 개인정보 입력 금지:</strong> 검토자에게 공개되어서는 안 되는 정보 또는 기밀 정보, 주민등록번호, 계좌번호, 비밀번호, 집 주소 같은 민감한 개인정보는 어떤 AI 대화창에도 절대 넣지 마세요.</li>
+        <li><strong>인공지능 대답 비판적 검토 및 사실 재확인:</strong> 인공지능의 출력 결과는 때때로 부정확하거나 오해의 소지가 있을 수 있습니다. 생성형 AI 도구에서 얻는 대답에 대해서는 비판적으로 생각하고, 공식 문서와 신뢰할 수 있는 자료를 활용하여 사실인지 반드시 확인하세요.</li>
+        <li><strong>미확인 기능 사용 금지:</strong> 공식 문서에서 확인되지 않은 복잡한 연동 명령어는 사용하지 마시고, 확인된 복사·붙여넣기 방식을 권장합니다.</li>
+      </ul>
+    </section>
+
+    <!-- 사용 환경 차이점 구역 (data-shot="diff") -->
+    <section class="sg-step-sec" data-shot="diff">
+      <div class="sg-step-head">
+        <span class="sg-step-num">🔄</span>
+        <h2 class="sg-step-title">스마트폰 앱과 컴퓨터 작업 환경의 차이점</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>내가 작업하는 기기에 따라 협업을 진행하는 방식에 알맞은 차이가 있습니다.</p>
+      </div>
+      <div class="sg-diff-grid">
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">스마트폰 모바일 앱</span>
+          <div class="sg-diff-title">화면 전환과 복사·붙여넣기</div>
+          <p class="sg-diff-desc">스마트폰에서는 설치된 Gemini, ChatGPT, Claude 모바일 앱 사이를 손가락으로 전환하며 글자를 복사해 넘겨줍니다. 별도의 복잡한 설치 없이 바로 시작할 수 있습니다.</p>
+        </div>
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">컴퓨터 웹 브라우저 & 도구</span>
+          <div class="sg-diff-title">창 분할 및 공식 환경 확인</div>
+          <p class="sg-diff-desc">컴퓨터에서는 브라우저 탭 세 개를 나란히 띄워두고 작업하거나, 계정 및 비용 조건을 확인한 뒤 공식 안내에 따라 도구를 활용할 수 있습니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 공식 안내 확인 링크와 확인일 -->
+    <div class="sg-source-box">
+      <p><strong>공식 확인 기준일:</strong> 2026년 11월 28일</p>
+      <p>이 가이드는 각 사의 공식 기술 문서와 고객센터 안내를 직접 대조하여 작성되었습니다:</p>
+      <ul style="margin:8px 0 0; padding-left:18px; line-height:1.6;">
+        <li><a href="https://support.google.com/gemini/answer/14579631" target="_blank" rel="noopener">Google Gemini 도움말 센터</a></li>
+        <li><a href="https://help.openai.com/en/articles/6783457-what-is-chatgpt" target="_blank" rel="noopener">OpenAI ChatGPT 도움말 센터</a></li>
+        <li><a href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview" target="_blank" rel="noopener">Anthropic Claude Code 공식 문서</a></li>
+      </ul>
+    </div>
+
+    <!-- 하단 이동 링크 -->
+    <div class="sg-bottom-links">
+      <a class="sg-link-btn" href="../start/">« AI 컴퓨터 프로그램 시작 가이드 보러가기</a>
+      <a class="sg-link-btn" href="../">« AI같이배워요 전체 목록으로 돌아가기</a>
+    </div>
+
+    <!-- 하단 카톡방 링크 -->
+    <div class="zw-ai-kakao" style="margin-top:24px;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 협업 질문, 카톡방에서 같이 나눠보세요</a>
+    </div>
+  </div>
+
+  <script src="../../_common/common.js"></script>
+  <script src="../_ai-learn/ai-learn.js"></script>
+  <script>
+    function copyPrompt(elementId, btn) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      var text = el.innerText || el.textContent;
+      var origText = btn.innerHTML;
+
+      var showDone = function() {
+        btn.innerHTML = '✅ 복사 완료! 다음 AI 대화창에 붙여 넣으세요';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = origText;
+          btn.classList.remove('copied');
+        }, 2500);
+      };
+
+      var fallback = function() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          var ok = document.execCommand('copy');
+          if (ok) showDone();
+          else alert('글을 길게 눌러 직접 복사해 주세요.');
+        } catch (e) {
+          alert('글을 길게 눌러 직접 복사해 주세요.');
+        }
+        document.body.removeChild(ta);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showDone).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>제미나이로 일 줄이는 도구 활용법 — 초보자 맞춤 안내 — 좌표나라 AI같이배워요</title>
+  <meta name="description" content="컴퓨터와 스마트폰에서 구글 제미나이의 딥 리서치, 캔버스 문서 작성, 맞춤 스킬, 예약 작업으로 일상을 편리하게 만드는 초보자 가이드입니다.">
+  <link rel="canonical" href="https://jwapyonara.com/ai-learn/gemini-tools/">
+  <meta property="og:title" content="제미나이로 일 줄이는 도구 활용법 — 좌표나라 AI같이배워요">
+  <meta property="og:description" content="딥 리서치, 캔버스, 스킬, 예약 작업까지 구글 제미나이 핵심 도구 초보자 사용법입니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://jwapyonara.com/ai-learn/gemini-tools/">
+  <link rel="stylesheet" href="../../_common/common.css">
+  <link rel="stylesheet" href="../_ai-learn/ai-learn.css">
+  <style>
+    /* 모든 스타일은 .sg-page 아래로 제한 */
+    .sg-page {
+      --sg-bg: #0e131c;
+      --sg-card: #171d29;
+      --sg-card-hover: #1e2638;
+      --sg-ink: #eef2f8;
+      --sg-sub: #98a3b5;
+      --sg-line: #2a3344;
+      --sg-accent: #3d8bff;
+      --sg-accent-soft: rgba(61, 139, 255, 0.12);
+      --sg-panel: #2b3547;
+      --sg-fill: #1f2735;
+      --sg-fill2: #253042;
+      --sg-ok: #4ade80;
+      --sg-ok-soft: rgba(74, 222, 128, 0.12);
+      --sg-amber: #facc15;
+      --sg-amber-soft: rgba(250, 204, 21, 0.12);
+      --sg-danger: #ff7a70;
+      --sg-radius: 14px;
+
+      background-color: var(--sg-bg);
+      color: var(--sg-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 16px 60px;
+      box-sizing: border-box;
+    }
+
+    .sg-page * {
+      box-sizing: border-box;
+    }
+
+    .sg-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* 빵부스러기 */
+    .sg-page .sg-breadcrumb {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* 머리말 */
+    .sg-page .sg-header {
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--sg-accent-soft);
+      color: var(--sg-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-header h1 {
+      font-size: 25px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .sg-page .sg-lead {
+      font-size: 15px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 상단 카톡방 링크 */
+    .sg-page .zw-ai-kakao {
+      margin: 0 0 20px;
+    }
+    .sg-page .zw-ai-kakao a.cta {
+      display: block;
+      background: #fae100;
+      color: #371d1e;
+      text-align: center;
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* 3줄 요약 상자 */
+    .sg-page .sg-summary-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-left: 4px solid var(--sg-accent);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 28px;
+    }
+    .sg-page .sg-summary-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-summary-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-summary-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-summary-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 단계 구역 카드 */
+    .sg-page .sg-step-sec {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 20px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-step-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-step-num {
+      background: var(--sg-accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sg-page .sg-step-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+    }
+    .sg-page .sg-step-desc {
+      font-size: 14px;
+      color: var(--sg-sub);
+      margin: 0 0 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-step-desc p {
+      margin: 0 0 6px;
+    }
+    .sg-page .sg-step-desc p:last-child {
+      margin: 0;
+    }
+
+    /* 부탁 예시 상자 */
+    .sg-page .sg-prompt-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+    .sg-page .sg-prompt-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sg-page .sg-prompt-text {
+      background: var(--sg-panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .sg-page .sg-btn-copy {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--sg-card-hover);
+      color: #fff;
+      border: 1px solid var(--sg-line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .sg-page .sg-btn-copy:hover {
+      background: var(--sg-accent);
+      border-color: var(--sg-accent);
+    }
+    .sg-page .sg-btn-copy.copied {
+      background: var(--sg-ok);
+      border-color: var(--sg-ok);
+      color: #0b2212;
+    }
+
+    /* 주의사항 상자 */
+    .sg-page .sg-warn-box {
+      background: var(--sg-amber-soft);
+      border: 1px solid var(--sg-amber);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-warn-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--sg-amber);
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-warn-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-warn-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-warn-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 컴퓨터 / 스마트폰 기기 비교 칸 */
+    .sg-page .sg-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-diff-card {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 16px 14px;
+    }
+    .sg-page .sg-diff-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: var(--sg-panel);
+      color: #fff;
+    }
+    .sg-page .sg-diff-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+    }
+    .sg-page .sg-diff-desc {
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* 공식 출처 및 확인일 안내 */
+    .sg-page .sg-source-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--sg-sub);
+    }
+    .sg-page .sg-source-box strong {
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-source-box a {
+      color: var(--sg-accent);
+      text-decoration: underline;
+    }
+
+    /* 하단 이동 링크 */
+    .sg-page .sg-bottom-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+      margin-top: 24px;
+    }
+    .sg-page .sg-link-btn {
+      display: block;
+      padding: 12px 16px;
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .sg-page .sg-link-btn:hover {
+      background: var(--sg-card-hover);
+      border-color: var(--sg-accent);
+    }
+
+    @media (max-width: 480px) {
+      .sg-page .sg-diff-grid {
+        grid-template-columns: 1fr;
+      }
+      .sg-page .sg-header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sg-page">
+    <!-- 빵부스러기 네비게이션 -->
+    <div class="sg-breadcrumb">
+      <a href="/">홈</a> &gt; <a href="../">AI같이배워요</a> &gt; <span>제미나이 업무 도구 활용</span>
+    </div>
+
+    <!-- 머리말 -->
+    <header class="sg-header">
+      <span class="sg-tag">업무 효율 도구 가이드</span>
+      <h1>제미나이로 일 줄이는 도구 활용법</h1>
+      <p class="sg-lead">딥 리서치, 캔버스 문서 작성, 맞춤 스킬, 예약 작업까지! 복잡하고 반복되는 일을 덜어주는 핵심 도구 사용법입니다.</p>
+    </header>
+
+    <!-- 카톡방 안내 링크 -->
+    <div class="zw-ai-kakao">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+
+    <!-- 맨 위 3줄 요약 (data-shot="s0") -->
+    <section class="sg-summary-box" data-shot="s0">
+      <div class="sg-summary-title">📌 세 줄 요약</div>
+      <ul class="sg-summary-list">
+        <li><strong>심층 조사(딥 리서치):</strong> 복잡한 주제를 인터넷 검색과 연동해 심층 조사 보고서로 정리하는 데 도움을 받습니다.</li>
+        <li><strong>문서·초안(캔버스):</strong> 화면 오른쪽 작업 공간에서 긴 글이나 발표 초안을 작성하고 마우스로 직접 짚어가며 부분 수정할 수 있습니다.</li>
+        <li><strong>반복 업무 줄이기(스킬·예약):</strong> 자주 쓰는 맞춤 요청 사항을 재사용하거나, 일반적인 시간대에 실행되도록 예약해 둘 수 있습니다.</li>
+      </ul>
+    </section>
+
+    <!-- 1단계: 딥 리서치로 심층 조사 보고서 받기 (data-shot="s1") -->
+    <section class="sg-step-sec" data-shot="s1">
+      <div class="sg-step-head">
+        <span class="sg-step-num">1</span>
+        <h2 class="sg-step-title">딥 리서치(Deep Research)로 심층 보고서 받기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>만 18세 이상이며 로그인한 상태에서 사용할 수 있습니다.</p>
+        <p>gemini.google.com 또는 지원되는 모바일 앱 텍스트 상자에서 <strong>파일 추가 &gt; Deep Research</strong>를 선택합니다.</p>
+        <p>조사하려는 질문을 입력하면 Gemini가 먼저 <strong>조사 계획서</strong>를 보여주며, 필요시 계획을 수정한 뒤 조사를 시작합니다.</p>
+        <p>다수의 소스를 분석하므로 보고서 생성에 보통 5분~10분 정도 걸리며, 복잡한 보고서인 경우 조금 더 오랜 시간이 걸릴 수 있습니다. 완료되면 알림으로 확인할 수 있습니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 1 (data-shot="p1") -->
+      <div class="sg-prompt-box" data-shot="p1">
+        <div class="sg-prompt-label">
+          <span>💡 딥 리서치 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText1">국내 60대 은퇴자를 위한 주말농장과 텃밭 가꾸기 트렌드를 조사해줘. 처음 시작할 때 필요한 필수 농기구와 계절별 추천 작물, 텃밭 임대 시 주의할 점을 체계적인 보고서 형식으로 작성해줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText1', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 2단계: 캔버스(Canvas)로 문서와 발표 초안 다듬기 (data-shot="s2") -->
+    <section class="sg-step-sec" data-shot="s2">
+      <div class="sg-step-head">
+        <span class="sg-step-num">2</span>
+        <h2 class="sg-step-title">캔버스(Canvas)로 문서와 발표 초안 만들기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>컴퓨터 브라우저(gemini.google.com) 하단 텍스트 상자 아래에서 <strong>파일 추가 &gt; Canvas</strong>를 클릭합니다.</p>
+        <p>프롬프트 상자에 원하는 문서나 슬라이드 발표 자료 초안을 요청하면 별도의 작업 패널에서 결과물이 열립니다.</p>
+        <p>Canvas 공간에서 마우스로 직접 텍스트를 고칠 수 있으며, 변경사항은 자동으로 저장됩니다.</p>
+        <p>수정하고 싶은 문장만 마우스로 드래그해 선택한 뒤 "더 쉬운 말로 바꿔줘"처럼 부분 수정을 요청할 수 있습니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 2 (data-shot="p2") -->
+      <div class="sg-prompt-box" data-shot="p2">
+        <div class="sg-prompt-label">
+          <span>💡 캔버스 문서 작성 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText2">동네 주민 모임에서 발표할 10분짜리 친환경 분리배출 안내문 초안을 작성해줘. 첫인사, 헷갈리기 쉬운 비닐과 플라스틱 배출 요령 3가지, 당부 말씀 순서로 명확하게 문단을 나눠서 적어줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText2', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 3단계: 스킬(Skills) 기능 활용하기 (data-shot="s3") -->
+    <section class="sg-step-sec" data-shot="s3">
+      <div class="sg-step-head">
+        <span class="sg-step-num">3</span>
+        <h2 class="sg-step-title">스킬(Skills)로 맞춤 요청 재사용하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>만 18세 이상이며 개인 Google 계정으로 로그인한 사용자는 채팅창에서 스킬을 사용할 수 있습니다.</p>
+        <p>스킬은 Gemini에서 작업을 자동화하고 시간을 절약하는 데 도움이 되는 재사용 가능한 맞춤 요청 사항입니다.</p>
+        <p>컴퓨터 웹의 <strong>'맞춤설정 &gt; 스킬 &gt; 만들기 &gt; 수동으로 만들기'</strong>에서 스킬을 만든 뒤, 채팅창에서 <strong>슬래시(/)</strong>와 스킬 이름으로 사용합니다.</p>
+        <p>18세 이상 개인 계정의 젬스는 11월 17일부터 읽기 전용이며, 12월 17일 제거될 때 스킬로 자동 전환됩니다. 지금 쓰려면 스킬을 직접 만들어야 합니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 3 (data-shot="p3") -->
+      <div class="sg-prompt-box" data-shot="p3">
+        <div class="sg-prompt-label">
+          <span>💡 스킬 활용 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText3">초보자 맞춤 쉬운 말 설명 스킬을 불러와서 다음 내용을 일상 비유를 들어 세 줄로 쉽게 정리해줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText3', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 4단계: 매일 정해진 시간대에 도는 예약 작업 (data-shot="s4") -->
+    <section class="sg-step-sec" data-shot="s4">
+      <div class="sg-step-head">
+        <span class="sg-step-num">4</span>
+        <h2 class="sg-step-title">시간대별로 챙겨주는 예약 작업 설정하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>만 18세 이상 개인 Google 계정이어야 하며, 활동 기록이 사용 설정되어 있어야 합니다.</p>
+        <p>대한민국에서는 Google AI 구독 없이도 아침, 낮, 저녁과 같은 일반적인 시간대에 하루 한 번 실행되는 태스크를 예약할 수 있습니다.</p>
+        <p>gemini.google.com 텍스트 상자 아래에서 <strong>태스크</strong>를 클릭하고 시간대와 할 일을 설명합니다.</p>
+        <p>설정이 완료되면 예약된 시간대 내에서 작업이 실행되어 알림으로 결과를 전해줍니다. 특정 분초 지정 실행은 지원되지 않습니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 4 (data-shot="p4") -->
+      <div class="sg-prompt-box" data-shot="p4">
+        <div class="sg-prompt-label">
+          <span>💡 예약 작업 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText4">매일 아침 시간대에 오늘 지역 날씨와 미세먼지 수치를 확인하고, 낮 시간에 가벼운 걷기 운동을 하기 좋은 시간대를 추천해서 세 줄로 요약해줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText4', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 5단계: 문서 내보내기와 결과물 활용 (data-shot="s5") -->
+    <section class="sg-step-sec" data-shot="s5">
+      <div class="sg-step-head">
+        <span class="sg-step-num">5</span>
+        <h2 class="sg-step-title">작성된 결과물 내보내기 및 활용하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>캔버스에서 작성한 문서나 딥 리서치 조사 보고서는 <strong>Google Docs(문서)</strong> 등으로 내보내어 보관하거나 출력할 수 있습니다.</p>
+        <p>같은 구글 계정으로 로그인되어 있으면 컴퓨터에서 작업한 내용을 스마트폰 모바일 앱에서도 그대로 열어볼 수 있습니다.</p>
+        <p>작성된 글이나 결과물은 이웃이나 지인에게 공유하기 전에 내용과 숫자가 맞는지 직접 꼼꼼히 확인하세요.</p>
+      </div>
+      <!-- 부탁 예시 상자 5 (data-shot="p5") -->
+      <div class="sg-prompt-box" data-shot="p5">
+        <div class="sg-prompt-label">
+          <span>💡 요약 및 공유문 다듬기 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText5">방금 작성한 분리배출 안내문 초안에서 주민들이 꼭 기억해야 할 핵심 규칙 3가지만 추려서 스마트폰 메시지로 편하게 전송할 수 있는 150자 안팎의 깔끔한 요약 글로 다듬어줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText5', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 주의사항 구역 (data-shot="warn") -->
+    <section class="sg-warn-box" data-shot="warn">
+      <div class="sg-warn-title">⚠️ 꼭 지켜야 할 두 가지 안전 수칙</div>
+      <ul class="sg-warn-list">
+        <li><strong>기밀 및 개인정보 입력 금지:</strong> 검토자에게 공개되어서는 안 되는 정보 또는 Google이 머신러닝 기술을 비롯한 서비스를 개선하는 데 사용해서는 안 되는 기밀 정보는 입력하지 마세요. 주민등록번호, 은행 계좌번호, 비밀번호 등 민감한 개인정보는 절대 넣지 마세요.</li>
+        <li><strong>생성형 AI 대답 비판적 검토 및 사실 재확인:</strong> 생성형 AI 도구에서 얻는 대답에 대해서는 비판적으로 생각하고, Google 및 기타 리소스를 활용하여 제시된 정보가 사실인지 확인하세요. 건강, 법률, 세금, 금융 등 중요한 결정은 반드시 전문가나 공식 문서를 다시 확인하세요.</li>
+      </ul>
+    </section>
+
+    <!-- 컴퓨터 / 스마트폰 사용 환경 비교 (data-shot="diff") -->
+    <section class="sg-step-sec" data-shot="diff">
+      <div class="sg-step-head">
+        <span class="sg-step-num">💻</span>
+        <h2 class="sg-step-title">컴퓨터와 스마트폰에서의 도구 활용 차이점</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>작업 환경에 따라 도구를 다루는 화면과 확인하는 방식에 차이가 있습니다.</p>
+      </div>
+      <div class="sg-diff-grid">
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">컴퓨터 웹 브라우저 (PC/Mac)</span>
+          <div class="sg-diff-title">초안 작성 및 정밀 설정</div>
+          <p class="sg-diff-desc">Canvas 패널 편집, 딥 리서치 소스 연동, 스킬 설정 등 넓은 화면에서 긴 문서를 작성하고 세부 작업을 하기에 편리합니다.</p>
+        </div>
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">스마트폰 모바일 앱 (Android/iOS)</span>
+          <div class="sg-diff-title">알림 확인 및 스킬 호출</div>
+          <p class="sg-diff-desc">채팅창에서 스킬을 불러와 대화할 수 있으며, 딥 리서치 완료 알림이나 예약 작업 결과를 이동 중에도 휴대기기 알림으로 받아볼 수 있습니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 공식 안내 확인 링크와 확인일 -->
+    <div class="sg-source-box">
+      <p><strong>공식 확인 기준일:</strong> 2026년 11월 28일</p>
+      <p>이 가이드는 구글 공식 도움말 문서를 직접 검증하여 작성되었습니다: 
+        <a href="https://support.google.com/gemini/answer/15719111" target="_blank" rel="noopener">Deep Research 고객센터</a> | 
+        <a href="https://support.google.com/gemini/answer/16047321" target="_blank" rel="noopener">Canvas 고객센터</a> | 
+        <a href="https://support.google.com/gemini/answer/18560919" target="_blank" rel="noopener">Skills 고객센터</a> | 
+        <a href="https://support.google.com/gemini/answer/17094710" target="_blank" rel="noopener">작업 예약 고객센터</a>
+      </p>
+    </div>
+
+    <!-- 하단 이동 링크 -->
+    <div class="sg-bottom-links">
+      <a class="sg-link-btn" href="../gemini-start/">« 1편: 휴대폰 구글 제미나이 처음 쓰기 기초 가이드 보러가기</a>
+      <a class="sg-link-btn" href="../start/">« AI 컴퓨터 프로그램 시작 가이드 보러가기</a>
+      <a class="sg-link-btn" href="../">« AI같이배워요 전체 목록으로 돌아가기</a>
+    </div>
+
+    <!-- 하단 카톡방 링크 -->
+    <div class="zw-ai-kakao" style="margin-top:24px;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+  </div>
+
+  <script src="../../_common/common.js"></script>
+  <script src="../_ai-learn/ai-learn.js"></script>
+  <script>
+    function copyPrompt(elementId, btn) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      var text = el.innerText || el.textContent;
+      var origText = btn.innerHTML;
+
+      var showDone = function() {
+        btn.innerHTML = '✅ 복사 완료! 앱에 붙여 넣으세요';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = origText;
+          btn.classList.remove('copied');
+        }, 2500);
+      };
+
+      var fallback = function() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          var ok = document.execCommand('copy');
+          if (ok) showDone();
+          else alert('글을 길게 눌러 직접 복사해 주세요.');
+        } catch (e) {
+          alert('글을 길게 눌러 직접 복사해 주세요.');
+        }
+        document.body.removeChild(ta);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showDone).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+  </script>
+</body>
+</html>
