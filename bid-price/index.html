@@ -3,16 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>경매 적정 입찰가 계산기 — 목표 수익으로 거꾸로 계산 | 좌표나라</title>
-<meta name="description" content="예상 매도가와 목표 수익을 넣으면 얼마까지 입찰할 수 있는지 거꾸로 계산하고, 입찰보증금도 계산합니다.">
+<title>경매 입찰가 계산기 — 목표 차액(입력한 비용만 반영)으로 거꾸로 계산 | 좌표나라</title>
+<meta name="description" content="예상 매도가와 목표 차액(입력한 비용만 반영)을 넣으면 입력값 기준 입찰가를 거꾸로 계산하고, 입찰보증금도 계산합니다.">
 <link rel="stylesheet" href="../_common/common.css">
 <script>try{document.documentElement.setAttribute("data-theme",localStorage.getItem("zw-theme")==="light"?"light":"dark")}catch(e){document.documentElement.setAttribute("data-theme","dark")}</script>
 <!--zw-adsense--><script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1172352737649711" crossorigin="anonymous"></script><!--/zw-adsense-->
 </head>
 <body>
 <main class="wrap">
-  <h1>적정 입찰가<br>얼마까지 써낼까?</h1>
-  <p class="lead">팔 때 가격과 목표 수익을 넣으면 최대 입찰가를 보여 드립니다.</p>
+  <h1>입력값 기준 입찰가<br>얼마까지 써낼까?</h1>
+  <p class="lead">팔 때 가격과 목표 차액(입력한 비용만 반영)을 넣으면 입력값 기준 입찰가를 보여 드립니다.</p>
 
   <section class="result" aria-live="polite">
     <div class="verdict" id="resVerdict">-</div>
@@ -20,20 +20,20 @@
     <dl class="rows">
       <div><dt>예상 매도가</dt><dd id="rowSalePrice">-</dd></div>
       <div><dt>총 비용 (매도·수리·기타)</dt><dd id="rowTotalExpense">-</dd></div>
-      <div><dt>목표 세전 수익</dt><dd id="rowTargetProfit">-</dd></div>
+      <div><dt>목표 차액(입력한 비용만 반영)</dt><dd id="rowTargetProfit">-</dd></div>
       <div><dt>예상 취득 비용</dt><dd id="rowBuyCost">-</dd></div>
       <div><dt>준비할 입찰보증금</dt><dd id="rowDeposit">-</dd></div>
     </dl>
   </section>
 
   <section class="card">
-    <h2>1. 목표 수익 기준 입찰가 계산</h2>
+    <h2>1. 목표 차액(입력한 비용만 반영) 기준 입찰가 계산</h2>
     <div class="field">
       <label for="salePrice">예상 매도가 (시세) <b class="hint" id="salePriceHint"></b></label>
       <div class="inp"><input id="salePrice" type="text" inputmode="decimal" value="500,000,000"><span>원</span></div>
     </div>
     <div class="field">
-      <label for="targetProfit">목표 수익 <b class="hint" id="profitHint"></b></label>
+      <label for="targetProfit">목표 차액(입력한 비용만 반영) <b class="hint" id="profitHint"></b></label>
       <div class="inp"><input id="targetProfit" type="text" inputmode="decimal" value="50,000,000"><span>원</span></div>
     </div>
     <div class="row2">
@@ -68,9 +68,9 @@
       <label for="depositPct">보증금 비율 <small style="font-size:12px;color:var(--sub);">(예시)</small></label>
       <div class="inp"><input id="depositPct" type="text" inputmode="decimal" value="10"><span>%</span></div>
       <div class="chips" style="margin-top:8px;">
-        <button type="button" data-dep="10">일반 (10%)</button>
-        <button type="button" data-dep="20">재매각 (20%)</button>
-        <button type="button" data-dep="30">특별매각 (30%)</button>
+        <button type="button" data-dep="10">예시 10%</button>
+        <button type="button" data-dep="20">예시 20%</button>
+        <button type="button" data-dep="30">예시 30%</button>
       </div>
     </div>
   </section>
@@ -82,26 +82,57 @@
   <details open>
     <summary>어떻게 계산했나요?</summary>
     <ul>
-      <li><b>최대 적정 입찰가:</b> (예상 매도가 − 매도 비용 − 수리비 − 기타 비용 − 목표 수익) ÷ (1 + 취득 비용률 ÷ 100)</li>
-      <li><b>예상 취득 비용:</b> 최대 적정 입찰가 × 취득 비용률 (취득세, 채권할인, 법무비용 등)</li>
+      <li><b>입력값 기준 입찰가:</b> (예상 매도가 − 매도 비용 − 수리비 − 기타 비용 − 목표 차액(입력한 비용만 반영)) ÷ (1 + 취득 비용률 ÷ 100)</li>
+      <li><b>예상 취득 비용:</b> 입력값 기준 입찰가 × 취득 비용률 (취득세, 채권할인, 법무비용 등)</li>
       <li><b>입찰보증금:</b> 최저매각가격 × 보증금 비율 (자신이 써내는 입찰가가 아닌 법원 최저가격 기준)</li>
     </ul>
   </details>
 
   <details>
     <summary>입찰보증금은 내가 쓴 입찰가의 10%가 아닌가요?</summary>
-    <p>경매 입찰보증금은 본인이 입찰표에 적어 내는 금액 기준이 아니라, 해당 회차 법원이 공고한 '최저매각가격'의 10%(또는 법원이 정한 비율)를 냅니다. 단 1원이라도 모자라면 입찰이 무효가 되므로 주의해야 합니다.</p>
+    <p>계산기는 입력한 최저매각가격과 비율을 곱합니다. 실제 보증금은 해당 사건의 입찰공고문에서 확인하세요.</p>
   </details>
 
   <details>
     <summary>취득 비용률 5%에는 무엇이 포함되나요?</summary>
-    <p>부동산 매수 시 납부하는 취득세(주택 수에 따라 1~12%), 지방교육세, 농어촌특별세와 법무사 수수료, 국민주택채권 매각 할인비용 등을 포함한 예시 수치입니다. 주택 수와 면적에 따라 세율이 다르므로 직접 조정해 보세요.</p>
+    <p>취득세, 지방교육세, 농특세 및 기타 부대비용을 가늠해 보기 위한 예시 수치입니다. 자산 종류나 보유 주택 수, 감면 혜택에 따라 실제 세율이 달라지므로 관할 지자체나 세무 전문가에게 확인하여 값을 변경하세요.</p>
   </details>
 
   <details>
-    <summary>적정 입찰가보다 높게 써내면 어떻게 되나요?</summary>
-    <p>적정 입찰가보다 높은 가격에 낙찰받으면 낙찰 확률은 높아지지만, 설정해 둔 목표 수익이 줄어들거나 예상치 못한 추가 비용 발생 시 손실이 발생할 위험이 커집니다.</p>
+    <summary>입력값 기준 입찰가보다 높게 써내면 어떻게 되나요?</summary>
+    <p>입력값 기준 입찰가보다 높은 가격에 낙찰받으면 낙찰 확률은 높아질 수 있으나, 당초 목표했던 차액(입력한 비용만 반영)이 줄어들 수 있습니다.</p>
   </details>
+
+  <section class="card guide">
+    <h2>직접 계산해 본 예시</h2>
+    <h3>예시 1: 5억 원 예상 매도가 기준 입력값 기준 입찰가</h3>
+    <p><b>입력값:</b> 예상 매도가 500,000,000원, 목표 차액(입력한 비용만 반영) 50,000,000원, 수리·인테리어비 20,000,000원, 취득 비용률 5%, 매도 비용 3,000,000원, 기타 비용 2,000,000원, 법원 최저매각가격 400,000,000원, 보증금 비율 10%</p>
+    <p><b>계산 과정:</b><br>
+    · 총 비용(매도·수리·기타) = 3,000,000원 + 20,000,000원 + 2,000,000원 = 25,000,000원<br>
+    · 취득 전 잔여 금액 = 500,000,000원 − 25,000,000원 − 50,000,000원 = 425,000,000원<br>
+    · 입력값 기준 입찰가 = Math.round(425,000,000 ÷ (1 + 0.05)) = 404,761,905원<br>
+    · 예상 취득 비용 = Math.round(404,761,905 × 5%) = 20,238,095원<br>
+    · 준비할 입찰보증금 = Math.round(400,000,000 × 10%) = 40,000,000원</p>
+    <p><b>계산 결과:</b> 입력값 기준 입찰가 <b>404,761,905원</b> (예상 취득 비용 20,238,095원 포함 시 총 취득가 425,000,000원, 준비할 입찰보증금 40,000,000원)</p>
+
+    <h3>예시 2: 3억 원 예상 매도가 및 보증금 비율 20%를 입력한 경우</h3>
+    <p><b>입력값:</b> 예상 매도가 300,000,000원, 목표 차액(입력한 비용만 반영) 30,000,000원, 수리·인테리어비 10,000,000원, 취득 비용률 4.6%, 매도 비용 2,000,000원, 기타 비용 1,000,000원, 법원 최저매각가격 200,000,000원, 보증금 비율 20%</p>
+    <p><b>계산 과정:</b><br>
+    · 총 비용(매도·수리·기타) = 2,000,000원 + 10,000,000원 + 1,000,000원 = 13,000,000원<br>
+    · 취득 전 잔여 금액 = 300,000,000원 − 13,000,000원 − 30,000,000원 = 257,000,000원<br>
+    · 입력값 기준 입찰가 = Math.round(257,000,000 ÷ (1 + 0.046)) = 245,697,897원<br>
+    · 예상 취득 비용 = Math.round(245,697,897 × 4.6%) = 11,302,103원<br>
+    · 준비할 입찰보증금 = Math.round(200,000,000 × 20%) = 40,000,000원</p>
+    <p><b>계산 결과:</b> 입력값 기준 입찰가 <b>245,697,897원</b> (예상 취득 비용 11,302,103원 포함 시 총 취득가 257,000,000원, 준비할 입찰보증금 40,000,000원)</p>
+
+    <h2>헷갈리기 쉬운 기준과 계산 방식</h2>
+    <ul>
+      <li><b>차액 기준(양도소득세 미반영):</b> 입력하는 목표 차액(입력한 비용만 반영)은 단순 차액 기준입니다. 매도 시 발생하는 양도소득세, 지방소득세 및 보유 기간 중 재산세 등은 계산식에 반영되지 않습니다.</li>
+      <li><b>입찰보증금의 산정 기준:</b> 준비할 입찰보증금은 본인이 써내는 '입력값 기준 입찰가'가 아닌, 법원이 정한 '최저매각가격'에 보증금 비율을 곱하여 산출됩니다.</li>
+      <li><b>비용 및 목표 차액 초과 시 중단:</b> 매도 비용, 수리비, 기타 비용과 목표 차액(입력한 비용만 반영)의 합계가 예상 매도가 이상이 되면 남은 금액이 0 이하가 되어 계산이 실행되지 않습니다.</li>
+      <li><b>대출이자 등 금융비용 미포함:</b> 경락잔금대출을 이용할 경우 발생하는 이자 비용이나 중도상환수수료는 계산기에 포함되지 않으므로 필요시 기타 비용 칸에 직접 합산해 입력해야 합니다.</li>
+    </ul>
+  </section>
 </main>
 
 <script src="calc.js"></script>
@@ -176,7 +207,7 @@
 
     if (!resBid.ok) {
       resVerdict.textContent = '가격을 확인해 주세요';
-      resSub.textContent = '비용과 목표 수익의 합이 예상 매도가보다 크거나 올바르지 않은 값입니다.';
+      resSub.textContent = '비용과 목표 차액(입력한 비용만 반영)의 합이 예상 매도가보다 크거나 올바르지 않은 값입니다.';
       rowSalePrice.textContent = '-';
       rowTotalExpense.textContent = '-';
       rowTargetProfit.textContent = '-';
@@ -185,7 +216,7 @@
       return;
     }
 
-    resVerdict.innerHTML = '최대 입찰가 <em>' + resBid.maxBid.toLocaleString('ko-KR') + '원</em>';
+    resVerdict.innerHTML = '입력값 기준 입찰가 <em>' + resBid.maxBid.toLocaleString('ko-KR') + '원</em>';
     resSub.textContent = '취득 비용 약 ' + resBid.buyCost.toLocaleString('ko-KR') + '원 포함 시 총 취득가 ' + (resBid.maxBid + resBid.buyCost).toLocaleString('ko-KR') + '원';
 
     var totalExpense = sellCost + repair + otherCost;
