@@ -7921,8 +7921,21 @@
     if (!Number.isInteger(index) || !Array.isArray(session.scrolls) || index < 0 || index >= session.scrolls.length) {
       return { success: false, reason: 'invalid_index', session };
     }
-    const [{ actionKey }] = session.scrolls.splice(index, 1);
+
+    const scrollItem = session.scrolls[index];
+    const actionKey = (scrollItem && typeof scrollItem === 'object') ? scrollItem.actionKey : (typeof scrollItem === 'number' ? scrollItem : undefined);
+    const def = SKILL_DEFINITIONS[actionKey];
+    if (!def || (typeof def.hasTarget === 'function' && !def.hasTarget(session))) {
+      return { success: false, reason: 'no_target', session };
+    }
+
+    const [removedScroll] = session.scrolls.splice(index, 1);
     const effectResult = executeSkillEffect(session, actionKey, options);
+    if (effectResult && effectResult.success === false) {
+      session.scrolls.splice(index, 0, removedScroll);
+      return { success: false, reason: effectResult.reason || 'effect_failed', actionKey, effectResult, session };
+    }
+
     if (!Array.isArray(session.events)) session.events = [];
     session.events.push({ type: 'scroll_used', actionKey }, { type: 'save_run' });
     return { success: true, actionKey, effectResult, phase: session.phase, session };
