@@ -483,12 +483,57 @@ details[open] summary {
   <details open>
     <summary>어떻게 플레이하나요?</summary>
     <ul class="rules-list">
-      <li><strong>조작 방법:</strong> 타일들 중 혼자만 색상이나 밝기가 미세하게 다른 타일을 터치(클릭)하세요.</li>
-      <li><strong>시간과 콤보:</strong> 기본 30초가 주어집니다. 정답을 맞히면 보너스 시간(쉬움 +1.4초·보통 +1.1초·어려움 +0.9초)과 함께 연속 콤보 점수가 쌓이고, 오답을 누르면 난이도에 따라 시간이 2초·2.5초·3초 차감됩니다.</li>
-      <li><strong>난이도 차이:</strong>
-        <br>• <strong>쉬움:</strong> 3×3 (9칸), 색상 차이 18% (구분 쉬움)
-        <br>• <strong>보통:</strong> 4×4 (16칸), 색상 차이 10% (신중한 관찰 필요)
-        <br>• <strong>어려움:</strong> 5×5 (25칸), 색상 차이 5.5% (고도의 집중력 필요)
+      <li><strong>조작 방법:</strong> 격자 타일 중 혼자만 색상이나 밝기가 미세하게 다른 타일을 터치(클릭)합니다.</li>
+      <li><strong>점수 계산:</strong>
+        <br>• <strong>정답 점수:</strong> <code>난이도별 기본 점수 + ((연속 콤보 - 1) × 콤보 보너스)</code> 획득.
+        <br>• <strong>시간 증감:</strong> 정답 시 보너스 시간(최대 45초까지) 추가, 오답 시 난이도별 페널티 시간 즉시 차감 및 콤보 0 초기화.
+        <br>• <i>예시:</i> 보통 난이도(기본 130점, 콤보 35점)에서 3연속 정답(3콤보) 달성 시 <code>130 + (3 - 1) × 35 = 200점</code> 획득 및 시간 +1.1초 연장.
+      </li>
+      <li><strong>난이도별 설정:</strong>
+        <table style="width:100%;border-collapse:collapse;margin:6px 0;font-size:11.5px;text-align:center;line-height:1.35;">
+          <thead>
+            <tr style="background:rgba(255,255,255,0.06);">
+              <th style="padding:4px 2px;border:1px solid var(--line);">난이도</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">격자 크기</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">색상 명도 차이</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">기본 / 콤보점수</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">정답 시간 보너스</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">오답 시간 페널티</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">쉬움</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">3×3 (9칸)</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">18% 차이</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">80점 / +20점</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">+1.4초</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">-2.0초</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">보통</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">4×4 (16칸)</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">10% 차이</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">130점 / +35점</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">+1.1초</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">-2.5초</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">어려움</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">5×5 (25칸)</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">5.5% 차이</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">200점 / +50점</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">+0.9초</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">-3.0초</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li><strong>끝나는 조건:</strong> 30초로 시작하여 시간이 모두 줄어들어 0초가 되면 게임이 종료됩니다.</li>
+      <li><strong>막힐 때 요령:</strong>
+        <br>1. 오답을 누르면 쉬움 2초, 보통 2.5초, 어려움 3초가 즉시 깎이고 콤보 보너스도 사라지므로 마구잡이 연타를 피해야 합니다.
+        <br>2. 타일 하나를 오래 응시하기보다 격자판 전체를 멀찍이 보며 전체적인 평균 색조에서 살짝 튀는 지점을 스캔하듯 포착하는 것이 빠릅니다.
+        <br>3. 시간 누적 상한선은 45초이므로, 색상 구분이 상대적으로 쉬운 초반에 빠르게 정답을 맞춰 시간을 미리 상한 가까이 비축해 두는 것이 유리합니다.
       </li>
     </ul>
   </details>

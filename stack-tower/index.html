@@ -319,10 +319,56 @@ h1 {
     </div>
 
     <div class="rule-box">
-      <b>하는 법 (터치·키보드 지원):</b><br>
-      1. 좌우로 움직이는 블록이 바로 아래 층 블록과 겹쳤을 때 화면이나 <b>블록 내려놓기</b> 단추(키보드 <code>Space</code>·<code>Enter</code>·<code>↓</code>)를 누릅니다.<br>
-      2. 아래 블록 밖으로 삐져나온 부분은 잘려 나가 다음 블록 폭이 좁아집니다.<br>
-      3. 오차 없이 거의 정확히 맞추면 <b>완벽(PERFECT)</b> 보너스 점수를 받고, 3연속 완벽 달성 시 블록 폭이 조금 넓어집니다!
+      <b>블록 쌓기 규칙 및 점수 안내</b><br>
+      • <b>조작 방법:</b> 좌우로 이동하는 블록이 아래 층과 겹쳤을 때 화면 터치 또는 <b>블록 내려놓기</b> 단추(키보드 <code>Space</code>·<code>Enter</code>·<code>↓</code>)를 누릅니다.<br>
+      • <b>점수 계산:</b>
+        <br>- <b>완벽(PERFECT) 착지:</b> 오차가 허용 오차 이내일 때 <code>층 기본 점수 + (연속 완벽 횟수 × 35점)</code>를 획득합니다. (3연속 달성 시 폭 회복 보너스)
+        <br>- <b>일반 착지:</b> 삐져나온 부분이 잘려 나가며 <code>Math.max(10, Math.round(층 기본 점수 × (남은 폭 / 시작 폭)))</code>를 받습니다. (연속 완벽 초기화)
+        <br>- <i>예시:</i> 보통 난이도(기본 80점)에서 1회차 완벽 착지 시 <code>80 + (1 × 35) = 115점</code>, 일부가 잘려 폭이 80%(116px/145px) 남은 일반 착지 시 <code>Math.round(80 × 0.8) = 64점</code>.<br>
+      • <b>난이도별 설정:</b>
+      <table style="width:100%;border-collapse:collapse;margin:6px 0;font-size:11.5px;text-align:center;line-height:1.35;">
+        <thead>
+          <tr style="background:rgba(255,255,255,0.06);">
+            <th style="padding:4px 2px;border:1px solid var(--line);">난이도</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">시작 폭</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">기본 속도 / 가속</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">완벽 허용 오차</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">폭 회복 보너스</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">층 기본 점수</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:4px 2px;border:1px solid var(--line);">쉬움</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">170px</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">2.3 / +0.08</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">8px 이내</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">+12px</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">50점</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 2px;border:1px solid var(--line);">보통</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">145px</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">3.3 / +0.12</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">5px 이내</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">+8px</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">80점</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 2px;border:1px solid var(--line);">어려움</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">120px</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">4.5 / +0.17</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">3px 이내</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">+5px</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">120점</td>
+          </tr>
+        </tbody>
+      </table>
+      • <b>끝나는 조건:</b> 블록이 아래 블록을 완전히 빗나가 겹치는 구간이 없거나, 잘려나간 뒤 남은 폭이 8px 미만이 되면 즉시 게임이 종료됩니다.<br>
+      • <b>막힐 때 요령:</b><br>
+      1. 난이도별 완벽 허용 오차(쉬움 8px, 보통 5px, 어려움 3px) 안으로 착지하면 아래 블록과 완전 일치 처리되므로 1px 단위까지 정확히 맞출 필요는 없습니다.<br>
+      2. 좁아진 블록도 연속 3번 완벽(PERFECT) 판정을 받으면 난이도별 회복 보너스(쉬움 12px, 보통 8px, 어려움 5px)만큼 폭이 다시 넓어집니다.<br>
+      3. 층당 이동 속도가 증가하지만 속도 가산치는 최대 +4.5로 상한이 정해져 있어 일정 층수 이후에는 더 빨라지지 않습니다.
     </div>
   </section>
 

@@ -5,13 +5,13 @@
 <link rel="icon" href="../_common/icon-192.png">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>한글 초성 퀴즈 무료 게임 | 좌표나라</title>
-<meta name="description" content="초성을 보고 알맞은 낱말을 맞히는 두뇌 한글 퀴즈 게임. 쉬움(2글자)·보통(3글자)·어려움(4글자) 3단계를 가입 없이 모바일과 PC에서 즐겨보세요.">
+<meta name="description" content="초성을 보고 알맞은 낱말을 맞히는 두뇌 한글 퀴즈 게임. 쉬움(2~3글자)·보통(3~4글자)·어려움(3~4글자) 3단계를 가입 없이 모바일과 PC에서 즐겨보세요.">
 <link rel="canonical" href="https://jwapyonara.com/chosung-quiz/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="한글 초성 퀴즈 무료 게임 | 좌표나라">
-<meta property="og:description" content="초성을 보고 알맞은 낱말을 맞히는 두뇌 한글 퀴즈 게임. 쉬움(2글자)·보통(3글자)·어려움(4글자) 3단계를 가입 없이 모바일과 PC에서 즐겨보세요.">
+<meta property="og:description" content="초성을 보고 알맞은 낱말을 맞히는 두뇌 한글 퀴즈 게임. 쉬움(2~3글자)·보통(3~4글자)·어려움(3~4글자) 3단계를 가입 없이 모바일과 PC에서 즐겨보세요.">
 <meta property="og:url" content="https://jwapyonara.com/chosung-quiz/">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"💡 한글 초성 퀴즈","description":"초성을 보고 알맞은 낱말을 맞히는 두뇌 한글 퀴즈 게임. 쉬움(2글자)·보통(3글자)·어려움(4글자) 3단계를 가입 없이 모바일과 PC에서 즐겨보세요.","url":"https://jwapyonara.com/chosung-quiz/","applicationCategory":"GameApplication","operatingSystem":"Web Browser"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"💡 한글 초성 퀴즈","description":"초성을 보고 알맞은 낱말을 맞히는 두뇌 한글 퀴즈 게임. 쉬움(2~3글자)·보통(3~4글자)·어려움(3~4글자) 3단계를 가입 없이 모바일과 PC에서 즐겨보세요.","url":"https://jwapyonara.com/chosung-quiz/","applicationCategory":"GameApplication","operatingSystem":"Web Browser"}</script>
 <style>
 :root {
   --bg: #f5f5f7;
@@ -541,11 +541,50 @@ details[open] summary {
     <summary>어떻게 플레이하나요?</summary>
     <ul class="rules-list">
       <li><strong>조작 방법:</strong> 4개의 보기 중 초성에 알맞은 낱말을 터치하세요. PC에서는 숫자키 <code>1</code>, <code>2</code>, <code>3</code>, <code>4</code>를 눌러 빠르게 선택할 수 있습니다.</li>
-      <li><strong>점수와 콤보:</strong> 빠르게 정답을 맞힐수록 남은 시간 보너스를 받으며, 연속 정답 시 콤보 가산점이 더해집니다.</li>
-      <li><strong>난이도:</strong>
-        <br>• <strong>쉬움:</strong> 2글자 친숙한 일상 낱말 (문제당 8초)
-        <br>• <strong>보통:</strong> 3글자 생활 용어 및 전자기기 (문제당 5.5초)
-        <br>• <strong>어려움:</strong> 4글자 복합명사 및 사자성어 (문제당 4초)
+      <li><strong>점수 계산:</strong>
+        <br>• <strong>정답 점수:</strong> <code>문제 기본 점수 + ((연속 콤보 - 1) × 콤보 가산점) + 시간 보너스</code> (시간 보너스는 <code>Math.floor((남은 시간 / 제한시간) × 50)</code>로 최대 50점).
+        <br>• <strong>만점 보너스:</strong> 12문제를 모두 맞히면 <code>+1,000점</code> 추가. (오답이나 시간 초과 시 콤보 0 초기화)
+        <br>• <i>예시:</i> 보통 난이도(기본 160점, 콤보 40점, 5.5초 제한)에서 2연속 정답(2콤보)이고 3.3초를 남겨 맞히면 시간 보너스 <code>Math.floor((3.3 / 5.5) × 50) = 30점</code>이 더해져 <code>160 + (2 - 1) × 40 + 30 = 230점</code> 획득.
+      </li>
+      <li><strong>난이도별 설정:</strong> (12문제 공통, 만점 보너스 +1,000점)
+        <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;margin:6px 0;font-size:11px;text-align:center;line-height:1.35;">
+          <thead>
+            <tr style="background:rgba(255,255,255,0.06);">
+              <th style="padding:4px 2px;border:1px solid var(--line);">난이도</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">제한시간</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">단어 유형</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">기본 / 콤보보너스</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">쉬움</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">8.0초</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">2~3글자 기초 일상어</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">100점 / +25점</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">보통</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">5.5초</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">3~4글자 생활·가전</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">160점 / +40점</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">어려움</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">4.0초</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">3~4글자 IT 용어·사자성어 등</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">240점 / +60점</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </li>
+      <li><strong>끝나는 조건:</strong> 총 12문제를 모두 풀면 종료되며 최종 점수와 정답률이 결과창에 표시됩니다.</li>
+      <li><strong>막힐 때 요령:</strong>
+        <br>1. 초성만 보면 후보가 많으므로 상단 카테고리 태그(과일, 음식, IT 등)와 중앙의 뜻 힌트를 빠르게 대조해 4지선다 보기를 좁힙니다.
+        <br>2. 남은 시간에 비례하여 최대 50점까지 보너스가 차등 지급되므로 정답을 확신하면 머뭇거리지 않고 즉시 터치해야 합니다.
+        <br>3. PC에서는 키보드 숫자 <code>1</code>~<code>4</code> 키를 누르면 마우스 커서 이동 없이 즉시 선택되어 시간 보너스를 최대로 받을 수 있습니다.
       </li>
     </ul>
   </details>

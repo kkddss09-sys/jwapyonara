@@ -374,10 +374,56 @@ h1 {
     </div>
 
     <div class="rule-box">
-      <b>하는 법 (터치·키보드 지원):</b><br>
-      1. 왼쪽 위 별(★) 칸과 이어진 같은 색 덩어리가 내 영역입니다.<br>
-      2. 아래 색상 단추(키보드 <code>1</code>~<code>6</code>)를 누르거나 판 위의 원하는 색 칸을 직접 누르면 내 영역이 그 색으로 바뀌면서 맞닿은 같은 색 칸을 모두 흡수합니다.<br>
-      3. 남은 횟수 안에 바위(■)를 제외한 모든 칸을 한 가지 색으로 통일하면 승리하며, 남은 횟수가 많을수록 큰 보너스 점수를 받습니다.
+      <b>색깔 물들이기 규칙 및 점수 안내</b><br>
+      • <b>조작 방법:</b> 하단 색상 단추(키보드 <code>1</code>~<code>6</code>)를 누르거나 판 위의 원하는 색 칸을 누르면 별(★) 영역이 해당 색으로 바뀌며 맞닿은 같은 색을 흡수합니다.<br>
+      • <b>점수 계산:</b>
+        <br>- <b>흡수 점수:</b> 새로 흡수한 칸당 점수(쉬움 15, 보통 20, 어려움 25점) 획득 (<code>새로 흡수한 칸 수 × 난이도별 칸당 점수</code>).
+        <br>- <b>완주 보너스:</b> 바위를 제외한 온 판을 통일하면 <code>완주 기본 점수 + (남은 횟수 × 잔여 횟수당 보너스)</code> 지급.
+        <br>- <i>예시:</i> 보통 난이도(칸당 20점, 완주 800점, 횟수당 180점)에서 6칸을 흡수하면 120점 획득, 남은 횟수 5회를 남기고 완주 시 보너스 <code>800 + (5 × 180) = 1,700점</code> 추가.<br>
+      • <b>난이도별 설정:</b>
+      <table style="width:100%;border-collapse:collapse;margin:6px 0;font-size:11.5px;text-align:center;line-height:1.35;">
+        <thead>
+          <tr style="background:rgba(255,255,255,0.06);">
+            <th style="padding:4px 2px;border:1px solid var(--line);">난이도</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">판 크기</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">색상 수</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">제한 횟수</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">바위 장애물</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">칸당 / 완주보너스</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:4px 2px;border:1px solid var(--line);">쉬움</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">8×8 (64칸)</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">4색</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">18회</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">0개</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">15점 / 500점 (회당 120)</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 2px;border:1px solid var(--line);">보통</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">10×10 (100칸)</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">5색</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">21회</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">0개</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">20점 / 800점 (회당 180)</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 2px;border:1px solid var(--line);">어려움</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">12×12 (144칸)</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">6색</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">24회</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">6개 (흡수 불가)</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">25점 / 1200점 (회당 260)</td>
+          </tr>
+        </tbody>
+      </table>
+      • <b>끝나는 조건:</b> 바위를 제외한 모든 칸을 통일하면 완주 보너스와 함께 승리하며, 통일하지 못하고 남은 횟수가 0회가 되면 패배로 끝납니다.<br>
+      • <b>막힐 때 요령:</b><br>
+      1. '가장 많이 넓어지는 색 추천' 단추(1회 제공)를 누르면 현재 한 수에서 가장 많은 칸을 즉시 흡수하는 최적의 색상(현재 한 수 기준)을 알려줍니다.<br>
+      2. 내 영역 둘레와 가장 넓게 맞닿아 있는 색을 골라야 1수당 칸 증가량이 극대화되며, 맞닿지 않은 색을 선택하면 0칸 흡수로 횟수만 낭비됩니다.<br>
+      3. 어려움 난이도의 검은 바위 6개는 흡수되지 않으므로, 바위 뒤쪽 영역으로 나아가려면 바위 옆 길을 둘러싸듯 연결해 나가야 합니다.
     </div>
   </section>
 

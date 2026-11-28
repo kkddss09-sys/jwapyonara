@@ -529,12 +529,53 @@ details[open] summary {
   <details open>
     <summary>어떻게 플레이하나요?</summary>
     <ul class="rules-list">
-      <li><strong>조작 방법:</strong> 화면에 표시된 4개의 보기 중 정답을 터치하세요. PC에서는 키보드 숫자 <code>1</code>, <code>2</code>, <code>3</code>, <code>4</code> 키로 빠르게 누를 수 있습니다.</li>
-      <li><strong>시간과 콤보:</strong> 기본 30초가 주어집니다. 정답을 맞히면 점수와 함께 보너스 시간이 추가되고 콤보가 쌓입니다. 오답 시에는 난이도에 따라 시간이 2.5초·3초·3.5초 차감됩니다.</li>
-      <li><strong>난이도 차이:</strong>
-        <br>• <strong>쉬움:</strong> 1~2자리 덧셈과 뺄셈 중심, 정답 시 +1.5초
-        <br>• <strong>보통:</strong> 2자리 덧셈/뺄셈 및 구구단 곱셈, 정답 시 +1.2초
-        <br>• <strong>어려움:</strong> 2자리 곱셈 및 3항 연산/나눗셈 혼합, 정답 시 +1.0초
+      <li><strong>조작 방법:</strong> 4개의 보기 중 올바른 계산 결과를 터치하세요. PC에서는 키보드 숫자 <code>1</code>, <code>2</code>, <code>3</code>, <code>4</code> 키로 빠르게 선택할 수 있습니다.</li>
+      <li><strong>점수 계산:</strong>
+        <br>• <strong>정답 점수:</strong> <code>난이도별 기본 점수 + ((연속 콤보 - 1) × 콤보 가산점)</code> 획득.
+        <br>• <strong>시간 증감:</strong> 정답 시 보너스 시간(최대 45초까지) 추가, 오답 시 난이도별 페널티 시간 즉시 차감 및 콤보 0 초기화.
+        <br>• <i>예시:</i> 보통 난이도(기본 150점, 콤보 35점)에서 2연속 정답(2콤보) 달성 시 <code>150 + (2 - 1) × 35 = 185점</code> 획득 및 시간 +1.2초 연장.
+      </li>
+      <li><strong>난이도별 설정:</strong>
+        <table style="width:100%;border-collapse:collapse;margin:6px 0;font-size:11.5px;text-align:center;line-height:1.35;">
+          <thead>
+            <tr style="background:rgba(255,255,255,0.06);">
+              <th style="padding:4px 2px;border:1px solid var(--line);">난이도</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">출제 문제 유형</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">기본 / 콤보점수</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">정답 시간 보너스</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">오답 시간 페널티</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">쉬움</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">1~2자리 덧셈·뺄셈</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">100점 / +20점</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">+1.5초</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">-2.5초</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">보통</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">2자리 덧셈·뺄셈, 구구단</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">150점 / +35점</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">+1.2초</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">-3.0초</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">어려움</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">혼합 연산 (a×b±c, a÷b+c)</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">220점 / +50점</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">+1.0초</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">-3.5초</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li><strong>끝나는 조건:</strong> 30초로 시작하여 제한 시간이 0초가 되면 암산 테스트가 종료됩니다.</li>
+      <li><strong>막힐 때 요령:</strong>
+        <br>1. 일의 자리(끝자리) 먼저 연산: 4개 보기는 정답과 유사한 값으로 구성되므로 식 전체를 다 계산하기 전에 끝자리 숫자만 먼저 따져보면 오답 2~3개를 순식간에 걸러낼 수 있습니다.
+        <br>2. 키보드 숫자키 입력: PC 환경에서는 마우스로 누르는 것보다 키보드 숫자 <code>1</code>~<code>4</code> 키를 누르는 것이 훨씬 빠르며 반응 시간을 대폭 줄일 수 있습니다.
+        <br>3. 오답 시간 페널티 주의: 보통 난이도 기준 오답 1번(-3초)은 정답 2.5문제분의 시간 보너스를 날리므로, 헷갈릴 때는 무턱대고 찍기보다 0.5초 더 생각하고 확실히 누르는 편이 유리합니다.
       </li>
     </ul>
   </details>

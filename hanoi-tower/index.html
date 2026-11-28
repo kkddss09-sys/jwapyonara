@@ -518,13 +518,59 @@ details[open] summary {
   <details open>
     <summary>어떻게 플레이하나요?</summary>
     <ul class="rules-list">
-      <li><strong>조작 방법:</strong> 원반이 있는 기둥을 터치하면 맨 위 원반이 선택(들림)됩니다. 그 후 옮겨 놓을 기둥을 터치하면 이동합니다. 키보드 숫자 <code>1</code>, <code>2</code>, <code>3</code> 키로도 조작할 수 있습니다.</li>
-      <li><strong>핵심 규칙:</strong>
-        <br>1. 한 번에 기둥의 맨 위에 있는 원반 하나씩만 옮길 수 있습니다.
-        <br>2. <strong>작은 원반 위에 더 큰 원반을 올릴 수 없습니다.</strong>
-        <br>3. 기둥 1의 모든 원반을 기둥 3으로 전부 옮기면 퍼즐 완성입니다.
+      <li><strong>조작 방법:</strong> 원반이 있는 기둥을 터치하면 맨 위 원반이 선택(들림)되며, 옮길 기둥을 터치하면 놓입니다. PC에서는 키보드 숫자 <code>1</code>, <code>2</code>, <code>3</code> 키로 조작할 수 있습니다. 작은 원반 위에 더 큰 원반을 올릴 수 없습니다.</li>
+      <li><strong>점수 계산:</strong>
+        <br>• <strong>계산식:</strong> <code>Math.round(기본 점수 × 이동 효율) + 시간 단축 보너스</code>
+        <br>• <strong>이동 효율:</strong> <code>Math.min(1.0, 최소 이동 횟수 / Math.max(최소 이동 횟수, 실제 이동 횟수))</code>
+        <br>• <strong>시간 보너스:</strong> <code>Math.max(0, Math.floor((기준 시간 - 소요 시간) × 20점))</code>
+        <br>• <i>예시:</i> 보통 난이도(원반 4개, 최소 15회, 기본 2400점, 기준 60초)에서 20회 이동, 45.0초에 클리어 시 이동 효율 0.75(15/20)로 기본 점수 <code>Math.round(2400 × 0.75) = 1,800점</code>, 시간 보너스 <code>(60 - 45) × 20 = 300점</code>이 더해져 <code>총 2,100점</code> 획득.
       </li>
-      <li><strong>점수 계산:</strong> 최소 이동 횟수에 가까울수록, 소요 시간이 짧을수록 높은 점수를 얻습니다.</li>
+      <li><strong>난이도별 설정:</strong>
+        <table style="width:100%;border-collapse:collapse;margin:6px 0;font-size:11.5px;text-align:center;line-height:1.35;">
+          <thead>
+            <tr style="background:rgba(255,255,255,0.06);">
+              <th style="padding:4px 2px;border:1px solid var(--line);">난이도</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">원반 수</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">최소 이동 횟수 (2ⁿ-1)</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">기준 시간</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">기본 점수</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">시간 단축 보너스</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">쉬움</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">3개</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">7회</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">30초</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">1200점</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">초당 20점</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">보통</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">4개</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">15회</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">60초</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">2400점</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">초당 20점</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">어려움</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">5개</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">31회</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">120초</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">4000점</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">초당 20점</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li><strong>끝나는 조건:</strong> 1번 기둥의 모든 원반을 3번 기둥(목표)으로 규칙에 맞게 전부 옮기면 퍼즐이 완성되어 종료됩니다. (최소 이동 횟수를 넘기면 이동 횟수가 늘수록 기본 점수가 줄어듭니다. 기준 시간을 넘기면 시간 보너스는 0점입니다.)</li>
+      <li><strong>막힐 때 요령:</strong>
+        <br>1. 홀수/짝수 첫 수 공식: 원반 수가 홀수(3개, 5개)일 때는 가장 작은 1번 원반을 <strong>3번(목표) 기둥</strong>으로 먼저 옮기고, 짝수(4개)일 때는 1번 원반을 <strong>2번(경유) 기둥</strong>으로 먼저 옮기며 시작해야 최단 횟수로 풀립니다.
+        <br>2. 1번 원반의 순환 이동: 가장 작은 1번 원반은 항상 한 수 건너 한 번씩(1, 3, 5번째 수...) 같은 순환 방향으로 이동합니다.
+        <br>3. 키보드 숫자키 조작: PC에서는 마우스 대신 키보드 숫자 <code>1</code>, <code>2</code>, <code>3</code> 키를 누르면 집기와 놓기가 즉각 처리되어 시간 단축 보너스를 크게 확보할 수 있습니다.
+      </li>
     </ul>
   </details>
 </div>

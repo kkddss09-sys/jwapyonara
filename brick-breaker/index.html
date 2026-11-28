@@ -433,10 +433,52 @@ details[open] summary {
   <details open>
     <summary>어떻게 플레이하나요?</summary>
     <ul class="rules-list">
-      <li><strong>조작 방법:</strong> 스마트폰에서는 캔버스를 손가락으로 드래그하거나 아래 좌/우 버튼을 터치하세요. PC에서는 키보드 방향키(←, →) 또는 A/D 키, 마우스로 패들을 움직입니다.</li>
-      <li><strong>공 튕기기:</strong> 공이 패들의 중심에 맞으면 똑바로 튀어 오르고, 가장자리에 맞을수록 예리한 각도로 꺾여 날아갑니다.</li>
-      <li><strong>점수와 콤보:</strong> 벽돌을 연속으로 깰수록 콤보 보너스 점수가 더해집니다. 단단한 벽돌은 여러 번 쳐야 깨집니다.</li>
-      <li><strong>난이도:</strong> 난이도가 올라갈수록 패들이 좁아지고 공 속도가 빨라지며 내구도가 높은 벽돌이 늘어납니다.</li>
+      <li><strong>조작 방법:</strong> 스마트폰에서는 캔버스를 터치·드래그하거나 좌/우 단추를 누릅니다. PC에서는 키보드 방향키(←, →), A/D 키, 또는 마우스 이동으로 패들을 움직입니다.</li>
+      <li><strong>점수 계산:</strong>
+        <br>• <strong>벽돌 타격:</strong> 패들에 닿지 않고 연속 타격 시 <code>벽돌 기본 점수 + ((연속 콤보 - 1) × 20점)</code>를 얻습니다. (패들에 공이 닿으면 콤보가 0으로 초기화)
+        <br>• <strong>올클리어 보너스:</strong> 모든 벽돌을 깨면 <code>클리어 기본 점수 + (남은 생명 × 400점)</code>를 받습니다.
+        <br>• <i>예시:</i> 보통 난이도(기본 80점)에서 패들에 닿지 않고 3번째 벽돌을 연속 타격(3콤보)하면 <code>80 + (3 - 1) × 20 = 120점</code>, 생명 2개를 남기고 올클리어 시 보너스 <code>1500 + (2 × 400) = 2,300점</code> 추가.
+      </li>
+      <li><strong>난이도별 설정:</strong>
+        <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;margin:6px 0;font-size:11px;text-align:center;line-height:1.35;">
+          <thead>
+            <tr style="background:rgba(255,255,255,0.06);">
+              <th style="padding:4px 2px;border:1px solid var(--line);">난이도</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">패들 / 공 속도</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">벽돌수 / 생명</th>
+              <th style="padding:4px 2px;border:1px solid var(--line);">기본 / 클리어점수</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">쉬움</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">90px / 3.8</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">24개(파랑) / 4개</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">50점 / 1000점</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">보통</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">74px / 4.6</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">35개(노랑+파랑) / 3개</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">80점 / 1500점</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 2px;border:1px solid var(--line);">어려움</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">58px / 5.4</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">48개(빨강+노랑+파랑) / 2개</td>
+              <td style="padding:4px 2px;border:1px solid var(--line);">120점 / 2200점</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </li>
+      <li><strong>끝나는 조건:</strong> 판의 모든 벽돌을 깨뜨리면 올클리어 보너스와 함께 승리하며, 공을 바닥으로 놓쳐 남은 생명이 0개가 되면 게임 오버로 끝납니다.</li>
+      <li><strong>막힐 때 요령:</strong>
+        <br>1. 패들 중심에 공이 맞으면 수직으로 튕기며, 가장자리에 맞을수록 최대 65도까지 큰 각도로 꺾여 나가므로 타격 지점을 조절해 원하는 벽돌을 조준할 수 있습니다.
+        <br>2. 공을 벽돌 무리 위쪽 빈 틈새로 밀어 넣으면 패들에 닿지 않고 연속 타격이 이어져 콤보 가산점(+20점씩)을 대량으로 얻을 수 있습니다.
+        <br>3. 남은 생명 1개당 400점의 클리어 보너스가 주어지므로 무리하게 공을 깎아 치기보다 안전하게 받아내는 수비가 고득점에 유리합니다.
+      </li>
     </ul>
   </details>
 </div>

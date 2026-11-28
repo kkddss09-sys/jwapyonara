@@ -345,10 +345,53 @@ h1 {
     </div>
 
     <div class="rule-box">
-      <b>하는 법 (터치 방향키·스와이프·키보드 지원):</b><br>
-      1. 파란 동그라미(내 위치)를 움직여 오른쪽 아래 깃발(🏁)까지 이동합니다.<br>
-      2. 보통·어려움 난이도에서는 미로 안의 황금 열쇠(🔑)를 모두 모아야 출구 문이 열립니다.<br>
-      3. 어려움 난이도는 주변 3칸만 밝게 보이는 안개 미로입니다. 빨리 탈출할수록 높은 점수를 받습니다.
+      <b>미로 찾기 규칙 및 점수 안내</b><br>
+      • <b>조작 방법:</b> 방향키 단추, 캔버스 스와이프, 키보드(방향키 또는 W·A·S·D)로 파란 원을 움직여 오른쪽 아래 출구로 이동합니다.<br>
+      • <b>점수 계산:</b> 열쇠 1개당 250점이며, 탈출 성공 시 <code>클리어 기본 점수 + (남은 시간(초) × 초당 보너스)</code>를 받습니다. (예: 보통 난이도에서 열쇠 1개(250점)를 얻고 40초를 남겨 탈출하면 <code>250 + 1000 + (40 × 22) = 2,130점</code>)<br>
+      • <b>난이도별 설정:</b>
+      <table style="width:100%;border-collapse:collapse;margin:6px 0;font-size:11.5px;text-align:center;line-height:1.35;">
+        <thead>
+          <tr style="background:rgba(255,255,255,0.06);">
+            <th style="padding:4px 2px;border:1px solid var(--line);">난이도</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">미로 크기</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">필수 열쇠</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">시야 / 힌트</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">제한 시간</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">기본 / 초당</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:4px 2px;border:1px solid var(--line);">쉬움</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">11×11</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">0개</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">전체 / 2회</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">60초</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">600점 / 15점</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 2px;border:1px solid var(--line);">보통</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">15×15</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">1개</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">전체 / 2회</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">75초</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">1000점 / 22점</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 2px;border:1px solid var(--line);">어려움</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">19×19</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">2개</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">반경 3칸 / 1회</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">95초</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">1600점 / 30점</td>
+          </tr>
+        </tbody>
+      </table>
+      • <b>끝나는 조건:</b> 필요한 열쇠를 모두 수집하고 출구에 도착하면 성공으로 끝나며, 제한 시간(쉬움 60초·보통 75초·어려움 95초)이 0초가 되면 시간 초과로 종료됩니다.<br>
+      • <b>막힐 때 요령:</b><br>
+      1. '길 힌트' 단추(쉬움·보통 2회, 어려움 1회)를 누르면 2초간 다음 열쇠나 출구까지의 최단 경로가 노란색으로 표시됩니다.<br>
+      2. 필수 열쇠를 다 모으기 전에는 출구 문이 빨간색으로 잠겨 열리지 않으므로, 출구보다 열쇠를 먼저 찾아야 합니다.<br>
+      3. 어려움 난이도의 안개 속에서도 이미 지나간 길은 어두운 남색으로 표시되므로 막다른 길을 피해 탐색할 수 있습니다.
     </div>
   </section>
 

@@ -449,10 +449,56 @@ h1 {
     </div>
 
     <div class="rule-box">
-      <b>하는 법 (터치·키보드 지원):</b><br>
-      1. 아래 조각 3개 중 하나를 누릅니다(키보드 <code>1</code>·<code>2</code>·<code>3</code>).<br>
-      2. 위 격자판에서 놓을 자리를 누르면 미리보기가 뜨고, 같은 칸을 한 번 더 누르면 놓입니다(키보드 방향키 이동 후 <code>Enter</code>/<code>Space</code>).<br>
-      3. 가로줄이나 세로줄이 빈칸 없이 가득 차면 줄이 지워지며 점수가 올라갑니다. 남은 조각을 어디에도 놓을 수 없으면 끝납니다.
+      <b>블록 줄 지우기 규칙 및 점수 안내</b><br>
+      • <b>조작 방법:</b> 하단 트레이의 조각을 선택(키보드 <code>1</code>·<code>2</code>·<code>3</code>)한 뒤, 격자판의 원하는 자리를 누르면 미리보기가 표시되고 한 번 더 누르면 놓입니다. (키보드 방향키 이동 후 <code>Enter</code>/<code>Space</code>)<br>
+      • <b>점수 계산:</b>
+        <br>- <b>조각 배치 점수:</b> 놓은 조각의 칸 수당 10점 (<code>조각 칸 수 × 10점</code>).
+        <br>- <b>줄 삭제 점수:</b> 가로·세로 줄이 가득 차면 <code>줄 기본 점수 × (동시 삭제 줄 수)² + (연속 콤보 > 1 ? (콤보 - 1) × 50 : 0)</code>. (줄을 못 지운 턴은 콤보 0 초기화)
+        <br>- <i>예시:</i> 보통 난이도(줄 기본 150점)에서 3칸 조각(30점)을 놓아 2줄을 동시 삭제(1콤보)하면 <code>30 + (150 × 2²) + 0 = 30 + 600 = 630점</code>.<br>
+      • <b>난이도별 설정:</b>
+      <table style="width:100%;border-collapse:collapse;margin:6px 0;font-size:11.5px;text-align:center;line-height:1.35;">
+        <thead>
+          <tr style="background:rgba(255,255,255,0.06);">
+            <th style="padding:4px 2px;border:1px solid var(--line);">난이도</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">판 크기</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">조각 구성</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">시작 방해 돌</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">진행 중 돌 추가</th>
+            <th style="padding:4px 2px;border:1px solid var(--line);">줄 기본 점수</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding:4px 2px;border:1px solid var(--line);">쉬움</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">8×8</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">1~3칸 조각 (7종)</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">0개</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">없음</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">100점</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 2px;border:1px solid var(--line);">보통</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">8×8</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">최대 4칸 조각 (13종)</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">3개</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">없음</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">150점</td>
+          </tr>
+          <tr>
+            <td style="padding:4px 2px;border:1px solid var(--line);">어려움</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">9×9</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">5칸 조각 포함 (17종)</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">5개</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">6개 놓을 때마다 1개</td>
+            <td style="padding:4px 2px;border:1px solid var(--line);">220점</td>
+          </tr>
+        </tbody>
+      </table>
+      • <b>끝나는 조건:</b> 하단 트레이에 남은 조각 중 판의 빈 공간에 배치할 수 있는 조각이 하나도 없을 때 게임이 종료됩니다.<br>
+      • <b>막힐 때 요령:</b><br>
+      1. 줄 점수는 줄 수의 제곱(줄 수²)에 비례하므로 1줄씩 지우기(150점)보다 2줄 동시 삭제는 4배(600점), 3줄 동시 삭제는 9배(1,350점)로 점수가 폭발적으로 오릅니다.<br>
+      2. 보통·어려움에서는 4~5칸 크기의 큰 조각(2×2, 십자, 1×4 등)이 나오므로 큰 조각이 들어갈 수 있는 공간을 항상 염두에 두고 비워두어야 합니다.<br>
+      3. 방해 돌도 가로 또는 세로 줄이 완성되면 함께 지워지므로, 돌이 있는 줄을 적극적으로 공략해 판을 넓혀야 합니다.
     </div>
   </section>
 
