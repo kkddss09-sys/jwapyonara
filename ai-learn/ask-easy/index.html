@@ -1,0 +1,393 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>AI에게 쉽게 말해 달라고 하기 — 좌표나라 AI같이배워요</title><meta name="description" content="AI의 어려운 설명을 쉽게 바꾸어 달라고 부탁하는 네 문장을 복사해 보세요."><link rel="canonical" href="https://jwapyonara.com/ai-learn/ask-easy/"><meta property="og:title" content="AI에게 쉽게 말해 달라고 하기"><meta property="og:description" content="어려운 AI 설명을 쉽게 듣는 네 가지 부탁 문장"><meta property="og:type" content="article"><meta property="og:url" content="https://jwapyonara.com/ai-learn/ask-easy/"><link rel="stylesheet" href="../../_common/common.css"><link rel="stylesheet" href="../_ai-learn/ai-learn.css"><style>
+    /* 모든 스타일은 .sg-page 아래로 제한 */
+    .sg-page {
+      --sg-bg: #0e131c;
+      --sg-card: #171d29;
+      --sg-card-hover: #1e2638;
+      --sg-ink: #eef2f8;
+      --sg-sub: #98a3b5;
+      --sg-line: #2a3344;
+      --sg-accent: #3d8bff;
+      --sg-accent-soft: rgba(61, 139, 255, 0.12);
+      --sg-panel: #2b3547;
+      --sg-fill: #1f2735;
+      --sg-fill2: #253042;
+      --sg-ok: #4ade80;
+      --sg-ok-soft: rgba(74, 222, 128, 0.12);
+      --sg-amber: #facc15;
+      --sg-amber-soft: rgba(250, 204, 21, 0.12);
+      --sg-danger: #ff7a70;
+      --sg-radius: 14px;
+
+      background-color: var(--sg-bg);
+      color: var(--sg-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 16px 60px;
+      box-sizing: border-box;
+    }
+
+    .sg-page * {
+      box-sizing: border-box;
+    }
+
+    .sg-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* 빵부스러기 */
+    .sg-page .sg-breadcrumb {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* 머리말 */
+    .sg-page .sg-header {
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--sg-accent-soft);
+      color: var(--sg-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-header h1 {
+      font-size: 25px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .sg-page .sg-lead {
+      font-size: 15px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 상단 카톡방 링크 */
+    .sg-page .zw-ai-kakao {
+      margin: 0 0 20px;
+    }
+    .sg-page .zw-ai-kakao a.cta {
+      display: block;
+      background: #fae100;
+      color: #371d1e;
+      text-align: center;
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* 3줄 요약 상자 */
+    .sg-page .sg-summary-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-left: 4px solid var(--sg-accent);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 28px;
+    }
+    .sg-page .sg-summary-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-summary-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-summary-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-summary-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 단계 구역 카드 */
+    .sg-page .sg-step-sec {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 20px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-step-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-step-num {
+      background: var(--sg-accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sg-page .sg-step-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+    }
+    .sg-page .sg-step-desc {
+      font-size: 14px;
+      color: var(--sg-sub);
+      margin: 0 0 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-step-desc p {
+      margin: 0 0 6px;
+    }
+    .sg-page .sg-step-desc p:last-child {
+      margin: 0;
+    }
+
+    /* 부탁 예시 상자 */
+    .sg-page .sg-prompt-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+    .sg-page .sg-prompt-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sg-page .sg-prompt-text {
+      background: var(--sg-panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .sg-page .sg-btn-copy {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--sg-card-hover);
+      color: #fff;
+      border: 1px solid var(--sg-line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .sg-page .sg-btn-copy:hover {
+      background: var(--sg-accent);
+      border-color: var(--sg-accent);
+    }
+    .sg-page .sg-btn-copy.copied {
+      background: var(--sg-ok);
+      border-color: var(--sg-ok);
+      color: #0b2212;
+    }
+
+    /* 주의사항 상자 */
+    .sg-page .sg-warn-box {
+      background: var(--sg-amber-soft);
+      border: 1px solid var(--sg-amber);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-warn-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--sg-amber);
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-warn-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-warn-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-warn-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 안드로이드 / 아이폰 비교 칸 */
+    .sg-page .sg-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-diff-card {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 16px 14px;
+    }
+    .sg-page .sg-diff-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: var(--sg-panel);
+      color: #fff;
+    }
+    .sg-page .sg-diff-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+    }
+    .sg-page .sg-diff-desc {
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* 공식 출처 및 확인일 안내 */
+    .sg-page .sg-source-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--sg-sub);
+    }
+    .sg-page .sg-source-box strong {
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-source-box a {
+      color: var(--sg-accent);
+      text-decoration: underline;
+    }
+
+    /* 하단 이동 링크 */
+    .sg-page .sg-bottom-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+      margin-top: 24px;
+    }
+    .sg-page .sg-link-btn {
+      display: block;
+      padding: 12px 16px;
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .sg-page .sg-link-btn:hover {
+      background: var(--sg-card-hover);
+      border-color: var(--sg-accent);
+    }
+
+    @media (max-width: 480px) {
+      .sg-page .sg-diff-grid {
+        grid-template-columns: 1fr;
+      }
+      .sg-page .sg-header h1 {
+        font-size: 22px;
+      }
+    }
+  
+.sg-page {width:100%; min-width:0; overflow-x:hidden} .sg-page .sg-step-sec,.sg-page .sg-prompt-box,.sg-page .sg-prompt-text {min-width:0;max-width:100%;overflow-wrap:anywhere}
+</style></head><body><div class="sg-page"><div class="sg-breadcrumb"><a href="/">홈</a> &gt; <a href="../">AI같이배워요</a> &gt; <span>쉽게 말해 달라고 하기</span></div><header class="sg-header"><span class="sg-tag">AI 대화 기초</span><h1>AI에게 쉽게 말해 달라고 하기</h1><p class="sg-lead">어려운 설명을 만나면 편한 우리말로 다시 부탁해 보세요.</p></header><div class="zw-ai-kakao"><a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a></div><section class="sg-summary-box" data-shot="s0"><div class="sg-summary-title">📌 세 줄 요약</div><ul class="sg-summary-list"><li>어려운 말이 나오면 쉽게 말해 달라고 부탁합니다.</li><li>그래도 모르겠으면 비유나 실생활 예시를 요청합니다.</li><li>질문이 떠오르지 않으면 AI에게 먼저 질문해 달라고 말합니다.</li></ul></section><section class="sg-step-sec" data-shot="s1"><div class="sg-step-head"><span class="sg-step-num">1</span><h2 class="sg-step-title">어려운 말을 쉽게 부탁하기</h2></div><div class="sg-step-desc"><p>대화창에 궁금한 말을 적습니다. 설명이 어렵다면 아래 문장을 이어서 보내 보세요.</p><p>안티그래비티 대화창에서 쓰는 이 문장은 다른 AI 대화창에서도 쓸 수 있습니다.</p></div><div class="sg-prompt-box" data-shot="p1"><div class="sg-prompt-label">💡 첫 번째 부탁</div><div class="sg-prompt-text" id="promptText1">초등학생처럼 쉽게 말해줘.</div><button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText1', this)">📋 이 질문 글 복사하기</button></div></section><section class="sg-step-sec" data-shot="s2"><div class="sg-step-head"><span class="sg-step-num">2</span><h2 class="sg-step-title">그래도 어렵다면 비유 부탁하기</h2></div><div class="sg-step-desc"><p>낯선 단어가 남으면 같은 대화에서 다시 부탁해 보세요.</p><p>내가 아는 물건이나 상황에 빗대어 달라고 말하면 됩니다.</p></div><div class="sg-prompt-box" data-shot="p2"><div class="sg-prompt-label">💡 두 번째 부탁</div><div class="sg-prompt-text" id="promptText2">그래도 어려우니 더 쉽게 비유를 들어서 설명해 줘.</div><button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText2', this)">📋 이 질문 글 복사하기</button></div></section><section class="sg-step-sec" data-shot="s3"><div class="sg-step-head"><span class="sg-step-num">3</span><h2 class="sg-step-title">실생활 예시 세 개 부탁하기</h2></div><div class="sg-step-desc"><p>개념만으로 감이 오지 않을 때 예시를 요청합니다.</p><p>예시를 읽고 내 상황과 닮은 부분을 찾아보세요.</p></div><div class="sg-prompt-box" data-shot="p3"><div class="sg-prompt-label">💡 세 번째 부탁</div><div class="sg-prompt-text" id="promptText3">실생활에서 쓰는 구체적인 예시 세 개만 들어줘.</div><button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText3', this)">📋 이 질문 글 복사하기</button></div></section><section class="sg-step-sec" data-shot="s4"><div class="sg-step-head"><span class="sg-step-num">4</span><h2 class="sg-step-title">무엇을 물을지 모를 때</h2></div><div class="sg-step-desc"><p>첫 질문이 떠오르지 않아도 괜찮습니다.</p><p>아래 문장을 보내고, 돌아온 질문 중 답하기 쉬운 것을 골라 보세요.</p></div><div class="sg-prompt-box" data-shot="p4"><div class="sg-prompt-label">💡 네 번째 부탁</div><div class="sg-prompt-text" id="promptText4">내가 무엇을 물어봐야 할지 잘 모르겠는데 나에게 질문 세 개만 먼저 해줘.</div><button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText4', this)">📋 이 질문 글 복사하기</button></div></section><section class="sg-warn-box" data-shot="warn"><div class="sg-warn-title">⚠️ 답을 볼 때 기억할 점</div><ul class="sg-warn-list"><li>AI의 답이 틀릴 수 있습니다. 중요한 내용은 다른 자료로 다시 확인하세요.</li><li>이름, 주소, 전화번호, 비밀번호 같은 개인정보는 입력하지 마세요.</li></ul></section><section class="sg-step-sec" data-shot="diff"><div class="sg-step-head"><span class="sg-step-num">📱</span><h2 class="sg-step-title">휴대폰에서는 이렇게 해 보세요</h2></div><div class="sg-step-desc"><p>위 문장의 복사 단추를 누른 뒤, 쓰고 있는 AI 대화창에 붙여 넣어 보세요.</p><p>휴대폰 화면은 좁으니 긴 설명을 한 번에 읽기보다 한 문장씩 다시 물어보면 됩니다.</p></div></section><div class="sg-source-box"><p><strong>공식 안내 확인일:</strong> 2026년 11월 28일</p><p><a href="https://support.google.com/gemini/answer/13954172" target="_blank" rel="noopener">Google Gemini 답변 확인 안내</a> · <a href="https://support.google.com/gemini/answer/13594961" target="_blank" rel="noopener">Google Gemini 정보 입력 안내</a></p></div><div class="sg-bottom-links"><a class="sg-link-btn" href="../start/">« AI 컴퓨터 프로그램 시작 가이드 보러가기</a><a class="sg-link-btn" href="../">« AI같이배워요 전체 목록으로 돌아가기</a></div><div class="zw-ai-kakao" style="margin-top:24px"><a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a></div></div><script src="../../_common/common.js"></script><script src="../_ai-learn/ai-learn.js"></script><script>
+    function copyPrompt(elementId, btn) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      var text = el.innerText || el.textContent;
+      var origText = btn.innerHTML;
+
+      var showDone = function() {
+        btn.innerHTML = '✅ 복사 완료! 앱에 붙여 넣으세요';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = origText;
+          btn.classList.remove('copied');
+        }, 2500);
+      };
+
+      var fallback = function() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          var ok = document.execCommand('copy');
+          if (ok) showDone();
+          else alert('글을 길게 눌러 직접 복사해 주세요.');
+        } catch (e) {
+          alert('글을 길게 눌러 직접 복사해 주세요.');
+        }
+        document.body.removeChild(ta);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showDone).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+  </script></body></html>
