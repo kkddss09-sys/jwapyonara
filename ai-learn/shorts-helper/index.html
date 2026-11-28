@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>챗GPT로 나만의 쇼츠 대본 도우미 웹페이지 만들기 — 좌표나라 AI같이배워요</title>
+  <meta name="description" content="코딩 지식이 없어도 챗GPT에게 요청하여 주제만 넣으면 쇼츠 대본 부탁 글이 완성되는 한 장짜리 도우미 웹페이지를 만드는 순서 안내입니다.">
+  <link rel="canonical" href="https://jwapyonara.com/ai-learn/shorts-helper/">
+  <meta property="og:title" content="챗GPT로 나만의 쇼츠 대본 도우미 웹페이지 만들기 — 좌표나라 AI같이배워요">
+  <meta property="og:description" content="코딩을 몰라도 챗GPT와 대화하며 나만의 쇼츠 대본 도우미 웹페이지 한 장을 내 컴퓨터에 만드는 초보자 순서입니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://jwapyonara.com/ai-learn/shorts-helper/">
+  <link rel="stylesheet" href="../../_common/common.css">
+  <link rel="stylesheet" href="../_ai-learn/ai-learn.css">
+  <style>
+    /* 모든 스타일은 .sg-page 아래로 제한 */
+    .sg-page {
+      --sg-bg: #0e131c;
+      --sg-card: #171d29;
+      --sg-card-hover: #1e2638;
+      --sg-ink: #eef2f8;
+      --sg-sub: #98a3b5;
+      --sg-line: #2a3344;
+      --sg-accent: #3d8bff;
+      --sg-accent-soft: rgba(61, 139, 255, 0.12);
+      --sg-panel: #2b3547;
+      --sg-fill: #1f2735;
+      --sg-fill2: #253042;
+      --sg-ok: #4ade80;
+      --sg-ok-soft: rgba(74, 222, 128, 0.12);
+      --sg-amber: #facc15;
+      --sg-amber-soft: rgba(250, 204, 21, 0.12);
+      --sg-danger: #ff7a70;
+      --sg-radius: 14px;
+
+      background-color: var(--sg-bg);
+      color: var(--sg-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 16px 60px;
+      box-sizing: border-box;
+    }
+
+    .sg-page * {
+      box-sizing: border-box;
+    }
+
+    .sg-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* 빵부스러기 */
+    .sg-page .sg-breadcrumb {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* 머리말 */
+    .sg-page .sg-header {
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--sg-accent-soft);
+      color: var(--sg-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-header h1 {
+      font-size: 25px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .sg-page .sg-lead {
+      font-size: 15px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 상단 카톡방 링크 */
+    .sg-page .zw-ai-kakao {
+      margin: 0 0 20px;
+    }
+    .sg-page .zw-ai-kakao a.cta {
+      display: block;
+      background: #fae100;
+      color: #371d1e;
+      text-align: center;
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* 3줄 요약 상자 */
+    .sg-page .sg-summary-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-left: 4px solid var(--sg-accent);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 28px;
+    }
+    .sg-page .sg-summary-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-summary-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-summary-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-summary-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 단계 구역 카드 */
+    .sg-page .sg-step-sec {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 20px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-step-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-step-num {
+      background: var(--sg-accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sg-page .sg-step-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+    }
+    .sg-page .sg-step-desc {
+      font-size: 14px;
+      color: var(--sg-sub);
+      margin: 0 0 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-step-desc p {
+      margin: 0 0 6px;
+    }
+    .sg-page .sg-step-desc p:last-child {
+      margin: 0;
+    }
+
+    /* 부탁 예시 상자 */
+    .sg-page .sg-prompt-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+    .sg-page .sg-prompt-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sg-page .sg-prompt-text {
+      background: var(--sg-panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .sg-page .sg-btn-copy {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--sg-card-hover);
+      color: #fff;
+      border: 1px solid var(--sg-line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .sg-page .sg-btn-copy:hover {
+      background: var(--sg-accent);
+      border-color: var(--sg-accent);
+    }
+    .sg-page .sg-btn-copy.copied {
+      background: var(--sg-ok);
+      border-color: var(--sg-ok);
+      color: #0b2212;
+    }
+
+    /* 주의사항 상자 */
+    .sg-page .sg-warn-box {
+      background: var(--sg-amber-soft);
+      border: 1px solid var(--sg-amber);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-warn-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--sg-amber);
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-warn-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-warn-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-warn-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 기기별 다른 점 칸 */
+    .sg-page .sg-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-diff-card {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 16px 14px;
+    }
+    .sg-page .sg-diff-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: var(--sg-panel);
+      color: #fff;
+    }
+    .sg-page .sg-diff-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+    }
+    .sg-page .sg-diff-desc {
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* 공식 출처 및 확인일 안내 */
+    .sg-page .sg-source-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--sg-sub);
+    }
+    .sg-page .sg-source-box strong {
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-source-box a {
+      color: var(--sg-accent);
+      text-decoration: underline;
+    }
+
+    /* 하단 이동 링크 */
+    .sg-page .sg-bottom-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+      margin-top: 24px;
+    }
+    .sg-page .sg-link-btn {
+      display: block;
+      padding: 12px 16px;
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .sg-page .sg-link-btn:hover {
+      background: var(--sg-card-hover);
+      border-color: var(--sg-accent);
+    }
+
+    @media (max-width: 480px) {
+      .sg-page .sg-diff-grid {
+        grid-template-columns: 1fr;
+      }
+      .sg-page .sg-header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sg-page">
+    <!-- 빵부스러기 네비게이션 -->
+    <div class="sg-breadcrumb">
+      <a href="/">홈</a> &gt; <a href="../">AI같이배워요</a> &gt; <span>쇼츠 대본 도우미</span>
+    </div>
+
+    <!-- 머리말 -->
+    <header class="sg-header">
+      <span class="sg-tag">실전 도구 제작 가이드</span>
+      <h1>챗GPT로 나만의 쇼츠 대본 도우미 웹페이지 만들기</h1>
+      <p class="sg-lead">프로그래밍 문법을 배우지 않고도, 챗GPT에게 원하는 모양을 요청하여 내 컴퓨터에서 작동하는 대본 작성 도우미 한 장을 만드는 순서입니다.</p>
+    </header>
+
+    <!-- 카톡방 안내 링크 -->
+    <div class="zw-ai-kakao">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+
+    <!-- 맨 위 3줄 요약 (data-shot="s0") -->
+    <section class="sg-summary-box" data-shot="s0">
+      <div class="sg-summary-title">📌 세 줄 요약</div>
+      <ul class="sg-summary-list">
+        <li><strong>원하는 화면 요청:</strong> 챗GPT에게 주제를 넣으면 부탁 글이 만들어지는 HTML 한 장 코드를 써달라고 구체적으로 요청합니다.</li>
+        <li><strong>코드 복사와 저장:</strong> 생성된 코드 블록 상단의 복사 단추를 누르고 메모장에 붙여넣은 뒤 영문 이름에 점 html을 붙여 저장합니다.</li>
+        <li><strong>브라우저로 열기:</strong> 저장한 파일을 더블클릭하여 크롬이나 엣지 창으로 열면 나만의 대본 도우미 화면이 실행됩니다.</li>
+      </ul>
+    </section>
+
+    <!-- 1단계: 챗GPT 접속 및 첫 요청 (data-shot="s1") -->
+    <section class="sg-step-sec" data-shot="s1">
+      <div class="sg-step-head">
+        <span class="sg-step-num">1</span>
+        <h2 class="sg-step-title">챗GPT 접속 및 기본 화면 구조 요청하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>컴퓨터 웹 브라우저를 열고 챗GPT 공식 사이트에 접속하여 로그인합니다.</p>
+        <p>인공지능에게 요청할 때는 작업 내용과 필요한 조건을 구체적으로 제시해야 원하는 결과에 가까워집니다.</p>
+        <p>초보자용으로 별도의 복잡한 설치 없이 브라우저에서 바로 열리는 단일 HTML 파일로 작성해달라고 명시합니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 1 (data-shot="p1") -->
+      <div class="sg-prompt-box" data-shot="p1">
+        <div class="sg-prompt-label">
+          <span>💡 첫 번째 웹페이지 요청 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText1">안녕하세요! 코딩 지식이 없는 초보자입니다. 내 컴퓨터 웹 브라우저에서 바로 열 수 있는 쇼츠 대본 도우미 웹페이지 한 장을 만들고 싶습니다. 다른 추가 파일 없이 HTML 파일 하나 안에 스타일과 자바스크립트가 모두 포함된 코드를 작성해줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText1', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 2단계: 기능 구체화 요청 (data-shot="s2") -->
+    <section class="sg-step-sec" data-shot="s2">
+      <div class="sg-step-head">
+        <span class="sg-step-num">2</span>
+        <h2 class="sg-step-title">입력칸과 복사 기능 구체적으로 다듬기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>원하는 웹페이지의 세부 기능과 구성을 하나씩 짚어서 추가 요청을 보냅니다.</p>
+        <p>주제를 입력하는 칸, 대본 요청 글을 만드는 생성 단추, 그리고 완성된 문장을 클립보드에 담아주는 복사 단추를 요청합니다.</p>
+        <p>글자 크기를 큼직하게 키우고 어두운 배경에 밝은 글씨로 초보자가 보기 편하게 만들어달라고 요청합니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 2 (data-shot="p2") -->
+      <div class="sg-prompt-box" data-shot="p2">
+        <div class="sg-prompt-label">
+          <span>💡 화면 구성과 단추 추가 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText2">앞서 요청한 대본 도우미 화면을 세 가지 요소로 구성해줘. 첫째, 다룰 주제를 입력하는 넓은 입력창. 둘째, 40초 분량 쇼츠 대본 프롬프트를 조립해주는 생성 단추. 셋째, 완성된 결과 글을 한 번에 복사할 수 있는 복사 단추입니다. 50대 사용자가 보기 편하도록 글씨를 큼직하게 키우고 깔끔하게 다듬어줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText2', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 3단계: 코드 블록 복사 (data-shot="s3") -->
+    <section class="sg-step-sec" data-shot="s3">
+      <div class="sg-step-head">
+        <span class="sg-step-num">3</span>
+        <h2 class="sg-step-title">챗GPT 답변에서 코드 블록 복사하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>챗GPT가 완성된 코드를 제시하면 일반 대화문과 분리된 별도의 코드 블록 상자에 담겨 나옵니다.</p>
+        <p>코드 블록 상단에 표시되는 <strong>Copy code(코드 복사)</strong> 단추를 누르면 전체 내용이 한 번에 복사됩니다.</p>
+        <p>마우스로 본문을 길게 드래그할 필요 없이 상단 단추를 한 번 누르면 빠짐없이 클립보드에 저장됩니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 3 (data-shot="p3") -->
+      <div class="sg-prompt-box" data-shot="p3">
+        <div class="sg-prompt-label">
+          <span>💡 코드 오류 수정 및 안내 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText3">작성해 준 코드 블록 상단의 복사 단추를 눌러 준비했습니다. 혹시 복사 버튼을 눌렀을 때 화면에 복사 완료 알림 문구가 2초간 떴다 사라지는 기능을 추가하려면 어느 줄을 수정해야 하는지 초보자 눈높이로 알기 쉽게 설명해줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText3', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 4단계: 메모장 붙여넣기 및 파일 저장 (data-shot="s4") -->
+    <section class="sg-step-sec" data-shot="s4">
+      <div class="sg-step-head">
+        <span class="sg-step-num">4</span>
+        <h2 class="sg-step-title">메모장에 붙여넣고 html 확장자로 저장하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>윈도우 작업표시줄 검색창에서 <strong>메모장</strong>을 찾아 실행한 뒤 빈 화면에 붙여넣기(단축키 Ctrl + V)를 합니다.</p>
+        <p>상단 메뉴에서 <strong>파일 &gt; 다른 이름으로 저장</strong>을 선택합니다.</p>
+        <p>파일 형식을 <strong>모든 파일(*.*)</strong>로 변경하고, 파일 이름 끝에 반드시 <strong>.html</strong>을 붙여 입력합니다.</p>
+        <p>한글이 깨지지 않도록 하단의 인코딩 항목이 <strong>UTF-8</strong>로 되어 있는지 확인한 뒤 저장 단추를 누릅니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 4 (data-shot="p4") -->
+      <div class="sg-prompt-box" data-shot="p4">
+        <div class="sg-prompt-label">
+          <span>💡 메모장 저장 시 한글 인코딩 확인 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText4">메모장에서 코드를 저장할 때 인코딩을 UTF-8로 지정하는 방법과 파일 확장자를 .html로 바르게 입력하는 방법을 컴퓨터 초보자가 헷갈리지 않게 세 줄로 요약해줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText4', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 5단계: 브라우저 실행 및 도구 사용 (data-shot="s5") -->
+    <section class="sg-step-sec" data-shot="s5">
+      <div class="sg-step-head">
+        <span class="sg-step-num">5</span>
+        <h2 class="sg-step-title">웹 브라우저로 열어 대본 요청 글 만들기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>바탕화면이나 폴더에 저장된 html 파일을 마우스로 더블클릭하면 평소 쓰는 인터넷 브라우저 창에서 열립니다.</p>
+        <p>주제 입력칸에 제작하고 싶은 쇼츠 주제를 적고 생성 단추를 누르면 조립된 부탁 글이 나타납니다.</p>
+        <p>복사 단추를 누른 뒤 실제로 복사가 되었는지 확인합니다. 브라우저 보안 권한이나 실행 환경에 따라 복사 단추가 작동하지 않을 때는, 상자의 결과 글을 마우스로 직접 드래그하여 선택한 뒤 복사(Ctrl+C)하시면 됩니다.</p>
+        <p>복사한 문장을 챗GPT 대화창에 붙여넣어 본격적인 쇼츠 대본 답변을 받아보시면 됩니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 5 (data-shot="p5") -->
+      <div class="sg-prompt-box" data-shot="p5">
+        <div class="sg-prompt-label">
+          <span>💡 완성된 도우미로 만든 대본 요청 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText5">도우미 웹페이지에서 만든 요청 글입니다: '스마트폰 사진 정리 팁을 주제로 40대 초보자가 이해하기 쉬운 40초 유튜브 쇼츠 대본을 작성해줘. 시선을 끄는 도입부 한 줄, 핵심 정리 세 문장, 마무리 한 줄로 구성해줘.' 이 조건에 맞춰 대본을 작성해줘.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText5', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 주의사항 구역 (data-shot="warn") -->
+    <section class="sg-warn-box" data-shot="warn">
+      <div class="sg-warn-title">⚠️ 제작 및 사용 시 꼭 지켜야 할 주의사항</div>
+      <ul class="sg-warn-list">
+        <li><strong>인공지능 대답 검토와 사실 확인:</strong> 인공지능이 생성한 출력 문장이나 코드는 때때로 부정확하거나 오해의 소지가 있을 수 있습니다. 생성된 대본의 정보나 코드가 의도대로 작동하는지 직접 열어서 확인하세요.</li>
+        <li><strong>민감한 개인정보 입력 금지 및 코드 점검:</strong> 파일 자체에 개인정보를 저장하지 마시고, 챗GPT에 프롬프트를 입력할 때도 주민등록번호, 계좌번호 등 민감한 개인정보를 입력하지 마세요. 또한 생성된 코드가 외부로 정보를 무단 전송하지 않는지 꼼꼼히 확인하세요.</li>
+        <li><strong>확인되지 않은 외부 스크립트 연결 금지:</strong> 웹페이지 코드를 다듬을 때 신뢰할 수 없는 외부 인터넷 주소(URL)에서 프로그램을 불러오도록 연결하지 마시고 순수 HTML과 자바스크립트로 구성하세요.</li>
+      </ul>
+    </section>
+
+    <!-- 컴퓨터와 스마트폰 차이점 구역 (data-shot="diff") -->
+    <section class="sg-step-sec" data-shot="diff">
+      <div class="sg-step-head">
+        <span class="sg-step-num">💻</span>
+        <h2 class="sg-step-title">컴퓨터와 스마트폰에서의 사용 환경 차이점</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>기기에 따라 파일을 다루고 대화창을 활용하는 방식에 차이가 있습니다.</p>
+      </div>
+      <div class="sg-diff-grid">
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">컴퓨터 (PC / 노트북)</span>
+          <div class="sg-diff-title">파일 저장 및 브라우저 실행</div>
+          <p class="sg-diff-desc">메모장을 활용해 HTML 파일을 내 컴퓨터에 직접 저장하고 브라우저로 바로 실행할 수 있어 화면 제작과 테스트에 적합합니다.</p>
+        </div>
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">스마트폰 (모바일 앱)</span>
+          <div class="sg-diff-title">대화 위주 프롬프트 활용</div>
+          <p class="sg-diff-desc">모바일에서는 별도 파일 저장보다 챗GPT 모바일 앱에서 직접 대화 형식으로 대본 질문을 주고받는 방식이 간편합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 공식 안내 확인 링크와 확인일 -->
+    <div class="sg-source-box">
+      <p><strong>공식 확인 기준일:</strong> 2026년 11월 28일</p>
+      <p>이 가이드는 OpenAI 공식 도움말 센터의 문서를 바탕으로 검증되었습니다: 
+        <a href="https://help.openai.com/en/articles/20001246-working-with-writing-blocks-and-code-blocks-in-chatgpt" target="_blank" rel="noopener">OpenAI 코드 블록 활용 안내</a> · 
+        <a href="https://help.openai.com/en/articles/4936848-how-do-i-create-a-good-prompt-for-an-ai-model" target="_blank" rel="noopener">OpenAI 프롬프트 작성 가이드</a>
+      </p>
+    </div>
+
+    <!-- 하단 이동 링크 -->
+    <div class="sg-bottom-links">
+      <a class="sg-link-btn" href="../start/">« AI 컴퓨터 프로그램 시작 가이드 보러가기</a>
+      <a class="sg-link-btn" href="../">« AI같이배워요 전체 목록으로 돌아가기</a>
+    </div>
+
+    <!-- 하단 카톡방 링크 -->
+    <div class="zw-ai-kakao" style="margin-top:24px;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+  </div>
+
+  <script src="../../_common/common.js"></script>
+  <script src="../_ai-learn/ai-learn.js"></script>
+  <script>
+    function copyPrompt(elementId, btn) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      var text = el.innerText || el.textContent;
+      var origText = btn.innerHTML;
+
+      var showDone = function() {
+        btn.innerHTML = '✅ 복사 완료! 붙여 넣으세요';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = origText;
+          btn.classList.remove('copied');
+        }, 2500);
+      };
+
+      var fallback = function() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          var ok = document.execCommand('copy');
+          if (ok) showDone();
+          else alert('글을 길게 눌러 직접 복사해 주세요.');
+        } catch (e) {
+          alert('글을 길게 눌러 직접 복사해 주세요.');
+        }
+        document.body.removeChild(ta);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showDone).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+  </script>
+</body>
+</html>

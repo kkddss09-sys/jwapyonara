@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 그림 캐릭터 연속 동작 그리는 법 — 동작 그림판(스프라이트 시트) 부탁과 수정 틀 — 좌표나라 AI같이배워요</title>
+  <meta name="description" content="인공지능에게 캐릭터의 걷기, 인사, 표정 변화 등 연속 동작을 한 장의 여러 칸으로 부탁하고 달라진 부분을 수정하는 초보자용 안내입니다.">
+  <link rel="canonical" href="https://jwapyonara.com/ai-learn/sprite-motion/">
+  <meta property="og:title" content="AI 그림 캐릭터 연속 동작 그리는 법 — 좌표나라 AI같이배워요">
+  <meta property="og:description" content="인공지능에게 한 장에 여러 칸으로 캐릭터 동작을 부탁하고 달라진 모양을 고쳐 요청하는 방법입니다.">
+  <link rel="stylesheet" href="../../_common/common.css">
+  <link rel="stylesheet" href="../_ai-learn/ai-learn.css">
+  <style>
+    /* 모든 스타일은 .sg-page 아래로 제한 */
+    .sg-page {
+      --sg-bg: #0e131c;
+      --sg-card: #171d29;
+      --sg-card-hover: #1e2638;
+      --sg-ink: #eef2f8;
+      --sg-sub: #98a3b5;
+      --sg-line: #2a3344;
+      --sg-accent: #3d8bff;
+      --sg-accent-soft: rgba(61, 139, 255, 0.12);
+      --sg-panel: #2b3547;
+      --sg-fill: #1f2735;
+      --sg-fill2: #253042;
+      --sg-ok: #4ade80;
+      --sg-ok-soft: rgba(74, 222, 128, 0.12);
+      --sg-amber: #facc15;
+      --sg-amber-soft: rgba(250, 204, 21, 0.12);
+      --sg-danger: #ff7a70;
+      --sg-radius: 14px;
+
+      background-color: var(--sg-bg);
+      color: var(--sg-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 16px 60px;
+      box-sizing: border-box;
+    }
+
+    .sg-page * {
+      box-sizing: border-box;
+    }
+
+    .sg-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* 빵부스러기 */
+    .sg-page .sg-breadcrumb {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* 머리말 */
+    .sg-page .sg-header {
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--sg-accent-soft);
+      color: var(--sg-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-header h1 {
+      font-size: 25px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .sg-page .sg-lead {
+      font-size: 15px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 상단 카톡방 링크 */
+    .sg-page .zw-ai-kakao {
+      margin: 0 0 20px;
+    }
+    .sg-page .zw-ai-kakao a.cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #fee500;
+      color: #191600;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      transition: background 0.15s;
+    }
+    .sg-page .zw-ai-kakao a.cta:hover {
+      background: #fedb00;
+    }
+
+    /* 3줄 요약 상자 */
+    .sg-page .sg-summary-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 18px 20px;
+      margin-bottom: 28px;
+    }
+    .sg-page .sg-summary-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--sg-amber);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-summary-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .sg-page .sg-summary-list li {
+      margin-bottom: 4px;
+    }
+
+    /* 단계 구역 */
+    .sg-page .sg-step-sec {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 22px 20px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-step-head {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--sg-line);
+      padding-bottom: 10px;
+    }
+    .sg-page .sg-step-num {
+      background: var(--sg-accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .sg-page .sg-step-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .sg-page .sg-step-desc {
+      font-size: 14px;
+      color: var(--sg-sub);
+      line-height: 1.65;
+      margin-bottom: 14px;
+    }
+    .sg-page .sg-step-desc p {
+      margin: 0 0 8px;
+    }
+    .sg-page .sg-step-desc p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 프롬프트 예시 상자 */
+    .sg-page .sg-prompt-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-panel);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-top: 12px;
+    }
+    .sg-page .sg-prompt-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .sg-page .sg-prompt-text {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 13px;
+      color: #e2e8f0;
+      background: var(--sg-fill2);
+      padding: 10px 12px;
+      border-radius: 6px;
+      line-height: 1.6;
+      word-break: break-all;
+      margin-bottom: 10px;
+      border: 1px solid var(--sg-line);
+    }
+    .sg-page .sg-btn-copy {
+      background: var(--sg-panel);
+      color: #fff;
+      border: 1px solid var(--sg-line);
+      padding: 7px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .sg-page .sg-btn-copy:hover {
+      background: var(--sg-card-hover);
+      border-color: var(--sg-accent);
+    }
+    .sg-page .sg-btn-copy.copied {
+      background: var(--sg-ok-soft);
+      color: var(--sg-ok);
+      border-color: var(--sg-ok);
+    }
+
+    /* 주의사항 상자 */
+    .sg-page .sg-warn-box {
+      background: rgba(255, 122, 112, 0.08);
+      border: 1px solid rgba(255, 122, 112, 0.3);
+      border-radius: var(--sg-radius);
+      padding: 18px 20px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-warn-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--sg-danger);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-warn-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--sg-ink);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+    .sg-page .sg-warn-list li {
+      margin-bottom: 6px;
+    }
+
+    /* 기기 비교 구역 */
+    .sg-page .sg-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    @media (max-width: 540px) {
+      .sg-page .sg-diff-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .sg-page .sg-diff-card {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-panel);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .sg-page .sg-diff-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sg-amber);
+      background: var(--sg-amber-soft);
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    .sg-page .sg-diff-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-diff-desc {
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* 공식 출처 및 기준일 상자 */
+    .sg-page .sg-source-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 12px;
+      color: var(--sg-sub);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-source-box a {
+      color: var(--sg-accent);
+      text-decoration: underline;
+    }
+
+    /* 하단 버튼 */
+    .sg-page .sg-bottom-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .sg-page .sg-link-btn {
+      display: block;
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      padding: 12px 16px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--sg-ink);
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .sg-page .sg-link-btn:hover {
+      background: var(--sg-card-hover);
+      border-color: var(--sg-accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="sg-page">
+    <!-- 빵부스러기 네비게이션 -->
+    <nav class="sg-breadcrumb" aria-label="breadcrumb">
+      <a href="../">AI같이배워요</a> &gt; <a href="../">그림 배우기</a> &gt; <span>연속 동작 그리기</span>
+    </nav>
+
+    <!-- 글 머리말 -->
+    <header class="sg-header">
+      <span class="sg-tag">🎨 AI 그림 실전 가이드</span>
+      <h1>AI 그림 캐릭터 연속 동작 그리는 법</h1>
+      <p class="sg-lead">동작 그림판(스프라이트 시트)으로 걷기, 인사, 웃는 표정을 한 장에 요청하고 달라진 부분을 바르게 고쳐 쓰는 법을 알아봅니다.</p>
+    </header>
+
+    <!-- 상단 카톡방 링크 -->
+    <div class="zw-ai-kakao">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+
+    <!-- 3줄 요약 구역 (data-shot="s0") -->
+    <section class="sg-summary-box" data-shot="s0">
+      <div class="sg-summary-title">💡 3줄 핵심 요약</div>
+      <ol class="sg-summary-list">
+        <li>한 장의 그림 안에 캐릭터의 여러 동작을 가로 격자로 나누어 한 화면에 요청하고 결과를 칸별로 확인합니다.</li>
+        <li>캐릭터의 외모, 옷차림, 화풍을 고정 설명으로 먼저 적고 각 칸별 동작 번호를 지정합니다.</li>
+        <li>칸마다 모양이나 색상이 달라졌을 때는 대화를 이어가며 해당 칸의 번호를 짚어 구체적으로 수정을 요청합니다.</li>
+      </ol>
+    </section>
+
+    <!-- 1단계: 동작 그림판 격자 요청 (data-shot="s1") -->
+    <section class="sg-step-sec" data-shot="s1">
+      <div class="sg-step-head">
+        <span class="sg-step-num">1단계</span>
+        <h2 class="sg-step-title">한 장에 여러 칸으로 나누어 동작 요청하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>캐릭터의 동작을 따로따로 여러 장으로 요청하면 얼굴과 옷차림이 매번 달라지기 쉽습니다.</p>
+        <p>게임이나 만화에서 사용하는 동작 그림판(스프라이트 시트) 방식처럼, 한 장의 캔버스에 4칸 가로 배열로 연속된 동작을 한 번에 그려달라고 요청하는 것이 좋습니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p1">
+        <div class="sg-prompt-label">📋 1단계 실전 부탁 예시</div>
+        <div class="sg-prompt-text" id="promptText1">동일한 아기 곰 캐릭터가 흰색 배경에서 가로 4칸(스프라이트 시트)으로 나열된 2D 만화 삽화입니다. 1번 칸: 정면 서 있기, 2번 칸: 손 흔들기, 3번 칸: 한 발 내딛으며 걷기, 4번 칸: 두 손 모아 인사하기. 각 칸마다 캐릭터의 모습과 비율이 동일하게 유지되도록 그려주세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText1', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 2단계: 캐릭터 외형 및 화풍 고정 (data-shot="s2") -->
+    <section class="sg-step-sec" data-shot="s2">
+      <div class="sg-step-head">
+        <span class="sg-step-num">2단계</span>
+        <h2 class="sg-step-title">외모, 옷차림, 화풍을 구체적으로 설명하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>공식 안내에 따르면 원하는 화풍과 시각적 세부 정보를 상세하게 설명할수록 좋은 결과를 얻을 수 있습니다.</p>
+        <p>털 색상, 귀 모양, 입고 있는 옷의 종류와 색상, 배경 스타일을 구체적인 단어로 고정하여 작성합니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p2">
+        <div class="sg-prompt-label">📋 2단계 실전 부탁 예시</div>
+        <div class="sg-prompt-text" id="promptText2">화풍: 굵은 외곽선의 2D 만화 일러스트 스타일. 캐릭터: 둥근 귀와 갈색 털을 가진 아기 곰. 의상: 밝은 파란색 멜빵바지와 흰색 티셔츠. 배경: 단순한 흰색 단색 배경. 모든 칸에서 캐릭터의 옷 색상과 털 질감을 동일하게 고정해주세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText2', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 3단계: 달라진 칸 짚어서 수정하기 (data-shot="s3") -->
+    <section class="sg-step-sec" data-shot="s3">
+      <div class="sg-step-head">
+        <span class="sg-step-num">3단계</span>
+        <h2 class="sg-step-title">칸마다 모양이 달라질 때 고쳐 부탁하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>처음 나온 결과물에서 특정 칸의 옷 색상이나 소품이 다르게 나올 수 있습니다.</p>
+        <p>새 창을 열면 결과가 달라질 수 있으니, 전체 그림을 처음부터 다시 그리지 말고 같은 대화창에서 변경하려는 칸의 번호와 내용을 구체적으로 짚어 수정을 요청합니다. 공식 안내처럼 다른 영역도 함께 바뀔 수 있으므로 다른 칸은 변경하지 말라고 요청한 뒤 다른 칸도 다시 확인합니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p3">
+        <div class="sg-prompt-label">📋 3단계 실전 부탁 예시</div>
+        <div class="sg-prompt-text" id="promptText3">방금 그려준 4칸 그림에서 캐릭터 형태는 좋습니다. 다만 3번 칸의 멜빵바지 색상이 초록색으로 변경되어 나왔습니다. 3번 칸의 바지도 1번 칸과 동일하게 밝은 파란색 멜빵바지로 수정해주세요. 다른 칸은 변경하지 말아주세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText3', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 4단계: 동작의 방향과 크기 다듬기 (data-shot="s4") -->
+    <section class="sg-step-sec" data-shot="s4">
+      <div class="sg-step-head">
+        <span class="sg-step-num">4단계</span>
+        <h2 class="sg-step-title">동작의 방향과 크기를 균일하게 맞추기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>캐릭터의 머리 크기가 칸마다 들쭉날쭉하거나 시선 방향이 어색할 때가 있습니다.</p>
+        <p>비교 기준이 되는 칸을 지정하고, 해당 칸의 크기와 높이에 맞추어 수정해달라고 명확히 지시합니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p4">
+        <div class="sg-prompt-label">📋 4단계 실전 부탁 예시</div>
+        <div class="sg-prompt-text" id="promptText4">2번 칸의 아기 곰 머리 크기가 1번 칸보다 다소 크게 표현되었습니다. 2번 칸 캐릭터의 전신 크기와 머리 비율을 1번 칸과 동일한 크기로 축소하고, 시선도 정면을 바라보도록 정돈해주세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText4', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 5단계: 여백 확보와 분할 저장 (data-shot="s5") -->
+    <section class="sg-step-sec" data-shot="s5">
+      <div class="sg-step-head">
+        <span class="sg-step-num">5단계</span>
+        <h2 class="sg-step-title">칸 사이 여백을 두고 저장하여 활용하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>완성된 연속 동작 그림을 개별 그림으로 나누어 쓰려면 칸 사이에 적당한 여백이 필요합니다.</p>
+        <p>인공지능에게 칸 사이의 간격을 띄워달라고 요청한 뒤 컴퓨터 기본 그림판이나 자르기 도구로 각 동작을 잘라 저장합니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p5">
+        <div class="sg-prompt-label">📋 5단계 실전 부탁 예시</div>
+        <div class="sg-prompt-text" id="promptText5">각 동작 칸 사이에 넉넉한 흰색 여백을 두어 캐릭터끼리 겹치지 않게 배치해주세요. 선명한 외곽선으로 구분해주시면 나중에 개별 이미지로 나누어 활용하기 편리합니다.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText5', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 주의사항 구역 (data-shot="warn") -->
+    <section class="sg-warn-box" data-shot="warn">
+      <div class="sg-warn-title">⚠️ 생성형 AI 이미지 생성 시 주의사항</div>
+      <ul class="sg-warn-list">
+        <li><strong>개인정보 및 기밀 입력 금지:</strong> 공식 안내에 따라 검토자에게 노출될 수 있는 가족의 얼굴 사진, 민감한 개인정보나 기밀 자료는 프롬프트에 입력하지 마세요.</li>
+        <li><strong>수정 후 다른 칸 확인:</strong> 공식 도움말에 따르면 특정 부분을 수정할 때 선택 영역 밖까지 바뀔 수 있으므로, 다른 칸을 변경하지 말라고 요청한 후에도 모든 칸을 다시 확인해야 합니다.</li>
+        <li><strong>생성 결과의 유연한 검토:</strong> 인공지능은 매번 새롭게 계산하여 이미지를 생성하므로 세부 선이나 모양이 한 번에 동일하게 나오지 않을 수 있습니다. 2~3회에 걸쳐 대화를 나누며 다듬어가는 과정이 필요합니다.</li>
+      </ul>
+    </section>
+
+    <!-- 안드로이드 / 아이폰 다른 점 구역 (data-shot="diff") -->
+    <section class="sg-step-sec" data-shot="diff">
+      <div class="sg-step-head">
+        <span class="sg-step-num">📱</span>
+        <h2 class="sg-step-title">컴퓨터와 스마트폰에서의 작업 차이점</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>기기에 따라 프롬프트 문장을 관리하고 수정하는 방식에 차이가 있습니다.</p>
+      </div>
+      <div class="sg-diff-grid">
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">컴퓨터 웹 브라우저</span>
+          <div class="sg-diff-title">메모장과 큰 화면 활용</div>
+          <p class="sg-diff-desc">화면 옆에 메모장을 열어두고 기본 캐릭터 설명글을 보관하면서 칸별 동작 지시문만 빠르게 수정해 입력하기 편리합니다.</p>
+        </div>
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">스마트폰 앱</span>
+          <div class="sg-diff-title">메시지 복사 및 부분 수정</div>
+          <p class="sg-diff-desc">이전에 보낸 지시 메시지를 길게 눌러 복사한 뒤 입력창에 붙여넣고 수정할 칸 번호와 지시문만 수정하여 전송하면 간편합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 공식 안내 확인 링크와 확인일 -->
+    <div class="sg-source-box">
+      <p><strong>공식 확인 기준일:</strong> 2026년 11월 28일</p>
+      <p>이 안내글은 인공지능 서비스 회사의 공식 도움말 문서를 바탕으로 작성되었습니다:
+        <br>• Google Gemini 이미지 지원 문서: <a href="https://support.google.com/gemini/answer/14286560" target="_blank" rel="noopener">Gemini 이미지 생성 및 수정 고객센터</a>
+        <br>• OpenAI 공식 문서: <a href="https://help.openai.com/en/articles/9055440-editing-images-in-chatgpt" target="_blank" rel="noopener">Images in ChatGPT Guide</a>
+      </p>
+    </div>
+
+    <!-- 하단 이동 링크 -->
+    <div class="sg-bottom-links">
+      <a class="sg-link-btn" href="../start/">« AI 컴퓨터 프로그램 시작 가이드 보러가기</a>
+      <a class="sg-link-btn" href="../">« AI같이배워요 전체 목록으로 돌아가기</a>
+    </div>
+
+    <!-- 하단 카톡방 링크 -->
+    <div class="zw-ai-kakao" style="margin-top:24px;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+  </div>
+
+  <script src="../../_common/common.js"></script>
+  <script src="../_ai-learn/ai-learn.js"></script>
+  <script>
+    function copyPrompt(elementId, btn) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      var text = el.innerText || el.textContent;
+      var origText = btn.innerHTML;
+
+      var showDone = function() {
+        btn.innerHTML = '✅ 복사 완료! 앱에 붙여 넣으세요';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = origText;
+          btn.classList.remove('copied');
+        }, 2500);
+      };
+
+      var fallback = function() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          var ok = document.execCommand('copy');
+          if (ok) showDone();
+          else alert('글을 길게 눌러 직접 복사해 주세요.');
+        } catch (e) {
+          alert('글을 길게 눌러 직접 복사해 주세요.');
+        }
+        document.body.removeChild(ta);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showDone).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+  </script>
+</body>
+</html>

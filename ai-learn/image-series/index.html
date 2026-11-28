@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 그림 여러 장 같은 분위기로 그리는 법 — 고정 칸과 바뀌는 칸 부탁 틀 — 좌표나라 AI같이배워요</title>
+  <meta name="description" content="인공지능에게 그림 여러 장을 연속으로 부탁할 때 같은 대화에서 앞 그림을 참고해 고정 칸과 바뀌는 칸으로 요청하고 일치 여부를 확인하는 초보자용 안내입니다.">
+  <link rel="canonical" href="https://jwapyonara.com/ai-learn/image-series/">
+  <meta property="og:title" content="AI 그림 여러 장 같은 분위기로 그리는 법 — 좌표나라 AI같이배워요">
+  <meta property="og:description" content="인공지능에게 그림 여러 장을 부탁할 때 앞 그림을 참고하여 화풍과 인물을 맞추는 고정 칸과 바뀌는 칸 활용법입니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://jwapyonara.com/ai-learn/image-series/">
+  <link rel="stylesheet" href="../../_common/common.css">
+  <link rel="stylesheet" href="../_ai-learn/ai-learn.css">
+  <style>
+    /* 모든 스타일은 .sg-page 아래로 제한 */
+    .sg-page {
+      --sg-bg: #0e131c;
+      --sg-card: #171d29;
+      --sg-card-hover: #1e2638;
+      --sg-ink: #eef2f8;
+      --sg-sub: #98a3b5;
+      --sg-line: #2a3344;
+      --sg-accent: #3d8bff;
+      --sg-accent-soft: rgba(61, 139, 255, 0.12);
+      --sg-panel: #2b3547;
+      --sg-fill: #1f2735;
+      --sg-fill2: #253042;
+      --sg-ok: #4ade80;
+      --sg-ok-soft: rgba(74, 222, 128, 0.12);
+      --sg-amber: #facc15;
+      --sg-amber-soft: rgba(250, 204, 21, 0.12);
+      --sg-danger: #ff7a70;
+      --sg-radius: 14px;
+
+      background-color: var(--sg-bg);
+      color: var(--sg-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 16px 60px;
+      box-sizing: border-box;
+    }
+
+    .sg-page * {
+      box-sizing: border-box;
+    }
+
+    .sg-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* 빵부스러기 */
+    .sg-page .sg-breadcrumb {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* 머리말 */
+    .sg-page .sg-header {
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--sg-accent-soft);
+      color: var(--sg-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-header h1 {
+      font-size: 25px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .sg-page .sg-lead {
+      font-size: 15px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 상단 카톡방 링크 */
+    .sg-page .zw-ai-kakao {
+      margin: 0 0 20px;
+    }
+    .sg-page .zw-ai-kakao a.cta {
+      display: block;
+      background: #fae100;
+      color: #371d1e;
+      text-align: center;
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* 3줄 요약 상자 */
+    .sg-page .sg-summary-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-left: 4px solid var(--sg-accent);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 28px;
+    }
+    .sg-page .sg-summary-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-summary-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-summary-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-summary-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 단계 구역 카드 */
+    .sg-page .sg-step-sec {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 20px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-step-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-step-num {
+      background: var(--sg-accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sg-page .sg-step-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+    }
+    .sg-page .sg-step-desc {
+      font-size: 14px;
+      color: var(--sg-sub);
+      margin: 0 0 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-step-desc p {
+      margin: 0 0 6px;
+    }
+    .sg-page .sg-step-desc p:last-child {
+      margin: 0;
+    }
+
+    /* 부탁 예시 상자 */
+    .sg-page .sg-prompt-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+    .sg-page .sg-prompt-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sg-page .sg-prompt-text {
+      background: var(--sg-panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .sg-page .sg-btn-copy {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--sg-card-hover);
+      color: #fff;
+      border: 1px solid var(--sg-line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .sg-page .sg-btn-copy:hover {
+      background: var(--sg-accent);
+      border-color: var(--sg-accent);
+    }
+    .sg-page .sg-btn-copy.copied {
+      background: var(--sg-ok);
+      border-color: var(--sg-ok);
+      color: #0b2212;
+    }
+
+    /* 주의사항 상자 */
+    .sg-page .sg-warn-box {
+      background: var(--sg-amber-soft);
+      border: 1px solid rgba(250, 204, 21, 0.3);
+      border-left: 4px solid var(--sg-amber);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-warn-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-warn-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-warn-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-warn-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 차이점 비교 상자 */
+    .sg-page .sg-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    @media (min-width: 600px) {
+      .sg-page .sg-diff-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .sg-page .sg-diff-card {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px;
+    }
+    .sg-page .sg-diff-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      background: var(--sg-accent-soft);
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .sg-page .sg-diff-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-diff-desc {
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* 출처 상자 */
+    .sg-page .sg-source-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-source-box strong {
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-source-box a {
+      color: var(--sg-accent);
+      text-decoration: underline;
+    }
+
+    /* 하단 버튼 */
+    .sg-page .sg-bottom-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .sg-page .sg-link-btn {
+      display: block;
+      text-align: center;
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--sg-ink);
+      transition: background 0.15s;
+    }
+    .sg-page .sg-link-btn:hover {
+      background: var(--sg-card-hover);
+    }
+  </style>
+</head>
+<body class="sg-body">
+  <div class="sg-page">
+    <!-- 빵부스러기 -->
+    <nav class="sg-breadcrumb" aria-label="경로">
+      <a href="/">홈</a> &gt; <a href="../">AI같이배워요</a> &gt; <span>같은 분위기 그림 그리기</span>
+    </nav>
+
+    <!-- 머리말 -->
+    <header class="sg-header">
+      <div class="sg-tag">🎨 이미지 생성 프롬프트 틀</div>
+      <h1>AI 그림 여러 장 같은 분위기로 그리는 법</h1>
+      <p class="sg-lead">동화책이나 카드뉴스, 설명 자료를 만들 때 그림체와 등장인물을 비슷하게 유지하도록 '고정 칸'과 '바뀌는 칸'을 나누어 요청하는 실용적인 방법입니다.</p>
+    </header>
+
+    <!-- 카톡방 안내 링크 -->
+    <div class="zw-ai-kakao">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+
+    <!-- 맨 위 3줄 요약 (data-shot="s0") -->
+    <section class="sg-summary-box" data-shot="s0">
+      <div class="sg-summary-title">📌 세 줄 요약</div>
+      <ul class="sg-summary-list">
+        <li><strong>고정 칸과 바뀌는 칸:</strong> 그림체·색상·인물 생김새는 윗줄에 기준을 두고, 아랫줄에 이번 장면만 바꾸어 적습니다.</li>
+        <li><strong>대화 이어가기:</strong> 같은 대화에서 앞 그림을 참고해 요청하고, 결과마다 일치 여부를 확인합니다.</li>
+        <li><strong>부분 수정 활용:</strong> 바꿀 부분을 지정한 뒤 다른 부분도 달라졌는지 결과를 확인합니다.</li>
+      </ul>
+    </section>
+
+    <!-- 1단계: 서비스 접속 및 화풍 고정 칸 작성 (data-shot="s1") -->
+    <section class="sg-step-sec" data-shot="s1">
+      <div class="sg-step-head">
+        <span class="sg-step-num">1</span>
+        <h2 class="sg-step-title">서비스 접속 및 화풍 고정 칸 작성</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>먼저 컴퓨터나 스마트폰 브라우저에서 구글 제미나이(gemini.google.com) 또는 챗지피티(chatgpt.com)에 접속하여 로그인합니다.</p>
+        <p>화면 아래 대화 입력창을 열고 그림 요청을 준비합니다. 인공지능에게 그림을 부탁할 때는 화풍 기준을 먼저 세워야 합니다.</p>
+        <p>공식 안내에 따르면 수채화, 목탄화, 색연필화, 만화 삽화처럼 구체적인 스타일 명칭을 제시하는 것이 중요합니다.</p>
+        <p>따뜻한 파스텔톤, 부드러운 수채화 질감 등 원하는 색채와 화풍을 한두 줄로 정해 맨 윗줄에 고정합니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 1 (data-shot="p1") -->
+      <div class="sg-prompt-box" data-shot="p1">
+        <div class="sg-prompt-label">
+          <span>💡 화풍 고정 칸 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText1">[고정 그림체: 부드럽고 따뜻한 수채화 동화책 삽화 스타일, 차분한 파스텔 색감, 연필 질감의 얇은 외곽선]</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText1', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 2단계: 등장인물 고정 칸 작성 (data-shot="s2") -->
+    <section class="sg-step-sec" data-shot="s2">
+      <div class="sg-step-head">
+        <span class="sg-step-num">2</span>
+        <h2 class="sg-step-title">인물의 겉모습을 상세히 적는 인물 고정 칸</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>사람이나 동물이 등장할 때는 나이, 헤어스타일, 안경 유무, 의상 색상을 구체적으로 지정해야 합니다.</p>
+        <p>'어린이'라고만 적으면 매번 다른 아이가 그려지므로 '둥근 뿔테 안경을 쓴 노란 모자의 소년'처럼 구체화합니다.</p>
+        <p>인물의 주요 특징 세 가지 정도를 정해서 화풍 아래에 두 번째 고정 줄로 둡니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 2 (data-shot="p2") -->
+      <div class="sg-prompt-box" data-shot="p2">
+        <div class="sg-prompt-label">
+          <span>💡 인물 고정 칸 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText2">[고정 인물: 둥근 은테 안경을 쓰고 줄무늬 멜빵바지를 입은 7세 흑발 소년 민우]</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText2', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 3단계: 부탁 틀(템플릿) 조립하기 (data-shot="s3") -->
+    <section class="sg-step-sec" data-shot="s3">
+      <div class="sg-step-head">
+        <span class="sg-step-num">3</span>
+        <h2 class="sg-step-title">고정 칸과 바뀌는 칸을 결합한 첫 부탁 틀 완성</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>윗부분에는 앞서 정한 '고정 화풍'과 '고정 인물'을 그대로 붙여넣습니다.</p>
+        <p>아랫부분에는 이번 장면에 필요한 '배경 환경'과 '인물이 하고 있는 행동'만 적습니다.</p>
+        <p>이렇게 역할을 나누어 요청하면 인공지능이 기준을 인지하고 첫 번째 장면을 그려줍니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 3 (data-shot="p3") -->
+      <div class="sg-prompt-box" data-shot="p3">
+        <div class="sg-prompt-label">
+          <span>💡 첫 번째 장면 전체 부탁 틀 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText3">[고정 스타일: 따뜻한 수채화 동화 삽화, 부드러운 파스텔톤]
+[고정 인물: 둥근 안경과 줄무늬 멜빵바지를 입은 7세 흑발 소년]
+[이번 장면: 소년이 맑은 봄날 풀밭에서 커다란 돋보기를 들고 작은 무당벌레를 관찰하는 모습, 배경에 노란 민들레꽃]
+위 기준에 맞추어 그림을 그려주세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText3', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 4단계: 바뀌는 칸만 교체하여 연속 생성 (data-shot="s4") -->
+    <section class="sg-step-sec" data-shot="s4">
+      <div class="sg-step-head">
+        <span class="sg-step-num">4</span>
+        <h2 class="sg-step-title">같은 대화에서 앞 그림을 참고해 요청하고 일치 확인하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>두 번째 그림부터는 같은 대화에서 앞 그림을 참고해 요청하고, 결과마다 일치 여부를 확인합니다.</p>
+        <p>고정 줄의 기준을 두고, 맨 아래 '이번 장면'의 행동과 배경만 바꾸어 전송합니다.</p>
+        <p>"앞 그림과 같은 인물, 같은 그림체로 다음 장면을 그려줘"라는 문장을 덧붙여 요청하고, 생성된 결과가 앞 그림과 맞는지 살펴봅니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 4 (data-shot="p4") -->
+      <div class="sg-prompt-box" data-shot="p4">
+        <div class="sg-prompt-label">
+          <span>💡 두 번째 장면 연속 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText4">앞선 그림의 화풍과 인물 생김새를 참고하여 다음 장면을 그려주세요.
+[고정 스타일: 따뜻한 수채화 동화 삽화, 부드러운 파스텔톤]
+[고정 인물: 둥근 안경과 줄무늬 멜빵바지를 입은 7세 흑발 소년]
+[이번 장면: 비가 내리기 시작하여 소년이 빨간 우산을 활짝 펴고 빗방울을 손으로 만지는 모습]
+다음 장면으로 그려주세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText4', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 5단계: 부분 수정으로 미세 조정하기 (data-shot="s5") -->
+    <section class="sg-step-sec" data-shot="s5">
+      <div class="sg-step-head">
+        <span class="sg-step-num">5</span>
+        <h2 class="sg-step-title">바꿀 부분 지정과 세부 결과 확인하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>전체적인 분위기는 마음에 들지만 모자 색이나 손 모양 등 일부만 아쉬울 때가 있습니다.</p>
+        <p>이때는 전체를 새로 그리지 않고 "소년의 손에 든 우산 색상을 노란색으로 바꿔줘"처럼 바꿀 부분을 지정한 뒤 다른 부분도 달라졌는지 확인합니다.</p>
+        <p>공식 기능의 부분 수정(Select/Brushing)이나 텍스트 수정 지침을 활용할 때도 바꿀 위치를 명확히 지정하고 의도치 않은 변화가 없는지 살펴봅니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 5 (data-shot="p5") -->
+      <div class="sg-prompt-box" data-shot="p5">
+        <div class="sg-prompt-label">
+          <span>💡 부분 수정 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText5">방금 그려준 그림에서 바꿀 부분으로 소년이 쥐고 있는 빨간 우산만 노란색 우산으로 변경해 주세요. 다른 부분은 가급적 유지해 주세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText5', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 주의사항 구역 (data-shot="warn") -->
+    <section class="sg-warn-box" data-shot="warn">
+      <div class="sg-warn-title">⚠️ 생성형 AI 이미지 생성 시 주의사항</div>
+      <ul class="sg-warn-list">
+        <li><strong>기밀 및 개인정보 입력 금지:</strong> 실제 인물의 민감한 개인정보나 얼굴 사진, 내부 기밀 자료는 입력하지 마세요. 공식 안전 지침에 따라 검토자에게 노출될 위험이 있습니다.</li>
+        <li><strong>결과물 검토와 유연한 접근:</strong> 인공지능은 매번 새롭게 계산하여 이미지를 생성하므로 세부 묘사나 선의 모양이 완전히 일치하지 않을 수 있습니다. 3~4번 정도 다듬으며 마음에 드는 그림을 고르는 여유가 필요합니다.</li>
+      </ul>
+    </section>
+
+    <!-- 안드로이드 / 아이폰 다른 점 구역 (data-shot="diff") -->
+    <section class="sg-step-sec" data-shot="diff">
+      <div class="sg-step-head">
+        <span class="sg-step-num">📱</span>
+        <h2 class="sg-step-title">컴퓨터와 스마트폰에서의 작업 차이점</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>사용하시는 기기 환경에 따라 부탁 틀을 관리하는 방식에 차이가 있습니다.</p>
+      </div>
+      <div class="sg-diff-grid">
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">컴퓨터 웹 브라우저</span>
+          <div class="sg-diff-title">메모장과 큰 화면 활용</div>
+          <p class="sg-diff-desc">화면 한쪽에 메모장을 띄워두고 고정 틀을 보관하면서 장면 글만 빠르게 고쳐 붙여넣기 좋습니다. 큰 모니터에서 세부 묘사를 확인하기 편리합니다.</p>
+        </div>
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">스마트폰 앱</span>
+          <div class="sg-diff-title">메시지 복사 기능 활용</div>
+          <p class="sg-diff-desc">이전에 보낸 프롬프트 메시지를 길게 눌러 '복사'한 뒤 입력창에 붙여넣고 [이번 장면] 부분만 자판으로 수정해 전송하면 간편합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 공식 안내 확인 링크와 확인일 -->
+    <div class="sg-source-box">
+      <p><strong>공식 확인 기준일:</strong> 2026년 11월 28일</p>
+      <p>이 안내글은 인공지능 서비스 회사의 공식 도움말 문서를 바탕으로 검증되었습니다:
+        <br>• Google Gemini 이미지 지원 문서: <a href="https://support.google.com/gemini/answer/14286560" target="_blank" rel="noopener">Gemini 이미지 생성 및 수정 고객센터</a>
+        <br>• OpenAI 공식 문서: <a href="https://help.openai.com/en/articles/9055440-editing-images-in-chatgpt" target="_blank" rel="noopener">Images in ChatGPT Guide</a>
+      </p>
+    </div>
+
+    <!-- 하단 이동 링크 -->
+    <div class="sg-bottom-links">
+      <a class="sg-link-btn" href="../start/">« AI 컴퓨터 프로그램 시작 가이드 보러가기</a>
+      <a class="sg-link-btn" href="../">« AI같이배워요 전체 목록으로 돌아가기</a>
+    </div>
+
+    <!-- 하단 카톡방 링크 -->
+    <div class="zw-ai-kakao" style="margin-top:24px;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+  </div>
+
+  <script src="../../_common/common.js"></script>
+  <script src="../_ai-learn/ai-learn.js"></script>
+  <script>
+    function copyPrompt(elementId, btn) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      var text = el.innerText || el.textContent;
+      var origText = btn.innerHTML;
+
+      var showDone = function() {
+        btn.innerHTML = '✅ 복사 완료! 앱에 붙여 넣으세요';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = origText;
+          btn.classList.remove('copied');
+        }, 2500);
+      };
+
+      var fallback = function() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          var ok = document.execCommand('copy');
+          if (ok) showDone();
+          else alert('글을 길게 눌러 직접 복사해 주세요.');
+        } catch (e) {
+          alert('글을 길게 눌러 직접 복사해 주세요.');
+        }
+        document.body.removeChild(ta);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showDone).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+  </script>
+</body>
+</html>

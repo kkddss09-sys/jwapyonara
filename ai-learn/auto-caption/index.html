@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>컴퓨터 영상 자동 자막 붙이기와 AI 맞춤법 교정법 — 초보자 맞춤 안내 — 좌표나라 AI같이배워요</title>
+  <meta name="description" content="컴퓨터 영상 편집 프로그램 Clipchamp와 유튜브 스튜디오를 활용해 자동으로 자막을 생성하고, 인공지능으로 맞춤법과 오탈자를 점검하는 초보자 가이드입니다.">
+  <link rel="canonical" href="https://jwapyonara.com/ai-learn/auto-caption/">
+  <meta property="og:title" content="컴퓨터 영상 자동 자막 붙이기와 AI 맞춤법 교정법 — 좌표나라 AI같이배워요">
+  <meta property="og:description" content="Clipchamp 자동 캡션 생성부터 유튜브 자막 관리, AI 맞춤법 검수까지 차근차근 배우는 초보자 실전 안내서입니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://jwapyonara.com/ai-learn/auto-caption/">
+  <link rel="stylesheet" href="../../_common/common.css">
+  <link rel="stylesheet" href="../_ai-learn/ai-learn.css">
+  <style>
+    /* 모든 스타일은 .sg-page 아래로 제한 */
+    .sg-page {
+      --sg-bg: #0e131c;
+      --sg-card: #171d29;
+      --sg-card-hover: #1e2638;
+      --sg-ink: #eef2f8;
+      --sg-sub: #98a3b5;
+      --sg-line: #2a3344;
+      --sg-accent: #3d8bff;
+      --sg-accent-soft: rgba(61, 139, 255, 0.12);
+      --sg-panel: #2b3547;
+      --sg-fill: #1f2735;
+      --sg-fill2: #253042;
+      --sg-ok: #4ade80;
+      --sg-ok-soft: rgba(74, 222, 128, 0.12);
+      --sg-amber: #facc15;
+      --sg-amber-soft: rgba(250, 204, 21, 0.12);
+      --sg-danger: #ff7a70;
+      --sg-radius: 14px;
+
+      background-color: var(--sg-bg);
+      color: var(--sg-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 16px 60px;
+      box-sizing: border-box;
+    }
+
+    .sg-page * {
+      box-sizing: border-box;
+    }
+
+    .sg-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* 빵부스러기 */
+    .sg-page .sg-breadcrumb {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* 머리말 */
+    .sg-page .sg-header {
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--sg-accent-soft);
+      color: var(--sg-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-header h1 {
+      font-size: 25px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .sg-page .sg-lead {
+      font-size: 15px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 상단 카톡방 링크 */
+    .sg-page .zw-ai-kakao {
+      margin: 0 0 20px;
+    }
+
+    /* 3줄 요약 상자 */
+    .sg-page .sg-summary-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-summary-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--sg-accent);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-summary-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 14px;
+      color: var(--sg-ink);
+      line-height: 1.7;
+    }
+    .sg-page .sg-summary-list li {
+      margin-bottom: 8px;
+    }
+    .sg-page .sg-summary-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 단계 구역 */
+    .sg-page .sg-step-sec {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 20px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-step-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-step-num {
+      background: var(--sg-accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sg-page .sg-step-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+    }
+    .sg-page .sg-step-desc {
+      font-size: 14px;
+      color: var(--sg-sub);
+      margin: 0 0 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-step-desc p {
+      margin: 0 0 6px;
+    }
+    .sg-page .sg-step-desc p:last-child {
+      margin: 0;
+    }
+
+    /* 부탁 예시 상자 */
+    .sg-page .sg-prompt-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+    .sg-page .sg-prompt-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sg-page .sg-prompt-text {
+      background: var(--sg-panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .sg-page .sg-btn-copy {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      display: flex;
+      box-sizing: border-box;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--sg-card-hover);
+      color: #fff;
+      border: 1px solid var(--sg-line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .sg-page .sg-btn-copy:hover {
+      background: var(--sg-accent);
+      border-color: var(--sg-accent);
+    }
+    .sg-page .sg-btn-copy.copied {
+      background: var(--sg-ok);
+      border-color: var(--sg-ok);
+      color: #0b2212;
+    }
+
+    /* 주의사항 상자 */
+    .sg-page .sg-warn-box {
+      background: var(--sg-amber-soft);
+      border: 1px solid var(--sg-amber);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-warn-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--sg-amber);
+      margin: 0 0 10px;
+    }
+    .sg-page .sg-warn-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 14px;
+      color: #fef9c3;
+      line-height: 1.7;
+    }
+    .sg-page .sg-warn-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-warn-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 기기별 차이점 상자 */
+    .sg-page .sg-diff-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-diff-head {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .sg-page .sg-diff-item {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .sg-page .sg-diff-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: var(--sg-fill2);
+      margin-bottom: 8px;
+      color: #fff;
+    }
+    .sg-page .sg-diff-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+    }
+    .sg-page .sg-diff-desc {
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* 공식 출처 및 확인일 안내 */
+    .sg-page .sg-source-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--sg-sub);
+    }
+    .sg-page .sg-source-box strong {
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-source-box a {
+      color: var(--sg-accent);
+      text-decoration: underline;
+    }
+
+    /* 하단 이동 링크 */
+    .sg-page .sg-bottom-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+      margin-top: 24px;
+    }
+    .sg-page .sg-link-btn {
+      display: block;
+      padding: 12px 16px;
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .sg-page .sg-link-btn:hover {
+      background: var(--sg-card-hover);
+      border-color: var(--sg-accent);
+    }
+
+    @media (max-width: 480px) {
+      .sg-page .sg-diff-grid {
+        grid-template-columns: 1fr;
+      }
+      .sg-page .sg-header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sg-page">
+    <!-- 빵부스러기 네비게이션 -->
+    <div class="sg-breadcrumb">
+      <a href="/">홈</a> &gt; <a href="../">AI같이배워요</a> &gt; <span>컴퓨터 영상 자동 자막과 AI 교정</span>
+    </div>
+
+    <!-- 머리말 -->
+    <header class="sg-header">
+      <span class="sg-tag">영상 자막 편집 가이드</span>
+      <h1>컴퓨터 영상 자동 자막 붙이기와 AI 맞춤법 교정법</h1>
+      <p class="sg-lead">윈도우 Clipchamp와 유튜브 스튜디오의 음성 인식 기술로 자막을 생성하고, 인공지능으로 오탈자를 다듬는 초보자 실전 가이드입니다.</p>
+    </header>
+
+    <!-- 카톡방 안내 링크 -->
+    <div class="zw-ai-kakao">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+
+    <!-- 맨 위 3줄 요약 (data-shot="s0") -->
+    <section class="sg-summary-box" data-shot="s0">
+      <div class="sg-summary-title">📌 세 줄 요약</div>
+      <ul class="sg-summary-list">
+        <li><strong>음성 인식 자동 자막:</strong> 윈도우 Clipchamp나 유튜브 스튜디오의 자동 음성 인식 기술을 사용해 영상 속 말소리를 자막으로 바꿉니다.</li>
+        <li><strong>대본 파일(SRT) 추출:</strong> 생성된 자막 텍스트와 시간 정보를 담은 자막 파일(SRT)을 컴퓨터에 다운로드할 수 있습니다.</li>
+        <li><strong>AI 맞춤법 점검과 게시:</strong> 추출한 자막 문장을 인공지능에게 보내 띄어쓰기와 오탈자를 교정한 뒤 영상에 반영합니다.</li>
+      </ul>
+    </section>
+
+    <!-- 1단계: 말소리가 담긴 영상 확인 (data-shot="s1") -->
+    <section class="sg-step-sec" data-shot="s1">
+      <div class="sg-step-head">
+        <span class="sg-step-num">1</span>
+        <h2 class="sg-step-title">영상 파일 준비와 음성 트랙 확인하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>자동 자막 기능은 영상에 사람이 말하는 소리나 대화 트랙이 들어 있을 때 작동합니다.</p>
+        <p>배경 음악만 있거나 말소리가 너무 작으면 음성 인식이 제대로 되지 않으므로 목소리가 또렷하게 들리는지 먼저 재생해 보세요.</p>
+        <p>영상 준비가 끝나면 컴퓨터 프로그램이나 웹 편집기에 파일을 추가하여 작업을 시작합니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p1">
+        <div class="sg-prompt-label">
+          <span>💡 시작 전 확인 질문 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="prompt-p1">내가 가진 영상 파일의 목소리가 또렷하게 녹음되어 있는지 먼저 10초 정도 재생하여 확인합니다.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('prompt-p1', this)">📋 확인 문장 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 2단계: 윈도우 Clipchamp에서 자동 캡션 켜기 (data-shot="s2") -->
+    <section class="sg-step-sec" data-shot="s2">
+      <div class="sg-step-head">
+        <span class="sg-step-num">2</span>
+        <h2 class="sg-step-title">윈도우 Clipchamp에서 자동 캡션 켜기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>윈도우 기본 영상 편집기인 Clipchamp에 영상을 타임라인으로 끌어다 놓습니다.</p>
+        <p>화면 오른쪽 속성 패널에서 캡션 탭을 누르거나 미리 보기 창의 캡션 아이콘을 클릭합니다.</p>
+        <p>팝업 창에서 대화 내용 기록 언어를 한국어로 선택하고 미디어 기록 버튼을 누르면 자막 생성이 시작됩니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p2">
+        <div class="sg-prompt-label">
+          <span>💡 Clipchamp 자막 생성 순서 메모</span>
+        </div>
+        <div class="sg-prompt-text" id="prompt-p2">1. 영상을 타임라인에 배치합니다.
+2. 오른쪽 속성 패널에서 캡션 탭을 클릭합니다.
+3. 한국어를 선택하고 미디어 기록을 눌러 자막을 생성합니다.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('prompt-p2', this)">📋 순서 메모 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 3단계: 대본에서 오탈자 확인 및 직접 수정 (data-shot="s3") -->
+    <section class="sg-step-sec" data-shot="s3">
+      <div class="sg-step-head">
+        <span class="sg-step-num">3</span>
+        <h2 class="sg-step-title">생성된 자막 확인과 직접 수정하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>자막 생성이 끝나면 속성 패널의 캡션 탭에 시간대별로 대본 목록이 나타납니다.</p>
+        <p>인명이나 전문 용어, 고유 명사는 발음이 비슷하더라도 글자가 다르게 적힐 수 있습니다.</p>
+        <p>수정하려는 문장을 두 번 클릭하면 글자를 직접 지우거나 다시 입력하여 바로 고칠 수 있습니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p3">
+        <div class="sg-prompt-label">
+          <span>💡 자주 틀리는 단어 점검 메모</span>
+        </div>
+        <div class="sg-prompt-text" id="prompt-p3">고유 명사, 상호 이름, 전문 단어는 음성 인식 결과에서 철자가 어긋날 수 있으니 대본 목록을 위에서부터 차례로 읽으며 확인합니다.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('prompt-p3', this)">📋 점검 메모 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 4단계: 자막 파일(SRT) 다운로드 및 AI 맞춤법 검수 (data-shot="s4") -->
+    <section class="sg-step-sec" data-shot="s4">
+      <div class="sg-step-head">
+        <span class="sg-step-num">4</span>
+        <h2 class="sg-step-title">자막 파일(SRT) 다운로드와 AI 맞춤법 교정</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>대본 상단의 캡션 다운로드 단추를 누르면 타임스탬프가 포함된 .SRT 자막 파일이 저장됩니다.</p>
+        <p>인공지능 대화창에 넣기 전에 영상 속 타인의 이름이나 연락처 등 개인정보가 포함되어 있는지 확인하고 먼저 제거합니다.</p>
+        <p>개인정보를 지운 자막 텍스트를 구글 제미나이 등 대화창에 넣고 시간 정보는 그대로 둔 채 맞춤법과 띄어쓰기 교정을 부탁합니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p4">
+        <div class="sg-prompt-label">
+          <span>💡 AI 맞춤법 검수 요청 프롬프트 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="prompt-p4">아래 제공하는 자막 대본에서 타인의 이름이나 연락처 등 민감한 개인정보는 미리 확인하여 지웠습니다. 타임스탬프와 문장 번호는 그대로 유지하고, 문장의 띄어쓰기와 맞춤법 오탈자만 바르게 다듬어 주세요. 고친 부분은 알기 쉽게 따로 요약해 주세요.
+
+[여기에 개인정보를 제거한 자막 대본 텍스트 붙여넣기]</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('prompt-p4', this)">📋 교정 부탁 프롬프트 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 5단계: 유튜브 스튜디오 자동 자막 활용 및 교정본 적용 (data-shot="s5") -->
+    <section class="sg-step-sec" data-shot="s5">
+      <div class="sg-step-head">
+        <span class="sg-step-num">5</span>
+        <h2 class="sg-step-title">유튜브 스튜디오 자막 관리와 교정본 게시</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>동영상을 유튜브에 올릴 때는 유튜브 스튜디오의 자동 자막 기능도 함께 활용할 수 있습니다.</p>
+        <p>왼쪽 자막 메뉴에서 해당 동영상을 누르고, 자동 자막 열에서 복사 및 수정을 누른 뒤 계속을 선택합니다.</p>
+        <p>AI가 점검해 준 수정 문장으로 행별 내용을 다듬은 뒤 게시 단추를 누르면 완성된 자막 트랙이 등록됩니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p5">
+        <div class="sg-prompt-label">
+          <span>💡 유튜브 자막 수정 점검 메모</span>
+        </div>
+        <div class="sg-prompt-text" id="prompt-p5">YouTube 스튜디오 > 자막 > 동영상 선택 > 자동 자막 '복사 및 수정' > '계속' 선택 후 텍스트를 정리하고 '게시'를 누릅니다.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('prompt-p5', this)">📋 절차 메모 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 주의사항 (data-shot="warn") -->
+    <section class="sg-warn-box" data-shot="warn">
+      <div class="sg-warn-title">⚠️ 자막 제작 및 AI 검수 시 주의할 점</div>
+      <ul class="sg-warn-list">
+        <li><strong>제3자 정보 및 기밀 입력 금지:</strong> 영상 속 타인의 이름이나 연락처, 가족 이름, 전화번호, 계좌 정보, 비밀번호 같은 중요한 개인정보는 자막에서 미리 지우고 AI 프롬프트에 절대 입력하지 마세요.</li>
+        <li><strong>AI 답변의 자체 확인:</strong> 인공지능도 문맥에 따라 실수를 할 수 있으므로, AI가 고쳐준 문장을 반드시 눈으로 다시 읽어보고 적용해야 합니다.</li>
+        <li><strong>오디오 품질과 인식률:</strong> 주변 소음이 크거나 여러 사람이 겹쳐서 말하면 음성 인식 오류가 늘어나므로 조용한 환경의 녹음본을 쓰는 것이 좋습니다.</li>
+      </ul>
+    </section>
+
+    <!-- 휴대폰과 컴퓨터 차이점 안내 (data-shot="diffa") -->
+    <section class="sg-diff-box" data-shot="diffa">
+      <div class="sg-diff-head">📱 휴대폰과 컴퓨터 작업의 차이점</div>
+      <div class="sg-diff-grid">
+        <div class="sg-diff-item">
+          <span class="sg-diff-badge">컴퓨터 (권장)</span>
+          <div class="sg-diff-title">넓은 화면과 정밀 편집</div>
+          <p class="sg-diff-desc">Clipchamp와 유튜브 스튜디오 웹 화면에서 자막 파일(SRT)을 내려받고, 긴 대본을 마우스로 보며 세부 타임스탬프를 손쉽게 수정할 수 있습니다.</p>
+        </div>
+        <div class="sg-diff-item">
+          <span class="sg-diff-badge">스마트폰 (모바일)</span>
+          <div class="sg-diff-title">간단한 확인 위주</div>
+          <p class="sg-diff-desc">모바일 앱에서는 긴 대본 복사나 SRT 파일 추출 과정이 번거로울 수 있으므로, 완성된 영상의 자막 표시 여부를 확인하는 용도로 권장합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 공식 안내 링크와 확인일 안내 -->
+    <div class="sg-source-box">
+      <strong>공식 출처 안내 (확인일: 2026-11-28)</strong>
+      <p style="margin: 6px 0 0;">이 안내는 서비스 제공사의 공식 지원 문서를 바탕으로 검증되었습니다: 
+        <a href="https://support.microsoft.com/ko-kr/clipchamp/how-to-use-autocaptions-in-clipchamp" target="_blank" rel="noopener">Microsoft Clipchamp 공식 캡션 안내</a> | 
+        <a href="https://support.google.com/youtube/answer/6373554?hl=ko" target="_blank" rel="noopener">YouTube 자동 자막 고객센터</a> | 
+        <a href="https://support.google.com/youtube/answer/2734705?hl=ko" target="_blank" rel="noopener">YouTube 자막 수정 안내</a> | 
+        <a href="https://support.google.com/gemini/answer/13594961?hl=ko" target="_blank" rel="noopener">Google Gemini 안전 가이드</a>
+      </p>
+    </div>
+
+    <!-- 하단 이동 링크 -->
+    <div class="sg-bottom-links">
+      <a class="sg-link-btn" href="../start/">« AI 컴퓨터 프로그램 시작 가이드 보러가기</a>
+      <a class="sg-link-btn" href="../gemini-tools/">« 제미나이 업무 도구 활용법 보러가기</a>
+      <a class="sg-link-btn" href="../">« AI같이배워요 전체 목록으로 돌아가기</a>
+    </div>
+
+    <!-- 하단 카톡방 링크 -->
+    <div class="zw-ai-kakao" style="margin-top:24px;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+  </div>
+
+  <script src="../../_common/common.js"></script>
+  <script src="../_ai-learn/ai-learn.js"></script>
+  <script>
+    function copyPrompt(elementId, btn) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      var text = el.innerText || el.textContent;
+      var origText = btn.innerHTML;
+
+      var showDone = function() {
+        btn.innerHTML = '✅ 복사 완료! 앱에 붙여 넣으세요';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = origText;
+          btn.classList.remove('copied');
+        }, 2500);
+      };
+
+      var fallback = function() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          var ok = document.execCommand('copy');
+          if (ok) showDone();
+          else alert('글을 길게 눌러 직접 복사해 주세요.');
+        } catch (e) {
+          alert('글을 길게 눌러 직접 복사해 주세요.');
+        }
+        document.body.removeChild(ta);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showDone).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+  </script>
+</body>
+</html>

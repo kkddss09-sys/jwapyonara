@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>클로드로 영상 대본과 장면표 만들기 — 초보자를 위한 영상 설계 가이드 — 좌표나라 AI같이배워요</title>
+  <meta name="description" content="인공지능 클로드(Claude)에게 부탁하여 짧은 영상의 대본과 초 단위 장면표(스토리보드)를 체계적으로 설계하는 초보자용 방법 안내입니다.">
+  <link rel="canonical" href="https://jwapyonara.com/ai-learn/video-storyboard/">
+  <meta property="og:title" content="클로드로 영상 대본과 장면표 만들기 — 좌표나라 AI같이배워요">
+  <meta property="og:description" content="촬영과 편집 전에 인공지능 클로드로 대본과 초 단위 장면표를 쉽게 설계하는 초보자 가이드입니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://jwapyonara.com/ai-learn/video-storyboard/">
+  <link rel="stylesheet" href="../../_common/common.css">
+  <link rel="stylesheet" href="../_ai-learn/ai-learn.css">
+  <style>
+    /* 모든 스타일은 .sg-page 아래로 제한 */
+    .sg-page {
+      --sg-bg: #0e131c;
+      --sg-card: #171d29;
+      --sg-card-hover: #1e2638;
+      --sg-ink: #eef2f8;
+      --sg-sub: #98a3b5;
+      --sg-line: #2a3344;
+      --sg-accent: #3d8bff;
+      --sg-accent-soft: rgba(61, 139, 255, 0.12);
+      --sg-panel: #2b3547;
+      --sg-fill: #1f2735;
+      --sg-fill2: #253042;
+      --sg-ok: #4ade80;
+      --sg-ok-soft: rgba(74, 222, 128, 0.12);
+      --sg-amber: #facc15;
+      --sg-amber-soft: rgba(250, 204, 21, 0.12);
+      --sg-danger: #ff7a70;
+      --sg-radius: 14px;
+
+      background-color: var(--sg-bg);
+      color: var(--sg-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 16px 60px;
+      box-sizing: border-box;
+    }
+
+    .sg-page * {
+      box-sizing: border-box;
+    }
+
+    .sg-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* 빵부스러기 */
+    .sg-page .sg-breadcrumb {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* 머리말 */
+    .sg-page .sg-header {
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--sg-accent-soft);
+      color: var(--sg-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-header h1 {
+      font-size: 25px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .sg-page .sg-lead {
+      font-size: 15px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 상단 카톡방 링크 */
+    .sg-page .zw-ai-kakao {
+      margin: 0 0 20px;
+    }
+    .sg-page .zw-ai-kakao a.cta {
+      display: block;
+      background: #fae100;
+      color: #371d1e;
+      text-align: center;
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* 3줄 요약 상자 */
+    .sg-page .sg-summary-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-left: 4px solid var(--sg-accent);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 28px;
+    }
+    .sg-page .sg-summary-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-summary-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-summary-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-summary-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 단계 구역 카드 */
+    .sg-page .sg-step-sec {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 20px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-step-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-step-num {
+      background: var(--sg-accent);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .sg-page .sg-step-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+    }
+    .sg-page .sg-step-desc {
+      font-size: 14px;
+      color: var(--sg-sub);
+      margin: 0 0 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-step-desc p {
+      margin: 0 0 6px;
+    }
+    .sg-page .sg-step-desc p:last-child {
+      margin: 0;
+    }
+
+    /* 부탁 예시 상자 */
+    .sg-page .sg-prompt-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+    .sg-page .sg-prompt-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sg-page .sg-prompt-text {
+      background: var(--sg-panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 14px;
+      color: #fff;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .sg-page .sg-btn-copy {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      background: var(--sg-card-hover);
+      color: #fff;
+      border: 1px solid var(--sg-line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .sg-page .sg-btn-copy:hover {
+      background: var(--sg-accent);
+      border-color: var(--sg-accent);
+    }
+    .sg-page .sg-btn-copy.copied {
+      background: var(--sg-ok);
+      border-color: var(--sg-ok);
+      color: #0b2212;
+    }
+
+    /* 주의사항 상자 */
+    .sg-page .sg-warn-box {
+      background: var(--sg-amber-soft);
+      border: 1px solid var(--sg-amber);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-warn-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--sg-amber);
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-warn-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-warn-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-warn-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 기기별 비교 칸 */
+    .sg-page .sg-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-diff-card {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 16px 14px;
+    }
+    .sg-page .sg-diff-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      background: var(--sg-panel);
+      color: #fff;
+    }
+    .sg-page .sg-diff-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+    }
+    .sg-page .sg-diff-desc {
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* 공식 출처 및 확인일 안내 */
+    .sg-page .sg-source-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--sg-sub);
+    }
+    .sg-page .sg-source-box strong {
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-source-box a {
+      color: var(--sg-accent);
+      text-decoration: underline;
+    }
+
+    /* 하단 이동 링크 */
+    .sg-page .sg-bottom-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+      margin-top: 24px;
+    }
+    .sg-page .sg-link-btn {
+      display: block;
+      padding: 12px 16px;
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .sg-page .sg-link-btn:hover {
+      background: var(--sg-card-hover);
+      border-color: var(--sg-accent);
+    }
+
+    @media (max-width: 480px) {
+      .sg-page .sg-diff-grid {
+        grid-template-columns: 1fr;
+      }
+      .sg-page .sg-header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sg-page">
+    <!-- 빵부스러기 네비게이션 -->
+    <div class="sg-breadcrumb">
+      <a href="/">홈</a> &gt; <a href="../">AI같이배워요</a> &gt; <span>영상 대본과 장면표 만들기</span>
+    </div>
+
+    <!-- 머리말 -->
+    <header class="sg-header">
+      <span class="sg-tag">영상 제작 전 사전 설계</span>
+      <h1>클로드로 영상 대본과 장면표 만들기</h1>
+      <p class="sg-lead">카메라를 켜거나 편집 앱을 열기 전에, 클로드에게 부탁해 말할 대본과 초 단위 화면 장면표를 미리 정리해두는 체계적인 설계 방법입니다.</p>
+    </header>
+
+    <!-- 카톡방 안내 링크 -->
+    <div class="zw-ai-kakao">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+
+    <!-- 맨 위 3줄 요약 (data-shot="s0") -->
+    <section class="sg-summary-box" data-shot="s0">
+      <div class="sg-summary-title">📌 세 줄 요약</div>
+      <ul class="sg-summary-list">
+        <li><strong>사전 설계의 힘:</strong> 촬영이나 편집 전에 무엇을 말하고 어떤 화면을 보여줄지 미리 정해두면 제작 순서를 정리할 수 있습니다.</li>
+        <li><strong>표 형태의 장면표:</strong> 몇 초에 어떤 말을 하고 어떤 그림이 나올지 번호와 시간별로 표를 만들어달라고 요청합니다.</li>
+        <li><strong>아티팩트로 확인:</strong> 대화창 옆 독립 창(아티팩트)으로 표를 열어두고, 문장을 다듬으며 필요한 내용을 편하게 복사합니다.</li>
+      </ul>
+    </section>
+
+    <!-- 1단계: 주제와 핵심 시청자 정의 (data-shot="s1") -->
+    <section class="sg-step-sec" data-shot="s1">
+      <div class="sg-step-head">
+        <span class="sg-step-num">1</span>
+        <h2 class="sg-step-title">영상 주제와 목표 시청자 정하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>짧은 영상은 단 하나의 명확한 정보나 메시지에 집중해야 시청자의 관심을 끌 수 있습니다.</p>
+        <p>누가 이 영상을 볼 것인지 시청자 연령대와 상황을 정하고, 전문 용어 대신 쉬운 일상어로 풀어내도록 방향을 잡습니다.</p>
+        <p>공식 안내 문서에서도 명확한 성공 기준을 먼저 세우는 것이 좋은 요청의 출발점이라고 설명합니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 1 (data-shot="p1") -->
+      <div class="sg-prompt-box" data-shot="p1">
+        <div class="sg-prompt-label">
+          <span>💡 1단계 기획 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText1">당신은 영상 기획자입니다. 50대 초보자를 위한 60초 짧은 영상 대본을 준비하려고 합니다. 복잡한 기술 용어를 쓰지 않고 일상 비유를 들어 알기 쉽게 전달할 수 있도록 기획 방향을 제시해 주세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText1', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 2단계: 초 단위 시간 배분과 대본 뼈대 (data-shot="s2") -->
+    <section class="sg-step-sec" data-shot="s2">
+      <div class="sg-step-head">
+        <span class="sg-step-num">2</span>
+        <h2 class="sg-step-title">초 단위 시간 배분과 대본 작성하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>전체 길이를 60초로 정하고 도입부 5초, 본론 세 토막, 마무리 10초처럼 구간을 나눕니다.</p>
+        <p>각 구간마다 말하는 호흡을 고려하여 문장 길이를 짧게 유지해달라고 조건을 제시합니다.</p>
+        <p>소리 내어 읽었을 때 끊김이 없도록 쉬운 존댓말로 문장을 완성합니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 2 (data-shot="p2") -->
+      <div class="sg-prompt-box" data-shot="p2">
+        <div class="sg-prompt-label">
+          <span>💡 2단계 시간 배분 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText2">전체 길이는 60초입니다. 도입부 0초부터 5초, 본론 세 가지 각 15초씩, 마무리 10초로 시간을 나누어 주세요. 각 구간마다 소리 내어 읽기 편한 짧은 존댓말 문장으로 대본을 써주세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText2', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 3단계: 화면 장면표(스토리보드) 표 요청 (data-shot="s3") -->
+    <section class="sg-step-sec" data-shot="s3">
+      <div class="sg-step-head">
+        <span class="sg-step-num">3</span>
+        <h2 class="sg-step-title">화면과 대사를 표로 엮은 장면표 만들기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>목소리 대사만 있으면 촬영할 때 카메라 앞에 무엇을 놓아야 할지 막막해집니다.</p>
+        <p>장면 번호, 소요 시간, 보여줄 화면이나 사진, 목소리 대사, 화면에 띄울 핵심 자막을 각각 열로 나누어 정리합니다.</p>
+        <p>표 형태로 정리해두면 나중에 영상을 찍거나 편집할 때 순서대로 체크하며 진행할 수 있습니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 3 (data-shot="p3") -->
+      <div class="sg-prompt-box" data-shot="p3">
+        <div class="sg-prompt-label">
+          <span>💡 3단계 장면표 표 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText3">앞서 작성한 대본을 바탕으로 표를 만들어 주세요. 열은 다섯 개로 구분합니다: 1. 장면 번호, 2. 시간(초), 3. 화면 구성(사진이나 동작), 4. 나레이션 대사, 5. 화면 핵심 자막(2줄 이하). 마크다운 표로 깔끔하게 정리해 주세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText3', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 4단계: 아티팩트 창에서 대화로 다듬기 (data-shot="s4") -->
+    <section class="sg-step-sec" data-shot="s4">
+      <div class="sg-step-head">
+        <span class="sg-step-num">4</span>
+        <h2 class="sg-step-title">독립 창(아티팩트)으로 열고 수정하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>클로드에게 장면표를 아티팩트로 열어 달라고 요청하고, 대화창 옆 자체 창에 잘 표시되는지 확인합니다.</p>
+        <p>아티팩트로 띄워진 장면표를 보며 어색한 문장이나 마음에 들지 않는 화면 구성을 대화창에서 바로 고칠 수 있습니다.</p>
+        <p>수정을 요청하면 아티팩트 창에 반영되어 최종 완성본을 한눈에 확인할 수 있습니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 4 (data-shot="p4") -->
+      <div class="sg-prompt-box" data-shot="p4">
+        <div class="sg-prompt-label">
+          <span>💡 4단계 수정 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText4">방금 만든 장면표를 아티팩트 문서로 열어 주세요. 3번째 장면의 대사가 조금 기니 두 문장으로 나누어 주시고, 화면 설명은 주변에서 쉽게 구할 수 있는 일상 소품 위주로 교체해 주세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText4', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 5단계: 프로젝트 기능으로 양식 보관하기 (data-shot="s5") -->
+    <section class="sg-step-sec" data-shot="s5">
+      <div class="sg-step-head">
+        <span class="sg-step-num">5</span>
+        <h2 class="sg-step-title">프로젝트 기능으로 나만의 양식 저장하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>클로드의 프로젝트 기능을 활용하면 나만의 독립된 작업 공간을 마련할 수 있습니다.</p>
+        <p>무료 Claude 계정 사용자는 최대 5개까지 프로젝트를 만들어 사용할 수 있습니다.</p>
+        <p>프로젝트에 장면표 양식을 적어 두면, 다음 편을 만들 때 그 양식을 참고해 달라고 부탁할 수 있습니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 5 (data-shot="p5") -->
+      <div class="sg-prompt-box" data-shot="p5">
+        <div class="sg-prompt-label">
+          <span>💡 5단계 프로젝트에 양식 적어 두기 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText5">[영상 대본 및 장면표 작성 지침]
+대본과 장면표를 요청받으면 다음 5칸 마크다운 표 양식을 준수하세요:
+1. 장면 번호
+2. 시간(초)
+3. 화면 구성(친숙한 일상 소품과 행동)
+4. 나레이션 대사(소리 내어 읽기 편한 짧은 존댓말)
+5. 화면 핵심 자막(2줄 이하)</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText5', this)">📋 이 지침 양식 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 주의사항 상자 (data-shot="warn") -->
+    <section class="sg-warn-box" data-shot="warn">
+      <div class="sg-warn-title">⚠️ 제작 전 꼭 확인해야 할 안전 수칙</div>
+      <ul class="sg-warn-list">
+        <li><strong>기밀 정보 및 개인정보 입력 금지:</strong> 주민등록번호, 비밀번호, 결제 정보나 비공개 사업 자료는 대화창에 넣지 않습니다.</li>
+        <li><strong>사실 관계 검토 필수:</strong> AI 도구가 제안한 통계 수치나 제품 정보는 오류가 있을 수 있으므로 제작 전에 공식 출처를 직접 확인해야 합니다.</li>
+        <li><strong>영상 직접 제작이 아님:</strong> 이번 과정은 촬영과 편집 전의 '대본 및 장면 설계' 단계이며, 실제 영상 파일 제작이나 편집은 별도 프로그램이나 촬영을 통해 진행됩니다.</li>
+      </ul>
+    </section>
+
+    <!-- 휴대폰과 컴퓨터 환경 차이 -->
+    <section class="sg-step-sec">
+      <div class="sg-step-head">
+        <h2 class="sg-step-title">휴대폰과 컴퓨터 화면에서 다른 점</h2>
+      </div>
+      <div class="sg-diff-grid">
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">컴퓨터 브라우저 (PC 웹)</span>
+          <div class="sg-diff-title">넓은 화면과 표 편집</div>
+          <p class="sg-diff-desc">대화창과 아티팩트 창이 나란히 표시되어 다섯 칸으로 된 장면표를 한눈에 보며 수정하기에 편리합니다.</p>
+        </div>
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">스마트폰 모바일 앱</span>
+          <div class="sg-diff-title">휴대성과 대본 읽기</div>
+          <p class="sg-diff-desc">화면 폭이 좁으므로 표 형태 대신 줄글 대본을 확인하거나, 복사 단추를 눌러 메모장에 저장한 뒤 촬영 프롬프터처럼 활용하기에 적합합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 공식 안내 확인 링크와 확인일 -->
+    <div class="sg-source-box">
+      <p><strong>공식 확인 기준일:</strong> 2026년 11월 28일</p>
+      <p>이 가이드는 Anthropic 공식 지원 센터 문서를 직접 검증하여 작성되었습니다: 
+        <a href="https://support.claude.com/ko/articles/17153992-what-are-artifacts-and-how-do-i-use-them" target="_blank" rel="noopener">Claude 아티팩트 공식 안내</a> · 
+        <a href="https://support.claude.com/ko/articles/9517075-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%EB%9E%80-%EB%AC%B4%EC%97%87%EC%9E%85%EB%8B%88%EA%B9%8C" target="_blank" rel="noopener">Claude 프로젝트 공식 안내</a>
+      </p>
+    </div>
+
+    <!-- 하단 이동 링크 -->
+    <div class="sg-bottom-links">
+      <a class="sg-link-btn" href="../start/">« AI 컴퓨터 프로그램 시작 가이드 보러가기</a>
+      <a class="sg-link-btn" href="../">« AI같이배워요 전체 목록으로 돌아가기</a>
+    </div>
+
+    <!-- 하단 카톡방 링크 -->
+    <div class="zw-ai-kakao" style="margin-top:24px;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+  </div>
+
+  <script src="../../_common/common.js"></script>
+  <script src="../_ai-learn/ai-learn.js"></script>
+  <script>
+    function copyPrompt(elementId, btn) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      var text = el.innerText || el.textContent;
+      var origText = btn.innerHTML;
+
+      var showDone = function() {
+        btn.innerHTML = '✅ 복사 완료! 대화창에 붙여 넣으세요';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = origText;
+          btn.classList.remove('copied');
+        }, 2500);
+      };
+
+      var fallback = function() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          var ok = document.execCommand('copy');
+          if (ok) showDone();
+          else alert('글을 길게 눌러 직접 복사해 주세요.');
+        } catch (e) {
+          alert('글을 길게 눌러 직접 복사해 주세요.');
+        }
+        document.body.removeChild(ta);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showDone).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+  </script>
+</body>
+</html>

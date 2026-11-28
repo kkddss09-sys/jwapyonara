@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>구글 플로우에서 그림 만들기 — 주제·장소·빛·구도 프롬프트 작성법 — 좌표나라 AI같이배워요</title>
+  <meta name="description" content="구글 플로우(Google Flow)에서 텍스트 부탁 문장을 주제, 장소, 빛, 구도로 나누어 원하는 이미지를 생성하는 초보자용 사용법 안내입니다.">
+  <link rel="canonical" href="https://jwapyonara.com/ai-learn/flow-image/">
+  <meta property="og:title" content="구글 플로우에서 그림 만들기 — 좌표나라 AI같이배워요">
+  <meta property="og:description" content="구글 플로우에서 문장을 주제, 장소, 빛, 구도로 나누어 체계적으로 그림을 만드는 초보자 가이드입니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://jwapyonara.com/ai-learn/flow-image/">
+  <link rel="stylesheet" href="../../_common/common.css">
+  <link rel="stylesheet" href="../_ai-learn/ai-learn.css">
+  <style>
+    /* 모든 스타일은 .sg-page 아래로 제한 */
+    .sg-page {
+      --sg-bg: #0e131c;
+      --sg-card: #171d29;
+      --sg-card-hover: #1e2638;
+      --sg-ink: #eef2f8;
+      --sg-sub: #98a3b5;
+      --sg-line: #2a3344;
+      --sg-accent: #3d8bff;
+      --sg-accent-soft: rgba(61, 139, 255, 0.12);
+      --sg-panel: #2b3547;
+      --sg-fill: #1f2735;
+      --sg-fill2: #253042;
+      --sg-ok: #4ade80;
+      --sg-ok-soft: rgba(74, 222, 128, 0.12);
+      --sg-amber: #facc15;
+      --sg-amber-soft: rgba(250, 204, 21, 0.12);
+      --sg-danger: #ff7a70;
+      --sg-radius: 14px;
+
+      background-color: var(--sg-bg);
+      color: var(--sg-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 16px 60px;
+      box-sizing: border-box;
+    }
+
+    .sg-page * {
+      box-sizing: border-box;
+    }
+
+    .sg-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* 빵부스러기 */
+    .sg-page .sg-breadcrumb {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* 머리말 */
+    .sg-page .sg-header {
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--sg-accent-soft);
+      color: var(--sg-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-header h1 {
+      font-size: 25px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .sg-page .sg-lead {
+      font-size: 15px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 상단 카톡방 링크 */
+    .sg-page .zw-ai-kakao {
+      margin: 0 0 20px;
+    }
+    .sg-page .zw-ai-kakao a.cta {
+      display: block;
+      background: #fae100;
+      color: #371d1e;
+      text-align: center;
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+
+    /* 3줄 요약 상자 */
+    .sg-page .sg-summary-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-left: 4px solid var(--sg-accent);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 28px;
+    }
+    .sg-page .sg-summary-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-summary-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-summary-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-summary-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 단계 구역 카드 */
+    .sg-page .sg-step-sec {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 20px 18px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-step-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--sg-accent);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .sg-page .sg-step-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+    }
+    .sg-page .sg-step-desc {
+      color: var(--sg-sub);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .sg-page .sg-step-desc p {
+      margin: 0 0 8px;
+    }
+    .sg-page .sg-step-desc p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 부탁 문장 예시 상자 */
+    .sg-page .sg-prompt-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 14px;
+    }
+    .sg-page .sg-prompt-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sg-page .sg-prompt-text {
+      font-size: 14px;
+      color: var(--sg-ink);
+      line-height: 1.5;
+      background: var(--sg-bg);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px;
+      padding: 12px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-btn-copy {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--sg-fill2);
+      border: 1px solid var(--sg-line);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .sg-page .sg-btn-copy:hover {
+      background: var(--sg-panel);
+    }
+    .sg-page .sg-btn-copy.copied {
+      background: rgba(74, 222, 128, 0.2);
+      border-color: var(--sg-ok);
+      color: var(--sg-ok);
+    }
+
+    /* 주의사항 상자 */
+    .sg-page .sg-warn-box {
+      background: rgba(255, 122, 112, 0.08);
+      border: 1px solid rgba(255, 122, 112, 0.3);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-warn-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--sg-danger);
+      margin: 0 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-warn-list {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--sg-ink);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-warn-list li {
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-warn-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 기기 환경 차이 그리드 */
+    .sg-page .sg-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    @media (max-width: 600px) {
+      .sg-page .sg-diff-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .sg-page .sg-diff-card {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .sg-page .sg-diff-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      background: var(--sg-accent-soft);
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+    .sg-page .sg-diff-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .sg-page .sg-diff-desc {
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* 출처 및 링크 */
+    .sg-page .sg-source-box {
+      font-size: 12px;
+      color: var(--sg-sub);
+      border-top: 1px solid var(--sg-line);
+      padding-top: 16px;
+      margin-top: 28px;
+      line-height: 1.6;
+    }
+    .sg-page .sg-source-box a {
+      color: var(--sg-accent);
+      text-decoration: underline;
+    }
+    .sg-page .sg-bottom-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .sg-page .sg-link-btn {
+      display: block;
+      text-align: center;
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      color: var(--sg-ink);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .sg-page .sg-link-btn:hover {
+      background: var(--sg-panel);
+    }
+  </style>
+</head>
+<body>
+  <div class="sg-page">
+    <!-- 빵부스러기 네비게이션 -->
+    <nav class="sg-breadcrumb">
+      <a href="../">AI같이배워요</a> &gt; <a href="../start/">시작 가이드</a> &gt; 구글 플로우 그림 만들기
+    </nav>
+
+    <!-- 머리말 -->
+    <header class="sg-header">
+      <span class="sg-tag">구글 플로우 안내</span>
+      <h1>구글 플로우에서 그림 만들기</h1>
+      <p class="sg-lead">부탁 문장을 주제, 장소, 빛, 구도로 나누어 원하는 이미지를 차근차근 완성하는 초보자용 안내서입니다.</p>
+    </header>
+
+    <!-- 상단 카톡방 링크 -->
+    <div class="zw-ai-kakao">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+
+    <!-- 3줄 요약 상자 (data-shot="s0") -->
+    <section class="sg-summary-box" data-shot="s0">
+      <div class="sg-summary-title">📌 세 줄 핵심 정리</div>
+      <ul class="sg-summary-list">
+        <li>구글 플로우(Google Flow)는 프로젝트 안에서 문장으로 이미지를 만들고 수정하는 창작 도구입니다.</li>
+        <li>모델 이름과 '이미지' 선택, 이미지 환경설정을 거쳐 주제·장소·빛·구도 4요소 문장을 입력하여 생성합니다.</li>
+        <li>이미지 수정 시에도 원본은 손실되지 않으며, 월간 크레딧 차감 없이 모델별 일일 한도가 적용됩니다.</li>
+      </ul>
+    </section>
+
+    <!-- 1단계: 프로젝트 접속 및 기본 모델 확인 (data-shot="s1") -->
+    <section class="sg-step-sec" data-shot="s1">
+      <div class="sg-step-head">
+        <span class="sg-step-num">1</span>
+        <h2 class="sg-step-title">프로젝트 만들기 및 이미지 생성 절차 확인하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>컴퓨터 브라우저에서 구글 플로우에 접속한 후 기존 프로젝트를 선택하거나 새 프로젝트를 시작합니다.</p>
+        <p>화면 아래 프롬프트 상자에서 모델 이름을 선택하고, '이미지'를 선택한 뒤 이미지 환경설정을 확인합니다.</p>
+        <p>기본 모델은 Nano Banana Pro로 설정되며, 환경설정을 마친 뒤 원하는 이미지를 설명하는 문장을 입력하여 생성합니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 1 (data-shot="p1") -->
+      <div class="sg-prompt-box" data-shot="p1">
+        <div class="sg-prompt-label">
+          <span>💡 1단계 프로젝트 확인 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText1">구글 플로우 프롬프트 상자에서 모델 이름을 확인하고 '이미지'를 선택한 뒤, 기본 이미지 모델 Nano Banana Pro 환경설정을 점검해 주세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText1', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 2단계: 핵심 주제(피사체와 동작) 정하기 (data-shot="s2") -->
+    <section class="sg-step-sec" data-shot="s2">
+      <div class="sg-step-head">
+        <span class="sg-step-num">2</span>
+        <h2 class="sg-step-title">핵심 주제(피사체와 동작) 구체화하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>그림의 중심이 되는 대상(인물, 동물, 사물)과 그 대상이 취하고 있는 동작이나 표정을 먼저 명확하게 정합니다.</p>
+        <p>'고양이'라고만 적기보다는 '책상 위에 엎드려 낮잠을 자고 있는 치즈색 줄무늬 고양이'처럼 명확하게 표현합니다.</p>
+        <p>대상이 여럿이면 혼선이 생길 수 있으므로 주인공 역할을 하는 주된 피사체를 뚜렷하게 세웁니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 2 (data-shot="p2") -->
+      <div class="sg-prompt-box" data-shot="p2">
+        <div class="sg-prompt-label">
+          <span>💡 2단계 주제 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText2">따뜻한 털을 가진 치즈색 줄무늬 고양이가 나무 책상 위에 엎드려 편안한 표정으로 곤히 낮잠을 자고 있습니다.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText2', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 3단계: 장소와 주변 환경 더하기 (data-shot="s3") -->
+    <section class="sg-step-sec" data-shot="s3">
+      <div class="sg-step-head">
+        <span class="sg-step-num">3</span>
+        <h2 class="sg-step-title">장소와 주변 배경 환경 구체화하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>주인공이 놓여 있는 공간과 주변 배경을 함께 적어주면 그림의 분위기가 한층 정돈됩니다.</p>
+        <p>실내 서재인지, 조용한 정원인지, 화초가 놓인 창가인지 장소의 특징을 두세 단어로 덧붙입니다.</p>
+        <p>창작 의도가 아니라면 장소와 스타일 설명에 불필요한 다른 인물이 섞여 들어가지 않도록 주의합니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 3 (data-shot="p3") -->
+      <div class="sg-prompt-box" data-shot="p3">
+        <div class="sg-prompt-label">
+          <span>💡 3단계 장소 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText3">배경은 조용한 한낮의 아늑한 서재 창가입니다. 하얀 커튼이 가볍게 흩날리고 나무 선반에는 오래된 책과 작은 다육식물 화분이 가지런히 놓여 있습니다.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText3', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 4단계: 빛과 조명 설정하기 (data-shot="s4") -->
+    <section class="sg-step-sec" data-shot="s4">
+      <div class="sg-step-head">
+        <span class="sg-step-num">4</span>
+        <h2 class="sg-step-title">빛과 조명의 방향 및 색감 설정하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>빛이 어디서 들어오고 어떤 색을 띠는지 지정하면 그림의 입체감과 감성이 크게 살아납니다.</p>
+        <p>'창문을 통해 부드럽게 쏟아지는 햇살', '따뜻한 노을빛', '차분한 실내 간접 조명'처럼 빛의 종류를 적습니다.</p>
+        <p>공식 안내에서도 조명 조건을 구체적으로 설명할수록 원하는 분위기에 부합하는 결과가 나온다고 권장합니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 4 (data-shot="p4") -->
+      <div class="sg-prompt-box" data-shot="p4">
+        <div class="sg-prompt-label">
+          <span>💡 4단계 빛과 조명 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText4">오후의 부드럽고 따뜻한 자연광이 창문을 통해 비쳐 들어오며, 고양이의 등과 책상 표면에 은은한 황금빛 햇살이 길게 드리워집니다.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText4', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 5단계: 구도와 카메라 앵글 지정하기 (data-shot="s5") -->
+    <section class="sg-step-sec" data-shot="s5">
+      <div class="sg-step-head">
+        <span class="sg-step-num">5</span>
+        <h2 class="sg-step-title">구도와 시점(앵글) 명확히 하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>카메라가 대상을 어느 거리에서 어느 각도로 바라보는지 시점을 지정합니다.</p>
+        <p>'피사체를 가까이서 담은 근접 촬영(클로즈업)', '눈높이 정면 시점(아이레벨)', '위에서 비스듬히 내려다보는 사선 구도' 중 하나를 고릅니다.</p>
+        <p>모델 이름 선택, '이미지' 선택, 이미지 환경설정을 확인한 뒤 4요소 문장을 입력하고 생성 단추를 누릅니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 5 (data-shot="p5") -->
+      <div class="sg-prompt-box" data-shot="p5">
+        <div class="sg-prompt-label">
+          <span>💡 5단계 4요소 종합 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText5">[주제] 나무 책상 위에서 곤히 낮잠 자는 치즈색 줄무늬 고양이. [장소] 하얀 커튼과 작은 화분이 놓인 아늑한 서재 창가. [빛] 창문으로 스며드는 따뜻한 오후 황금빛 자연광. [구도] 눈높이에서 비스듬히 바라본 부드러운 초점의 근접 촬영.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText5', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 6단계: 기록 패널 확인 및 이미지 수정하기 (data-shot="s6") -->
+    <section class="sg-step-sec" data-shot="s6">
+      <div class="sg-step-head">
+        <span class="sg-step-num">6</span>
+        <h2 class="sg-step-title">기록 패널 확인과 이전 버전 활용하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>구글 플로우에서 이미지를 수정해도 원본 이미지는 손실되지 않습니다.</p>
+        <p>'기록' 패널에서 이미지의 모든 이전 버전과 이미지를 생성하는 데 사용한 문장을 확인할 수 있습니다.</p>
+        <p>수정하고 싶은 이미지를 프롬프트 상자로 가져와 추가 문장을 입력하면 손쉽게 새로운 버전을 만듭니다.</p>
+      </div>
+      <!-- 부탁 예시 상자 6 (data-shot="p6") -->
+      <div class="sg-prompt-box" data-shot="p6">
+        <div class="sg-prompt-label">
+          <span>💡 6단계 수정 부탁 예시</span>
+        </div>
+        <div class="sg-prompt-text" id="promptText6">이전 기록에서 선택한 고양이 사진의 구도와 자세는 유지한 채로, 배경 조명을 차분한 저녁 노을빛으로 변경해 주세요.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('promptText6', this)">📋 이 질문 글 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 주의사항 상자 (data-shot="warn") -->
+    <section class="sg-warn-box" data-shot="warn">
+      <div class="sg-warn-title">⚠️ 이용 조건 및 안전 안내</div>
+      <ul class="sg-warn-list">
+        <li><strong>만 18세 이상 이용 가능:</strong> 구글 플로우는 대한민국을 포함하여 지원 지역 내 만 18세 이상 구글 계정 사용자에게 제공됩니다.</li>
+        <li><strong>크레딧 및 생성 한도:</strong> 현재 구글 플로우에서 이미지를 생성하고 업스케일링할 때는 월간 플로우 크레딧이나 AI 크레딧이 차감되지 않으며, 모델별 일일 생성 한도는 첫 생성 후 24시간이 지나면 재설정됩니다.</li>
+        <li><strong>기밀 정보 및 개인정보 입력 금지:</strong> 검토자에게 공개되어서는 안 되는 비밀 정보나 개인정보는 프롬프트 상자에 입력하지 않아야 합니다.</li>
+        <li><strong>사실 관계 확인 필요:</strong> 인공지능이 생성한 결과물은 실제 사실과 다를 수 있으므로 중요한 정보는 신뢰할 수 있는 공식 자료를 통해 확인해야 합니다.</li>
+      </ul>
+    </section>
+
+    <!-- 휴대폰과 컴퓨터 환경 차이 -->
+    <section class="sg-step-sec">
+      <div class="sg-step-head">
+        <h2 class="sg-step-title">휴대폰과 컴퓨터 화면에서 다른 점</h2>
+      </div>
+      <div class="sg-diff-grid">
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">컴퓨터 브라우저 (PC 웹)</span>
+          <div class="sg-diff-title">넓은 화면과 기록 패널</div>
+          <p class="sg-diff-desc">넓은 모니터에서 프롬프트 상자와 우측 기록 패널을 한눈에 보며 이전 생성 버전을 비교하고 참조 미디어를 끌어다 놓기에 편리합니다.</p>
+        </div>
+        <div class="sg-diff-card">
+          <span class="sg-diff-badge">스마트폰 모바일 브라우저</span>
+          <div class="sg-diff-title">간단한 문장 입력과 확인</div>
+          <p class="sg-diff-desc">화면 폭이 좁으므로 긴 편집 작업보다는 본 페이지의 복사 단추를 활용해 준비된 프롬프트를 붙여 넣고 생성 결과를 확인하기에 적합합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 공식 안내 확인 링크와 확인일 -->
+    <div class="sg-source-box">
+      <p><strong>공식 확인 기준일:</strong> 2026년 11월 28일</p>
+      <p>이 안내서는 Google Flow 공식 지원 센터 문서를 직접 검증하여 작성되었습니다: 
+        <a href="https://support.google.com/flow/answer/16729550?hl=ko" target="_blank" rel="noopener">Google Flow 이미지 만들기 및 수정 공식 안내</a> · 
+        <a href="https://support.google.com/flow/answer/16353333?hl=ko" target="_blank" rel="noopener">Google Flow 시작하기 및 요구조건 안내</a> · 
+        <a href="https://support.google.com/flow/answer/16353544?hl=ko" target="_blank" rel="noopener">Google Flow 지원 국가 및 지역 안내</a>
+      </p>
+    </div>
+
+    <!-- 하단 이동 링크 -->
+    <div class="sg-bottom-links">
+      <a class="sg-link-btn" href="../start/">« AI 컴퓨터 프로그램 시작 가이드 보러가기</a>
+      <a class="sg-link-btn" href="../">« AI같이배워요 전체 목록으로 돌아가기</a>
+    </div>
+
+    <!-- 하단 카톡방 링크 -->
+    <div class="zw-ai-kakao" style="margin-top:24px;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+  </div>
+
+  <script src="../../_common/common.js"></script>
+  <script src="../_ai-learn/ai-learn.js"></script>
+  <script>
+    function copyPrompt(elementId, btn) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      var text = el.innerText || el.textContent;
+      var origText = btn.innerHTML;
+
+      var showDone = function() {
+        btn.innerHTML = '✅ 복사 완료! 프롬프트 상자에 붙여 넣으세요';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = origText;
+          btn.classList.remove('copied');
+        }, 2500);
+      };
+
+      var fallback = function() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          var ok = document.execCommand('copy');
+          if (ok) showDone();
+          else alert('글을 길게 눌러 직접 복사해 주세요.');
+        } catch (e) {
+          alert('글을 길게 눌러 직접 복사해 주세요.');
+        }
+        document.body.removeChild(ta);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showDone).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+  </script>
+</body>
+</html>

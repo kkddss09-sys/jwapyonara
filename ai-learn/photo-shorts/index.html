@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>컴퓨터에서 사진으로 세로 짧은 영상(쇼츠) 만드는 법 — 초보자 맞춤 안내 — 좌표나라 AI같이배워요</title>
+  <meta name="description" content="컴퓨터 기본 영상 편집기 Clipchamp를 사용해 사진 여러 장으로 세로 9:16 쇼츠 영상을 만들고 내보내는 초보자 실전 가이드입니다.">
+  <link rel="canonical" href="https://jwapyonara.com/ai-learn/photo-shorts/">
+  <meta property="og:title" content="컴퓨터에서 사진으로 세로 짧은 영상(쇼츠) 만드는 법 — 좌표나라 AI같이배워요">
+  <meta property="og:description" content="세로 9:16 비율 설정부터 사진 순서 배치, 재생 시간 조절, 전환 효과, 1080p 내보내기까지 배우는 실전 안내서입니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://jwapyonara.com/ai-learn/photo-shorts/">
+  <link rel="stylesheet" href="../../_common/common.css">
+  <link rel="stylesheet" href="../_ai-learn/ai-learn.css">
+  <style>
+    /* 모든 스타일은 .sg-page 아래로 제한 */
+    .sg-page {
+      --sg-bg: #0e131c;
+      --sg-card: #171d29;
+      --sg-card-hover: #1e2638;
+      --sg-ink: #eef2f8;
+      --sg-sub: #98a3b5;
+      --sg-line: #2a3344;
+      --sg-accent: #3d8bff;
+      --sg-accent-soft: rgba(61, 139, 255, 0.12);
+      --sg-panel: #2b3547;
+      --sg-fill: #1f2735;
+      --sg-fill2: #253042;
+      --sg-ok: #4ade80;
+      --sg-ok-soft: rgba(74, 222, 128, 0.12);
+      --sg-amber: #facc15;
+      --sg-amber-soft: rgba(250, 204, 21, 0.12);
+      --sg-danger: #ff7a70;
+      --sg-radius: 14px;
+
+      background-color: var(--sg-bg);
+      color: var(--sg-ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      line-height: 1.6;
+      word-break: keep-all;
+      overflow-wrap: break-word;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 16px 16px 60px;
+      box-sizing: border-box;
+    }
+
+    .sg-page * {
+      box-sizing: border-box;
+    }
+
+    .sg-page a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* 빵부스러기 */
+    .sg-page .sg-breadcrumb {
+      font-size: 13px;
+      color: var(--sg-sub);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    /* 머리말 */
+    .sg-page .sg-header {
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--sg-accent-soft);
+      color: var(--sg-accent);
+      border: 1px solid rgba(61, 139, 255, 0.3);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-header h1 {
+      font-size: 25px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 8px;
+      letter-spacing: -0.02em;
+    }
+    .sg-page .sg-lead {
+      font-size: 15px;
+      color: var(--sg-sub);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* 상단 카톡방 링크 */
+    .sg-page .zw-ai-kakao {
+      margin: 0 0 20px;
+    }
+
+    /* 3줄 요약 상자 */
+    .sg-page .sg-summary-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-summary-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--sg-accent);
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-summary-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 14px;
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-summary-list li {
+      margin-bottom: 8px;
+    }
+    .sg-page .sg-summary-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    /* 단계별 섹션 */
+    .sg-page .sg-step-sec {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 20px 18px;
+      margin-bottom: 20px;
+    }
+    .sg-page .sg-step-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .sg-page .sg-step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--sg-accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 800;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    .sg-page .sg-step-title {
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0;
+    }
+    .sg-page .sg-step-desc {
+      font-size: 14px;
+      color: var(--sg-sub);
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .sg-page .sg-step-desc p {
+      margin: 0 0 8px;
+    }
+    .sg-page .sg-step-desc p:last-child {
+      margin: 0;
+    }
+
+    /* 복사 단추 상자 */
+    .sg-page .sg-prompt-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      padding: 14px 14px;
+    }
+    .sg-page .sg-prompt-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sg-accent);
+      margin-bottom: 8px;
+    }
+    .sg-page .sg-prompt-text {
+      font-family: inherit;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--sg-ink);
+      white-space: pre-wrap;
+      background: var(--sg-fill2);
+      border: 1px solid var(--sg-line);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+    .sg-page .sg-btn-copy {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--sg-panel);
+      color: var(--sg-ink);
+      border: 1px solid var(--sg-line);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .sg-page .sg-btn-copy:hover {
+      background: var(--sg-accent);
+      color: #fff;
+      border-color: var(--sg-accent);
+    }
+    .sg-page .sg-btn-copy.copied {
+      background: var(--sg-ok);
+      color: #000;
+      border-color: var(--sg-ok);
+    }
+
+    /* 주의 상자 */
+    .sg-page .sg-warn-box {
+      background: rgba(255, 122, 112, 0.08);
+      border: 1px solid rgba(255, 122, 112, 0.3);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-warn-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--sg-danger);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sg-page .sg-warn-list {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.6;
+    }
+    .sg-page .sg-warn-list li {
+      margin-bottom: 6px;
+    }
+
+    /* 기기 비교 상자 */
+    .sg-page .sg-diff-box {
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: var(--sg-radius);
+      padding: 18px 16px;
+      margin-bottom: 24px;
+    }
+    .sg-page .sg-diff-head {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 14px;
+    }
+    .sg-page .sg-diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .sg-page .sg-diff-item {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .sg-page .sg-diff-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: var(--sg-fill2);
+      color: var(--sg-accent);
+      margin-bottom: 8px;
+    }
+    .sg-page .sg-diff-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      margin: 0 0 8px;
+    }
+    .sg-page .sg-diff-desc {
+      font-size: 13px;
+      color: var(--sg-sub);
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    /* 공식 출처 및 확인일 안내 */
+    .sg-page .sg-source-box {
+      background: var(--sg-fill);
+      border: 1px solid var(--sg-line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 28px;
+      font-size: 13px;
+      color: var(--sg-sub);
+    }
+    .sg-page .sg-source-box strong {
+      color: var(--sg-ink);
+    }
+    .sg-page .sg-source-box a {
+      color: var(--sg-accent);
+      text-decoration: underline;
+    }
+
+    /* 하단 이동 링크 */
+    .sg-page .sg-bottom-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+      margin-top: 24px;
+    }
+    .sg-page .sg-link-btn {
+      display: block;
+      padding: 12px 16px;
+      background: var(--sg-card);
+      border: 1px solid var(--sg-line);
+      border-radius: 10px;
+      color: var(--sg-ink);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .sg-page .sg-link-btn:hover {
+      background: var(--sg-card-hover);
+      border-color: var(--sg-accent);
+    }
+
+    @media (max-width: 480px) {
+      .sg-page .sg-diff-grid {
+        grid-template-columns: 1fr;
+      }
+      .sg-page .sg-header h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sg-page">
+    <!-- 빵부스러기 네비게이션 -->
+    <div class="sg-breadcrumb">
+      <a href="/">홈</a> &gt; <a href="../">AI같이배워요</a> &gt; <span>컴퓨터 사진으로 쇼츠 영상 제작</span>
+    </div>
+
+    <!-- 머리말 -->
+    <header class="sg-header">
+      <span class="sg-tag">사진 쇼츠 제작 가이드</span>
+      <h1>컴퓨터에서 사진으로 세로 짧은 영상(쇼츠) 만드는 법</h1>
+      <p class="sg-lead">윈도우 기본 편집기 Clipchamp를 사용해 사진 여러 장으로 세로 9:16 짧은 영상을 만들고 1080p 고화질로 저장하는 초보자 맞춤 안내서입니다.</p>
+    </header>
+
+    <!-- 카톡방 안내 링크 -->
+    <div class="zw-ai-kakao">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+
+    <!-- 맨 위 3줄 요약 (data-shot="s0") -->
+    <section class="sg-summary-box" data-shot="s0">
+      <div class="sg-summary-title">📌 세 줄 요약</div>
+      <ul class="sg-summary-list">
+        <li><strong>세로 9:16 비율 설정:</strong> 비디오 비율 메뉴에서 모바일 화면에 알맞은 9:16 세로 규격을 선택합니다.</li>
+        <li><strong>사진 배치와 길이 조절:</strong> 컴퓨터 속 사진을 타임라인으로 끌어다 놓고 양쪽 핸들로 각 장면의 재생 시간을 맞춥니다.</li>
+        <li><strong>전환 효과와 1080p 저장:</strong> 사진 사이에 페이드 전환을 적용하고 1080p 고화질 MP4 파일로 내보냅니다.</li>
+      </ul>
+    </section>
+
+    <!-- 1단계: 세로 9:16 비율 설정 (data-shot="s1") -->
+    <section class="sg-step-sec" data-shot="s1">
+      <div class="sg-step-head">
+        <span class="sg-step-num">1</span>
+        <h2 class="sg-step-title">프로젝트 생성과 세로 9:16 화면비 설정하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>컴퓨터에서 Clipchamp를 실행하고 새 동영상 만들기 단추를 누릅니다.</p>
+        <p>화면 오른쪽 상단의 비율 메뉴(기본 16:9)를 눌러 모바일과 쇼츠에 맞는 9:16 세로 비율을 지정합니다.</p>
+        <p>검은 여백 없이 스마트폰 세로 화면 전체에 맞춰 제작할 수 있는 도화지가 준비됩니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p1">
+        <div class="sg-prompt-label">
+          <span>💡 1단계 작업 점검 메모</span>
+        </div>
+        <div class="sg-prompt-text" id="prompt-p1">1. 새 비디오 프로젝트를 생성합니다.
+2. 화면 상단 비율 메뉴를 클릭하여 9:16 세로 비율로 변경합니다.
+3. 검은 여백을 고려하여 세로 화면 크기를 확인합니다.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('prompt-p1', this)">📋 점검 메모 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 2단계: 사진 가져오기 및 타임라인 순서 배치 (data-shot="s2") -->
+    <section class="sg-step-sec" data-shot="s2">
+      <div class="sg-step-head">
+        <span class="sg-step-num">2</span>
+        <h2 class="sg-step-title">사진 파일 가져오기와 타임라인 순서 배치하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>왼쪽 도구 모음의 미디어 가져오기 버튼을 눌러 컴퓨터에 저장된 사진들을 선택합니다.</p>
+        <p>불러온 사진들을 편집 타임라인 트랙으로 하나씩 마우스로 끌어다 놓습니다.</p>
+        <p>이야기 흐름에 맞게 사진 순서를 좌우로 움직여 원하는 배치로 정렬합니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p2">
+        <div class="sg-prompt-label">
+          <span>💡 2단계 사진 순서 메모</span>
+        </div>
+        <div class="sg-prompt-text" id="prompt-p2">1. 미디어 가져오기를 클릭해 준비한 사진 5~8장을 불러옵니다.
+2. 타임라인 트랙에 사진을 순서대로 끌어다 놓습니다.
+3. 사진 간격에 빈틈이 생기지 않도록 차례로 붙여 정렬합니다.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('prompt-p2', this)">📋 순서 메모 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 3단계: 사진 재생 시간 조절 및 화면 맞춤 (data-shot="s3") -->
+    <section class="sg-step-sec" data-shot="s3">
+      <div class="sg-step-head">
+        <span class="sg-step-num">3</span>
+        <h2 class="sg-step-title">사진 재생 시간 조절과 화면 크기 맞추기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>타임라인에서 사진 클립을 선택하면 양쪽 끝에 녹색 핸들이 표시됩니다.</p>
+        <p>핸들을 마우스로 잡고 안쪽으로 밀거나 바깥쪽으로 당겨 사진이 머무는 시간(예: 3초~4초)을 조절합니다.</p>
+        <p>비디오 미리보기 도구 모음의 자르기 단추를 활용해 가로 사진의 중요한 부분이 세로 프레임 중심에 오도록 맞춥니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p3">
+        <div class="sg-prompt-label">
+          <span>💡 3단계 시간 조절 기준 메모</span>
+        </div>
+        <div class="sg-prompt-text" id="prompt-p3">1. 사진 클립의 양쪽 끝 핸들을 끌어 3초 안팎으로 길이를 맞춥니다.
+2. 가로 사진은 자르기 핸들을 끌어 중심 피사체가 세로 화면에 차도록 설정합니다.
+3. 전체 영상 길이가 30초~50초 사이인지 타임라인 눈금을 확인합니다.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('prompt-p3', this)">📋 기준 메모 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 4단계: 사진 사이에 부드러운 전환 효과 넣기 (data-shot="s4") -->
+    <section class="sg-step-sec" data-shot="s4">
+      <div class="sg-step-head">
+        <span class="sg-step-num">4</span>
+        <h2 class="sg-step-title">사진 사이에 부드러운 전환(트랜지션) 적용하기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>왼쪽 사이드바의 전환 탭을 클릭하여 여러 가지 화면 전환 스타일을 살펴봅니다.</p>
+        <p>원하는 전환 효과를 마우스로 끌어 두 사진 클립이 맞닿은 경계면 위에 놓습니다.</p>
+        <p>오른쪽 속성 패널에서 전환 지속 시간을 0.5초에서 1초 정도로 설정하여 자연스러운 장면 전환을 만듭니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p4">
+        <div class="sg-prompt-label">
+          <span>💡 4단계 전환 효과 메모</span>
+        </div>
+        <div class="sg-prompt-text" id="prompt-p4">1. 도구 모음에서 전환 탭을 클릭합니다.
+2. 페이드 또는 디졸브 효과를 사진 사이 경계면에 끌어다 놓습니다.
+3. 속성 패널에서 전환 지속 시간을 확인하고 스페이스바로 미리 재생해 봅니다.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('prompt-p4', this)">📋 전환 메모 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 5단계: 배경음악 추가 및 1080p 고화질 저장 (data-shot="s5") -->
+    <section class="sg-step-sec" data-shot="s5">
+      <div class="sg-step-head">
+        <span class="sg-step-num">5</span>
+        <h2 class="sg-step-title">오디오 트랙 추가와 1080p 고화질 파일로 내보내기</h2>
+      </div>
+      <div class="sg-step-desc">
+        <p>내 미디어에서 소장한 오디오 파일을 가져와 타임라인 사진 아래 오디오 트랙으로 끌어다 놓습니다.</p>
+        <p>사진 끝부분과 음악 끝부분을 맞추어 핸들로 오디오 길이를 자르고 음량을 조절합니다.</p>
+        <p>오른쪽 상단의 내보내기 단추를 누르고 1080p(HD) 화질을 선택하여 컴퓨터 다운로드 폴더에 MP4 파일로 저장합니다.</p>
+      </div>
+      <div class="sg-prompt-box" data-shot="p5">
+        <div class="sg-prompt-label">
+          <span>💡 5단계 내보내기 점검 메모</span>
+        </div>
+        <div class="sg-prompt-text" id="prompt-p5">1. 오디오 자산을 타임라인 오디오 트랙으로 끌어다 놓습니다.
+2. 사진이 끝나는 지점에 맞춰 오디오 끝부분을 정렬합니다.
+3. 상단 내보내기 단추를 누르고 1080p(HD)를 선택해 MP4 파일로 내려받습니다.</div>
+        <button type="button" class="sg-btn-copy" onclick="copyPrompt('prompt-p5', this)">📋 내보내기 메모 복사하기</button>
+      </div>
+    </section>
+
+    <!-- 주의 상자 (data-shot="warn") -->
+    <section class="sg-warn-box" data-shot="warn">
+      <div class="sg-warn-title">⚠️ 사진 쇼츠 제작 시 주의할 점</div>
+      <ul class="sg-warn-list">
+        <li><strong>다이아몬드 표시 기능 주의:</strong> 무료 플랜에서 프리미엄 기능을 사용했다면 내보내기 옵션 옆 다이아몬드 표시를 확인하고 해당 기능을 제거해야 원활히 저장할 수 있습니다.</li>
+        <li><strong>사진 저작권 및 초상권:</strong> 직접 촬영한 사진이나 라이선스가 허용된 이미지를 사용해야 하며 타인의 얼굴이 포함된 경우 초상권 동의 여부를 살펴봅니다.</li>
+        <li><strong>유튜브 쇼츠 재생 시간 규격:</strong> YouTube Shorts는 최대 3분 길이까지 지원하며, 사진 영상은 30초에서 1분 안팎의 길이로 구성해 볼 수 있습니다.</li>
+      </ul>
+    </section>
+
+    <!-- 기기 비교 상자 (data-shot="diffa") -->
+    <section class="sg-diff-box" data-shot="diffa">
+      <div class="sg-diff-head">📱 컴퓨터 작업과 스마트폰 작업의 차이점</div>
+      <div class="sg-diff-grid">
+        <div class="sg-diff-item">
+          <span class="sg-diff-badge">컴퓨터 (권장)</span>
+          <div class="sg-diff-title">넓은 화면과 정밀한 타임라인</div>
+          <p class="sg-diff-desc">마우스를 이용해 핸들을 끌어 사진 길이를 조절하고 전환 효과를 원하는 위치에 나란히 배치하기 수월합니다.</p>
+        </div>
+        <div class="sg-diff-item">
+          <span class="sg-diff-badge">스마트폰 (모바일)</span>
+          <div class="sg-diff-title">신속한 촬영과 결과 확인</div>
+          <p class="sg-diff-desc">손가락 터치로 작은 사진을 길게 조작하기에는 정밀도가 다소 떨어질 수 있으므로, 사진 촬영 직후 곧바로 확인하거나 완성 영상을 업로드하는 용도로 병행합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 공식 안내 링크와 확인일 안내 -->
+    <div class="sg-source-box">
+      <strong>공식 출처 안내 (확인일: 2026-11-28)</strong>
+      <p style="margin: 6px 0 0;">이 안내는 서비스 제공사의 공식 지원 문서를 바탕으로 작성되었습니다: 
+        <a href="https://support.microsoft.com/ko-kr/clipchamp/how-to-change-the-aspect-ratio-of-a-video" target="_blank" rel="noopener">Microsoft Clipchamp 비율 변경 공식 안내</a> | 
+        <a href="https://support.microsoft.com/ko-kr/clipchamp/how-to-trim-videos-images-or-audio-assets" target="_blank" rel="noopener">Clipchamp 자르기 및 트리밍 지원</a> | 
+        <a href="https://support.microsoft.com/ko-kr/clipchamp/how-to-add-transitions-and-fades-to-videos" target="_blank" rel="noopener">Clipchamp 전환 효과 가이드</a> | 
+        <a href="https://support.microsoft.com/ko-kr/clipchamp/exporting-and-saving-a-video-in-clipchamp" target="_blank" rel="noopener">Clipchamp 동영상 내보내기 안내</a> | 
+        <a href="https://support.google.com/youtube/answer/10059070?hl=ko" target="_blank" rel="noopener">YouTube Shorts 공식 도움말</a>
+      </p>
+    </div>
+
+    <!-- 하단 이동 링크 -->
+    <div class="sg-bottom-links">
+      <a class="sg-link-btn" href="../start/">« AI 컴퓨터 프로그램 시작 가이드 보러가기</a>
+      <a class="sg-link-btn" href="../auto-caption/">« 컴퓨터 영상 자동 자막과 AI 맞춤법 교정 보러가기</a>
+      <a class="sg-link-btn" href="../">« AI같이배워요 전체 목록으로 돌아가기</a>
+    </div>
+
+    <!-- 하단 카톡방 링크 -->
+    <div class="zw-ai-kakao" style="margin-top:24px;">
+      <a class="cta" href="https://open.kakao.com/o/gLzKdIgc" target="_blank" rel="noopener">궁금한 AI 사용법, 카톡방에서 같이 물어보세요</a>
+    </div>
+  </div>
+
+  <script src="../../_common/common.js"></script>
+  <script src="../_ai-learn/ai-learn.js"></script>
+  <script>
+    function copyPrompt(elementId, btn) {
+      var el = document.getElementById(elementId);
+      if (!el) return;
+      var text = el.innerText || el.textContent;
+      var origText = btn.innerHTML;
+
+      var showDone = function() {
+        btn.innerHTML = '✅ 복사 완료! 프로그램에 붙여 넣으세요';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = origText;
+          btn.classList.remove('copied');
+        }, 2500);
+      };
+
+      var fallback = function() {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try {
+          var ok = document.execCommand('copy');
+          if (ok) showDone();
+          else alert('글을 길게 눌러 직접 복사해 주세요.');
+        } catch (e) {
+          alert('글을 길게 눌러 직접 복사해 주세요.');
+        }
+        document.body.removeChild(ta);
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showDone).catch(fallback);
+      } else {
+        fallback();
+      }
+    }
+  </script>
+</body>
+</html>
